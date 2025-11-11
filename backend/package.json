@@ -1,0 +1,43 @@
+{
+    "name": "rpg-gemini-backend",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "start": "node dist/main.js",
+        "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts",
+        "build": "tsc -p tsconfig.build.json",
+        "lint": "echo 'no linter configured'",
+        "test": "ava"
+    },
+    "dependencies": {
+        "@google/genai": "~1.29.0",
+        "@nestjs/common": "^11.1.8",
+        "@nestjs/core": "^11.1.8",
+        "@nestjs/platform-express": "^11.1.8",
+        "@nestjs/swagger": "^11.1.8",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.14.0",
+        "dotenv": "^16.1.4",
+        "joi": "^17.9.2",
+        "reflect-metadata": "^0.1.13",
+        "rimraf": "^5.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.6.1",
+        "ava": "^5.3.0",
+        "ts-node": "^10.9.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.1.6"
+    },
+    "ava": {
+        "files": [
+            "test/**/*.test.ts"
+        ],
+        "require": [
+            "ts-node/register/transpile-only"
+        ],
+        "extensions": [
+            "ts"
+        ]
+    }
+}

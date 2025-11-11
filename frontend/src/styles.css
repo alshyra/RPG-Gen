@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* small helpers for the app */
+.app-bg {
+  @apply bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100;
+}
+.card {
+  @apply bg-slate-900/60 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-slate-800/50;
+}
+
+/* The root element has the `app-bg` class (used in App.vue) to style the page background via Tailwind utilities. */
+
+/* Buttons */
+.btn-primary {
+  @apply inline-flex items-center px-3 py-1 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-sm;
+}
+.btn-ghost {
+  @apply inline-flex items-center px-3 py-1 rounded-md bg-white/10 text-white;
+}
+
+/* Input and small button utilities used across components */
+.input {
+  @apply block w-full rounded border border-slate-700 bg-slate-800/60 p-2;
+}
+
+/* Prompt template button */
+.tpl {
+  @apply p-3 rounded-md bg-slate-800/50 border border-slate-700/40 text-left hover:bg-slate-800/70;
+}
+
+/* Small utilities used in App.vue */
+.muted {
+  @apply text-slate-400;
+}
+/* Prefer using Tailwind utility classes (e.g. `mb-3`, `mt-2`) directly in markup.
+   Removed manual margin rules so Tailwind can manage spacing consistently. */
