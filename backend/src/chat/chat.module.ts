@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ChatController } from './chat.controller';
-import { GeminiService } from '../shared/gemini.service';
+import { GeminiService } from '../external/gemini.service';
 import { ConversationService } from './conversation.service';
 
 @Module({

@@ -4,57 +4,57 @@ import { gameEngine } from '../services/gameEngine';
 export function useGameMessages() {
   const gameStore = useGameStore();
 
-  /**
-   * Send user message to backend and handle response
-   */
-  async function sendMessage() {
-    if (!gameStore.playerText) return;
+  const handleMessageResponse = (response: any): void => {
+    gameStore.messages.pop();
+    gameStore.appendMessage('GM', response.text);
+    processInstructions(response.instructions);
+  };
 
+  const handleMessageError = (e: any): void => {
+    gameStore.messages.pop();
+    gameStore.appendMessage('Error', e?.message || 'Failed to send message');
+  };
+
+  const sendMessage = async (): Promise<void> => {
+    if (!gameStore.playerText) return;
     gameStore.appendMessage('Player', gameStore.playerText);
     gameStore.appendMessage('System', '...thinking...');
     gameStore.setSending(true);
-
     try {
-      const msgText = gameStore.playerText;
+      const response = await gameEngine.sendMessage(gameStore.playerText);
       gameStore.clearPlayerText();
-      const response = await gameEngine.sendMessage(msgText);
-
-      // Remove "thinking" message
-      gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
-
-      // Handle game instructions (roll, xp, hp)
-      processInstructions(response.instructions);
+      handleMessageResponse(response);
     } catch (e: any) {
-      gameStore.messages.pop();
-      gameStore.appendMessage('Error', e?.message || 'Failed to send message');
+      handleMessageError(e);
     } finally {
       gameStore.setSending(false);
     }
-  }
+  };
 
-  /**
-   * Process game instructions (rolls, XP gains, HP changes)
-   */
-  function processInstructions(instructions: any[]) {
-    for (const instr of instructions) {
-      if (instr.roll) {
-        gameStore.setPendingInstruction(instr);
-        gameStore.appendMessage(
-          'System',
-          `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`
-        );
-      } else if (instr.xp) {
-        gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-        gameStore.updateCharacterXp(instr.xp);
-      } else if (instr.hp) {
-        const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-        gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-        gameStore.updateCharacterHp(instr.hp);
-        if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      }
-    }
-  }
+  const handleRollInstruction = (instr: any): void => {
+    gameStore.setPendingInstruction(instr);
+    gameStore.appendMessage('System', `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`);
+  };
+
+  const handleXpInstruction = (instr: any): void => {
+    gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+    gameStore.updateCharacterXp(instr.xp);
+  };
+
+  const handleHpInstruction = (instr: any): void => {
+    const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
+    gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+    gameStore.updateCharacterHp(instr.hp);
+    if (gameStore.isDead) gameStore.setDeathModalVisible(true);
+  };
+
+  const processInstructions = (instructions: any[]): void => {
+    instructions.forEach((instr) => {
+      if (instr.roll) handleRollInstruction(instr);
+      else if (instr.xp) handleXpInstruction(instr);
+      else if (instr.hp) handleHpInstruction(instr);
+    });
+  };
 
   return {
     sendMessage,

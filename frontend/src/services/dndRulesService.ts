@@ -108,11 +108,11 @@ export class DnDRulesService {
     raceModifiers: RaceModifiers
   ): Record<string, number> {
     const result = { ...baseScores };
-    for (const key of Object.keys(raceModifiers)) {
+    Object.keys(raceModifiers).forEach((key) => {
       if (result[key] !== undefined) {
         result[key] += raceModifiers[key];
       }
-    }
+    });
     return result;
   }
 

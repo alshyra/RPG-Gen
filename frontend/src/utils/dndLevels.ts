@@ -27,14 +27,7 @@ export const DND_LEVELS: DndLevel[] = [
   { level: 20, totalXp: 355000, proficiencyBonus: 6 },
 ];
 
-export function getCurrentLevel(totalXp: number): DndLevel {
-  for (let i = DND_LEVELS.length - 1; i >= 0; i--) {
-    if (totalXp >= DND_LEVELS[i].totalXp) {
-      return DND_LEVELS[i];
-    }
-  }
-  return DND_LEVELS[0];
-}
+export const getCurrentLevel = (totalXp: number): DndLevel => DND_LEVELS.reverse().find(l => totalXp >= l.totalXp) || DND_LEVELS[0];
 
 export function getNextLevel(totalXp: number): DndLevel | null {
   const current = getCurrentLevel(totalXp);

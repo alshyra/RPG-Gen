@@ -63,7 +63,10 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'arrow-body-style': ['warn', 'as-needed']
+      'arrow-body-style': ['warn', 'as-needed'],
+      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['warn', 10],
+      'prefer-object-spread': 'warn'
     }
   }
 ];

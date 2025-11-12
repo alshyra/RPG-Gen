@@ -84,11 +84,7 @@ export class GameEngine {
     const diceSize = parseInt(match[2], 10);
     const staticBonus = match[3] ? parseInt(match[3], 10) : 0;
 
-    const rolls: number[] = [];
-    for (let i = 0; i < numDice; i++) {
-      rolls.push(Math.floor(Math.random() * diceSize) + 1);
-    }
-
+    const rolls = Array.from({ length: numDice }, () => Math.floor(Math.random() * diceSize) + 1);
     const sum = rolls.reduce((acc, r) => acc + r, 0);
     const total = sum + staticBonus + modifier;
 

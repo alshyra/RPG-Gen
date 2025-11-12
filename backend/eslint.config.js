@@ -27,7 +27,11 @@ export default [
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'no-console': 'off'
+      'no-console': 'off',
+      'arrow-body-style': ['warn', 'as-needed'],
+      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['warn', 10],
+      'prefer-object-spread': 'warn'
     }
   }
 ];

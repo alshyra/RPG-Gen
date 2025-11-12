@@ -1,5 +1,5 @@
 import test from 'ava';
-import { parseGameResponse } from '../src/shared/game-parser.util';
+import { parseGameResponse } from '../src/external/game-parser.util';
 
 test('should extract roll instruction from narrative text', (t) => {
   const input = `Tu inspires profondément et te laisses glisser sous la surface froide. 

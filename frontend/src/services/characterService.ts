@@ -84,29 +84,22 @@ const loadCharacter = (): CharacterEntry | null => {
   return null;
 };
 
+const ensureCharacterHp = (character: CharacterEntry): void => {
+  if (!character.hpMax && character.hp) character.hpMax = character.hp;
+  if (!character.hpMax) character.hpMax = 12;
+};
+
 const saveCharacter = (character: CharacterEntry): string => {
   const charId = generateUUID();
-
-  // Ensure required fields exist
-  if (!character.hpMax && character.hp) {
-    character.hpMax = character.hp;
-  }
-  if (!character.hpMax) {
-    character.hpMax = 12; // default HP for level 1 character
-  }
-
-  // Save to localStorage
+  ensureCharacterHp(character);
   const saved = getAllSavedCharacters();
-  const entry: SavedCharacterEntry = { id: charId, data: character };
-  saved.unshift(entry);
+  saved.unshift({ id: charId, data: character });
   try {
     localStorage.setItem(STORAGE_KEYS.savedCharacters, JSON.stringify(saved));
-    // Set as current character
     localStorage.setItem(STORAGE_KEYS.currentCharacterId, charId);
   } catch (e) {
     console.error('Failed to save character to localStorage', e);
   }
-
   return charId;
 };
 
