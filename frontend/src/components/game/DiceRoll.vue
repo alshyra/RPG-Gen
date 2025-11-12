@@ -1,17 +1,18 @@
 <template>
   <div>
-    <button
-      class="btn-primary"
+    <UiButton
+      variant="primary"
       @click="onClick"
     >
       {{ props.pendingInstruction?.roll ? 'Roll 🎲' : 'Envoyer' }}
-    </button>
+    </UiButton>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import axios from 'axios';
+import UiButton from '../ui/UiButton.vue';
 import { characterService } from '../../services/characterService';
 import { type GameInstruction } from '../../services/gameEngine';
 

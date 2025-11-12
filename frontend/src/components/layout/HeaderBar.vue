@@ -1,5 +1,5 @@
 <template>
-  <header class="mb-6 flex items-stretch">
+  <header class="flex items-stretch">
     <div class="flex-1">
       <h2 class="text-xl font-semibold">
         {{ subtitle }}
@@ -9,7 +9,7 @@
       </p>
     </div>
     <div class="flex-1">
-      <h1 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+      <h1 class="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500">
         RPG Gemini
       </h1>
     </div>

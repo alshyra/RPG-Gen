@@ -7,10 +7,7 @@
     >
       <!-- Left: character info panel -->
       <aside class="lg:col-span-3 lg:row-span-2 flex flex-col gap-2 min-h-0 overflow-hidden">
-        <CharacterPortrait
-          :character="gameStore.session.character"
-          class="flex-shrink-0"
-        />
+        <CharacterPortrait class="flex-shrink-0" />
         <div class="card flex-1 overflow-auto min-h-0">
           <AbilityScores
             :character="gameStore.session.character"
@@ -40,7 +37,7 @@
               <div class="text-xs text-slate-400 font-medium">
                 {{ m.role }}
               </div>
-              <MarkdownVue :text="m.text" />
+              <UiMarkdown :text="m.text" />
             </div>
           </div>
         </div>
@@ -84,21 +81,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import UiMarkdown from '../components/ui/UiMarkdown.vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useGameStore } from '../stores/gameStore';
-import { useGameSession } from '../composables/useGameSession';
-import { useGameMessages } from '../composables/useGameMessages';
-import { useGameRolls } from '../composables/useGameRolls';
-import RollResultModal from '../components/game/RollResultModal.vue';
-import DeathModal from '../components/game/DeathModal.vue';
-import ChatBar from '../components/layout/ChatBar.vue';
-import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
 import SkillsPanel from '../components/character-stats/SkillsPanel.vue';
-import MarkdownVue from '../ui/markdown.vue';
+import CharacterPortrait from '../components/character/CharacterPortrait.vue';
+import DeathModal from '../components/game/DeathModal.vue';
+import RollResultModal from '../components/game/RollResultModal.vue';
+import ChatBar from '../components/layout/ChatBar.vue';
+import { useGameMessages } from '../composables/useGameMessages';
+import { useGameRolls } from '../composables/useGameRolls';
+import { useGameSession } from '../composables/useGameSession';
 import { characterService } from '../services/characterService';
 import { gameEngine } from '../services/gameEngine';
+import { useGameStore } from '../stores/gameStore';
 
 // State
 const router = useRouter();

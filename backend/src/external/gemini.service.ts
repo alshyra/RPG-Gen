@@ -76,13 +76,13 @@ function textFromResponse(data: unknown): string {
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
   private client: GoogleGenAI | null = null;
-  private model = 'gemini-2.5-flash';
+  private model = 'gemini-2.0-flash';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
   constructor() {
     this.logger.debug('Initializing GeminiService', process.env.GOOGLE_API_KEY ? '***' : 'no API key');
-    this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || undefined });
+    this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
   }
 
   private isMock() {

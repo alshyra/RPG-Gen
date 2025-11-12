@@ -40,9 +40,8 @@
         <div class="mt-3">
           <label class="block font-medium mb-1">Classe</label>
           <div class="flex gap-2 items-center">
-            <select
+            <UiSelect
               v-model="primaryClass"
-              class="input w-full"
             >
               <option
                 v-for="c in classesList"
@@ -51,13 +50,13 @@
               >
                 {{ c }}
               </option>
-            </select>
-            <button
-              class="btn-ghost"
+            </UiSelect>
+            <UiButton
+              variant="ghost"
               @click="toggleMulticlass"
             >
               {{ multiclass ? 'Multiclasse: ON' : 'Activer multiclasse' }}
-            </button>
+            </UiButton>
           </div>
         </div>
 
@@ -66,9 +65,8 @@
           class="mt-2"
         >
           <label class="text-sm text-slate-400">Seconde classe</label>
-          <select
+          <UiSelect
             v-model="secondaryClass"
-            class="input w-full mt-1"
           >
             <option value="">
               — aucune —
@@ -80,7 +78,7 @@
             >
               {{ c }}
             </option>
-          </select>
+          </UiSelect>
         </div>
 
         <div class="text-sm text-slate-400 mt-3">
@@ -111,18 +109,18 @@
       </div>
     </div>
     <div class="mt-4 flex justify-end gap-2">
-      <button
-        class="btn-secondary"
+      <UiButton
+        variant="ghost"
         @click="cancel"
       >
         Annuler
-      </button>
-      <button
-        class="btn-primary"
+      </UiButton>
+      <UiButton
+        variant="primary"
         @click="handleSave"
       >
         {{ props.mode === 'levelup' ? 'Confirmer Levelup' : 'Enregistrer' }}
-      </button>
+      </UiButton>
     </div>
   </div>
 </template>
@@ -132,6 +130,8 @@ import { useRouter } from 'vue-router';
 import RacePicker from './RacePicker.vue';
 import AbilityScorePicker from '../character-stats/AbilityScorePicker.vue';
 import CharacterIllustration from '../character/CharacterIllustration.vue';
+import UiButton from '../ui/UiButton.vue';
+import UiSelect from '../ui/UiSelect.vue';
 import { useCharacterCreation } from '../../composables/useCharacterCreation';
 import { gameEngine } from '../../services/gameEngine';
 import { useGameStore } from '../../stores/gameStore';

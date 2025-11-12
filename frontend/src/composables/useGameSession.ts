@@ -1,5 +1,6 @@
 import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
+import { characterService } from '../services/characterService';
 import { gameEngine } from '../services/gameEngine';
 
 const worldMap: Record<string, string> = { dnd: 'Dungeons & Dragons', vtm: 'Vampire: The Masquerade', cyberpunk: 'Cyberpunk' };
@@ -27,10 +28,12 @@ export function useGameSession() {
   const gameStore = useGameStore();
 
   const initSession = async (): Promise<void> => {
-    if (gameStore.isDead) gameStore.setDeathModalVisible(true);
     gameStore.setWorld((route.params.world as string) || '', worldMap[(route.params.world as string)] || (route.params.world as string));
     gameStore.setInitializing(true);
     try {
+      const char = characterService.getCurrentCharacter();
+      if (char) gameStore.setCharacter(char);
+      if (gameStore.isDead) gameStore.setDeathModalVisible(true);
       const { messages: history } = await gameEngine.initSession();
       if (history?.length) gameStore.updateMessages(processHistoryMessages(history, gameStore));
     } catch (e: any) {

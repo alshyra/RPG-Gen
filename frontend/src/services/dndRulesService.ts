@@ -199,11 +199,11 @@ export class DnDRulesService {
     // Proficiency bonus for level 1
     const proficiency = this.getProficiencyBonus(1);
 
-    // Initialize skills (all with no proficiency initially, then add selected ones)
-    const skills: { name: string; proficient: boolean; modifier: number }[] = SKILLS.map(skill => ({
+    // Initialize skills with proper modifiers
+    const skills = SKILLS.map(skill => ({
       name: skill.name,
       proficient: (selectedSkills || []).includes(skill.name),
-      modifier: 0, // Will be calculated on demand
+      modifier: this.calculateSkillModifier(skill.name, finalScores, proficiency, (selectedSkills || []).includes(skill.name)),
     }));
 
     return {

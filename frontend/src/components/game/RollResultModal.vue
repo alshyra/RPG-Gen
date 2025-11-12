@@ -1,7 +1,7 @@
 <template>
   <Modal
-    :is-open="isOpen"
-    @close="close"
+    :model-value="isOpen"
+    @update:model-value="close"
   >
     <!-- Header -->
     <div class="text-center mb-6">
@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Modal from '../ui/modal.vue';
+import Modal from '../ui/Modal.vue';
 
 interface Props {
   isOpen: boolean;

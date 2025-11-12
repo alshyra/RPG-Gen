@@ -26,8 +26,9 @@
         </div>
 
         <div>
-          <button
-            class="btn-ghost flex items-center gap-2"
+          <UiButton
+            variant="ghost"
+            class="flex items-center gap-2"
             @click="$emit('select', w.id)"
           >
             <span>Commencer</span>
@@ -45,7 +46,7 @@
                 d="M9 5l7 7-7 7"
               />
             </svg>
-          </button>
+          </UiButton>
         </div>
       </div>
     </div>
@@ -54,6 +55,8 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue';
+import UiButton from '../ui/UiButton.vue';
+
 const emit = defineEmits<{
   (e: 'select', id: string): void
 }>();

@@ -26,18 +26,18 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <button
-            class="btn-primary"
+          <UiButton
+            variant="primary"
             @click="resumeCharacter"
           >
             Reprendre
-          </button>
-          <button
-            class="btn-ghost"
+          </UiButton>
+          <UiButton
+            variant="ghost"
             @click="clearCurrentCharacter"
           >
             Supprimer
-          </button>
+          </UiButton>
         </div>
       </div>
 
@@ -50,6 +50,7 @@
 import { useRouter } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
+import UiButton from '../components/ui/UiButton.vue';
 import { characterService } from '../services/characterService';
 
 const router = useRouter();

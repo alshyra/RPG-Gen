@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+      <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2">
         <!-- XP Bar -->
         <XpBar
           :percentage="xpPercent"
@@ -39,37 +39,25 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import CharacterIllustration from './CharacterIllustration.vue';
-import XpBar from '../../ui/xp-bar.vue';
+import XpBar from '../ui/XpBar.vue';
+import { characterService } from '../../services/characterService';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 
-interface Character {
-    name?: string;
-    portrait?: string;
-    classes?: { name: string; level: number }[];
-    race?: { id: string; name: string };
-    gender?: 'male' | 'female';
-    hp?: number;
-    hpMax?: number;
-    totalXp?: number;
-}
-
-const props = defineProps<{
-    character?: Character | null;
-}>();
+const character = computed(() => characterService.getCurrentCharacter());
 
 const hp = computed(() => {
-    if (!props.character) return '0/0';
-    return `${props.character.hp || 0}/${props.character.hpMax || 12}`;
+    if (!character.value) return '0/0';
+    return `${character.value.hp || 0}/${character.value.hpMax || 12}`;
 });
 
 const currentLevel = computed(() => {
-    const xp = props.character?.totalXp || 0;
+    const xp = character.value?.totalXp || 0;
     const level = getCurrentLevel(xp);
     return `Level ${level.level}`;
 });
 
 const xpPercent = computed(() => {
-    const xp = props.character?.totalXp || 0;
+    const xp = character.value?.totalXp || 0;
     const progress = getXpProgress(xp);
     return progress.percentage;
 });

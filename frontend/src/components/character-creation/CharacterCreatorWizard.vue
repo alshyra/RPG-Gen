@@ -57,19 +57,19 @@
       </div>
 
       <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="btn-secondary"
+        <UiButton
+          variant="ghost"
           @click="cancel"
         >
           Annuler
-        </button>
-        <button
-          class="btn-primary"
+        </UiButton>
+        <UiButton
+          variant="primary"
           :disabled="!character.name"
           @click="nextStep"
         >
           Suivant
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -93,9 +93,8 @@
 
         <div>
           <label class="block font-medium mb-2">Classe</label>
-          <select
+          <UiSelect
             v-model="primaryClass"
-            class="input w-full"
           >
             <option
               v-for="c in classesList"
@@ -104,24 +103,24 @@
             >
               {{ c }}
             </option>
-          </select>
+          </UiSelect>
         </div>
       </div>
 
       <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="btn-secondary"
+        <UiButton
+          variant="ghost"
           @click="previousStep"
         >
           Retour
-        </button>
-        <button
-          class="btn-primary"
+        </UiButton>
+        <UiButton
+          variant="primary"
           :disabled="!character.race || !primaryClass"
           @click="nextStep"
         >
           Suivant
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -143,18 +142,18 @@
       />
 
       <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="btn-secondary"
+        <UiButton
+          variant="ghost"
           @click="previousStep"
         >
           Retour
-        </button>
-        <button
-          class="btn-primary"
+        </UiButton>
+        <UiButton
+          variant="primary"
           @click="nextStep"
         >
           Suivant
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -193,19 +192,19 @@
       </div>
 
       <div class="flex justify-end gap-2 mt-6">
-        <button
-          class="btn-secondary"
+        <UiButton
+          variant="ghost"
           @click="previousStep"
         >
           Retour
-        </button>
-        <button
-          class="btn-primary"
+        </UiButton>
+        <UiButton
+          variant="primary"
           :disabled="selectedSkills.length !== skillsToChoose"
           @click="finishCreation"
         >
           Créer
-        </button>
+        </UiButton>
       </div>
     </div>
 
@@ -237,6 +236,8 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import RacePicker from './RacePicker.vue';
 import AbilityScorePicker from '../character-stats/AbilityScorePicker.vue';
+import UiButton from '../ui/UiButton.vue';
+import UiSelect from '../ui/UiSelect.vue';
 import { characterService } from '../../services/characterService';
 import { DnDRulesService } from '../../services/dndRulesService';
 

@@ -13,11 +13,12 @@
           {{ ability.short }}
         </div>
         <div :class="['font-bold', ability.color]">
-          {{ getAbilityScore(key) }}
-        </div>
-        <div class="text-xs text-slate-500 mt-0.5">
-          {{ getModifier(getAbilityScore(key)) > 0 ? '+' : '' }}{{
-            getModifier(getAbilityScore(key)) }}
+          <span>
+            {{ getAbilityScore(key) }}
+          </span>
+          <span class="text-xs text-slate-500 mt-0.5">
+            ({{ getModifier(getAbilityScore(key)) > 0 ? '+' : '' }}{{ getModifier(getAbilityScore(key)) }})
+          </span>
         </div>
       </div>
     </div>
