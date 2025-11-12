@@ -96,33 +96,6 @@ export class GameEngine {
   }
 
   /**
-   * Format game instruction for display
-   */
-  formatInstruction(instr: GameInstruction): string {
-    if (instr.roll) {
-      return `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`;
-    }
-    if (instr.xp) {
-      return `✨ Gained ${instr.xp} XP`;
-    }
-    if (instr.hp) {
-      const change = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-      return `❤️ HP changed: ${change}`;
-    }
-    return '';
-  }
-
-  /**
-   * Format roll result for sending back to backend
-   */
-  formatRollResult(diceNotation: string, rolls: number[], total: number, modifier?: string, modifierValue: number = 0): string {
-    const baseTotal = rolls.reduce((a, b) => a + b, 0);
-    const modifierStr = modifier ? ` with ${modifier}` : '';
-    const modifierDisplay = modifierValue > 0 ? ` + ${modifierValue}` : modifierValue < 0 ? ` ${modifierValue}` : '';
-    return `Roll result: ${diceNotation}${modifierStr} = ${baseTotal}${modifierDisplay} = **${total}**`;
-  }
-
-  /**
    * Get current session ID
    */
   getSessionId(): string | null {

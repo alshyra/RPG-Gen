@@ -1,9 +1,18 @@
 <template>
   <div>
     <div class="grid grid-cols-4 gap-2">
-      <button v-for="r in allowedRaces" :key="r.id" @click.prevent="select(r)" :class="['p-2 rounded border', selected?.id===r.id ? 'border-indigo-500 bg-indigo-600/20' : 'border-slate-700']">
-        <div class="font-medium">{{ r.name }}</div>
-        <div class="text-xs text-slate-400">{{ summaryMods(r.mods) }}</div>
+      <button
+        v-for="r in allowedRaces"
+        :key="r.id"
+        :class="['p-2 rounded border', selected?.id===r.id ? 'border-indigo-500 bg-indigo-600/20' : 'border-slate-700']"
+        @click.prevent="select(r)"
+      >
+        <div class="font-medium">
+          {{ r.name }}
+        </div>
+        <div class="text-xs text-slate-400">
+          {{ summaryMods(r.mods) }}
+        </div>
       </button>
     </div>
   </div>

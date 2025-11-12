@@ -1,6 +1,6 @@
 <template>
   <!-- PromptCarousel removed per user request -->
-  <div style="display:none"></div>
+  <div style="display:none" />
 </template>
 
 <script setup lang="ts">

@@ -1,20 +1,32 @@
 <template>
-    <div>
-        <div class="font-bold text-sm text-slate-300">Caractéristiques</div>
-        <div class="mt-2 grid grid-cols-3 gap-1 text-xs">
-            <div v-for="(ability, key) in abilities" :key="key" class="text-center">
-                <div class="text-slate-400">{{ ability.short }}</div>
-                <div :class="['font-bold', ability.color]">{{ getAbilityScore(key) }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">{{ getModifier(getAbilityScore(key)) > 0 ? '+' : '' }}{{
-                    getModifier(getAbilityScore(key)) }}</div>
-            </div>
-        </div>
+  <div>
+    <div class="font-bold text-sm text-slate-300">
+      Caractéristiques
     </div>
+    <div class="mt-2 grid grid-cols-3 gap-1 text-xs">
+      <div
+        v-for="(ability, key) in abilities"
+        :key="key"
+        class="text-center"
+      >
+        <div class="text-slate-400">
+          {{ ability.short }}
+        </div>
+        <div :class="['font-bold', ability.color]">
+          {{ getAbilityScore(key) }}
+        </div>
+        <div class="text-xs text-slate-500 mt-0.5">
+          {{ getModifier(getAbilityScore(key)) > 0 ? '+' : '' }}{{
+            getModifier(getAbilityScore(key)) }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { characterService } from '../services/characterService';
+import { characterService } from '../../services/characterService';
 
 
 const abilities = {

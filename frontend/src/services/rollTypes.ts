@@ -1,22 +1,28 @@
 /**
- * Common roll data structures used across the app
+ * Roll instruction received from backend
  */
-
-export interface RollResult {
-  diceValue: number;      // Raw d20 result (1-20)
-  modifier: number;       // Ability/skill modifier
-  total: number;          // diceValue + modifier
-  diceNotation?: string;  // e.g. "1d20"
-  skillName?: string;     // e.g. "Persuasion"
-  isCritical?: boolean;   // true if nat 20 or nat 1
-  isNat20?: boolean;      // Specifically nat 20
-  isNat1?: boolean;       // Specifically nat 1
+export interface RollInstruction {
+  dices: string;           // e.g. "1d20"
+  modifier: string;        // e.g. "Perception Check" - skill/check name
 }
 
+/**
+ * Roll result sent to backend
+ */
+export interface RollResult {
+  rolls: number[];         // Array of individual die rolls (e.g. [18] for d20)
+  total: number;           // Sum of rolls + bonus
+  bonus: number;           // Skill/ability modifier applied
+  advantage: boolean;      // Always false for now
+}
+
+/**
+ * Roll data for display in modal
+ */
 export interface RollModalData {
-  diceNotation: string;
-  diceValue: number;
-  rolls: number[];        // For display (array of individual die rolls)
-  modifier: number;
-  total: number;
+  skillName: string;       // Name of the skill/check (e.g. "Perception Check")
+  diceNotation: string;    // e.g. "1d20"
+  rolls: number[];         // Array of dice rolls
+  bonus: number;           // Skill bonus
+  total: number;           // final total (rolls sum + bonus)
 }

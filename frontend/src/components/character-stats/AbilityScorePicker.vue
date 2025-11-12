@@ -3,23 +3,55 @@
     <!-- point-buy only UI (method hidden from user) -->
 
     <div class="mt-3 grid grid-cols-2 gap-2">
-      <div v-for="stat in stats" :key="stat">
+      <div
+        v-for="stat in stats"
+        :key="stat"
+      >
         <div class="flex items-baseline justify-between">
-          <div class="text-sm font-medium">{{ stat }}</div>
-          <div class="text-xs text-slate-400">{{ formatMod(assigned[stat]) }} • PB {{ proficiency }}</div>
+          <div class="text-sm font-medium">
+            {{ stat }}
+          </div>
+          <div class="text-xs text-slate-400">
+            {{ formatMod(assigned[stat]) }} • PB {{ proficiency }}
+          </div>
         </div>
         <div class="mt-1">
-          <div v-if="props.mode === 'edit'" class="w-12 text-center font-medium">{{ assigned[stat] }}</div>
-          <div v-else class="flex items-center gap-2">
-            <button class="btn-ghost" @click.prevent="change(stat, -1)">-</button>
-            <div class="w-12 text-center font-medium">{{ assigned[stat] }}</div>
-            <button class="btn-ghost" @click.prevent="change(stat, +1)">+</button>
+          <div
+            v-if="props.mode === 'edit'"
+            class="w-12 text-center font-medium"
+          >
+            {{ assigned[stat] }}
+          </div>
+          <div
+            v-else
+            class="flex items-center gap-2"
+          >
+            <button
+              class="btn-ghost"
+              @click.prevent="change(stat, -1)"
+            >
+              -
+            </button>
+            <div class="w-12 text-center font-medium">
+              {{ assigned[stat] }}
+            </div>
+            <button
+              class="btn-ghost"
+              @click.prevent="change(stat, +1)"
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="props.mode !== 'edit'" class="mt-2 text-sm">Points restants: {{ pointsLeft }}</div>
+    <div
+      v-if="props.mode !== 'edit'"
+      class="mt-2 text-sm"
+    >
+      Points restants: {{ pointsLeft }}
+    </div>
   </div>
 </template>
 
@@ -32,7 +64,6 @@ const emit = defineEmits<{
 }>();
 
 const stats = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'];
-const standardList = [15, 14, 13, 12, 10, 8];
 const method = ref('pointbuy');
 const assigned = reactive<Record<string, number>>({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
 const proficiency = computed(() => typeof props.proficiency === 'number' ? props.proficiency : 2);
@@ -84,7 +115,7 @@ function change(stat: string, delta: number) {
   emit('update:scores', { ...assigned });
 }
 
-function formatMod(n: number) {
+function formatMod(n: number): string {
   const m = Math.floor((Number(n) - 10) / 2);
   return m >= 0 ? `+${m}` : `${m}`;
 }

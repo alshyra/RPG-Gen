@@ -75,7 +75,7 @@ export function parseGameResponse(text: string): ParsedGameResponse {
         if (parsed.roll || typeof parsed.xp === 'number' || typeof parsed.hp === 'number') {
           instructions.push(parsed);
         }
-      } catch (_) {
+      } catch {
         // Not valid JSON or not a game instruction
       }
     }
@@ -122,7 +122,7 @@ export function rollDice(notation: string): { rolls: number[]; total: number } {
 /**
  * Get a modifier value from character stats
  */
-export function getModifierValue(character: any, modifierName?: string): number {
+export function getModifierValue(character: Record<string, unknown>, modifierName?: string): number {
   if (!modifierName || !character) return 0;
 
   const modLower = modifierName.toLowerCase();

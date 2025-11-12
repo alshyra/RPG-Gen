@@ -6,6 +6,38 @@ import { ConversationService, ChatMessage } from './conversation.service';
 import { parseGameResponse } from '../shared/game-parser.util';
 import { readFile } from 'fs/promises';
 
+interface CharacterClass {
+  name: string;
+  level: number;
+}
+
+interface CharacterRace {
+  name: string;
+}
+
+interface Character {
+  name?: string;
+  race?: CharacterRace | string;
+  classes?: CharacterClass[];
+  gender?: string;
+  hp?: number;
+  hpMax?: number;
+  totalXp?: number;
+  Str?: number;
+  Dex?: number;
+  Con?: number;
+  Int?: number;
+  Wis?: number;
+  Cha?: number;
+  scores?: Record<string, number>;
+}
+
+interface ChatRequest {
+  message?: string;
+  sessionId?: string;
+  character?: Character;
+}
+
 const schema = Joi.object({
   message: Joi.string().allow('').optional(),
   sessionId: Joi.string().optional(),
@@ -23,12 +55,12 @@ export class ChatController {
   private async loadSystemPrompt(): Promise<string> {
     try {
       return await readFile(TEMPLATE_PATH, 'utf8');
-    } catch (_) {
+    } catch {
       return '';
     }
   }
 
-  private async initializeNewSession(sessionId: string, systemPrompt: string, character?: any): Promise<ChatMessage> {
+  private async initializeNewSession(sessionId: string, systemPrompt: string, character?: Character): Promise<ChatMessage> {
     this.logger.log(`Initializing new session: ${sessionId}`);
     
     // Create chat client with system template
@@ -64,8 +96,8 @@ export class ChatController {
       const charSummary = `
 Character Information:
 - Name: ${character.name || 'Unknown'}
-- Race: ${character.race?.name || character.race || 'Unknown'}
-- Classes: ${character.classes?.map((c: any) => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
+- Race: ${typeof character.race === 'object' ? character.race?.name : character.race || 'Unknown'}
+- Classes: ${character.classes?.map((c: CharacterClass) => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
 - Gender: ${character.gender || 'Unknown'}
 - HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
 - XP: ${character.totalXp || 0}
@@ -81,7 +113,7 @@ Character Information:
       role: 'assistant',
       text: initResp.text || '',
       timestamp: Date.now(),
-      meta: { usage: initResp.usage || null, model: initResp.modelVersion }
+      meta: { usage: initResp.usage || null, model: initResp.modelVersion || '' }
     };
     
     await this.conv.append(sessionId, initMsg);
@@ -90,7 +122,7 @@ Character Information:
     return initMsg;
   }
 
-  private async processUserMessage(sessionId: string, userText: string, systemPrompt: string): Promise<{ userMsg: ChatMessage; assistantMsg: ChatMessage }> {
+  private async processUserMessage(sessionId: string, userText: string, _systemPrompt: string): Promise<{ userMsg: ChatMessage; assistantMsg: ChatMessage }> {
     this.logger.log(`Processing message for session ${sessionId}: "${userText.substring(0, 50)}..."`);
 
     // Append user message to history
@@ -105,14 +137,14 @@ Character Information:
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
-      meta: { usage: resp.usage || null, model: resp.modelVersion }
+      meta: { usage: resp.usage || null, model: resp.modelVersion || '' }
     };
     await this.conv.append(sessionId, assistantMsg);
 
     return { userMsg, assistantMsg };
   }
 
-  private formatChatResponse(sessionId: string, responseText: string, model: string, usage: any) {
+  private formatChatResponse(sessionId: string, responseText: string, model: string, usage: Record<string, unknown> | null) {
     const { narrative, instructions } = parseGameResponse(responseText);
     return {
       text: narrative,
@@ -126,14 +158,20 @@ Character Information:
   @Post()
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
   @ApiBody({ schema: { type: 'object' } })
-  async chat(@Body() body: any) {
+  async chat(@Body() body: ChatRequest) {
     const { error, value } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
 
     const providedId = value.sessionId;
-    const sessionId = typeof providedId === 'string' && providedId.length
-      ? providedId
-      : (globalThis as any).crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    let sessionId: string;
+    try {
+      sessionId = typeof providedId === 'string' && providedId.length
+        ? providedId
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        : ((globalThis as any).crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+    } catch {
+      sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     try {
       const systemPrompt = await this.loadSystemPrompt();
@@ -149,20 +187,20 @@ Character Information:
       const { assistantMsg } = await this.processUserMessage(sessionId, value.message || '', systemPrompt);
 
       // Format and return response
-      const result = this.formatChatResponse(sessionId, assistantMsg.text, assistantMsg.meta?.model, assistantMsg.meta?.usage);
+      const result = this.formatChatResponse(sessionId, assistantMsg.text, (assistantMsg.meta?.model || '') as string, (assistantMsg.meta?.usage || null) as Record<string, unknown> | null);
 
       this.logger.log(`Chat response ready for session ${sessionId}`);
       return { ok: true, sessionId, result };
-    } catch (e: any) {
-      this.logger.error('Chat failed', e?.stack || e, 'ChatController');
-      throw new InternalServerErrorException(e?.message || 'Chat failed');
+    } catch (e) {
+      this.logger.error('Chat failed', (e as Error)?.stack || e, 'ChatController');
+      throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
     }
   }
 
   @Post('template')
   @ApiOperation({ summary: 'Update developer prompt template (dev only)' })
   @ApiBody({ schema: { type: 'object' } })
-  async updateTemplate(@Body() body: any) {
+  async updateTemplate(@Body() body: Record<string, unknown>) {
     const text = body?.template;
     if (typeof text !== 'string') throw new BadRequestException('template required');
     const fs = await import('fs/promises');
@@ -177,7 +215,7 @@ Character Information:
     try {
       const txt = await fs.readFile(TEMPLATE_PATH, 'utf8');
       return { ok: true, template: txt };
-    } catch (e) {
+    } catch {
       return { ok: true, template: '' };
     }
   }
@@ -190,13 +228,13 @@ Character Information:
     try {
       const history = await this.conv.getHistory(sessionId);
       const systemPrompt = await this.loadSystemPrompt();
-      let charData: any = undefined;
+      let charData: Character | undefined;
       
       // Parse character data if provided as query string (JSON)
       if (character && typeof character === 'string') {
         try {
-          charData = JSON.parse(character);
-        } catch (_) {
+          charData = JSON.parse(character) as Character;
+        } catch {
           // Character data not valid JSON, ignore
         }
       }
@@ -209,14 +247,14 @@ Character Information:
       }
 
       // Existing session: rebuild chat client with history
-      const sdkHistory = history.map(m => ({
+      const sdkHistory = history.map((m) => ({
         role: m.role === 'assistant' ? 'model' : m.role,
         parts: [{ text: m.text }],
       }));
       this.gemini.getOrCreateChat(sessionId, systemPrompt || undefined, sdkHistory);
 
       // Parse instructions from assistant messages
-      const historyWithInstructions = history.map(msg => {
+      const historyWithInstructions = history.map((msg) => {
         if (msg.role === 'assistant') {
           const { narrative, instructions } = parseGameResponse(msg.text);
           return { ...msg, text: narrative, instructions };
@@ -226,9 +264,9 @@ Character Information:
 
       this.logger.log(`History loaded for session ${sessionId}: ${history.length} messages`);
       return { ok: true, sessionId, isNew: false, history: historyWithInstructions };
-    } catch (e: any) {
-      this.logger.error('History retrieval failed', e?.stack || e, 'ChatController');
-      throw new InternalServerErrorException(e?.message || 'Failed to retrieve history');
+    } catch (e) {
+      this.logger.error('History retrieval failed', (e as Error)?.stack || e, 'ChatController');
+      throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve history');
     }
   }
 }

@@ -1,7 +1,12 @@
 <template>
-    <div class="illustration rounded-md">
-        <img :src="imgSrc" :alt="alt" class="object-contain max-w-full max-h-full" @error="onError" />
-    </div>
+  <div class="illustration rounded-md">
+    <img
+      :src="imgSrc"
+      :alt="alt"
+      class="object-contain max-w-full max-h-full"
+      @error="onError"
+    >
+  </div>
 </template>
 
 <script setup lang="ts">

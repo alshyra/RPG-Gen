@@ -1,14 +1,19 @@
 <template>
   <div>
-    <button class="btn-primary" @click="onClick">{{ props.pendingInstruction?.roll ? 'Roll 🎲' : 'Envoyer' }}</button>
+    <button
+      class="btn-primary"
+      @click="onClick"
+    >
+      {{ props.pendingInstruction?.roll ? 'Roll 🎲' : 'Envoyer' }}
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import axios from 'axios';
-import { characterService } from '../services/characterService';
-import { type GameInstruction } from '../services/gameEngine';
+import { characterService } from '../../services/characterService';
+import { type GameInstruction } from '../../services/gameEngine';
 
 const emit = defineEmits<{
   (e: 'rolled', payload: any): void

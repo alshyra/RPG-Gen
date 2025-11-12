@@ -1,5 +1,8 @@
 <template>
-  <div class="markdown-content" v-html="renderedMarkdown"></div>
+  <div
+    class="markdown-content"
+    v-html="renderedMarkdown"
+  />
 </template>
 
 <script>

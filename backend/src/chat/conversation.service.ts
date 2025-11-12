@@ -8,7 +8,7 @@ export type ChatMessage = {
   role: ChatRole;
   text: string;
   timestamp: number;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 };
 
 @Injectable()
@@ -25,8 +25,8 @@ export class ConversationService {
   private async ensureArchiveDir() {
     try {
       await mkdir(this.ARCHIVE_DIR, { recursive: true });
-    } catch (e) {
-      this.logger.error('Failed to create archives directory', e);
+    } catch {
+      this.logger.error('Failed to create archives directory');
     }
   }
 
@@ -51,7 +51,7 @@ export class ConversationService {
       const path = this.getHistoryPath(id);
       const data = await fsReadFile(path, 'utf-8');
       return JSON.parse(data);
-    } catch (e) {
+    } catch {
       // File doesn't exist or is invalid, that's ok
       return null;
     }
