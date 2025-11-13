@@ -8,13 +8,16 @@ const routes = [
   { path: "/", name: "home", component: HomeView },
   { path: "/game/:world?", name: "game", component: GameView },
   {
-    path: "/character/:world?",
-    name: "character",
+    path: "/character/:world?/step/:step",
+    name: "character-step",
     component: CharacterCreatorView,
-    children: [
-      { path: "", redirect: "step/1" },
-      { path: "step/:step", name: "character-step", component: CharacterCreatorView },
-    ],
+  },
+  {
+    path: "/character/:world?",
+    redirect: (to: any) => {
+      const world = to.params.world || "dnd";
+      return `/character/${world}/step/1`;
+    },
   },
   { path: "/levelup/:world?", name: "levelup", component: CharacterLevelupView },
 ];

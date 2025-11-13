@@ -66,7 +66,7 @@ function onSelect(id: string) {
     //
   }
   characterService.clearCurrentCharacterId()
-  router.push({ name: 'character', params: { world: id } });
+  router.push({ name: 'character-step', params: { world: id, step: 1 } });
 }
 
 function resumeCharacter() {

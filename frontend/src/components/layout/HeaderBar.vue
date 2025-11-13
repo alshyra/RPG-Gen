@@ -34,7 +34,7 @@ const subtitle = computed(() => {
   const routeName = route.name as string;
 
   if (routeName === 'home') return 'Bienvenue';
-  if (routeName === 'character') {
+  if (routeName === 'character-step') {
     const world = (route.params.world as string) || '';
     return worldMap[world] || 'Créateur de personnage';
   }
@@ -50,7 +50,7 @@ const description = computed(() => {
   const routeName = route.name as string;
 
   if (routeName === 'home') return 'Choisissez votre univers';
-  if (routeName === 'character') {
+  if (routeName === 'character-step') {
     const action = route.query.action as string;
     if (action === 'levelup') return 'Montée de niveau';
     return 'Création de personnage';
