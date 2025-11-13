@@ -22,26 +22,13 @@
           >
             {{ assigned[stat] }}
           </div>
-          <div
+          <UiInputNumber
             v-else
-            class="flex items-center gap-2"
-          >
-            <UiButton
-              variant="ghost"
-              @click.prevent="change(stat, -1)"
-            >
-              -
-            </UiButton>
-            <div class="w-12 text-center font-medium">
-              {{ assigned[stat] }}
-            </div>
-            <UiButton
-              variant="ghost"
-              @click.prevent="change(stat, +1)"
-            >
-              +
-            </UiButton>
-          </div>
+            :model-value="assigned[stat]"
+            :min="8"
+            :max="15"
+            @update:model-value="(val) => change(stat, val - assigned[stat])"
+          />
         </div>
       </div>
     </div>
@@ -57,7 +44,7 @@
 
 <script setup lang="ts">
 import { reactive, watch, computed, ref } from 'vue';
-import UiButton from '../ui/UiButton.vue';
+import UiInputNumber from '../ui/UiInputNumber.vue';
 
 const props = defineProps<{ scores?: Record<string, number>, proficiency?: number, mode?: string, levelUpBudget?: number, initialScores?: Record<string, number> }>();
 const emit = defineEmits<{
