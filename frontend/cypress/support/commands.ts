@@ -8,6 +8,7 @@
 // ***********************************************
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       /**
@@ -20,8 +21,6 @@ declare global {
 }
 
 // Custom command to select elements by data-cy attribute
-Cypress.Commands.add('dataCy', (value: string) => {
-  return cy.get(`[data-cy="${value}"]`);
-});
+Cypress.Commands.add('dataCy', (value: string) => cy.get(`[data-cy="${value}"]`));
 
 export {};

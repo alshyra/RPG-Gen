@@ -16,6 +16,7 @@ describe('Application Smoke Tests', () => {
     // Check meta tags
     cy.document().should((doc) => {
       expect(doc.charset).to.eq('UTF-8');
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(doc.querySelector('meta[name="viewport"]')).to.exist;
     });
 
