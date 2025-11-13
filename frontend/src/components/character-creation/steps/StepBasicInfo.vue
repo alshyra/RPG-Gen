@@ -16,22 +16,18 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block font-medium mb-2">Genre</label>
-        <div class="flex gap-2">
-          <UiButtonToggle
-            v-for="g in genders"
-            :key="g"
-            :is-selected="gender === g"
-            @click="$emit('update:gender', g)"
-          >
-            {{ g === 'male' ? '♂️ Homme' : '♀️ Femme' }}
-          </UiButtonToggle>
-        </div>
+        <UiButtonToggle
+          :options="genderOptions"
+          :model-value="gender"
+          @update:model-value="$emit('update:gender', $event as string)"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
 import UiButtonToggle from '@/components/ui/UiButtonToggle.vue';
 
@@ -42,9 +38,16 @@ interface Props {
   genders: string[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 defineEmits<{
   (e: 'update:character', value: any): void;
   (e: 'update:gender', value: string): void;
 }>();
+
+const genderOptions = computed(() =>
+  props.genders.map(g => ({
+    value: g,
+    label: g === 'male' ? '♂️ Homme' : '♀️ Femme'
+  }))
+);
 </script>

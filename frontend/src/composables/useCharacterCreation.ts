@@ -175,6 +175,71 @@ const initializeCharacterRefs = (initialCharacter?: CreatedCharacter) => ({
   isGeneratingAvatar: ref(false),
 });
 
+const DRAFT_KEY = "rpg-character-draft";
+
+const saveDraft = (state: {
+  character: CreatedCharacter;
+  primaryClass: string;
+  secondaryClass: string;
+  multiclass: boolean;
+  baseScores: Record<string, number>;
+  gender: "male" | "female";
+  selectedSkills: string[];
+  avatarDescription: string;
+  generatedAvatar: string | null;
+  world?: string;
+  worldId?: string;
+  currentStep?: number;
+}): void => {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error("Failed to save character draft:", e);
+  }
+};
+
+const loadDraft = (): Omit<ReturnType<typeof initializeCharacterRefs>, never> | null => {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (!saved) return null;
+    const data = JSON.parse(saved);
+    return {
+      character: ref(data.character),
+      primaryClass: ref(data.primaryClass),
+      secondaryClass: ref(data.secondaryClass),
+      multiclass: ref(data.multiclass),
+      baseScores: ref(data.baseScores),
+      gender: ref(data.gender),
+      selectedSkills: ref(data.selectedSkills),
+      avatarDescription: ref(data.avatarDescription),
+      generatedAvatar: ref(data.generatedAvatar),
+      isGeneratingAvatar: ref(false),
+    };
+  } catch (e) {
+    console.error("Failed to load character draft:", e);
+    return null;
+  }
+};
+
+const getDraftCurrentStep = (): number => {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (!saved) return 0;
+    const data = JSON.parse(saved);
+    return data.currentStep ?? 0;
+  } catch (e) {
+    return 0;
+  }
+};
+
+const clearDraft = (): void => {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch (e) {
+    console.error("Failed to clear character draft:", e);
+  }
+};
+
 export const useCharacterCreation = (
   world?: string,
   worldId?: string,
@@ -182,6 +247,10 @@ export const useCharacterCreation = (
   creationMode: "create" | "levelup" = "create"
 ) => {
   const router = useRouter();
+
+  // Try to load draft if in create mode (not levelup)
+  const draftRefs = creationMode === "create" ? loadDraft() : null;
+
   const {
     character,
     primaryClass,
@@ -193,7 +262,7 @@ export const useCharacterCreation = (
     avatarDescription,
     generatedAvatar,
     isGeneratingAvatar,
-  } = initializeCharacterRefs(initialCharacter);
+  } = draftRefs || initializeCharacterRefs(initialCharacter);
 
   const methods = createMethods(
     character,
@@ -205,10 +274,42 @@ export const useCharacterCreation = (
     world,
     worldId
   );
+
+  // Auto-save draft when creation state changes (debounced)
+  const draftState = computed(() => ({
+    character: character.value,
+    primaryClass: primaryClass.value,
+    secondaryClass: secondaryClass.value,
+    multiclass: multiclass.value,
+    baseScores: baseScores.value,
+    gender: gender.value,
+    selectedSkills: selectedSkills.value,
+    avatarDescription: avatarDescription.value,
+    generatedAvatar: generatedAvatar.value,
+    world,
+    worldId,
+  }));
+
+  // No more auto-watch - we'll save on demand from components
+  // This avoids the arrow function size issue and makes saves more explicit
+
   const applyAndSave = () => {
     methods.applyRacialAndCompute();
     methods.saveCharacter();
+    clearDraft(); // Clear draft after successful save
     router.push({ name: "game", params: { world } });
+  };
+
+  const saveDraftWithStep = (currentStep: number): void => {
+    const fullDraftState = {
+      ...draftState.value,
+      currentStep,
+    };
+    saveDraft(fullDraftState);
+  };
+
+  const saveDraftNow = (): void => {
+    saveDraft(draftState.value);
   };
 
   return {
@@ -235,5 +336,9 @@ export const useCharacterCreation = (
     ...methods,
     applyAndSave,
     generatePortraitPath,
+    clearDraft, // Export clear function for manual cleanup if needed
+    getDraftCurrentStep, // Export to restore step on refresh
+    saveDraftWithStep, // Export to save step when navigating
+    saveDraftNow, // Export to save draft on demand from components
   };
 };

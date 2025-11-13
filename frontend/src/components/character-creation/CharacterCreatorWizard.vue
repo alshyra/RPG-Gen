@@ -1,5 +1,14 @@
 <template>
   <div class="p-4 rounded-md max-w-4xl mx-auto">
+    <!-- Header with restore draft button -->
+    <div class="flex justify-between mb-4">
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold">
+          Création de personnage
+        </h2>
+      </div>
+    </div>
+
     <!-- Progress indicator -->
     <div class="flex justify-between mb-8">
       <div
@@ -22,8 +31,8 @@
       :gender="gender"
       :world="world"
       :genders="genders"
-      @update:character="character = $event"
-      @update:gender="(g: any) => gender = g"
+      @update:character="character = Object.assign({}, character, $event); saveDraftNow()"
+      @update:gender="(g: any) => { gender = g; saveDraftNow(); }"
     />
 
     <StepRaceClass
@@ -32,14 +41,14 @@
       :primary-class="primaryClass"
       :allowed-races="allowedRaces"
       :class-list="classesList"
-      @update:character="Object.assign(character, $event)"
-      @update:primary-class="primaryClass = $event"
+      @update:character="Object.assign(character, $event); saveDraftNow()"
+      @update:primary-class="primaryClass = $event; saveDraftNow()"
     />
 
     <StepAbilityScores
       v-if="currentStep === 2"
       :base-scores="baseScores"
-      @update:base-scores="(scores: any) => Object.assign(baseScores, scores)"
+      @update:base-scores="(scores: any) => { Object.assign(baseScores, scores); saveDraftNow(); }"
     />
 
     <StepSkills
@@ -48,7 +57,7 @@
       :selected-skills="selectedSkills"
       :available-skills="availableSkills"
       :skills-to-choose="skillsToChoose"
-      @update:selected-skills="selectedSkills = $event"
+      @update:selected-skills="(skills: any) => { selectedSkills.splice(0, selectedSkills.length, ...skills); saveDraftNow(); }"
     />
 
     <StepAvatar
@@ -59,7 +68,7 @@
       :generated-avatar="generatedAvatar"
       :is-generating="isGeneratingAvatar"
       :avatar-description="avatarDescription"
-      @update:avatar-description="avatarDescription = $event"
+      @update:avatar-description="avatarDescription = $event; saveDraftNow()"
       @generate="generateAvatar"
       @regenerate="regenerateAvatar"
     />
@@ -121,17 +130,6 @@ const route = useRoute();
 
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
 
-// Get current step from route, default to 0
-const currentStep = computed({
-  get: () => {
-    const step = parseInt(route.params.step as string, 10);
-    return isNaN(step) ? 0 : Math.min(step - 1, steps.length - 1);
-  },
-  set: (value: number) => {
-    router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
-  }
-});
-
 // Use character creation composable
 const {
   character,
@@ -147,8 +145,26 @@ const {
   genders,
   availableSkills,
   skillsToChoose,
-  applyAndSave
+  applyAndSave,
+  getDraftCurrentStep,
+  saveDraftWithStep,
+  saveDraftNow,
 } = useCharacterCreation(props.world, props.worldId);
+
+// Get current step from route, or from draft if no route param
+const currentStep = computed({
+  get: () => {
+    const routeStep = parseInt(route.params.step as string, 10);
+    if (!isNaN(routeStep)) {
+      return Math.min(routeStep - 1, steps.length - 1);
+    }
+    // Fall back to draft step if available
+    return getDraftCurrentStep();
+  },
+  set: (value: number) => {
+    router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
+  }
+});
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -169,12 +185,14 @@ const canProceed = computed(() => {
 
 function nextStep() {
   if (currentStep.value < steps.length - 1) {
+    saveDraftWithStep(currentStep.value + 1);
     currentStep.value++;
   }
 }
 
 function previousStep() {
   if (currentStep.value > 0) {
+    saveDraftWithStep(currentStep.value - 1);
     currentStep.value--;
   }
 }

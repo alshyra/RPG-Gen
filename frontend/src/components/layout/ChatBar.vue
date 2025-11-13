@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
-import { type GameInstruction } from '../../services/gameEngine';
+import { type GameInstruction } from '@shared/types';
 
 interface Props {
     playerText: string;

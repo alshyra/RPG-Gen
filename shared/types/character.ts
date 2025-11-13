@@ -15,6 +15,7 @@ export interface AbilityScores {
   Int: number;
   Wis: number;
   Cha: number;
+  [key: string]: number; // Allow string indexing for dynamic access
 }
 
 export interface CharacterClass {

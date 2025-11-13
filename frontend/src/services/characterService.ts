@@ -179,6 +179,45 @@ const clearDeceased = (): void => {
   }
 };
 
+/**
+ * Draft management - for character creation in progress
+ */
+const DRAFT_KEY = "rpg-character-draft";
+
+const saveDraft = (draftData: any): void => {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
+  } catch (e) {
+    console.error("Failed to save character draft", e);
+  }
+};
+
+const loadDraft = (): any | null => {
+  try {
+    const draft = localStorage.getItem(DRAFT_KEY);
+    return draft ? JSON.parse(draft) : null;
+  } catch (e) {
+    console.error("Failed to load character draft", e);
+    return null;
+  }
+};
+
+const hasDraft = (): boolean => {
+  try {
+    return !!localStorage.getItem(DRAFT_KEY);
+  } catch {
+    return false;
+  }
+};
+
+const clearDraft = (): void => {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch (e) {
+    console.error("Failed to clear character draft", e);
+  }
+};
+
 export const characterService = {
   generateUUID,
   loadCharacter,
@@ -193,4 +232,8 @@ export const characterService = {
   killCharacter,
   getDeceasedCharacters,
   clearDeceased,
+  saveDraft,
+  loadDraft,
+  hasDraft,
+  clearDraft,
 };

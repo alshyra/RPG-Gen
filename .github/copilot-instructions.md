@@ -238,6 +238,28 @@ backend/src/
 5. Update D&D rules in `dndRulesService` if needed
 6. Update character save/load in `characterService`
 
+## Testing & Development Checklist
+
+### Frontend Quality Checks
+
+- **Linting + Type Checking** (comprehensive): `npm run lint`
+  - Includes: TypeScript type-check (vue-tsc) + ESLint style checks
+  - Use `npm run lint:fix` to auto-fix formatting issues
+- **Build Test**: `npm run build` (verify production build works)
+- **Dev Server**: `npm run dev` (port 5173, proxies `/api/*` to backend)
+
+### Backend Quality Checks
+
+- **Tests**: `npm run test` (GameParser + Dice tests)
+- **Dev Server**: `npm run start:dev` (port 3001, NestJS hot-reload)
+
+### Git Workflow
+
+1. Make changes following architectural principles
+2. Run `npm run lint` in frontend (and `npm run test` in backend if changed)
+3. All tests/lints must pass before commit
+4. Use `npm run lint:fix` to resolve formatting automatically
+
 ---
 
 **Last Updated**: Nov 13, 2025 | **Contributors**: Initial generation from codebase analysis
