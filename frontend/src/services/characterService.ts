@@ -3,48 +3,7 @@
  * Single source of truth: localStorage with UUID-based character IDs
  */
 
-interface SkillEntry {
-  name: string;
-  proficient: boolean;
-  modifier: number;
-}
-
-interface RaceEntry {
-  id: string;
-  name: string;
-  mods: Record<string, number>;
-}
-
-interface ClassEntry {
-  name: string;
-  level: number;
-}
-
-interface AbilityScores {
-  [key: string]: number;
-}
-
-export interface SavedCharacterEntry {
-  id: string; // UUID
-  data: CharacterEntry;
-}
-
-export interface CharacterEntry {
-  id: string; // UUID
-  name: string;
-  race: RaceEntry;
-  scores: AbilityScores;
-  hp: number;
-  hpMax: number;
-  totalXp: number;
-  classes: ClassEntry[];
-  skills?: SkillEntry[];
-  world: string;
-  worldId: string;
-  portrait: string;
-  gender: 'male' | 'female';
-  proficiency?: number;
-}
+import type { CharacterEntry, SavedCharacterEntry } from "@shared/types";
 
 interface DeceasedCharacterEntry {
   id: string;
@@ -53,10 +12,13 @@ interface DeceasedCharacterEntry {
   location: string;
 }
 
+// Re-export for convenience
+export type { SavedCharacterEntry, CharacterEntry } from "../../../shared/types";
+
 const STORAGE_KEYS = {
-  savedCharacters: 'rpg-characters',
-  currentCharacterId: 'rpg-character-id',
-  deceasedCharacters: 'rpg-deceased-characters',
+  savedCharacters: "rpg-characters",
+  currentCharacterId: "rpg-character-id",
+  deceasedCharacters: "rpg-deceased-characters",
 };
 
 const generateUUID = (): string => crypto.randomUUID();
@@ -66,7 +28,7 @@ const getAllSavedCharacters = (): SavedCharacterEntry[] => {
     const saved = localStorage.getItem(STORAGE_KEYS.savedCharacters);
     return saved ? JSON.parse(saved) : [];
   } catch (e) {
-    console.error('Failed to load saved characters', e);
+    console.error("Failed to load saved characters", e);
     return [];
   }
 };
@@ -75,7 +37,7 @@ const loadCharacter = (): CharacterEntry | null => {
   const currentCharId = localStorage.getItem(STORAGE_KEYS.currentCharacterId);
   if (currentCharId) {
     const saved = getAllSavedCharacters();
-    const found = saved.find(s => s.id === currentCharId);
+    const found = saved.find((s) => s.id === currentCharId);
     if (found?.data) {
       return found.data;
     }
@@ -98,7 +60,7 @@ const saveCharacter = (character: CharacterEntry): string => {
     localStorage.setItem(STORAGE_KEYS.savedCharacters, JSON.stringify(saved));
     localStorage.setItem(STORAGE_KEYS.currentCharacterId, charId);
   } catch (e) {
-    console.error('Failed to save character to localStorage', e);
+    console.error("Failed to save character to localStorage", e);
   }
   return charId;
 };
@@ -113,16 +75,16 @@ const updateCurrentCharacter = (character: CharacterEntry): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.savedCharacters, JSON.stringify(saved));
   } catch (e) {
-    console.error('Failed to update character in localStorage', e);
+    console.error("Failed to update character in localStorage", e);
   }
 };
 
 const getCurrentCharacter = (): CharacterEntry | null => {
   const saved = getAllSavedCharacters();
   if (saved.length === 0) return null;
-  const currentCharId = localStorage.getItem('rpg-character-id');
+  const currentCharId = localStorage.getItem("rpg-character-id");
   if (!currentCharId) return null;
-  const charData = saved.find(s => s.id === currentCharId)?.data;
+  const charData = saved.find((s) => s.id === currentCharId)?.data;
   if (!charData) return null;
 
   // Ensure required fields exist with defaults
@@ -133,7 +95,7 @@ const getCurrentCharacter = (): CharacterEntry | null => {
     hpMax: charData.hpMax || charData.hp || 12,
     totalXp: charData.totalXp || 0,
     proficiency: charData.proficiency || 2,
-    gender: charData.gender || 'male',
+    gender: charData.gender || "male",
   };
 
   return result;
@@ -142,7 +104,7 @@ const getCurrentCharacter = (): CharacterEntry | null => {
 const deleteCharacter = (charId: string): void => {
   try {
     const saved = getAllSavedCharacters();
-    const filtered = saved.filter(s => s.id !== charId);
+    const filtered = saved.filter((s) => s.id !== charId);
     localStorage.setItem(STORAGE_KEYS.savedCharacters, JSON.stringify(filtered));
 
     // If this was the current character, clear it
@@ -151,7 +113,7 @@ const deleteCharacter = (charId: string): void => {
       localStorage.removeItem(STORAGE_KEYS.currentCharacterId);
     }
   } catch (e) {
-    console.error('Failed to delete character', e);
+    console.error("Failed to delete character", e);
   }
 };
 
@@ -159,7 +121,7 @@ const setCurrentCharacterId = (charId: string): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.currentCharacterId, charId);
   } catch (e) {
-    console.error('Failed to set current character ID', e);
+    console.error("Failed to set current character ID", e);
   }
 };
 
@@ -170,13 +132,13 @@ const clearCurrentCharacterId = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEYS.currentCharacterId);
   } catch (e) {
-    console.error('Failed to clear current character ID', e);
+    console.error("Failed to clear current character ID", e);
   }
 };
 
 const killCharacter = (charId: string, deathLocation?: string): void => {
   try {
-    const char = getAllSavedCharacters().find(s => s.id === charId);
+    const char = getAllSavedCharacters().find((s) => s.id === charId);
     if (!char) return;
 
     // Add death metadata
@@ -184,7 +146,7 @@ const killCharacter = (charId: string, deathLocation?: string): void => {
       id: charId,
       character: char.data,
       diedAt: new Date().toISOString(),
-      location: deathLocation || 'Unknown location',
+      location: deathLocation || "Unknown location",
     };
 
     // Add to deceased list
@@ -195,7 +157,7 @@ const killCharacter = (charId: string, deathLocation?: string): void => {
     // Remove from active characters
     deleteCharacter(charId);
   } catch (e) {
-    console.error('Failed to mark character as deceased', e);
+    console.error("Failed to mark character as deceased", e);
   }
 };
 
@@ -204,7 +166,7 @@ const getDeceasedCharacters = (): DeceasedCharacterEntry[] => {
     const deceased = localStorage.getItem(STORAGE_KEYS.deceasedCharacters);
     return deceased ? JSON.parse(deceased) : [];
   } catch (e) {
-    console.error('Failed to load deceased characters', e);
+    console.error("Failed to load deceased characters", e);
     return [];
   }
 };
@@ -213,7 +175,7 @@ const clearDeceased = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEYS.deceasedCharacters);
   } catch (e) {
-    console.error('Failed to clear deceased characters', e);
+    console.error("Failed to clear deceased characters", e);
   }
 };
 
