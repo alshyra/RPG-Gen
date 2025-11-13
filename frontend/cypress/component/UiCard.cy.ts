@@ -30,7 +30,6 @@ describe('UiCard Component', () => {
     });
 
     cy.contains('Content')
-      .parent()
       .should('have.class', 'bg-slate-900/60')
       .and('have.class', 'backdrop-blur-sm')
       .and('have.class', 'rounded-lg')

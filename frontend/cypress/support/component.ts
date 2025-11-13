@@ -5,8 +5,9 @@
 // https://on.cypress.io/configuration
 // ***********************************************
 
-import './commands';
-import { mount } from 'cypress/vue';
+import "./commands";
+import { mount } from "cypress/vue";
+import "../../src/styles.css";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -17,4 +18,4 @@ declare global {
   }
 }
 
-Cypress.Commands.add('mount', mount);
+Cypress.Commands.add("mount", mount);

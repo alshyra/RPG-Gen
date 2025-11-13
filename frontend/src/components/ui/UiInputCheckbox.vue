@@ -2,9 +2,10 @@
   <input
     type="checkbox"
     :checked="checked"
-    @change="$emit('change')"
+    :disabled="disabled"
     class="rounded border border-slate-600 bg-slate-700 cursor-pointer accent-indigo-600"
     v-bind="$attrs"
+    @change="$emit('change')"
   >
 </template>
 
