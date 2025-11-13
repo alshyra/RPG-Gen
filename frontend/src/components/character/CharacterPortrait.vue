@@ -11,7 +11,7 @@
         :src="character?.portrait"
       />
 
-      <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-2">
+      <div class="absolute top-0 left-0 right-0 bg-linear-to-b from-black/80 to-transparent p-2">
         <div class="text-white font-bold text-sm truncate">
           {{ character?.name }}
         </div>
@@ -27,7 +27,7 @@
 
       <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2">
         <!-- XP Bar -->
-        <XpBar
+        <UiXpBar
           :percentage="xpPercent"
           :label="currentLevel"
         />
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import CharacterIllustration from './CharacterIllustration.vue';
-import XpBar from '../ui/XpBar.vue';
+import UiXpBar from '../ui/UiXpBar.vue';
 import { characterService } from '../../services/characterService';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 

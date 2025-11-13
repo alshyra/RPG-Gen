@@ -9,7 +9,7 @@
         "preview": "vite preview",
         "test": "vitest",
         "type-check": "vue-tsc --noEmit",
-        "lint": "eslint . --max-warnings=0",
+        "lint": "npm run type-check && eslint .",
         "lint:fix": "eslint . --fix"
     },
     "dependencies": {

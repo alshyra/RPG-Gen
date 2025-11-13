@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { ImageController } from './image.controller';
-import { GeminiService } from '../external/gemini.service';
+import { Module } from "@nestjs/common";
+import { ImageController } from "./image.controller";
+import { GeminiImageService } from "../external/image/gemini-image.service";
 
 @Module({
   controllers: [ImageController],
-  providers: [GeminiService],
+  providers: [GeminiImageService],
 })
 export class ImageModule {}

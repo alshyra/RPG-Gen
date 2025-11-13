@@ -201,9 +201,73 @@
         <UiButton
           variant="primary"
           :disabled="selectedSkills.length !== skillsToChoose"
+          @click="nextStep"
+        >
+          Suivant
+        </UiButton>
+      </div>
+    </div>
+
+    <!-- Step 5: Avatar -->
+    <div
+      v-if="currentStep === 4"
+      class="space-y-4"
+    >
+      <h2 class="text-xl font-bold">
+        Générer un Avatar
+      </h2>
+      <p class="text-slate-400 text-sm">
+        (Optionnel) Décrivez l'apparence physique de votre personnage pour générer un avatar avec l'IA
+      </p>
+
+      <div class="mt-4">
+        <label class="block font-medium mb-2">Description physique</label>
+        <textarea
+          v-model="avatarDescription"
+          class="w-full p-3 rounded bg-slate-800 border border-slate-600 text-slate-100"
+          placeholder="Ex: Grand et musclé, cheveux noirs long, cicatrice sur la joue gauche..."
+          rows="4"
+        />
+      </div>
+
+      <div
+        v-if="generatedAvatar"
+        class="mt-4"
+      >
+        <img
+          :src="generatedAvatar"
+          alt="Generated Avatar"
+          class="w-48 h-48 rounded border border-slate-600 object-cover"
+        >
+      </div>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <UiButton
+          variant="ghost"
+          @click="previousStep"
+        >
+          Retour
+        </UiButton>
+        <UiButton
+          v-if="!generatedAvatar"
+          variant="ghost"
+          :disabled="!avatarDescription.trim() || isGeneratingAvatar"
+          @click="generateAvatar"
+        >
+          {{ isGeneratingAvatar ? 'Génération...' : '🎨 Générer' }}
+        </UiButton>
+        <UiButton
+          v-if="generatedAvatar"
+          variant="ghost"
+          @click="regenerateAvatar"
+        >
+          Régénérer
+        </UiButton>
+        <UiButton
+          variant="primary"
           @click="finishCreation"
         >
-          Créer
+          Terminer
         </UiButton>
       </div>
     </div>
@@ -234,6 +298,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import RacePicker from './RacePicker.vue';
 import AbilityScorePicker from '../character-stats/AbilityScorePicker.vue';
 import UiButton from '../ui/UiButton.vue';
@@ -246,7 +311,7 @@ type Race = { id: string; name: string; mods: Record<string, number> };
 const props = defineProps<{ world?: string; worldId?: string }>();
 const router = useRouter();
 
-const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences'];
+const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
 const currentStep = ref(0);
 
 const allowedRaces: Race[] = [
@@ -269,6 +334,9 @@ const primaryClass = ref('Fighter');
 const baseScores = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
 const gender = ref('male');
 const selectedSkills = ref<string[]>([]);
+const avatarDescription = ref('');
+const generatedAvatar = ref<string | null>(null);
+const isGeneratingAvatar = ref(false);
 
 const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
@@ -289,6 +357,34 @@ function cancel() {
     router.back();
 }
 
+async function generateAvatar() {
+    if (!avatarDescription.value.trim()) return;
+    
+    isGeneratingAvatar.value = true;
+    try {
+        const response = await axios.post('/api/image/generate-avatar', {
+            character: {
+                name: character.value.name,
+                gender: gender.value,
+                race: character.value.race,
+                classes: [{ name: primaryClass.value }]
+            },
+            description: avatarDescription.value
+        });
+
+        generatedAvatar.value = response.data.imageUrl;
+    } catch (error) {
+        console.error('Avatar generation error:', error);
+    } finally {
+        isGeneratingAvatar.value = false;
+    }
+}
+
+function regenerateAvatar() {
+    generatedAvatar.value = null;
+    generateAvatar();
+}
+
 function finishCreation() {
     // Set basic fields
     character.value.gender = gender.value as 'male' | 'female';
@@ -300,7 +396,7 @@ function finishCreation() {
     const rId = character.value.race?.id?.toLowerCase() || 'human';
     const g = String(gender.value).toLowerCase();
     const baseUrl = ((import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL : '/';
-    character.value.portrait = `${baseUrl}images/${c}_${rId}_${g}.png`;
+    character.value.portrait = generatedAvatar.value || `${baseUrl}images/${c}_${rId}_${g}.png`;
 
     // Use service to calculate all D&D rules with skills
     const calculated = DnDRulesService.prepareNewCharacter(

@@ -1,7 +1,7 @@
 <template>
-  <Modal
-    :model-value="isOpen"
-    @update:model-value="close"
+  <UiModal
+    :is-open="isOpen"
+    @close="close"
   >
     <!-- Header -->
     <div class="text-center mb-6">
@@ -79,12 +79,12 @@
         Reroll
       </button>
     </div>
-  </Modal>
+  </UiModal>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Modal from '../ui/Modal.vue';
+import UiModal from '../ui/UiModal.vue';
 
 interface Props {
   isOpen: boolean;

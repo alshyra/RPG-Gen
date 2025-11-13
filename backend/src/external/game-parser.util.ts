@@ -1,6 +1,9 @@
 export interface GameInstruction {
-  type: 'roll' | 'xp' | 'hp';
-  data: Record<string, unknown>;
+  type?: "roll" | "xp" | "hp";
+  data?: Record<string, unknown>;
+  roll?: { dices: string; modifier?: string; description?: string };
+  hp?: number;
+  xp?: number;
 }
 
 function extractJsonBlocks(text: string): string[] {
@@ -18,15 +21,21 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] =>
       }
     })
     .filter((obj): obj is Record<string, unknown> => obj !== null)
-    .filter((obj) => obj.type === 'roll' || obj.type === 'xp' || obj.type === 'hp')
-    .map((obj) => ({ type: obj.type as 'roll' | 'xp' | 'hp', data: obj }));
+    .filter((obj) => obj.type === "roll" || obj.type === "xp" || obj.type === "hp")
+    .map((obj) => ({ type: obj.type as "roll" | "xp" | "hp", data: obj }));
 
 export const cleanNarrativeText = (narrative: string): string =>
-  narrative.replace(/```json\n[\s\S]*?\n```/g, '').replace(/\n\n+/g, '\n').trim();
+  narrative
+    .replace(/```json\n[\s\S]*?\n```/g, "")
+    .replace(/\n\n+/g, "\n")
+    .trim();
 
 export const parseGameResponse = extractInstructions;
 
-export function extractInstructions(narrative: string): { narrative: string; instructions: GameInstruction[] } {
+export function extractInstructions(narrative: string): {
+  narrative: string;
+  instructions: GameInstruction[];
+} {
   const instructions = parseGameInstructions(narrative);
   const cleanedNarrative = cleanNarrativeText(narrative);
   return { narrative: cleanedNarrative, instructions };
