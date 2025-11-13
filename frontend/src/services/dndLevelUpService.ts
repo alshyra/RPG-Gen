@@ -5,9 +5,6 @@
 
 import type { LevelUpResult } from "@shared/types";
 
-// Re-export the type from shared
-export type { LevelUpResult } from "@shared/types";
-
 interface ClassLevelUpRules {
   hpDie: number;
   proficiencyProgression: number[];
