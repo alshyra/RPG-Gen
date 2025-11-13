@@ -5,7 +5,7 @@ import vueParser from 'vue-eslint-parser';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', '.vite', 'coverage', '*.config.js', '*.config.cjs']
+    ignores: ['dist', 'node_modules', '.vite', 'coverage', '*.config.js', '*.config.cjs', 'cypress/**']
   },
   js.configs.recommended,
   ...ts.configs.recommended,
