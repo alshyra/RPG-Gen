@@ -19,7 +19,12 @@ export class ConversationService {
   async getHistory(userId: string, sessionId: string): Promise<ChatMessage[]> {
     const history = await this.chatHistoryModel.findOne({ userId, sessionId }).exec();
     if (history) {
-      return history.messages as ChatMessage[];
+      return history.messages.map(m => ({
+        role: m.role,
+        text: m.text,
+        timestamp: m.timestamp,
+        meta: (m.meta ? { ...m.meta } : undefined) as Record<string, unknown> | undefined,
+      })) as ChatMessage[];
     }
     return [];
   }

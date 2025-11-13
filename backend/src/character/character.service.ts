@@ -113,7 +113,7 @@ export class CharacterService {
       skills: doc.skills as any,
       world: doc.world,
       portrait: doc.portrait,
-      gender: doc.gender,
+      gender: doc.gender as 'male' | 'female',
       proficiency: doc.proficiency,
     };
   }
