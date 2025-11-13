@@ -38,9 +38,9 @@ npm run test:e2e:open
 npm run test:e2e
 ```
 
-### Documentation complète
+### CI/CD
 
-Pour plus d'informations sur les tests Cypress, consultez [CYPRESS.md](./CYPRESS.md).
+Les tests Cypress s'exécutent automatiquement via GitHub Actions sur chaque push et pull request vers les branches `main` et `develop`. Les screenshots et vidéos sont disponibles en tant qu'artifacts en cas d'échec.
 
 ## Scripts disponibles
 
