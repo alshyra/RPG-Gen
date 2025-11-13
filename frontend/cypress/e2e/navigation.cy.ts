@@ -10,7 +10,7 @@ describe('Navigation', () => {
 
     // Navigate back to home
     cy.visit('/');
-    cy.url().should('eq', Cypress.config().baseUrl + '/');
+    cy.url().should('match', new RegExp(`${Cypress.config().baseUrl}/?$`));
   });
 
   it('should handle game route', () => {
@@ -24,8 +24,9 @@ describe('Navigation', () => {
   });
 
   it('should handle 404 for unknown routes', () => {
-    // Visit an unknown route
+    // Visit an unknown route - Vue router handles this client-side
     cy.visit('/unknown-route', { failOnStatusCode: false });
-    // The app should still load (Vue router typically handles this client-side)
+    // The app should still load
+    cy.get('#app').should('exist');
   });
 });

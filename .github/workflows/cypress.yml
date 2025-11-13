@@ -16,6 +16,8 @@ permissions:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     
     steps:
       - name: Checkout

@@ -21,7 +21,7 @@ describe('World Selection', () => {
 
   it('should display world logos', () => {
     // Check that world logos/initials are displayed
-    cy.get('.logo').should('have.length.at.least', 3);
+    cy.get('.logo').should('have.length.gte', 3);
     cy.contains('.logo', 'D').should('be.visible');
     cy.contains('.logo', 'V').should('be.visible');
     cy.contains('.logo', 'C').should('be.visible');
@@ -29,7 +29,8 @@ describe('World Selection', () => {
 
   it('should have start buttons for each world', () => {
     // Each world should have a "Commencer" button
-    cy.contains('button', 'Commencer').should('have.length.at.least', 3);
+    cy.get('button').contains('Commencer').should('exist');
+    cy.get('button').filter(':contains("Commencer")').should('have.length.gte', 3);
   });
 
   it('should navigate to character creation when clicking start on a world', () => {
