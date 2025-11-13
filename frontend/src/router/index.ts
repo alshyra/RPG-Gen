@@ -3,6 +3,7 @@ import HomeView from "../views/HomeView.vue";
 import GameView from "../views/GameView.vue";
 import CharacterCreatorView from "../views/CharacterCreatorView.vue";
 import CharacterLevelupView from "../views/CharacterLevelupView.vue";
+import NotFoundView from "../views/NotFoundView.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomeView },
@@ -20,6 +21,7 @@ const routes = [
     },
   },
   { path: "/levelup/:world?", name: "levelup", component: CharacterLevelupView },
+  { path: "/:pathMatch(.*)*", name: "not-found", component: NotFoundView },
 ];
 
 const router = createRouter({
