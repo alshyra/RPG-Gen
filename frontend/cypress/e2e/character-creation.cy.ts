@@ -146,4 +146,61 @@ describe("Character Creation", () => {
     // Now button should be enabled
     cy.contains("button", "Suivant").should("not.be.disabled");
   });
+
+  it("should persist ability scores (character.scores) on page refresh", () => {
+    cy.visit("/");
+    cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
+
+    // Fill in basic info (Step 1)
+    cy.get('input[placeholder="Ex: Aragorn"]').type("ScorePersistHero");
+    cy.contains("♂️ Homme").click();
+
+    // Go to step 2 (Race & Class)
+    cy.contains("button", "Suivant").click();
+    cy.url().should("include", "/character/dnd/step/2");
+
+    // Select race and class
+    cy.contains("Humain").click();
+    cy.get("select").select("Fighter");
+
+    // Go to step 3 (Ability Scores)
+    cy.contains("button", "Suivant").click();
+    cy.url().should("include", "/character/dnd/step/3");
+    cy.contains("Capacités").should("be.visible");
+
+    // Modify ability scores - find the Str input and change it
+    // The AbilityScorePicker uses UiInputNumber components
+    cy.get('input[type="number"]').first().clear().type("14");
+
+    // Wait for draft to save
+    cy.wait(600);
+
+    // Verify the draft contains the modified scores
+    cy.window().then((win) => {
+      const draft = win.localStorage.getItem("rpg-character-draft");
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      expect(draft).to.exist;
+      const draftData = JSON.parse(draft);
+      // Check that baseScores has been updated
+      expect(draftData.baseScores).to.exist;
+      expect(draftData.baseScores.Str).to.equal(14);
+    });
+
+    // Refresh the page
+    cy.reload();
+
+    // Should still be on step 3
+    cy.url().should("include", "/character/dnd/step/3");
+    cy.contains("Capacités").should("be.visible");
+
+    // Verify the score is still 14
+    cy.get('input[type="number"]').first().should("have.value", "14");
+
+    // Verify localStorage still has the correct value
+    cy.window().then((win) => {
+      const draft = win.localStorage.getItem("rpg-character-draft");
+      const draftData = JSON.parse(draft);
+      expect(draftData.baseScores.Str).to.equal(14);
+    });
+  });
 });

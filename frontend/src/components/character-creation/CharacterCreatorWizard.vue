@@ -48,7 +48,7 @@
     <StepAbilityScores
       v-if="currentStep === 2"
       :base-scores="baseScores"
-      @update:base-scores="(scores: any) => { Object.assign(baseScores, scores); saveDraftNow(); }"
+      @update:base-scores="(scores: any) => { baseScores = scores; saveDraftNow(); }"
     />
 
     <StepSkills
