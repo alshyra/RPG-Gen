@@ -15,15 +15,22 @@ npm install
 ```
 cypress/
 ├── e2e/              # Tests end-to-end
+│   ├── api-integration.cy.ts
 │   ├── home.cy.ts
 │   ├── navigation.cy.ts
-│   └── smoke.cy.ts
+│   ├── smoke.cy.ts
+│   └── world-selection.cy.ts
+├── component/        # Tests de composants
+│   └── UiButton.cy.ts
 ├── fixtures/         # Données de test
 │   └── example.json
 ├── support/          # Commandes et configurations personnalisées
 │   ├── commands.ts   # Commandes personnalisées
 │   ├── e2e.ts        # Configuration E2E
 │   └── component.ts  # Configuration des tests de composants
+├── downloads/        # Fichiers téléchargés lors des tests
+├── screenshots/      # Captures d'écran des échecs
+├── videos/           # Vidéos des exécutions de tests
 └── tsconfig.json     # Configuration TypeScript pour Cypress
 ```
 
@@ -104,6 +111,48 @@ describe('MonComposant', () => {
 });
 ```
 
+### Stubbing/Mocking API
+
+Pour simuler les réponses API dans vos tests :
+
+```typescript
+describe('Mon test avec API', () => {
+  it('devrait gérer la réponse API', () => {
+    // Intercepter et simuler une réponse API
+    cy.intercept('POST', '/api/game/start', {
+      statusCode: 200,
+      body: {
+        success: true,
+        gameId: '123',
+      },
+    }).as('startGame');
+
+    // Effectuer une action qui déclenche l'API
+    cy.visit('/game');
+    cy.get('button').contains('Démarrer').click();
+
+    // Attendre et vérifier l'appel API
+    cy.wait('@startGame').its('response.statusCode').should('eq', 200);
+  });
+
+  it('devrait gérer les erreurs API', () => {
+    cy.intercept('POST', '/api/game/start', {
+      statusCode: 500,
+      body: {
+        error: 'Server error',
+      },
+    }).as('gameError');
+
+    cy.visit('/game');
+    cy.get('button').contains('Démarrer').click();
+    cy.wait('@gameError');
+    
+    // Vérifier l'affichage d'un message d'erreur
+    cy.contains('Une erreur est survenue').should('be.visible');
+  });
+});
+```
+
 ## Bonnes pratiques
 
 1. **Utilisez des data-cy attributes** : Préférez `data-cy="mon-element"` plutôt que des sélecteurs CSS fragiles
@@ -124,14 +173,38 @@ La configuration de Cypress se trouve dans `cypress.config.ts`. Voici les param�
 
 ## Tests actuels
 
-### smoke.cy.ts
-Tests de fumée pour vérifier que l'application se charge correctement.
+### Tests E2E
 
-### home.cy.ts
+#### smoke.cy.ts
+Tests de fumée pour vérifier que l'application se charge correctement sans erreurs.
+
+#### home.cy.ts
 Tests de la page d'accueil, incluant l'affichage du titre et du sélecteur de monde.
 
-### navigation.cy.ts
-Tests de navigation entre les différentes routes de l'application.
+#### navigation.cy.ts
+Tests de navigation entre les différentes routes de l'application (home, game, character, levelup).
+
+#### world-selection.cy.ts
+Tests complets du sélecteur de monde :
+- Affichage de tous les univers disponibles (D&D, VtM, Cyberpunk)
+- Fonctionnement des boutons "Commencer"
+- Navigation vers la création de personnage
+- Sauvegarde de la sélection dans sessionStorage
+
+#### api-integration.cy.ts
+Tests d'intégration API :
+- Gestion des appels API
+- Gestion des erreurs API
+- Fonctionnement hors ligne (sans backend)
+
+### Tests de composants
+
+#### UiButton.cy.ts
+Tests du composant UiButton :
+- Rendu avec variante par défaut (primary)
+- Rendu avec variante ghost
+- Gestion des clics
+- Application des classes CSS
 
 ## Débogage
 

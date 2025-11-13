@@ -8,8 +8,15 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "../src/components/**/*.vue"],
   "exclude": ["node_modules"]
 }
