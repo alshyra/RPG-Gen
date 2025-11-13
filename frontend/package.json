@@ -8,6 +8,8 @@
         "build": "vite build",
         "preview": "vite preview",
         "test": "vitest",
+        "test:e2e": "cypress run",
+        "test:e2e:open": "cypress open",
         "type-check": "vue-tsc --noEmit",
         "lint": "npm run type-check && eslint .",
         "lint:fix": "eslint . --fix"
@@ -22,6 +24,7 @@
         "vue-router": "^4.6.3"
     },
     "devDependencies": {
+        "@cypress/vite-dev-server": "^7.0.1",
         "@eslint/js": "^9.39.1",
         "@tailwindcss/postcss": "^4.1.17",
         "@types/node": "^24.10.1",

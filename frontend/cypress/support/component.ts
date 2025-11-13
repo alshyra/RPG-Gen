@@ -1,6 +1,12 @@
-import { mount } from 'cypress/vue';
+// ***********************************************
+// This file is used for component testing support
+//
+// You can read more here:
+// https://on.cypress.io/configuration
+// ***********************************************
 
-Cypress.Commands.add('mount', mount);
+import './commands';
+import { mount } from 'cypress/vue';
 
 declare global {
   namespace Cypress {
@@ -9,3 +15,5 @@ declare global {
     }
   }
 }
+
+Cypress.Commands.add('mount', mount);
