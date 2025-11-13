@@ -131,7 +131,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { dndLevelUpService, type LevelUpResult } from '../../services/dndLevelUpService';
+import { dndLevelUpService } from '../../services/dndLevelUpService';
+import type { LevelUpResult } from '@shared/types';
 import { useGameStore } from '../../stores/gameStore';
 import { characterService } from '../../services/characterService';
 import { gameEngine } from '../../services/gameEngine';

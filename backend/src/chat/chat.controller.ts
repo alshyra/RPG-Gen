@@ -14,13 +14,7 @@ import { GeminiTextService } from "../external/text/gemini-text.service";
 import { ConversationService, ChatMessage } from "./conversation.service";
 import { parseGameResponse, GameInstruction } from "../external/game-parser.util";
 import { readFile } from "fs/promises";
-import type { CharacterEntry } from "../../../shared/types";
-
-interface ChatRequest {
-  message?: string;
-  sessionId?: string;
-  character?: CharacterEntry;
-}
+import type { CharacterEntry, ChatRequest } from "../../../shared/types";
 
 const schema = Joi.object({
   message: Joi.string().allow("").optional(),

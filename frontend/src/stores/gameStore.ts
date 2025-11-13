@@ -1,11 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { CharacterEntry, GameInstruction } from "@shared/types";
-
-export interface GameMessage {
-  role: string;
-  text: string;
-}
+import type { CharacterEntry, GameInstruction, GameMessage } from "@shared/types";
 
 export interface GameSession {
   world: string;

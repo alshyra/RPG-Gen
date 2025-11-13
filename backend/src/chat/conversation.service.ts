@@ -1,15 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mkdir, writeFile, readFile as fsReadFile } from 'fs/promises';
 import { join } from 'path';
+import type { ChatMessage } from '../../../shared/types';
 
-export type ChatRole = 'system' | 'user' | 'assistant';
-
-export type ChatMessage = {
-  role: ChatRole;
-  text: string;
-  timestamp: number;
-  meta?: Record<string, unknown>;
-};
+// Re-export for convenience
+export type { ChatMessage, ChatRole } from '../../../shared/types';
 
 @Injectable()
 export class ConversationService {
