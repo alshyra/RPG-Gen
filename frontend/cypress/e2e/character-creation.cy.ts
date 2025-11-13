@@ -30,11 +30,11 @@ describe("Character Creation", () => {
     // Should see Race & Class step
     cy.contains("Race & Classe").should("be.visible");
 
-    // Select a race (just click the first one)
+    // Select a race (click the first race button)
     cy.contains("Humain").click();
 
-    // Select a class (just click the first one)
-    cy.contains("Barbarian").click();
+    // Select a class from the select dropdown
+    cy.get("select").select("Barbarian");
 
     // Go to next step
     cy.contains("button", "Suivant").click();
