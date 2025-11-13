@@ -1,4 +1,14 @@
 node_modules
 dist
 backend/.env
+frontend/.env
 archives
+.git
+.github
+.gitignore
+*.md
+cypress
+screenshots
+videos
+downloads
+.cypress-cache

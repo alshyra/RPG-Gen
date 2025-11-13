@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { mkdir, writeFile, readFile as fsReadFile } from 'fs/promises';
-import { join } from 'path';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import type { ChatMessage } from '../../../shared/types';
+import { ChatHistory, ChatHistoryDocument } from '../schemas/chat-history.schema';
 
 // Re-export for convenience
 export type { ChatMessage, ChatRole } from '../../../shared/types';
@@ -9,86 +10,68 @@ export type { ChatMessage, ChatRole } from '../../../shared/types';
 @Injectable()
 export class ConversationService {
   private readonly logger = new Logger(ConversationService.name);
-  private store = new Map<string, ChatMessage[]>();
   private readonly MAX_MESSAGES = Number(process.env.CONV_MAX_MESSAGES || '60');
-  private readonly ARCHIVE_DIR = join(process.cwd(), 'archives');
 
-  constructor() {
-    this.ensureArchiveDir();
-  }
+  constructor(
+    @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>
+  ) {}
 
-  private async ensureArchiveDir() {
-    try {
-      await mkdir(this.ARCHIVE_DIR, { recursive: true });
-    } catch {
-      this.logger.error('Failed to create archives directory');
+  async getHistory(userId: string, sessionId: string): Promise<ChatMessage[]> {
+    const history = await this.chatHistoryModel.findOne({ userId, sessionId }).exec();
+    if (history) {
+      return history.messages as ChatMessage[];
     }
-  }
-
-  private getHistoryPath(id: string): string {
-    return join(this.ARCHIVE_DIR, id, 'history.json');
-  }
-
-  private async saveToFile(id: string, messages: ChatMessage[]) {
-    try {
-      const dir = join(this.ARCHIVE_DIR, id);
-      await mkdir(dir, { recursive: true });
-      const path = this.getHistoryPath(id);
-      await writeFile(path, JSON.stringify(messages, null, 2), 'utf-8');
-      this.logger.log(`📁 Saved history to ${path} (${messages.length} messages)`);
-    } catch (e) {
-      this.logger.error(`Failed to save history for session ${id}`, e);
-    }
-  }
-
-  private async loadFromFile(id: string): Promise<ChatMessage[] | null> {
-    try {
-      const path = this.getHistoryPath(id);
-      const data = await fsReadFile(path, 'utf-8');
-      return JSON.parse(data);
-    } catch {
-      // File doesn't exist or is invalid, that's ok
-      return null;
-    }
-  }
-
-  async getHistory(id: string): Promise<ChatMessage[]> {
-    // Check in-memory first
-    if (this.store.has(id)) {
-      return [...this.store.get(id)!];
-    }
-    
-    // Try to load from file
-    const fileHistory = await this.loadFromFile(id);
-    if (fileHistory) {
-      this.store.set(id, fileHistory);
-      return [...fileHistory];
-    }
-    
     return [];
   }
 
-  async append(id: string, msg: ChatMessage) {
-    const arr = this.store.get(id) || [];
-    arr.push(msg);
-    // prune oldest if too long
-    if (arr.length > this.MAX_MESSAGES) arr.splice(0, arr.length - this.MAX_MESSAGES);
-    this.store.set(id, arr);
+  async append(userId: string, sessionId: string, msg: ChatMessage) {
+    let history = await this.chatHistoryModel.findOne({ userId, sessionId });
     
-    // Persist to file
-    await this.saveToFile(id, arr);
+    if (!history) {
+      history = new this.chatHistoryModel({
+        userId,
+        sessionId,
+        messages: [msg],
+        lastUpdated: new Date(),
+      });
+    } else {
+      history.messages.push(msg as any);
+      // Prune oldest if too long
+      if (history.messages.length > this.MAX_MESSAGES) {
+        history.messages = history.messages.slice(-this.MAX_MESSAGES);
+      }
+      history.lastUpdated = new Date();
+    }
+
+    await history.save();
+    this.logger.log(`💬 Saved message to session ${sessionId} (${history.messages.length} messages)`);
   }
 
-  async setHistory(id: string, list: ChatMessage[]) {
+  async setHistory(userId: string, sessionId: string, list: ChatMessage[]) {
     const truncated = list.slice(-this.MAX_MESSAGES);
-    this.store.set(id, truncated);
     
-    // Persist to file
-    await this.saveToFile(id, truncated);
+    await this.chatHistoryModel.findOneAndUpdate(
+      { userId, sessionId },
+      {
+        messages: truncated,
+        lastUpdated: new Date(),
+      },
+      { upsert: true, new: true }
+    );
+    
+    this.logger.log(`📝 Set history for session ${sessionId} (${truncated.length} messages)`);
   }
 
-  async clear(id: string) {
-    this.store.delete(id);
-    await this.saveToFile(id, []);
+  async clear(userId: string, sessionId: string) {
+    await this.chatHistoryModel.findOneAndUpdate(
+      { userId, sessionId },
+      {
+        messages: [],
+        lastUpdated: new Date(),
+      },
+      { upsert: true }
+    );
+    
+    this.logger.log(`🗑️ Cleared history for session ${sessionId}`);
   }
 }

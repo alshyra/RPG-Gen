@@ -1,0 +1,15 @@
+FROM node:25-alpine
+
+WORKDIR /app
+
+COPY backend/package*.json ./backend/
+COPY shared ./shared
+
+WORKDIR /app/backend
+RUN npm install
+
+COPY backend ./
+
+EXPOSE 3001
+
+CMD ["npm", "run", "start:dev"]
