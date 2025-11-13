@@ -1,28 +1,6 @@
 import axios from 'axios';
 import { characterService } from './characterService';
-
-export interface GameInstruction {
-  roll?: {
-    dices: string;
-    modifier?: string;
-    modifierValue?: number;
-    description?: string;
-  };
-  xp?: number;
-  hp?: number;
-}
-
-export interface GameResponse {
-  text: string;
-  instructions: GameInstruction[];
-  model?: string;
-  usage?: any;
-}
-
-export interface ChatMessage {
-  role: string;
-  text: string;
-}
+import type { GameResponse, ChatMessage } from '@shared/types';
 
 export class GameEngine {
   private sessionId: string | null = null;
@@ -34,12 +12,15 @@ export class GameEngine {
   async initSession(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
     // Get current character's UUID - this becomes the sessionId for conversation
     const char = characterService.getCurrentCharacter();
-    if (!char) throw new Error('No current character found. Please create or load a character first.');
+    if (!char)
+      throw new Error("No current character found. Please create or load a character first.");
     this.sessionId = char.id;
 
     // Load conversation history for this character, passing character data for initialization
     const charParam = encodeURIComponent(JSON.stringify(char));
-    const histRes = await axios.get(`/api/chat/history?sessionId=${this.sessionId}&character=${charParam}`);
+    const histRes = await axios.get(
+      `/api/chat/history?sessionId=${this.sessionId}&character=${charParam}`
+    );
     const isNew = histRes?.data?.isNew || false;
     const history = histRes?.data?.history || [];
 
@@ -50,14 +31,18 @@ export class GameEngine {
    * Send a message to the game backend
    */
   async sendMessage(message: string): Promise<GameResponse> {
-    if (!this.sessionId) throw new Error('Session not initialized. Call initSession first.');
+    if (!this.sessionId) throw new Error("Session not initialized. Call initSession first.");
 
     const char = characterService.getCurrentCharacter();
-    const res = await axios.post('/api/chat', { message, sessionId: this.sessionId, character: char });
+    const res = await axios.post("/api/chat", {
+      message,
+      sessionId: this.sessionId,
+      character: char,
+    });
     const result = res?.data?.result || {};
 
     return {
-      text: result.text || '',
+      text: result.text || "",
       instructions: result.instructions || [],
       model: result.model,
       usage: result.usage,

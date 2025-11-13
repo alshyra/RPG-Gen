@@ -14,37 +14,12 @@ import { GeminiTextService } from "../external/text/gemini-text.service";
 import { ConversationService, ChatMessage } from "./conversation.service";
 import { parseGameResponse, GameInstruction } from "../external/game-parser.util";
 import { readFile } from "fs/promises";
-
-interface CharacterClass {
-  name: string;
-  level: number;
-}
-
-interface CharacterRace {
-  name: string;
-}
-
-interface Character {
-  name?: string;
-  race?: CharacterRace | string;
-  classes?: CharacterClass[];
-  gender?: string;
-  hp?: number;
-  hpMax?: number;
-  totalXp?: number;
-  Str?: number;
-  Dex?: number;
-  Con?: number;
-  Int?: number;
-  Wis?: number;
-  Cha?: number;
-  scores?: Record<string, number>;
-}
+import type { CharacterEntry } from "../../../shared/types";
 
 interface ChatRequest {
   message?: string;
   sessionId?: string;
-  character?: Character;
+  character?: CharacterEntry;
 }
 
 const schema = Joi.object({
@@ -72,7 +47,7 @@ export class ChatController {
     }
   }
 
-  private getAbilityScore(character: Character, key: string): number {
+  private getAbilityScore(character: CharacterEntry, key: string): number {
     let score = character[key];
     if (typeof score === "number") return score;
     score = character[key.toLowerCase()];
@@ -83,15 +58,12 @@ export class ChatController {
     return typeof score === "number" ? score : 10;
   }
 
-  private buildCharacterSummary(character: Character): string {
+  private buildCharacterSummary(character: CharacterEntry): string {
     return `
 Character Information:
 - Name: ${character.name || "Unknown"}
 - Race: ${typeof character.race === "object" ? character.race?.name : character.race || "Unknown"}
-- Classes: ${
-      character.classes?.map((c: CharacterClass) => `${c.name} (Lvl ${c.level})`).join(", ") ||
-      "None"
-    }
+- Classes: ${character.classes?.map((c) => `${c.name} (Lvl ${c.level})`).join(", ") || "None"}
 - Gender: ${character.gender || "Unknown"}
 - HP: ${character.hp || character.hpMax || "Unknown"}/${character.hpMax || "Unknown"}
 - XP: ${character.totalXp || 0}
@@ -108,7 +80,7 @@ Character Information:
   private async initializeNewSession(
     sessionId: string,
     systemPrompt: string,
-    character?: Character
+    character?: CharacterEntry
   ): Promise<ChatMessage> {
     this.logger.log(`Initializing new session: ${sessionId}`);
     this.gemini.getOrCreateChat(sessionId, systemPrompt || undefined, []);
@@ -161,9 +133,9 @@ Character Information:
   private generateSessionId(providedId?: string): string {
     if (typeof providedId === "string" && providedId.length) return providedId;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cryptoGlobal = globalThis as unknown as { crypto?: { randomUUID?: () => string } };
       return (
-        (globalThis as any).crypto?.randomUUID?.() ||
+        cryptoGlobal.crypto?.randomUUID?.() ||
         `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
       );
     } catch {
@@ -190,7 +162,7 @@ Character Information:
   private async handleChatSession(
     sessionId: string,
     message: string,
-    character: Character | undefined
+    character: CharacterEntry | undefined
   ): Promise<{ sessionId: string; result: Record<string, unknown> }> {
     const systemPrompt = await this.loadSystemPrompt();
     const history = await this.conv.getHistory(sessionId);
@@ -249,10 +221,10 @@ Character Information:
     }
   }
 
-  private parseCharacterFromQuery(character?: string): Character | undefined {
+  private parseCharacterFromQuery(character?: string): CharacterEntry | undefined {
     if (!character || typeof character !== "string") return undefined;
     try {
-      return JSON.parse(character) as Character;
+      return JSON.parse(character) as CharacterEntry;
     } catch {
       return undefined;
     }
@@ -278,7 +250,7 @@ Character Information:
   private async handleNewSessionHistory(
     sessionId: string,
     systemPrompt: string,
-    charData: Character | undefined
+    charData: CharacterEntry | undefined
   ): Promise<{ ok: boolean; sessionId: string; isNew: boolean; history: ChatMessage[] }> {
     const initMsg = await this.initializeNewSession(sessionId, systemPrompt, charData);
     return { ok: true, sessionId, isNew: true, history: [initMsg] };

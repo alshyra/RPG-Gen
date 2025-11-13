@@ -33,8 +33,9 @@ export default [
       }
     },
     rules: {
-      'vue/multi-word-component-names': 'off',
+      'vue/multi-word-component-names': 'error',
       'vue/no-v-html': 'off',
+      'vue/block-order': 'error',
       'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: 1 }],
       'vue/first-attribute-linebreak': ['error', { singleline: 'ignore', multiline: 'below' }],
       '@typescript-eslint/no-unused-vars': 'off',

@@ -6,7 +6,7 @@ export interface GameInstruction {
   xp?: number;
 }
 
-function extractJsonBlocks(text: string): string[] {
+const extractJsonBlocks = (text: string): string[] => {
   const jsonMatches = Array.from(text.matchAll(/```json\n([\s\S]*?)\n```/g));
   return jsonMatches.map((m) => m[1]);
 }

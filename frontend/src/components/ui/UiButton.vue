@@ -1,6 +1,6 @@
 <template>
   <button
-    :class="['inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm', variantClass]"
+    :class="['inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity', variantClass]"
     v-bind="$attrs"
   >
     <slot />

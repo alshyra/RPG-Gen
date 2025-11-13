@@ -84,7 +84,7 @@ function textFromResponse(data: unknown): string {
 export class GeminiTextService {
   private readonly logger = new Logger(GeminiTextService.name);
   private client: GoogleGenAI | null = null;
-  private model = "gemini-2.0-flash";
+  private model = "gemini-2.5-flash";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
@@ -139,7 +139,7 @@ export class GeminiTextService {
     response: Record<string, unknown>
   ): { usage: Record<string, unknown> | null; modelVersion: string } => ({
     usage: ((response?.usageMetadata || response?.usage) as Record<string, unknown> | null) || null,
-    modelVersion: (response?.modelVersion || response?.model || this.model) as string,
+    modelVersion: this.model,
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

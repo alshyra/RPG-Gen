@@ -1,5 +1,14 @@
 <template>
   <div class="p-4 rounded-md max-w-4xl mx-auto">
+    <!-- Header with restore draft button -->
+    <div class="flex justify-between mb-4">
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold">
+          Création de personnage
+        </h2>
+      </div>
+    </div>
+
     <!-- Progress indicator -->
     <div class="flex justify-between mb-8">
       <div
@@ -15,405 +24,208 @@
       </div>
     </div>
 
-    <!-- Step 1: Basic Info -->
-    <div
+    <!-- Steps -->
+    <StepBasicInfo
       v-if="currentStep === 0"
-      class="space-y-4"
-    >
-      <h2 class="text-xl font-bold">
-        Informations de base
-      </h2>
+      :character="character"
+      :gender="gender"
+      :world="world"
+      :genders="genders"
+      @update:character="character = Object.assign({}, character, $event); saveDraftNow()"
+      @update:gender="(g: any) => { gender = g; saveDraftNow(); }"
+    />
 
-      <div>
-        <label class="block font-medium mb-2">Nom du personnage</label>
-        <input
-          v-model="character.name"
-          class="input w-full"
-          placeholder="Ex: Aragorn"
-        >
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block font-medium mb-2">Genre</label>
-          <div class="flex gap-2">
-            <button
-              v-for="g in genders"
-              :key="g"
-              :class="['flex-1 px-3 py-2 rounded', gender === g ? 'bg-indigo-600 text-white' : 'bg-slate-800']"
-              @click.prevent="gender = g"
-            >
-              {{ g === 'male' ? '♂️ Homme' : '♀️ Femme' }}
-            </button>
-          </div>
-        </div>
-
-        <div v-if="props.world">
-          <label class="block font-medium mb-2">Monde</label>
-          <div class="text-slate-300 py-2 px-3 bg-slate-800 rounded">
-            {{ props.world }}
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 mt-6">
-        <UiButton
-          variant="ghost"
-          @click="cancel"
-        >
-          Annuler
-        </UiButton>
-        <UiButton
-          variant="primary"
-          :disabled="!character.name"
-          @click="nextStep"
-        >
-          Suivant
-        </UiButton>
-      </div>
-    </div>
-
-    <!-- Step 2: Race & Class -->
-    <div
+    <StepRaceClass
       v-if="currentStep === 1"
-      class="space-y-4"
-    >
-      <h2 class="text-xl font-bold">
-        Race et Classe
-      </h2>
+      :character="character"
+      :primary-class="primaryClass"
+      :allowed-races="allowedRaces"
+      :class-list="classesList"
+      @update:character="Object.assign(character, $event); saveDraftNow()"
+      @update:primary-class="primaryClass = $event; saveDraftNow()"
+    />
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block font-medium mb-2">Race</label>
-          <RacePicker
-            v-model:race="character.race"
-            :allowed-races="allowedRaces"
-          />
-        </div>
-
-        <div>
-          <label class="block font-medium mb-2">Classe</label>
-          <UiSelect
-            v-model="primaryClass"
-          >
-            <option
-              v-for="c in classesList"
-              :key="c"
-              :value="c"
-            >
-              {{ c }}
-            </option>
-          </UiSelect>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 mt-6">
-        <UiButton
-          variant="ghost"
-          @click="previousStep"
-        >
-          Retour
-        </UiButton>
-        <UiButton
-          variant="primary"
-          :disabled="!character.race || !primaryClass"
-          @click="nextStep"
-        >
-          Suivant
-        </UiButton>
-      </div>
-    </div>
-
-    <!-- Step 3: Ability Scores -->
-    <div
+    <StepAbilityScores
       v-if="currentStep === 2"
-      class="space-y-4"
-    >
-      <h2 class="text-xl font-bold">
-        Scores de capacités
-      </h2>
-      <p class="text-slate-400 text-sm">
-        Répartissez vos scores parmi les 6 capacités
-      </p>
+      :base-scores="baseScores"
+      @update:base-scores="(scores: any) => { Object.assign(baseScores, scores); saveDraftNow(); }"
+    />
 
-      <AbilityScorePicker
-        v-model:scores="baseScores"
-        :proficiency="2"
-      />
-
-      <div class="flex justify-end gap-2 mt-6">
-        <UiButton
-          variant="ghost"
-          @click="previousStep"
-        >
-          Retour
-        </UiButton>
-        <UiButton
-          variant="primary"
-          @click="nextStep"
-        >
-          Suivant
-        </UiButton>
-      </div>
-    </div>
-
-    <!-- Step 4: Skills -->
-    <div
+    <StepSkills
       v-if="currentStep === 3"
-      class="space-y-4"
-    >
-      <h2 class="text-xl font-bold">
-        Compétences
-      </h2>
-      <p class="text-slate-400 text-sm">
-        Sélectionnez {{ skillsToChoose }} compétences pour votre {{ primaryClass
-        }}
-      </p>
+      :primary-class="primaryClass"
+      :selected-skills="selectedSkills"
+      :available-skills="availableSkills"
+      :skills-to-choose="skillsToChoose"
+      @update:selected-skills="(skills: any) => { selectedSkills.splice(0, selectedSkills.length, ...skills); saveDraftNow(); }"
+    />
 
-      <div class="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto p-2">
-        <label
-          v-for="skill in availableSkills"
-          :key="skill"
-          class="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-slate-800 transition"
-        >
-          <input
-            v-model="selectedSkills"
-            type="checkbox"
-            :value="skill"
-            :disabled="selectedSkills.length >= skillsToChoose && !selectedSkills.includes(skill)"
-            class="rounded"
-          >
-          <span>{{ skill }}</span>
-        </label>
-      </div>
-
-      <div class="text-sm text-slate-400">
-        Sélectionnés: {{ selectedSkills.length }}/{{ skillsToChoose }}
-      </div>
-
-      <div class="flex justify-end gap-2 mt-6">
-        <UiButton
-          variant="ghost"
-          @click="previousStep"
-        >
-          Retour
-        </UiButton>
-        <UiButton
-          variant="primary"
-          :disabled="selectedSkills.length !== skillsToChoose"
-          @click="nextStep"
-        >
-          Suivant
-        </UiButton>
-      </div>
-    </div>
-
-    <!-- Step 5: Avatar -->
-    <div
+    <StepAvatar
       v-if="currentStep === 4"
-      class="space-y-4"
-    >
-      <h2 class="text-xl font-bold">
-        Générer un Avatar
-      </h2>
-      <p class="text-slate-400 text-sm">
-        (Optionnel) Décrivez l'apparence physique de votre personnage pour générer un avatar avec l'IA
-      </p>
+      :character="character"
+      :gender="gender"
+      :primary-class="primaryClass"
+      :generated-avatar="generatedAvatar"
+      :is-generating="isGeneratingAvatar"
+      :avatar-description="avatarDescription"
+      @update:avatar-description="avatarDescription = $event; saveDraftNow()"
+      @generate="generateAvatar"
+      @regenerate="regenerateAvatar"
+    />
 
-      <div class="mt-4">
-        <label class="block font-medium mb-2">Description physique</label>
-        <textarea
-          v-model="avatarDescription"
-          class="w-full p-3 rounded bg-slate-800 border border-slate-600 text-slate-100"
-          placeholder="Ex: Grand et musclé, cheveux noirs long, cicatrice sur la joue gauche..."
-          rows="4"
-        />
-      </div>
-
-      <div
-        v-if="generatedAvatar"
-        class="mt-4"
+    <!-- Navigation buttons -->
+    <div class="flex justify-end gap-2 mt-6">
+      <UiButton
+        variant="ghost"
+        :disabled="currentStep === 0"
+        @click="previousStep"
       >
-        <img
-          :src="generatedAvatar"
-          alt="Generated Avatar"
-          class="w-48 h-48 rounded border border-slate-600 object-cover"
-        >
-      </div>
-
-      <div class="flex justify-end gap-2 mt-6">
-        <UiButton
-          variant="ghost"
-          @click="previousStep"
-        >
-          Retour
-        </UiButton>
-        <UiButton
-          v-if="!generatedAvatar"
-          variant="ghost"
-          :disabled="!avatarDescription.trim() || isGeneratingAvatar"
-          @click="generateAvatar"
-        >
-          {{ isGeneratingAvatar ? 'Génération...' : '🎨 Générer' }}
-        </UiButton>
-        <UiButton
-          v-if="generatedAvatar"
-          variant="ghost"
-          @click="regenerateAvatar"
-        >
-          Régénérer
-        </UiButton>
-        <UiButton
-          variant="primary"
-          @click="finishCreation"
-        >
-          Terminer
-        </UiButton>
-      </div>
+        Retour
+      </UiButton>
+      <UiButton
+        v-if="currentStep < steps.length - 1"
+        variant="primary"
+        :disabled="!canProceed"
+        @click="nextStep"
+      >
+        Suivant
+      </UiButton>
+      <UiButton
+        v-if="currentStep === steps.length - 1"
+        variant="primary"
+        @click="finishCreation"
+      >
+        Terminer
+      </UiButton>
     </div>
 
     <!-- Character Preview -->
-    <div class="mt-8 p-4 bg-slate-900 rounded border border-slate-700">
-      <h3 class="font-bold mb-2">
-        Aperçu du personnage
-      </h3>
-      <div class="text-sm text-slate-300 space-y-1">
-        <div><strong>Nom:</strong> {{ character.name || '—' }}</div>
-        <div><strong>Genre:</strong> {{ gender }}</div>
-        <div><strong>Race:</strong> {{ character.race?.name || '—' }}</div>
-        <div><strong>Classe:</strong> {{ primaryClass }}</div>
-        <div v-if="currentStep >= 2">
-          <strong>Scores:</strong> STR {{ baseScores.Str }} | DEX {{ baseScores.Dex
-          }} | CON {{ baseScores.Con }} | INT {{ baseScores.Int }} | WIS {{ baseScores.Wis }} | CHA {{
-            baseScores.Cha }}
-        </div>
-        <div v-if="currentStep >= 3">
-          <strong>Compétences:</strong> {{ selectedSkills.join(', ') || '—' }}
-        </div>
-      </div>
-    </div>
+    <CharacterPreview
+      :character="character"
+      :gender="gender"
+      :primary-class="primaryClass"
+      :base-scores="baseScores"
+      :selected-skills="selectedSkills"
+      :current-step="currentStep"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
-import RacePicker from './RacePicker.vue';
-import AbilityScorePicker from '../character-stats/AbilityScorePicker.vue';
 import UiButton from '../ui/UiButton.vue';
-import UiSelect from '../ui/UiSelect.vue';
-import { characterService } from '../../services/characterService';
-import { DnDRulesService } from '../../services/dndRulesService';
-
-type Race = { id: string; name: string; mods: Record<string, number> };
+import StepBasicInfo from './steps/StepBasicInfo.vue';
+import StepRaceClass from './steps/StepRaceClass.vue';
+import StepAbilityScores from './steps/StepAbilityScores.vue';
+import StepSkills from './steps/StepSkills.vue';
+import StepAvatar from './steps/StepAvatar.vue';
+import CharacterPreview from './CharacterPreview.vue';
+import { useCharacterCreation } from '../../composables/useCharacterCreation';
 
 const props = defineProps<{ world?: string; worldId?: string }>();
 const router = useRouter();
+const route = useRoute();
 
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
-const currentStep = ref(0);
 
-const allowedRaces: Race[] = [
-    { id: 'human', name: 'Humain', mods: { Str: 1, Dex: 1, Con: 1, Int: 1, Wis: 1, Cha: 1 } },
-    { id: 'dwarf', name: 'Nain', mods: { Con: 2 } },
-    { id: 'elf', name: 'Elfe', mods: { Dex: 2 } },
-    { id: 'halfling', name: 'Halfelin', mods: { Dex: 2 } },
-    { id: 'gnome', name: 'Gnome', mods: { Int: 2 } },
-    { id: 'half-elf', name: 'Demi-elfe', mods: { Cha: 2 } },
-    { id: 'half-orc', name: 'Demi-orc', mods: { Str: 2, Con: 1 } },
-    { id: 'tiefling', name: 'Tieffelin', mods: { Cha: 2, Int: 1 } },
-    { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } }
-];
+// Use character creation composable
+const {
+  character,
+  primaryClass,
+  baseScores,
+  gender,
+  selectedSkills,
+  avatarDescription,
+  generatedAvatar,
+  isGeneratingAvatar,
+  allowedRaces,
+  classesList,
+  genders,
+  availableSkills,
+  skillsToChoose,
+  applyAndSave,
+  getDraftCurrentStep,
+  saveDraftWithStep,
+  saveDraftNow,
+} = useCharacterCreation(props.world, props.worldId);
 
-const classesList = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'];
-const genders = ['male', 'female'];
+// Get current step from route, or from draft if no route param
+const currentStep = computed({
+  get: () => {
+    const routeStep = parseInt(route.params.step as string, 10);
+    if (!isNaN(routeStep)) {
+      return Math.min(routeStep - 1, steps.length - 1);
+    }
+    // Fall back to draft step if available
+    return getDraftCurrentStep();
+  },
+  set: (value: number) => {
+    router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
+  }
+});
 
-const character = ref<any>({ name: '', race: null, scores: {} });
-const primaryClass = ref('Fighter');
-const baseScores = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
-const gender = ref('male');
-const selectedSkills = ref<string[]>([]);
-const avatarDescription = ref('');
-const generatedAvatar = ref<string | null>(null);
-const isGeneratingAvatar = ref(false);
-
-const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
-const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
+const canProceed = computed(() => {
+  switch (currentStep.value) {
+    case 0:
+      return character.value.name?.trim();
+    case 1:
+      return character.value.race && primaryClass.value;
+    case 2:
+      return true;
+    case 3:
+      return selectedSkills.value.length === skillsToChoose.value;
+    case 4:
+      return true;
+    default:
+      return false;
+  }
+});
 
 function nextStep() {
-    if (currentStep.value < steps.length - 1) {
-        currentStep.value++;
-    }
+  if (currentStep.value < steps.length - 1) {
+    saveDraftWithStep(currentStep.value + 1);
+    currentStep.value++;
+  }
 }
 
 function previousStep() {
-    if (currentStep.value > 0) {
-        currentStep.value--;
-    }
-}
-
-function cancel() {
-    router.back();
+  if (currentStep.value > 0) {
+    saveDraftWithStep(currentStep.value - 1);
+    currentStep.value--;
+  }
 }
 
 async function generateAvatar() {
-    if (!avatarDescription.value.trim()) return;
-    
-    isGeneratingAvatar.value = true;
-    try {
-        const response = await axios.post('/api/image/generate-avatar', {
-            character: {
-                name: character.value.name,
-                gender: gender.value,
-                race: character.value.race,
-                classes: [{ name: primaryClass.value }]
-            },
-            description: avatarDescription.value
-        });
+  if (!avatarDescription.value.trim()) return;
 
-        generatedAvatar.value = response.data.imageUrl;
-    } catch (error) {
-        console.error('Avatar generation error:', error);
-    } finally {
-        isGeneratingAvatar.value = false;
-    }
+  isGeneratingAvatar.value = true;
+  try {
+    const response = await axios.post('/api/image/generate-avatar', {
+      character: {
+        name: character.value.name,
+        gender: gender.value,
+        race: character.value.race,
+        classes: [{ name: primaryClass.value }]
+      },
+      description: avatarDescription.value
+    });
+
+    generatedAvatar.value = response.data.imageUrl;
+  } catch (error) {
+    console.error('Avatar generation error:', error);
+  } finally {
+    isGeneratingAvatar.value = false;
+  }
 }
 
 function regenerateAvatar() {
-    generatedAvatar.value = null;
-    generateAvatar();
+  generatedAvatar.value = null;
+  generateAvatar();
 }
 
 function finishCreation() {
-    // Set basic fields
-    character.value.gender = gender.value as 'male' | 'female';
-    character.value.world = props.world;
-    character.value.worldId = props.worldId;
-
-    // Generate portrait
-    const c = String(primaryClass.value).toLowerCase();
-    const rId = character.value.race?.id?.toLowerCase() || 'human';
-    const g = String(gender.value).toLowerCase();
-    const baseUrl = ((import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL : '/';
-    character.value.portrait = generatedAvatar.value || `${baseUrl}images/${c}_${rId}_${g}.png`;
-
-    // Use service to calculate all D&D rules with skills
-    const calculated = DnDRulesService.prepareNewCharacter(
-        character.value.name || 'Unnamed',
-        baseScores.value,
-        primaryClass.value,
-        character.value.race?.mods || {},
-        character.value.race,
-        { world: props.world, worldId: props.worldId },
-        selectedSkills.value
-    );
-
-    // Merge with character data
-    const finalCharacter = { ...character.value, ...calculated };
-
-    // Save and redirect
-    characterService.saveCharacter(finalCharacter);
-    router.push({ name: 'game', params: { world: props.world } });
+  applyAndSave();
 }
 </script>
