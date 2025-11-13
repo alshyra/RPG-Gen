@@ -2,10 +2,7 @@ import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import * as Joi from 'joi';
 import { rollDiceExpr } from './dice.util';
-
-interface DiceRequest {
-  expr: string;
-}
+import type { DiceRequest } from '../../../shared/types';
 
 const schema = Joi.object({ expr: Joi.string().required() });
 

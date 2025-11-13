@@ -3,17 +3,10 @@
  * Single source of truth: localStorage with UUID-based character IDs
  */
 
-import type { CharacterEntry, SavedCharacterEntry } from "@shared/types";
-
-interface DeceasedCharacterEntry {
-  id: string;
-  character: CharacterEntry;
-  diedAt: string;
-  location: string;
-}
+import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from "@shared/types";
 
 // Re-export for convenience
-export type { SavedCharacterEntry, CharacterEntry } from "../../../shared/types";
+export type { SavedCharacterEntry, CharacterEntry, DeceasedCharacterEntry } from "../../../shared/types";
 
 const STORAGE_KEYS = {
   savedCharacters: "rpg-characters",

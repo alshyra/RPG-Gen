@@ -2,22 +2,7 @@ import { Body, Controller, Post, BadRequestException, Logger } from "@nestjs/com
 import { ApiTags, ApiOperation, ApiBody } from "@nestjs/swagger";
 import * as Joi from "joi";
 import { GeminiImageService } from "../external/image/gemini-image.service";
-
-interface ImageRequest {
-  token?: string;
-  prompt: string;
-  model?: string;
-}
-
-interface AvatarRequest {
-  character?: {
-    name?: string;
-    gender?: string;
-    race?: { name?: string };
-    classes?: Array<{ name?: string }>;
-  };
-  description: string;
-}
+import type { ImageRequest, AvatarRequest } from "../../../shared/types";
 
 const schema = Joi.object({
   token: Joi.string().allow("").optional(),

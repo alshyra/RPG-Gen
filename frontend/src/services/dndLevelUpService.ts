@@ -3,6 +3,11 @@
  * Handles HP gain, ASI, features, and spell slots
  */
 
+import type { LevelUpResult } from "@shared/types";
+
+// Re-export the type from shared
+export type { LevelUpResult } from "@shared/types";
+
 interface ClassLevelUpRules {
   hpDie: number;
   proficiencyProgression: number[];
@@ -193,16 +198,6 @@ const classRules: Record<string, ClassLevelUpRules> = {
     },
   },
 };
-
-export interface LevelUpResult {
-  success: boolean;
-  newLevel: number;
-  hpGain: number;
-  hasASI: boolean;
-  newFeatures: string[];
-  proficiencyBonus: number;
-  message: string;
-}
 
 export const dndLevelUpService = {
   /**

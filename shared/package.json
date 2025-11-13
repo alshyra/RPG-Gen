@@ -7,7 +7,9 @@
         ".": "./types/index.ts",
         "./types": "./types/index.ts",
         "./types/character": "./types/character.ts",
-        "./types/game": "./types/game.ts"
+        "./types/game": "./types/game.ts",
+        "./types/dnd": "./types/dnd.ts",
+        "./types/api": "./types/api.ts"
     },
     "files": [
         "types"
