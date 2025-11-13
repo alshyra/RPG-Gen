@@ -4,7 +4,7 @@ backend/.env
 archives
 
 # Cypress
-cypress/screenshots
-cypress/videos
-cypress/downloads
+screenshots
+videos
+downloads
 .cypress-cache

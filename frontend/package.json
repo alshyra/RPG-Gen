@@ -8,6 +8,8 @@
         "build": "vite build",
         "preview": "vite preview",
         "test": "vitest",
+        "test:component": "cypress run --component",
+        "test:component:open": "cypress open --component",
         "test:e2e": "cypress run",
         "test:e2e:open": "cypress open",
         "type-check": "vue-tsc --noEmit",

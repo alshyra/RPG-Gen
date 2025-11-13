@@ -31,7 +31,7 @@
       :gender="gender"
       :world="world"
       :genders="genders"
-      @update:character="character = Object.assign({}, character, $event); saveDraftNow()"
+      @update:character="updateCharacter($event); saveDraftNow()"
       @update:gender="(g: any) => { gender = g; saveDraftNow(); }"
     />
 
@@ -41,7 +41,7 @@
       :primary-class="primaryClass"
       :allowed-races="allowedRaces"
       :class-list="classesList"
-      @update:character="Object.assign(character, $event); saveDraftNow()"
+      @update:character="updateCharacter($event); saveDraftNow()"
       @update:primary-class="primaryClass = $event; saveDraftNow()"
     />
 
@@ -195,6 +195,10 @@ function previousStep() {
     saveDraftWithStep(currentStep.value - 1);
     currentStep.value--;
   }
+}
+
+function updateCharacter(updates: any) {
+  character.value = { ...character.value, ...updates };
 }
 
 async function generateAvatar() {
