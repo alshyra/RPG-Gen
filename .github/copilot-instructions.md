@@ -1,5 +1,45 @@
 # Copilot Instructions for RPG-Gen Project
 
+## Project Setup
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- npm or yarn
+- Google Gemini API key (for backend)
+
+### Environment Configuration
+
+The backend requires environment variables. Create a `.env` file in the `backend/` directory (do not commit):
+
+```env
+# backend/.env
+GOOGLE_API_KEY=AIza...your_api_key_here
+```
+
+### Initial Setup
+
+**Backend:**
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+- Runs on port 3001
+- Swagger UI available at http://localhost:3001/docs
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+- Runs on port 5173
+- Proxies `/api/*` requests to backend (port 3001)
+
+**Shared Types:**
+Located in `shared/types/` - used by both frontend and backend for type safety.
+
 ## Architecture Overview
 
 ### Full Stack
@@ -49,6 +89,20 @@
 - **`GameParser`**: Extracts instructions from Gemini responses
   - Preserves newlines in narrative (critical for lists/formatting)
   - Parses roll instructions: `[ROLL:dices=1d20 modifier=+5]`
+
+#### Shared Types
+
+Located in `shared/types/` - provides type safety across frontend and backend:
+
+- **`types/character.ts`**: Character, Race, Skills, SavedCharacterEntry
+- **`types/game.ts`**: GameInstruction, ChatMessage, GameResponse, RollResult
+- **Usage**: Import from relative path `../../shared/types` in both frontend and backend
+- **Guidelines**:
+  - Use `interface` for object types (not `type`)
+  - Document with JSDoc comments
+  - Prefer single responsibility per type
+  - Keep types immutable (no mutable methods)
+  - Avoid circular dependencies between character.ts and game.ts
 
 ## UI Component Standards
 
@@ -126,15 +180,35 @@ interface GameInstruction {
 
 ### Frontend
 
-- Start: `npm run dev` (Vite, http://localhost:5173)
-- Lint: `npx eslint .` (alias check)
-- Proxy: `/api/*` routes to `http://localhost:3001`
+- **Dev Server**: `npm run dev` (Vite, http://localhost:5173)
+  - Proxies `/api/*` routes to `http://localhost:3001`
+- **Linting + Type Checking**: `npm run lint` 
+  - Runs TypeScript type-check (vue-tsc) + ESLint style checks
+  - Use `npm run lint:fix` to auto-fix formatting issues
+- **Build**: `npm run build` (verify production build works)
+- **Unit Tests**: `npm run test` (Vitest)
+- **E2E Tests**: 
+  - `npm run test:e2e` - Run Cypress tests in headless mode
+  - `npm run test:e2e:open` - Open Cypress interactive UI
+  - Requires dev server running (`npm run dev`)
+  - Tests run automatically via GitHub Actions on push/PR to main/develop branches
+  - Screenshots and videos available as artifacts on failure
+- **Component Tests**:
+  - `npm run test:component` - Run component tests in headless mode
+  - `npm run test:component:open` - Open Cypress component testing UI
 
 ### Backend
 
-- Start: `npm run start:dev` (NestJS, port 3001)
-- Tests: `npm run test` (12 tests for game-parser, all passing)
-- Chat history stored in `archives/{sessionId}/history.json`
+- **Dev Server**: `npm run start:dev` (NestJS, port 3001)
+  - Hot-reload enabled
+  - Swagger UI available at http://localhost:3001/docs
+- **Tests**: `npm run test` (Ava test runner)
+  - 12 tests for GameParser + Dice logic (all passing)
+- **Linting**: `npm run lint` (TypeScript + ESLint)
+  - Use `npm run lint:fix` to auto-fix issues
+- **Build**: `npm run build` (compile TypeScript to dist/)
+- **Production**: `npm run start` (run compiled code from dist/)
+- **Chat History**: Stored in `archives/{sessionId}/history.json`
 
 ## Key Implementation Details
 
@@ -159,6 +233,18 @@ interface GameInstruction {
 - ConversationService: escape `\n` to `\\n` on save, keep escaped on load
 - ChatController: escape for API transmission, unescape for storage
 - Result: Markdown lists render correctly in frontend
+
+### API Exploration & Debugging
+
+- **Swagger UI**: http://localhost:3001/docs
+  - Interactive API documentation for all backend endpoints
+  - Test endpoints directly from the browser
+  - View request/response schemas
+- **Chat History**: View stored conversations at `backend/archives/{sessionId}/history.json`
+- **Frontend State**: Check localStorage keys in browser DevTools:
+  - `rpg-characters` - All saved characters
+  - `rpg-character-id` - Current character ID
+  - Deceased characters stored separately
 
 ## Common Pitfalls
 
@@ -227,6 +313,13 @@ backend/src/
 ├── chat/                      # ChatController, ConversationService
 ├── external/                  # GeminiTextService, GameParser
 └── test/                      # game-parser.test.ts (12 tests passing)
+
+shared/
+├── types/
+│   ├── character.ts           # Character, Race, Skills types
+│   ├── game.ts                # GameInstruction, ChatMessage, GameResponse
+│   └── index.ts               # Export all types
+└── README.md                  # Shared types documentation
 ```
 
 ## Example: Adding a New Character Feature
@@ -242,16 +335,22 @@ backend/src/
 
 ### Frontend Quality Checks
 
-- **Linting + Type Checking** (comprehensive): `npm run lint`
+- **Linting + Type Checking**: `npm run lint`
   - Includes: TypeScript type-check (vue-tsc) + ESLint style checks
   - Use `npm run lint:fix` to auto-fix formatting issues
+- **Unit Tests**: `npm run test` (Vitest)
+- **E2E Tests**: `npm run test:e2e` or `npm run test:e2e:open` (Cypress)
+- **Component Tests**: `npm run test:component` or `npm run test:component:open` (Cypress)
 - **Build Test**: `npm run build` (verify production build works)
 - **Dev Server**: `npm run dev` (port 5173, proxies `/api/*` to backend)
 
 ### Backend Quality Checks
 
-- **Tests**: `npm run test` (GameParser + Dice tests)
+- **Tests**: `npm run test` (Ava - GameParser + Dice tests)
+- **Linting**: `npm run lint` (TypeScript + ESLint)
+- **Build**: `npm run build` (compile to dist/)
 - **Dev Server**: `npm run start:dev` (port 3001, NestJS hot-reload)
+- **Swagger UI**: http://localhost:3001/docs (API documentation)
 
 ### Git Workflow
 
@@ -259,6 +358,7 @@ backend/src/
 2. Run `npm run lint` in frontend (and `npm run test` in backend if changed)
 3. All tests/lints must pass before commit
 4. Use `npm run lint:fix` to resolve formatting automatically
+5. E2E tests run automatically in CI/CD on push/PR
 
 ---
 
