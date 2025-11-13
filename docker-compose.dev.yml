@@ -1,7 +1,7 @@
 services:
   mongodb:
     image: mongo:7.0
-    container_name: rpg-gen-mongodb
+    container_name: rpg-gen-mongodb-dev
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: rpgadmin
@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: rpg-gen-backend
+    container_name: rpg-gen-backend-dev
     restart: unless-stopped
     environment:
       - NODE_ENV=development
@@ -28,7 +28,7 @@ services:
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
       - JWT_SECRET=${JWT_SECRET:-default-secret-change-in-production}
-      - FRONTEND_URL=http://localhost:80
+      - FRONTEND_URL=http://localhost:5173
     ports:
       - "3001:3001"
     depends_on:
@@ -40,16 +40,23 @@ services:
       - rpg-network
     command: sh -c "cd backend && npm run start:dev"
 
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: rpg-gen-frontend
+  frontend-dev:
+    image: node:25-alpine
+    container_name: rpg-gen-frontend-dev
     restart: unless-stopped
+    working_dir: /app/frontend
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
     ports:
-      - "80:80"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
+      - /app/frontend/node_modules
     networks:
       - rpg-network
+    command: sh -c "npm install && npm run dev -- --host"
 
 volumes:
   mongodb_data:

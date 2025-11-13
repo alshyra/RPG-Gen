@@ -76,8 +76,28 @@ npm run test:e2e:open
 ```
 
 ### Full Stack with Docker Compose
+
+**Development Mode (with hot-reload):**
 ```bash
-# Start everything (MongoDB + Backend + Frontend)
+# Start everything (MongoDB + Backend + Frontend with hot-reload)
+docker-compose -f docker-compose.dev.yml up --build
+
+# Start in background
+docker-compose -f docker-compose.dev.yml up -d
+
+# Stop all services
+docker-compose -f docker-compose.dev.yml down
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Rebuild and restart
+docker-compose -f docker-compose.dev.yml up --build --force-recreate
+```
+
+**Production Mode (with nginx):**
+```bash
+# Start everything (MongoDB + Backend + Frontend with nginx)
 docker-compose up --build
 
 # Start in background
@@ -258,7 +278,14 @@ db.chathistories.deleteMany({})
 
 ## Port Usage
 
-- Frontend: http://localhost:5173
+**Development Mode:**
+- Frontend: http://localhost:5173 (Vite dev server)
+- Backend API: http://localhost:3001/api
+- Swagger Docs: http://localhost:3001/docs
+- MongoDB: localhost:27017
+
+**Production Mode (Docker):**
+- Frontend: http://localhost:80 (nginx)
 - Backend API: http://localhost:3001/api
 - Swagger Docs: http://localhost:3001/docs
 - MongoDB: localhost:27017

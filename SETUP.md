@@ -103,9 +103,27 @@ Frontend will run on http://localhost:5173
 4. Authorize the application
 5. You'll be redirected back and logged in!
 
-## Docker Compose Full Stack (Alternative)
+## Docker Compose Full Stack
 
-You can also run the entire stack (MongoDB + Backend + Frontend) with Docker Compose:
+### Development Mode (with hot-reload)
+
+For local development with hot-reload:
+
+```bash
+# Make sure your backend/.env is configured
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+This will start:
+- MongoDB on port 27017
+- Backend on port 3001 (with hot-reload)
+- Frontend on port 5173 (with hot-reload)
+
+Access the application at http://localhost:5173
+
+### Production Mode (with nginx)
+
+For production-like deployment:
 
 ```bash
 # Make sure your backend/.env is configured
@@ -115,7 +133,9 @@ docker-compose up --build
 This will start:
 - MongoDB on port 27017
 - Backend on port 3001
-- Frontend on port 5173
+- Frontend on port 80 (served by nginx)
+
+Access the application at http://localhost
 
 ## Heroku Deployment
 
