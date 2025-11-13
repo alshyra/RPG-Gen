@@ -7,15 +7,15 @@
         :key="w.id"
         class="tpl flex items-center justify-between p-3 rounded-md bg-slate-800/50 hover:bg-slate-800/70"
       >
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <div
-            class="logo flex items-center justify-center w-12 h-12 rounded-md text-white font-bold"
+            class="logo flex items-center justify-center w-12 h-12 rounded-md text-white font-bold flex-shrink-0"
             :class="w.bgClass"
           >
             <!-- simple initials as logo -->
             {{ w.logo }}
           </div>
-          <div>
+          <div class="text-left">
             <div class="text-sm font-semibold text-purple-300">
               {{ w.name }}
             </div>

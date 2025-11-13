@@ -1,27 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { GoogleGenAI } from "@google/genai";
-
-interface GeminiPart {
-  inlineData?: { data: string };
-  fileData?: { fileUri: string };
-  text?: string;
-}
-
-interface GeminiCandidate {
-  content?: {
-    parts?: GeminiPart[];
-  };
-}
-
-interface GeminiImageResponse {
-  candidates?: GeminiCandidate[];
-}
+import { GenerateContentResponse, GoogleGenAI } from "@google/genai";
 
 @Injectable()
 export class GeminiImageService {
   private readonly logger = new Logger(GeminiImageService.name);
   private client: GoogleGenAI | null = null;
-  private model = "gemini-2.5-flash-image";
+  private model = "gemini-2.0-flash-preview-image-generation";
 
   constructor() {
     this.logger.debug(
@@ -46,12 +30,12 @@ export class GeminiImageService {
     return this.extractImageUrl(response);
   }
 
-  private async callGenerativeModel(prompt: string): Promise<GeminiImageResponse> {
+  private async callGenerativeModel(prompt: string): Promise<GenerateContentResponse> {
     try {
       return (await this.client.models.generateContent({
         model: this.model,
         contents: [{ parts: [{ text: prompt }] }],
-      })) as unknown as GeminiImageResponse;
+      }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       this.logger.error("Gemini API call failed:", message);
@@ -59,13 +43,13 @@ export class GeminiImageService {
     }
   }
 
-  private extractImageUrl(response: GeminiImageResponse): string {
+  private extractImageUrl(response: GenerateContentResponse): string {
     const imageUrl = this.extractImageFromResponse(response);
     if (!imageUrl) throw new Error("No image generated in response");
     return imageUrl;
   }
 
-  private extractImageFromResponse(response: GeminiImageResponse): string | null {
+  private extractImageFromResponse(response: GenerateContentResponse): string | null {
     const parts = response?.candidates?.[0]?.content?.parts;
     if (!Array.isArray(parts)) return null;
 
