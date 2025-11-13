@@ -1,0 +1,8 @@
+{
+  "example": {
+    "name": "Test Character",
+    "race": "Human",
+    "class": "Warrior",
+    "level": 1
+  }
+}

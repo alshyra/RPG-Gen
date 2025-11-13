@@ -2,3 +2,9 @@ node_modules
 dist
 backend/.env
 archives
+
+# Cypress
+cypress/screenshots
+cypress/videos
+cypress/downloads
+.cypress-cache
