@@ -83,6 +83,7 @@ describe("Character Creation", () => {
     // Check localStorage contains draft
     cy.window().then((win) => {
       const draft = win.localStorage.getItem("rpg-character-draft");
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(draft).to.exist;
       const draftData = JSON.parse(draft);
       expect(draftData.character.name).to.equal("DraftHero");
