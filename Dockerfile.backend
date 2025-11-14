@@ -8,7 +8,7 @@ COPY shared ./shared
 
 # Install all dependencies
 WORKDIR /app/backend
-RUN npm install || (npm cache clean --force && npm install)
+RUN npm ci
 
 # Copy backend source
 COPY backend ./

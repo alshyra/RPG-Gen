@@ -9,7 +9,7 @@ COPY shared ./shared
 WORKDIR /app/frontend
 
 # Install dependencies
-RUN npm install || (npm cache clean --force && npm install)
+RUN npm ci
 
 # Copy source files
 COPY frontend ./
