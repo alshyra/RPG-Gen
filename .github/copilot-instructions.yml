@@ -1,0 +1,12 @@
+# GitHub Copilot Coding Agent Configuration
+# This file configures the environment for the coding agent before firewall restrictions are applied
+
+setup_steps:
+  # Install Cypress binary before firewall is enabled
+  - name: Install Cypress E2E testing framework
+    run: |
+      cd frontend
+      npm install
+      npx cypress install --force
+      npx cypress verify
+    description: Pre-install Cypress binary to enable E2E test execution
