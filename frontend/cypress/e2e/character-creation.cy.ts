@@ -153,7 +153,7 @@ describe('Character Creation', () => {
     cy.contains("button", "Suivant").should("not.be.disabled");
   });
 
-  it.only("should persist ability scores (character.scores) on page refresh", () => {
+  it("should persist ability scores (character.scores) on page refresh", () => {
     cy.visit("/");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
@@ -199,8 +199,8 @@ describe('Character Creation', () => {
     cy.contains("Capacités").should("be.visible");
 
     // Verify the score is still 14
-    cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').contains(14)
-    cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').contains(15)
+    cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').should('contain', '14');
+    cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').should('contain', '15');
 
     // Verify localStorage still has the correct value
     cy.window().then((win) => {
