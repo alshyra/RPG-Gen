@@ -12,7 +12,7 @@ describe('API Integration', () => {
     localStorage.setItem('rpg-auth-token', mockToken);
     localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
     
-    cy.visit('/');
+    cy.visit('/home');
   });
 
   it('should handle API calls gracefully', () => {
@@ -39,13 +39,13 @@ describe('API Integration', () => {
     }).as('apiError');
 
     // Navigate through the app
-    cy.visit('/');
+    cy.visit('/home');
     cy.contains('RPG Gemini').should('be.visible');
   });
 
   it('should work offline (no backend)', () => {
     // This test verifies the frontend loads without a backend
-    cy.visit('/');
+    cy.visit('/home');
     
     // Basic UI should still work
     cy.contains('RPG Gemini').should('be.visible');

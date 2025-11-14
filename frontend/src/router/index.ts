@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import LandingView from "../views/LandingView.vue";
 import HomeView from "../views/HomeView.vue";
 import GameView from "../views/GameView.vue";
 import CharacterCreatorView from "../views/CharacterCreatorView.vue";
@@ -9,9 +10,10 @@ import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { authService } from "../services/authService";
 
 const routes = [
+  { path: "/", name: "landing", component: LandingView, meta: { public: true } },
   { path: "/login", name: "login", component: LoginView, meta: { public: true } },
   { path: "/auth/callback", name: "auth-callback", component: AuthCallbackView, meta: { public: true } },
-  { path: "/", name: "home", component: HomeView },
+  { path: "/home", name: "home", component: HomeView },
   { path: "/game/:world?", name: "game", component: GameView },
   {
     path: "/character/:world?/step/:step",

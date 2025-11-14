@@ -5,8 +5,21 @@ describe('Authentication Flow', () => {
     cy.clearCookies();
   });
 
-  it('should redirect to login when not authenticated', () => {
+  it('should display landing page when not authenticated', () => {
     cy.visit('/');
+    
+    // Should see landing page
+    cy.url().should('not.include', '/login');
+    cy.contains('RPG Gemini').should('be.visible');
+    cy.contains('Vivez des aventures épiques générées par l\'IA').should('be.visible');
+    cy.contains('Commencer à jouer').should('be.visible');
+  });
+
+  it('should redirect to login when clicking start playing', () => {
+    cy.visit('/');
+    
+    // Click on start playing button
+    cy.contains('Commencer à jouer').click();
     
     // Should be redirected to login page
     cy.url().should('include', '/login');
@@ -24,11 +37,11 @@ describe('Authentication Flow', () => {
     cy.get('button').contains('Se connecter avec Google').should('be.visible');
   });
 
-  it('should show login page before accessing world selector', () => {
+  it('should protect home route (world selector)', () => {
     // Try to access home without being authenticated
-    cy.visit('/');
+    cy.visit('/home');
     
-    // Should be on login page
+    // Should redirect to login page
     cy.url().should('include', '/login');
     
     // World selector should not be visible
@@ -66,18 +79,27 @@ describe('Authentication Flow', () => {
       localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
     });
 
-    it('should access home page when authenticated', () => {
-      cy.visit('/');
+    it('should access home page (world selector) when authenticated', () => {
+      cy.visit('/home');
       
       // Should not redirect to login
       cy.url().should('not.include', '/login');
+      cy.url().should('include', '/home');
       
       // Should see home page content
       cy.contains('RPG Gemini').should('be.visible');
     });
 
+    it('should redirect authenticated users from login to home', () => {
+      cy.visit('/login');
+      
+      // Should redirect to home
+      cy.url().should('include', '/home');
+      cy.url().should('not.include', '/login');
+    });
+
     it('should display user profile when authenticated', () => {
-      cy.visit('/');
+      cy.visit('/home');
       
       // User profile should be visible
       cy.contains('Test User').should('be.visible');
@@ -85,7 +107,7 @@ describe('Authentication Flow', () => {
     });
 
     it('should allow logout', () => {
-      cy.visit('/');
+      cy.visit('/home');
       
       // Click on user profile to open menu (if dropdown exists)
       cy.get('button').contains('Test User').click();
@@ -95,13 +117,13 @@ describe('Authentication Flow', () => {
     });
 
     it('should redirect to login after logout', () => {
-      cy.visit('/');
+      cy.visit('/home');
       
       // Perform logout by clearing storage
       cy.clearLocalStorage();
       
       // Try to visit home again
-      cy.visit('/');
+      cy.visit('/home');
       
       // Should redirect to login
       cy.url().should('include', '/login');

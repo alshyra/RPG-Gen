@@ -65,8 +65,8 @@ onMounted(async () => {
       return;
     }
 
-    // Redirect to home
-    router.push('/');
+    // Redirect to home (world selector)
+    router.push('/home');
   } catch (e) {
     console.error('Auth callback error', e);
     error.value = 'Une erreur est survenue lors de l\'authentification';

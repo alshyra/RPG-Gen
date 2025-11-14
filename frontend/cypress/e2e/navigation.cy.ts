@@ -13,7 +13,7 @@ describe("Navigation", () => {
 
   it("should navigate between routes", () => {
     // Start at home
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("RPG Gemini").should("be.visible");
 
     // Test direct navigation to character creation
@@ -21,8 +21,8 @@ describe("Navigation", () => {
     cy.url().should("include", "/character");
 
     // Navigate back to home
-    cy.visit("/");
-    cy.url().should("match", new RegExp(`${Cypress.config().baseUrl}/?$`));
+    cy.visit("/home");
+    cy.url().should("include", "/home");
   });
 
   it("should redirect to home when visiting /game without a character", () => {
@@ -33,7 +33,7 @@ describe("Navigation", () => {
     cy.visit("/game");
 
     // Should redirect to home
-    cy.url().should("match", new RegExp(`${Cypress.config().baseUrl}/?$`));
+    cy.url().should("include", "/home");
     cy.contains("RPG Gemini").should("be.visible");
   });
 

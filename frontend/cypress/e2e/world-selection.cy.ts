@@ -13,7 +13,7 @@ describe('World Selection', () => {
     localStorage.setItem('rpg-auth-token', mockToken);
     localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
     
-    cy.visit('/');
+    cy.visit('/home');
   });
 
   it('should display all available worlds', () => {

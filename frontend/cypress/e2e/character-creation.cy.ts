@@ -1,5 +1,5 @@
 /* eslint-disable max-statements */
-describe("Character Creation", () => {
+describe('Character Creation', () => {
   beforeEach(() => {
     // Clear localStorage to ensure fresh start
     cy.clearLocalStorage();
@@ -17,7 +17,7 @@ describe("Character Creation", () => {
 
   it("should navigate through all character creation steps", () => {
     // Start from home
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("RPG Gemini").should("be.visible");
 
     // Select a world (D&D)

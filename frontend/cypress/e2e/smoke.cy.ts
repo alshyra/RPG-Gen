@@ -12,7 +12,7 @@ describe('Application Smoke Tests', () => {
   });
 
   it('should load the application without errors', () => {
-    cy.visit('/');
+    cy.visit('/home');
     
     // Check that the app div is present
     cy.get('#app').should('exist');
@@ -23,7 +23,7 @@ describe('Application Smoke Tests', () => {
   });
 
   it('should have proper HTML structure', () => {
-    cy.visit('/');
+    cy.visit('/home');
     
     // Check meta tags
     cy.document().should((doc) => {
@@ -37,7 +37,7 @@ describe('Application Smoke Tests', () => {
   });
 
   it('should load without console errors', () => {
-    cy.visit('/', {
+    cy.visit('/home', {
       onBeforeLoad(win) {
         cy.stub(win.console, 'error').as('consoleError');
       },

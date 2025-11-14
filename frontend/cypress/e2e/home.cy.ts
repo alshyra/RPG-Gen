@@ -13,7 +13,7 @@ describe('Home Page', () => {
     localStorage.setItem('rpg-auth-token', mockToken);
     localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
     
-    cy.visit('/');
+    cy.visit('/home');
   });
 
   it('should load the home page successfully', () => {
