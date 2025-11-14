@@ -1,7 +1,5 @@
 <template>
   <div class="p-2 bg-slate-800/40 rounded">
-    <!-- point-buy only UI (method hidden from user) -->
-
     <div class="mt-3 grid grid-cols-2 gap-2">
       <div
         v-for="stat in stats"
@@ -15,7 +13,10 @@
             {{ formatMod(assigned[stat]) }} • PB {{ proficiency }}
           </div>
         </div>
-        <div class="mt-1">
+        <div
+          class="mt-1"
+          :data-test-id="`ability-score-${stat}`"
+        >
           <div
             v-if="props.mode === 'edit'"
             class="w-12 text-center font-medium"
@@ -24,6 +25,8 @@
           </div>
           <UiInputNumber
             v-else
+            data-test-id="ability-score"
+            :data-test-value="stat"
             :model-value="assigned[stat]"
             :min="8"
             :max="15"
@@ -46,9 +49,9 @@
 import { reactive, watch, computed, ref } from 'vue';
 import UiInputNumber from '../ui/UiInputNumber.vue';
 
-const props = defineProps<{ scores?: Record<string, number>, proficiency?: number, mode?: string, levelUpBudget?: number, initialScores?: Record<string, number> }>();
+const props = defineProps<{ modelValue?: Record<string, number>, proficiency?: number, mode?: string, levelUpBudget?: number, initialScores?: Record<string, number> }>();
 const emit = defineEmits<{
-  (e: 'update:scores', val: Record<string, number>): void
+  (e: 'update:modelValue', val: Record<string, number>): void
 }>();
 
 const stats = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'];
@@ -89,7 +92,7 @@ function change(stat: string, delta: number) {
     const newUsed = usedBefore - prevInc + newInc;
     if (newUsed > (props.levelUpBudget ?? 2)) return;
     assigned[stat] = v;
-    emit('update:scores', { ...assigned });
+    emit('update:modelValue', { ...assigned });
     return;
   }
 
@@ -100,7 +103,7 @@ function change(stat: string, delta: number) {
   const newUsed = used - prevCost + newCost;
   if (newUsed > 27) return; // prevent overspend
   assigned[stat] = v;
-  emit('update:scores', { ...assigned });
+  emit('update:modelValue', { ...assigned });
 }
 
 function formatMod(n: number): string {
@@ -109,12 +112,12 @@ function formatMod(n: number): string {
 }
 
 // initialize from props if provided
-if (props.scores) {
-  for (const k of stats) if ((props.scores as any)[k]) assigned[k] = (props.scores as any)[k];
-  emit('update:scores', { ...assigned });
+if (props.modelValue) {
+  for (const k of stats) if ((props.modelValue as any)[k]) assigned[k] = (props.modelValue as any)[k];
+  emit('update:modelValue', { ...assigned });
 } else {
-  emit('update:scores', { ...assigned });
+  emit('update:modelValue', { ...assigned });
 }
 
-watch(() => method.value, () => { emit('update:scores', { ...assigned }); });
+watch(() => method.value, () => { emit('update:modelValue', { ...assigned }); });
 </script>
