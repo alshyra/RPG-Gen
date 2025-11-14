@@ -58,6 +58,15 @@ services:
       dockerfile: Dockerfile.frontend
     ports:
       - "80:80"
+    environment:
+      # Backend URL for API proxy - adjust based on your deployment
+      # For local docker-compose: http://backend:3001
+      # For Cloud Run prod: https://rpggen-backend-469869562907.europe-west1.run.app
+      - BACKEND_URL=http://backend:3001
+    networks:
+      - rpg-network
+    depends_on:
+      - backend
 
 volumes:
   mongodb_data:
