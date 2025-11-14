@@ -44,7 +44,7 @@ jobs:
 
       - name: Start production Docker containers
         run: |
-          docker compose up -d mongodb backend frontend_prod
+          docker compose up -d mongodb backend_prod frontend_prod
           
       - name: Wait for services to be ready
         run: |
@@ -61,11 +61,11 @@ jobs:
           fi
           
           # Check Backend
-          if docker compose ps backend | grep -q "Up"; then
+          if docker compose ps backend_prod | grep -q "Up"; then
             echo "✓ Backend is running"
           else
             echo "✗ Backend failed to start"
-            docker compose logs backend
+            docker compose logs backend_prod
             exit 1
           fi
           
@@ -105,7 +105,7 @@ jobs:
           docker compose logs --tail=50 frontend_prod
           echo ""
           echo "=== Backend logs ==="
-          docker compose logs --tail=50 backend
+          docker compose logs --tail=50 backend_prod
           echo ""
           echo "=== MongoDB logs ==="
           docker compose logs --tail=20 mongodb
