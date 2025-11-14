@@ -16,6 +16,24 @@ declare global {
        * @example cy.dataCy('submit-button')
        */
       dataCy(value: string): Chainable<JQuery<HTMLElement>>;
+      
+      /**
+       * Mock authentication by setting token and user in localStorage
+       * @example cy.mockAuth()
+       */
+      mockAuth(): Chainable<void>;
+      
+      /**
+       * Clear authentication tokens from localStorage
+       * @example cy.clearAuth()
+       */
+      clearAuth(): Chainable<void>;
+      
+      /**
+       * Setup API mocks to prevent timeouts
+       * @example cy.setupApiMocks()
+       */
+      setupApiMocks(): Chainable<void>;
     }
   }
 }

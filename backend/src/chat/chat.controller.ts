@@ -7,14 +7,19 @@ import {
   InternalServerErrorException,
   Logger,
   Query,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBody } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
 import * as Joi from "joi";
+import { Request } from "express";
 import { GeminiTextService } from "../external/text/gemini-text.service";
 import { ConversationService, ChatMessage } from "./conversation.service";
 import { parseGameResponse, GameInstruction } from "../external/game-parser.util";
 import { readFile } from "fs/promises";
 import type { CharacterEntry, ChatRequest } from "../../../shared/types";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { UserDocument } from "../schemas/user.schema";
 
 const schema = Joi.object({
   message: Joi.string().allow("").optional(),
@@ -26,6 +31,8 @@ const TEMPLATE_PATH = process.cwd() + "/chat.prompt.txt";
 
 @ApiTags("chat")
 @Controller("chat")
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
   constructor(
@@ -72,11 +79,12 @@ Character Information:
   }
 
   private async initializeNewSession(
+    userId: string,
     sessionId: string,
     systemPrompt: string,
     character?: CharacterEntry
   ): Promise<ChatMessage> {
-    this.logger.log(`Initializing new session: ${sessionId}`);
+    this.logger.log(`Initializing new session: ${sessionId} for user ${userId}`);
     this.gemini.getOrCreateChat(sessionId, systemPrompt || undefined, []);
     const initMessage = character
       ? (this.logger.debug(`Character data received:`, JSON.stringify(character, null, 2)),
@@ -91,12 +99,13 @@ Character Information:
       timestamp: Date.now(),
       meta: { usage: initResp.usage || null, model: initResp.modelVersion || "" },
     };
-    await this.conv.append(sessionId, initMsg);
+    await this.conv.append(userId, sessionId, initMsg);
     this.logger.log(`Session ${sessionId} initialized with ${initMsg.text.length} chars`);
     return initMsg;
   }
 
   private async processUserMessage(
+    userId: string,
     sessionId: string,
     userText: string,
     _systemPrompt: string
@@ -107,7 +116,7 @@ Character Information:
 
     // Append user message to history
     const userMsg: ChatMessage = { role: "user", text: userText, timestamp: Date.now() };
-    await this.conv.append(sessionId, userMsg);
+    await this.conv.append(userId, sessionId, userMsg);
 
     // Send via chat (context handled automatically)
     const resp = await this.gemini.sendMessage(sessionId, userText);
@@ -119,7 +128,7 @@ Character Information:
       timestamp: Date.now(),
       meta: { usage: resp.usage || null, model: resp.modelVersion || "" },
     };
-    await this.conv.append(sessionId, assistantMsg);
+    await this.conv.append(userId, sessionId, assistantMsg);
 
     return { userMsg, assistantMsg };
   }
@@ -154,14 +163,15 @@ Character Information:
   }
 
   private async handleChatSession(
+    userId: string,
     sessionId: string,
     message: string,
     character: CharacterEntry | undefined
   ): Promise<{ sessionId: string; result: Record<string, unknown> }> {
     const systemPrompt = await this.loadSystemPrompt();
-    const history = await this.conv.getHistory(sessionId);
-    if (history.length === 0) await this.initializeNewSession(sessionId, systemPrompt, character);
-    const { assistantMsg } = await this.processUserMessage(sessionId, message || "", systemPrompt);
+    const history = await this.conv.getHistory(userId, sessionId);
+    if (history.length === 0) await this.initializeNewSession(userId, sessionId, systemPrompt, character);
+    const { assistantMsg } = await this.processUserMessage(userId, sessionId, message || "", systemPrompt);
     const result = this.formatChatResponse(
       sessionId,
       assistantMsg.text,
@@ -175,12 +185,16 @@ Character Information:
   @Post()
   @ApiOperation({ summary: "Send prompt to Gemini (chat)" })
   @ApiBody({ schema: { type: "object" } })
-  async chat(@Body() body: ChatRequest) {
+  async chat(@Req() req: Request, @Body() body: ChatRequest) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+    
     const { error, value } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
     try {
       const sessionId = this.generateSessionId(value.sessionId);
       const { result } = await this.handleChatSession(
+        userId,
         sessionId,
         value.message || "",
         value.character
@@ -242,11 +256,12 @@ Character Information:
   }
 
   private async handleNewSessionHistory(
+    userId: string,
     sessionId: string,
     systemPrompt: string,
     charData: CharacterEntry | undefined
   ): Promise<{ ok: boolean; sessionId: string; isNew: boolean; history: ChatMessage[] }> {
-    const initMsg = await this.initializeNewSession(sessionId, systemPrompt, charData);
+    const initMsg = await this.initializeNewSession(userId, sessionId, systemPrompt, charData);
     return { ok: true, sessionId, isNew: true, history: [initMsg] };
   }
 
@@ -272,14 +287,21 @@ Character Information:
 
   @Get("history")
   @ApiOperation({ summary: "Get conversation history for a session" })
-  async getHistory(@Query("sessionId") sessionId?: string, @Query("character") character?: string) {
+  async getHistory(
+    @Req() req: Request,
+    @Query("sessionId") sessionId?: string,
+    @Query("character") character?: string
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+    
     if (!sessionId) throw new BadRequestException("sessionId required");
     try {
-      const history = await this.conv.getHistory(sessionId);
+      const history = await this.conv.getHistory(userId, sessionId);
       const systemPrompt = await this.loadSystemPrompt();
       const charData = this.parseCharacterFromQuery(character);
       return history.length === 0
-        ? this.handleNewSessionHistory(sessionId, systemPrompt, charData)
+        ? this.handleNewSessionHistory(userId, sessionId, systemPrompt, charData)
         : this.handleExistingSessionHistory(sessionId, systemPrompt, history);
     } catch (e) {
       this.logger.error("History retrieval failed", (e as Error)?.stack || e, "ChatController");

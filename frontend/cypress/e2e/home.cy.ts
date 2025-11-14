@@ -2,7 +2,14 @@ describe('Home Page', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
-    cy.visit('/');
+    
+    // Setup API mocks to prevent timeouts
+    cy.setupApiMocks();
+    
+    // Mock authentication for these tests
+    cy.mockAuth();
+    
+    cy.visit('/home');
   });
 
   it('should load the home page successfully', () => {

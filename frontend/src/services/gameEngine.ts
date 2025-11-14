@@ -1,6 +1,34 @@
 import axios from 'axios';
 import { characterService } from './characterService';
+import { authService } from './authService';
 import type { GameResponse, ChatMessage } from '@shared/types';
+
+// Create axios instance with auth interceptor
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+});
+
+// Add auth token to all requests
+apiClient.interceptors.request.use((config) => {
+  const token = authService.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Handle auth errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, logout and redirect to login
+      authService.logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export class GameEngine {
   private sessionId: string | null = null;
@@ -18,8 +46,8 @@ export class GameEngine {
 
     // Load conversation history for this character, passing character data for initialization
     const charParam = encodeURIComponent(JSON.stringify(char));
-    const histRes = await axios.get(
-      `/api/chat/history?sessionId=${this.sessionId}&character=${charParam}`
+    const histRes = await apiClient.get(
+      `/chat/history?sessionId=${this.sessionId}&character=${charParam}`
     );
     const isNew = histRes?.data?.isNew || false;
     const history = histRes?.data?.history || [];
@@ -34,7 +62,7 @@ export class GameEngine {
     if (!this.sessionId) throw new Error("Session not initialized. Call initSession first.");
 
     const char = characterService.getCurrentCharacter();
-    const res = await axios.post("/api/chat", {
+    const res = await apiClient.post("/chat", {
       message,
       sessionId: this.sessionId,
       character: char,

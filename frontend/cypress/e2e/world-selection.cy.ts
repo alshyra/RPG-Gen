@@ -2,7 +2,14 @@ describe('World Selection', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
-    cy.visit('/');
+    
+    // Setup API mocks
+    cy.setupApiMocks();
+    
+    // Mock authentication
+    cy.mockAuth();
+    
+    cy.visit('/home');
   });
 
   it('should display all available worlds', () => {

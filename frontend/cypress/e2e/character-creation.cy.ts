@@ -1,13 +1,19 @@
 /* eslint-disable max-statements */
-describe("Character Creation", () => {
+describe('Character Creation', () => {
   beforeEach(() => {
     // Clear localStorage to ensure fresh start
     cy.clearLocalStorage();
+    
+    // Setup API mocks
+    cy.setupApiMocks();
+    
+    // Mock authentication
+    cy.mockAuth();
   });
 
   it("should navigate through all character creation steps", () => {
     // Start from home
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("RPG Gemini").should("be.visible");
 
     // Select a world (D&D)
@@ -85,7 +91,7 @@ describe("Character Creation", () => {
       const draft = win.localStorage.getItem("rpg-character-draft");
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(draft).to.exist;
-      const draftData = JSON.parse(draft);
+      const draftData = JSON.parse(draft!);
       expect(draftData.character.name).to.equal("DraftHero");
       expect(draftData.gender).to.equal("female");
     });
