@@ -198,11 +198,11 @@ const clearDraft = (): void => {
 };
 
 // Synchronous version for compatibility with existing code
-const loadCharacter = (): CharacterEntry | null => {
+const loadCharacter = (): CharacterEntry | null => 
   // This is a synchronous wrapper that returns cached data
   // The actual data should be loaded asynchronously using getCurrentCharacter()
-  return null;
-};
+   null
+;
 
 export const characterServiceApi = {
   generateUUID,

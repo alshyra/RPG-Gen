@@ -1,4 +1,16 @@
 describe('Application Smoke Tests', () => {
+  beforeEach(() => {
+    // Mock authentication for smoke tests
+    const mockToken = 'smoke-test-token';
+    const mockUser = {
+      id: 'smoke-user',
+      email: 'smoke@example.com',
+      displayName: 'Smoke Tester'
+    };
+    localStorage.setItem('rpg-auth-token', mockToken);
+    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+  });
+
   it('should load the application without errors', () => {
     cy.visit('/');
     

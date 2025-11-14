@@ -24,7 +24,7 @@ export class AuthService {
     };
   }
 
-  async validateUser(userId: string): Promise<UserDocument | null> {
+  async validateUser(_userId: string): Promise<UserDocument | null> {
     // This would typically query the database
     // For now, we'll rely on the JWT strategy to handle validation
     return null;

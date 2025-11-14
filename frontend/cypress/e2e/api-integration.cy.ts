@@ -1,6 +1,17 @@
 describe('API Integration', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
+    
+    // Mock authentication for API tests
+    const mockToken = 'api-test-token';
+    const mockUser = {
+      id: 'api-user',
+      email: 'api@example.com',
+      displayName: 'API Tester'
+    };
+    localStorage.setItem('rpg-auth-token', mockToken);
+    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+    
     cy.visit('/');
   });
 

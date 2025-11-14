@@ -54,9 +54,7 @@ const setUser = (user: User): void => {
   }
 };
 
-const isAuthenticated = (): boolean => {
-  return !!getToken();
-};
+const isAuthenticated = (): boolean => !!getToken();
 
 const logout = (): void => {
   clearToken();

@@ -19,11 +19,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: Profile,
     done: VerifyCallback
-  ): Promise<any> {
+  ): Promise<void> {
     const { id, name, emails, photos } = profile;
     
     let user = await this.userModel.findOne({ googleId: id });

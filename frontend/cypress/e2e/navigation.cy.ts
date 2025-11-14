@@ -1,4 +1,16 @@
 describe("Navigation", () => {
+  beforeEach(() => {
+    // Mock authentication for navigation tests
+    const mockToken = 'nav-test-token';
+    const mockUser = {
+      id: 'nav-user',
+      email: 'nav@example.com',
+      displayName: 'Nav User'
+    };
+    localStorage.setItem('rpg-auth-token', mockToken);
+    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+  });
+
   it("should navigate between routes", () => {
     // Start at home
     cy.visit("/");
@@ -14,8 +26,8 @@ describe("Navigation", () => {
   });
 
   it("should redirect to home when visiting /game without a character", () => {
-    // Clear localStorage to ensure no character exists
-    cy.clearLocalStorage();
+    // Clear localStorage to ensure no character exists (but keep auth)
+    localStorage.removeItem('rpg-character-id');
 
     // Visit /game without a character
     cy.visit("/game");

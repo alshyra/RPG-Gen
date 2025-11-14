@@ -1,5 +1,8 @@
 <template>
-  <div v-if="user" class="flex items-center gap-3">
+  <div
+    v-if="user"
+    class="flex items-center gap-3"
+  >
     <div class="hidden sm:block text-right">
       <div class="text-sm font-medium text-white">
         {{ user.displayName }}
@@ -11,16 +14,19 @@
     
     <div class="relative">
       <button
-        @click="showMenu = !showMenu"
         class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-600 hover:border-indigo-500 transition-colors"
+        @click="showMenu = !showMenu"
       >
         <img
           v-if="user.picture"
           :src="user.picture"
           :alt="user.displayName"
           class="w-full h-full object-cover"
-        />
-        <div v-else class="w-full h-full bg-slate-700 flex items-center justify-center text-white font-bold">
+        >
+        <div
+          v-else
+          class="w-full h-full bg-slate-700 flex items-center justify-center text-white font-bold"
+        >
           {{ user.displayName?.charAt(0).toUpperCase() }}
         </div>
       </button>
@@ -31,8 +37,8 @@
         class="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50"
       >
         <button
-          @click="handleLogout"
           class="w-full px-4 py-2 text-left text-slate-300 hover:bg-slate-700 hover:text-white transition-colors rounded-lg"
+          @click="handleLogout"
         >
           Se déconnecter
         </button>

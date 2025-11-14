@@ -2,6 +2,17 @@ describe('World Selection', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
+    
+    // Mock authentication
+    const mockToken = 'world-test-token';
+    const mockUser = {
+      id: 'world-user',
+      email: 'world@example.com',
+      displayName: 'World Selector'
+    };
+    localStorage.setItem('rpg-auth-token', mockToken);
+    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+    
     cy.visit('/');
   });
 
