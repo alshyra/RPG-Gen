@@ -70,14 +70,6 @@ if (!char) {
 
 This ensures authenticated users without a character are sent to the home page, not the public landing page.
 
-### 3. Documentation Added
-
-Created `CYPRESS_ACCESS.md` with comprehensive guide for:
-- Running tests with Docker (required due to network restrictions)
-- Test configuration details
-- Troubleshooting common issues
-- Custom Cypress commands available
-
 ## Test Results
 
 ### Final Test Run Output
@@ -149,8 +141,7 @@ All changes are minimal and focused on fixing test issues without introducing se
 1. `frontend/cypress/e2e/character-creation.cy.ts` - Fixed test syntax and routes
 2. `frontend/cypress/e2e/authentication.cy.ts` - Fixed selector
 3. `frontend/src/composables/useGameSession.ts` - Fixed redirect route
-4. `CYPRESS_ACCESS.md` - Added documentation
 
 ## Conclusion
 
-All e2e tests are now working successfully. The fixes address test code issues, routing inconsistencies, and selector problems. Comprehensive documentation has been added to help others run the tests using Docker.
+All e2e tests are now working successfully. The fixes address test code issues, routing inconsistencies, and selector problems.
