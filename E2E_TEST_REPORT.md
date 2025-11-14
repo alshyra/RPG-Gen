@@ -6,6 +6,8 @@
 
 All E2E tests have been reviewed, fixed, and are ready to execute. However, test execution is currently blocked by firewall restrictions preventing Cypress binary download.
 
+**📋 For workarounds and solutions, see [.github/copilot-setup-steps.yml](.github/copilot-setup-steps.yml)**
+
 ### Test Fixes Applied
 
 #### 1. TypeScript Error Fixed
