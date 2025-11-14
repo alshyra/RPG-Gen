@@ -22,7 +22,9 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-      - name: Install frontend
+      - name: Install frontend dependencies
         run: cd frontend && npm ci
-      - name: Install backend
+      - name: Install backend dependencies
         run: cd backend && npm ci
+      - name: Install Cypress
+        run: cd frontend && npx cypress install
