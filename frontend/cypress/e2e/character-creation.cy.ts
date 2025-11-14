@@ -76,7 +76,7 @@ describe('Character Creation', () => {
   });
 
   it("should save character draft to localStorage", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -98,7 +98,7 @@ describe('Character Creation', () => {
   });
 
   it("should restore draft on page refresh", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -121,7 +121,7 @@ describe('Character Creation', () => {
   });
 
   it("should go back to previous step", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -140,7 +140,7 @@ describe('Character Creation', () => {
   });
 
   it("should validate step completion before allowing next", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Try to go next without entering name - button should be disabled
@@ -153,8 +153,8 @@ describe('Character Creation', () => {
     cy.contains("button", "Suivant").should("not.be.disabled");
   });
 
-  it.only("should persist ability scores (character.scores) on page refresh", () => {
-    cy.visit("/");
+  it("should persist ability scores (character.scores) on page refresh", () => {
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info (Step 1)
@@ -199,8 +199,8 @@ describe('Character Creation', () => {
     cy.contains("Capacités").should("be.visible");
 
     // Verify the score is still 14
-    cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').contains(14)
-    cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').contains(15)
+    cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').should('contain', '14');
+    cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').should('contain', '15');
 
     // Verify localStorage still has the correct value
     cy.window().then((win) => {

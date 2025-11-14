@@ -103,8 +103,8 @@ describe('Authentication Flow', () => {
     it('should allow logout', () => {
       cy.visit('/home');
       
-      // Click on user profile to open menu (if dropdown exists)
-      cy.get('button').contains('Test User').click();
+      // Click on user profile avatar to open menu
+      cy.get('button').find('img[alt="Test User"]').parent().click();
       
       // Look for logout button
       cy.contains('Se déconnecter').should('be.visible');
