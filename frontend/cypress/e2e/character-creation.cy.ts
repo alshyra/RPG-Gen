@@ -5,14 +5,7 @@ describe('Character Creation', () => {
     cy.clearLocalStorage();
     
     // Mock authentication
-    const mockToken = 'char-test-token';
-    const mockUser = {
-      id: 'char-user',
-      email: 'char@example.com',
-      displayName: 'Character Creator'
-    };
-    localStorage.setItem('rpg-auth-token', mockToken);
-    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+    cy.mockAuth();
   });
 
   it("should navigate through all character creation steps", () => {

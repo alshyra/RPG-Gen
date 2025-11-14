@@ -1,14 +1,7 @@
 describe("Navigation", () => {
   beforeEach(() => {
     // Mock authentication for navigation tests
-    const mockToken = 'nav-test-token';
-    const mockUser = {
-      id: 'nav-user',
-      email: 'nav@example.com',
-      displayName: 'Nav User'
-    };
-    localStorage.setItem('rpg-auth-token', mockToken);
-    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+    cy.mockAuth();
   });
 
   it("should navigate between routes", () => {

@@ -66,17 +66,8 @@ describe('Authentication Flow', () => {
 
   describe('With mocked authentication', () => {
     beforeEach(() => {
-      // Mock authentication by setting token and user in localStorage
-      const mockToken = 'mock-jwt-token-for-testing';
-      const mockUser = {
-        id: 'test-user-123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        picture: 'https://example.com/avatar.jpg'
-      };
-      
-      localStorage.setItem('rpg-auth-token', mockToken);
-      localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+      // Use the custom mockAuth command
+      cy.mockAuth();
     });
 
     it('should access home page (world selector) when authenticated', () => {
@@ -120,7 +111,7 @@ describe('Authentication Flow', () => {
       cy.visit('/home');
       
       // Perform logout by clearing storage
-      cy.clearLocalStorage();
+      cy.clearAuth();
       
       // Try to visit home again
       cy.visit('/home');
@@ -157,37 +148,27 @@ describe('Authentication Flow', () => {
   describe('Session persistence', () => {
     it('should persist authentication across page reloads', () => {
       // Set up authentication
-      const mockToken = 'persistent-token';
-      const mockUser = {
-        id: 'user-456',
-        email: 'persistent@example.com',
-        displayName: 'Persistent User'
-      };
+      cy.mockAuth();
       
-      localStorage.setItem('rpg-auth-token', mockToken);
-      localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
-      
-      cy.visit('/');
-      cy.contains('Persistent User').should('be.visible');
+      cy.visit('/home');
+      cy.contains('Test User').should('be.visible');
       
       // Reload page
       cy.reload();
       
       // Should still be authenticated
-      cy.contains('Persistent User').should('be.visible');
+      cy.contains('Test User').should('be.visible');
       cy.url().should('not.include', '/login');
     });
 
     it('should clear authentication when token is removed', () => {
       // Set up authentication
-      localStorage.setItem('rpg-auth-token', 'token-to-remove');
-      localStorage.setItem('rpg-user-data', JSON.stringify({ id: '1', email: 'test@test.com' }));
+      cy.mockAuth();
       
-      cy.visit('/');
+      cy.visit('/home');
       
       // Clear token
-      cy.clearLocalStorage('rpg-auth-token');
-      cy.clearLocalStorage('rpg-user-data');
+      cy.clearAuth();
       
       // Reload
       cy.reload();

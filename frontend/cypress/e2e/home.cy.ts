@@ -4,14 +4,7 @@ describe('Home Page', () => {
     cy.clearLocalStorage();
     
     // Mock authentication for these tests
-    const mockToken = 'test-token';
-    const mockUser = {
-      id: 'test-user',
-      email: 'test@example.com',
-      displayName: 'Test User'
-    };
-    localStorage.setItem('rpg-auth-token', mockToken);
-    localStorage.setItem('rpg-user-data', JSON.stringify(mockUser));
+    cy.mockAuth();
     
     cy.visit('/home');
   });
