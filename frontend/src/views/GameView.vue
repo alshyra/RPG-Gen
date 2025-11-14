@@ -93,7 +93,7 @@ import ChatBar from '../components/layout/ChatBar.vue';
 import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
-import { characterService } from '../services/characterService';
+import { characterServiceApi } from '../services/characterServiceApi';
 import { gameEngine } from '../services/gameEngine';
 import { useGameStore } from '../stores/gameStore';
 
@@ -132,9 +132,9 @@ watch(
 );
 
 // Handle character death
-const onDeathConfirm = () => {
+const onDeathConfirm = async () => {
   if (!gameStore.session.character?.id) return;
-  characterService.killCharacter(gameStore.session.character.id, gameStore.session.worldName);
+  await characterServiceApi.killCharacter(gameStore.session.character.id, gameStore.session.worldName);
   gameEngine.clearSession();
   gameStore.setDeathModalVisible(false);
   router.push('/');

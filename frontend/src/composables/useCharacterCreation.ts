@@ -1,6 +1,6 @@
 import { ref, computed, Ref } from "vue";
 import { useRouter } from "vue-router";
-import { characterService } from "../services/characterService";
+import { characterServiceApi } from "../services/characterServiceApi";
 import { DnDRulesService } from "../services/dndRulesService";
 
 interface CreationRace {
@@ -120,15 +120,15 @@ const createMethods = (
     return { ...character.value, ...calculated };
   };
 
-  const saveCharacter = (): string => {
+  const saveCharacter = async (): Promise<string> => {
     character.value.world = world;
     character.value.worldId = worldId;
     character.value.gender = gender.value;
-    return characterService.saveCharacter(character.value as any);
+    return await characterServiceApi.saveCharacter(character.value as any);
   };
 
-  const loadLatest = (): void => {
-    const saved = characterService.getAllSavedCharacters();
+  const loadLatest = async (): Promise<void> => {
+    const saved = await characterServiceApi.getAllSavedCharacters();
     if (!saved.length) {
       window.alert("Aucun personnage sauvegardé");
       return;
@@ -293,9 +293,13 @@ export const useCharacterCreation = (
   // No more auto-watch - we'll save on demand from components
   // This avoids the arrow function size issue and makes saves more explicit
 
-  const applyAndSave = () => {
+  const applyAndSave = async () => {
     methods.applyRacialAndCompute();
-    methods.saveCharacter();
+    // If we have a generated avatar, use it; otherwise keep the portrait path
+    if (generatedAvatar.value) {
+      character.value.portrait = generatedAvatar.value;
+    }
+    await methods.saveCharacter();
     clearDraft(); // Clear draft after successful save
     router.push({ name: "game", params: { world } });
   };
