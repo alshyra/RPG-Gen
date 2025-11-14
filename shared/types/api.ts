@@ -40,4 +40,5 @@ export interface AvatarRequest {
     classes?: Array<{ name?: string }>;
   };
   description: string;
+  characterId?: string; // Optional: If provided, saves avatar to this character
 }

@@ -1,7 +1,12 @@
-import { Body, Controller, Post, BadRequestException, Logger } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBody } from "@nestjs/swagger";
+import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
+import { Request } from 'express';
 import * as Joi from "joi";
 import { GeminiImageService } from "../external/image/gemini-image.service";
+import { ImageService } from "./image.service";
+import { CharacterService } from "../character/character.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { UserDocument } from "../schemas/user.schema";
 import type { ImageRequest, AvatarRequest } from "../../../shared/types";
 
 const schema = Joi.object({
@@ -10,12 +15,20 @@ const schema = Joi.object({
   model: Joi.string().optional(),
 });
 
+interface AvatarRequestWithCharacterId extends AvatarRequest {
+  characterId?: string; // Optional character ID to save avatar to
+}
+
 @ApiTags("image")
 @Controller("image")
 export class ImageController {
   private readonly logger = new Logger(ImageController.name);
 
-  constructor(private readonly geminiImage: GeminiImageService) {}
+  constructor(
+    private readonly geminiImage: GeminiImageService,
+    private readonly imageService: ImageService,
+    private readonly characterService: CharacterService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: "Generate image from prompt" })
@@ -28,14 +41,35 @@ export class ImageController {
   }
 
   @Post("generate-avatar")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Generate character avatar from description" })
   @ApiBody({ schema: { type: "object" } })
-  async generateAvatar(@Body() body: AvatarRequest) {
+  async generateAvatar(@Req() req: Request, @Body() body: AvatarRequestWithCharacterId) {
     this.validateAvatarRequest(body);
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
     try {
+      // Generate avatar image
       const prompt = this.buildAvatarPrompt(body);
       const imageUrl = await this.geminiImage.generateImage(prompt);
-      return { imageUrl };
+
+      // Compress the image
+      const compressedImage = await this.imageService.compressImage(imageUrl);
+
+      // If characterId is provided, save to character
+      if (body.characterId) {
+        await this.characterService.update(userId, body.characterId, {
+          portrait: compressedImage,
+        });
+        this.logger.log(`Avatar saved to character ${body.characterId} for user ${userId}`);
+      }
+
+      return { 
+        imageUrl: compressedImage,
+        compressed: true,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to generate avatar";
       this.logger.error("Avatar generation error:", message);
