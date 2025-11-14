@@ -1,9 +1,6 @@
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <section class="mb-8 text-center">
-      <h1 class="text-3xl font-extrabold mb-2">
-        RPG Gemini
-      </h1>
+  <div class="p-6 flex flex-col justify-between min-h-[50vh] mt-28">
+    <section class="text-center w-3/4 mx-auto mt-10">
       <p class="text-slate-300">
         Un moteur d'aventure assisté par Gemini — génère scènes, PNJ, et images. Choisis ton
         univers et commence immédiatement.
@@ -12,7 +9,7 @@
       <!-- Resume current character if present -->
       <div
         v-if="currentCharacter"
-        class="mt-4 mb-6 p-4 bg-slate-800/50 rounded-lg flex items-center justify-between"
+        class="mt-4 p-4 bg-slate-800/50 rounded-lg flex items-center justify-between"
       >
         <div class="text-left">
           <div class="text-sm text-slate-300">
@@ -40,9 +37,13 @@
           </UiButton>
         </div>
       </div>
-
-      <WorldSelector @select="onSelect" />
     </section>
+
+    <div class="max-w-2xl w-full mx-auto">
+      <WorldSelector @select="onSelect" />
+    </div>
+
+    <div></div>
   </div>
 </template>
 

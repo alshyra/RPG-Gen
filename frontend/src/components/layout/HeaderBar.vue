@@ -1,5 +1,5 @@
 <template>
-  <header class="flex items-stretch">
+  <header class="flex items-center justify-between">
     <div class="flex-none p-2">
       <h2 class="text-xl font-semibold">
         {{ subtitle }}
@@ -8,7 +8,7 @@
         {{ description }}
       </p>
     </div>
-    <div class="flex-grow flex items-center justify-center">
+    <div class="absolute left-1/2 -translate-x-1/2">
       <h1 class="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500">
         RPG Gemini
       </h1>
@@ -33,7 +33,7 @@ const worldMap: Record<string, string> = {
 const subtitle = computed(() => {
   const routeName = route.name as string;
 
-  if (routeName === 'home') return 'Bienvenue';
+  if (routeName === 'home') return 'Bienvenue Aventurier';
   if (routeName === 'character-step') {
     const world = (route.params.world as string) || '';
     return worldMap[world] || 'Créateur de personnage';
@@ -49,7 +49,7 @@ const subtitle = computed(() => {
 const description = computed(() => {
   const routeName = route.name as string;
 
-  if (routeName === 'home') return 'Choisissez votre univers';
+  if (routeName === 'home') return 'Choisissez votre univers !';
   if (routeName === 'character-step') {
     const action = route.query.action as string;
     if (action === 'levelup') return 'Montée de niveau';

@@ -63,7 +63,7 @@ const logout = (): void => {
 // Fetch user profile from backend
 const fetchUserProfile = async (token: string): Promise<User | null> => {
   try {
-    const response = await fetch('http://localhost:3001/api/auth/profile', {
+    const response = await fetch('http://localhost/api/auth/profile', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

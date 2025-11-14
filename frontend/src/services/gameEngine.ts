@@ -5,7 +5,7 @@ import type { GameResponse, ChatMessage } from '@shared/types';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost/api',
 });
 
 // Add auth token to all requests

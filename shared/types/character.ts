@@ -5,7 +5,7 @@
 export interface Race {
   id: string;
   name: string;
-  mods: Record<string, number>;
+  mods: Record<keyof AbilityScores, number>;
 }
 
 export interface AbilityScores {

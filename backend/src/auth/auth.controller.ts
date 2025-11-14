@@ -31,11 +31,11 @@ export class AuthController {
       this.logger.log(`User logged in: ${user.email}`);
       
       // Redirect to frontend with token
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:80';
       res.redirect(`${frontendUrl}/auth/callback?token=${loginResult.access_token}`);
     } catch (error) {
       this.logger.error('Google auth callback error', error);
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:80';
       res.redirect(`${frontendUrl}/auth/error`);
     }
   }

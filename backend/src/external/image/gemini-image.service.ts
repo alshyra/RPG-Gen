@@ -5,7 +5,7 @@ import { GenerateContentResponse, GoogleGenAI } from "@google/genai";
 export class GeminiImageService {
   private readonly logger = new Logger(GeminiImageService.name);
   private client: GoogleGenAI | null = null;
-  private model = "gemini-2.0-flash-preview-image-generation";
+  private model = "gemini-2.5-flash-image";
 
   constructor() {
     this.logger.debug(
@@ -13,6 +13,7 @@ export class GeminiImageService {
       process.env.GOOGLE_API_KEY ? "***" : "no API key"
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+    this.logger.log("GeminiImageService initialized");
   }
 
   private isMock() {
@@ -32,10 +33,10 @@ export class GeminiImageService {
 
   private async callGenerativeModel(prompt: string): Promise<GenerateContentResponse> {
     try {
-      return (await this.client.models.generateContent({
+      return await this.client.models.generateContent({
         model: this.model,
-        contents: [{ parts: [{ text: prompt }] }],
-      }));
+        contents: prompt,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       this.logger.error("Gemini API call failed:", message);
