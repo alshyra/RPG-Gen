@@ -91,7 +91,7 @@ describe('Character Creation', () => {
       const draft = win.localStorage.getItem("rpg-character-draft");
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(draft).to.exist;
-      const draftData = JSON.parse(draft);
+      const draftData = JSON.parse(draft!);
       expect(draftData.character.name).to.equal("DraftHero");
       expect(draftData.gender).to.equal("female");
     });
