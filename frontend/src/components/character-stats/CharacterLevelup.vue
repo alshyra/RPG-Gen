@@ -134,7 +134,7 @@ import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
 import type { LevelUpResult } from '@shared/types';
 import { useGameStore } from '../../stores/gameStore';
-import { characterService } from '../../services/characterService';
+import { characterServiceApi } from '../../services/characterServiceApi';
 import { gameEngine } from '../../services/gameEngine';
 
 interface Props {
@@ -201,8 +201,8 @@ const handleConfirm = async (): Promise<void> => {
       hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
     };
 
-    // Save locally
-    characterService.saveCharacter(updatedCharacter as any);
+    // Save to backend
+    await characterServiceApi.updateCurrentCharacter(updatedCharacter as any);
 
     // Send to backend
     const levelupMsg = `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({

@@ -40,10 +40,11 @@
 import { computed } from 'vue';
 import CharacterIllustration from './CharacterIllustration.vue';
 import UiXpBar from '../ui/UiXpBar.vue';
-import { characterService } from '../../services/characterService';
+import { useGameStore } from '../../stores/gameStore';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 
-const character = computed(() => characterService.getCurrentCharacter());
+const gameStore = useGameStore();
+const character = computed(() => gameStore.session.character);
 
 const hp = computed(() => {
     if (!character.value) return '0/0';

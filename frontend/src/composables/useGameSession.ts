@@ -1,6 +1,7 @@
 import { useRoute, useRouter } from "vue-router";
 import { useGameStore } from "../stores/gameStore";
-import { CharacterEntry, characterService } from "../services/characterService";
+import { CharacterEntry } from "@shared/types";
+import { characterServiceApi } from "../services/characterServiceApi";
 import { gameEngine } from "../services/gameEngine";
 
 const worldMap: Record<string, string> = {
@@ -50,7 +51,7 @@ export function useGameSession() {
   };
   const initSession = async (): Promise<void> => {
     // Check if character exists, redirect to home if not
-    const char = characterService.getCurrentCharacter();
+    const char = await characterServiceApi.getCurrentCharacter();
     if (!char) {
       await router.push("/home");
       return;

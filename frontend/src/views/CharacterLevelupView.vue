@@ -9,14 +9,19 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import CharacterLevelup from '../components/character-stats/CharacterLevelup.vue';
-import { characterService } from '../services/characterService';
+import { characterServiceApi } from '../services/characterServiceApi';
 
 const route = useRoute();
 const world = (route.params.world as string) || '';
 
-// Get character from localStorage for levelup
-const initialCharacter = characterService.loadCharacter();
+// Get character from backend for levelup
+const initialCharacter = ref<any>(null);
+
+onMounted(async () => {
+  initialCharacter.value = await characterServiceApi.getCurrentCharacter();
+});
 </script>
 
 <style scoped></style>

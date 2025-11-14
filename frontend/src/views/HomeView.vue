@@ -52,7 +52,7 @@ import { useRouter } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { characterService } from '../services/characterService';
+import { characterServiceApi } from '../services/characterServiceApi';
 
 const router = useRouter();
 const currentCharacter = ref<any>(null);
@@ -66,29 +66,29 @@ function onSelect(id: string) {
   try { window.sessionStorage.setItem('selected-world', id); } catch {
     //
   }
-  characterService.clearCurrentCharacterId()
+  characterServiceApi.clearCurrentCharacterId()
   router.push({ name: 'character-step', params: { world: id, step: 1 } });
 }
 
-function resumeCharacter() {
+async function resumeCharacter() {
   // set current character in localStorage and go to game view
-  const saved = characterService.getAllSavedCharacters();
+  const saved = await characterServiceApi.getAllSavedCharacters();
   if (saved.length > 0) {
-    characterService.setCurrentCharacterId(saved[0].id);
+    characterServiceApi.setCurrentCharacterId(saved[0].id);
     router.push({ name: 'game', params: { world: saved[0].data.worldId } });
   }
 }
 
-function clearCurrentCharacter() {
-  const saved = characterService.getAllSavedCharacters();
+async function clearCurrentCharacter() {
+  const saved = await characterServiceApi.getAllSavedCharacters();
   if (saved.length > 0) {
-    characterService.deleteCharacter(saved[0].id);
+    await characterServiceApi.deleteCharacter(saved[0].id);
   }
   currentCharacter.value = null;
 }
 
-onMounted(() => {
-  currentCharacter.value = characterService.getCurrentCharacter();
+onMounted(async () => {
+  currentCharacter.value = await characterServiceApi.getCurrentCharacter();
 });
 </script>
 

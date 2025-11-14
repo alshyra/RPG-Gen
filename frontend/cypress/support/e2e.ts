@@ -42,14 +42,99 @@ Cypress.Commands.add('clearAuth', () => {
 
 // Helper to setup API mocks - call this in beforeEach of each test
 Cypress.Commands.add('setupApiMocks', () => {
-  // Intercept backend API calls and return quick mock responses
+  // Mock a character that can be used for testing
+  const mockCharacter = {
+    id: 'test-char-id-123',
+    name: 'TestHero',
+    race: { id: 'human', name: 'Humain', mods: {} },
+    scores: { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 },
+    hp: 12,
+    hpMax: 12,
+    totalXp: 0,
+    classes: [{ name: 'Fighter', level: 1 }],
+    skills: [],
+    world: 'dnd',
+    portrait: '',
+    gender: 'male',
+    proficiency: 2,
+  };
+
+  // Auth endpoints
   cy.intercept('GET', '**/api/auth/profile', { 
     statusCode: 200, 
     body: { id: 'test', email: 'test@example.com', displayName: 'Test User' }
   });
-  cy.intercept('GET', '**/api/characters', { statusCode: 200, body: [] });
-  cy.intercept('GET', '**/api/chat/history/**', { statusCode: 200, body: [] });
-  cy.intercept('POST', '**/api/**', { statusCode: 200, body: { success: true } });
+  
+  // Character CRUD endpoints
+  cy.intercept('GET', '**/api/characters', { 
+    statusCode: 200, 
+    body: { ok: true, characters: [] }
+  }).as('getCharacters');
+  
+  cy.intercept('POST', '**/api/characters', (req) => {
+    req.reply({ 
+      statusCode: 200, 
+      body: { ok: true, character: { ...mockCharacter, ...req.body } }
+    });
+  }).as('createCharacter');
+  
+  cy.intercept('GET', '**/api/characters/*', { 
+    statusCode: 200, 
+    body: { ok: true, character: mockCharacter }
+  }).as('getCharacter');
+  
+  cy.intercept('PUT', '**/api/characters/*', (req) => {
+    req.reply({ 
+      statusCode: 200, 
+      body: { ok: true, character: { ...mockCharacter, ...req.body } }
+    });
+  }).as('updateCharacter');
+  
+  cy.intercept('DELETE', '**/api/characters/*', { 
+    statusCode: 200, 
+    body: { ok: true, message: 'Character deleted' }
+  }).as('deleteCharacter');
+  
+  cy.intercept('POST', '**/api/characters/*/kill', { 
+    statusCode: 200, 
+    body: { ok: true, character: mockCharacter }
+  }).as('killCharacter');
+  
+  cy.intercept('GET', '**/api/characters/deceased', { 
+    statusCode: 200, 
+    body: { ok: true, characters: [] }
+  }).as('getDeceasedCharacters');
+  
+  // Chat/Game endpoints
+  cy.intercept('GET', '**/api/chat/history/**', { 
+    statusCode: 200, 
+    body: { isNew: true, history: [] }
+  }).as('getChatHistory');
+  
+  cy.intercept('POST', '**/api/chat', { 
+    statusCode: 200, 
+    body: { 
+      result: { 
+        text: 'Mock game response', 
+        instructions: [] 
+      } 
+    }
+  }).as('sendChat');
+  
+  // Image generation endpoint
+  cy.intercept('POST', '**/api/image/generate-avatar', {
+    statusCode: 200,
+    body: { 
+      imageUrl: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCfAAf/2Q==',
+      compressed: true
+    }
+  }).as('generateAvatar');
+  
+  // Fallback for any other POST requests
+  cy.intercept('POST', '**/api/**', { 
+    statusCode: 200, 
+    body: { success: true } 
+  });
 });
 
 // Alternatively you can use CommonJS syntax:

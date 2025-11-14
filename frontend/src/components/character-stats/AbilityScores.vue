@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { characterService } from '../../services/characterService';
+import { useGameStore } from '../../stores/gameStore';
 
 
 const abilities = {
@@ -39,7 +39,8 @@ const abilities = {
     cha: { short: 'CHA', color: 'text-pink-400' },
 };
 
-const character = computed(() => characterService.getCurrentCharacter());
+const gameStore = useGameStore();
+const character = computed(() => gameStore.session.character);
 
 // Get ability score from character (tries multiple formats)
 function getAbilityScore(key: string): number {

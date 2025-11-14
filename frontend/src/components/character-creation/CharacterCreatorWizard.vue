@@ -123,6 +123,7 @@ import StepSkills from './steps/StepSkills.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import { useCharacterCreation } from '../../composables/useCharacterCreation';
+import { characterServiceApi } from '../../services/characterServiceApi';
 
 const props = defineProps<{ world?: string; worldId?: string }>();
 const router = useRouter();
@@ -206,6 +207,14 @@ async function generateAvatar() {
 
   isGeneratingAvatar.value = true;
   try {
+    // First, ensure character has an ID by saving it if needed
+    let charId = character.value.id;
+    if (!charId) {
+      // Generate a UUID for the character before saving the avatar
+      charId = characterServiceApi.generateUUID();
+      character.value.id = charId;
+    }
+
     const response = await axios.post('/api/image/generate-avatar', {
       character: {
         name: character.value.name,
@@ -213,10 +222,12 @@ async function generateAvatar() {
         race: character.value.race,
         classes: [{ name: primaryClass.value }]
       },
-      description: avatarDescription.value
+      description: avatarDescription.value,
+      characterId: charId, // Pass character ID to save avatar
     });
 
     generatedAvatar.value = response.data.imageUrl;
+    saveDraftNow(); // Save draft with new avatar
   } catch (error) {
     console.error('Avatar generation error:', error);
   } finally {
@@ -229,7 +240,7 @@ function regenerateAvatar() {
   generateAvatar();
 }
 
-function finishCreation() {
-  applyAndSave();
+async function finishCreation() {
+  await applyAndSave();
 }
 </script>

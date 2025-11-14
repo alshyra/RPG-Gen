@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { characterService } from './characterService';
+import { characterServiceApi } from './characterServiceApi';
 import { authService } from './authService';
 import type { GameResponse, ChatMessage } from '@shared/types';
 
@@ -39,7 +39,7 @@ export class GameEngine {
    */
   async initSession(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
     // Get current character's UUID - this becomes the sessionId for conversation
-    const char = characterService.getCurrentCharacter();
+    const char = await characterServiceApi.getCurrentCharacter();
     if (!char)
       throw new Error("No current character found. Please create or load a character first.");
     this.sessionId = char.id;
@@ -61,7 +61,7 @@ export class GameEngine {
   async sendMessage(message: string): Promise<GameResponse> {
     if (!this.sessionId) throw new Error("Session not initialized. Call initSession first.");
 
-    const char = characterService.getCurrentCharacter();
+    const char = await characterServiceApi.getCurrentCharacter();
     const res = await apiClient.post("/chat", {
       message,
       sessionId: this.sessionId,
