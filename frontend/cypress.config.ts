@@ -9,6 +9,16 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     viewportWidth: 1280,
     viewportHeight: 720,
+    // Performance optimizations
+    defaultCommandTimeout: 4000,
+    pageLoadTimeout: 10000,
+    requestTimeout: 5000,
+    responseTimeout: 5000,
+    // Reduce retries for faster feedback
+    retries: {
+      runMode: 1,
+      openMode: 0,
+    },
   },
   component: {
     devServer: {

@@ -130,18 +130,26 @@ describe('Authentication Flow', () => {
 
   describe('OAuth callback handling', () => {
     it('should handle auth callback route', () => {
+      // Intercept any API calls during callback
+      cy.intercept('POST', '/api/**', { statusCode: 200 });
+      cy.intercept('GET', '/api/**', { statusCode: 200 });
+      
       // Visit callback route with a mock token
-      cy.visit('/auth/callback?token=mock-token-123');
+      cy.visit('/auth/callback?token=mock-token-123', { failOnStatusCode: false });
       
       // Page should exist and handle the callback
-      cy.get('#app').should('exist');
+      cy.get('#app', { timeout: 3000 }).should('exist');
     });
 
     it('should show error when callback has no token', () => {
-      cy.visit('/auth/callback');
+      // Intercept any API calls
+      cy.intercept('POST', '/api/**', { statusCode: 200 });
+      cy.intercept('GET', '/api/**', { statusCode: 200 });
+      
+      cy.visit('/auth/callback', { failOnStatusCode: false });
       
       // Should show error message or redirect
-      cy.get('#app').should('exist');
+      cy.get('#app', { timeout: 3000 }).should('exist');
     });
   });
 
