@@ -39,13 +39,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: antoinesavajols/rpggen
+          images: antoinesavajols/rpggen-back
           tags: |
-            type=raw,value=backend-latest,enable={{is_default_branch}}
-            type=raw,value=backend-{{branch}}
-            type=sha,prefix=backend-,format=short
-            type=semver,pattern=backend-{{version}}
-            type=semver,pattern=backend-{{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{branch}}
+            type=sha,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Backend Docker image
         uses: docker/build-push-action@v5
@@ -55,8 +55,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=antoinesavajols/rpggen:backend-buildcache
-          cache-to: type=registry,ref=antoinesavajols/rpggen:backend-buildcache,mode=max
+          cache-from: type=registry,ref=antoinesavajols/rpggen-back:buildcache
+          cache-to: type=registry,ref=antoinesavajols/rpggen-back:buildcache,mode=max
 
   build-and-push-frontend:
     name: Build and Push Frontend Image
@@ -80,13 +80,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: antoinesavajols/rpggen
+          images: antoinesavajols/rpggen-front
           tags: |
-            type=raw,value=frontend-latest,enable={{is_default_branch}}
-            type=raw,value=frontend-{{branch}}
-            type=sha,prefix=frontend-,format=short
-            type=semver,pattern=frontend-{{version}}
-            type=semver,pattern=frontend-{{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{branch}}
+            type=sha,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push Frontend Docker image
         uses: docker/build-push-action@v5
@@ -96,8 +96,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=antoinesavajols/rpggen:frontend-buildcache
-          cache-to: type=registry,ref=antoinesavajols/rpggen:frontend-buildcache,mode=max
+          cache-from: type=registry,ref=antoinesavajols/rpggen-front:buildcache
+          cache-to: type=registry,ref=antoinesavajols/rpggen-front:buildcache,mode=max
 
   test-build-on-pr:
     name: Test Docker Build (PR only)

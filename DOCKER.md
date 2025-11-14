@@ -4,25 +4,25 @@ This document describes how to use the Docker images published to Docker Hub.
 
 ## Available Docker Images
 
-The project publishes two Docker images to Docker Hub under the repository `antoinesavajols/rpggen`:
+The project publishes two Docker images to Docker Hub:
 
 ### Backend Image
-- **Repository**: `antoinesavajols/rpggen`
+- **Repository**: `antoinesavajols/rpggen-back`
 - **Tags**:
-  - `backend-latest` - Latest build from main branch
-  - `backend-main` - Latest main branch build
-  - `backend-develop` - Latest develop branch build
-  - `backend-<sha>` - Specific commit (e.g., `backend-abc1234`)
-  - `backend-<version>` - Semantic version (e.g., `backend-0.1.0`)
+  - `latest` - Latest build from main branch
+  - `main` - Latest main branch build
+  - `develop` - Latest develop branch build
+  - `<sha>` - Specific commit (e.g., `abc1234`)
+  - `<version>` - Semantic version (e.g., `0.1.0`)
 
 ### Frontend Image
-- **Repository**: `antoinesavajols/rpggen`
+- **Repository**: `antoinesavajols/rpggen-front`
 - **Tags**:
-  - `frontend-latest` - Latest build from main branch
-  - `frontend-main` - Latest main branch build
-  - `frontend-develop` - Latest develop branch build
-  - `frontend-<sha>` - Specific commit (e.g., `frontend-abc1234`)
-  - `frontend-<version>` - Semantic version (e.g., `frontend-0.1.0`)
+  - `latest` - Latest build from main branch
+  - `main` - Latest main branch build
+  - `develop` - Latest develop branch build
+  - `<sha>` - Specific commit (e.g., `abc1234`)
+  - `<version>` - Semantic version (e.g., `0.1.0`)
 
 ## Usage
 
@@ -33,7 +33,7 @@ Update your `compose.yml` to use the published images:
 ```yaml
 services:
   backend:
-    image: antoinesavajols/rpggen:backend-latest
+    image: antoinesavajols/rpggen-back:latest
     container_name: rpg-gen-backend
     restart: unless-stopped
     environment:
@@ -47,7 +47,7 @@ services:
       - mongodb
 
   frontend:
-    image: antoinesavajols/rpggen:frontend-latest
+    image: antoinesavajols/rpggen-front:latest
     container_name: rpg-gen-frontend
     restart: unless-stopped
     ports:
@@ -58,14 +58,14 @@ services:
 
 #### Pull and run backend:
 ```bash
-docker pull antoinesavajols/rpggen:backend-latest
-docker run -d -p 3001:3001 --env-file backend/.env antoinesavajols/rpggen:backend-latest
+docker pull antoinesavajols/rpggen-back:latest
+docker run -d -p 3001:3001 --env-file backend/.env antoinesavajols/rpggen-back:latest
 ```
 
 #### Pull and run frontend:
 ```bash
-docker pull antoinesavajols/rpggen:frontend-latest
-docker run -d -p 80:80 antoinesavajols/rpggen:frontend-latest
+docker pull antoinesavajols/rpggen-front:latest
+docker run -d -p 80:80 antoinesavajols/rpggen-front:latest
 ```
 
 ## CI/CD Pipeline
@@ -101,12 +101,12 @@ The workflow performs the following:
 
 #### Backend:
 ```bash
-docker build -f Dockerfile.backend -t antoinesavajols/rpggen:backend-local .
+docker build -f Dockerfile.backend -t antoinesavajols/rpggen-back:local .
 ```
 
 #### Frontend:
 ```bash
-docker build -f Dockerfile.frontend -t antoinesavajols/rpggen:frontend-local .
+docker build -f Dockerfile.frontend -t antoinesavajols/rpggen-front:local .
 ```
 
 ### Pushing Images Manually
@@ -118,10 +118,10 @@ If you need to push images manually:
 docker login
 
 # Tag your image
-docker tag antoinesavajols/rpggen:backend-local antoinesavajols/rpggen:backend-<tagname>
+docker tag antoinesavajols/rpggen-back:local antoinesavajols/rpggen-back:<tagname>
 
 # Push to Docker Hub
-docker push antoinesavajols/rpggen:backend-<tagname>
+docker push antoinesavajols/rpggen-back:<tagname>
 ```
 
 ## Troubleshooting
