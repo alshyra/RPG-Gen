@@ -240,7 +240,7 @@ function regenerateAvatar() {
   generateAvatar();
 }
 
-function finishCreation() {
-  applyAndSave();
+async function finishCreation() {
+  await applyAndSave();
 }
 </script>
