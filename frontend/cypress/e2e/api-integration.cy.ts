@@ -2,6 +2,9 @@ describe('API Integration', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     
+    // Setup base API mocks
+    cy.setupApiMocks();
+    
     // Mock authentication for API tests
     cy.mockAuth();
     

@@ -3,6 +3,9 @@ describe('Home Page', () => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
     
+    // Setup API mocks to prevent timeouts
+    cy.setupApiMocks();
+    
     // Mock authentication for these tests
     cy.mockAuth();
     

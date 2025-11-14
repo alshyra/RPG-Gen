@@ -3,6 +3,9 @@ describe('World Selection', () => {
     cy.clearLocalStorage();
     cy.clearCookies();
     
+    // Setup API mocks
+    cy.setupApiMocks();
+    
     // Mock authentication
     cy.mockAuth();
     

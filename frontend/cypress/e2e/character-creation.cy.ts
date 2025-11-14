@@ -4,6 +4,9 @@ describe('Character Creation', () => {
     // Clear localStorage to ensure fresh start
     cy.clearLocalStorage();
     
+    // Setup API mocks
+    cy.setupApiMocks();
+    
     // Mock authentication
     cy.mockAuth();
   });

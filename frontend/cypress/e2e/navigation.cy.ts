@@ -1,5 +1,8 @@
 describe("Navigation", () => {
   beforeEach(() => {
+    // Setup API mocks
+    cy.setupApiMocks();
+    
     // Mock authentication for navigation tests
     cy.mockAuth();
   });

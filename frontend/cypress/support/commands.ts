@@ -28,6 +28,12 @@ declare global {
        * @example cy.clearAuth()
        */
       clearAuth(): Chainable<void>;
+      
+      /**
+       * Setup API mocks to prevent timeouts
+       * @example cy.setupApiMocks()
+       */
+      setupApiMocks(): Chainable<void>;
     }
   }
 }

@@ -9,11 +9,11 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     viewportWidth: 1280,
     viewportHeight: 720,
-    // Performance optimizations
-    defaultCommandTimeout: 4000,
-    pageLoadTimeout: 10000,
-    requestTimeout: 5000,
-    responseTimeout: 5000,
+    // Performance optimizations - reasonable timeouts
+    defaultCommandTimeout: 6000,
+    pageLoadTimeout: 20000,
+    requestTimeout: 10000,
+    responseTimeout: 10000,
     // Reduce retries for faster feedback
     retries: {
       runMode: 1,

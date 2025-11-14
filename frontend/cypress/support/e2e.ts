@@ -21,21 +21,6 @@ Cypress.on('uncaught:exception', (err) => {
   return true;
 });
 
-// Global intercept for API calls to prevent timeouts
-beforeEach(() => {
-  // Intercept backend API calls and return quick mock responses
-  cy.intercept('GET', '**/api/auth/profile', { 
-    statusCode: 200, 
-    body: { id: 'test', email: 'test@example.com', displayName: 'Test User' }
-  });
-  cy.intercept('GET', '**/api/characters', { statusCode: 200, body: [] });
-  cy.intercept('GET', '**/api/chat/history/**', { statusCode: 200, body: [] });
-  // Let other API calls through or fail quickly
-  cy.intercept('POST', '**/api/**', (req) => {
-    req.reply({ statusCode: 200, body: { success: true } });
-  });
-});
-
 // Set up authentication mocking utilities
 Cypress.Commands.add('mockAuth', () => {
   const mockToken = 'test-jwt-token-cypress-mock';
@@ -53,6 +38,18 @@ Cypress.Commands.add('mockAuth', () => {
 Cypress.Commands.add('clearAuth', () => {
   localStorage.removeItem('rpg-auth-token');
   localStorage.removeItem('rpg-user-data');
+});
+
+// Helper to setup API mocks - call this in beforeEach of each test
+Cypress.Commands.add('setupApiMocks', () => {
+  // Intercept backend API calls and return quick mock responses
+  cy.intercept('GET', '**/api/auth/profile', { 
+    statusCode: 200, 
+    body: { id: 'test', email: 'test@example.com', displayName: 'Test User' }
+  });
+  cy.intercept('GET', '**/api/characters', { statusCode: 200, body: [] });
+  cy.intercept('GET', '**/api/chat/history/**', { statusCode: 200, body: [] });
+  cy.intercept('POST', '**/api/**', { statusCode: 200, body: { success: true } });
 });
 
 // Alternatively you can use CommonJS syntax:

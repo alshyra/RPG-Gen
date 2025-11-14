@@ -1,5 +1,8 @@
 describe('Authentication Flow', () => {
   beforeEach(() => {
+    // Setup API mocks first
+    cy.setupApiMocks();
+    
     // Clear all storage before each test
     cy.clearLocalStorage();
     cy.clearCookies();
