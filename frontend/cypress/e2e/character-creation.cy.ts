@@ -76,7 +76,7 @@ describe('Character Creation', () => {
   });
 
   it("should save character draft to localStorage", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -98,7 +98,7 @@ describe('Character Creation', () => {
   });
 
   it("should restore draft on page refresh", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -121,7 +121,7 @@ describe('Character Creation', () => {
   });
 
   it("should go back to previous step", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info
@@ -140,7 +140,7 @@ describe('Character Creation', () => {
   });
 
   it("should validate step completion before allowing next", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Try to go next without entering name - button should be disabled
@@ -154,7 +154,7 @@ describe('Character Creation', () => {
   });
 
   it("should persist ability scores (character.scores) on page refresh", () => {
-    cy.visit("/");
+    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill in basic info (Step 1)

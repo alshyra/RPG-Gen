@@ -52,7 +52,7 @@ export function useGameSession() {
     // Check if character exists, redirect to home if not
     const char = characterService.getCurrentCharacter();
     if (!char) {
-      await router.push("/");
+      await router.push("/home");
       return;
     }
 
