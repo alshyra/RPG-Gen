@@ -1,7 +1,5 @@
 <template>
   <div class="p-2 bg-slate-800/40 rounded">
-    <!-- point-buy only UI (method hidden from user) -->
-
     <div class="mt-3 grid grid-cols-2 gap-2">
       <div
         v-for="stat in stats"
@@ -15,7 +13,10 @@
             {{ formatMod(assigned[stat]) }} • PB {{ proficiency }}
           </div>
         </div>
-        <div class="mt-1">
+        <div
+          class="mt-1"
+          :data-test-id="`ability-score-${stat}`"
+        >
           <div
             v-if="props.mode === 'edit'"
             class="w-12 text-center font-medium"
@@ -24,6 +25,8 @@
           </div>
           <UiInputNumber
             v-else
+            data-test-id="ability-score"
+            :data-test-value="stat"
             :model-value="assigned[stat]"
             :min="8"
             :max="15"

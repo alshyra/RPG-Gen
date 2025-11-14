@@ -147,7 +147,7 @@ describe("Character Creation", () => {
     cy.contains("button", "Suivant").should("not.be.disabled");
   });
 
-  it("should persist ability scores (character.scores) on page refresh", () => {
+  it.only("should persist ability scores (character.scores) on page refresh", () => {
     cy.visit("/");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
@@ -168,10 +168,9 @@ describe("Character Creation", () => {
     cy.url().should("include", "/character/dnd/step/3");
     cy.contains("Capacités").should("be.visible");
 
-    // Modify ability scores - find the Str input and change it
-    // The AbilityScorePicker uses UiInputNumber components
-    cy.get('input[type="number"]').first().clear().type("14");
-
+    // Lower the Str input and Raise dex
+    cy.get('[data-test-id="ability-score-Str"]').contains("-").click();
+    cy.get('[data-test-id="ability-score-Dex"]').contains("+").click();
     // Wait for draft to save
     cy.wait(600);
 
@@ -194,7 +193,8 @@ describe("Character Creation", () => {
     cy.contains("Capacités").should("be.visible");
 
     // Verify the score is still 14
-    cy.get('input[type="number"]').first().should("have.value", "14");
+    cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').contains(14)
+    cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').contains(15)
 
     // Verify localStorage still has the correct value
     cy.window().then((win) => {
