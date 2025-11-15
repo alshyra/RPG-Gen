@@ -27,6 +27,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Create backend .env for testing
         run: |
@@ -42,55 +44,49 @@ jobs:
           FRONTEND_URL=http://localhost
           EOF
 
+      - name: Pull Docker images
+        run: |
+          # Pull pre-built images if available, otherwise build will happen
+          docker compose pull mongodb || true
+          
+      - name: Build Docker images with cache
+        run: |
+          # Build images with cache
+          docker compose build --parallel backend_prod frontend_prod
+
       - name: Start production Docker containers
         run: |
           docker compose up -d mongodb backend_prod frontend_prod
           
+      - name: Install Cypress dependencies (parallel with container startup)
+        working-directory: frontend
+        run: npm ci
+
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to start..."
-          sleep 15
           
-          # Check MongoDB
-          if docker compose ps mongodb | grep -q "Up"; then
-            echo "✓ MongoDB is running"
-          else
-            echo "✗ MongoDB failed to start"
-            docker compose logs mongodb
+          # Wait for MongoDB (faster check)
+          timeout 30 bash -c 'until docker compose exec -T mongodb mongosh --eval "db.adminCommand({ping: 1})" --quiet > /dev/null 2>&1; do sleep 1; done' || echo "MongoDB check timeout, continuing..."
+          
+          # Wait for backend to be healthy
+          echo "Waiting for backend..."
+          timeout 60 bash -c 'until curl -sf http://localhost:3001 > /dev/null 2>&1 || curl -sf http://localhost:3001/api > /dev/null 2>&1; do sleep 2; done' || {
+            echo "Backend not responding, checking status..."
+            docker compose ps backend_prod
+            docker compose logs --tail=30 backend_prod
+          }
+          
+          # Wait for frontend to be accessible
+          echo "Waiting for frontend..."
+          timeout 30 bash -c 'until curl -sf http://localhost/ > /dev/null 2>&1; do sleep 1; done' || {
+            echo "Frontend not responding, checking status..."
+            docker compose ps frontend_prod
+            docker compose logs --tail=30 frontend_prod
             exit 1
-          fi
+          }
           
-          # Check Backend
-          if docker compose ps backend_prod | grep -q "Up"; then
-            echo "✓ Backend is running"
-          else
-            echo "✗ Backend failed to start"
-            docker compose logs backend_prod
-            exit 1
-          fi
-          
-          # Check Frontend
-          if docker compose ps frontend_prod | grep -q "Up"; then
-            echo "✓ Frontend is running"
-          else
-            echo "✗ Frontend failed to start"
-            docker compose logs frontend_prod
-            exit 1
-          fi
-          
-          # Test frontend accessibility
-          for i in {1..10}; do
-            if curl -s http://localhost/ > /dev/null; then
-              echo "✓ Frontend is accessible"
-              break
-            fi
-            echo "Waiting for frontend to be accessible (attempt $i/10)..."
-            sleep 3
-          done
-
-      - name: Install Cypress dependencies
-        working-directory: frontend
-        run: npm ci
+          echo "✓ All services are ready"
 
       - name: Run Cypress tests
         working-directory: frontend
@@ -112,7 +108,7 @@ jobs:
 
       - name: Stop Docker containers
         if: always()
-        run: docker compose down
+        run: docker compose down -v
 
       - name: Upload Cypress screenshots
         if: failure()
