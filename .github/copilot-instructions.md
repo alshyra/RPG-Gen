@@ -258,6 +258,7 @@ interface GameInstruction {
 8. **Props are for generics (especially UI)** → Business components use composables + stores instead of prop drilling
 9. **URL only stores essential info** → `/character/:world?/step/:step` (not full form state); derive rest from composables
 10. **DRY principle strictly enforced** → Search existing code before creating new implementations; reuse existing patterns
+11. **Don't create markdown (.md) files** → Only update existing documentation files; don't create new .md files for documentation or planning
 
 ## Architectural Principles
 
