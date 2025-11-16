@@ -10,7 +10,7 @@
         <RacePicker
           :model-value="character.race"
           :allowed-races="allowedRaces"
-          @update:model-value="(race: Race | null) => updateCharacter({ ...character, race })"
+          @update:race="(race: Race | null) => updateCharacter({ ...character, race })"
         />
       </div>
 

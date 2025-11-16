@@ -74,6 +74,7 @@ const createMethods = (
   multiclass: Ref<boolean>,
   baseScores: Ref<Record<string, number>>,
   gender: Ref<"male" | "female">,
+  selectedSkills: Ref<string[]>,
   world?: string,
   worldId?: string
 ) => {
@@ -85,7 +86,8 @@ const createMethods = (
       primaryClass.value,
       race?.mods || {},
       race,
-      { world, worldId }
+      { world, worldId },
+      selectedSkills.value || []
     );
     character.value = { ...character.value, ...calculated };
     if (multiclass.value && secondaryClass.value) {
@@ -271,6 +273,7 @@ export const useCharacterCreation = (
     multiclass,
     baseScores,
     gender,
+    selectedSkills,
     world,
     worldId
   );

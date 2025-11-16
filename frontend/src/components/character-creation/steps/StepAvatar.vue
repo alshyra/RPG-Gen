@@ -19,20 +19,10 @@ interface Props {
 
 interface Emits {
   (e: 'update:avatar-description', value: string): void;
-  (e: 'generate'): void;
-  (e: 'regenerate'): void;
 }
 
 defineProps<Props>();
 const emit = defineEmits<Emits>();
-
-const handleGenerate = () => {
-  emit('generate');
-};
-
-const handleRegenerate = () => {
-  emit('regenerate');
-};
 </script>
 
 <template>
@@ -55,6 +45,15 @@ const handleRegenerate = () => {
     </div>
 
     <div
+      v-if="isGenerating"
+      class="mt-4 text-center text-slate-400"
+    >
+      <div class="animate-pulse">
+        Génération de l'avatar en cours...
+      </div>
+    </div>
+
+    <div
       v-if="generatedAvatar"
       class="mt-4"
     >
@@ -63,25 +62,6 @@ const handleRegenerate = () => {
         alt="Generated Avatar"
         class="w-48 h-48 rounded border border-slate-600 object-cover"
       >
-    </div>
-
-    <!-- Generation buttons -->
-    <div class="flex gap-2 mt-4">
-      <button
-        v-if="!generatedAvatar"
-        :disabled="!avatarDescription.trim() || isGenerating"
-        class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        @click="handleGenerate"
-      >
-        {{ isGenerating ? 'Génération...' : '🎨 Générer' }}
-      </button>
-      <button
-        v-if="generatedAvatar"
-        class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 transition"
-        @click="handleRegenerate"
-      >
-        Régénérer
-      </button>
     </div>
   </div>
 </template>

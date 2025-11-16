@@ -69,8 +69,6 @@
       :is-generating="isGeneratingAvatar"
       :avatar-description="avatarDescription"
       @update:avatar-description="avatarDescription = $event; saveDraftNow()"
-      @generate="generateAvatar"
-      @regenerate="regenerateAvatar"
     />
 
     <!-- Navigation buttons -->
@@ -184,10 +182,15 @@ const canProceed = computed(() => {
   }
 });
 
-function nextStep() {
+async function nextStep() {
   if (currentStep.value < steps.length - 1) {
     saveDraftWithStep(currentStep.value + 1);
     currentStep.value++;
+    
+    // Auto-generate avatar when entering the avatar step (step 4)
+    if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
+      await generateAvatar();
+    }
   }
 }
 
@@ -233,11 +236,6 @@ async function generateAvatar() {
   } finally {
     isGeneratingAvatar.value = false;
   }
-}
-
-function regenerateAvatar() {
-  generatedAvatar.value = null;
-  generateAvatar();
 }
 
 async function finishCreation() {
