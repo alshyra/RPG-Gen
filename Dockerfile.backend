@@ -1,34 +1,20 @@
-FROM node:20-alpine AS builder
+FROM node:25.2.0-alpine3.22 AS base_node
+FROM base_node AS builder
 
-WORKDIR /app
-
-# Copy package files and shared types
-COPY backend/package*.json ./backend/
-COPY shared ./shared
-
-# Install all dependencies
-WORKDIR /app/backend
-RUN npm ci
-
-# Copy backend source
-COPY backend ./
-
-# Build the application
-RUN npm run build
-
-# Remove dev dependencies
-RUN npm prune --production
-
-FROM node:20-alpine
+COPY . /app/
 
 WORKDIR /app/backend
 
-# Copy package files
-COPY backend/package*.json ./
+RUN cd /app/backend &&\
+    npm ci && \
+    npm run build && \
+    npm prune --production
 
-# Copy built application and production dependencies from builder
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/node_modules ./node_modules
+FROM base_node
+
+WORKDIR /app/backend
+
+COPY --from=builder /app/ /app
 
 EXPOSE 3001
 

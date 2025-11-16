@@ -1,0 +1,88 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: europe-west1
+  SERVICE_NAME: rpggen
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-cloud-run:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Create/Update GCP Secrets
+        run: |
+          # MongoDB URI
+          echo -n "${{ secrets.MONGODB_URI }}" | gcloud secrets create mongodb-uri --data-file=- --replication-policy="automatic" 2>/dev/null || \
+          echo -n "${{ secrets.MONGODB_URI }}" | gcloud secrets versions add mongodb-uri --data-file=-
+
+          # Google API Key
+          echo -n "${{ secrets.GOOGLE_API_KEY }}" | gcloud secrets create google-api-key --data-file=- --replication-policy="automatic" 2>/dev/null || \
+          echo -n "${{ secrets.GOOGLE_API_KEY }}" | gcloud secrets versions add google-api-key --data-file=-
+
+          # Google OAuth Client ID
+          echo -n "${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" | gcloud secrets create google-oauth-client-id --data-file=- --replication-policy="automatic" 2>/dev/null || \
+          echo -n "${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" | gcloud secrets versions add google-oauth-client-id --data-file=-
+
+          # Google OAuth Client Secret
+          echo -n "${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" | gcloud secrets create google-oauth-client-secret --data-file=- --replication-policy="automatic" 2>/dev/null || \
+          echo -n "${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" | gcloud secrets versions add google-oauth-client-secret --data-file=-
+
+          # JWT Secret
+          echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets create jwt-secret --data-file=- --replication-policy="automatic" 2>/dev/null || \
+          echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets versions add jwt-secret --data-file=-
+
+      - name: Grant Cloud Run service account access to secrets
+        run: |
+          SERVICE_ACCOUNT="cloud-run-rpggen@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+
+          for secret in mongodb-uri google-api-key google-oauth-client-id google-oauth-client-secret jwt-secret; do
+            gcloud secrets add-iam-policy-binding $secret \
+              --member="serviceAccount:$SERVICE_ACCOUNT" \
+              --role="roles/secretmanager.secretAccessor" || true
+          done
+
+      - name: Create/Update Cloud Run Service
+        run: |
+          gcloud run services replace k8s/cloud-run-service.yaml \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }}
+
+      - name: Get Service URL
+        id: service-url
+        run: |
+          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --format='value(status.url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Print Deployment Info
+        run: |
+          echo "✅ Deployed to Cloud Run"
+          echo "Service URL: ${{ steps.service-url.outputs.url }}"
+          echo "Region: ${{ env.REGION }}"
+          echo "Project: ${{ env.PROJECT_ID }}"
