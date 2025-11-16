@@ -39,7 +39,6 @@ services:
       - "80:80"
     environment:
       - BACKEND_URL=http://backend:3001
-      - DNS_RESOLVER=127.0.0.11
     networks:
       - rpg-network
     depends_on:
