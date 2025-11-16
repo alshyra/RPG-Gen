@@ -30,6 +30,6 @@ describe('Home Page', () => {
     // This test would need to interact with WorldSelector
     // For now, we just verify the page structure is correct
     cy.get('.p-6').should('exist');
-    cy.get('.text-3xl').should('contain', 'RPG Gemini');
+    cy.get('.text-2xl').should('contain', 'RPG Gemini');
   });
 });
