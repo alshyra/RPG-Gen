@@ -75,16 +75,6 @@ jobs:
           echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets create jwt-secret --data-file=- --replication-policy="automatic" 2>/dev/null || \
           echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets versions add jwt-secret --data-file=-
 
-      - name: Grant Cloud Run service account access to secrets
-        run: |
-          SERVICE_ACCOUNT="github-sa@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
-
-          for secret in mongodb-uri google-api-key google-oauth-client-id google-oauth-client-secret jwt-secret; do
-            gcloud secrets add-iam-policy-binding $secret \
-              --member="serviceAccount:$SERVICE_ACCOUNT" \
-              --role="roles/secretmanager.secretAccessor" || true
-          done
-
       - name: Create/Update Cloud Run Service
         run: |
           gcloud run services replace k8s/cloud-run-service.yaml \
