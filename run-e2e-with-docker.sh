@@ -23,7 +23,7 @@ echo ""
 
 # Start production containers
 echo "Starting production Docker containers..."
-docker compose up -d mongodb backend_prod frontend_prod
+docker compose up -d mongodb backend frontend
 echo "✓ Containers started"
 echo ""
 
@@ -41,20 +41,20 @@ else
     exit 1
 fi
 
-if docker compose ps backend_prod | grep -q "Up"; then
+if docker compose ps backend | grep -q "Up"; then
     echo "✓ Backend is running"
 else
     echo "✗ Backend failed to start"
-    docker compose logs backend_prod
+    docker compose logs backend
     docker compose down
     exit 1
 fi
 
-if docker compose ps frontend_prod | grep -q "Up"; then
+if docker compose ps frontend | grep -q "Up"; then
     echo "✓ Frontend (production) is running"
 else
     echo "✗ Frontend failed to start"
-    docker compose logs frontend_prod
+    docker compose logs frontend
     docker compose down
     exit 1
 fi
@@ -107,10 +107,10 @@ echo ""
 echo "Container logs (last 20 lines):"
 echo ""
 echo "=== Frontend logs ==="
-docker compose logs --tail=20 frontend_prod
+docker compose logs --tail=20 frontend
 echo ""
 echo "=== Backend logs ==="
-docker compose logs --tail=20 backend_prod
+docker compose logs --tail=20 backend
 echo ""
 
 # Cleanup

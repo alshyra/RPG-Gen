@@ -14,7 +14,7 @@ jobs:
   test-e2e:
     name: Run E2E Tests with Production Containers
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '25.2.0'
-          cache: 'npm'
+          node-version: "25.2.0"
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
       - name: Create backend .env for testing
@@ -43,12 +43,12 @@ jobs:
       - name: Pull and Build Docker images
         run: |
           docker compose pull mongodb || true
-          docker compose build --parallel backend_prod frontend_prod
+          docker compose build --parallel backend frontend
 
       - name: Start production Docker containers
         run: |
-          docker compose up -d mongodb backend_prod frontend_prod
-          
+          docker compose up -d mongodb backend frontend
+
       - name: Install Cypress dependencies (parallel with container startup)
         working-directory: frontend
         run: npm ci
@@ -56,25 +56,25 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to start..."
-          
+
           # Wait for MongoDB
           timeout 30 bash -c 'until docker compose exec -T mongodb mongosh --eval "db.adminCommand({ping: 1})" --quiet > /dev/null 2>&1; do sleep 1; done' || echo "MongoDB check timeout, continuing..."
-          
+
           # Wait for backend
           echo "Waiting for backend..."
           timeout 60 bash -c 'until curl -sf http://localhost:3001 > /dev/null 2>&1 || curl -sf http://localhost:3001/api > /dev/null 2>&1; do sleep 2; done' || {
             echo "Backend not responding"
-            docker compose logs --tail=30 backend_prod
+            docker compose logs --tail=30 backend
           }
-          
+
           # Wait for frontend
           echo "Waiting for frontend..."
           timeout 30 bash -c 'until curl -sf http://localhost/ > /dev/null 2>&1; do sleep 1; done' || {
             echo "Frontend not responding"
-            docker compose logs --tail=30 frontend_prod
+            docker compose logs --tail=30 frontend
             exit 1
           }
-          
+
           echo "✓ All services are ready"
 
       - name: Run Cypress tests
@@ -110,7 +110,7 @@ jobs:
     outputs:
       backend-image: ${{ steps.backend-meta.outputs.tags }}
       frontend-image: ${{ steps.frontend-meta.outputs.tags }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -170,7 +170,7 @@ jobs:
     needs: build-and-push
     outputs:
       backend-url: ${{ steps.deploy.outputs.url }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -199,7 +199,7 @@ jobs:
             --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             --set-env-vars "JWT_EXPIRES_IN=7d" \
             --format=json | jq -r '.status.url' > backend_url.txt
-          
+
           BACKEND_URL=$(cat backend_url.txt)
           echo "Backend deployed at: $BACKEND_URL"
           echo "url=$BACKEND_URL" >> $GITHUB_OUTPUT
@@ -215,7 +215,7 @@ jobs:
     name: Deploy Frontend to Cloud Run
     runs-on: ubuntu-latest
     needs: deploy-backend
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -231,18 +231,18 @@ jobs:
       - name: Deploy Frontend to Cloud Run
         run: |
           BACKEND_URL="${{ needs.deploy-backend.outputs.backend-url }}"
-          
+
           gcloud run deploy rpggen-frontend \
             --image antoinesavajols/rpggen-front:latest \
             --platform managed \
             --region europe-west1 \
             --allow-unauthenticated \
             --set-env-vars "BACKEND_URL=$BACKEND_URL"
-          
+
           FRONTEND_URL=$(gcloud run services describe rpggen-frontend \
             --region europe-west1 \
             --format 'value(status.url)')
-          
+
           echo "Frontend deployed at: $FRONTEND_URL"
           echo "Backend URL: $BACKEND_URL"
 
@@ -251,7 +251,7 @@ jobs:
           FRONTEND_URL=$(gcloud run services describe rpggen-frontend \
             --region europe-west1 \
             --format 'value(status.url)')
-          
+
           gcloud run services update rpggen-backend \
             --region europe-west1 \
             --set-env-vars "FRONTEND_URL=$FRONTEND_URL"
@@ -260,13 +260,13 @@ jobs:
     name: Verify Deployment
     runs-on: ubuntu-latest
     needs: [deploy-backend, deploy-frontend]
-    
+
     steps:
       - name: Check Backend Health
         run: |
           BACKEND_URL="${{ needs.deploy-backend.outputs.backend-url }}"
           echo "Checking backend health at: $BACKEND_URL"
-          
+
           for i in {1..5}; do
             if curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL" | grep -q "200\|404"; then
               echo "✓ Backend is responding"
@@ -275,7 +275,7 @@ jobs:
             echo "Waiting for backend to respond (attempt $i/5)..."
             sleep 10
           done
-          
+
           echo "⚠ Backend may not be fully ready yet"
 
       - name: Display Deployment URLs
