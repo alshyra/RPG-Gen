@@ -13,7 +13,7 @@ spec:
       containers:
         # Frontend container (entry point on port 80)
         - name: frontend
-          image: antoinesavajols/rpggen-front:${VERSION:-latest}
+          image: antoinesavajols/rpggen-front:${VERSION}
           ports:
             - name: http1
               containerPort: 80
@@ -27,7 +27,7 @@ spec:
 
         # Backend container (internal on port 3001)
         - name: backend
-          image: antoinesavajols/rpggen-back:${VERSION:-latest}
+          image: antoinesavajols/rpggen-back:${VERSION}
           resources:
             limits:
               cpu: "1"
