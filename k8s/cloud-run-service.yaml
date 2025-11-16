@@ -9,12 +9,13 @@ spec:
         autoscaling.knative.dev/minScale: "0"
         autoscaling.knative.dev/maxScale: "1"
     spec:
+      serviceAccountName: github-sa
       containers:
         # Frontend container (entry point on port 80)
         - name: frontend
           image: antoinesavajols/rpggen-front:latest
           ports:
-            - name: nginx
+            - name: http1
               containerPort: 80
           resources:
             limits:
@@ -27,9 +28,6 @@ spec:
         # Backend container (internal on port 3001)
         - name: backend
           image: antoinesavajols/rpggen-back:latest
-          ports:
-            - name: node
-              containerPort: 3001
           resources:
             limits:
               cpu: "1"
@@ -45,26 +43,26 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: mongodb-uri
-                  key: uri
+                  key: latest
             - name: GOOGLE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: google-api-key
-                  key: key
+                  key: latest
             - name: GOOGLE_OAUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: google-oauth-client-id
-                  key: id
+                  key: latest
             - name: GOOGLE_OAUTH_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: google-oauth-client-secret
-                  key: secret
+                  key: latest
             - name: GOOGLE_OAUTH_CALLBACK_URL
               value: "https://rpggen-469869562907.europe-west1.run.app/api/auth/google/callback"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
-                  key: secret
+                  key: latest
