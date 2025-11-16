@@ -135,10 +135,8 @@ jobs:
       - name: Update Cloud Run service with image version
         env:
           VERSION: ${{ needs.determine-version.outputs.version }}
-          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         run: |
           export VERSION
-          export FRONTEND_URL
           envsubst < k8s/cloud-run-service.yaml > k8s/cloud-run-service-resolved.yaml
           mv k8s/cloud-run-service-resolved.yaml k8s/cloud-run-service.yaml
 

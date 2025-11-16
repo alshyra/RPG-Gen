@@ -39,7 +39,7 @@ spec:
             - name: PORT
               value: "3001"
             - name: FRONTEND_URL
-              value: "${FRONTEND_URL}"
+              value: "https://rpggen-469869562907.europe-west1.run.app"
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
@@ -61,7 +61,7 @@ spec:
                   name: google-oauth-client-secret
                   key: latest
             - name: GOOGLE_OAUTH_CALLBACK_URL
-              value: "${FRONTEND_URL}/api/auth/google/callback"
+              value: "https://rpggen-469869562907.europe-west1.run.app/api/auth/google/callback"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
