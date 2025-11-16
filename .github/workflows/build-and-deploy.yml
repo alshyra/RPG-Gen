@@ -135,8 +135,10 @@ jobs:
       - name: Update Cloud Run service with image version
         env:
           VERSION: ${{ needs.determine-version.outputs.version }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         run: |
           export VERSION
+          export FRONTEND_URL
           envsubst < k8s/cloud-run-service.yaml > k8s/cloud-run-service-resolved.yaml
           mv k8s/cloud-run-service-resolved.yaml k8s/cloud-run-service.yaml
 
@@ -166,7 +168,8 @@ jobs:
         run: |
           gcloud run services replace k8s/cloud-run-service.yaml \
             --region=${{ env.REGION }} \
-            --project=${{ env.PROJECT_ID }}
+            --project=${{ env.PROJECT_ID }} \
+            --allow-unauthenticated
 
       - name: Get Service URL
         id: service-url
