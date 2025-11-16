@@ -33,6 +33,24 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Determine image version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          if [[ "$VERSION" == "refs/tags"* ]] || [[ -z "$VERSION" ]]; then
+            VERSION="latest"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using image version: $VERSION"
+
+      - name: Update Cloud Run service with image version
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          export VERSION
+          envsubst < k8s/cloud-run-service.yaml > k8s/cloud-run-service-resolved.yaml
+          mv k8s/cloud-run-service-resolved.yaml k8s/cloud-run-service.yaml
+
       - name: Create/Update GCP Secrets
         run: |
           # MongoDB URI
