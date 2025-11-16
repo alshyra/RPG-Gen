@@ -1,3 +1,4 @@
+# draft
 services:
   mongodb:
     image: mongo:7.0
@@ -14,15 +15,15 @@ services:
       - rpg-network
 
   backend:
-    image: antoinesavajols/rpggen-back:latest
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+    image: node:25.2.0-alpine
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
+    volumes:
+      - ./backend:/app/backend
+      - ./shared:/app/shared
     env_file:
       - backend/.env
     depends_on:
@@ -39,7 +40,6 @@ services:
       - "80:80"
     environment:
       - BACKEND_URL=http://backend:3001
-      - DNS_RESOLVER=127.0.0.11
     networks:
       - rpg-network
     depends_on:

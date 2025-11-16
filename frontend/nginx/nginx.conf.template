@@ -1,5 +1,5 @@
 # docker resolver
-resolver 127.0.0.11;
+resolver ${DNS_RESOLVER:-8.8.8.8};
 
 server {
     listen 80;
