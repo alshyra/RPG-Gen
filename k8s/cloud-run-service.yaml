@@ -9,6 +9,7 @@ spec:
         autoscaling.knative.dev/minScale: "0"
         autoscaling.knative.dev/maxScale: "1"
     spec:
+      serviceAccountName: github-sa
       containers:
         # Frontend container (entry point on port 80)
         - name: frontend

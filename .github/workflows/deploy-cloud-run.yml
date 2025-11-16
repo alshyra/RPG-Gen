@@ -57,7 +57,7 @@ jobs:
 
       - name: Grant Cloud Run service account access to secrets
         run: |
-          SERVICE_ACCOUNT="cloud-run-rpggen@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
+          SERVICE_ACCOUNT="github-sa@${{ env.PROJECT_ID }}.iam.gserviceaccount.com"
 
           for secret in mongodb-uri google-api-key google-oauth-client-id google-oauth-client-secret jwt-secret; do
             gcloud secrets add-iam-policy-binding $secret \
