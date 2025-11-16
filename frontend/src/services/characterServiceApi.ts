@@ -6,7 +6,7 @@ import axios from 'axios';
 import { authService } from './authService';
 import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@shared/types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
