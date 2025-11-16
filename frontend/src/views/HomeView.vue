@@ -43,7 +43,7 @@
       <WorldSelector @select="onSelect" />
     </div>
 
-    <div></div>
+    <div />
   </div>
 </template>
 
