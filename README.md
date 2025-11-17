@@ -56,7 +56,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions to Goo
 **Key Points**:
 - Configure all required GitHub Secrets (see DEPLOYMENT.md)
 - Set `FRONTEND_URL` secret to your actual Cloud Run URL to prevent OAuth redirect issues
-- Cloud Run deployments automatically include `--allow-unauthenticated` flag for public access
+
 
 ## Documentation
 
