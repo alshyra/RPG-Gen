@@ -24,7 +24,7 @@ spec:
               memory: 512Mi
           env:
             - name: BACKEND_URL
-              value: "http://localhost:3001"
+              value: "http://127.0.0.1:3001"
 
         # Backend container (internal on port 3001)
         - name: backend
