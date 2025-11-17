@@ -69,7 +69,6 @@
       :is-generating="isGeneratingAvatar"
       :avatar-description="avatarDescription"
       @update:avatar-description="avatarDescription = $event; saveDraftNow()"
-      @generate-avatar="generateAvatar"
     />
 
     <!-- Navigation buttons -->
@@ -240,6 +239,10 @@ async function generateAvatar() {
 }
 
 async function finishCreation() {
+  // Auto-generate avatar if description exists but avatar hasn't been generated yet
+  if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
+    await generateAvatar();
+  }
   await applyAndSave();
 }
 </script>

@@ -210,17 +210,14 @@ describe('Character Creation', () => {
     });
   });
 
-  it("should generate and save avatar during character creation", () => {
+  it("should auto-generate and save avatar when finishing character creation", () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     // Fill basic info (Step 1)
-    cy.get('input[placeholder="Ex: Aragorn"]').type("AvatarHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').type("AutoAvatarHero");
     cy.contains("♂️ Homme").click();
-
-    // Go through steps to reach avatar step
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/2");
 
     // Select race and class (Step 2)
     cy.contains("Humain").click();
@@ -242,40 +239,14 @@ describe('Character Creation', () => {
     // Enter avatar description
     cy.get("textarea").type("Un grand guerrier musclé aux cheveux noirs");
 
-    // Generate avatar button should be visible and enabled
-    cy.contains("button", "Générer l'avatar").should("be.visible").should("not.be.disabled");
-
-    // Click generate avatar button
-    cy.contains("button", "Générer l'avatar").click();
-
-    // Wait for avatar generation API call
-    cy.wait("@generateAvatar");
-
-    // Should show "Aperçu de l'avatar" label
-    cy.contains("Aperçu de l'avatar").should("be.visible");
-
-    // Avatar image should be visible
-    cy.get('img[alt="Generated Avatar"]').should("be.visible");
-
-    // Button should now say "Régénérer l'avatar"
-    cy.contains("button", "Régénérer l'avatar").should("be.visible");
-
-    // Wait a bit for draft to save
+    // Wait for draft to save
     cy.wait(600);
 
-    // Check that draft contains the generated avatar
-    cy.window().then((win) => {
-      const draft = win.localStorage.getItem("rpg-character-draft");
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      expect(draft).to.exist;
-      const draftData = JSON.parse(draft!);
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      expect(draftData.generatedAvatar).to.exist;
-      expect(draftData.generatedAvatar).to.include("data:image");
-    });
-
-    // Finish creation
+    // Click finish WITHOUT manually generating avatar
     cy.contains("button", "Terminer").click();
+
+    // Should trigger avatar generation automatically
+    cy.wait("@generateAvatar");
 
     // Wait for character creation API call
     cy.wait("@createCharacter").then((interception) => {
@@ -286,54 +257,5 @@ describe('Character Creation', () => {
 
     // Should redirect to game view
     cy.url().should("include", "/game/dnd");
-  });
-
-  it("should persist generated avatar on page refresh", () => {
-    cy.visit("/home");
-    cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
-
-    // Fill basic info
-    cy.get('input[placeholder="Ex: Aragorn"]').type("PersistAvatarHero");
-    cy.contains("button", "Suivant").click();
-
-    // Race & Class
-    cy.contains("Humain").click();
-    cy.get("select").select("Fighter");
-    cy.contains("button", "Suivant").click();
-
-    // Ability scores
-    cy.contains("button", "Suivant").click();
-
-    // Skills
-    cy.get('input[type="checkbox"]').first().check();
-    cy.get('input[type="checkbox"]').eq(1).check();
-    cy.contains("button", "Suivant").click();
-
-    // Avatar step
-    cy.url().should("include", "/character/dnd/step/5");
-    cy.get("textarea").type("Grand elfe aux oreilles pointues");
-    cy.contains("button", "Générer l'avatar").click();
-    cy.wait("@generateAvatar");
-
-    // Wait for avatar to be displayed
-    cy.get('img[alt="Generated Avatar"]').should("be.visible");
-
-    // Wait for draft to save
-    cy.wait(600);
-
-    // Refresh the page
-    cy.reload();
-
-    // Should still be on step 5
-    cy.url().should("include", "/character/dnd/step/5");
-
-    // Avatar should still be visible
-    cy.get('img[alt="Generated Avatar"]').should("be.visible");
-
-    // Description should be restored
-    cy.get("textarea").should("have.value", "Grand elfe aux oreilles pointues");
-
-    // Button should say "Régénérer l'avatar"
-    cy.contains("button", "Régénérer l'avatar").should("be.visible");
   });
 });
