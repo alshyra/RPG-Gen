@@ -50,6 +50,10 @@ export class ImageController {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
+    return await this.handleGenerateAvatar(userId, body);
+  }
+
+  private async handleGenerateAvatar(userId: string, body: AvatarRequestWithCharacterId) {
     try {
       // Generate avatar image
       const prompt = this.buildAvatarPrompt(body);
@@ -60,10 +64,7 @@ export class ImageController {
 
       // If characterId is provided, save to character
       if (body.characterId) {
-        await this.characterService.update(userId, body.characterId, {
-          portrait: compressedImage,
-        });
-        this.logger.log(`Avatar saved to character ${body.characterId} for user ${userId}`);
+        await this.saveAvatarToCharacter(userId, body.characterId, compressedImage);
       }
 
       return { 
@@ -75,6 +76,13 @@ export class ImageController {
       this.logger.error("Avatar generation error:", message);
       throw new BadRequestException(`Avatar generation failed: ${message}`);
     }
+  }
+
+  private async saveAvatarToCharacter(userId: string, characterId: string, compressedImage: string) {
+    await this.characterService.update(userId, characterId, {
+      portrait: compressedImage,
+    });
+    this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 
   private validateAvatarRequest(body: AvatarRequest) {
