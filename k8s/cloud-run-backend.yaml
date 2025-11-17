@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: rpggen
+  name: rpggen-back
 spec:
   template:
     metadata:
@@ -12,30 +12,18 @@ spec:
     spec:
       serviceAccountName: github-sa
       containers:
-        # Frontend container (entry point on port 80)
-        - name: frontend
-          image: antoinesavajols/rpggen-front:${VERSION}
-          ports:
-            - name: http1
-              containerPort: 80
-          resources:
-            limits:
-              cpu: "1"
-              memory: 512Mi
-          env:
-            - name: BACKEND_URL
-              value: "http://127.0.0.1:3001"
-
-        # Backend container (internal on port 3001)
         - name: backend
           image: antoinesavajols/rpggen-back:${VERSION}
+          ports:
+            - name: http1
+              containerPort: 3001
           resources:
             limits:
               cpu: "1"
               memory: 512Mi
           startupProbe:
             httpGet:
-              path: /
+              path: /health
               port: 3001
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -43,10 +31,17 @@ spec:
             failureThreshold: 30
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: 3001
             initialDelaySeconds: 10
             periodSeconds: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 3
           env:
             - name: NODE_ENV
@@ -56,7 +51,7 @@ spec:
             - name: PORT
               value: "3001"
             - name: FRONTEND_URL
-              value: "https://rpggen-469869562907.europe-west1.run.app"
+              value: "https://rpggen-front-469869562907.europe-west1.run.app"
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
@@ -78,7 +73,7 @@ spec:
                   name: google-oauth-client-secret
                   key: latest
             - name: GOOGLE_OAUTH_CALLBACK_URL
-              value: "https://rpggen-469869562907.europe-west1.run.app/api/auth/google/callback"
+              value: "https://rpggen-front-469869562907.europe-west1.run.app/api/auth/google/callback"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

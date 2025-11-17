@@ -1,0 +1,26 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: rpggen-front
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "1"
+        run.googleapis.com/ingress: "all"
+    spec:
+      serviceAccountName: github-sa
+      containers:
+        - name: frontend
+          image: antoinesavajols/rpggen-front:${VERSION}
+          ports:
+            - name: http1
+              containerPort: 80
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          env:
+            - name: BACKEND_URL
+              value: "https://rpggen-back-469869562907.europe-west1.run.app"

@@ -14,7 +14,8 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: europe-west1
-  SERVICE_NAME: rpggen
+  SERVICE_BACK: rpggen-back
+  SERVICE_FRONT: rpggen-front
 
 permissions:
   contents: read
@@ -137,8 +138,10 @@ jobs:
           VERSION: ${{ needs.determine-version.outputs.version }}
         run: |
           export VERSION
-          envsubst < k8s/cloud-run-service.yaml > k8s/cloud-run-service-resolved.yaml
-          mv k8s/cloud-run-service-resolved.yaml k8s/cloud-run-service.yaml
+          envsubst < k8s/cloud-run-backend.yaml > k8s/cloud-run-backend-resolved.yaml
+          envsubst < k8s/cloud-run-frontend.yaml > k8s/cloud-run-frontend-resolved.yaml
+          mv k8s/cloud-run-backend-resolved.yaml k8s/cloud-run-backend.yaml
+          mv k8s/cloud-run-frontend-resolved.yaml k8s/cloud-run-frontend.yaml
 
       - name: Create/Update GCP Secrets
         run: |
@@ -162,24 +165,35 @@ jobs:
           echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets create jwt-secret --data-file=- --replication-policy="automatic" 2>/dev/null || \
           echo -n "${{ secrets.JWT_SECRET }}" | gcloud secrets versions add jwt-secret --data-file=-
 
-      - name: Create/Update Cloud Run Service
+      - name: Create/Update Cloud Run Services
         run: |
-          gcloud run services replace k8s/cloud-run-service.yaml \
+          # Replace/Deploy backend service
+          gcloud run services replace k8s/cloud-run-backend.yaml \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }}
+
+          # Replace/Deploy frontend service
+          gcloud run services replace k8s/cloud-run-frontend.yaml \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }}
 
       - name: Allow unauthenticated access to Cloud Run service
         run: |
-          gcloud run services add-iam-policy-binding ${{ env.SERVICE_NAME }} \
+          gcloud run services add-iam-policy-binding ${{env.SERVICE_BACK}} \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --member="allUsers" \
+            --role="roles/run.invoker"
+          gcloud run services add-iam-policy-binding ${{env.SERVICE_FRONT}} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
             --member="allUsers" \
             --role="roles/run.invoker"
 
-      - name: Get Service URL
+      - name: Get Front URL
         id: service-url
         run: |
-          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+          URL=$(gcloud run services describe ${{ env.SERVICE_FRONT }} \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
             --format='value(status.url)')
@@ -188,7 +202,7 @@ jobs:
       - name: Print Deployment Info
         run: |
           echo "✅ Deployed to Cloud Run"
-          echo "Service URL: ${{ steps.service-url.outputs.url }}"
+          echo "Front URL: ${{ steps.service-url.outputs.url }}"
           echo "Region: ${{ env.REGION }}"
           echo "Project: ${{ env.PROJECT_ID }}"
           echo "Image version: ${{ needs.determine-version.outputs.version }}"

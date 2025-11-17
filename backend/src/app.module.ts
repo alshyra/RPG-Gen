@@ -9,6 +9,7 @@ import { DiceModule } from "./dice/dice.module";
 import { ImageModule } from "./image/image.module";
 import { AuthModule } from "./auth/auth.module";
 import { CharacterModule } from "./character/character.module";
+import { HealthModule } from './health/health.module';
 
 // Create pino logger instance
 const getPinoLogger = () => {
@@ -40,6 +41,7 @@ const getPinoLogger = () => {
     ChatModule,
     DiceModule,
     ImageModule,
+  HealthModule,
     CharacterModule,
   ],
 })
