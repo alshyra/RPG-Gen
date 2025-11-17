@@ -36,8 +36,8 @@ docker compose -f compose.dev.yml logs -f
 
 ### 3. Access the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3001/docs (Swagger UI)
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost/docs (Swagger UI)
 - **MongoDB**: mongodb://rpgadmin:rpgpass123@localhost:27017/rpggen?authSource=admin
 
 ### 4. Run E2E Tests from Host

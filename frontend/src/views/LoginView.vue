@@ -66,6 +66,6 @@
 <script setup lang="ts">
 const handleGoogleLogin = () => {
   // Redirect to backend OAuth endpoint
-  window.location.href = 'http://localhost/api/auth/google';
+  window.location.href = '/api/auth/google';
 };
 </script>

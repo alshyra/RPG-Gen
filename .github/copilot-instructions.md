@@ -180,7 +180,7 @@ interface GameInstruction {
 
 ### Frontend
 
-- **Dev Server**: `npm run dev` (Vite, http://localhost:5173)
+- **Dev Server**: `npm run dev` (Vite, http://localhost)
   - Proxies `/api/*` routes to `http://localhost:3001`
 - **Linting + Type Checking**: `npm run lint` 
   - Runs TypeScript type-check (vue-tsc) + ESLint style checks

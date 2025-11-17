@@ -8,6 +8,7 @@ spec:
       annotations:
         autoscaling.knative.dev/minScale: "0"
         autoscaling.knative.dev/maxScale: "1"
+        run.googleapis.com/ingress: "all"
     spec:
       serviceAccountName: github-sa
       containers:
