@@ -100,13 +100,20 @@ jobs:
       fail-fast: false
       matrix:
         specs:
-          - "cypress/e2e/api-integration.cy.ts"
-          - "cypress/e2e/authentication.cy.ts"
-          - "cypress/e2e/character-creation.cy.ts"
-          - "cypress/e2e/home.cy.ts"
-          - "cypress/e2e/navigation.cy.ts"
-          - "cypress/e2e/smoke.cy.ts"
-          - "cypress/e2e/world-selection.cy.ts"
+          - path: "cypress/e2e/api-integration.cy.ts"
+            name: "api-integration"
+          - path: "cypress/e2e/authentication.cy.ts"
+            name: "authentication"
+          - path: "cypress/e2e/character-creation.cy.ts"
+            name: "character-creation"
+          - path: "cypress/e2e/home.cy.ts"
+            name: "home"
+          - path: "cypress/e2e/navigation.cy.ts"
+            name: "navigation"
+          - path: "cypress/e2e/smoke.cy.ts"
+            name: "smoke"
+          - path: "cypress/e2e/world-selection.cy.ts"
+            name: "world-selection"
 
     steps:
       - name: Checkout
@@ -169,7 +176,7 @@ jobs:
 
       - name: Run Cypress tests
         working-directory: frontend
-        run: npm run test:e2e -- --spec="${{ matrix.specs }}"
+        run: npm run test:e2e -- --spec="${{ matrix.specs.path }}"
         env:
           CYPRESS_BASE_URL: http://localhost
 
@@ -193,7 +200,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-screenshots-${{ matrix.specs }}
+          name: e2e-screenshots-${{ matrix.specs.name }}
           path: frontend/cypress/screenshots
           if-no-files-found: ignore
 
@@ -201,7 +208,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-videos-${{ matrix.specs }}
+          name: e2e-videos-${{ matrix.specs.name }}
           path: frontend/cypress/videos
           if-no-files-found: ignore
 
@@ -209,7 +216,7 @@ jobs:
     name: Frontend - Component Tests
     runs-on: ubuntu-latest
     # Avoid duplicate runs for PRs from the same repo
-    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
