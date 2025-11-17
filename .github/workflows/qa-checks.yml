@@ -193,7 +193,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
+          name: e2e-screenshots-${{ matrix.specs }}
           path: frontend/cypress/screenshots
           if-no-files-found: ignore
 
@@ -201,7 +201,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-videos
+          name: e2e-videos-${{ matrix.specs }}
           path: frontend/cypress/videos
           if-no-files-found: ignore
 

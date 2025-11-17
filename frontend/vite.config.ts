@@ -13,7 +13,7 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0",
-    port: 80,
+    port: process.env.CI ? 5173 : 80,
     proxy: {
       "/api": {
         target: process.env.BACKEND_URL || "http://backend:3001",
