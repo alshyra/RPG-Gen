@@ -60,7 +60,7 @@ export class ChatController {
   }
 
   private buildCharacterSummary(character: CharacterEntry): string {
-    return `
+    let summary = `
 Character Information:
 - Name: ${character.name || "Unknown"}
 - Race: ${typeof character.race === "object" ? character.race?.name : character.race || "Unknown"}
@@ -76,6 +76,18 @@ Character Information:
       "Int"
     )}, WIS ${this.getAbilityScore(character, "Wis")}, CHA ${this.getAbilityScore(character, "Cha")}
 `;
+
+    // Add spells if character has any
+    if (character.spells && character.spells.length > 0) {
+      summary += `- Spells Known: ${character.spells.map((s) => `${s.name} (Lvl ${s.level})`).join(", ")}\n`;
+    }
+
+    // Add inventory if character has any
+    if (character.inventory && character.inventory.length > 0) {
+      summary += `- Inventory: ${character.inventory.map((i) => `${i.name} (x${i.quantity || 1})`).join(", ")}\n`;
+    }
+
+    return summary;
   }
 
   private async initializeNewSession(

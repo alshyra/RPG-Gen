@@ -58,6 +58,30 @@
         ```json
         {"hp": -8}
         ```
+      * **Apprendre un sort :**
+        ```json
+        {"spell": {"action": "learn", "name": "Boule de feu", "level": 3, "school": "Évocation"}}
+        ```
+      * **Lancer un sort :**
+        ```json
+        {"spell": {"action": "cast", "name": "Boule de feu"}}
+        ```
+      * **Oublier un sort :**
+        ```json
+        {"spell": {"action": "forget", "name": "Boule de feu"}}
+        ```
+      * **Ajouter un objet à l'inventaire :**
+        ```json
+        {"inventory": {"action": "add", "name": "Potion de soin", "quantity": 1}}
+        ```
+      * **Retirer un objet de l'inventaire :**
+        ```json
+        {"inventory": {"action": "remove", "name": "Potion de soin", "quantity": 1}}
+        ```
+      * **Utiliser un objet de l'inventaire :**
+        ```json
+        {"inventory": {"action": "use", "name": "Potion de soin"}}
+        ```
 
 ### ➡️ Première Étape : Création et Introduction Détaillée (Exigence de Longueur)
 

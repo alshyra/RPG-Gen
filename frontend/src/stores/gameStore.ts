@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { CharacterEntry, GameInstruction, GameMessage } from "@shared/types";
+import type { CharacterEntry, GameInstruction, GameMessage, Spell, InventoryItem } from "@shared/types";
 
 export interface GameSession {
   world: string;
@@ -39,6 +39,50 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
   },
   updateCharacterXp: (delta: number) => {
     if (s.value.character) s.value.character.totalXp = (s.value.character.totalXp || 0) + delta;
+  },
+  learnSpell: (spell: any) => {
+    if (s.value.character) {
+      if (!s.value.character.spells) s.value.character.spells = [];
+      s.value.character.spells.push(spell);
+    }
+  },
+  forgetSpell: (spellName: string) => {
+    if (s.value.character && s.value.character.spells) {
+      s.value.character.spells = s.value.character.spells.filter((sp: Spell) => sp.name !== spellName);
+    }
+  },
+  addInventoryItem: (item: any) => {
+    if (s.value.character) {
+      if (!s.value.character.inventory) s.value.character.inventory = [];
+      const existing = s.value.character.inventory.find((i: InventoryItem) => i.name === item.name);
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
+      } else {
+        s.value.character.inventory.push({ ...item, quantity: item.quantity || 1 });
+      }
+    }
+  },
+  removeInventoryItem: (itemName: string, quantity: number = 1) => {
+    if (s.value.character && s.value.character.inventory) {
+      const item = s.value.character.inventory.find((i: InventoryItem) => i.name === itemName);
+      if (item) {
+        item.quantity = (item.quantity || 1) - quantity;
+        if (item.quantity <= 0) {
+          s.value.character.inventory = s.value.character.inventory.filter((i: InventoryItem) => i.name !== itemName);
+        }
+      }
+    }
+  },
+  useInventoryItem: (itemName: string) => {
+    if (s.value.character && s.value.character.inventory) {
+      const item = s.value.character.inventory.find((i: InventoryItem) => i.name === itemName);
+      if (item) {
+        item.quantity = (item.quantity || 1) - 1;
+        if (item.quantity <= 0) {
+          s.value.character.inventory = s.value.character.inventory.filter((i: InventoryItem) => i.name !== itemName);
+        }
+      }
+    }
   },
   setPendingInstruction: (instruction: GameInstruction | null) => {
     pi.value = instruction;

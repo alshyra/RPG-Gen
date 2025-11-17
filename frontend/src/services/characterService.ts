@@ -89,6 +89,8 @@ const getCurrentCharacter = (): CharacterEntry | null => {
     totalXp: charData.totalXp || 0,
     proficiency: charData.proficiency || 2,
     gender: charData.gender || "male",
+    spells: charData.spells || [],
+    inventory: charData.inventory || [],
   };
 
   return result;
