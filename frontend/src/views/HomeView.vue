@@ -6,40 +6,59 @@
         univers et commence immédiatement.
       </p>
 
-      <!-- Resume current character if present -->
+      <!-- List of all saved characters -->
       <div
-        v-if="currentCharacter"
-        class="mt-4 p-4 bg-slate-800/50 rounded-lg flex items-center justify-between"
+        v-if="savedCharacters.length > 0"
+        class="mt-6"
       >
-        <div class="text-left">
-          <div class="text-sm text-slate-300">
-            Personnage en cours
-          </div>
-          <div class="text-lg font-semibold">
-            {{ currentCharacter.name || 'Personnage inconnu' }}
-          </div>
-          <div class="text-xs text-slate-400">
-            {{ charSummary }}
+        <h3 class="text-lg font-semibold mb-4 text-slate-200">
+          Mes personnages
+        </h3>
+        <div class="space-y-3">
+          <div
+            v-for="char in savedCharacters"
+            :key="char.id"
+            class="p-4 bg-slate-800/50 rounded-lg flex items-center justify-between hover:bg-slate-800/70 transition-colors"
+          >
+            <div class="text-left flex-1">
+              <div class="text-lg font-semibold">
+                {{ char.data.name || 'Personnage inconnu' }}
+              </div>
+              <div class="text-xs text-slate-400">
+                {{ getCharSummary(char.data) }}
+              </div>
+              <div class="text-xs text-slate-500 mt-1">
+                {{ char.data.world || 'D&D' }} • HP: {{ char.data.hp }}/{{ char.data.hpMax }} • XP: {{ char.data.totalXp || 0 }}
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <UiButton
+                variant="primary"
+                @click="resumeCharacter(char.id, char.data.world)"
+              >
+                Reprendre
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                @click="deleteCharacter(char.id)"
+              >
+                Supprimer
+              </UiButton>
+            </div>
           </div>
         </div>
-        <div class="flex gap-2">
-          <UiButton
-            variant="primary"
-            @click="resumeCharacter"
-          >
-            Reprendre
-          </UiButton>
-          <UiButton
-            variant="ghost"
-            @click="clearCurrentCharacter"
-          >
-            Supprimer
-          </UiButton>
-        </div>
+      </div>
+
+      <!-- Message if no characters -->
+      <div
+        v-else
+        class="mt-6 p-4 bg-slate-800/30 rounded-lg text-slate-400"
+      >
+        Aucun personnage créé. Sélectionnez un univers ci-dessous pour commencer !
       </div>
     </section>
 
-    <div class="max-w-2xl w-full mx-auto">
+    <div class="max-w-2xl w-full mx-auto mt-8">
       <WorldSelector @select="onSelect" />
     </div>
 
@@ -49,18 +68,20 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../services/characterServiceApi';
+import type { SavedCharacterEntry, CharacterEntry } from '@shared/types';
 
 const router = useRouter();
-const currentCharacter = ref<any>(null);
-const charSummary = computed(() => {
-  if (!currentCharacter.value) return '';
-  const classes = currentCharacter.value.classes || [];
-  return classes.map((c: any) => (c?.name ? `${c.name} ${c.level}` : '')).filter(Boolean).join(', ');
-});
+const savedCharacters = ref<SavedCharacterEntry[]>([]);
+
+function getCharSummary(character: CharacterEntry): string {
+  if (!character) return '';
+  const classes = character.classes || [];
+  return classes.map((c: any) => (c?.name ? `${c.name} Niveau ${c.level}` : '')).filter(Boolean).join(', ');
+}
 
 function onSelect(id: string) {
   try { window.sessionStorage.setItem('selected-world', id); } catch {
@@ -70,25 +91,25 @@ function onSelect(id: string) {
   router.push({ name: 'character-step', params: { world: id, step: 1 } });
 }
 
-async function resumeCharacter() {
-  // set current character in localStorage and go to game view
-  const saved = await characterServiceApi.getAllSavedCharacters();
-  if (saved.length > 0) {
-    characterServiceApi.setCurrentCharacterId(saved[0].id);
-    router.push({ name: 'game', params: { world: saved[0].data.worldId } });
+async function resumeCharacter(characterId: string, world: string) {
+  characterServiceApi.setCurrentCharacterId(characterId);
+  router.push({ name: 'game', params: { world: world || 'dnd' } });
+}
+
+async function deleteCharacter(characterId: string) {
+  if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
+    await characterServiceApi.deleteCharacter(characterId);
+    // Refresh the character list
+    await loadCharacters();
   }
 }
 
-async function clearCurrentCharacter() {
-  const saved = await characterServiceApi.getAllSavedCharacters();
-  if (saved.length > 0) {
-    await characterServiceApi.deleteCharacter(saved[0].id);
-  }
-  currentCharacter.value = null;
+async function loadCharacters() {
+  savedCharacters.value = await characterServiceApi.getAllSavedCharacters();
 }
 
 onMounted(async () => {
-  currentCharacter.value = await characterServiceApi.getCurrentCharacter();
+  await loadCharacters();
 });
 </script>
 
