@@ -2,13 +2,13 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: rpggen-back
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/minScale: "0"
+    run.googleapis.com/maxScale: "1"
+    run.googleapis.com/invoker-iam-disabled: "true"
 spec:
   template:
-    metadata:
-      annotations:
-        autoscaling.knative.dev/minScale: "0"
-        autoscaling.knative.dev/maxScale: "1"
-        run.googleapis.com/ingress: "all"
     spec:
       serviceAccountName: github-sa
       containers:
@@ -36,19 +36,13 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
             timeoutSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 3001
-            periodSeconds: 10
-            timeoutSeconds: 3
           env:
             - name: NODE_ENV
               value: "production"
+            - name: SERVER_PORT
+              value: "3001"
             - name: LOG_FORMAT
               value: "json"
-            - name: PORT
-              value: "3001"
             - name: FRONTEND_URL
               value: "https://rpggen-front-469869562907.europe-west1.run.app"
             - name: MONGODB_URI

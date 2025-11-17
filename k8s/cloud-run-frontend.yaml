@@ -2,13 +2,13 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: rpggen-front
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/minScale: "0"
+    run.googleapis.com/maxScale: "1"
+    run.googleapis.com/invoker-iam-disabled: 'true'
 spec:
   template:
-    metadata:
-      annotations:
-        autoscaling.knative.dev/minScale: "0"
-        autoscaling.knative.dev/maxScale: "1"
-        run.googleapis.com/ingress: "all"
     spec:
       serviceAccountName: github-sa
       containers:

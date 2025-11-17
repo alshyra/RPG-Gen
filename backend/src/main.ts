@@ -57,7 +57,7 @@ const bootstrap = async () => {
   validateEnv(app);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }));
   setupSwagger(app);
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+  const port = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 3001;
   await app.listen(port, "0.0.0.0");
   await logApplicationStartup(app, port);
 }
