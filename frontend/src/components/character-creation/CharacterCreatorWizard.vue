@@ -69,6 +69,7 @@
       :is-generating="isGeneratingAvatar"
       :avatar-description="avatarDescription"
       @update:avatar-description="avatarDescription = $event; saveDraftNow()"
+      @generate-avatar="generateAvatar"
     />
 
     <!-- Navigation buttons -->

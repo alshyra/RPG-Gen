@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 
 interface Character {
   name: string;
@@ -19,6 +20,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:avatar-description', value: string): void;
+  (e: 'generate-avatar'): void;
 }
 
 defineProps<Props>();
@@ -44,6 +46,16 @@ const emit = defineEmits<Emits>();
       />
     </div>
 
+    <div class="mt-4">
+      <UiButton
+        variant="primary"
+        :disabled="!avatarDescription.trim() || isGenerating"
+        @click="$emit('generate-avatar')"
+      >
+        {{ isGenerating ? 'Génération...' : generatedAvatar ? 'Régénérer l\'avatar' : 'Générer l\'avatar' }}
+      </UiButton>
+    </div>
+
     <div
       v-if="isGenerating"
       class="mt-4 text-center text-slate-400"
@@ -57,6 +69,7 @@ const emit = defineEmits<Emits>();
       v-if="generatedAvatar"
       class="mt-4"
     >
+      <label class="block font-medium mb-2">Aperçu de l'avatar</label>
       <img
         :src="generatedAvatar"
         alt="Generated Avatar"
