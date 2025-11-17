@@ -19,10 +19,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="mt-8 p-4 bg-slate-900 rounded border border-slate-700">
-    <h3 class="font-bold mb-2">
-      Aperçu du personnage
-    </h3>
+  <div class="p-3 lg:p-4 bg-slate-900/50 rounded-b border-x border-b border-slate-700">
     <div class="text-sm text-slate-300 space-y-1">
       <div><strong>Nom:</strong> {{ character.name || '—' }}</div>
       <div><strong>Genre:</strong> {{ gender }}</div>
