@@ -1,0 +1,249 @@
+name: Code Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-lint:
+    name: Frontend - ESLint & TypeScript
+    runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+
+      - name: Run ESLint and TypeScript checks
+        working-directory: ./frontend
+        run: npm run lint
+
+  backend-lint:
+    name: Backend - ESLint & TypeScript
+    runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run ESLint and TypeScript checks
+        working-directory: ./backend
+        run: npm run lint
+
+  backend-tests:
+    name: Backend - Unit Tests
+    runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ./backend
+        run: npm run test
+
+  cypress-run:
+    runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        specs:
+          - "cypress/e2e/api-integration.cy.ts"
+          - "cypress/e2e/authentication.cy.ts"
+          - "cypress/e2e/character-creation.cy.ts"
+          - "cypress/e2e/home.cy.ts"
+          - "cypress/e2e/navigation.cy.ts"
+          - "cypress/e2e/smoke.cy.ts"
+          - "cypress/e2e/world-selection.cy.ts"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Create backend .env for testing
+        run: |
+          cat > backend/.env << 'EOF'
+          GOOGLE_API_KEY=test-key-will-be-mocked
+          MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
+          NODE_ENV=production
+          GOOGLE_OAUTH_CLIENT_ID=test-client-id
+          GOOGLE_OAUTH_CLIENT_SECRET=test-client-secret
+          GOOGLE_OAUTH_CALLBACK_URL=http://localhost:3001/auth/google/callback
+          JWT_SECRET=test-jwt-secret-for-e2e-tests
+          JWT_EXPIRES_IN=7d
+          FRONTEND_URL=http://localhost
+          EOF
+
+      - name: Start production Docker containers
+        run: |
+          docker compose up --build -d mongodb backend frontend
+
+      - name: Install Cypress dependencies (parallel with container startup)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to start..."
+
+          # Wait for MongoDB (faster check)
+          timeout 30 bash -c 'until docker compose exec -T mongodb mongosh --eval "db.adminCommand({ping: 1})" --quiet > /dev/null 2>&1; do sleep 1; done' || echo "MongoDB check timeout, continuing..."
+
+          # Wait for backend to be healthy
+          echo "Waiting for backend..."
+          timeout 60 bash -c 'until curl -sf http://localhost:3001 > /dev/null 2>&1 || curl -sf http://localhost:3001/api > /dev/null 2>&1; do sleep 2; done' || {
+            echo "Backend not responding, checking status..."
+            docker compose ps backend
+            docker compose logs --tail=30 backend
+          }
+
+          # Wait for frontend to be accessible
+          echo "Waiting for frontend..."
+          timeout 30 bash -c 'until curl -sf http://localhost/ > /dev/null 2>&1; do sleep 1; done' || {
+            echo "Frontend not responding, checking status..."
+            docker compose ps frontend
+            docker compose logs --tail=30 frontend
+            exit 1
+          }
+
+          echo "✓ All services are ready"
+
+      - name: Run Cypress tests
+        working-directory: frontend
+        run: npm run test:e2e -- --spec="${{ matrix.specs }}"
+        env:
+          CYPRESS_BASE_URL: http://localhost
+
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          echo "=== Frontend logs ==="
+          docker compose logs --tail=50 frontend
+          echo ""
+          echo "=== Backend logs ==="
+          docker compose logs --tail=50 backend
+          echo ""
+          echo "=== MongoDB logs ==="
+          docker compose logs --tail=20 mongodb
+
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose down -v
+
+      - name: Upload Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
+          if-no-files-found: ignore
+
+  frontend-component-tests:
+    name: Frontend - Component Tests
+    runs-on: ubuntu-latest
+    # Avoid duplicate runs for PRs from the same repo
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run component tests
+        working-directory: ./frontend
+        run: npm run test:component
+        env:
+          CI: true
+
+      - name: Upload component test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-test-screenshots
+          path: frontend/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload component test videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-test-videos
+          path: frontend/cypress/videos
+          if-no-files-found: ignore
