@@ -34,8 +34,7 @@ RUN chmod +x /docker-entrypoint.sh
 # nginx config at /etc/ssl/certs/ca-certificates.crt
 RUN apk add --no-cache ca-certificates \
     && update-ca-certificates \
-    && mkdir -p /etc/ssl/certs \
-    && ln -sf /etc/ssl/cert.pem /etc/ssl/certs/ca-certificates.crt || true
+    && mkdir -p /etc/ssl/certs
 
 # Set default backend URL (can be overridden at runtime)
 ENV BACKEND_URL=http://backend:3001
