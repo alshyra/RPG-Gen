@@ -1,4 +1,4 @@
-import type { CharacterEntry } from "@shared/types";
+import type { CharacterEntry } from '@shared/types';
 
 /**
  * Get the bonus for a specific skill check
@@ -9,16 +9,16 @@ import type { CharacterEntry } from "@shared/types";
  */
 export function getSkillBonus(
   character: CharacterEntry | null,
-  skillNameWithCheck: string
+  skillNameWithCheck: string,
 ): number {
   if (!character) return 0;
 
   // Extract skill name from "Skill Name Check" format
-  const skillName = skillNameWithCheck.replace(" Check", "").trim();
+  const skillName = skillNameWithCheck.replace(' Check', '').trim();
 
   // Try to find the skill in character's skills array
   if (character.skills && Array.isArray(character.skills)) {
-    const skill = character.skills.find((s) => s.name.toLowerCase() === skillName.toLowerCase());
+    const skill = character.skills.find(s => s.name.toLowerCase() === skillName.toLowerCase());
     if (skill) return skill.modifier;
   }
 
@@ -32,7 +32,7 @@ export function getSkillBonus(
  * @param character The character to get skills from
  */
 export function getAvailableSkills(
-  character: CharacterEntry | null
+  character: CharacterEntry | null,
 ): Array<{ name: string; modifier: number }> {
   return character?.skills || [];
 }

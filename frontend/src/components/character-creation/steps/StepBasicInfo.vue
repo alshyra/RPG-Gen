@@ -47,7 +47,7 @@ defineEmits<{
 const genderOptions = computed(() =>
   props.genders.map(g => ({
     value: g,
-    label: g === 'male' ? '♂️ Homme' : '♀️ Femme'
-  }))
+    label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
+  })),
 );
 </script>

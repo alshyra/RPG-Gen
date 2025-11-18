@@ -1,4 +1,4 @@
-import sharp from "sharp";
+import sharp from 'sharp';
 
 const MAX_WIDTH = 512;
 const MAX_HEIGHT = 512;
@@ -12,10 +12,10 @@ export async function compressImage(imageData: string | Buffer): Promise<string>
   let buffer: Buffer;
 
   // Convert base64 to buffer if needed
-  if (typeof imageData === "string") {
+  if (typeof imageData === 'string') {
     // Remove data URI prefix if present
-    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
-    buffer = Buffer.from(base64Data, "base64");
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    buffer = Buffer.from(base64Data, 'base64');
   } else {
     buffer = imageData;
   }
@@ -23,14 +23,14 @@ export async function compressImage(imageData: string | Buffer): Promise<string>
   // Compress and resize image
   const compressed = await sharp(buffer)
     .resize(MAX_WIDTH, MAX_HEIGHT, {
-      fit: "inside",
+      fit: 'inside',
       withoutEnlargement: true,
     })
     .jpeg({ quality: JPEG_QUALITY })
     .toBuffer();
 
   // Convert back to base64 data URI
-  const base64 = compressed.toString("base64");
+  const base64 = compressed.toString('base64');
   const dataUri = `data:image/jpeg;base64,${base64}`;
 
   return dataUri;
@@ -43,9 +43,9 @@ export async function validateImage(imageData: string | Buffer): Promise<boolean
   try {
     let buffer: Buffer;
 
-    if (typeof imageData === "string") {
-      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
-      buffer = Buffer.from(base64Data, "base64");
+    if (typeof imageData === 'string') {
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      buffer = Buffer.from(base64Data, 'base64');
     } else {
       buffer = imageData;
     }

@@ -26,24 +26,24 @@ import { computed } from 'vue';
 import { DnDRulesService } from '../../services/dndRulesService';
 
 interface CharacterData {
-    skills?: { name: string; proficient: boolean; modifier: number }[];
-    scores?: { [key: string]: number };
-    proficiency?: number;
+  skills?: { name: string; proficient: boolean; modifier: number }[];
+  scores?: { [key: string]: number };
+  proficiency?: number;
 }
 
 const props = defineProps<{ character: CharacterData }>();
 
 const skills = computed(() => {
-    if (!props.character.scores || !props.character.skills) return [];
+  if (!props.character.scores || !props.character.skills) return [];
 
-    return props.character.skills.map(skill => ({
-        ...skill,
-        modifier: DnDRulesService.calculateSkillModifier(
-            skill.name,
-            props.character.scores || {},
-            props.character.proficiency || 2,
-            skill.proficient
-        )
-    }));
+  return props.character.skills.map(skill => ({
+    ...skill,
+    modifier: DnDRulesService.calculateSkillModifier(
+      skill.name,
+      props.character.scores || {},
+      props.character.proficiency || 2,
+      skill.proficient,
+    ),
+  }));
 });
 </script>

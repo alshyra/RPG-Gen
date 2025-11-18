@@ -96,7 +96,7 @@ export class CharacterController {
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() updates: Partial<CharacterEntry>
+    @Body() updates: Partial<CharacterEntry>,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -123,7 +123,7 @@ export class CharacterController {
   async kill(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: { deathLocation?: string }
+    @Body() body: { deathLocation?: string },
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -131,7 +131,7 @@ export class CharacterController {
     const character = await this.characterService.markAsDeceased(
       userId,
       characterId,
-      body.deathLocation
+      body.deathLocation,
     );
     return {
       ok: true,

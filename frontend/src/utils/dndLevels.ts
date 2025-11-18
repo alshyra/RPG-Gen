@@ -1,7 +1,7 @@
-import type { DndLevel } from "@shared/types";
+import type { DndLevel } from '@shared/types';
 
 // Re-export the type from shared
-export type { DndLevel } from "@shared/types";
+export type { DndLevel } from '@shared/types';
 
 export const DND_LEVELS: DndLevel[] = [
   { level: 1, totalXp: 0, proficiencyBonus: 2 },

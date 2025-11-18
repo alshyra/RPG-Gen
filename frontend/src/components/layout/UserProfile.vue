@@ -11,7 +11,7 @@
         {{ user.email }}
       </div>
     </div>
-    
+
     <div class="relative">
       <button
         class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-600 hover:border-indigo-500 transition-colors"

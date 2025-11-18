@@ -27,9 +27,9 @@ export class AuthController {
     try {
       const user = req.user as UserDocument;
       const loginResult = await this.authService.login(user);
-      
+
       this.logger.log(`User logged in: ${user.email}`);
-      
+
       // Redirect to frontend with token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:80';
       res.redirect(`${frontendUrl}/auth/callback?token=${loginResult.access_token}`);

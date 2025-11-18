@@ -20,20 +20,24 @@ GOOGLE_API_KEY=AIza...your_api_key_here
 ### Initial Setup
 
 **Backend:**
+
 ```bash
 cd backend
 npm install
 npm run start:dev
 ```
+
 - Runs on port 3001
 - Swagger UI available at http://localhost:3001/docs
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
 - Runs on port 5173
 - Proxies `/api/*` requests to backend (port 3001)
 
@@ -182,19 +186,35 @@ interface GameInstruction {
 
 - **Dev Server**: `npm run dev` (Vite, http://localhost)
   - Proxies `/api/*` routes to `http://localhost:3001`
-- **Linting + Type Checking**: `npm run lint` 
+- **Linting + Type Checking**: `npm run lint`
   - Runs TypeScript type-check (vue-tsc) + ESLint style checks
   - Use `npm run lint:fix` to auto-fix formatting issues
 - **Build**: `npm run build` (verify production build works)
 - **Unit Tests**: `npm run test` (Vitest)
-- **E2E Tests**: 
+- **E2E Tests**:
   - `npm run test:e2e` - Run Cypress tests in headless mode
   - `npm run test:e2e:open` - Open Cypress interactive UI
   - Requires dev server running (`npm run dev`)
   - Tests run automatically via GitHub Actions on push/PR to main/develop branches
   - Screenshots and videos available as artifacts on failure
 - **Component Tests**:
+
   - `npm run test:component` - Run component tests in headless mode
+
+  ### Cypress selector best-practices (important)
+
+  - Avoid using CSS utility classes (Tailwind or other) as Cypress selectors; they change frequently and break tests.
+  - Always prefer stable selectors such as `data-cy` attributes for E2E and component tests. This ensures tests are resilient to style changes.
+  - Use the custom Cypress command `cy.dataCy('<value>')` (already defined in `frontend/cypress/support/commands.ts`) that maps to `[data-cy="<value>"]`.
+  - Example: in a Vue component, add `data-cy="some-action"` to an actionable control and in your test:
+
+    - Component: `<button data-cy="world-start-dnd">Commencer</button>`
+    - Test: `cy.dataCy('world-start-dnd').click(); cy.url().should('include', '/character/dnd/step/1');`
+
+  - Additional tips:
+    - Prefer `data-cy` over `id` since `id` collisions may happen between test runs; `data-cy` is explicitly for testing.
+    - Group `data-cy` values by feature to keep naming consistent: `world-start-dnd`, `char-resume-<id>`, `char-delete-<id>`.
+    - Use `aria-*` attributes for accessibility-driven queries (e.g. `cy.get('button[aria-label="Open settings"]')`) if it makes sense.
   - `npm run test:component:open` - Open Cypress component testing UI
 
 ### Backend

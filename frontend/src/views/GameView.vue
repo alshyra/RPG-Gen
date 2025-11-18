@@ -177,7 +177,7 @@ const gameStore = useGameStore();
 const isSidebarOpen = ref(false);
 
 // Composables
-  const { startGame } = useGameSession();
+const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls();
 
@@ -208,7 +208,7 @@ watch(
       }, 50);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Handle character death

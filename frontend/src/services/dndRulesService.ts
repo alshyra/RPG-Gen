@@ -105,7 +105,7 @@ export class DnDRulesService {
    */
   static applyRacialModifiers(
     baseScores: Record<string, number>,
-    raceModifiers: RaceModifiers
+    raceModifiers: RaceModifiers,
   ): Record<string, number> {
     const result = { ...baseScores };
     Object.keys(raceModifiers).forEach((key) => {
@@ -174,7 +174,7 @@ export class DnDRulesService {
 
     const abilityScore = scores[skill.ability] || 10;
     const modifier = this.getAbilityModifier(abilityScore);
-    
+
     return isProficient ? modifier + proficiency : modifier;
   }
 
@@ -188,7 +188,7 @@ export class DnDRulesService {
     raceModifiers: RaceModifiers,
     raceInfo: any,
     worldInfo?: { world?: string; worldId?: string },
-    selectedSkills?: string[]
+    selectedSkills?: string[],
   ): any {
     // Apply racial bonuses
     const finalScores = this.applyRacialModifiers(baseScores, raceModifiers);

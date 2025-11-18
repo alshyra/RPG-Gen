@@ -22,7 +22,7 @@ interface Emits {
 }
 
 defineProps<Props>();
-const emit = defineEmits<Emits>();
+defineEmits<Emits>();
 </script>
 
 <template>

@@ -65,7 +65,7 @@ const fetchUserProfile = async (token: string): Promise<User | null> => {
   try {
     const response = await fetch('/api/auth/profile', {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     if (response.ok) {

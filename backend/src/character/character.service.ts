@@ -9,7 +9,7 @@ export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
 
   constructor(
-    @InjectModel(Character.name) private characterModel: Model<CharacterDocument>
+    @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
   ) {}
 
   async create(userId: string, characterData: CharacterEntry): Promise<CharacterDocument> {
@@ -77,9 +77,9 @@ export class CharacterService {
   }
 
   async markAsDeceased(
-    userId: string, 
-    characterId: string, 
-    deathLocation?: string
+    userId: string,
+    characterId: string,
+    deathLocation?: string,
   ): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) {

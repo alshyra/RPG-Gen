@@ -38,6 +38,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.5.0",
     "@types/node": "^24.10.1",
     "ava": "^6.4.1",
     "ts-node": "^10.9.2",

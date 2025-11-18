@@ -168,7 +168,7 @@ const currentStep = computed({
   },
   set: (value: number) => {
     router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
-  }
+  },
 });
 
 const canProceed = computed(() => {
@@ -189,7 +189,6 @@ const canProceed = computed(() => {
 });
 
 const nextStep = async () => {
-  // If already on the last step, do nothing
   if (currentStep.value >= steps.length - 1) return;
 
   saveDraftWithStep(currentStep.value + 1);
@@ -199,55 +198,61 @@ const nextStep = async () => {
   if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
     await generateAvatar();
   }
-}
+};
 
 const previousStep = () => {
-  if (currentStep.value <= 0) return
+  if (currentStep.value <= 0) return;
 
   saveDraftWithStep(currentStep.value - 1);
   currentStep.value--;
-}
+};
 
 const updateCharacter = (updates: any) => character.value = { ...character.value, ...updates };
 
+const ensureCharacterId = () => {
+  let charId = character.value.id;
+  if (!charId) {
+    charId = characterServiceApi.generateUUID();
+    character.value.id = charId;
+  }
+  return charId;
+};
+
+const requestAvatar = async (charId: string) => {
+  const response = await axios.post('/api/image/generate-avatar', {
+    character: {
+      name: character.value.name,
+      gender: gender.value,
+      race: character.value.race,
+      classes: [{ name: primaryClass.value }],
+    },
+    description: avatarDescription.value,
+    characterId: charId, // Pass character ID to save avatar
+  });
+
+  generatedAvatar.value = response.data.imageUrl;
+  saveDraftNow(); // Save draft with new avatar
+};
 
 const generateAvatar = async () => {
   if (!avatarDescription.value.trim()) return;
 
   isGeneratingAvatar.value = true;
   try {
-    // First, ensure character has an ID by saving it if needed
-    let charId = character.value.id;
-    if (!charId) {
-      // Generate a UUID for the character before saving the avatar
-      charId = characterServiceApi.generateUUID();
-      character.value.id = charId;
-    }
-
-    const response = await axios.post('/api/image/generate-avatar', {
-      character: {
-        name: character.value.name,
-        gender: gender.value,
-        race: character.value.race,
-        classes: [{ name: primaryClass.value }]
-      },
-      description: avatarDescription.value,
-      characterId: charId, // Pass character ID to save avatar
-    });
-
-    generatedAvatar.value = response.data.imageUrl;
-    saveDraftNow(); // Save draft with new avatar
+    // Ensure the character has an ID before requesting an avatar
+    const charId = ensureCharacterId();
+    await requestAvatar(charId);
   } catch (error) {
     console.error('Avatar generation error:', error);
   } finally {
     isGeneratingAvatar.value = false;
   }
-}
+};
 
 const finishCreation = async () => {
   if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
     await generateAvatar();
   }
   await applyAndSave();
-}
+};
 </script>

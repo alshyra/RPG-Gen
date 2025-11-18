@@ -12,7 +12,7 @@ export class ImageService {
   async compressImage(imageData: string | Buffer): Promise<string> {
     try {
       const result = await compressImageUtil(imageData);
-      
+
       // Log compression details
       let originalSize = 0;
       if (typeof imageData === 'string') {
@@ -21,10 +21,10 @@ export class ImageService {
       } else {
         originalSize = imageData.length;
       }
-      
+
       const compressedSize = Buffer.from(result.replace(/^data:image\/\w+;base64,/, ''), 'base64').length;
       this.logger.debug(
-        `Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`
+        `Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`,
       );
 
       return result;

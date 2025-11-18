@@ -6,9 +6,12 @@
         RPG Gemini
       </h1>
     </div>
-    
+
     <!-- Subtitle and description - below title on mobile, left side on desktop -->
-    <div v-if="subtitle && description" class="flex-none text-center lg:text-left">
+    <div
+      v-if="subtitle && description"
+      class="flex-none text-center lg:text-left"
+    >
       <h2 class="text-lg lg:text-xl font-semibold">
         {{ subtitle }}
       </h2>
@@ -30,7 +33,7 @@ const gameStore = useGameStore();
 const worldMap: Record<string, string> = {
   dnd: 'Dungeons & Dragons',
   vtm: 'Vampire: The Masquerade',
-  cyberpunk: 'Cyberpunk'
+  cyberpunk: 'Cyberpunk',
 };
 
 const subtitle = computed(() => {

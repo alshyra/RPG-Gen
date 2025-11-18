@@ -13,7 +13,7 @@ export class ConversationService {
   private readonly MAX_MESSAGES = Number(process.env.CONV_MAX_MESSAGES || '60');
 
   constructor(
-    @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>
+    @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>,
   ) {}
 
   async getHistory(userId: string, characterId: string): Promise<ChatMessage[]> {
@@ -31,7 +31,7 @@ export class ConversationService {
 
   async append(userId: string, characterId: string, msg: ChatMessage) {
     let history = await this.chatHistoryModel.findOne({ userId, characterId });
-    
+
     if (!history) {
       history = new this.chatHistoryModel({
         userId,
@@ -54,16 +54,16 @@ export class ConversationService {
 
   async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
     const truncated = list.slice(-this.MAX_MESSAGES);
-    
+
     await this.chatHistoryModel.findOneAndUpdate(
       { userId, characterId },
       {
         messages: truncated,
         lastUpdated: new Date(),
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-    
+
     this.logger.log(`📝 Set history for character ${characterId} (${truncated.length} messages)`);
   }
 
@@ -74,9 +74,9 @@ export class ConversationService {
         messages: [],
         lastUpdated: new Date(),
       },
-      { upsert: true }
+      { upsert: true },
     );
-    
+
     this.logger.log(`🗑️ Cleared history for character ${characterId}`);
   }
 }

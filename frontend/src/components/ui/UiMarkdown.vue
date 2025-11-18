@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <div
     class="markdown-content"
@@ -12,26 +13,24 @@ import { computed } from 'vue';
 const props = defineProps({
   text: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 // Configure marked to allow HTML
 marked.setOptions({
- "async": false,
- "breaks": false,
- "extensions": null,
- "gfm": true,
- "hooks": null,
- "pedantic": false,
- "silent": false,
- "tokenizer": null,
- "walkTokens": null
+  async: false,
+  breaks: false,
+  extensions: null,
+  gfm: true,
+  hooks: null,
+  pedantic: false,
+  silent: false,
+  tokenizer: null,
+  walkTokens: null,
 });
 
-const renderedMarkdown = computed(() => {
-  return marked(props.text);
-});
+const renderedMarkdown = computed(() => marked(props.text));
 </script>
 
 <style scoped>
