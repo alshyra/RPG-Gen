@@ -41,7 +41,7 @@ export class GameEngine {
     // Get current character's UUID - this becomes the characterId for conversation
     const char = await characterServiceApi.getCurrentCharacter();
     if (!char)
-      throw new Error("No current character found. Please create or load a character first.");
+      throw new Error('No current character found. Please create or load a character first.');
     this.characterId = char.id;
 
     const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
@@ -55,7 +55,7 @@ export class GameEngine {
    * Send a message to the game backend
    */
   async sendMessage(message: string): Promise<GameResponse> {
-    if (!this.characterId) throw new Error("Game not started. Call startGame first.");
+    if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 
     const char = await characterServiceApi.getCurrentCharacter();
     const res = await apiClient.post('/chat', {
