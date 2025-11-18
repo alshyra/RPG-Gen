@@ -1,19 +1,11 @@
 <script setup lang="ts">
 import AbilityScorePicker from '../../character-stats/AbilityScorePicker.vue';
+import { useCharacterCreation } from '@/composables/useCharacterCreation';
 
-interface Props {
-  baseScores: Record<string, number>;
-}
-
-interface Emits {
-  (e: 'update:base-scores', value: Record<string, number>): void;
-}
-
-defineProps<Props>();
-const emit = defineEmits<Emits>();
+const { currentCharacter } = useCharacterCreation();
 
 const updateScores = (newScores: Record<string, number>) => {
-  emit('update:base-scores', newScores);
+  currentCharacter.value = { ...currentCharacter.value, scores: newScores };
 };
 </script>
 

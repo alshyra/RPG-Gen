@@ -1,9 +1,4 @@
-import type { DndLevel } from '@shared/types';
-
-// Re-export the type from shared
-export type { DndLevel } from '@shared/types';
-
-export const DND_LEVELS: DndLevel[] = [
+export const DND_LEVELS = [
   { level: 1, totalXp: 0, proficiencyBonus: 2 },
   { level: 2, totalXp: 300, proficiencyBonus: 2 },
   { level: 3, totalXp: 900, proficiencyBonus: 2 },
@@ -24,7 +19,9 @@ export const DND_LEVELS: DndLevel[] = [
   { level: 18, totalXp: 265000, proficiencyBonus: 6 },
   { level: 19, totalXp: 305000, proficiencyBonus: 6 },
   { level: 20, totalXp: 355000, proficiencyBonus: 6 },
-];
+] as const;
+
+type DndLevel = typeof DND_LEVELS[number];
 
 export const getCurrentLevel = (totalXp: number): DndLevel => [...DND_LEVELS].reverse().find(l => totalXp >= l.totalXp) || DND_LEVELS[0];
 

@@ -1,7 +1,15 @@
 import axios from 'axios';
 import { characterServiceApi } from './characterServiceApi';
 import { authService } from './authService';
-import type { GameResponse, ChatMessage } from '@shared/types';
+import type { ChatMessage } from '@backend/src/schemas/conversation.schema';
+import type { GameInstruction } from '@backend/src/external/game-parser.util';
+
+type GameResponse = {
+  text: string;
+  instructions?: GameInstruction[];
+  model?: string;
+  usage?: Record<string, unknown> | null;
+};
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
@@ -37,14 +45,8 @@ export class GameEngine {
    * Start game linked to current character
    * Each character gets its own conversation history using their UUID as characterId
    */
-  async startGame(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
-    // Get current character's UUID - this becomes the characterId for conversation
-    const currentChar = await characterServiceApi.getCurrentCharacter();
-    if (!currentChar)
-      throw new Error('No current character found. Please create or load a character first.');
-    this.characterId = currentChar.id;
-
-    // GET /api/conversation/:characterId returns { ok, ... } or ok:false when missing
+  async startGame(characterId: string): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
+    this.characterId = characterId;
     const histRes = await apiClient.get(`/conversation/${this.characterId}`);
     const ok = histRes?.data?.ok ?? true;
     if (!ok) {

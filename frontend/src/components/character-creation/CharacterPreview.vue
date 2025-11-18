@@ -1,13 +1,8 @@
 <script setup lang="ts">
-interface Character {
-  name: string;
-  race: any;
-  scores: Record<string, number>;
-  [key: string]: any;
-}
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
 
 interface Props {
-  character: Character;
+  character: Partial<CharacterDto>;
   gender: string;
   primaryClass: string;
   baseScores: Record<string, number>;

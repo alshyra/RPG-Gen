@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { CharacterEntry, GameInstruction, GameMessage, Spell, InventoryItem } from '@shared/types';
-
+import type { CharacterDto as CharacterDto, InventoryItemDto as InventoryItem, SpellDto as Spell } from '@backend/src/character/dto/character.dto';
+import type { ChatMessage } from '@backend/src/schemas/conversation.schema';
+import type { GameMessage, GameInstruction } from '@backend/src/external/game-parser.util';
 export interface GameSession {
   world: string;
   worldName: string;
-  character: CharacterEntry | null;
+  character: CharacterDto | null;
 }
 
 const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any) => ({
@@ -13,13 +14,13 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
     s.value.world = world;
     s.value.worldName = name;
   },
-  setCharacter: (character: CharacterEntry | null) => {
+  setCharacter: (character: CharacterDto | null) => {
     s.value.character = character;
   },
   appendMessage: (role: string, text: string) => {
     m.value.push({ role, text });
   },
-  updateMessages: (newMessages: GameMessage[]) => {
+  updateMessages: (newMessages: ChatMessage[]) => {
     m.value = newMessages;
   },
   clearMessages: () => {

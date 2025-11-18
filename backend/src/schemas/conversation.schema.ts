@@ -13,7 +13,7 @@ class MessageMeta {
 }
 
 @Schema({ _id: false })
-class ChatMessage {
+export class ChatMessage {
   @Prop({ required: true })
   role: string;
 

@@ -13,7 +13,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import UiButton from '../ui/UiButton.vue';
-import { type GameInstruction } from '@shared/types';
+import type { GameInstruction } from '@backend/src/external/game-parser.util';
 
 const emit = defineEmits<{
   (e: 'rolled', payload: any): void;

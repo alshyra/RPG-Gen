@@ -30,25 +30,25 @@
 
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
+import { useCharacterCreation } from '@/composables/useCharacterCreation';
+import { DnDRulesService } from '@/services/dndRulesService';
 
-interface Props {
-  primaryClass: string;
-  selectedSkills: string[];
-  availableSkills: string[];
-  skillsToChoose: number;
-}
-
-interface Emits {
-  (e: 'update:selected-skills', value: string[]): void;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const { currentCharacter } = useCharacterCreation();
 
 const toggleSkill = (skill: string) => {
-  const newSkills = props.selectedSkills.includes(skill)
-    ? props.selectedSkills.filter(s => s !== skill)
-    : [...props.selectedSkills, skill];
-  emit('update:selected-skills', newSkills);
+  const skills = currentCharacter.value.skills || [];
+  const isSelected = skills.some(s => s.name === skill);
+  let newSkills;
+  if (isSelected) {
+    newSkills = skills.filter(s => s.name !== skill);
+  } else {
+    newSkills = [...skills, { name: skill, proficient: true, modifier: 0 }];
+  }
+  currentCharacter.value = { ...currentCharacter.value, skills: newSkills };
 };
+
+const primaryClass = computed(() => currentCharacter.value.classes?.[0]?.name || '');
+const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
+const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
+const selectedSkills = computed(() => (currentCharacter.value.skills || []).map(s => s.name));
 </script>

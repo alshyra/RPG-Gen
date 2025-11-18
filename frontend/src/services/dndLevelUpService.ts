@@ -240,7 +240,7 @@ export const dndLevelUpService = {
 
   /**
    * Get proficiency bonus for a level
-   * @param level - Character level
+   * @param level - CharacterDto level
    * @returns Proficiency bonus
    */
   getProficiencyBonus(level: number): number {

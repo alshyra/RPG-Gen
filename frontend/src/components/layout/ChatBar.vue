@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
-import { type GameInstruction } from '@shared/types';
+import type { GameInstruction } from '@backend/src/external/game-parser.util';
 
 interface Props {
   playerText: string;

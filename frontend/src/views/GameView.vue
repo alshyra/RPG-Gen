@@ -192,7 +192,8 @@ const toggleSidebar = () => {
 // Load on mount
 onMounted(async () => {
   try {
-    await startGame();
+    const characterId = router.currentRoute.value.params.characterId as string;
+    await startGame(characterId);
   } catch (e) {
     gameStore.appendMessage('Error', String(e));
   }
@@ -213,8 +214,8 @@ watch(
 
 // Handle character death
 const onDeathConfirm = async () => {
-  if (!gameStore.session.character?.id) return;
-  await characterServiceApi.killCharacter(gameStore.session.character.id, gameStore.session.worldName);
+  if (!gameStore.session.character?.characterId) return;
+  await characterServiceApi.killCharacter(gameStore.session.character.characterId, gameStore.session.worldName);
   gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');

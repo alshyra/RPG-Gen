@@ -8,16 +8,16 @@
       <div>
         <label class="block font-medium mb-2">Race</label>
         <RacePicker
-          :model-value="character.race"
+          :model-value="currentCharacter.race"
           :allowed-races="allowedRaces"
-          @update:race="(race: Race | null) => updateCharacter({ ...character, race })"
+          @update:race="(race: Race | null) => onRaceUpdate(race)"
         />
       </div>
 
       <div>
         <label class="block font-medium mb-2">Classe</label>
         <UiSelect
-          :model-value="primaryClass"
+          :model-value="currentCharacter.classes?.[0]?.name || ''"
           @update:model-value="updateClass"
         >
           <option
@@ -34,42 +34,36 @@
 </template>
 
 <script setup lang="ts">
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
+import type { RaceDto as Race } from '@backend/src/character/dto/character.dto';
 import RacePicker from '../RacePicker.vue';
 import UiSelect from '../../ui/UiSelect.vue';
 
-interface Race {
-  id: string;
-  name: string;
-  mods: Record<string, number>;
-}
+import { useCharacterCreation } from '@/composables/useCharacterCreation';
 
-interface Character {
-  name: string;
-  race: Race | null;
-  scores: Record<string, number>;
-  [key: string]: any;
-}
+const { currentCharacter } = useCharacterCreation();
 
 interface Props {
-  character: Character;
-  primaryClass: string;
   allowedRaces: Race[];
   classList: string[];
 }
 
-interface Emits {
-  (e: 'update:character', value: Character): void;
-  (e: 'update:primary-class', value: string): void;
-}
-
 defineProps<Props>();
-const emit = defineEmits<Emits>();
 
-const updateCharacter = (newCharacter: Character) => {
-  emit('update:character', newCharacter);
+const updateCharacter = (newCharacter: Partial<CharacterDto>) => {
+  currentCharacter.value = { ...currentCharacter.value, ...newCharacter };
 };
 
 const updateClass = (newClass: string) => {
-  emit('update:primary-class', newClass);
+  // set primary class as first class in the array
+  const current = currentCharacter.value || {};
+  const classes = current.classes ? [...current.classes] : [];
+  if (classes.length === 0) classes.push({ name: newClass, level: 1 });
+  else classes[0] = { ...classes[0], name: newClass };
+  currentCharacter.value = { ...current, classes };
+};
+
+const onRaceUpdate = (race: Race | null) => {
+  updateCharacter({ ...currentCharacter.value, race: race || undefined });
 };
 </script>

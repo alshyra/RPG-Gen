@@ -1,6 +1,6 @@
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
-import { CharacterEntry } from '@shared/types';
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { gameEngine } from '../services/gameEngine';
 
@@ -36,26 +36,20 @@ const processHistoryMessages = (history: any[], gameStore: any): any[] =>
 
 export function useGameSession() {
   const route = useRoute();
-  const router = useRouter();
   const gameStore = useGameStore();
 
-  const initializeGame = async (char: CharacterEntry) => {
+  const initializeGame = async (char: CharacterDto) => {
     try {
       gameStore.setCharacter(char);
       if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      const { messages: history } = await gameEngine.startGame();
+      const { messages: history } = await gameEngine.startGame(char.characterId);
       if (history?.length) gameStore.updateMessages(processHistoryMessages(history, gameStore));
     } catch (e: any) {
       gameStore.appendMessage('Error', e?.response?.data?.error || e.message);
     }
   };
-  const startGame = async (): Promise<void> => {
-    // Check if character exists, redirect to home if not
-    const char = await characterServiceApi.getCurrentCharacter();
-    if (!char) {
-      await router.push('/home');
-      return;
-    }
+  const startGame = async (characterId: string): Promise<void> => {
+    const char = await characterServiceApi.getCharacterById(characterId);
 
     gameStore.setWorld(
       (route.params.world as string) || '',

@@ -2,7 +2,7 @@
   <div class="flex gap-2">
     <UiButton
       v-for="option in options"
-      :key="option.value"
+      :key="typeof option.value === 'string' || typeof option.value === 'number' ? option.value : String(option.value)"
       :variant="modelValue === option.value ? 'primary' : 'ghost'"
       @click="$emit('update:modelValue', option.value)"
     >
@@ -15,16 +15,16 @@
 import UiButton from './UiButton.vue';
 
 interface Option {
-  value: string | number;
+  value: unknown;
   label: string;
 }
 
 defineProps<{
   options?: Option[]; // List of toggle options
-  modelValue?: string | number; // Currently selected value
+  modelValue?: unknown; // Currently selected value
 }>();
 
 defineEmits<{
-  (e: 'update:modelValue', value: string | number): void;
+  (e: 'update:modelValue', value: unknown): void;
 }>();
 </script>

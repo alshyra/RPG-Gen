@@ -1,22 +1,22 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Logger,
+  Param,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Req,
   UseGuards,
-  Logger,
-  BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { CharacterService } from './character.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Character } from '../schemas/character.schema';
 import { UserDocument } from '../schemas/user.schema';
-import type { CharacterEntry } from '../../../shared/types';
+import { CharacterService } from './character.service';
+import type { CharacterDto } from './dto/character.dto';
 
 @ApiTags('characters')
 @Controller('characters')
@@ -29,19 +29,12 @@ export class CharacterController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
-  async create(@Req() req: Request, @Body() characterData: CharacterEntry) {
+  async create(@Req() req: Request, @Body() characterData: Character) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    if (!characterData.id) {
-      throw new BadRequestException('Character must have an id');
-    }
-
     const character = await this.characterService.create(userId, characterData);
-    return {
-      ok: true,
-      character: this.characterService.toCharacterEntry(character),
-    };
+    return this.characterService.toCharacterDto(character) as CharacterDto;
   }
 
   @Get()
@@ -51,10 +44,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.findByUserId(userId);
-    return {
-      ok: true,
-      characters: characters.map(this.characterService.toCharacterEntry, this),
-    };
+    return characters.map(this.characterService.toCharacterDto, this.characterService) as CharacterDto[];
   }
 
   @Get('deceased')
@@ -64,14 +54,8 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.getDeceasedCharacters(userId);
-    return {
-      ok: true,
-      characters: characters.map(c => ({
-        ...this.characterService.toCharacterEntry(c),
-        diedAt: c.diedAt?.toISOString(),
-        deathLocation: c.deathLocation,
-      })),
-    };
+    // toCharacterDto already converts dates -> ISO strings; keep shapes consistent
+    return characters.map(c => ({ ...this.characterService.toCharacterDto(c) }));
   }
 
   @Get(':characterId')
@@ -87,7 +71,7 @@ export class CharacterController {
 
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character),
+      character: this.characterService.toCharacterDto(character) as CharacterDto,
     };
   }
 
@@ -96,7 +80,7 @@ export class CharacterController {
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() updates: Partial<CharacterEntry>,
+    @Body() updates: Partial<Character>,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -104,7 +88,7 @@ export class CharacterController {
     const character = await this.characterService.update(userId, characterId, updates);
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character),
+      character: this.characterService.toCharacterDto(character) as CharacterDto,
     };
   }
 
@@ -133,9 +117,6 @@ export class CharacterController {
       characterId,
       body.deathLocation,
     );
-    return {
-      ok: true,
-      character: this.characterService.toCharacterEntry(character),
-    };
+    return this.characterService.toCharacterDto(character) as CharacterDto;
   }
 }

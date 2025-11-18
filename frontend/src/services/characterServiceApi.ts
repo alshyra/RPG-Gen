@@ -1,10 +1,10 @@
 /**
- * Character API Service - Communicates with backend for character persistence
+ * CharacterDto API Service - Communicates with backend for character persistence
  */
 
 import axios from 'axios';
 import { authService } from './authService';
-import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@shared/types';
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
 
 const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
@@ -34,115 +34,66 @@ apiClient.interceptors.response.use(
   },
 );
 
-const generateUUID = (): string => crypto.randomUUID();
-
-const getAllSavedCharacters = async (): Promise<SavedCharacterEntry[]> => {
+const getAllSavedCharacters = async (): Promise<CharacterDto[]> => {
   try {
-    const response = await apiClient.get('/characters');
-    const characters = response.data.characters || [];
-    return characters.map((char: CharacterEntry) => ({
-      id: char.id,
-      data: char,
-    }));
+    const response = await apiClient.get<CharacterDto[]>('/characters');
+    return response.data as CharacterDto[];
   } catch (e) {
     console.error('Failed to load characters from API', e);
     return [];
   }
 };
 
-const saveCharacter = async (character: CharacterEntry): Promise<string> => {
+const createCharacter = async (character: Partial<CharacterDto>): Promise<CharacterDto> => {
   try {
-    const charId = character.id || generateUUID();
-    const charWithId = { ...character, id: charId };
-
-    await apiClient.post('/characters', charWithId);
-
-    // Also save current character ID in localStorage for quick access
-    localStorage.setItem('rpg-character-id', charId);
-
-    return charId;
+    return (await apiClient.post<CharacterDto>('/characters', character)).data as CharacterDto;
   } catch (e) {
-    console.error('Failed to save character to API', e);
+    console.error('Failed to create character in API', e);
     throw e;
   }
 };
 
-const updateCurrentCharacter = async (character: CharacterEntry): Promise<void> => {
+const updateCharacter = async (character: CharacterDto): Promise<void> => {
   try {
-    if (!character.id) {
-      throw new Error('Character must have an ID to update');
+    if (!character.characterId) {
+      throw new Error('CharacterDto must have an ID to update');
     }
-
-    await apiClient.put(`/characters/${character.id}`, character);
+    const charId = character.characterId;
+    await apiClient.put(`/characters/${charId}`, character);
   } catch (e) {
     console.error('Failed to update character in API', e);
     throw e;
   }
 };
 
-const getCurrentCharacter = async (): Promise<CharacterEntry | null> => {
-  try {
-    const currentCharId = localStorage.getItem('rpg-character-id');
-    if (!currentCharId) return null;
-
-    const response = await apiClient.get(`/characters/${currentCharId}`);
-    return response.data.character || null;
-  } catch (e) {
-    console.error('Failed to get current character from API', e);
-    return null;
-  }
+const getCharacterById = async (characterId: string): Promise<CharacterDto> => {
+  const response = await apiClient.get<CharacterDto>(`/characters/${characterId}`);
+  if (!response.data) throw new Error('CharacterDto not found');
+  // Backend returns `{ ok: true, character }` — normalize to return the character object
+  const data = response.data as any;
+  if (data.character) return data.character as CharacterDto;
+  return data as CharacterDto;
 };
 
 const deleteCharacter = async (charId: string): Promise<void> => {
   try {
     await apiClient.delete(`/characters/${charId}`);
-
-    // If this was the current character, clear it
-    const currentCharId = localStorage.getItem('rpg-character-id');
-    if (currentCharId === charId) {
-      localStorage.removeItem('rpg-character-id');
-    }
   } catch (e) {
     console.error('Failed to delete character from API', e);
     throw e;
   }
 };
 
-const setCurrentCharacterId = (charId: string): void => {
-  try {
-    localStorage.setItem('rpg-character-id', charId);
-  } catch (e) {
-    console.error('Failed to set current character ID', e);
-  }
-};
-
-const getCurrentCharacterId = (): string | null =>
-  localStorage.getItem('rpg-character-id');
-
-const clearCurrentCharacterId = (): void => {
-  try {
-    localStorage.removeItem('rpg-character-id');
-  } catch (e) {
-    console.error('Failed to clear current character ID', e);
-  }
-};
-
 const killCharacter = async (charId: string, deathLocation?: string): Promise<void> => {
   try {
     await apiClient.post(`/characters/${charId}/kill`, { deathLocation });
-
-    // Remove from current character if it's the one that died
-    const currentCharId = localStorage.getItem('rpg-character-id');
-    if (currentCharId === charId) {
-      localStorage.removeItem('rpg-character-id');
-    }
   } catch (e) {
     console.error('Failed to mark character as deceased in API', e);
     throw e;
   }
 };
 
-const getDeceasedCharacters = async (): Promise<DeceasedCharacterEntry[]> => {
+const getDeceasedCharacters = async (): Promise<CharacterDto[]> => {
   try {
     const response = await apiClient.get('/characters/deceased');
     const characters = response.data.characters || [];
@@ -158,67 +109,23 @@ const getDeceasedCharacters = async (): Promise<DeceasedCharacterEntry[]> => {
   }
 };
 
-/**
- * Draft management - still uses localStorage since drafts are temporary
- */
-const DRAFT_KEY = 'rpg-character-draft';
-
-const saveDraft = (draftData: any): void => {
+const hasDraft = async (): Promise<boolean> => {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
-  } catch (e) {
-    console.error('Failed to save character draft', e);
-  }
-};
-
-const loadDraft = (): any | null => {
-  try {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    return draft ? JSON.parse(draft) : null;
-  } catch (e) {
-    console.error('Failed to load character draft', e);
-    return null;
-  }
-};
-
-const hasDraft = (): boolean => {
-  try {
-    return !!localStorage.getItem(DRAFT_KEY);
+    const response = await apiClient.get('/characters');
+    const characters: CharacterDto[] = response.data || response.data.characters || [];
+    return characters.some((c: any) => c?.state === 'draft');
   } catch {
     return false;
   }
 };
 
-const clearDraft = (): void => {
-  try {
-    localStorage.removeItem(DRAFT_KEY);
-  } catch (e) {
-    console.error('Failed to clear character draft', e);
-  }
-};
-
-// Synchronous version for compatibility with existing code
-const loadCharacter = (): CharacterEntry | null =>
-  // This is a synchronous wrapper that returns cached data
-  // The actual data should be loaded asynchronously using getCurrentCharacter()
-  null
-;
-
 export const characterServiceApi = {
-  generateUUID,
-  loadCharacter, // Deprecated - use getCurrentCharacter()
-  saveCharacter,
-  updateCurrentCharacter,
-  getCurrentCharacter,
+  createCharacter,
+  updateCharacter,
+  getCharacterById,
   getAllSavedCharacters,
   deleteCharacter,
-  setCurrentCharacterId,
-  getCurrentCharacterId,
-  clearCurrentCharacterId,
   killCharacter,
   getDeceasedCharacters,
-  saveDraft,
-  loadDraft,
   hasDraft,
-  clearDraft,
 };

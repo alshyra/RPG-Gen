@@ -7,9 +7,9 @@
     <div>
       <label class="block font-medium mb-2">Nom du personnage</label>
       <UiInputText
-        :model-value="character.name"
+        :model-value="currentCharacter.name"
         placeholder="Ex: Aragorn"
-        @update:model-value="$emit('update:character', { ...character, name: $event })"
+        @update:model-value="updateCharacterName($event)"
       />
     </div>
 
@@ -18,8 +18,8 @@
         <label class="block font-medium mb-2">Genre</label>
         <UiButtonToggle
           :options="genderOptions"
-          :model-value="gender"
-          @update:model-value="$emit('update:gender', $event as string)"
+          :model-value="currentCharacter?.gender"
+          @update:model-value="updateGender($event)"
         />
       </div>
     </div>
@@ -27,27 +27,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
 import UiButtonToggle from '@/components/ui/UiButtonToggle.vue';
+import { GENDERS, isGenderTypeGuard, useCharacterCreation } from '@/composables/useCharacterCreation';
 
-interface Props {
-  character: any;
-  gender: string;
-  world?: string;
-  genders: string[];
-}
+const { currentCharacter } = useCharacterCreation();
 
-const props = defineProps<Props>();
-defineEmits<{
-  (e: 'update:character', value: any): void;
-  (e: 'update:gender', value: string): void;
-}>();
+const updateGender = (newGender: unknown) => {
+  if (!isGenderTypeGuard(newGender)) return;
+  currentCharacter.value = {
+    ...currentCharacter.value,
+    gender: newGender,
+  };
+};
 
-const genderOptions = computed(() =>
-  props.genders.map(g => ({
-    value: g,
-    label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
-  })),
-);
+const updateCharacterName = (newName: string) => {
+  currentCharacter.value = {
+    ...currentCharacter.value,
+    name: newName,
+  };
+};
+
+const genderOptions = GENDERS.map(g => ({
+  value: g,
+  label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
+}));
+
 </script>

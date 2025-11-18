@@ -1,32 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LandingView from '../views/LandingView.vue';
-import HomeView from '../views/HomeView.vue';
-import GameView from '../views/GameView.vue';
+import { authService } from '../services/authService';
+import AuthCallbackView from '../views/AuthCallbackView.vue';
 import CharacterCreatorView from '../views/CharacterCreatorView.vue';
 import CharacterLevelupView from '../views/CharacterLevelupView.vue';
-import NotFoundView from '../views/NotFoundView.vue';
+import GameView from '../views/GameView.vue';
+import HomeView from '../views/HomeView.vue';
+import LandingView from '../views/LandingView.vue';
 import LoginView from '../views/LoginView.vue';
-import AuthCallbackView from '../views/AuthCallbackView.vue';
-import { authService } from '../services/authService';
+import NotFoundView from '../views/NotFoundView.vue';
 
 const routes = [
   { path: '/', name: 'landing', component: LandingView, meta: { public: true } },
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/auth/callback', name: 'auth-callback', component: AuthCallbackView, meta: { public: true } },
   { path: '/home', name: 'home', component: HomeView },
-  { path: '/game/:world?', name: 'game', component: GameView },
+  { path: '/game/:characterId', name: 'game', component: GameView },
   {
-    path: '/character/:world?/step/:step',
+    path: '/character/:characterId/step/:step',
     name: 'character-step',
     component: CharacterCreatorView,
   },
-  {
-    path: '/character/:world?',
-    redirect: (to: any) => {
-      const world = to.params.world || 'dnd';
-      return `/character/${world}/step/1`;
-    },
-  },
+
   { path: '/levelup/:world?', name: 'levelup', component: CharacterLevelupView },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
 ];

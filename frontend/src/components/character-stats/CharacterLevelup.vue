@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 rounded-md">
     <div class="md:flex md:items-start md:gap-6">
-      <!-- Left: Character info and levelup preview -->
+      <!-- Left: CharacterDto info and levelup preview -->
       <div class="md:w-1/3 mb-4 md:mb-0">
         <!-- Current Level -->
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4">
@@ -99,10 +99,10 @@
           </div>
         </div>
 
-        <!-- Character Preview -->
+        <!-- CharacterDto Preview -->
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4">
           <div class="text-sm text-slate-400 mb-3">
-            Character Summary
+            CharacterDto Summary
           </div>
           <div class="space-y-2 text-sm">
             <div>
@@ -153,7 +153,7 @@ const gameStore = useGameStore();
 // State
 const isPending = ref(false);
 
-// Character data
+// CharacterDto data
 const character = computed(() => props.initialCharacter || {});
 const currentLevel = computed(() => character.value.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));

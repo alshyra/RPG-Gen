@@ -12,19 +12,19 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-// Swagger decorators
 import { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
-// Joi removed; optional validation can be implemented with NestJS validation pipe
-import type { CharacterEntry } from '../../../shared/types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
 import { GeminiTextService } from '../external/text/gemini-text.service';
 import { CharacterService } from '../character/character.service';
+import { parseGameResponse } from '../external/game-parser.util';
 import { UserDocument } from '../schemas/user.schema';
-import type { ChatMessage } from '../../../shared/types';
 import { ConversationService } from './conversation.service';
+import { Character } from 'src/schemas/character.schema';
+import type { CharacterDto } from '../character/dto/character.dto';
+import type { GameInstruction, GameMessage } from '../external/game-parser.util';
+import type { ChatMessage } from '../schemas/conversation.schema';
 
 const TEMPLATE_PATH = path.join(__dirname, 'dnd.prompt.txt');
 
@@ -56,7 +56,7 @@ export class ConversationController {
     }
   }
 
-  private getAbilityScore(character: CharacterEntry, key: string): number {
+  private getAbilityScore(character: Character | CharacterDto, key: string): number {
     let score = character[key];
     if (typeof score === 'number') return score;
     score = character[key.toLowerCase()];
@@ -67,7 +67,7 @@ export class ConversationController {
     return typeof score === 'number' ? score : 10;
   }
 
-  private buildCharacterSummary(character: CharacterEntry): string {
+  private buildCharacterSummary(character: Character | CharacterDto): string {
     let summary = `
 Character Information:
 - Name: ${character.name || 'Unknown'}
@@ -102,7 +102,7 @@ Character Information:
     userId: string,
     characterId: string,
     systemPrompt: string,
-    character?: CharacterEntry,
+    character?: Character | CharacterDto,
   ): Promise<ChatMessage> {
     this.logger.log(`Starting conversation for character ${characterId} (user: ${userId})`);
     this.logger.log(`Starting conversation for character ${characterId} (user: ${userId})`);
@@ -173,7 +173,7 @@ Character Information:
     userId: string,
     characterId: string,
     message: string,
-    character: CharacterEntry | undefined,
+    character: Character | CharacterDto | undefined,
   ): Promise<{ characterId: string; result: Record<string, unknown> }> {
     const systemPrompt = await this.loadSystemPrompt(character?.world as string | undefined);
     const history = await this.conv.getHistory(userId, characterId);
@@ -229,12 +229,13 @@ Character Information:
   private async validateAndGetCharacter(userId: string, characterId: string) {
     const characterDocument = await this.characterService.findByCharacterId(userId, characterId);
     if (!characterDocument) throw new BadRequestException('character not found');
-    return this.characterService.toCharacterEntry(characterDocument);
+    // Convert to DTO to avoid leaking mongoose ObjectId types to other services.
+    return this.characterService.toCharacterDto(characterDocument) as CharacterDto;
   }
 
-  private async createConversationForCharacter(userId: string, characterId: string, charEntry: CharacterEntry) {
+  private async createConversationForCharacter(userId: string, characterId: string, charEntry: CharacterDto | Character) {
     const systemPrompt = await this.loadSystemPrompt(charEntry.world);
-    const initMsg = await this.startConversation(userId, characterId, systemPrompt, charEntry);
+    const initMsg = await this.startConversation(userId, characterId, systemPrompt, charEntry as CharacterDto);
     return { ok: true, characterId, isNew: true, history: [initMsg] };
   }
 

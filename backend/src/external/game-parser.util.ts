@@ -1,14 +1,35 @@
-import type { GameInstruction } from '../../../shared/types';
-
-// Re-export for convenience
-export type { GameInstruction } from '../../../shared/types';
-
 const extractJsonBlocks = (text: string): string[] => {
   // Handle both actual newlines and escaped newlines (literal \n) in code blocks
   // Also handle spaces before/after the JSON
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
   return jsonMatches.map(m => m[1].trim()).filter(Boolean);
 };
+
+// Shared types used across backend and frontend for parsing game responses
+export interface GameInstruction {
+  type?: 'roll' | 'xp' | 'hp' | 'spell' | 'inventory';
+  data?: Record<string, unknown>;
+  roll?: { dices: string; modifier?: string | number; description?: string };
+  hp?: number;
+  xp?: number;
+  spell?: Record<string, unknown>;
+  inventory?: Record<string, unknown>;
+}
+
+export interface GameMessage {
+  role: string;
+  text: string;
+}
+
+export interface GameResponse {
+  text: string;
+  instructions: GameInstruction[];
+  model: string;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+  };
+}
 
 const parseNestedJson = (text: string): string[] => {
   const results: string[] = [];
@@ -114,6 +135,6 @@ export const extractInstructions = (narrative: string): {
   const instructions = parseGameInstructions(narrative);
   const cleanedNarrative = cleanNarrativeText(narrative);
   return { narrative: cleanedNarrative, instructions };
-}
+};
 
 export const parseGameResponse = extractInstructions;

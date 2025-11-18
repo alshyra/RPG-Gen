@@ -41,9 +41,6 @@ npm run dev
 - Runs on port 5173
 - Proxies `/api/*` requests to backend (port 3001)
 
-**Shared Types:**
-Located in `shared/types/` - used by both frontend and backend for type safety.
-
 ## Architecture Overview
 
 ### Full Stack
@@ -96,19 +93,6 @@ Located in `shared/types/` - used by both frontend and backend for type safety.
   - Parses roll instructions: `[ROLL:dices=1d20 modifier=+5]`
     Developer prompt files for conversation (DND / world templates) are stored near the conversation module: `backend/src/conversation/*.prompt.txt` (e.g. `dnd.prompt.txt`).
 
-#### Shared Types
-
-Located in `shared/types/` - provides type safety across frontend and backend:
-
-- **`types/character.ts`**: Character, Race, Skills, SavedCharacterEntry
-- **`types/game.ts`**: GameInstruction, ChatMessage, GameResponse, RollResult
-- **Usage**: Import from relative path `../../shared/types` in both frontend and backend
-- **Guidelines**:
-  - Use `interface` for object types (not `type`)
-  - Document with JSDoc comments
-  - Prefer single responsibility per type
-  - Keep types immutable (no mutable methods)
-  - Avoid circular dependencies between character.ts and game.ts
 
 ## UI Component Standards
 
@@ -131,27 +115,6 @@ Located in `shared/types/` - provides type safety across frontend and backend:
 - **`DeathModal`**: Character death flow
 - Generic modal structure: title + content + action buttons
 
-## Character & D&D Rules
-
-### Character Structure
-
-```typescript
-interface CharacterEntry {
-  id: string; // UUID
-  name: string;
-  race: { id: string; name: string; mods: Record<string, number> };
-  scores: { Str; Dex; Con; Int; Wis; Cha }; // Racial mods applied
-  hp: number; // Current
-  hpMax: number; // Max from CON
-  totalXp: number; // Cumulative
-  classes: [{ name: string; level: number }]; // Level from XP (L1-20)
-  skills: [{ name: string; proficient: boolean; modifier: number }];
-  world: string; // Game universe ID (dnd/vtm/cyberpunk)
-  portrait: string; // Image path or generated URL
-  gender: "male" | "female";
-  proficiency: number; // Bonus (default 2)
-}
-```
 
 ### D&D Rules Service
 
@@ -336,13 +299,6 @@ backend/src/
 ├── chat/                      # ConversationController, ConversationService
 ├── external/                  # GeminiTextService, GameParser
 └── test/                      # game-parser.test.ts (12 tests passing)
-
-shared/
-├── types/
-│   ├── character.ts           # Character, Race, Skills types
-│   ├── game.ts                # GameInstruction, ChatMessage, GameResponse
-│   └── index.ts               # Export all types
-└── README.md                  # Shared types documentation
 ```
 
 ## Example: Adding a New Character Feature

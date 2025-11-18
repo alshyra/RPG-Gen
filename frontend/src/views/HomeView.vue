@@ -8,7 +8,7 @@
 
       <!-- List of all saved characters -->
       <div
-        v-if="savedCharacters.length > 0"
+        v-if="characters.length > 0"
         class="mt-6"
       >
         <h3 class="text-lg font-semibold mb-4 text-slate-200">
@@ -16,31 +16,31 @@
         </h3>
         <div class="space-y-3">
           <div
-            v-for="char in savedCharacters"
-            :key="char.id"
+            v-for="character in characters"
+            :key="character.characterId"
             class="p-4 bg-slate-800/50 rounded-lg flex items-center justify-between hover:bg-slate-800/70 transition-colors"
           >
             <div class="text-left flex-1">
               <div class="text-lg font-semibold">
-                {{ char.data.name || 'Personnage inconnu' }}
+                {{ character.name || 'Personnage inconnu' }}
               </div>
               <div class="text-xs text-slate-400">
-                {{ getCharSummary(char.data) }}
+                {{ getCharSummary(character) }}
               </div>
               <div class="text-xs text-slate-500 mt-1">
-                {{ char.data.world || 'D&D' }} • HP: {{ char.data.hp }}/{{ char.data.hpMax }} • XP: {{ char.data.totalXp || 0 }}
+                {{ character.world || 'D&D' }} • HP: {{ character.hp }}/{{ character.hpMax }} • XP: {{ character.totalXp || 0 }}
               </div>
             </div>
             <div class="flex gap-2">
               <UiButton
                 variant="primary"
-                @click="resumeCharacter(char.id, char.data.world)"
+                @click="resumeCharacter(character)"
               >
                 Reprendre
               </UiButton>
               <UiButton
                 variant="ghost"
-                @click="deleteCharacter(char.id)"
+                @click="deleteCharacter(character)"
               >
                 Supprimer
               </UiButton>
@@ -59,7 +59,7 @@
     </section>
 
     <div class="max-w-2xl w-full mx-auto mt-8">
-      <WorldSelector @select="onSelect" />
+      <WorldSelector />
     </div>
 
     <div />
@@ -72,41 +72,35 @@ import { ref, onMounted } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../services/characterServiceApi';
-import type { SavedCharacterEntry, CharacterEntry } from '@shared/types';
-
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
 const router = useRouter();
-const savedCharacters = ref<SavedCharacterEntry[]>([]);
+const characters = ref<Partial<CharacterDto>[]>([]);
 
-function getCharSummary(character: CharacterEntry): string {
-  if (!character) return '';
+const getCharSummary = (character: Partial<CharacterDto>): string => {
   const classes = character.classes || [];
-  return classes.map((c: any) => (c?.name ? `${c.name} Niveau ${c.level}` : '')).filter(Boolean).join(', ');
-}
+  return classes
+    .map(character => (character?.name ? `${character.name} Niveau ${character.level}` : ''))
+    .filter(Boolean)
+    .join(', ');
+};
 
-function onSelect(id: string) {
-  try {
-    window.sessionStorage.setItem('selected-world', id);
-  } catch { /* ignore */ }
-  characterServiceApi.clearCurrentCharacterId();
-  router.push({ name: 'character-step', params: { world: id, step: 1 } });
-}
+const resumeCharacter = (character: Partial<CharacterDto>) => {
+  if (character.state === 'draft') {
+    router.push({ name: 'character-step', params: { characterId: character.characterId, step: 1 } });
+    return;
+  }
+  router.push({ name: 'game', params: { characterId: character.characterId } });
+};
 
-async function resumeCharacter(characterId: string, world: string) {
-  characterServiceApi.setCurrentCharacterId(characterId);
-  router.push({ name: 'game', params: { world: world || 'dnd' } });
-}
-
-async function deleteCharacter(characterId: string) {
+const deleteCharacter = async (character: Partial<CharacterDto>) => {
+  if (!character.characterId) return;
   if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
-    await characterServiceApi.deleteCharacter(characterId);
-    // Refresh the character list
+    await characterServiceApi.deleteCharacter(character.characterId);
     await loadCharacters();
   }
-}
+};
 
-async function loadCharacters() {
-  savedCharacters.value = await characterServiceApi.getAllSavedCharacters();
-}
+const loadCharacters = async () => characters.value = await characterServiceApi.getAllSavedCharacters();
 
 onMounted(async () => {
   await loadCharacters();

@@ -1,4 +1,4 @@
-import type { CharacterEntry } from '@shared/types';
+import type { CharacterDto as CharacterDto } from '@backend/src/character/dto/character.dto';
 
 /**
  * Get the bonus for a specific skill check
@@ -8,7 +8,7 @@ import type { CharacterEntry } from '@shared/types';
  * @returns The skill bonus modifier
  */
 export function getSkillBonus(
-  character: CharacterEntry | null,
+  character: CharacterDto | null,
   skillNameWithCheck: string,
 ): number {
   if (!character) return 0;
@@ -32,7 +32,7 @@ export function getSkillBonus(
  * @param character The character to get skills from
  */
 export function getAvailableSkills(
-  character: CharacterEntry | null,
+  character: CharacterDto | null,
 ): Array<{ name: string; modifier: number }> {
   return character?.skills || [];
 }

@@ -52,24 +52,11 @@
       @update:base-scores="(scores: any) => { baseScores = scores; saveDraftNow(); }"
     />
 
-    <StepSkills
-      v-if="currentStep === 3"
-      :primary-class="primaryClass"
-      :selected-skills="selectedSkills"
-      :available-skills="availableSkills"
-      :skills-to-choose="skillsToChoose"
-      @update:selected-skills="(skills: any) => { selectedSkills.splice(0, selectedSkills.length, ...skills); saveDraftNow(); }"
-    />
+    <StepSkills v-if="currentStep === 3" />
 
     <StepAvatar
       v-if="currentStep === 4"
-      :character="character"
-      :gender="gender"
-      :primary-class="primaryClass"
-      :generated-avatar="generatedAvatar"
       :is-generating="isGeneratingAvatar"
-      :avatar-description="avatarDescription"
-      @update:avatar-description="avatarDescription = $event; saveDraftNow()"
     />
 
     <!-- Navigation buttons -->
@@ -127,7 +114,6 @@ import StepSkills from './steps/StepSkills.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import { useCharacterCreation } from '../../composables/useCharacterCreation';
-import { characterServiceApi } from '../../services/characterServiceApi';
 
 const props = defineProps<{ world?: string; worldId?: string }>();
 const router = useRouter();
@@ -142,7 +128,7 @@ const {
   baseScores,
   gender,
   selectedSkills,
-  avatarDescription,
+  physicalDescription,
   generatedAvatar,
   isGeneratingAvatar,
   allowedRaces,
@@ -150,24 +136,18 @@ const {
   genders,
   availableSkills,
   skillsToChoose,
+  applyRacialAndCompute,
   applyAndSave,
-  getDraftCurrentStep,
-  saveDraftWithStep,
-  saveDraftNow,
+  saveCharacter,
 } = useCharacterCreation(props.world, props.worldId);
 
-// Get current step from route, or from draft if no route param
 const currentStep = computed({
   get: () => {
     const routeStep = parseInt(route.params.step as string, 10);
-    if (!isNaN(routeStep)) {
-      return Math.min(routeStep - 1, steps.length - 1);
-    }
-    // Fall back to draft step if available
-    return getDraftCurrentStep();
+    return Math.min(routeStep - 1, steps.length - 1);
   },
   set: (value: number) => {
-    router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
+    router.push({ name: 'character-step', params: { step: value + 1 } });
   },
 });
 
@@ -191,11 +171,10 @@ const canProceed = computed(() => {
 const nextStep = async () => {
   if (currentStep.value >= steps.length - 1) return;
 
-  saveDraftWithStep(currentStep.value + 1);
   currentStep.value++;
 
   // Auto-generate avatar when entering the avatar step (step 4)
-  if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
+  if (currentStep.value === 4 && physicalDescription.value.trim() && !generatedAvatar.value) {
     await generateAvatar();
   }
 };
@@ -203,45 +182,45 @@ const nextStep = async () => {
 const previousStep = () => {
   if (currentStep.value <= 0) return;
 
-  saveDraftWithStep(currentStep.value - 1);
   currentStep.value--;
 };
 
-const updateCharacter = (updates: any) => character.value = { ...character.value, ...updates };
-
-const ensureCharacterId = () => {
-  let charId = character.value.id;
-  if (!charId) {
-    charId = characterServiceApi.generateUUID();
-    character.value.id = charId;
-  }
-  return charId;
-};
+const updateCharacter = (updates: Record<string, unknown>) => character.value = { ...character.value, ...updates };
 
 const requestAvatar = async (charId: string) => {
   // New API: POST /api/image/:characterId/generate-avatar — server will fetch saved character and description
   const response = await axios.post(`/api/image/${charId}/generate-avatar`);
 
   generatedAvatar.value = response.data.imageUrl;
-  saveDraftNow(); // Save draft with new avatar
+};
+
+const persistPhysicalDescription = async () => {
+  // Ensure computed fields are applied before persisting
+  applyRacialAndCompute();
+  character.value.physicalDescription = physicalDescription.value;
+  const charId = await saveCharacter();
+  (character.value as any).characterId = charId;
+  return charId;
+};
+
+const requestAndApplyAvatar = async (charId: string) => {
+  await requestAvatar(charId);
+  if (generatedAvatar.value) {
+    character.value.portrait = generatedAvatar.value;
+    await saveCharacter();
+    saveDraftNow();
+  }
 };
 
 const generateAvatar = async () => {
-  if (!avatarDescription.value.trim()) return;
+  if (!physicalDescription.value.trim()) return;
 
   isGeneratingAvatar.value = true;
   try {
-    // Ensure the character has an ID before requesting an avatar
-    const charId = ensureCharacterId();
-    // Persist the physical description so the server can use it when generating the image
-    character.value.physicalDescription = avatarDescription.value;
-    await methods.saveCharacter();
-    await requestAvatar(charId);
-    if (generatedAvatar.value) {
-      character.value.portrait = generatedAvatar.value;
-      await methods.saveCharacter();
-      saveDraftNow();
-    }
+    // Persist the description and computed fields and get the server id
+    const charId = await persistPhysicalDescription();
+    if (!charId) throw new Error('Failed to save character before avatar generation');
+    await requestAndApplyAvatar(charId);
   } catch (error) {
     console.error('Avatar generation error:', error);
   } finally {
@@ -250,7 +229,7 @@ const generateAvatar = async () => {
 };
 
 const finishCreation = async () => {
-  if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
+  if (physicalDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
     await generateAvatar();
   }
   await applyAndSave();

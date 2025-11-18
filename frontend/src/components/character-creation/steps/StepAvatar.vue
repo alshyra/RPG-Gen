@@ -1,30 +1,3 @@
-<script setup lang="ts">
-import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
-
-interface Character {
-  name: string;
-  race: any;
-  scores: Record<string, number>;
-  [key: string]: any;
-}
-
-interface Props {
-  character: Character;
-  gender: string;
-  primaryClass: string;
-  generatedAvatar: string | null;
-  isGenerating: boolean;
-  avatarDescription: string;
-}
-
-interface Emits {
-  (e: 'update:avatar-description', value: string): void;
-}
-
-defineProps<Props>();
-defineEmits<Emits>();
-</script>
-
 <template>
   <div class="space-y-4">
     <h2 class="text-xl font-bold">
@@ -37,10 +10,10 @@ defineEmits<Emits>();
     <div class="mt-4">
       <label class="block font-medium mb-2">Description physique</label>
       <UiInputTextarea
-        :model-value="avatarDescription"
+        :model-value="currentCharacter?.physicalDescription"
         placeholder="Ex: Grand et musclé, cheveux noirs long, cicatrice sur la joue gauche..."
         :rows="4"
-        @update:model-value="$emit('update:avatar-description', $event)"
+        @update:model-value="(val) => { currentCharacter.value = { ...currentCharacter.value, physicalDescription: val }; }"
       />
     </div>
 
@@ -54,14 +27,27 @@ defineEmits<Emits>();
     </div>
 
     <div
-      v-if="generatedAvatar"
+      v-if="currentCharacter?.portrait"
       class="mt-4"
     >
       <img
-        :src="generatedAvatar"
+        :src="currentCharacter?.portrait"
         alt="Generated Avatar"
         class="w-48 h-48 rounded border border-slate-600 object-cover"
       >
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
+import { useCharacterCreation } from '@/composables/useCharacterCreation';
+
+interface Props {
+  isGenerating: boolean;
+}
+
+const props = defineProps<Props>();
+
+const { currentCharacter } = useCharacterCreation();
+</script>

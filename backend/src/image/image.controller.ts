@@ -1,14 +1,12 @@
-import { BadRequestException, Controller, Logger, Post, Req, UseGuards, Param } from '@nestjs/common';
+import { BadRequestException, Controller, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { CharacterDocument } from 'src/schemas/character.schema';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CharacterService } from '../character/character.service';
 import { GeminiImageService } from '../external/image/gemini-image.service';
 import { UserDocument } from '../schemas/user.schema';
 import { ImageService } from './image.service';
-
-// GenerateAvatarDto removed - endpoint expects characterId in path
 
 @ApiTags('image')
 @Controller('image')
@@ -27,61 +25,37 @@ export class ImageController {
   @ApiOperation({ summary: 'Generate character avatar from description' })
   @ApiParam({ name: 'characterId', required: true })
   async generateAvatar(@Req() req: Request, @Param('characterId') characterId: string) {
-    if (!characterId) throw new BadRequestException('characterId is required');
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character) throw new BadRequestException('character not found');
-    return await this.handleGenerateAvatar(userId, character);
+    character.portrait = await this.handlePortrait(userId, character);
+    return await this.saveAvatarToCharacter(userId, character);
   }
 
-  private async handleGenerateAvatar(userId: string, character: CharacterDocument) {
-    try {
-      // Generate avatar image
-      // For generate-from-description, prefer explicit description passed in body
-      const prompt = this.buildAvatarPrompt(character);
-      const imageUrl = await this.geminiImage.generateImage(prompt);
-
-      // Compress the image
-      const compressedImage = await this.imageService.compressImage(imageUrl);
-
-      // If characterId is provided, save to character
-      if (character.characterId) {
-        await this.saveAvatarToCharacter(userId, character.characterId, compressedImage);
-      }
-
-      return {
-        imageUrl: compressedImage,
-        compressed: true,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to generate avatar';
-      this.logger.error('Avatar generation error:', message);
-      throw new BadRequestException(`Avatar generation failed: ${message}`);
-    }
+  private async handlePortrait(userId: string, character: CharacterDocument) {
+    const prompt = this.buildAvatarPrompt(character);
+    const imageUrl = await this.geminiImage.generateImage(prompt);
+    return await this.imageService.compressImage(imageUrl);
   }
 
-  private async saveAvatarToCharacter(userId: string, characterId: string, compressedImage: string) {
-    await this.characterService.update(userId, characterId, {
-      portrait: compressedImage,
-    });
-    this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
+  private async saveAvatarToCharacter(userId: string, { portrait, _id, characterId }: CharacterDocument) {
+    await this.characterService.update(userId, characterId, { portrait });
+    this.logger.log(`Avatar saved to character ${_id.toString()} for user ${userId}`);
   }
 
   private buildAvatarPrompt(character: CharacterDocument): string {
-    const characterContext: string[] = [];
-    if (character.name) characterContext.push(`Name: ${character.name}`);
-    if (character.gender) characterContext.push(`Gender: ${character.gender}`);
-    if (character.race?.name) characterContext.push(`Race: ${character.race.name}`);
-    if (character.classes?.length) {
-      const classNames = character.classes
-        .map(c => c.name)
-        .filter(Boolean)
-        .join(', ');
-      if (classNames) characterContext.push(`Classes: ${classNames}`);
-    }
+    const characterContext = [
+      `Name: ${character.name}`,
+      `Gender: ${character.gender}`,
+      `Race: ${character.race?.name}`,
+      `Classe: ${character.classes[0]?.name}`,
+    ];
 
-    const contextStr = characterContext.length ? `\n${characterContext.join('\n')}` : '';
-    return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
+    const contextStr = `${characterContext.join('\n')}`;
+    return `Generate a D&D character portrait based on this description:
+${contextStr}
+\nPhysical Description: ${character.physicalDescription}
+\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
   }
 }
