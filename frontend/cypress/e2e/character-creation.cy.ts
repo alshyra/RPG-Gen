@@ -181,20 +181,21 @@ describe('Character Creation', () => {
 
     cy.get("textarea").type("Un grand guerrier musclé aux cheveux noirs");
 
-    // Add a test-local intercept to ensure we catch the actual generate-avatar request
-    cy.intercept('POST', '**/api/image/generate-avatar*').as('generateAvatarTest');
+    // Add a test-local intercept to ensure we catch the actual generate-avatar request (path param)
+    cy.intercept('POST', '**/api/image/*/generate-avatar*').as('generateAvatarTest');
     // Also intercept character creation locally to ensure we capture it
     cy.intercept('POST', '**/api/characters').as('createCharacterTest');
 
     cy.contains("button", "Terminer").click();
 
     // Wait for local alias — the app can trigger generation slightly before we call wait
-    cy.wait("@generateAvatarTest").then((interception) => {
-      // Ensure the request included the description and charId
-      expect(interception.request.body).to.have.property('description');
-      expect(interception.request.body).to.have.property('characterId');
+    cy.wait('@generateAvatarTest').then((interception) => {
+      // Ensure the request path contains the characterId
+      expect(interception.request.url).to.match(/\/api\/image\/[^/]+\/generate-avatar/);
     });
-    cy.wait("@createCharacterTest").then((interception) => {
+    // Wait for the character creation events; one occurs when saving before generation, the second when the final save happens
+    cy.wait('@createCharacterTest');
+    cy.wait('@createCharacterTest').then((interception) => {
       const characterData = interception.request.body;
       // The portrait should either be a generated data URL or the default /images/... path
       expect(characterData.portrait).to.match(/data:image|^\/images\//);

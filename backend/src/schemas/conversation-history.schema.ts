@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export type ChatHistoryDocument = ChatHistory & Document;
+export type ConversationDocument = Conversation & Document;
 
 @Schema({ _id: false })
 class MessageMeta {
@@ -28,7 +28,7 @@ class ChatMessage {
 }
 
 @Schema({ timestamps: true })
-export class ChatHistory {
+export class Conversation {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: MongooseSchema.Types.ObjectId;
 
@@ -42,7 +42,7 @@ export class ChatHistory {
   lastUpdated: Date;
 }
 
-export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);
+export const ConversationHistorySchema = SchemaFactory.createForClass(Conversation);
 
 // Index for efficient querying
-ChatHistorySchema.index({ userId: 1, characterId: 1 }, { unique: true });
+ConversationHistorySchema.index({ userId: 1, characterId: 1 }, { unique: true });

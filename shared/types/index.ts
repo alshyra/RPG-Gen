@@ -31,4 +31,4 @@ export type {
 export type { DndLevel, LevelUpResult } from "./dnd";
 
 // API request/response types
-export type { ChatRequest, DiceRequest, ImageRequest, AvatarRequest } from "./api";
+export type { DiceRequest } from "./api";

@@ -39,12 +39,21 @@ export class GameEngine {
    */
   async startGame(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
     // Get current character's UUID - this becomes the characterId for conversation
-    const char = await characterServiceApi.getCurrentCharacter();
-    if (!char)
+    const currentChar = await characterServiceApi.getCurrentCharacter();
+    if (!currentChar)
       throw new Error('No current character found. Please create or load a character first.');
-    this.characterId = char.id;
+    this.characterId = currentChar.id;
 
-    const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
+    // GET /api/conversation/:characterId returns { ok, ... } or ok:false when missing
+    const histRes = await apiClient.get(`/conversation/${this.characterId}`);
+    const ok = histRes?.data?.ok ?? true;
+    if (!ok) {
+      // Create conversation server-side using POST /api/conversation/:characterId
+      const createRes = await apiClient.post(`/conversation/${this.characterId}`, {});
+      const isNew = createRes?.data?.isNew || false;
+      const history = createRes?.data?.history || [];
+      return { isNew, messages: history };
+    }
     const isNew = histRes?.data?.isNew || false;
     const history = histRes?.data?.history || [];
 
@@ -57,11 +66,9 @@ export class GameEngine {
   async sendMessage(message: string): Promise<GameResponse> {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 
-    const char = await characterServiceApi.getCurrentCharacter();
-    const res = await apiClient.post('/chat', {
+    await characterServiceApi.getCurrentCharacter();
+    const res = await apiClient.post(`/conversation/${this.characterId}/message`, {
       message,
-      characterId: this.characterId,
-      character: char,
     });
     const result = res?.data?.result || {};
 

@@ -32,9 +32,11 @@ const parseNestedJson = (text: string): string[] => {
   return results;
 };
 
+/**
+ * Match inline JSON objects outside of code blocks
+ * First, remove all code blocks to avoid matching JSON inside them
+ */
 const extractInlineJson = (text: string): string[] => {
-  // Match JSON objects that are not in code blocks
-  // First, remove all code blocks to avoid matching JSON inside them
   const textWithoutCodeBlocks = text.replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, '');
   return parseNestedJson(textWithoutCodeBlocks);
 };
@@ -51,31 +53,35 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   return false;
 };
 
+const parseJsonWithNewlines = (json: string) => {
+  try {
+    // Replace escaped newlines with actual newlines for parsing
+    const normalized = json.replace(/\\n/g, '\n');
+    return JSON.parse(normalized) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+const convertToGameInstruction = (obj: Record<string, unknown>): GameInstruction => {
+  // If it has a type field, use the structured format
+  if (obj.type === 'roll' || obj.type === 'xp' || obj.type === 'hp' || obj.type === 'spell' || obj.type === 'inventory') {
+    return { type: obj.type as 'roll' | 'xp' | 'hp' | 'spell' | 'inventory', data: obj } as GameInstruction;
+  }
+  // Otherwise, use the direct format (backward compatibility)
+  return obj as GameInstruction;
+};
+
 export const parseGameInstructions = (narrative: string): GameInstruction[] => {
   const jsonBlocks = extractJsonBlocks(narrative);
   const inlineJsons = extractInlineJson(narrative);
   const allJsons = [...jsonBlocks, ...inlineJsons];
 
   return allJsons
-    .map((json) => {
-      try {
-        // Replace escaped newlines with actual newlines for parsing
-        const normalized = json.replace(/\\n/g, '\n');
-        return JSON.parse(normalized) as Record<string, unknown>;
-      } catch {
-        return null;
-      }
-    })
+    .map(parseJsonWithNewlines)
     .filter((obj): obj is Record<string, unknown> => obj !== null)
     .filter(isGameInstruction)
-    .map((obj) => {
-      // If it has a type field, use the structured format
-      if (obj.type === 'roll' || obj.type === 'xp' || obj.type === 'hp' || obj.type === 'spell' || obj.type === 'inventory') {
-        return { type: obj.type as 'roll' | 'xp' | 'hp' | 'spell' | 'inventory', data: obj } as GameInstruction;
-      }
-      // Otherwise, use the direct format (backward compatibility)
-      return obj as GameInstruction;
-    });
+    .map(convertToGameInstruction);
 };
 
 export const cleanNarrativeText = (narrative: string): string => {
@@ -101,13 +107,13 @@ export const cleanNarrativeText = (narrative: string): string => {
   return cleaned;
 };
 
-export const parseGameResponse = extractInstructions;
-
-export function extractInstructions(narrative: string): {
+export const extractInstructions = (narrative: string): {
   narrative: string;
   instructions: GameInstruction[];
-} {
+} => {
   const instructions = parseGameInstructions(narrative);
   const cleanedNarrative = cleanNarrativeText(narrative);
   return { narrative: cleanedNarrative, instructions };
 }
+
+export const parseGameResponse = extractInstructions;

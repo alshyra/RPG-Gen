@@ -82,35 +82,31 @@ function textFromResponse(data: unknown): string {
 
 @Injectable()
 export class GeminiTextService {
+  /**
+   * This service holds in-memory chat clients (Gemini chat objects) for active sessions.
+   *
+   * Notes on persistence / restarts:
+   * - `chatClients` is in-memory only: when the service restarts (process reboot or redeploy)
+   *   in-memory objects are lost.
+   * - The proper persistence of conversation content is handled by `ConversationService`.
+   * - On retrieval of a conversation (see Controller), `getOrCreateChat(sessionId, systemInstruction, initialHistory)`
+   *   is called to rehydrate an in-memory Gemini chat client from the stored history.
+   * - If you want cross-process persistence (e.g. multiple backend instances), prefer:
+   *   - store conversation history in DB and rehydrate on demand,
+   *   - or use a shared store (Redis) to store minimal session metadata and TTLs for rehydration.
+   */
   private readonly logger = new Logger(GeminiTextService.name);
   private client: GoogleGenAI | null = null;
   private model = 'gemini-2.5-flash';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
+  // Optional timestamps to track last used, helpful for eviction policies
+  private chatLastUsed = new Map<string, number>();
+
   constructor() {
-    this.logger.debug(
-      'Initializing GeminiTextService',
-      process.env.GOOGLE_API_KEY ? '***' : 'no API key',
-    );
+    this.logger.debug('Initializing GeminiTextService');
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
-  }
-
-  private isMock() {
-    return process.env.MOCK_GEMINI === 'true';
-  }
-
-  private mockText(prompt: string): GeminiMessage {
-    const text = `[[MOCK GEMINI - ${this.model}]]\n\n${prompt.slice(0, 1000)}`;
-    const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-    const genTokens = Math.max(20, Math.min(1500, Math.ceil(text.length / 4)));
-    const usage = {
-      promptTokenCount: promptTokens,
-      candidatesTokenCount: genTokens,
-      totalTokenCount: promptTokens + genTokens,
-    };
-    const raw = { candidates: [{ content: [{ text }] }], modelVersion: this.model };
-    return { text, raw, usage, modelVersion: this.model };
   }
 
   getOrCreateChat(
@@ -130,8 +126,8 @@ export class GeminiTextService {
         temperature: 0.7,
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.chatClients.set(sessionId, chat as any);
+    this.chatClients.set(sessionId, chat);
+    this.chatLastUsed.set(sessionId, Date.now());
     return chat;
   }
 
@@ -154,10 +150,10 @@ export class GeminiTextService {
   }
 
   async sendMessage(sessionId: string, message: string): Promise<GeminiMessage> {
-    if (this.isMock()) return this.mockText(message);
-    const chat = this.chatClients.get(sessionId) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
     try {
+      this.chatLastUsed.set(sessionId, Date.now());
       return await this.handleChatMessage(chat, message);
     } catch (e) {
       this.logger.warn(`Chat sendMessage failed for ${sessionId}`, (e as Error)?.stack || e);
@@ -168,5 +164,16 @@ export class GeminiTextService {
   clearChat(sessionId: string) {
     this.chatClients.delete(sessionId);
     this.logger.debug(`Cleared chat session ${sessionId}`);
+  }
+
+  // Small utility for monitoring / housekeeping
+  getActiveSessionsCount(): number {
+    return this.chatClients.size;
+  }
+
+  // Rehydrate or create a chat for the supplied session; useful from controllers
+  rehydrateChat(sessionId: string, systemInstruction?: string, history: Array<unknown> = []) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.getOrCreateChat(sessionId, systemInstruction || '', history as any);
   }
 }

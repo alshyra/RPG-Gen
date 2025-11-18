@@ -20,7 +20,6 @@ interface Option {
 }
 
 defineProps<{
-  isSelected?: boolean; // For backward compatibility
   options?: Option[]; // List of toggle options
   modelValue?: string | number; // Currently selected value
 }>();

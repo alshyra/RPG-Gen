@@ -115,6 +115,10 @@ export class CharacterService {
       portrait: doc.portrait,
       gender: doc.gender as 'male' | 'female',
       proficiency: doc.proficiency,
+      isDeceased: doc.isDeceased,
+      diedAt: doc.diedAt?.toISOString(),
+      deathLocation: doc.deathLocation,
+      physicalDescription: doc.physicalDescription,
     };
   }
 }

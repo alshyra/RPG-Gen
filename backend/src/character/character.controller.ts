@@ -53,7 +53,7 @@ export class CharacterController {
     const characters = await this.characterService.findByUserId(userId);
     return {
       ok: true,
-      characters: characters.map(c => this.characterService.toCharacterEntry(c)),
+      characters: characters.map(this.characterService.toCharacterEntry, this),
     };
   }
 

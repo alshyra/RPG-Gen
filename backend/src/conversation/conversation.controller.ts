@@ -1,3 +1,5 @@
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { SendMessageDto } from './dto/send-message.dto';
 import {
   BadRequestException,
   Body,
@@ -5,43 +7,49 @@ import {
   Get,
   InternalServerErrorException,
   Logger,
+  Param,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+// Swagger decorators
 import { Request } from 'express';
-import fs, { readFile } from 'fs/promises';
-import * as Joi from 'joi';
-import type { CharacterEntry, ChatRequest } from '../../../shared/types';
+import { readFile } from 'fs/promises';
+import path from 'path';
+// Joi removed; optional validation can be implemented with NestJS validation pipe
+import type { CharacterEntry } from '../../../shared/types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
 import { GeminiTextService } from '../external/text/gemini-text.service';
+import { CharacterService } from '../character/character.service';
 import { UserDocument } from '../schemas/user.schema';
-import { ChatMessage, ConversationService } from './conversation.service';
+import type { ChatMessage } from '../../../shared/types';
+import { ConversationService } from './conversation.service';
 
-const schema = Joi.object({
-  message: Joi.string().allow('').optional(),
-  characterId: Joi.string().optional(),
-  character: Joi.string().optional(),
-});
+const TEMPLATE_PATH = path.join(__dirname, 'dnd.prompt.txt');
 
-const TEMPLATE_PATH = process.cwd() + '/chat.prompt.txt';
-
-@ApiTags('chat')
-@Controller('chat')
+@ApiTags('conversation')
+@Controller('conversation')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-export class ChatController {
-  private readonly logger = new Logger(ChatController.name);
+export class ConversationController {
+  private readonly logger = new Logger(ConversationController.name);
   constructor(
     private readonly gemini: GeminiTextService,
     private readonly conv: ConversationService,
+    private readonly characterService: CharacterService,
   ) {}
 
-  private async loadSystemPrompt(): Promise<string> {
+  private async loadSystemPrompt(world?: string): Promise<string> {
     try {
+      if (world) {
+        const candidate = path.join(__dirname, `${world}.prompt.txt`);
+        try {
+          return await readFile(candidate, 'utf8');
+        } catch {
+          // fallback to default
+        }
+      }
       return await readFile(TEMPLATE_PATH, 'utf8');
     } catch {
       return '';
@@ -90,20 +98,21 @@ Character Information:
     return summary;
   }
 
-  private async startChat(
+  private async startConversation(
     userId: string,
     characterId: string,
     systemPrompt: string,
     character?: CharacterEntry,
   ): Promise<ChatMessage> {
-    this.logger.log(`Starting chat for character ${characterId} (user: ${userId})`);
+    this.logger.log(`Starting conversation for character ${characterId} (user: ${userId})`);
+    this.logger.log(`Starting conversation for character ${characterId} (user: ${userId})`);
     this.gemini.getOrCreateChat(characterId, systemPrompt || undefined, []);
     const initMessage = character
       ? (this.logger.debug(`Character data received:`, JSON.stringify(character, null, 2)),
         `${systemPrompt}\n\n${this.buildCharacterSummary(character)}`)
       : systemPrompt;
     if (character)
-      this.logger.log(`Chat ${characterId} started with character: ${character.name}`);
+      this.logger.log(`Conversation ${characterId} started with character: ${character.name}`);
     const initResp = await this.gemini.sendMessage(characterId, initMessage);
     const initMsg: ChatMessage = {
       role: 'assistant',
@@ -112,11 +121,11 @@ Character Information:
       meta: { usage: initResp.usage || null, model: initResp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, initMsg);
-    this.logger.log(`Chat ${characterId} started with ${initMsg.text.length} chars`);
+    this.logger.log(`Conversation ${characterId} started with ${initMsg.text.length} chars`);
     return initMsg;
   }
 
-  private async processUserMessage(
+  private async processConversationMessage(
     userId: string,
     characterId: string,
     userText: string,
@@ -160,91 +169,81 @@ Character Information:
     };
   }
 
-  private async handleChat(
+  private async handleConversation(
     userId: string,
     characterId: string,
     message: string,
     character: CharacterEntry | undefined,
   ): Promise<{ characterId: string; result: Record<string, unknown> }> {
-    const systemPrompt = await this.loadSystemPrompt();
+    const systemPrompt = await this.loadSystemPrompt(character?.world as string | undefined);
     const history = await this.conv.getHistory(userId, characterId);
-    if (history.length === 0) await this.startChat(userId, characterId, systemPrompt, character);
-    const { assistantMsg } = await this.processUserMessage(userId, characterId, message || '', systemPrompt);
+    if (history.length === 0) await this.startConversation(userId, characterId, systemPrompt, character);
+    const { assistantMsg } = await this.processConversationMessage(userId, characterId, message || '', systemPrompt);
     const result = this.formatChatResponse(
       assistantMsg.text,
       (assistantMsg.meta?.model || '') as string,
       (assistantMsg.meta?.usage || null) as Record<string, unknown> | null,
     );
-    this.logger.log(`Chat response ready for character ${characterId}`);
+    this.logger.log(`Conversation response ready for character ${characterId}`);
     return { characterId, result };
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
-  @ApiBody({ schema: { type: 'object' } })
-  async chat(@Req() req: Request, @Body() body: ChatRequest) {
-    const user = req.user as UserDocument;
+  @Post(':characterId')
+  @ApiOperation({ summary: 'Create a conversation for a character client initiates' })
+  @ApiParam({ name: 'characterId', required: true })
+  async conversation(
+    @Req() req: Request<UserDocument>,
+    @Param('characterId') characterId: string,
+  ) {
+    const { user } = req;
     const userId = user._id.toString();
-    const value = this.validateChatBody(body);
     try {
-      if (!value.characterId || typeof value.characterId !== 'string')
+      if (!characterId || typeof characterId !== 'string')
         throw new BadRequestException('characterId required');
-      const { result } = await this.handleChat(
-        userId,
-        value.characterId as string,
-        value.message || '',
-        value.character as CharacterEntry | undefined,
-      );
-      return { ok: true, characterId: value.characterId, result };
+      const charEntry = await this.validateAndGetCharacter(userId, characterId);
+
+      return await this.createConversationForCharacter(userId, characterId, charEntry);
     } catch (e) {
-      this.logger.error('Chat failed', (e as Error)?.stack || e, 'ChatController');
-      throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
+      this.logger.error('Conversation failed', (e as Error)?.stack || e, ConversationController.name);
+      throw new InternalServerErrorException((e as Error)?.message || 'Conversation failed');
     }
   }
 
-  private validateChatBody(body: ChatRequest) {
-    const { error, value } = schema.validate(body);
-    if (error) throw new BadRequestException(error.message);
-    return value as Record<string, unknown> & ChatRequest;
-  }
-
-  @Post('template')
-  @ApiOperation({ summary: 'Update developer prompt template (dev only)' })
-  @ApiBody({ schema: { type: 'object' } })
-  async updateTemplate(@Body() body: Record<string, unknown>) {
-    const text = body?.template;
-    if (typeof text !== 'string') throw new BadRequestException('template required');
-    const fs = await import('fs/promises');
-    await fs.writeFile(TEMPLATE_PATH, text, 'utf8');
-    return { ok: true };
-  }
-
-  @Post('template/get')
-  @ApiOperation({ summary: 'Get developer prompt template (dev only)' })
-  async getTemplate() {
+  @Post(':characterId/message')
+  @ApiOperation({ summary: 'Post a message to an existing conversation (creates if needed)' })
+  @ApiParam({ name: 'characterId', required: true })
+  @ApiBody({ type: SendMessageDto })
+  async sendMessage(@Req() req: Request<UserDocument>, @Param('characterId') characterId: string, @Body() body: SendMessageDto) {
+    const userId = req.user._id.toString();
     try {
-      const txt = await fs.readFile(TEMPLATE_PATH, 'utf8');
-      return { ok: true, template: txt };
-    } catch {
-      return { ok: true, template: '' };
+      const charEntry = await this.validateAndGetCharacter(userId, characterId);
+      const message = typeof body?.message === 'string' ? body.message : '';
+      // Call the existing conversation handler (this will create the conversation if absent and process message)
+      return await this.handleConversation(userId, characterId, message || '', charEntry);
+    } catch (e) {
+      this.logger.error('Conversation send failed', (e as Error)?.stack || e, ConversationController.name);
+      throw new InternalServerErrorException((e as Error)?.message || 'Failed to send message');
     }
   }
 
-  private parseCharacterFromQuery(character?: string): CharacterEntry | undefined {
-    if (!character || typeof character !== 'string') return undefined;
-    try {
-      return JSON.parse(character) as CharacterEntry;
-    } catch {
-      return undefined;
-    }
+  private async validateAndGetCharacter(userId: string, characterId: string) {
+    const characterDocument = await this.characterService.findByCharacterId(userId, characterId);
+    if (!characterDocument) throw new BadRequestException('character not found');
+    return this.characterService.toCharacterEntry(characterDocument);
+  }
+
+  private async createConversationForCharacter(userId: string, characterId: string, charEntry: CharacterEntry) {
+    const systemPrompt = await this.loadSystemPrompt(charEntry.world);
+    const initMsg = await this.startConversation(userId, characterId, systemPrompt, charEntry);
+    return { ok: true, characterId, isNew: true, history: [initMsg] };
   }
 
   private buildSdkHistory(
     history: ChatMessage[],
   ): Array<{ role: string; parts: Array<{ text: string }> }> {
-    return history.map(m => ({
-      role: m.role === 'assistant' ? 'model' : m.role,
-      parts: [{ text: m.text }],
+    return history.map(message => ({
+      role: message.role === 'assistant' ? 'model' : message.role,
+      parts: [{ text: message.text }],
     }));
   }
 
@@ -256,17 +255,7 @@ Character Information:
     );
   }
 
-  private async handleNewChatHistory(
-    userId: string,
-    characterId: string,
-    systemPrompt: string,
-    charData: CharacterEntry | undefined,
-  ): Promise<{ ok: boolean; characterId: string; isNew: boolean; history: ChatMessage[] }> {
-    const initMsg = await this.startChat(userId, characterId, systemPrompt, charData);
-    return { ok: true, characterId, isNew: true, history: [initMsg] };
-  }
-
-  private async handleExistingChatHistory(
+  private async handleExistingConversationHistory(
     characterId: string,
     systemPrompt: string,
     history: ChatMessage[],
@@ -286,28 +275,31 @@ Character Information:
     return { ok: true, characterId, isNew: false, history: historyWithInstructions };
   }
 
-  @Get('history')
-  @ApiOperation({ summary: 'Get conversation history for a character' })
+  @Get(':characterId')
+  @ApiOperation({ summary: 'Get conversation for a character' })
+  @ApiParam({ name: 'characterId', required: true })
   async getHistory(
     @Req() req: Request,
-    @Query('character') character?: string,
-    @Query('characterId') characterId?: string,
+    @Param('characterId') characterId: string,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    if (!characterId) throw new BadRequestException('characterId required');
     try {
-      // characterId is the conversation key for history
-      const history = await this.conv.getHistory(userId, characterId);
-      const systemPrompt = await this.loadSystemPrompt();
-      const charData = this.parseCharacterFromQuery(character);
-      return history.length === 0
-        ? this.handleNewChatHistory(userId, characterId, systemPrompt, charData)
-        : this.handleExistingChatHistory(characterId, systemPrompt, history);
-    } catch (e) {
-      this.logger.error('History retrieval failed', (e as Error)?.stack || e, 'ChatController');
-      throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve history');
+      return await this.returnExistingConversationOrNotFound(userId, characterId);
+    } catch (e: unknown) {
+      this.logger.error('Conversation retrieval failed', (e as Error).stack || e, ConversationController.name);
+      throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve Conversation');
     }
+  }
+
+  private async returnExistingConversationOrNotFound(userId: string, characterId: string) {
+    const history = await this.conv.getHistory(userId, characterId);
+    if (history.length === 0) {
+      return { ok: false, message: 'conversation not found' };
+    }
+    const charDoc = await this.characterService.findByCharacterId(userId, characterId);
+    const systemPrompt = await this.loadSystemPrompt(charDoc?.world as string | undefined);
+    return this.handleExistingConversationHistory(characterId, systemPrompt, history);
   }
 }

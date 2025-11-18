@@ -130,10 +130,9 @@ const generate = async () => {
   error.value = null;
 
   try {
-    const { data } = await axios.post('/api/image/generate-avatar', {
-      character: props.character,
-      description: description.value,
-    });
+    const charId = props.character?.id;
+    if (!charId) throw new Error('Le personnage doit être sauvegardé avant de générer un avatar');
+    const { data } = await axios.post(`/api/image/${charId}/generate-avatar`);
     generatedAvatar.value = data.imageUrl;
   } catch (err: any) {
     error.value = err.response?.data?.error || err.message || 'Erreur lors de la génération de l\'avatar';

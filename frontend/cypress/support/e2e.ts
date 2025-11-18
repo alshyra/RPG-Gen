@@ -110,13 +110,18 @@ Cypress.Commands.add("setupApiMocks", () => {
   }).as("getDeceasedCharacters");
 
   // Chat/Game endpoints
-  // Match both trailing slash and query-string variants of /api/chat/history
-  cy.intercept("GET", "**/api/chat/history*", {
+  // Match both trailing slash and path param variants of /api/conversation
+  cy.intercept("GET", "**/api/conversation/*", {
     statusCode: 200,
     body: { isNew: true, history: [] },
-  }).as("getChatHistory");
+  }).as("getConversationHistory");
 
-  cy.intercept("POST", "**/api/chat", {
+  cy.intercept("POST", "**/api/conversation/*", {
+    statusCode: 200,
+    body: { isNew: true, history: [] },
+  }).as("createConversation");
+
+  cy.intercept("POST", "**/api/conversation/*/message", {
     statusCode: 200,
     body: {
       result: {
@@ -124,10 +129,10 @@ Cypress.Commands.add("setupApiMocks", () => {
         instructions: [],
       },
     },
-  }).as("sendChat");
+  }).as("sendConversation");
 
   // Image generation endpoint - match generate-avatar exactly and any additional path variants
-  cy.intercept("POST", "**/api/image/generate-avatar*", {
+  cy.intercept("POST", "**/api/image/*/generate-avatar*", {
     statusCode: 200,
     body: {
       imageUrl:

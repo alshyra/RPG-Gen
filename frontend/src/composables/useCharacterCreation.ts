@@ -296,6 +296,10 @@ export const useCharacterCreation = (
   const applyAndSave = async () => {
     methods.applyRacialAndCompute();
     // If we have a generated avatar, use it; otherwise keep the portrait path
+    // Persist physical description from avatar description field
+    if (avatarDescription.value?.trim()) {
+      character.value.physicalDescription = avatarDescription.value;
+    }
     if (generatedAvatar.value) {
       character.value.portrait = generatedAvatar.value;
     }

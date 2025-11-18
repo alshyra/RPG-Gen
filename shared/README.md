@@ -7,30 +7,6 @@ Shared TypeScript types and interfaces used across RPG-Gen frontend and backend.
 - `types/character.ts` - Character, Race, Skills, SavedCharacterEntry
 - `types/game.ts` - GameInstruction, ChatMessage, GameResponse, RollResult
 
-## Usage
-
-### Frontend
-
-```typescript
-import type { CharacterEntry, GameResponse } from "../../shared/types";
-
-const character: CharacterEntry = {
-  /* ... */
-};
-```
-
-### Backend
-
-```typescript
-import type { CharacterEntry, GameInstruction } from "../../shared/types";
-
-interface ChatRequest {
-  sessionId: string;
-  character: CharacterEntry;
-  message: string;
-}
-```
-
 ## Adding Types
 
 1. Add new type to appropriate file in `types/`

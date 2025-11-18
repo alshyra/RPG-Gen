@@ -73,6 +73,10 @@ export interface CharacterEntry {
   portrait: string; // Image URL or path
   gender: "male" | "female";
   proficiency: number; // Proficiency bonus (default 2)
+  isDeceased?: boolean; // Flag if character is deceased
+  diedAt?: string; // ISO timestamp of death
+  deathLocation?: string; // Last known location
+  physicalDescription?: string; // Character physical description
   [key: string]: any; // Allow additional properties for extensibility
 }
 

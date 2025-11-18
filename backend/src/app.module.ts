@@ -3,11 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from 'nestjs-pino';
 import pino from 'pino';
 import pretty from 'pino-pretty';
-import { ChatModule } from './chat/chat.module';
-import { DiceModule } from './dice/dice.module';
-import { ImageModule } from './image/image.module';
 import { AuthModule } from './auth/auth.module';
 import { CharacterModule } from './character/character.module';
+import { DiceModule } from './dice/dice.module';
+import { ImageModule } from './image/image.module';
+
+import { ConversationModule } from './conversation/conversation.module';
 import { HealthModule } from './health/health.module';
 
 // Create pino logger instance
@@ -37,7 +38,7 @@ const getPinoLogger = () => {
       retryDelay: 3000,
     }),
     AuthModule,
-    ChatModule,
+    ConversationModule,
     DiceModule,
     ImageModule,
     HealthModule,

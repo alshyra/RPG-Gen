@@ -219,16 +219,8 @@ const ensureCharacterId = () => {
 };
 
 const requestAvatar = async (charId: string) => {
-  const response = await axios.post('/api/image/generate-avatar', {
-    character: {
-      name: character.value.name,
-      gender: gender.value,
-      race: character.value.race,
-      classes: [{ name: primaryClass.value }],
-    },
-    description: avatarDescription.value,
-    characterId: charId, // Pass character ID to save avatar
-  });
+  // New API: POST /api/image/:characterId/generate-avatar — server will fetch saved character and description
+  const response = await axios.post(`/api/image/${charId}/generate-avatar`);
 
   generatedAvatar.value = response.data.imageUrl;
   saveDraftNow(); // Save draft with new avatar
@@ -241,7 +233,15 @@ const generateAvatar = async () => {
   try {
     // Ensure the character has an ID before requesting an avatar
     const charId = ensureCharacterId();
+    // Persist the physical description so the server can use it when generating the image
+    character.value.physicalDescription = avatarDescription.value;
+    await methods.saveCharacter();
     await requestAvatar(charId);
+    if (generatedAvatar.value) {
+      character.value.portrait = generatedAvatar.value;
+      await methods.saveCharacter();
+      saveDraftNow();
+    }
   } catch (error) {
     console.error('Avatar generation error:', error);
   } finally {
