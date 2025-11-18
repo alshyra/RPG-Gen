@@ -1,5 +1,5 @@
 <template>
-  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2">
+  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2 min-h-14">
     <!-- Title - centered on desktop, top on mobile -->
     <div class="text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2 order-first lg:order-none">
       <h1 class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
@@ -8,7 +8,7 @@
     </div>
     
     <!-- Subtitle and description - below title on mobile, left side on desktop -->
-    <div class="flex-none text-center lg:text-left">
+    <div v-if="subtitle && description" class="flex-none text-center lg:text-left">
       <h2 class="text-lg lg:text-xl font-semibold">
         {{ subtitle }}
       </h2>
@@ -46,7 +46,7 @@ const subtitle = computed(() => {
     return worldMap[world] || 'Aventure';
   }
 
-  return '—';
+  return undefined;
 });
 
 const description = computed(() => {
@@ -62,7 +62,7 @@ const description = computed(() => {
     return gameStore.isInitializing ? 'Initialisation...' : 'Session active';
   }
 
-  return '—';
+  return undefined;
 });
 </script>
 
