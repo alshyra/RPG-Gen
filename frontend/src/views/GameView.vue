@@ -1,8 +1,9 @@
 <template>
   <div class="flex flex-col h-[94vh] p-2 lg:p-4 gap-2">
     <!-- Mobile Menu Toggle Button (only visible on mobile) -->
-    <button
-      class="lg:hidden fixed top-16 left-2 z-50 p-2 bg-slate-800 rounded-lg border border-slate-600 shadow-lg hover:bg-slate-700 transition-colors"
+    <UiButton
+      variant="ghost"
+      class="lg:hidden fixed top-16 left-2 z-50 !p-2 bg-slate-800 border border-slate-600 shadow-lg"
       @click="toggleSidebar"
     >
       <svg
@@ -33,7 +34,7 @@
           d="M6 18L18 6M6 6l12 12"
         />
       </svg>
-    </button>
+    </UiButton>
 
     <!-- Backdrop for mobile sidebar -->
     <div
@@ -154,6 +155,7 @@
 </template>
 <script setup lang="ts">
 import UiMarkdown from '../components/ui/UiMarkdown.vue';
+import UiButton from '../components/ui/UiButton.vue';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
