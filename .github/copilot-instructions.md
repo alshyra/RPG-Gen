@@ -41,21 +41,18 @@ npm run dev
 - Runs on port 5173
 - Proxies `/api/*` requests to backend (port 3001)
 
-**Shared Types:**
-Located in `shared/types/` - used by both frontend and backend for type safety.
-
 ## Architecture Overview
 
 ### Full Stack
 
 - **Frontend**: Vue 3 + TypeScript + Tailwind CSS + Vite (port 5173)
 - **Backend**: NestJS + Gemini SDK + file-based persistence (port 3001)
-- **Storage**: Frontend uses `localStorage` only; Backend stores chat history in `archives/{uuid}/history.json`
+- **Storage**: Frontend uses `localStorage` only; Backend stores conversation history in `archives/{uuid}/history.json`
 
 ### Core Data Flow
 
 1. **Character Creation**: User creates character → saved to localStorage with UUID → UUID becomes session ID
-2. **Game Session**: Each character UUID = unique chat session ID; backend persists chat history per session
+2. **Game Session**: Each character UUID = unique conversation session ID; backend persists conversation history per session
 3. **Game Loop**: Player sends message → Backend (Gemini) processes with character context → Returns narrative + instructions (roll/xp/hp) → Frontend handles modals
 
 ### Key Services & Patterns
@@ -68,7 +65,7 @@ Located in `shared/types/` - used by both frontend and backend for type safety.
   - Deceased characters archived separately
 - **`gameEngine`**: Session manager (singleton) - character.id
   - `initSession()`: Loads character + conversation history
-  - `sendMessage()`: Posts to `/api/chat` with characterId
+  - `sendMessage()`: Posts to `/api/conversation/:characterId/message` with message in the body
 - **`useCharacterCreation`**: Composable for character form state (5-step wizard)
   - Routes: `/character/:world?/step/:step` (1-based step in URL)
   - Step 0: Name + Gender
@@ -83,30 +80,19 @@ Located in `shared/types/` - used by both frontend and backend for type safety.
 
 #### Backend
 
-- **`ChatController`**: Main API endpoint
-  - `POST /api/chat`: Send message (returns narrative + instructions)
-  - `GET /api/chat/history`: Load session history for character
+- **`ConversationController`**: Main API endpoint
+  - `POST /api/conversation/:characterId`: Create a conversation for a character (returns initial assistant message)
+  - `POST /api/conversation/:characterId/message`: Send message to an existing conversation (returns narrative + instructions)
+  - `GET /api/conversation/:characterId`: Load existing conversation for a character; returns not found if none exists (use POST to create)
   - Session management: Maps characterId → character context → Gemini API
-- **`ConversationService`**: Persists chat history to files
+- **`ConversationService`**: Persists conversation history to files
   - Escapes `\n` in messages for JSON storage/transmission
   - Maintains conversation per characterId (per character)
 - **`GameParser`**: Extracts instructions from Gemini responses
   - Preserves newlines in narrative (critical for lists/formatting)
   - Parses roll instructions: `[ROLL:dices=1d20 modifier=+5]`
+    Developer prompt files for conversation (DND / world templates) are stored near the conversation module: `backend/src/conversation/*.prompt.txt` (e.g. `dnd.prompt.txt`).
 
-#### Shared Types
-
-Located in `shared/types/` - provides type safety across frontend and backend:
-
-- **`types/character.ts`**: Character, Race, Skills, SavedCharacterEntry
-- **`types/game.ts`**: GameInstruction, ChatMessage, GameResponse, RollResult
-- **Usage**: Import from relative path `../../shared/types` in both frontend and backend
-- **Guidelines**:
-  - Use `interface` for object types (not `type`)
-  - Document with JSDoc comments
-  - Prefer single responsibility per type
-  - Keep types immutable (no mutable methods)
-  - Avoid circular dependencies between character.ts and game.ts
 
 ## UI Component Standards
 
@@ -129,27 +115,6 @@ Located in `shared/types/` - provides type safety across frontend and backend:
 - **`DeathModal`**: Character death flow
 - Generic modal structure: title + content + action buttons
 
-## Character & D&D Rules
-
-### Character Structure
-
-```typescript
-interface CharacterEntry {
-  id: string; // UUID
-  name: string;
-  race: { id: string; name: string; mods: Record<string, number> };
-  scores: { Str; Dex; Con; Int; Wis; Cha }; // Racial mods applied
-  hp: number; // Current
-  hpMax: number; // Max from CON
-  totalXp: number; // Cumulative
-  classes: [{ name: string; level: number }]; // Level from XP (L1-20)
-  skills: [{ name: string; proficient: boolean; modifier: number }];
-  world: string; // Game universe ID (dnd/vtm/cyberpunk)
-  portrait: string; // Image path or generated URL
-  gender: "male" | "female";
-  proficiency: number; // Bonus (default 2)
-}
-```
 
 ### D&D Rules Service
 
@@ -228,7 +193,7 @@ interface GameInstruction {
   - Use `npm run lint:fix` to auto-fix issues
 - **Build**: `npm run build` (compile TypeScript to dist/)
 - **Production**: `npm run start` (run compiled code from dist/)
-- **Chat History**: Stored in `archives/{characterId}/history.json`
+- **Conversation History**: Stored in `archives/{characterId}/history.json`
 
 ## Key Implementation Details
 
@@ -251,7 +216,7 @@ interface GameInstruction {
 
 - Backend parser: preserve `\n` in narrative (don't use `/\s+/g`)
 - ConversationService: escape `\n` to `\\n` on save, keep escaped on load
-- ChatController: escape for API transmission, unescape for storage
+- ConversationController: escape for API transmission, unescape for storage
 - Result: Markdown lists render correctly in frontend
 
 ### API Exploration & Debugging
@@ -260,7 +225,7 @@ interface GameInstruction {
   - Interactive API documentation for all backend endpoints
   - Test endpoints directly from the browser
   - View request/response schemas
-- **Chat History**: View stored conversations at `backend/archives/{characterId}/history.json`
+- **Conversation History**: View stored conversations at `backend/archives/{characterId}/history.json`
 - **Frontend State**: Check localStorage keys in browser DevTools:
   - `rpg-characters` - All saved characters
   - `rpg-character-id` - Current character ID
@@ -331,16 +296,9 @@ frontend/src/
 └── views/                     # HomeView, GameView, CharacterCreatorView
 
 backend/src/
-├── chat/                      # ChatController, ConversationService
+├── chat/                      # ConversationController, ConversationService
 ├── external/                  # GeminiTextService, GameParser
 └── test/                      # game-parser.test.ts (12 tests passing)
-
-shared/
-├── types/
-│   ├── character.ts           # Character, Race, Skills types
-│   ├── game.ts                # GameInstruction, ChatMessage, GameResponse
-│   └── index.ts               # Export all types
-└── README.md                  # Shared types documentation
 ```
 
 ## Example: Adding a New Character Feature
