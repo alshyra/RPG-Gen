@@ -85,8 +85,11 @@ describe('Home Page', () => {
     cy.contains('HP: 20/25').should('be.visible');
 
     // Should have resume and delete buttons for each character
-    cy.contains('Reprendre').should('have.length', 2);
-    cy.contains('Supprimer').should('have.length', 2);
+    cy.get('button').contains('Reprendre').should('exist');
+    cy.get('button').contains('Supprimer').should('exist');
+    // Verify we have 2 of each by checking all buttons
+    cy.get('button').filter(':contains("Reprendre")').should('have.length', 2);
+    cy.get('button').filter(':contains("Supprimer")').should('have.length', 2);
   });
 
   it('should navigate to character creation when world is selected', () => {
