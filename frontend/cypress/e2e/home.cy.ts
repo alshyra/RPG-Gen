@@ -95,7 +95,11 @@ describe('Home Page', () => {
   it('should navigate to character creation when world is selected', () => {
     // This test would need to interact with WorldSelector
     // For now, we just verify the page structure is correct
-    cy.get('.p-6').should('exist');
-    cy.get('.text-2xl').should('contain', 'RPG Gemini');
+    // Use data-cy selector to choose a world and assert we navigate to the character creation flow
+    cy.dataCy('world-start-dnd').click();
+    // Should navigate to the character creation route for DnD
+    cy.url().should('include', '/character/dnd/step/1');
+    // Confirm the character creation wizard header is visible
+    cy.contains('Création de personnage').should('be.visible');
   });
 });

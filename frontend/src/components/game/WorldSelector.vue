@@ -9,7 +9,7 @@
       >
         <div class="flex items-start gap-3">
           <div
-            class="logo flex items-center justify-center w-12 h-12 rounded-md text-white font-bold flex-shrink-0"
+            class="logo flex items-center justify-center w-12 h-12 rounded-md text-white font-bold shrink-0"
             :class="w.bgClass"
           >
             <!-- simple initials as logo -->
@@ -29,6 +29,7 @@
           <UiButton
             variant="ghost"
             class="flex items-center gap-2"
+            :data-cy="`world-start-${w.id}`"
             @click="$emit('select', w.id)"
           >
             <span>Commencer</span>
