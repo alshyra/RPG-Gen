@@ -1,6 +1,9 @@
 <template>
-  <header class="flex items-center justify-between">
-    <div class="flex-none p-2">
+  <header class="flex items-center justify-between min-h-14">
+    <div
+      v-if="subtitle && description"
+      class="flex-none p-2"
+    >
       <h2 class="text-xl font-semibold">
         {{ subtitle }}
       </h2>
@@ -43,7 +46,7 @@ const subtitle = computed(() => {
     return worldMap[world] || 'Aventure';
   }
 
-  return '—';
+  return undefined;
 });
 
 const description = computed(() => {
@@ -59,7 +62,7 @@ const description = computed(() => {
     return gameStore.isInitializing ? 'Initialisation...' : 'Session active';
   }
 
-  return '—';
+  return undefined;
 });
 </script>
 
