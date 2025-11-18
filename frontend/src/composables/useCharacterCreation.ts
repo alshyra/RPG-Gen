@@ -35,7 +35,7 @@ const ALLOWED_RACES: CreationRace[] = [
   { id: 'half-elf', name: 'Demi-elfe', mods: { Cha: 2 } },
   { id: 'half-orc', name: 'Demi-orc', mods: { Str: 2, Con: 1 } },
   { id: 'tiefling', name: 'Tieffelin', mods: { Cha: 2, Int: 1 } },
-  { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } }
+  { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } },
 ];
 
 const CLASSES_LIST = [
@@ -50,7 +50,7 @@ const CLASSES_LIST = [
   'Rogue',
   'Sorcerer',
   'Warlock',
-  'Wizard'
+  'Wizard',
 ];
 const GENDERS = ['male', 'female'];
 const DEFAULT_RACE = ALLOWED_RACES[0];
@@ -60,7 +60,7 @@ const generatePortraitPath = (className: string, raceId: string, genderStr: stri
   try {
     const baseUrl = (import.meta as any).env?.BASE_URL || '/';
     return `${baseUrl}images/${String(className || '').toLowerCase()}_${String(
-      raceId || 'human'
+      raceId || 'human',
     ).toLowerCase()}_${String(genderStr || 'male').toLowerCase()}.png`;
   } catch {
     return '';
@@ -76,7 +76,7 @@ const createMethods = (
   gender: Ref<'male' | 'female'>,
   selectedSkills: Ref<string[]>,
   world?: string,
-  worldId?: string
+  worldId?: string,
 ) => {
   const applyRacialAndCompute = (): void => {
     const race = character.value.race;
@@ -87,7 +87,7 @@ const createMethods = (
       race?.mods || {},
       race,
       { world, worldId },
-      selectedSkills.value || []
+      selectedSkills.value || [],
     );
     character.value = { ...character.value, ...calculated };
     if (multiclass.value && secondaryClass.value) {
@@ -97,7 +97,7 @@ const createMethods = (
     character.value.portrait = generatePortraitPath(
       primaryClass.value,
       character.value.race?.id || 'human',
-      gender.value
+      gender.value,
     );
   };
 
@@ -108,7 +108,7 @@ const createMethods = (
     character.value.portrait = generatePortraitPath(
       primaryClass.value,
       character.value.race?.id || 'human',
-      gender.value
+      gender.value,
     );
     const calculated = DnDRulesService.prepareNewCharacter(
       character.value.name || 'Unnamed',
@@ -117,7 +117,7 @@ const createMethods = (
       character.value.race?.mods || {},
       character.value.race,
       { world, worldId },
-      skills || []
+      skills || [],
     );
     return { ...character.value, ...calculated };
   };
@@ -149,7 +149,7 @@ const createMethods = (
     loadLatest,
     toggleMulticlass: () => {
       multiclass.value = !multiclass.value;
-    }
+    },
   };
 };
 
@@ -163,8 +163,8 @@ const initializeCharacterRefs = (initialCharacter?: CreatedCharacter) => ({
           scores: {},
           hp: 0,
           hpMax: 0,
-          classes: [{ name: '', level: 1 }]
-        }
+          classes: [{ name: '', level: 1 }],
+        },
   ),
   primaryClass: ref(CLASSES_LIST[4]),
   secondaryClass: ref(''),
@@ -174,7 +174,7 @@ const initializeCharacterRefs = (initialCharacter?: CreatedCharacter) => ({
   selectedSkills: ref<string[]>([]),
   avatarDescription: ref(''),
   generatedAvatar: ref<string | null>(null),
-  isGeneratingAvatar: ref(false)
+  isGeneratingAvatar: ref(false),
 });
 
 const DRAFT_KEY = 'rpg-character-draft';
@@ -215,7 +215,7 @@ const loadDraft = (): Omit<ReturnType<typeof initializeCharacterRefs>, never> | 
       selectedSkills: ref(data.selectedSkills),
       avatarDescription: ref(data.avatarDescription),
       generatedAvatar: ref(data.generatedAvatar),
-      isGeneratingAvatar: ref(false)
+      isGeneratingAvatar: ref(false),
     };
   } catch (e) {
     console.error('Failed to load character draft:', e);
@@ -229,7 +229,7 @@ const getDraftCurrentStep = (): number => {
     if (!saved) return 0;
     const data = JSON.parse(saved);
     return data.currentStep ?? 0;
-  } catch (e) {
+  } catch {
     return 0;
   }
 };
@@ -246,7 +246,7 @@ export const useCharacterCreation = (
   world?: string,
   worldId?: string,
   initialCharacter?: CreatedCharacter,
-  creationMode: 'create' | 'levelup' = 'create'
+  creationMode: 'create' | 'levelup' = 'create',
 ) => {
   const router = useRouter();
 
@@ -263,7 +263,7 @@ export const useCharacterCreation = (
     selectedSkills,
     avatarDescription,
     generatedAvatar,
-    isGeneratingAvatar
+    isGeneratingAvatar,
   } = draftRefs || initializeCharacterRefs(initialCharacter);
 
   const methods = createMethods(
@@ -275,7 +275,7 @@ export const useCharacterCreation = (
     gender,
     selectedSkills,
     world,
-    worldId
+    worldId,
   );
 
   // Auto-save draft when creation state changes (debounced)
@@ -290,7 +290,7 @@ export const useCharacterCreation = (
     avatarDescription: avatarDescription.value,
     generatedAvatar: generatedAvatar.value,
     world,
-    worldId
+    worldId,
   }));
 
   const applyAndSave = async () => {
@@ -329,7 +329,7 @@ export const useCharacterCreation = (
     skillsToChoose: computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value)),
     levelUpBudget: computed(() => (creationMode === 'levelup' ? 2 : undefined)),
     levelUpInitial: computed(() =>
-      creationMode === 'levelup' ? initialCharacter?.scores || character.value?.scores : undefined
+      creationMode === 'levelup' ? initialCharacter?.scores || character.value?.scores : undefined,
     ),
     proficiencyBonus: computed(() => 2),
     ...methods,
@@ -338,6 +338,6 @@ export const useCharacterCreation = (
     clearDraft, // Export clear function for manual cleanup if needed
     getDraftCurrentStep, // Export to restore step on refresh
     saveDraftWithStep, // Export to save step when navigating
-    saveDraftNow // Export to save draft on demand from components
+    saveDraftNow, // Export to save draft on demand from components
   };
 };

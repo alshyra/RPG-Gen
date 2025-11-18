@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   e2e: {
@@ -17,15 +18,21 @@ export default defineConfig({
     // Disable retries - fail fast
     retries: {
       runMode: 0,
-      openMode: 0
-    }
+      openMode: 0,
+    },
   },
   component: {
     devServer: {
       framework: 'vue',
-      bundler: 'vite'
+      bundler: 'vite',
+      viteConfig: {
+        plugins: [vue()],
+        server: {
+          port: 5173,
+        },
+      },
     },
     specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'cypress/support/component.ts'
-  }
+    supportFile: 'cypress/support/component.ts',
+  },
 });

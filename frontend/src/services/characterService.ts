@@ -11,7 +11,7 @@ export type { SavedCharacterEntry, CharacterEntry, DeceasedCharacterEntry } from
 const STORAGE_KEYS = {
   savedCharacters: 'rpg-characters',
   currentCharacterId: 'rpg-character-id',
-  deceasedCharacters: 'rpg-deceased-characters'
+  deceasedCharacters: 'rpg-deceased-characters',
 };
 
 const generateUUID = (): string => crypto.randomUUID();
@@ -141,7 +141,7 @@ const killCharacter = (charId: string, deathLocation?: string): void => {
       id: charId,
       character: char.data,
       diedAt: new Date().toISOString(),
-      location: deathLocation || 'Unknown location'
+      location: deathLocation || 'Unknown location',
     };
 
     // Add to deceased list
@@ -230,5 +230,5 @@ export const characterService = {
   saveDraft,
   loadDraft,
   hasDraft,
-  clearDraft
+  clearDraft,
 };

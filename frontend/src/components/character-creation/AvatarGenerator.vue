@@ -102,7 +102,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  character: () => ({})
+  character: () => ({}),
 });
 
 defineEmits<Emits>();
@@ -132,7 +132,7 @@ const generate = async () => {
   try {
     const { data } = await axios.post('/api/image/generate-avatar', {
       character: props.character,
-      description: description.value
+      description: description.value,
     });
     generatedAvatar.value = data.imageUrl;
   } catch (err: any) {

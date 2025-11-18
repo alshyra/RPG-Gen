@@ -17,7 +17,7 @@ export default [
     semi: true,
     jsx: false,
     braceStyle: '1tbs',
-    commaDangle: 'never'
+    commaDangle: 'always-multiline',
   }),
   {
     files: ['**/*.vue'],
@@ -43,13 +43,14 @@ export default [
     },
     rules: {
       'vue/multi-word-component-names': 'error',
-      'vue/no-v-html': 'off',
       'vue/block-order': 'error',
       'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: 1 }],
       'vue/first-attribute-linebreak': ['error', { singleline: 'ignore', multiline: 'below' }],
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@stylistic/max-statements-per-line': 'off'
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'arrow-body-style': ['error', 'as-needed'],
+      'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['error', 10],
+      'prefer-object-spread': 'error',
     }
   },
   {
@@ -72,13 +73,11 @@ export default [
       }
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'arrow-body-style': ['warn', 'as-needed'],
-      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-      'max-statements': ['warn', 10],
-      'prefer-object-spread': 'warn',
-      '@stylistic/max-statements-per-line': 'off'
+      'arrow-body-style': ['error', 'as-needed'],
+      'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['error', 10],
+      'prefer-object-spread': 'error',
     }
   }
 ];

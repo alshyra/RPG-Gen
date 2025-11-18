@@ -8,8 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@shared': fileURLToPath(new URL('../shared', import.meta.url))
-    }
+      '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
+    },
   },
   server: {
     host: '0.0.0.0',
@@ -17,8 +17,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: process.env.BACKEND_URL || 'http://backend:3001',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 });

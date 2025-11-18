@@ -18,22 +18,22 @@ const routes = [
   {
     path: '/character/:world?/step/:step',
     name: 'character-step',
-    component: CharacterCreatorView
+    component: CharacterCreatorView,
   },
   {
     path: '/character/:world?',
     redirect: (to: any) => {
       const world = to.params.world || 'dnd';
       return `/character/${world}/step/1`;
-    }
+    },
   },
   { path: '/levelup/:world?', name: 'levelup', component: CharacterLevelupView },
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView }
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
 // Navigation guard to check authentication

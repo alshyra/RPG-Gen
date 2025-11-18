@@ -208,7 +208,7 @@ watch(
       }, 50);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Handle character death

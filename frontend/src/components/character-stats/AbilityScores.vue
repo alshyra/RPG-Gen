@@ -35,7 +35,7 @@ const abilities = {
   con: { short: 'CON', color: 'text-amber-400' },
   int: { short: 'INT', color: 'text-blue-400' },
   wis: { short: 'WIS', color: 'text-green-400' },
-  cha: { short: 'CHA', color: 'text-pink-400' }
+  cha: { short: 'CHA', color: 'text-pink-400' },
 };
 
 const gameStore = useGameStore();

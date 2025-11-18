@@ -42,8 +42,8 @@ const skills = computed(() => {
       skill.name,
       props.character.scores || {},
       props.character.proficiency || 2,
-      skill.proficient
-    )
+      skill.proficient,
+    ),
   }));
 });
 </script>

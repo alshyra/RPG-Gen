@@ -5,7 +5,7 @@ import type { GameResponse, ChatMessage } from '@shared/types';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || `${window.location.origin}/api`
+  baseURL: import.meta.env.VITE_API_URL || `${window.location.origin}/api`,
 });
 
 // Add auth token to all requests
@@ -27,7 +27,7 @@ apiClient.interceptors.response.use(
       window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export class GameEngine {
@@ -69,7 +69,7 @@ export class GameEngine {
       text: result.text || '',
       instructions: result.instructions || [],
       model: result.model,
-      usage: result.usage
+      usage: result.usage,
     };
   }
 

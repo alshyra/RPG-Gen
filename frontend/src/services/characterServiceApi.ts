@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
-  baseURL: API_URL
+  baseURL: API_URL,
 });
 
 // Add auth token to all requests
@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
       window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 const generateUUID = (): string => crypto.randomUUID();
@@ -42,7 +42,7 @@ const getAllSavedCharacters = async (): Promise<SavedCharacterEntry[]> => {
     const characters = response.data.characters || [];
     return characters.map((char: CharacterEntry) => ({
       id: char.id,
-      data: char
+      data: char,
     }));
   } catch (e) {
     console.error('Failed to load characters from API', e);
@@ -150,7 +150,7 @@ const getDeceasedCharacters = async (): Promise<DeceasedCharacterEntry[]> => {
       id: char.id,
       character: char,
       diedAt: char.diedAt,
-      location: char.deathLocation || 'Unknown location'
+      location: char.deathLocation || 'Unknown location',
     }));
   } catch (e) {
     console.error('Failed to load deceased characters from API', e);
@@ -220,5 +220,5 @@ export const characterServiceApi = {
   saveDraft,
   loadDraft,
   hasDraft,
-  clearDraft
+  clearDraft,
 };

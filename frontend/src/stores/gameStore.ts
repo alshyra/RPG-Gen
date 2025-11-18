@@ -105,7 +105,7 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
     pi.value = null;
     sr.value = false;
     dm.value = false;
-  }
+  },
 });
 
 const gameStoreSession = ref<GameSession>({ world: '', worldName: '—', character: null });
@@ -121,7 +121,7 @@ export const useGameStore = defineStore('game', () => {
   const charHpMax = computed(() => gameStoreSession.value.character?.hpMax || 12);
   const isDead = computed(() => (gameStoreSession.value.character?.hp || 0) === 0);
   const lastMessage = computed(
-    () => gameStoreMessages.value[gameStoreMessages.value.length - 1] || null
+    () => gameStoreMessages.value[gameStoreMessages.value.length - 1] || null,
   );
   const actions = createActions(
     gameStoreSession,
@@ -130,7 +130,7 @@ export const useGameStore = defineStore('game', () => {
     gameStorePendingInstruction,
     gameStoreShowRollModal,
     gameStoreShowDeathModal,
-    charHpMax
+    charHpMax,
   );
   return {
     session: gameStoreSession,
@@ -144,6 +144,6 @@ export const useGameStore = defineStore('game', () => {
     charHpMax,
     isDead,
     lastMessage,
-    ...actions
+    ...actions,
   };
 });

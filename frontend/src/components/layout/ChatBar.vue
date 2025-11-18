@@ -65,14 +65,14 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isThinking: false
+  isThinking: false,
 });
 
 const emit = defineEmits<Emits>();
 
 const playerText = computed({
   get: () => props.playerText,
-  set: (value: string) => emit('update:playerText', value)
+  set: (value: string) => emit('update:playerText', value),
 });
 
 const isRolling = computed(() => !!props.pendingInstruction?.roll);

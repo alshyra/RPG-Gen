@@ -63,7 +63,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  character: undefined
+  character: undefined,
 });
 
 const emit = defineEmits<Emits>();
@@ -81,8 +81,8 @@ const diedDate = computed(() =>
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
-  })
+    minute: '2-digit',
+  }),
 );
 
 const close = () => emit('close');

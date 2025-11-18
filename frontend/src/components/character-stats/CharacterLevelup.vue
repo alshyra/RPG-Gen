@@ -144,7 +144,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   world: '',
-  initialCharacter: undefined
+  initialCharacter: undefined,
 });
 
 const router = useRouter();
@@ -165,17 +165,58 @@ const conModifier = computed(() => {
   return Math.floor((conScore - 10) / 2);
 });
 
-const levelUpReward = computed<LevelUpResult>(() => {
-  return dndLevelUpService.levelUp(
-    className.value,
-    currentLevel.value,
-    conModifier.value
-  );
-});
+const levelUpReward = computed<LevelUpResult>(() => dndLevelUpService.levelUp(
+  className.value,
+  currentLevel.value,
+  conModifier.value,
+));
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
 
 // Handlers
+
+const buildLevelUpMessage = (updatedCharacter: any): string => `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({
+  name: updatedCharacter.name,
+  level: nextLevel.value,
+  class: className.value,
+  hp: updatedCharacter.hp,
+  hpMax: updatedCharacter.hpMax,
+  proficiency: proficiencyBonus.value,
+  newFeatures: levelUpReward.value.newFeatures,
+  hasASI: levelUpReward.value.hasASI,
+}, null, 2)}`;
+
+const executeLevelUp = async (): Promise<void> => {
+  // Update character with new level and HP
+  const updatedCharacter = {
+    ...character.value,
+    classes: [
+      {
+        ...character.value.classes?.[0],
+        level: nextLevel.value,
+      },
+    ],
+    hp: Math.min(
+      (character.value.hp || 0) + levelUpReward.value.hpGain,
+      (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+    ),
+    hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+  };
+
+  // Save to backend
+  await characterServiceApi.updateCurrentCharacter(updatedCharacter as any);
+
+  // Send to backend
+  const levelupMsg = buildLevelUpMessage(updatedCharacter);
+  await gameEngine.sendMessage(levelupMsg);
+  gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
+
+  // Return to game
+  setTimeout(() => {
+    router.push({ name: 'game', params: { world: props.world } });
+  }, 1500);
+};
+
 const handleConfirm = async (): Promise<void> => {
   if (!levelUpReward.value.success) {
     gameStore.appendMessage('Error', 'Cannot level up further');
@@ -183,46 +224,8 @@ const handleConfirm = async (): Promise<void> => {
   }
 
   isPending.value = true;
-
   try {
-    // Update character with new level and HP
-    const updatedCharacter = {
-      ...character.value,
-      classes: [
-        {
-          ...character.value.classes?.[0],
-          level: nextLevel.value
-        }
-      ],
-      hp: Math.min(
-        (character.value.hp || 0) + levelUpReward.value.hpGain,
-        (character.value.hpMax || 0) + levelUpReward.value.hpGain
-      ),
-      hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain
-    };
-
-    // Save to backend
-    await characterServiceApi.updateCurrentCharacter(updatedCharacter as any);
-
-    // Send to backend
-    const levelupMsg = `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({
-      name: updatedCharacter.name,
-      level: nextLevel.value,
-      class: className.value,
-      hp: updatedCharacter.hp,
-      hpMax: updatedCharacter.hpMax,
-      proficiency: proficiencyBonus.value,
-      newFeatures: levelUpReward.value.newFeatures,
-      hasASI: levelUpReward.value.hasASI
-    }, null, 2)}`;
-
-    await gameEngine.sendMessage(levelupMsg);
-    gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
-
-    // Return to game
-    setTimeout(() => {
-      router.push({ name: 'game', params: { world: props.world } });
-    }, 1500);
+    await executeLevelUp();
   } catch (error: any) {
     gameStore.appendMessage('Error', `Level up failed: ${error.message}`);
   } finally {

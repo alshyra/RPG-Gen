@@ -9,7 +9,7 @@ import type { CharacterEntry } from '@shared/types';
  */
 export function getSkillBonus(
   character: CharacterEntry | null,
-  skillNameWithCheck: string
+  skillNameWithCheck: string,
 ): number {
   if (!character) return 0;
 
@@ -32,7 +32,7 @@ export function getSkillBonus(
  * @param character The character to get skills from
  */
 export function getAvailableSkills(
-  character: CharacterEntry | null
+  character: CharacterEntry | null,
 ): Array<{ name: string; modifier: number }> {
   return character?.skills || [];
 }

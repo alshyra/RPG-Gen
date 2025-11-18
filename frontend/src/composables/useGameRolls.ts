@@ -16,7 +16,7 @@ const buildRollMessage = (
   bonus: number,
   skillName: string,
   total: number,
-  criticalNote: string
+  criticalNote: string,
 ): string =>
   `Rolled: [${diceValue}] = ${diceValue}${
     bonus !== 0 ? ` + ${bonus}` : ''
@@ -26,7 +26,7 @@ const handleAdditionalRoll = (instr: any, gameStore: any): void => {
   gameStore.setPendingInstruction(instr);
   gameStore.appendMessage(
     'System',
-    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`
+    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`,
   );
 };
 
@@ -49,7 +49,7 @@ export function useGameRolls() {
     total: 0,
     bonus: 0,
     diceNotation: '',
-    skillName: ''
+    skillName: '',
   });
 
   const onDiceRolled = async (rollResult: any): Promise<void> => {
@@ -68,7 +68,7 @@ export function useGameRolls() {
       rolls: [diceValue],
       bonus: skillBonus,
       total: diceValue + skillBonus,
-      diceNotation: instr.dices
+      diceNotation: instr.dices,
     };
     gameStore.setRollModalVisible(true);
   };
@@ -87,10 +87,10 @@ export function useGameRolls() {
   const sendRollResult = async (
     rollResult: any,
     skillName: string,
-    criticalNote: string
+    criticalNote: string,
   ): Promise<void> => {
     const rollResultMsg = `[${skillName}] Roll result: ${JSON.stringify(
-      rollResult
+      rollResult,
     )}${criticalNote}`;
     const response = await gameEngine.sendMessage(rollResultMsg);
     await handleRollResponse(response);
@@ -103,7 +103,7 @@ export function useGameRolls() {
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage(
       'System',
-      buildRollMessage(diceValue, bonus, skillName, total, criticalNote)
+      buildRollMessage(diceValue, bonus, skillName, total, criticalNote),
     );
     try {
       await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
@@ -129,7 +129,7 @@ export function useGameRolls() {
       rolls: [diceValue],
       bonus: skillBonus,
       total: diceValue + skillBonus,
-      diceNotation: instr.dices
+      diceNotation: instr.dices,
     };
   };
 

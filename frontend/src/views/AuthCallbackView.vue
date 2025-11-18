@@ -42,39 +42,49 @@ const router = useRouter();
 const loading = ref(true);
 const error = ref('');
 
-onMounted(async () => {
+onMounted(() => runAuthFlow());
+
+const runAuthFlow = async () => {
   try {
-    // Get token from URL query params
-    const urlParams = new window.URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-
+    const token = getTokenFromUrl();
     if (!token) {
-      error.value = 'Token manquant';
-      loading.value = false;
+      setError('Token manquant');
       return;
     }
 
-    // Save token
-    authService.setToken(token);
-
-    // Fetch user profile
-    const user = await authService.fetchUserProfile(token);
-    if (!user) {
-      error.value = 'Impossible de récupérer le profil utilisateur';
-      loading.value = false;
-      return;
-    }
-
-    // Redirect to home (world selector)
+    await saveTokenAndFetchProfile(token);
     router.push('/home');
   } catch (e) {
-    console.error('Auth callback error', e);
-    error.value = 'Une erreur est survenue lors de l\'authentification';
-    loading.value = false;
+    handleAuthError(e);
   }
-});
-
-const goToLogin = () => {
-  router.push('/login');
 };
+
+const getTokenFromUrl = () => {
+  const urlParams = new window.URLSearchParams(window.location.search);
+  return urlParams.get('token');
+};
+
+const setError = (message: string) => {
+  error.value = message;
+  loading.value = false;
+};
+
+const saveTokenAndFetchProfile = async (token: string) => {
+  // Save token
+  authService.setToken(token);
+
+  // Fetch user profile
+  const user = await authService.fetchUserProfile(token);
+  if (!user) {
+    setError('Impossible de récupérer le profil utilisateur');
+    return;
+  }
+};
+
+const handleAuthError = (e: unknown) => {
+  console.error('Auth callback error', e);
+  setError('Une erreur est survenue lors de l\'authentification');
+};
+
+const goToLogin = () => router.push('/login');
 </script>

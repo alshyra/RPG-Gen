@@ -87,6 +87,6 @@ export function useGameMessages() {
 
   return {
     sendMessage,
-    processInstructions
+    processInstructions,
   };
 }

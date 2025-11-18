@@ -27,7 +27,7 @@ import { ref, watch, onMounted, computed } from 'vue';
 const props = defineProps<{ hp?: string | number; animate?: boolean }>();
 
 const beating = ref(false);
-let timer: any = null;
+let timer: ReturnType<typeof setTimeout> | null = null;
 
 const displayedHp = computed(() => {
   const v: any = props.hp as any;
@@ -41,15 +41,22 @@ const displayedHp = computed(() => {
 
 watch(() => props.hp, () => {
   if (!props.animate) return;
-  if (timer) { clearTimeout(timer); timer = null; }
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
   // trigger a short beat animation when hp changes
   beating.value = true;
-  timer = setTimeout(() => { beating.value = false; timer = null; }, 700);
+  timer = setTimeout(() => {
+    beating.value = false;
+    timer = null;
+  }, 700);
 });
 
 onMounted(() => {
-  // initial small beat to draw attention
-  if (props.animate) { beating.value = true; setTimeout(() => beating.value = false, 400); }
+  if (!props.animate) return;
+  beating.value = true;
+  setTimeout(() => beating.value = false, 400);
 });
 </script>
 

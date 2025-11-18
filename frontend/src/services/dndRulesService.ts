@@ -41,7 +41,7 @@ const SKILLS: Skill[] = [
   { name: 'Religion', ability: 'Int' },
   { name: 'Sleight of Hand', ability: 'Dex' },
   { name: 'Stealth', ability: 'Dex' },
-  { name: 'Survival', ability: 'Wis' }
+  { name: 'Survival', ability: 'Wis' },
 ];
 
 // Class skill proficiencies (can choose X from this list)
@@ -57,7 +57,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
   Rogue: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth'],
   Sorcerer: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
   Warlock: ['Arcana', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
-  Wizard: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion']
+  Wizard: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
 };
 
 // How many skills can be chosen per class
@@ -73,7 +73,7 @@ const CLASS_SKILL_CHOICES: { [className: string]: number } = {
   Rogue: 4,
   Sorcerer: 2,
   Warlock: 2,
-  Wizard: 2
+  Wizard: 2,
 };
 
 // D&D 5e Hit Dice by class
@@ -89,7 +89,7 @@ const HIT_DIE_MAP: HitDieMap = {
   Cleric: 8,
   Druid: 8,
   Sorcerer: 6,
-  Wizard: 6
+  Wizard: 6,
 };
 
 export class DnDRulesService {
@@ -105,7 +105,7 @@ export class DnDRulesService {
    */
   static applyRacialModifiers(
     baseScores: Record<string, number>,
-    raceModifiers: RaceModifiers
+    raceModifiers: RaceModifiers,
   ): Record<string, number> {
     const result = { ...baseScores };
     Object.keys(raceModifiers).forEach((key) => {
@@ -188,7 +188,7 @@ export class DnDRulesService {
     raceModifiers: RaceModifiers,
     raceInfo: any,
     worldInfo?: { world?: string; worldId?: string },
-    selectedSkills?: string[]
+    selectedSkills?: string[],
   ): any {
     // Apply racial bonuses
     const finalScores = this.applyRacialModifiers(baseScores, raceModifiers);
@@ -203,7 +203,7 @@ export class DnDRulesService {
     const skills = SKILLS.map(skill => ({
       name: skill.name,
       proficient: (selectedSkills || []).includes(skill.name),
-      modifier: this.calculateSkillModifier(skill.name, finalScores, proficiency, (selectedSkills || []).includes(skill.name))
+      modifier: this.calculateSkillModifier(skill.name, finalScores, proficiency, (selectedSkills || []).includes(skill.name)),
     }));
 
     return {
@@ -217,7 +217,7 @@ export class DnDRulesService {
       proficiency,
       skills,
       ...(worldInfo?.world && { world: worldInfo.world }),
-      ...(worldInfo?.worldId && { worldId: worldInfo.worldId })
+      ...(worldInfo?.worldId && { worldId: worldInfo.worldId }),
     };
   }
 }
