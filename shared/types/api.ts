@@ -2,15 +2,14 @@
  * Shared API request/response types for RPG-Gen
  */
 
-import type { CharacterEntry } from "./character";
-
 /**
  * Chat request to backend
  */
 export interface ChatRequest {
   message?: string;
-  sessionId?: string;
-  character?: CharacterEntry;
+  characterId?: string;
+  // Optional full character data used when initializing a new conversation
+  character?: Record<string, unknown> | undefined;
 }
 
 /**

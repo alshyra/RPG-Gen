@@ -33,7 +33,7 @@ export class ChatHistory {
   userId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
-  sessionId: string; // Character UUID
+  characterId: string; // Character UUID
 
   @Prop({ type: [ChatMessage], default: [] })
   messages: ChatMessage[];
@@ -45,4 +45,4 @@ export class ChatHistory {
 export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);
 
 // Index for efficient querying
-ChatHistorySchema.index({ userId: 1, sessionId: 1 }, { unique: true });
+ChatHistorySchema.index({ userId: 1, characterId: 1 }, { unique: true });

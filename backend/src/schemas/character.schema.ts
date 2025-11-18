@@ -68,6 +68,9 @@ export class Character {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: false })
+  physicalDescription: string;
+
   @Prop({ type: Race, required: true })
   race: Race;
 

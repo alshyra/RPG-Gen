@@ -16,26 +16,26 @@ export class ConversationService {
     @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>
   ) {}
 
-  async getHistory(userId: string, sessionId: string): Promise<ChatMessage[]> {
-    const history = await this.chatHistoryModel.findOne({ userId, sessionId }).exec();
-    if (history) {
-      return history.messages.map(m => ({
-        role: m.role,
-        text: m.text,
-        timestamp: m.timestamp,
-        meta: (m.meta ? { ...m.meta } : undefined) as Record<string, unknown> | undefined,
-      })) as ChatMessage[];
-    }
-    return [];
+  async getHistory(userId: string, characterId: string): Promise<ChatMessage[]> {
+    const history = await this.chatHistoryModel.findOne({ userId, characterId }).exec();
+
+    if (!history) return [];
+
+    return history.messages.map(m => ({
+      role: m.role,
+      text: m.text,
+      timestamp: m.timestamp,
+      meta: (m.meta ? { ...m.meta } : undefined) as Record<string, unknown> | undefined,
+    })) as ChatMessage[];
   }
 
-  async append(userId: string, sessionId: string, msg: ChatMessage) {
-    let history = await this.chatHistoryModel.findOne({ userId, sessionId });
+  async append(userId: string, characterId: string, msg: ChatMessage) {
+    let history = await this.chatHistoryModel.findOne({ userId, characterId });
     
     if (!history) {
       history = new this.chatHistoryModel({
         userId,
-        sessionId,
+        characterId,
         messages: [msg],
         lastUpdated: new Date(),
       });
@@ -49,14 +49,14 @@ export class ConversationService {
     }
 
     await history.save();
-    this.logger.log(`💬 Saved message to session ${sessionId} (${history.messages.length} messages)`);
+    this.logger.log(`💬 Saved message to character ${characterId} (${history.messages.length} messages)`);
   }
 
-  async setHistory(userId: string, sessionId: string, list: ChatMessage[]) {
+  async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
     const truncated = list.slice(-this.MAX_MESSAGES);
     
     await this.chatHistoryModel.findOneAndUpdate(
-      { userId, sessionId },
+      { userId, characterId },
       {
         messages: truncated,
         lastUpdated: new Date(),
@@ -64,12 +64,12 @@ export class ConversationService {
       { upsert: true, new: true }
     );
     
-    this.logger.log(`📝 Set history for session ${sessionId} (${truncated.length} messages)`);
+    this.logger.log(`📝 Set history for character ${characterId} (${truncated.length} messages)`);
   }
 
-  async clear(userId: string, sessionId: string) {
+  async clear(userId: string, characterId: string) {
     await this.chatHistoryModel.findOneAndUpdate(
-      { userId, sessionId },
+      { userId, characterId },
       {
         messages: [],
         lastUpdated: new Date(),
@@ -77,6 +77,6 @@ export class ConversationService {
       { upsert: true }
     );
     
-    this.logger.log(`🗑️ Cleared history for session ${sessionId}`);
+    this.logger.log(`🗑️ Cleared history for character ${characterId}`);
   }
 }

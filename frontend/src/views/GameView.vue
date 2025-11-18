@@ -177,7 +177,7 @@ const gameStore = useGameStore();
 const isSidebarOpen = ref(false);
 
 // Composables
-const { initSession } = useGameSession();
+  const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls();
 
@@ -192,7 +192,7 @@ const toggleSidebar = () => {
 // Load on mount
 onMounted(async () => {
   try {
-    await initSession();
+    await startGame();
   } catch (e) {
     gameStore.appendMessage('Error', String(e));
   }
@@ -215,7 +215,7 @@ watch(
 const onDeathConfirm = async () => {
   if (!gameStore.session.character?.id) return;
   await characterServiceApi.killCharacter(gameStore.session.character.id, gameStore.session.worldName);
-  gameEngine.clearSession();
+  gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');
 };

@@ -293,9 +293,6 @@ export const useCharacterCreation = (
     worldId,
   }));
 
-  // No more auto-watch - we'll save on demand from components
-  // This avoids the arrow function size issue and makes saves more explicit
-
   const applyAndSave = async () => {
     methods.applyRacialAndCompute();
     // If we have a generated avatar, use it; otherwise keep the portrait path
@@ -307,17 +304,12 @@ export const useCharacterCreation = (
     router.push({ name: "game", params: { world } });
   };
 
-  const saveDraftWithStep = (currentStep: number): void => {
-    const fullDraftState = {
-      ...draftState.value,
-      currentStep,
-    };
-    saveDraft(fullDraftState);
-  };
+  const saveDraftWithStep = (currentStep: number) => saveDraft({
+    ...draftState.value,
+    currentStep,
+  });
 
-  const saveDraftNow = (): void => {
-    saveDraft(draftState.value);
-  };
+  const saveDraftNow = () => saveDraft(draftState.value);
 
   return {
     character,
