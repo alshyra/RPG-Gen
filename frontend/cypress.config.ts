@@ -1,10 +1,10 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL || "http://127.0.0.1",
-    specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
-    supportFile: "cypress/support/e2e.ts",
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://127.0.0.1',
+    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    supportFile: 'cypress/support/e2e.ts',
     video: process.env.CI ? true : false,
     screenshotOnRunFailure: true,
     viewportWidth: 1280,
@@ -17,15 +17,15 @@ export default defineConfig({
     // Disable retries - fail fast
     retries: {
       runMode: 0,
-      openMode: 0,
-    },
+      openMode: 0
+    }
   },
   component: {
     devServer: {
-      framework: "vue",
-      bundler: "vite",
+      framework: 'vue',
+      bundler: 'vite'
     },
-    specPattern: "cypress/component/**/*.cy.{js,jsx,ts,tsx}",
-    supportFile: "cypress/support/component.ts",
-  },
+    specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
+    supportFile: 'cypress/support/component.ts'
+  }
 });

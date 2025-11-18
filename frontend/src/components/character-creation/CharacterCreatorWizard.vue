@@ -153,7 +153,7 @@ const {
   applyAndSave,
   getDraftCurrentStep,
   saveDraftWithStep,
-  saveDraftNow,
+  saveDraftNow
 } = useCharacterCreation(props.world, props.worldId);
 
 // Get current step from route, or from draft if no route param
@@ -199,17 +199,16 @@ const nextStep = async () => {
   if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
     await generateAvatar();
   }
-}
+};
 
 const previousStep = () => {
-  if (currentStep.value <= 0) return
+  if (currentStep.value <= 0) return;
 
   saveDraftWithStep(currentStep.value - 1);
   currentStep.value--;
-}
+};
 
 const updateCharacter = (updates: any) => character.value = { ...character.value, ...updates };
-
 
 const generateAvatar = async () => {
   if (!avatarDescription.value.trim()) return;
@@ -232,7 +231,7 @@ const generateAvatar = async () => {
         classes: [{ name: primaryClass.value }]
       },
       description: avatarDescription.value,
-      characterId: charId, // Pass character ID to save avatar
+      characterId: charId // Pass character ID to save avatar
     });
 
     generatedAvatar.value = response.data.imageUrl;
@@ -242,12 +241,12 @@ const generateAvatar = async () => {
   } finally {
     isGeneratingAvatar.value = false;
   }
-}
+};
 
 const finishCreation = async () => {
   if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
     await generateAvatar();
   }
   await applyAndSave();
-}
+};
 </script>

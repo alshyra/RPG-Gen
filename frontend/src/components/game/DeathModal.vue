@@ -53,36 +53,36 @@ import UiModal from '../ui/UiModal.vue';
 import { getCurrentLevel } from '../../utils/dndLevels';
 
 interface Props {
-    isOpen: boolean;
-    character?: any;
+  isOpen: boolean;
+  character?: any;
 }
 
 interface Emits {
-    confirm: [];
-    close: [];
+  confirm: [];
+  close: [];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    character: undefined,
+  character: undefined
 });
 
 const emit = defineEmits<Emits>();
 
 const characterName = computed(() => props.character?.name || 'Unknown');
 const characterClass = computed(() => {
-    const classes = props.character?.classes || [];
-    return classes.map((c: any) => `${c.name} ${c.level}`).join(', ') || '';
+  const classes = props.character?.classes || [];
+  return classes.map((c: any) => `${c.name} ${c.level}`).join(', ') || '';
 });
 const characterXp = computed(() => props.character?.totalXp || 0);
 const characterLevel = computed(() => getCurrentLevel(props.character.totalXp).level);
 const diedDate = computed(() =>
-    new Date().toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    })
+  new Date().toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 );
 
 const close = () => emit('close');

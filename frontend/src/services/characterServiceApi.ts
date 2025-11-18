@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL
 });
 
 // Add auth token to all requests
@@ -24,7 +24,7 @@ apiClient.interceptors.request.use((config) => {
 
 // Handle auth errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  response => response,
   (error) => {
     if (error.response?.status === 401) {
       authService.logout();
@@ -42,7 +42,7 @@ const getAllSavedCharacters = async (): Promise<SavedCharacterEntry[]> => {
     const characters = response.data.characters || [];
     return characters.map((char: CharacterEntry) => ({
       id: char.id,
-      data: char,
+      data: char
     }));
   } catch (e) {
     console.error('Failed to load characters from API', e);
@@ -54,12 +54,12 @@ const saveCharacter = async (character: CharacterEntry): Promise<string> => {
   try {
     const charId = character.id || generateUUID();
     const charWithId = { ...character, id: charId };
-    
+
     await apiClient.post('/characters', charWithId);
-    
+
     // Also save current character ID in localStorage for quick access
     localStorage.setItem('rpg-character-id', charId);
-    
+
     return charId;
   } catch (e) {
     console.error('Failed to save character to API', e);
@@ -72,7 +72,7 @@ const updateCurrentCharacter = async (character: CharacterEntry): Promise<void> 
     if (!character.id) {
       throw new Error('Character must have an ID to update');
     }
-    
+
     await apiClient.put(`/characters/${character.id}`, character);
   } catch (e) {
     console.error('Failed to update character in API', e);
@@ -84,7 +84,7 @@ const getCurrentCharacter = async (): Promise<CharacterEntry | null> => {
   try {
     const currentCharId = localStorage.getItem('rpg-character-id');
     if (!currentCharId) return null;
-    
+
     const response = await apiClient.get(`/characters/${currentCharId}`);
     return response.data.character || null;
   } catch (e) {
@@ -96,7 +96,7 @@ const getCurrentCharacter = async (): Promise<CharacterEntry | null> => {
 const deleteCharacter = async (charId: string): Promise<void> => {
   try {
     await apiClient.delete(`/characters/${charId}`);
-    
+
     // If this was the current character, clear it
     const currentCharId = localStorage.getItem('rpg-character-id');
     if (currentCharId === charId) {
@@ -130,7 +130,7 @@ const clearCurrentCharacterId = (): void => {
 const killCharacter = async (charId: string, deathLocation?: string): Promise<void> => {
   try {
     await apiClient.post(`/characters/${charId}/kill`, { deathLocation });
-    
+
     // Remove from current character if it's the one that died
     const currentCharId = localStorage.getItem('rpg-character-id');
     if (currentCharId === charId) {
@@ -150,7 +150,7 @@ const getDeceasedCharacters = async (): Promise<DeceasedCharacterEntry[]> => {
       id: char.id,
       character: char,
       diedAt: char.diedAt,
-      location: char.deathLocation || 'Unknown location',
+      location: char.deathLocation || 'Unknown location'
     }));
   } catch (e) {
     console.error('Failed to load deceased characters from API', e);
@@ -198,10 +198,10 @@ const clearDraft = (): void => {
 };
 
 // Synchronous version for compatibility with existing code
-const loadCharacter = (): CharacterEntry | null => 
+const loadCharacter = (): CharacterEntry | null =>
   // This is a synchronous wrapper that returns cached data
   // The actual data should be loaded asynchronously using getCurrentCharacter()
-   null
+  null
 ;
 
 export const characterServiceApi = {
@@ -220,5 +220,5 @@ export const characterServiceApi = {
   saveDraft,
   loadDraft,
   hasDraft,
-  clearDraft,
+  clearDraft
 };

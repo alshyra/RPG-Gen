@@ -18,15 +18,15 @@ const props = defineProps({
 
 // Configure marked to allow HTML
 marked.setOptions({
- "async": false,
- "breaks": false,
- "extensions": null,
- "gfm": true,
- "hooks": null,
- "pedantic": false,
- "silent": false,
- "tokenizer": null,
- "walkTokens": null
+  async: false,
+  breaks: false,
+  extensions: null,
+  gfm: true,
+  hooks: null,
+  pedantic: false,
+  silent: false,
+  tokenizer: null,
+  walkTokens: null
 });
 
 const renderedMarkdown = computed(() => {

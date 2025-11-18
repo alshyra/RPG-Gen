@@ -73,4 +73,3 @@ const updateClass = (newClass: string) => {
   emit('update:primary-class', newClass);
 };
 </script>
-

@@ -16,12 +16,12 @@ import UiButton from '../ui/UiButton.vue';
 import { type GameInstruction } from '@shared/types';
 
 const emit = defineEmits<{
-  (e: 'rolled', payload: any): void
-  (e: 'send'): void
+  (e: 'rolled', payload: any): void;
+  (e: 'send'): void;
 }>();
 
 const error = ref('');
-const props = defineProps<{ pendingInstruction?: GameInstruction | null, expr: string }>();
+const props = defineProps<{ pendingInstruction?: GameInstruction | null; expr: string }>();
 
 const onClick = async () => {
   if (props.pendingInstruction?.roll) {

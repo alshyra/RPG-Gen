@@ -1,5 +1,6 @@
 const js = require('@eslint/js');
 const ts = require('typescript-eslint');
+const stylistic = require('@stylistic/eslint-plugin');
 
 module.exports = [
   {
@@ -7,6 +8,14 @@ module.exports = [
   },
   js.configs.recommended,
   ...ts.configs.recommended,
+  stylistic.configs.customize({
+    indent: 2,
+    quotes: 'single',
+    semi: true,
+    jsx: false,
+    braceStyle: '1tbs',
+    commaDangle: 'never'
+  }),
   {
     files: ['**/*.{js,ts}'],
     languageOptions: {

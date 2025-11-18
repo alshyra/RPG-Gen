@@ -6,10 +6,10 @@ import { Character, CharacterSchema } from '../schemas/character.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Character.name, schema: CharacterSchema }]),
+    MongooseModule.forFeature([{ name: Character.name, schema: CharacterSchema }])
   ],
   controllers: [CharacterController],
   providers: [CharacterService],
-  exports: [CharacterService],
+  exports: [CharacterService]
 })
 export class CharacterModule {}

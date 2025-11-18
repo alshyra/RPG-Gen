@@ -29,7 +29,7 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
     p.value = text;
   },
   clearPlayerText: () => {
-    p.value = "";
+    p.value = '';
   },
   updateCharacterHp: (delta: number) => {
     if (s.value.character) {
@@ -101,23 +101,23 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
   },
   reset: () => {
     m.value = [];
-    p.value = "";
+    p.value = '';
     pi.value = null;
     sr.value = false;
     dm.value = false;
-  },
+  }
 });
 
-const gameStoreSession = ref<GameSession>({ world: "", worldName: "—", character: null });
+const gameStoreSession = ref<GameSession>({ world: '', worldName: '—', character: null });
 const gameStoreMessages = ref<GameMessage[]>([]);
-const gameStorePlayerText = ref("");
+const gameStorePlayerText = ref('');
 const gameStoreIsInitializing = ref(false);
 const gameStoreIsSending = ref(false);
 const gameStorePendingInstruction = ref<GameInstruction | null>(null);
 const gameStoreShowRollModal = ref(false);
 const gameStoreShowDeathModal = ref(false);
 
-export const useGameStore = defineStore("game", () => {
+export const useGameStore = defineStore('game', () => {
   const charHpMax = computed(() => gameStoreSession.value.character?.hpMax || 12);
   const isDead = computed(() => (gameStoreSession.value.character?.hp || 0) === 0);
   const lastMessage = computed(
@@ -144,6 +144,6 @@ export const useGameStore = defineStore("game", () => {
     charHpMax,
     isDead,
     lastMessage,
-    ...actions,
+    ...actions
   };
 });

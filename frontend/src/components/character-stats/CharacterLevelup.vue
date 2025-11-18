@@ -144,7 +144,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   world: '',
-  initialCharacter: undefined,
+  initialCharacter: undefined
 });
 
 const router = useRouter();
@@ -169,7 +169,7 @@ const levelUpReward = computed<LevelUpResult>(() => {
   return dndLevelUpService.levelUp(
     className.value,
     currentLevel.value,
-    conModifier.value,
+    conModifier.value
   );
 });
 
@@ -191,14 +191,14 @@ const handleConfirm = async (): Promise<void> => {
       classes: [
         {
           ...character.value.classes?.[0],
-          level: nextLevel.value,
-        },
+          level: nextLevel.value
+        }
       ],
       hp: Math.min(
         (character.value.hp || 0) + levelUpReward.value.hpGain,
-        (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+        (character.value.hpMax || 0) + levelUpReward.value.hpGain
       ),
-      hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+      hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain
     };
 
     // Save to backend
@@ -213,7 +213,7 @@ const handleConfirm = async (): Promise<void> => {
       hpMax: updatedCharacter.hpMax,
       proficiency: proficiencyBonus.value,
       newFeatures: levelUpReward.value.newFeatures,
-      hasASI: levelUpReward.value.hasASI,
+      hasASI: levelUpReward.value.hasASI
     }, null, 2)}`;
 
     await gameEngine.sendMessage(levelupMsg);

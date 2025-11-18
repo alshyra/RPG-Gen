@@ -28,7 +28,7 @@ export class CharacterService {
       portrait: characterData.portrait,
       gender: characterData.gender,
       proficiency: characterData.proficiency || 2,
-      isDeceased: false,
+      isDeceased: false
     });
 
     const saved = await character.save();
@@ -77,8 +77,8 @@ export class CharacterService {
   }
 
   async markAsDeceased(
-    userId: string, 
-    characterId: string, 
+    userId: string,
+    characterId: string,
     deathLocation?: string
   ): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
@@ -114,7 +114,7 @@ export class CharacterService {
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender as 'male' | 'female',
-      proficiency: doc.proficiency,
+      proficiency: doc.proficiency
     };
   }
 }

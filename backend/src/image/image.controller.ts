@@ -1,5 +1,5 @@
-import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from "@nestjs/swagger";
+import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import * as Joi from "joi";
 import { GeminiImageService } from "../external/image/gemini-image.service";
@@ -11,37 +11,37 @@ import type { ImageRequest, AvatarRequest } from "../../../shared/types";
 import { CharacterDocument } from "src/schemas/character.schema";
 
 const schema = Joi.object({
-  token: Joi.string().allow("").optional(),
+  token: Joi.string().allow('').optional(),
   prompt: Joi.string().required(),
-  model: Joi.string().optional(),
+  model: Joi.string().optional()
 });
 
 interface AvatarRequestWithCharacterId extends AvatarRequest {
   characterId?: string; // Optional character ID to save avatar to
 }
 
-@ApiTags("image")
-@Controller("image")
+@ApiTags('image')
+@Controller('image')
 export class ImageController {
   private readonly logger = new Logger(ImageController.name);
 
   constructor(
     private readonly geminiImage: GeminiImageService,
     private readonly imageService: ImageService,
-    private readonly characterService: CharacterService,
+    private readonly characterService: CharacterService
   ) {}
 
   @Post()
-  @ApiOperation({ summary: "Generate image from prompt" })
-  @ApiBody({ schema: { type: "object" } })
+  @ApiOperation({ summary: 'Generate image from prompt' })
+  @ApiBody({ schema: { type: 'object' } })
   async generate(@Body() body: ImageRequest) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
     // Image generation not implemented yet
-    throw new BadRequestException("Image generation is not yet implemented");
+    throw new BadRequestException('Image generation is not yet implemented');
   }
 
-  @Post("generate-avatar")
+  @Post('generate-avatar')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Generate character avatar from description" })
@@ -69,27 +69,27 @@ export class ImageController {
         await this.saveAvatarToCharacter(userId, character.characterId, compressedImage);
       }
 
-      return { 
+      return {
         imageUrl: compressedImage,
-        compressed: true,
+        compressed: true
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to generate avatar";
-      this.logger.error("Avatar generation error:", message);
+      const message = error instanceof Error ? error.message : 'Failed to generate avatar';
+      this.logger.error('Avatar generation error:', message);
       throw new BadRequestException(`Avatar generation failed: ${message}`);
     }
   }
 
   private async saveAvatarToCharacter(userId: string, characterId: string, compressedImage: string) {
     await this.characterService.update(userId, characterId, {
-      portrait: compressedImage,
+      portrait: compressedImage
     });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 
   private validateAvatarRequest(body: AvatarRequest) {
-    if (!body.description || typeof body.description !== "string") {
-      throw new BadRequestException("Description is required and must be a string");
+    if (!body.description || typeof body.description !== 'string') {
+      throw new BadRequestException('Description is required and must be a string');
     }
   }
 
@@ -102,7 +102,7 @@ export class ImageController {
       const classNames = character.classes
         .map((c) => c.name)
         .filter(Boolean)
-        .join(", ");
+        .join(', ');
       if (classNames) characterContext.push(`Classes: ${classNames}`);
     }
 

@@ -52,4 +52,3 @@ const toggleSkill = (skill: string) => {
   emit('update:selected-skills', newSkills);
 };
 </script>
-

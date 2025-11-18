@@ -37,7 +37,7 @@ export class ConversationService {
         userId,
         characterId,
         messages: [msg],
-        lastUpdated: new Date(),
+        lastUpdated: new Date()
       });
     } else {
       history.messages.push(msg as any);
@@ -54,12 +54,12 @@ export class ConversationService {
 
   async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
     const truncated = list.slice(-this.MAX_MESSAGES);
-    
+
     await this.chatHistoryModel.findOneAndUpdate(
       { userId, characterId },
       {
         messages: truncated,
-        lastUpdated: new Date(),
+        lastUpdated: new Date()
       },
       { upsert: true, new: true }
     );
@@ -72,7 +72,7 @@ export class ConversationService {
       { userId, characterId },
       {
         messages: [],
-        lastUpdated: new Date(),
+        lastUpdated: new Date()
       },
       { upsert: true }
     );

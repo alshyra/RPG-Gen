@@ -47,20 +47,20 @@ const gameStore = useGameStore();
 const character = computed(() => gameStore.session.character);
 
 const hp = computed(() => {
-    if (!character.value) return '0/0';
-    return `${character.value.hp || 0}/${character.value.hpMax || 12}`;
+  if (!character.value) return '0/0';
+  return `${character.value.hp || 0}/${character.value.hpMax || 12}`;
 });
 
 const currentLevel = computed(() => {
-    const xp = character.value?.totalXp || 0;
-    const level = getCurrentLevel(xp);
-    return `Level ${level.level}`;
+  const xp = character.value?.totalXp || 0;
+  const level = getCurrentLevel(xp);
+  return `Level ${level.level}`;
 });
 
 const xpPercent = computed(() => {
-    const xp = character.value?.totalXp || 0;
-    const progress = getXpProgress(xp);
-    return progress.percentage;
+  const xp = character.value?.totalXp || 0;
+  const progress = getXpProgress(xp);
+  return progress.percentage;
 });
 </script>
 

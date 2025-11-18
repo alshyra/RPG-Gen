@@ -53,26 +53,26 @@ import DiceRoll from '../game/DiceRoll.vue';
 import { type GameInstruction } from '@shared/types';
 
 interface Props {
-    playerText: string;
-    pendingInstruction: GameInstruction | null;
-    isThinking?: boolean;
+  playerText: string;
+  pendingInstruction: GameInstruction | null;
+  isThinking?: boolean;
 }
 
 interface Emits {
-    (e: 'update:playerText', value: string): void;
-    (e: 'send'): void;
-    (e: 'rolled', payload: any): void;
+  (e: 'update:playerText', value: string): void;
+  (e: 'send'): void;
+  (e: 'rolled', payload: any): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    isThinking: false,
+  isThinking: false
 });
 
 const emit = defineEmits<Emits>();
 
 const playerText = computed({
-    get: () => props.playerText,
-    set: (value: string) => emit('update:playerText', value),
+  get: () => props.playerText,
+  set: (value: string) => emit('update:playerText', value)
 });
 
 const isRolling = computed(() => !!props.pendingInstruction?.roll);

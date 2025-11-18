@@ -1,15 +1,15 @@
-import { ref, toRaw } from "vue";
-import { useGameStore } from "../stores/gameStore";
-import { gameEngine } from "../services/gameEngine";
-import { type RollModalData } from "../services/rollTypes";
-import { getSkillBonus } from "../services/skillService";
+import { ref, toRaw } from 'vue';
+import { useGameStore } from '../stores/gameStore';
+import { gameEngine } from '../services/gameEngine';
+import { type RollModalData } from '../services/rollTypes';
+import { getSkillBonus } from '../services/skillService';
 
 const getCriticalNote = (diceValue: number): string =>
   diceValue === 20
-    ? " (CRITICAL SUCCESS - Natural 20!)"
+    ? ' (CRITICAL SUCCESS - Natural 20!)'
     : diceValue === 1
-    ? " (CRITICAL FAILURE - Natural 1!)"
-    : "";
+      ? ' (CRITICAL FAILURE - Natural 1!)'
+      : '';
 
 const buildRollMessage = (
   diceValue: number,
@@ -19,25 +19,25 @@ const buildRollMessage = (
   criticalNote: string
 ): string =>
   `Rolled: [${diceValue}] = ${diceValue}${
-    bonus !== 0 ? ` + ${bonus}` : ""
+    bonus !== 0 ? ` + ${bonus}` : ''
   } (${skillName}) = **${total}**${criticalNote}`;
 
 const handleAdditionalRoll = (instr: any, gameStore: any): void => {
   gameStore.setPendingInstruction(instr);
   gameStore.appendMessage(
-    "System",
-    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ""}`
+    'System',
+    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`
   );
 };
 
 const handleAdditionalXp = (instr: any, gameStore: any): void => {
-  gameStore.appendMessage("System", `✨ Gained ${instr.xp} XP`);
+  gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
   gameStore.updateCharacterXp(instr.xp);
 };
 
 const handleAdditionalHp = (instr: any, gameStore: any): void => {
   const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-  gameStore.appendMessage("System", `❤️ HP changed: ${hpChange}`);
+  gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
   gameStore.updateCharacterHp(instr.hp);
   if (gameStore.isDead) gameStore.setDeathModalVisible(true);
 };
@@ -48,33 +48,33 @@ export function useGameRolls() {
     rolls: [],
     total: 0,
     bonus: 0,
-    diceNotation: "",
-    skillName: "",
+    diceNotation: '',
+    skillName: ''
   });
 
   const onDiceRolled = async (rollResult: any): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
     const instr = gameStore.pendingInstruction.roll;
-    const skillName = typeof instr.modifier === "string" ? instr.modifier : "Roll";
-    const skillBonus =
-      typeof instr.modifier === "string"
+    const skillName = typeof instr.modifier === 'string' ? instr.modifier : 'Roll';
+    const skillBonus
+      = typeof instr.modifier === 'string'
         ? getSkillBonus(gameStore.session.character, skillName)
-        : typeof instr.modifier === "number"
-        ? instr.modifier
-        : 0;
+        : typeof instr.modifier === 'number'
+          ? instr.modifier
+          : 0;
     const diceValue = rollResult.diceValue || 0;
     rollData.value = {
       skillName,
       rolls: [diceValue],
       bonus: skillBonus,
       total: diceValue + skillBonus,
-      diceNotation: instr.dices,
+      diceNotation: instr.dices
     };
     gameStore.setRollModalVisible(true);
   };
 
   const handleRollResponse = async (response: any): Promise<void> => {
-    gameStore.appendMessage("GM", response.text);
+    gameStore.appendMessage('GM', response.text);
     gameStore.setPendingInstruction(null);
     gameStore.setRollModalVisible(false);
     response.instructions?.forEach((instr: any) => {
@@ -102,13 +102,13 @@ export function useGameRolls() {
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage(
-      "System",
+      'System',
       buildRollMessage(diceValue, bonus, skillName, total, criticalNote)
     );
     try {
       await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
     } catch (e: any) {
-      gameStore.appendMessage("Error", "Failed to send roll result: " + e.message);
+      gameStore.appendMessage('Error', 'Failed to send roll result: ' + e.message);
       gameStore.setRollModalVisible(false);
     }
   };
@@ -116,20 +116,20 @@ export function useGameRolls() {
   const rerollDice = async (): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
     const instr = gameStore.pendingInstruction.roll;
-    const skillName = typeof instr.modifier === "string" ? instr.modifier : "Roll";
+    const skillName = typeof instr.modifier === 'string' ? instr.modifier : 'Roll';
     const diceValue = toRaw(gameEngine.rollDice(instr.dices)).total;
-    const skillBonus =
-      typeof instr.modifier === "string"
+    const skillBonus
+      = typeof instr.modifier === 'string'
         ? getSkillBonus(gameStore.session.character, skillName)
-        : typeof instr.modifier === "number"
-        ? instr.modifier
-        : 0;
+        : typeof instr.modifier === 'number'
+          ? instr.modifier
+          : 0;
     rollData.value = {
       skillName,
       rolls: [diceValue],
       bonus: skillBonus,
       total: diceValue + skillBonus,
-      diceNotation: instr.dices,
+      diceNotation: instr.dices
     };
   };
 

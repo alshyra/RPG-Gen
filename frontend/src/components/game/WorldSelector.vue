@@ -58,11 +58,11 @@ import { reactive } from 'vue';
 import UiButton from '../ui/UiButton.vue';
 
 const emit = defineEmits<{
-  (e: 'select', id: string): void
+  (e: 'select', id: string): void;
 }>();
 
 const worlds = reactive([
-  { id: 'dnd', logo: 'D', bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500', name: "Dungeons & Dragons", desc: 'High fantasy, parties, and epic quests.' },
+  { id: 'dnd', logo: 'D', bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500', name: 'Dungeons & Dragons', desc: 'High fantasy, parties, and epic quests.' },
   { id: 'vtm', logo: 'V', bgClass: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500', name: 'Vampire: The Masquerade', desc: 'Gothic-punk political roleplay among vampires.' },
   { id: 'cyberpunk', logo: 'C', bgClass: 'bg-gradient-to-tr from-cyan-400 to-indigo-500', name: 'Cyberpunk', desc: 'Near-future neon dystopia with tech & megacorps.' }
 ]);

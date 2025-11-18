@@ -10,8 +10,8 @@
           Vivez des aventures épiques générées par l'IA
         </p>
         <p class="text-lg text-slate-400 max-w-2xl mx-auto">
-          Un moteur d'aventure assisté par Gemini qui génère des scènes immersives, des PNJ 
-          captivants et des images uniques. Créez votre personnage et plongez dans des univers 
+          Un moteur d'aventure assisté par Gemini qui génère des scènes immersives, des PNJ
+          captivants et des images uniques. Créez votre personnage et plongez dans des univers
           fantastiques illimités.
         </p>
       </div>

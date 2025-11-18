@@ -7,14 +7,14 @@ const extractJsonBlocks = (text: string): string[] => {
   // Handle both actual newlines and escaped newlines (literal \n) in code blocks
   // Also handle spaces before/after the JSON
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
-  return jsonMatches.map((m) => m[1].trim()).filter(Boolean);
-}
+  return jsonMatches.map(m => m[1].trim()).filter(Boolean);
+};
 
 const parseNestedJson = (text: string): string[] => {
   const results: string[] = [];
   let depth = 0;
   let start = -1;
-  
+
   const chars = text.split('');
   chars.forEach((char, i) => {
     if (char === '{') {
@@ -28,16 +28,16 @@ const parseNestedJson = (text: string): string[] => {
       }
     }
   });
-  
+
   return results;
-}
+};
 
 const extractInlineJson = (text: string): string[] => {
   // Match JSON objects that are not in code blocks
   // First, remove all code blocks to avoid matching JSON inside them
   const textWithoutCodeBlocks = text.replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, '');
   return parseNestedJson(textWithoutCodeBlocks);
-}
+};
 
 const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   // Check if object has type field with valid value
@@ -49,13 +49,13 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
     return true;
   }
   return false;
-}
+};
 
 export const parseGameInstructions = (narrative: string): GameInstruction[] => {
   const jsonBlocks = extractJsonBlocks(narrative);
   const inlineJsons = extractInlineJson(narrative);
   const allJsons = [...jsonBlocks, ...inlineJsons];
-  
+
   return allJsons
     .map((json) => {
       try {
@@ -76,12 +76,12 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
       // Otherwise, use the direct format (backward compatibility)
       return obj as GameInstruction;
     });
-}
+};
 
 export const cleanNarrativeText = (narrative: string): string => {
   const cleaned = narrative
     // Remove JSON code blocks (both actual and escaped newlines, with possible spaces)
-    .replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, "")
+    .replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, '')
     // Remove inline JSON objects (avoiding code blocks)
     .replace(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, (match) => {
       // Only remove if it's a game instruction
@@ -94,12 +94,12 @@ export const cleanNarrativeText = (narrative: string): string => {
       }
     })
     // Normalize multiple spaces to single space
-    .replace(/\s+/g, " ")
+    .replace(/\s+/g, ' ')
     // Remove leading/trailing whitespace
     .trim();
-  
+
   return cleaned;
-}
+};
 
 export const parseGameResponse = extractInstructions;
 

@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import ts from 'typescript-eslint';
 import vue from 'eslint-plugin-vue';
 import vueParser from 'vue-eslint-parser';
+import stylistic from '@stylistic/eslint-plugin';
 
 export default [
   {
@@ -10,6 +11,14 @@ export default [
   js.configs.recommended,
   ...ts.configs.recommended,
   ...vue.configs['flat/recommended'],
+  stylistic.configs.customize({
+    indent: 2,
+    quotes: 'single',
+    semi: true,
+    jsx: false,
+    braceStyle: '1tbs',
+    commaDangle: 'never'
+  }),
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -39,7 +48,8 @@ export default [
       'vue/max-attributes-per-line': ['error', { singleline: 1, multiline: 1 }],
       'vue/first-attribute-linebreak': ['error', { singleline: 'ignore', multiline: 'below' }],
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@stylistic/max-statements-per-line': 'off'
     }
   },
   {
@@ -67,7 +77,8 @@ export default [
       'arrow-body-style': ['warn', 'as-needed'],
       'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['warn', 10],
-      'prefer-object-spread': 'warn'
+      'prefer-object-spread': 'warn',
+      '@stylistic/max-statements-per-line': 'off'
     }
   }
 ];

@@ -5,7 +5,7 @@ import type { GameResponse, ChatMessage } from '@shared/types';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || `${window.location.origin}/api`,
+  baseURL: import.meta.env.VITE_API_URL || `${window.location.origin}/api`
 });
 
 // Add auth token to all requests
@@ -19,7 +19,7 @@ apiClient.interceptors.request.use((config) => {
 
 // Handle auth errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  response => response,
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, logout and redirect to login
@@ -58,7 +58,7 @@ export class GameEngine {
     if (!this.characterId) throw new Error("Game not started. Call startGame first.");
 
     const char = await characterServiceApi.getCurrentCharacter();
-    const res = await apiClient.post("/chat", {
+    const res = await apiClient.post('/chat', {
       message,
       characterId: this.characterId,
       character: char,
@@ -66,10 +66,10 @@ export class GameEngine {
     const result = res?.data?.result || {};
 
     return {
-      text: result.text || "",
+      text: result.text || '',
       instructions: result.instructions || [],
       model: result.model,
-      usage: result.usage,
+      usage: result.usage
     };
   }
 

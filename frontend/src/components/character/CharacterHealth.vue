@@ -24,13 +24,13 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue';
-const props = defineProps<{ hp?: string | number, animate?: boolean }>();
+const props = defineProps<{ hp?: string | number; animate?: boolean }>();
 
 const beating = ref(false);
 let timer: any = null;
 
 const displayedHp = computed(() => {
-  const v: any = (props.hp as any);
+  const v: any = props.hp as any;
   if (v == null) return '';
   if (typeof v === 'object') {
     if (v.current != null && v.max != null) return `${v.current}/${v.max}`;

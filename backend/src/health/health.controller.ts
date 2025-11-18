@@ -14,7 +14,7 @@ export class HealthController {
       status: 'ok',
       pid: process.pid,
       uptime: process.uptime(),
-      timestamp: now,
+      timestamp: now
     };
   }
 }

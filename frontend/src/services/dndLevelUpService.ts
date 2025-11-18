@@ -3,7 +3,7 @@
  * Handles HP gain, ASI, features, and spell slots
  */
 
-import type { LevelUpResult } from "@shared/types";
+import type { LevelUpResult } from '@shared/types';
 
 interface ClassLevelUpRules {
   hpDie: number;
@@ -27,8 +27,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       9: ['Brutal Critical (1d6)'],
       11: ['Relentless Rage'],
       15: ['Primal Champion'],
-      20: ['Primal Champion'],
-    },
+      20: ['Primal Champion']
+    }
   },
   Bard: {
     hpDie: 8,
@@ -40,8 +40,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       3: ['Bard College'],
       5: ['Bardic Inspiration Improvement'],
       10: ['Magical Secrets'],
-      20: ['Superior Inspiration'],
-    },
+      20: ['Superior Inspiration']
+    }
   },
   Cleric: {
     hpDie: 8,
@@ -52,8 +52,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       2: ['Channel Divinity: Turn Undead'],
       5: ['Destroy Undead'],
       10: ['Divine Intervention'],
-      20: ['Divine Intervention Improvement'],
-    },
+      20: ['Divine Intervention Improvement']
+    }
   },
   Druid: {
     hpDie: 8,
@@ -65,8 +65,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       4: ['Wild Shape Improvement'],
       8: ['Wild Shape Improvement'],
       18: ['Timeless Body'],
-      20: ['Archdruid'],
-    },
+      20: ['Archdruid']
+    }
   },
   Fighter: {
     hpDie: 10,
@@ -81,8 +81,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       9: ['Indomitable'],
       13: ['Indomitable Improvement'],
       17: ['Indomitable Improvement'],
-      20: ['Extra Attack Improvement'],
-    },
+      20: ['Extra Attack Improvement']
+    }
   },
   Monk: {
     hpDie: 8,
@@ -99,8 +99,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       13: ['Tongue of the Sun and Moon'],
       14: ['Diamond Soul'],
       15: ['Timeless Body'],
-      20: ['Perfect Self'],
-    },
+      20: ['Perfect Self']
+    }
   },
   Paladin: {
     hpDie: 10,
@@ -114,8 +114,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       9: ['Improved Divine Smite'],
       11: ['Improved Divine Smite'],
       18: ['Aura of Protection'],
-      20: ['Holy Nimbus'],
-    },
+      20: ['Holy Nimbus']
+    }
   },
   Ranger: {
     hpDie: 10,
@@ -130,8 +130,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       14: ['Vanish'],
       15: ['Ranger Archetype Feature'],
       18: ['Feral Senses'],
-      20: ['Foe Slayer'],
-    },
+      20: ['Foe Slayer']
+    }
   },
   Rogue: {
     hpDie: 8,
@@ -145,8 +145,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       7: ['Evasion'],
       11: ['Reliable Talent'],
       15: ['Slippery Mind'],
-      20: ['Stroke of Luck'],
-    },
+      20: ['Stroke of Luck']
+    }
   },
   Sorcerer: {
     hpDie: 6,
@@ -160,8 +160,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       9: ['Sorcerous Resilience'],
       14: ['Sorcerous Fortitude'],
       17: ['Metamagic Mastery'],
-      20: ['Sorcerous Restoration Improvement'],
-    },
+      20: ['Sorcerous Restoration Improvement']
+    }
   },
   Warlock: {
     hpDie: 8,
@@ -176,8 +176,8 @@ const classRules: Record<string, ClassLevelUpRules> = {
       13: ['Mystic Arcanum (7th)'],
       15: ['Mystic Arcanum (8th)'],
       17: ['Mystic Arcanum (9th)'],
-      20: ['Eldritch Master'],
-    },
+      20: ['Eldritch Master']
+    }
   },
   Wizard: {
     hpDie: 6,
@@ -191,9 +191,9 @@ const classRules: Record<string, ClassLevelUpRules> = {
       10: ['Arcane Tradition Feature'],
       14: ['Arcane Tradition Feature'],
       18: ['Spell Mastery'],
-      20: ['Signature Spells'],
-    },
-  },
+      20: ['Signature Spells']
+    }
+  }
 };
 
 export const dndLevelUpService = {
@@ -269,7 +269,7 @@ export const dndLevelUpService = {
         hasASI: false,
         newFeatures: [],
         proficiencyBonus: this.getProficiencyBonus(currentLevel),
-        message: 'Cannot level up beyond level 20',
+        message: 'Cannot level up beyond level 20'
       };
     }
 
@@ -285,7 +285,7 @@ export const dndLevelUpService = {
       hasASI,
       newFeatures,
       proficiencyBonus,
-      message: `Leveled up to ${newLevel}! Gained ${hpGain} HP.${hasASI ? ' You get an Ability Score Improvement!' : ''}${newFeatures.length > 0 ? ` New features: ${newFeatures.join(', ')}` : ''}`,
+      message: `Leveled up to ${newLevel}! Gained ${hpGain} HP.${hasASI ? ' You get an Ability Score Improvement!' : ''}${newFeatures.length > 0 ? ` New features: ${newFeatures.join(', ')}` : ''}`
     };
-  },
+  }
 };

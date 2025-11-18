@@ -7,20 +7,20 @@ export class AuthService {
   constructor(private jwtService: JwtService) {}
 
   async login(user: UserDocument) {
-    const payload = { 
-      sub: user._id.toString(), 
+    const payload = {
+      sub: user._id.toString(),
       email: user.email,
       googleId: user.googleId
     };
-    
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user._id.toString(),
         email: user.email,
         displayName: user.displayName,
-        picture: user.picture,
-      },
+        picture: user.picture
+      }
     };
   }
 

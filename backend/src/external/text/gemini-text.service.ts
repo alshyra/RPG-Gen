@@ -1,5 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { GoogleGenAI } from "@google/genai";
+import { Injectable, Logger } from '@nestjs/common';
+import { GoogleGenAI } from '@google/genai';
 
 type GeminiResponse = Record<string, unknown>;
 
@@ -11,34 +11,34 @@ interface GeminiMessage {
 }
 
 const extractTextFromParts = (parts: Array<unknown>): string =>
-  ((parts[0] as Record<string, unknown>)?.text as string) || "";
+  ((parts[0] as Record<string, unknown>)?.text as string) || '';
 
 const extractTextFromArrayContent = (content: Array<unknown>): string => {
   const first = content[0] as Record<string, unknown>;
   if (first?.text) return first.text as string;
   const parts = first?.parts as Array<unknown>;
-  return Array.isArray(parts) ? extractTextFromParts(parts) : "";
+  return Array.isArray(parts) ? extractTextFromParts(parts) : '';
 };
 
 const extractTextFromObjectContent = (obj: Record<string, unknown>): string => {
   if (obj.text) return obj.text as string;
   const parts = obj.parts as Array<unknown>;
-  return Array.isArray(parts) ? extractTextFromParts(parts) : "";
+  return Array.isArray(parts) ? extractTextFromParts(parts) : '';
 };
 
 const extractTextFromContent = (content: unknown): string =>
   Array.isArray(content)
     ? extractTextFromArrayContent(content)
-    : content && typeof content === "object"
-    ? extractTextFromObjectContent(content as Record<string, unknown>)
-    : "";
+    : content && typeof content === 'object'
+      ? extractTextFromObjectContent(content as Record<string, unknown>)
+      : '';
 
 const extractTextFromFirstCandidate = (candidates: Array<unknown>): string => {
   const firstCand = candidates[0] as Record<string, unknown>;
   const content = firstCand?.content;
   const text = extractTextFromContent(content);
   if (text) return text;
-  return typeof firstCand?.output === "string" ? firstCand.output : "";
+  return typeof firstCand?.output === 'string' ? firstCand.output : '';
 };
 
 const extractTextFromCandidates = (candidates: Array<unknown>): string => {
@@ -47,7 +47,7 @@ const extractTextFromCandidates = (candidates: Array<unknown>): string => {
     const parts = (candObj?.content as Record<string, unknown>)?.parts as Array<unknown>;
     return Array.isArray(parts) && (parts[0] as Record<string, unknown>)?.text;
   });
-  if (!found) return "";
+  if (!found) return '';
   const parts = ((found as Record<string, unknown>)?.content as Record<string, unknown>)
     ?.parts as Array<unknown>;
   return extractTextFromParts(parts);
@@ -67,8 +67,8 @@ const extractFromCandidate = (candidates: Array<unknown>): string => {
 };
 
 function textFromResponse(data: unknown): string {
-  if (!data) return "";
-  if (typeof data === "string") {
+  if (!data) return '';
+  if (typeof data === 'string') {
     const parsed = parseJsonString(data);
     return parsed ? textFromResponse(parsed) : data;
   }
@@ -84,20 +84,20 @@ function textFromResponse(data: unknown): string {
 export class GeminiTextService {
   private readonly logger = new Logger(GeminiTextService.name);
   private client: GoogleGenAI | null = null;
-  private model = "gemini-2.5-flash";
+  private model = 'gemini-2.5-flash';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
   constructor() {
     this.logger.debug(
-      "Initializing GeminiTextService",
-      process.env.GOOGLE_API_KEY ? "***" : "no API key"
+      'Initializing GeminiTextService',
+      process.env.GOOGLE_API_KEY ? '***' : 'no API key'
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
   }
 
   private isMock() {
-    return process.env.MOCK_GEMINI === "true";
+    return process.env.MOCK_GEMINI === 'true';
   }
 
   private mockText(prompt: string): GeminiMessage {
@@ -107,7 +107,7 @@ export class GeminiTextService {
     const usage = {
       promptTokenCount: promptTokens,
       candidatesTokenCount: genTokens,
-      totalTokenCount: promptTokens + genTokens,
+      totalTokenCount: promptTokens + genTokens
     };
     const raw = { candidates: [{ content: [{ text }] }], modelVersion: this.model };
     return { text, raw, usage, modelVersion: this.model };
@@ -127,8 +127,8 @@ export class GeminiTextService {
       history: initialHistory,
       config: {
         systemInstruction,
-        temperature: 0.7,
-      },
+        temperature: 0.7
+      }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.chatClients.set(sessionId, chat as any);
@@ -139,7 +139,7 @@ export class GeminiTextService {
     response: Record<string, unknown>
   ): { usage: Record<string, unknown> | null; modelVersion: string } => ({
     usage: ((response?.usageMetadata || response?.usage) as Record<string, unknown> | null) || null,
-    modelVersion: this.model,
+    modelVersion: this.model
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

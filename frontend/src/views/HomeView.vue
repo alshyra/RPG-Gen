@@ -87,7 +87,7 @@ function onSelect(id: string) {
   try { window.sessionStorage.setItem('selected-world', id); } catch {
     //
   }
-  characterServiceApi.clearCurrentCharacterId()
+  characterServiceApi.clearCurrentCharacterId();
   router.push({ name: 'character-step', params: { world: id, step: 1 } });
 }
 

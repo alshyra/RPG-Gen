@@ -10,7 +10,7 @@
           Authentification en cours...
         </p>
       </div>
-      
+
       <div
         v-else-if="error"
         class="space-y-4"

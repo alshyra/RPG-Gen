@@ -22,19 +22,18 @@
 import { ref, watch, computed } from 'vue';
 const props = defineProps<{ allowedRaces: Array<any> }>();
 const emit = defineEmits<{
-  (e: 'update:race', val: any): void
+  (e: 'update:race', val: any): void;
 }>();
 
 const selected = ref<any>(null);
-function select(r:any){ selected.value = r; emit('update:race', r); }
-function summaryMods(mods:any){
-  try{ return Object.entries(mods).map(([k,v])=>`${k}${(v as number)>=0? '+'+(v as number): v}`).join(' '); }
-  catch(e){ return '' }
+function select(r: any) { selected.value = r; emit('update:race', r); }
+function summaryMods(mods: any) {
+  try { return Object.entries(mods).map(([k, v]) => `${k}${(v as number) >= 0 ? '+' + (v as number) : v}`).join(' '); } catch (e) { return ''; }
 }
 
-watch(()=>props.allowedRaces, (n)=>{ if(n && n.length===1) select(n[0]); }, { immediate: true });
+watch(() => props.allowedRaces, (n) => { if (n && n.length === 1) select(n[0]); }, { immediate: true });
 
-const allowedRaces = computed(()=> props.allowedRaces || []);
+const allowedRaces = computed(() => props.allowedRaces || []);
 </script>
 
 <style scoped>

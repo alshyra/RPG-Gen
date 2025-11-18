@@ -49,9 +49,9 @@
 import { reactive, watch, computed, ref } from 'vue';
 import UiInputNumber from '../ui/UiInputNumber.vue';
 
-const props = defineProps<{ modelValue?: Record<string, number>, proficiency?: number, mode?: string, levelUpBudget?: number, initialScores?: Record<string, number> }>();
+const props = defineProps<{ modelValue?: Record<string, number>; proficiency?: number; mode?: string; levelUpBudget?: number; initialScores?: Record<string, number> }>();
 const emit = defineEmits<{
-  (e: 'update:modelValue', val: Record<string, number>): void
+  (e: 'update:modelValue', val: Record<string, number>): void;
 }>();
 
 const stats = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'];
@@ -76,7 +76,6 @@ const pointsLeft = computed(() => {
   }
   return 27 - pointsUsed();
 });
-
 
 function change(stat: string, delta: number) {
   if (props.mode === 'edit') return; // locked

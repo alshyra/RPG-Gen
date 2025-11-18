@@ -41,27 +41,27 @@ const stepValue = computed(() => props.step ?? 1);
 
 function increment() {
   if (props.disabled) return;
-  
+
   const current = props.modelValue ?? 0;
   let newValue = current + stepValue.value;
-  
+
   if (props.max !== undefined) {
     newValue = Math.min(newValue, props.max);
   }
-  
+
   emit('update:modelValue', newValue);
 }
 
 function decrement() {
   if (props.disabled) return;
-  
+
   const current = props.modelValue ?? 0;
   let newValue = current - stepValue.value;
-  
+
   if (props.min !== undefined) {
     newValue = Math.max(newValue, props.min);
   }
-  
+
   emit('update:modelValue', newValue);
 }
 </script>
