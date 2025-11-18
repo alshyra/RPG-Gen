@@ -62,9 +62,9 @@ Located in `shared/types/` - used by both frontend and backend for type safety.
   - All characters stored in `rpg-characters` key
   - Current character tracked separately in `rpg-character-id`
   - Deceased characters archived separately
-- **`gameEngine`**: Session manager (singleton) - sessionId = character.id
+- **`gameEngine`**: Session manager (singleton) - character.id
   - `initSession()`: Loads character + conversation history
-  - `sendMessage()`: Posts to `/api/chat` with sessionId + character
+  - `sendMessage()`: Posts to `/api/chat` with characterId
 - **`useCharacterCreation`**: Composable for character form state (5-step wizard)
   - Routes: `/character/:world?/step/:step` (1-based step in URL)
   - Step 0: Name + Gender
@@ -82,10 +82,10 @@ Located in `shared/types/` - used by both frontend and backend for type safety.
 - **`ChatController`**: Main API endpoint
   - `POST /api/chat`: Send message (returns narrative + instructions)
   - `GET /api/chat/history`: Load session history for character
-  - Session management: Maps sessionId → character context → Gemini API
+  - Session management: Maps characterId → character context → Gemini API
 - **`ConversationService`**: Persists chat history to files
   - Escapes `\n` in messages for JSON storage/transmission
-  - Maintains conversation per sessionId (per character)
+  - Maintains conversation per characterId (per character)
 - **`GameParser`**: Extracts instructions from Gemini responses
   - Preserves newlines in narrative (critical for lists/formatting)
   - Parses roll instructions: `[ROLL:dices=1d20 modifier=+5]`
@@ -158,7 +158,7 @@ interface CharacterEntry {
 
 ### Message Processing
 
-1. User sends message + sessionId + character
+1. User sends message + characterId
 2. Build character summary (abilities, HP, XP, skills)
 3. Load conversation history (escaped newlines preserved)
 4. Call Gemini with system prompt + history + character context
@@ -208,7 +208,7 @@ interface GameInstruction {
   - Use `npm run lint:fix` to auto-fix issues
 - **Build**: `npm run build` (compile TypeScript to dist/)
 - **Production**: `npm run start` (run compiled code from dist/)
-- **Chat History**: Stored in `archives/{sessionId}/history.json`
+- **Chat History**: Stored in `archives/{characterId}/history.json`
 
 ## Key Implementation Details
 
@@ -240,7 +240,7 @@ interface GameInstruction {
   - Interactive API documentation for all backend endpoints
   - Test endpoints directly from the browser
   - View request/response schemas
-- **Chat History**: View stored conversations at `backend/archives/{sessionId}/history.json`
+- **Chat History**: View stored conversations at `backend/archives/{characterId}/history.json`
 - **Frontend State**: Check localStorage keys in browser DevTools:
   - `rpg-characters` - All saved characters
   - `rpg-character-id` - Current character ID

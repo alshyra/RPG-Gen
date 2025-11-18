@@ -31,24 +31,20 @@ apiClient.interceptors.response.use(
 );
 
 export class GameEngine {
-  private sessionId: string | null = null;
+  private characterId: string | null = null;
 
   /**
-   * Initialize session linked to current character
-   * Each character gets its own conversation history using their UUID as sessionId
+   * Start game linked to current character
+   * Each character gets its own conversation history using their UUID as characterId
    */
-  async initSession(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
-    // Get current character's UUID - this becomes the sessionId for conversation
+  async startGame(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
+    // Get current character's UUID - this becomes the characterId for conversation
     const char = await characterServiceApi.getCurrentCharacter();
     if (!char)
       throw new Error("No current character found. Please create or load a character first.");
-    this.sessionId = char.id;
+    this.characterId = char.id;
 
-    // Load conversation history for this character, passing character data for initialization
-    const charParam = encodeURIComponent(JSON.stringify(char));
-    const histRes = await apiClient.get(
-      `/chat/history?sessionId=${this.sessionId}&character=${charParam}`
-    );
+    const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
     const isNew = histRes?.data?.isNew || false;
     const history = histRes?.data?.history || [];
 
@@ -59,12 +55,12 @@ export class GameEngine {
    * Send a message to the game backend
    */
   async sendMessage(message: string): Promise<GameResponse> {
-    if (!this.sessionId) throw new Error("Session not initialized. Call initSession first.");
+    if (!this.characterId) throw new Error("Game not started. Call startGame first.");
 
     const char = await characterServiceApi.getCurrentCharacter();
     const res = await apiClient.post("/chat", {
       message,
-      sessionId: this.sessionId,
+      characterId: this.characterId,
       character: char,
     });
     const result = res?.data?.result || {};
@@ -105,17 +101,10 @@ export class GameEngine {
   }
 
   /**
-   * Get current session ID
-   */
-  getSessionId(): string | null {
-    return this.sessionId;
-  }
-
-  /**
    * Clear session (for cleanup)
    */
-  clearSession(): void {
-    this.sessionId = null;
+  endGame(): void {
+    this.characterId = null;
   }
 }
 

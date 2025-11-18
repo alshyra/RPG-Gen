@@ -43,13 +43,13 @@ export function useGameSession() {
     try {
       gameStore.setCharacter(char);
       if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      const { messages: history } = await gameEngine.initSession();
+      const { messages: history } = await gameEngine.startGame();
       if (history?.length) gameStore.updateMessages(processHistoryMessages(history, gameStore));
     } catch (e: any) {
       gameStore.appendMessage("Error", e?.response?.data?.error || e.message);
     }
   };
-  const initSession = async (): Promise<void> => {
+  const startGame = async (): Promise<void> => {
     // Check if character exists, redirect to home if not
     const char = await characterServiceApi.getCurrentCharacter();
     if (!char) {
@@ -66,5 +66,5 @@ export function useGameSession() {
     gameStore.setInitializing(false);
   };
 
-  return { initSession };
+  return { startGame };
 }

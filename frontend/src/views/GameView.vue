@@ -102,7 +102,7 @@ const router = useRouter();
 const gameStore = useGameStore();
 
 // Composables
-const { initSession } = useGameSession();
+  const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls();
 
@@ -112,7 +112,7 @@ const messagesPane = ref<any>(null);
 // Load on mount
 onMounted(async () => {
   try {
-    await initSession();
+    await startGame();
   } catch (e) {
     gameStore.appendMessage('Error', String(e));
   }
@@ -135,7 +135,7 @@ watch(
 const onDeathConfirm = async () => {
   if (!gameStore.session.character?.id) return;
   await characterServiceApi.killCharacter(gameStore.session.character.id, gameStore.session.worldName);
-  gameEngine.clearSession();
+  gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');
 };

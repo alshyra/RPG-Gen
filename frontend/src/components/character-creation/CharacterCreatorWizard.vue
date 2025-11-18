@@ -182,30 +182,30 @@ const canProceed = computed(() => {
   }
 });
 
-async function nextStep() {
-  if (currentStep.value < steps.length - 1) {
-    saveDraftWithStep(currentStep.value + 1);
-    currentStep.value++;
-    
-    // Auto-generate avatar when entering the avatar step (step 4)
-    if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
-      await generateAvatar();
-    }
+const nextStep = async () => {
+  // If already on the last step, do nothing
+  if (currentStep.value >= steps.length - 1) return;
+
+  saveDraftWithStep(currentStep.value + 1);
+  currentStep.value++;
+
+  // Auto-generate avatar when entering the avatar step (step 4)
+  if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
+    await generateAvatar();
   }
 }
 
-function previousStep() {
-  if (currentStep.value > 0) {
-    saveDraftWithStep(currentStep.value - 1);
-    currentStep.value--;
-  }
+const previousStep = () => {
+  if (currentStep.value <= 0) return
+
+  saveDraftWithStep(currentStep.value - 1);
+  currentStep.value--;
 }
 
-function updateCharacter(updates: any) {
-  character.value = { ...character.value, ...updates };
-}
+const updateCharacter = (updates: any) => character.value = { ...character.value, ...updates };
 
-async function generateAvatar() {
+
+const generateAvatar = async () => {
   if (!avatarDescription.value.trim()) return;
 
   isGeneratingAvatar.value = true;
@@ -238,8 +238,7 @@ async function generateAvatar() {
   }
 }
 
-async function finishCreation() {
-  // Auto-generate avatar if description exists but avatar hasn't been generated yet
+const finishCreation = async () => {
   if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
     await generateAvatar();
   }

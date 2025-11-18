@@ -8,6 +8,7 @@ import { CharacterService } from "../character/character.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UserDocument } from "../schemas/user.schema";
 import type { ImageRequest, AvatarRequest } from "../../../shared/types";
+import { CharacterDocument } from "src/schemas/character.schema";
 
 const schema = Joi.object({
   token: Joi.string().allow("").optional(),
@@ -45,26 +46,27 @@ export class ImageController {
   @ApiBearerAuth()
   @ApiOperation({ summary: "Generate character avatar from description" })
   @ApiBody({ schema: { type: "object" } })
-  async generateAvatar(@Req() req: Request, @Body() body: AvatarRequestWithCharacterId) {
-    this.validateAvatarRequest(body);
+  async generateAvatar(@Req() req: Request, @Body() body: { characterId?: string }) {
+    if (!body.characterId) throw new BadRequestException("characterId is required");
+    const characterId = body.characterId;
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-
-    return await this.handleGenerateAvatar(userId, body);
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    return await this.handleGenerateAvatar(userId, character);
   }
 
-  private async handleGenerateAvatar(userId: string, body: AvatarRequestWithCharacterId) {
+  private async handleGenerateAvatar(userId: string, character: CharacterDocument) {
     try {
       // Generate avatar image
-      const prompt = this.buildAvatarPrompt(body);
+      const prompt = this.buildAvatarPrompt(character);
       const imageUrl = await this.geminiImage.generateImage(prompt);
 
       // Compress the image
       const compressedImage = await this.imageService.compressImage(imageUrl);
 
       // If characterId is provided, save to character
-      if (body.characterId) {
-        await this.saveAvatarToCharacter(userId, body.characterId, compressedImage);
+      if (character.characterId) {
+        await this.saveAvatarToCharacter(userId, character.characterId, compressedImage);
       }
 
       return { 
@@ -91,13 +93,13 @@ export class ImageController {
     }
   }
 
-  private buildAvatarPrompt(body: AvatarRequest): string {
+  private buildAvatarPrompt(character: CharacterDocument): string {
     const characterContext: string[] = [];
-    if (body.character?.name) characterContext.push(`Name: ${body.character.name}`);
-    if (body.character?.gender) characterContext.push(`Gender: ${body.character.gender}`);
-    if (body.character?.race?.name) characterContext.push(`Race: ${body.character.race.name}`);
-    if (body.character?.classes?.length) {
-      const classNames = body.character.classes
+    if (character.name) characterContext.push(`Name: ${character.name}`);
+    if (character.gender) characterContext.push(`Gender: ${character.gender}`);
+    if (character.race?.name) characterContext.push(`Race: ${character.race.name}`);
+    if (character.classes?.length) {
+      const classNames = character.classes
         .map((c) => c.name)
         .filter(Boolean)
         .join(", ");
@@ -105,6 +107,6 @@ export class ImageController {
     }
 
     const contextStr = characterContext.length ? `\n${characterContext.join("\n")}` : "";
-    return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${body.description}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
+    return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
   }
 }

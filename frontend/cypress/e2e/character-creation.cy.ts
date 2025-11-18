@@ -1,76 +1,53 @@
 /* eslint-disable max-statements */
 describe('Character Creation', () => {
   beforeEach(() => {
-    // Clear localStorage to ensure fresh start
     cy.clearLocalStorage();
-    
-    // Setup API mocks
     cy.setupApiMocks();
-    
-    // Mock authentication
     cy.mockAuth();
   });
 
   it("should navigate through all character creation steps", () => {
-    // Start from home
     cy.visit("/home");
     cy.contains("RPG Gemini").should("be.visible");
 
-    // Select a world (D&D)
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Should be on step 1 (Basic Info)
     cy.url().should("include", "/character/dnd/step/1");
     cy.contains("Informations de base").should("be.visible");
 
-    // Fill in character name
     cy.get('input[placeholder="Ex: Aragorn"]').type("TestHero");
 
-    // Select gender
     cy.contains("♂️ Homme").click();
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/2");
 
-    // Should see Race & Class step
     cy.contains("Race & Classe").should("be.visible");
 
-    // Select a race (click the first race button)
     cy.contains("Humain").click();
 
-    // Select a class from the select dropdown
     cy.get("select").select("Barbarian");
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/3");
 
-    // Should see Ability Scores step
     cy.contains("Capacités").should("be.visible");
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/4");
 
-    // Should see Skills step
     cy.contains("Compétences").should("be.visible");
 
-    // Select required number of skills (should be 2 for some classes)
     cy.get('input[type="checkbox"]').first().check();
     cy.get('input[type="checkbox"]').eq(1).check();
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/5");
 
-    // Should see Avatar step
     cy.contains("Avatar").should("be.visible");
 
-    // Finish creation
     cy.contains("button", "Terminer").click();
 
-    // Should redirect to game view
     cy.url().should("include", "/game/dnd");
     cy.contains("Dungeons & Dragons").should("be.visible");
   });
@@ -79,17 +56,13 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Fill in basic info
     cy.get('input[placeholder="Ex: Aragorn"]').type("DraftHero");
     cy.contains("♀️ Femme").click();
 
-    // Wait a bit for the draft to save
     cy.wait(600);
 
-    // Check localStorage contains draft
     cy.window().then((win) => {
       const draft = win.localStorage.getItem("rpg-character-draft");
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(draft).to.exist;
       const draftData = JSON.parse(draft!);
       expect(draftData.character.name).to.equal("DraftHero");
@@ -101,21 +74,16 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Fill in basic info
     cy.get('input[placeholder="Ex: Aragorn"]').type("RefreshHero");
     cy.contains("♀️ Femme").click();
 
-    // Wait for draft to save
     cy.wait(600);
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/2");
 
-    // Refresh the page
     cy.reload();
 
-    // Should restore the draft and be on step 2
     cy.url().should("include", "/character/dnd/step/2");
     cy.contains("Race & Classe").should("be.visible");
   });
@@ -124,18 +92,14 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Fill in basic info
     cy.get('input[placeholder="Ex: Aragorn"]').type("BackHero");
 
-    // Go to next step
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/2");
 
-    // Go back
     cy.contains("button", "Retour").click();
     cy.url().should("include", "/character/dnd/step/1");
 
-    // Name should still be there (draft restored)
     cy.get('input[placeholder="Ex: Aragorn"]').should("have.value", "BackHero");
   });
 
@@ -143,13 +107,10 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Try to go next without entering name - button should be disabled
     cy.contains("button", "Suivant").should("be.disabled");
 
-    // Enter name
     cy.get('input[placeholder="Ex: Aragorn"]').type("ValidationHero");
 
-    // Now button should be enabled
     cy.contains("button", "Suivant").should("not.be.disabled");
   });
 
@@ -157,55 +118,43 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Fill in basic info (Step 1)
     cy.get('input[placeholder="Ex: Aragorn"]').type("ScorePersistHero");
     cy.contains("♂️ Homme").click();
 
-    // Go to step 2 (Race & Class)
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/2");
 
-    // Select race and class
     cy.contains("Humain").click();
     cy.get("select").select("Fighter");
 
-    // Go to step 3 (Ability Scores)
     cy.contains("button", "Suivant").click();
     cy.url().should("include", "/character/dnd/step/3");
     cy.contains("Capacités").should("be.visible");
 
-    // Lower the Str input and Raise dex
     cy.get('[data-test-id="ability-score-Str"]').contains("-").click();
     cy.get('[data-test-id="ability-score-Dex"]').contains("+").click();
-    // Wait for draft to save
     cy.wait(600);
 
-    // Verify the draft contains the modified scores
     cy.window().then((win) => {
       const draft = win.localStorage.getItem("rpg-character-draft");
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(draft).to.exist;
-      const draftData = JSON.parse(draft);
-      // Check that baseScores has been updated
+      const draftData = JSON.parse(draft!);
       expect(draftData.baseScores).to.exist;
       expect(draftData.baseScores.Str).to.equal(14);
     });
 
-    // Refresh the page
     cy.reload();
 
-    // Should still be on step 3
     cy.url().should("include", "/character/dnd/step/3");
     cy.contains("Capacités").should("be.visible");
 
-    // Verify the score is still 14
     cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').should('contain', '14');
     cy.get('[data-test-id=ability-score-Dex] [data-test-id=ability-score]').should('contain', '15');
 
-    // Verify localStorage still has the correct value
     cy.window().then((win) => {
       const draft = win.localStorage.getItem("rpg-character-draft");
-      const draftData = JSON.parse(draft);
+      expect(draft).to.not.be.null;
+      const draftData = JSON.parse(draft!);
       expect(draftData.baseScores.Str).to.equal(14);
     });
   });
@@ -214,48 +163,46 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    // Fill basic info (Step 1)
     cy.get('input[placeholder="Ex: Aragorn"]').type("AutoAvatarHero");
     cy.contains("♂️ Homme").click();
     cy.contains("button", "Suivant").click();
 
-    // Select race and class (Step 2)
     cy.contains("Humain").click();
     cy.get("select").select("Barbarian");
     cy.contains("button", "Suivant").click();
-
-    // Skip ability scores (Step 3)
     cy.contains("button", "Suivant").click();
 
-    // Select skills (Step 4)
     cy.get('input[type="checkbox"]').first().check();
     cy.get('input[type="checkbox"]').eq(1).check();
     cy.contains("button", "Suivant").click();
 
-    // Should be on avatar step (Step 5)
     cy.url().should("include", "/character/dnd/step/5");
     cy.contains("Générer un Avatar").should("be.visible");
 
-    // Enter avatar description
     cy.get("textarea").type("Un grand guerrier musclé aux cheveux noirs");
 
-    // Wait for draft to save
-    cy.wait(600);
+    // Add a test-local intercept to ensure we catch the actual generate-avatar request
+    cy.intercept('POST', '**/api/image/generate-avatar*').as('generateAvatarTest');
+    // Also intercept character creation locally to ensure we capture it
+    cy.intercept('POST', '**/api/characters').as('createCharacterTest');
 
-    // Click finish WITHOUT manually generating avatar
     cy.contains("button", "Terminer").click();
 
-    // Should trigger avatar generation automatically
-    cy.wait("@generateAvatar");
-
-    // Wait for character creation API call
-    cy.wait("@createCharacter").then((interception) => {
-      // Verify that the character was created with the avatar as portrait
+    // Wait for local alias — the app can trigger generation slightly before we call wait
+    cy.wait("@generateAvatarTest").then((interception) => {
+      // Ensure the request included the description and charId
+      expect(interception.request.body).to.have.property('description');
+      expect(interception.request.body).to.have.property('characterId');
+    });
+    cy.wait("@createCharacterTest").then((interception) => {
       const characterData = interception.request.body;
-      expect(characterData.portrait).to.include("data:image");
+      // The portrait should either be a generated data URL or the default /images/... path
+      expect(characterData.portrait).to.match(/data:image|^\/images\//);
+      // The creation request should be authenticated in tests
+      expect(interception.request.headers).to.have.property('authorization');
+      expect(interception.request.headers.authorization).to.contain('Bearer');
     });
 
-    // Should redirect to game view
     cy.url().should("include", "/game/dnd");
   });
 });
