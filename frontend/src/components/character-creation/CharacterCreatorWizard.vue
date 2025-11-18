@@ -1,25 +1,26 @@
 <template>
-  <div class="p-4 rounded-md max-w-4xl mx-auto">
+  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full overflow-y-auto">
     <!-- Header with restore draft button -->
-    <div class="flex justify-between mb-4">
+    <div class="flex justify-between mb-3 lg:mb-4">
       <div class="flex-1">
-        <h2 class="text-lg font-semibold">
+        <h2 class="text-base lg:text-lg font-semibold">
           Création de personnage
         </h2>
       </div>
     </div>
 
-    <!-- Progress indicator -->
-    <div class="flex justify-between mb-8">
+    <!-- Progress indicator - compact on mobile -->
+    <div class="flex justify-between mb-4 lg:mb-8">
       <div
         v-for="(s, i) in steps"
         :key="i"
-        :class="['flex-1 text-center pb-2 px-2', i <= currentStep ? 'border-b-2 border-indigo-600' : 'border-b border-slate-600']"
+        :class="['flex-1 text-center pb-2 px-1 lg:px-2', i <= currentStep ? 'border-b-2 border-indigo-600' : 'border-b border-slate-600']"
       >
         <div
-          :class="['font-medium', i === currentStep ? 'text-indigo-400' : i < currentStep ? 'text-green-400' : 'text-slate-500']"
+          :class="['text-xs lg:text-base font-medium', i === currentStep ? 'text-indigo-400' : i < currentStep ? 'text-green-400' : 'text-slate-500']"
         >
-          {{ s }}
+          <span class="hidden sm:inline">{{ s }}</span>
+          <span class="sm:hidden">{{ i + 1 }}</span>
         </div>
       </div>
     </div>
@@ -72,7 +73,7 @@
     />
 
     <!-- Navigation buttons -->
-    <div class="flex justify-end gap-2 mt-6">
+    <div class="flex justify-end gap-2 mt-4 lg:mt-6 sticky bottom-0 bg-slate-900/95 py-3 -mx-2 px-2 lg:mx-0 lg:px-0 lg:bg-transparent lg:static">
       <UiButton
         variant="ghost"
         :disabled="currentStep === 0"
@@ -97,15 +98,20 @@
       </UiButton>
     </div>
 
-    <!-- Character Preview -->
-    <CharacterPreview
-      :character="character"
-      :gender="gender"
-      :primary-class="primaryClass"
-      :base-scores="baseScores"
-      :selected-skills="selectedSkills"
-      :current-step="currentStep"
-    />
+    <!-- Character Preview - collapsible on mobile -->
+    <details class="mt-4 lg:mt-8">
+      <summary class="cursor-pointer p-3 lg:p-4 bg-slate-900 rounded border border-slate-700 hover:bg-slate-800 transition-colors">
+        <span class="font-bold">Aperçu du personnage</span>
+      </summary>
+      <CharacterPreview
+        :character="character"
+        :gender="gender"
+        :primary-class="primaryClass"
+        :base-scores="baseScores"
+        :selected-skills="selectedSkills"
+        :current-step="currentStep"
+      />
+    </details>
   </div>
 </template>
 

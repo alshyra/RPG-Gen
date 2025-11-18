@@ -1,20 +1,20 @@
 <template>
-  <header class="flex items-center justify-between min-h-14">
-    <div
-      v-if="subtitle && description"
-      class="flex-none p-2"
-    >
-      <h2 class="text-xl font-semibold">
-        {{ subtitle }}
-      </h2>
-      <p class="text-sm text-slate-400">
-        {{ description }}
-      </p>
-    </div>
-    <div class="absolute left-1/2 -translate-x-1/2">
-      <h1 class="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500">
+  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2 min-h-14">
+    <!-- Title - centered on desktop, top on mobile -->
+    <div class="text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2 order-first lg:order-none">
+      <h1 class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
         RPG Gemini
       </h1>
+    </div>
+    
+    <!-- Subtitle and description - below title on mobile, left side on desktop -->
+    <div v-if="subtitle && description" class="flex-none text-center lg:text-left">
+      <h2 class="text-lg lg:text-xl font-semibold">
+        {{ subtitle }}
+      </h2>
+      <p class="text-xs lg:text-sm text-slate-400">
+        {{ description }}
+      </p>
     </div>
   </header>
 </template>
