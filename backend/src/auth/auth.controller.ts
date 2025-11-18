@@ -49,7 +49,7 @@ export class AuthController {
       id: user._id.toString(),
       email: user.email,
       displayName: user.displayName,
-      picture: user.picture
+      picture: user.picture,
     };
   }
 

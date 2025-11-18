@@ -20,8 +20,8 @@ const getPinoLogger = () => {
     pretty({
       colorize: true,
       singleLine: false,
-      sync: true
-    })
+      sync: true,
+    }),
   );
 };
 
@@ -29,19 +29,19 @@ const getPinoLogger = () => {
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        logger: getPinoLogger()
-      }
+        logger: getPinoLogger(),
+      },
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/rpggen', {
       retryAttempts: 5,
-      retryDelay: 3000
+      retryDelay: 3000,
     }),
     AuthModule,
     ChatModule,
     DiceModule,
     ImageModule,
     HealthModule,
-    CharacterModule
-  ]
+    CharacterModule,
+  ],
 })
 export class AppModule {}

@@ -7,9 +7,9 @@ import { ChatHistory, ChatHistorySchema } from '../schemas/chat-history.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: ChatHistory.name, schema: ChatHistorySchema }])
+    MongooseModule.forFeature([{ name: ChatHistory.name, schema: ChatHistorySchema }]),
   ],
   controllers: [ChatController],
-  providers: [GeminiTextService, ConversationService]
+  providers: [GeminiTextService, ConversationService],
 })
 export class ChatModule {}

@@ -10,7 +10,7 @@ export class AuthService {
     const payload = {
       sub: user._id.toString(),
       email: user.email,
-      googleId: user.googleId
+      googleId: user.googleId,
     };
 
     return {
@@ -19,8 +19,8 @@ export class AuthService {
         id: user._id.toString(),
         email: user.email,
         displayName: user.displayName,
-        picture: user.picture
-      }
+        picture: user.picture,
+      },
     };
   }
 

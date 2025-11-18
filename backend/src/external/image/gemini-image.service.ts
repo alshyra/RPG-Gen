@@ -10,7 +10,7 @@ export class GeminiImageService {
   constructor() {
     this.logger.debug(
       'Initializing GeminiImageService',
-      process.env.GOOGLE_API_KEY ? '***' : 'no API key'
+      process.env.GOOGLE_API_KEY ? '***' : 'no API key',
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
     this.logger.log('GeminiImageService initialized');
@@ -35,7 +35,7 @@ export class GeminiImageService {
     try {
       return await this.client.models.generateContent({
         model: this.model,
-        contents: prompt
+        contents: prompt,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

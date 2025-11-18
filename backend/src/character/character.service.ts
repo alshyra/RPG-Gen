@@ -9,7 +9,7 @@ export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
 
   constructor(
-    @InjectModel(Character.name) private characterModel: Model<CharacterDocument>
+    @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
   ) {}
 
   async create(userId: string, characterData: CharacterEntry): Promise<CharacterDocument> {
@@ -28,7 +28,7 @@ export class CharacterService {
       portrait: characterData.portrait,
       gender: characterData.gender,
       proficiency: characterData.proficiency || 2,
-      isDeceased: false
+      isDeceased: false,
     });
 
     const saved = await character.save();
@@ -79,7 +79,7 @@ export class CharacterService {
   async markAsDeceased(
     userId: string,
     characterId: string,
-    deathLocation?: string
+    deathLocation?: string,
   ): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) {
@@ -114,7 +114,7 @@ export class CharacterService {
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender as 'male' | 'female',
-      proficiency: doc.proficiency
+      proficiency: doc.proficiency,
     };
   }
 }

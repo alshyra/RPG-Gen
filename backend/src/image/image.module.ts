@@ -8,6 +8,6 @@ import { CharacterModule } from '../character/character.module';
   imports: [CharacterModule],
   controllers: [ImageController],
   providers: [GeminiImageService, ImageService],
-  exports: [ImageService]
+  exports: [ImageService],
 })
 export class ImageModule {}

@@ -15,12 +15,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       callbackURL:
         process.env.GOOGLE_OAUTH_CALLBACK_URL || 'http://localhost/api/auth/google/callback',
-      scope: ['email', 'profile']
+      scope: ['email', 'profile'],
     });
 
     this.logger.log('GoogleStrategy initialized with:', {
       clientID: process.env.GOOGLE_OAUTH_CLIENT_ID?.substring(0, 10) + '***',
-      callbackURL: process.env.GOOGLE_OAUTH_CALLBACK_URL
+      callbackURL: process.env.GOOGLE_OAUTH_CALLBACK_URL,
     });
   }
 
@@ -28,12 +28,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-    done: VerifyCallback
+    done: VerifyCallback,
   ): Promise<void> {
     this.logger.log('Google profile received:', {
       id: profile.id,
       email: profile.emails?.[0]?.value,
-      displayName: profile.displayName
+      displayName: profile.displayName,
     });
 
     const user = await this.findOrCreateUser(profile);
@@ -53,7 +53,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         firstName: name?.givenName,
         lastName: name?.familyName,
         picture: photos?.[0]?.value,
-        lastLogin: new Date()
+        lastLogin: new Date(),
       });
       this.logger.log('User created:', { id: user._id, email: user.email });
     } else {

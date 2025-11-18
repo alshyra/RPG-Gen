@@ -24,7 +24,7 @@ export class ImageService {
 
       const compressedSize = Buffer.from(result.replace(/^data:image\/\w+;base64,/, ''), 'base64').length;
       this.logger.debug(
-        `Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`
+        `Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`,
       );
 
       return result;

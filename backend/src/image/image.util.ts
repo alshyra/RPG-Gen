@@ -24,7 +24,7 @@ export async function compressImage(imageData: string | Buffer): Promise<string>
   const compressed = await sharp(buffer)
     .resize(MAX_WIDTH, MAX_HEIGHT, {
       fit: 'inside',
-      withoutEnlargement: true
+      withoutEnlargement: true,
     })
     .jpeg({ quality: JPEG_QUALITY })
     .toBuffer();

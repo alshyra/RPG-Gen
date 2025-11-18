@@ -91,7 +91,7 @@ export class GeminiTextService {
   constructor() {
     this.logger.debug(
       'Initializing GeminiTextService',
-      process.env.GOOGLE_API_KEY ? '***' : 'no API key'
+      process.env.GOOGLE_API_KEY ? '***' : 'no API key',
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
   }
@@ -107,7 +107,7 @@ export class GeminiTextService {
     const usage = {
       promptTokenCount: promptTokens,
       candidatesTokenCount: genTokens,
-      totalTokenCount: promptTokens + genTokens
+      totalTokenCount: promptTokens + genTokens,
     };
     const raw = { candidates: [{ content: [{ text }] }], modelVersion: this.model };
     return { text, raw, usage, modelVersion: this.model };
@@ -117,7 +117,7 @@ export class GeminiTextService {
     sessionId: string,
     systemInstruction: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initialHistory: any[] = []
+    initialHistory: any[] = [],
   ) {
     if (this.chatClients.has(sessionId)) return this.chatClients.get(sessionId);
 
@@ -127,8 +127,8 @@ export class GeminiTextService {
       history: initialHistory,
       config: {
         systemInstruction,
-        temperature: 0.7
-      }
+        temperature: 0.7,
+      },
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.chatClients.set(sessionId, chat as any);
@@ -136,10 +136,10 @@ export class GeminiTextService {
   }
 
   private extractResponseMetadata = (
-    response: Record<string, unknown>
+    response: Record<string, unknown>,
   ): { usage: Record<string, unknown> | null; modelVersion: string } => ({
     usage: ((response?.usageMetadata || response?.usage) as Record<string, unknown> | null) || null,
-    modelVersion: this.model
+    modelVersion: this.model,
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +148,7 @@ export class GeminiTextService {
     const response = await chat.sendMessage({ message });
     const text = textFromResponse(response);
     const { usage, modelVersion } = this.extractResponseMetadata(
-      response as Record<string, unknown>
+      response as Record<string, unknown>,
     );
     return { text, raw: response as GeminiResponse, usage, modelVersion };
   }

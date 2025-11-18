@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
   Logger,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -40,7 +40,7 @@ export class CharacterController {
     const character = await this.characterService.create(userId, characterData);
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character)
+      character: this.characterService.toCharacterEntry(character),
     };
   }
 
@@ -53,7 +53,7 @@ export class CharacterController {
     const characters = await this.characterService.findByUserId(userId);
     return {
       ok: true,
-      characters: characters.map(c => this.characterService.toCharacterEntry(c))
+      characters: characters.map(c => this.characterService.toCharacterEntry(c)),
     };
   }
 
@@ -69,8 +69,8 @@ export class CharacterController {
       characters: characters.map(c => ({
         ...this.characterService.toCharacterEntry(c),
         diedAt: c.diedAt?.toISOString(),
-        deathLocation: c.deathLocation
-      }))
+        deathLocation: c.deathLocation,
+      })),
     };
   }
 
@@ -87,7 +87,7 @@ export class CharacterController {
 
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character)
+      character: this.characterService.toCharacterEntry(character),
     };
   }
 
@@ -96,7 +96,7 @@ export class CharacterController {
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() updates: Partial<CharacterEntry>
+    @Body() updates: Partial<CharacterEntry>,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -104,7 +104,7 @@ export class CharacterController {
     const character = await this.characterService.update(userId, characterId, updates);
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character)
+      character: this.characterService.toCharacterEntry(character),
     };
   }
 
@@ -123,7 +123,7 @@ export class CharacterController {
   async kill(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: { deathLocation?: string }
+    @Body() body: { deathLocation?: string },
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -131,11 +131,11 @@ export class CharacterController {
     const character = await this.characterService.markAsDeceased(
       userId,
       characterId,
-      body.deathLocation
+      body.deathLocation,
     );
     return {
       ok: true,
-      character: this.characterService.toCharacterEntry(character)
+      character: this.characterService.toCharacterEntry(character),
     };
   }
 }

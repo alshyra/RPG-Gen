@@ -1,19 +1,19 @@
 import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
-import * as Joi from "joi";
-import { GeminiImageService } from "../external/image/gemini-image.service";
-import { ImageService } from "./image.service";
-import { CharacterService } from "../character/character.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { UserDocument } from "../schemas/user.schema";
-import type { ImageRequest, AvatarRequest } from "../../../shared/types";
-import { CharacterDocument } from "src/schemas/character.schema";
+import * as Joi from 'joi';
+import { GeminiImageService } from '../external/image/gemini-image.service';
+import { ImageService } from './image.service';
+import { CharacterService } from '../character/character.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserDocument } from '../schemas/user.schema';
+import type { ImageRequest, AvatarRequest } from '../../../shared/types';
+import { CharacterDocument } from 'src/schemas/character.schema';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
   prompt: Joi.string().required(),
-  model: Joi.string().optional()
+  model: Joi.string().optional(),
 });
 
 interface AvatarRequestWithCharacterId extends AvatarRequest {
@@ -28,7 +28,7 @@ export class ImageController {
   constructor(
     private readonly geminiImage: GeminiImageService,
     private readonly imageService: ImageService,
-    private readonly characterService: CharacterService
+    private readonly characterService: CharacterService,
   ) {}
 
   @Post()
@@ -44,10 +44,10 @@ export class ImageController {
   @Post('generate-avatar')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Generate character avatar from description" })
-  @ApiBody({ schema: { type: "object" } })
+  @ApiOperation({ summary: 'Generate character avatar from description' })
+  @ApiBody({ schema: { type: 'object' } })
   async generateAvatar(@Req() req: Request, @Body() body: { characterId?: string }) {
-    if (!body.characterId) throw new BadRequestException("characterId is required");
+    if (!body.characterId) throw new BadRequestException('characterId is required');
     const characterId = body.characterId;
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -71,7 +71,7 @@ export class ImageController {
 
       return {
         imageUrl: compressedImage,
-        compressed: true
+        compressed: true,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate avatar';
@@ -82,7 +82,7 @@ export class ImageController {
 
   private async saveAvatarToCharacter(userId: string, characterId: string, compressedImage: string) {
     await this.characterService.update(userId, characterId, {
-      portrait: compressedImage
+      portrait: compressedImage,
     });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
@@ -100,13 +100,13 @@ export class ImageController {
     if (character.race?.name) characterContext.push(`Race: ${character.race.name}`);
     if (character.classes?.length) {
       const classNames = character.classes
-        .map((c) => c.name)
+        .map(c => c.name)
         .filter(Boolean)
         .join(', ');
       if (classNames) characterContext.push(`Classes: ${classNames}`);
     }
 
-    const contextStr = characterContext.length ? `\n${characterContext.join("\n")}` : "";
+    const contextStr = characterContext.length ? `\n${characterContext.join('\n')}` : '';
     return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
   }
 }

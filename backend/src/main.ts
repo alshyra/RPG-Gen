@@ -22,7 +22,7 @@ const setupCors = (app: INestApplication) => {
     origin: process.env.FRONTEND_URL || 'http://localhost:80',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 };
 

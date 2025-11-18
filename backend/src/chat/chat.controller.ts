@@ -9,20 +9,20 @@ import {
   Query,
   Req,
   UseGuards,
-} from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Request } from "express";
-import fs, { readFile } from "fs/promises";
-import * as Joi from "joi";
-import type { CharacterEntry, ChatRequest } from "../../../shared/types";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { GameInstruction, parseGameResponse } from "../external/game-parser.util";
-import { GeminiTextService } from "../external/text/gemini-text.service";
-import { UserDocument } from "../schemas/user.schema";
-import { ChatMessage, ConversationService } from "./conversation.service";
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import fs, { readFile } from 'fs/promises';
+import * as Joi from 'joi';
+import type { CharacterEntry, ChatRequest } from '../../../shared/types';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
+import { GeminiTextService } from '../external/text/gemini-text.service';
+import { UserDocument } from '../schemas/user.schema';
+import { ChatMessage, ConversationService } from './conversation.service';
 
 const schema = Joi.object({
-  message: Joi.string().allow("").optional(),
+  message: Joi.string().allow('').optional(),
   characterId: Joi.string().optional(),
   character: Joi.string().optional(),
 });
@@ -37,7 +37,7 @@ export class ChatController {
   private readonly logger = new Logger(ChatController.name);
   constructor(
     private readonly gemini: GeminiTextService,
-    private readonly conv: ConversationService
+    private readonly conv: ConversationService,
   ) {}
 
   private async loadSystemPrompt(): Promise<string> {
@@ -70,21 +70,21 @@ Character Information:
 - XP: ${character.totalXp || 0}
 - Stats: STR ${this.getAbilityScore(character, 'Str')}, DEX ${this.getAbilityScore(
   character,
-  'Dex'
+  'Dex',
 )}, CON ${this.getAbilityScore(character, 'Con')}, INT ${this.getAbilityScore(
   character,
-  'Int'
+  'Int',
 )}, WIS ${this.getAbilityScore(character, 'Wis')}, CHA ${this.getAbilityScore(character, 'Cha')}
 `;
 
     // Add spells if character has any
     if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells.map((s) => `${s.name} (Lvl ${s.level})`).join(", ")}\n`;
+      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
     }
 
     // Add inventory if character has any
     if (character.inventory && character.inventory.length > 0) {
-      summary += `- Inventory: ${character.inventory.map((i) => `${i.name} (x${i.quantity || 1})`).join(", ")}\n`;
+      summary += `- Inventory: ${character.inventory.map(i => `${i.name} (x${i.quantity || 1})`).join(', ')}\n`;
     }
 
     return summary;
@@ -94,7 +94,7 @@ Character Information:
     userId: string,
     characterId: string,
     systemPrompt: string,
-    character?: CharacterEntry
+    character?: CharacterEntry,
   ): Promise<ChatMessage> {
     this.logger.log(`Starting chat for character ${characterId} (user: ${userId})`);
     this.gemini.getOrCreateChat(characterId, systemPrompt || undefined, []);
@@ -109,7 +109,7 @@ Character Information:
       role: 'assistant',
       text: initResp.text || '',
       timestamp: Date.now(),
-      meta: { usage: initResp.usage || null, model: initResp.modelVersion || '' }
+      meta: { usage: initResp.usage || null, model: initResp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, initMsg);
     this.logger.log(`Chat ${characterId} started with ${initMsg.text.length} chars`);
@@ -120,14 +120,14 @@ Character Information:
     userId: string,
     characterId: string,
     userText: string,
-    _systemPrompt: string
+    _systemPrompt: string,
   ): Promise<{ userMsg: ChatMessage; assistantMsg: ChatMessage }> {
     this.logger.log(
-      `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`
+      `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`,
     );
 
     // Append user message to history
-    const userMsg: ChatMessage = { role: "user", text: userText, timestamp: Date.now() };
+    const userMsg: ChatMessage = { role: 'user', text: userText, timestamp: Date.now() };
     await this.conv.append(userId, characterId, userMsg);
 
     // Send via chat (context handled automatically)
@@ -138,7 +138,7 @@ Character Information:
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
-      meta: { usage: resp.usage || null, model: resp.modelVersion || '' }
+      meta: { usage: resp.usage || null, model: resp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, assistantMsg);
 
@@ -148,7 +148,7 @@ Character Information:
   private formatChatResponse(
     responseText: string,
     model: string,
-    usage: Record<string, unknown> | null
+    usage: Record<string, unknown> | null,
   ) {
     const { narrative, instructions } = parseGameResponse(responseText);
     return {
@@ -156,7 +156,7 @@ Character Information:
       instructions,
       model: model || 'unknown',
       usage: usage || null,
-      raw: null
+      raw: null,
     };
   }
 
@@ -164,16 +164,16 @@ Character Information:
     userId: string,
     characterId: string,
     message: string,
-    character: CharacterEntry | undefined
+    character: CharacterEntry | undefined,
   ): Promise<{ characterId: string; result: Record<string, unknown> }> {
     const systemPrompt = await this.loadSystemPrompt();
     const history = await this.conv.getHistory(userId, characterId);
     if (history.length === 0) await this.startChat(userId, characterId, systemPrompt, character);
-    const { assistantMsg } = await this.processUserMessage(userId, characterId, message || "", systemPrompt);
+    const { assistantMsg } = await this.processUserMessage(userId, characterId, message || '', systemPrompt);
     const result = this.formatChatResponse(
       assistantMsg.text,
       (assistantMsg.meta?.model || '') as string,
-      (assistantMsg.meta?.usage || null) as Record<string, unknown> | null
+      (assistantMsg.meta?.usage || null) as Record<string, unknown> | null,
     );
     this.logger.log(`Chat response ready for character ${characterId}`);
     return { characterId, result };
@@ -187,13 +187,13 @@ Character Information:
     const userId = user._id.toString();
     const value = this.validateChatBody(body);
     try {
-      if (!value.characterId || typeof value.characterId !== "string")
-        throw new BadRequestException("characterId required");
+      if (!value.characterId || typeof value.characterId !== 'string')
+        throw new BadRequestException('characterId required');
       const { result } = await this.handleChat(
         userId,
         value.characterId as string,
-        value.message || "",
-        value.character as CharacterEntry | undefined
+        value.message || '',
+        value.character as CharacterEntry | undefined,
       );
       return { ok: true, characterId: value.characterId, result };
     } catch (e) {
@@ -208,9 +208,9 @@ Character Information:
     return value as Record<string, unknown> & ChatRequest;
   }
 
-  @Post("template")
-  @ApiOperation({ summary: "Update developer prompt template (dev only)" })
-  @ApiBody({ schema: { type: "object" } })
+  @Post('template')
+  @ApiOperation({ summary: 'Update developer prompt template (dev only)' })
+  @ApiBody({ schema: { type: 'object' } })
   async updateTemplate(@Body() body: Record<string, unknown>) {
     const text = body?.template;
     if (typeof text !== 'string') throw new BadRequestException('template required');
@@ -240,19 +240,19 @@ Character Information:
   }
 
   private buildSdkHistory(
-    history: ChatMessage[]
+    history: ChatMessage[],
   ): Array<{ role: string; parts: Array<{ text: string }> }> {
     return history.map(m => ({
       role: m.role === 'assistant' ? 'model' : m.role,
-      parts: [{ text: m.text }]
+      parts: [{ text: m.text }],
     }));
   }
 
   private addInstructionsToHistory(
-    history: ChatMessage[]
+    history: ChatMessage[],
   ): Array<ChatMessage & { instructions?: GameInstruction[] }> {
     return history.map(msg =>
-      msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg
+      msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg,
     );
   }
 
@@ -260,7 +260,7 @@ Character Information:
     userId: string,
     characterId: string,
     systemPrompt: string,
-    charData: CharacterEntry | undefined
+    charData: CharacterEntry | undefined,
   ): Promise<{ ok: boolean; characterId: string; isNew: boolean; history: ChatMessage[] }> {
     const initMsg = await this.startChat(userId, characterId, systemPrompt, charData);
     return { ok: true, characterId, isNew: true, history: [initMsg] };
@@ -269,7 +269,7 @@ Character Information:
   private async handleExistingChatHistory(
     characterId: string,
     systemPrompt: string,
-    history: ChatMessage[]
+    history: ChatMessage[],
   ): Promise<{
     ok: boolean;
     characterId: string;
@@ -279,24 +279,24 @@ Character Information:
     this.gemini.getOrCreateChat(
       characterId,
       systemPrompt || undefined,
-      this.buildSdkHistory(history)
+      this.buildSdkHistory(history),
     );
     const historyWithInstructions = this.addInstructionsToHistory(history);
     this.logger.log(`History loaded for character ${characterId}: ${history.length} messages`);
     return { ok: true, characterId, isNew: false, history: historyWithInstructions };
   }
 
-  @Get("history")
-  @ApiOperation({ summary: "Get conversation history for a character" })
+  @Get('history')
+  @ApiOperation({ summary: 'Get conversation history for a character' })
   async getHistory(
     @Req() req: Request,
-    @Query("character") character?: string,
-    @Query("characterId") characterId?: string
+    @Query('character') character?: string,
+    @Query('characterId') characterId?: string,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    
-    if (!characterId) throw new BadRequestException("characterId required");
+
+    if (!characterId) throw new BadRequestException('characterId required');
     try {
       // characterId is the conversation key for history
       const history = await this.conv.getHistory(userId, characterId);

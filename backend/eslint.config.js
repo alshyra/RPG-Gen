@@ -14,7 +14,7 @@ module.exports = [
     semi: true,
     jsx: false,
     braceStyle: '1tbs',
-    commaDangle: 'never'
+    commaDangle: 'always-multiline',
   }),
   {
     files: ['**/*.{js,ts}'],
