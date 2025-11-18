@@ -11,6 +11,8 @@ export type {
   AbilityScores,
   CharacterClass,
   Skill,
+  Spell,
+  InventoryItem,
 } from "./character";
 
 // Game mechanics types

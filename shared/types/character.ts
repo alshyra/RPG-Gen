@@ -29,6 +29,33 @@ export interface Skill {
   modifier: number;
 }
 
+/**
+ * D&D spell information
+ */
+export interface Spell {
+  name: string;
+  level: number; // 0 for cantrips, 1-9 for spell levels
+  school: string; // Evocation, Abjuration, etc.
+  castingTime?: string;
+  range?: string;
+  components?: string;
+  duration?: string;
+  description?: string;
+  prepared?: boolean; // For prepared casters
+}
+
+/**
+ * Character inventory item
+ */
+export interface InventoryItem {
+  name: string;
+  quantity: number;
+  description?: string;
+  weight?: number;
+  value?: number; // In gold pieces
+  equipped?: boolean;
+}
+
 export interface CharacterEntry {
   id: string; // UUID, also serves as sessionId for chat
   name: string;
@@ -39,6 +66,8 @@ export interface CharacterEntry {
   totalXp: number; // Cumulative experience points
   classes: CharacterClass[]; // Character classes and their levels
   skills?: Skill[];
+  spells?: Spell[]; // Character's known/prepared spells
+  inventory?: InventoryItem[]; // Character's inventory
   world: string; // Game universe (dnd, vtm, cyberpunk)
   worldId?: string; // Alternative world identifier
   portrait: string; // Image URL or path

@@ -41,11 +41,11 @@ const extractInlineJson = (text: string): string[] => {
 
 const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   // Check if object has type field with valid value
-  if (obj.type === "roll" || obj.type === "xp" || obj.type === "hp") {
+  if (obj.type === "roll" || obj.type === "xp" || obj.type === "hp" || obj.type === "spell" || obj.type === "inventory") {
     return true;
   }
   // Check if object has instruction fields directly (backward compatibility)
-  if (obj.roll || obj.xp !== undefined || obj.hp !== undefined) {
+  if (obj.roll || obj.xp !== undefined || obj.hp !== undefined || obj.spell || obj.inventory) {
     return true;
   }
   return false;
@@ -70,8 +70,8 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
     .filter(isGameInstruction)
     .map((obj) => {
       // If it has a type field, use the structured format
-      if (obj.type === "roll" || obj.type === "xp" || obj.type === "hp") {
-        return { type: obj.type as "roll" | "xp" | "hp", data: obj } as GameInstruction;
+      if (obj.type === "roll" || obj.type === "xp" || obj.type === "hp" || obj.type === "spell" || obj.type === "inventory") {
+        return { type: obj.type as "roll" | "xp" | "hp" | "spell" | "inventory", data: obj } as GameInstruction;
       }
       // Otherwise, use the direct format (backward compatibility)
       return obj as GameInstruction;

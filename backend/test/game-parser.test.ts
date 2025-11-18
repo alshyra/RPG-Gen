@@ -127,3 +127,83 @@ Pour observer les allées et venues discrètement, tu dois trouver une position 
   t.false(result.narrative.includes('```'));
   t.false(result.narrative.includes('"roll"'));
 });
+
+test('should extract spell instruction (learn)', (t) => {
+  const input = `Tu apprends un nouveau sort puissant.
+  
+  \`\`\`json
+  {"spell": {"action": "learn", "name": "Boule de feu", "level": 3, "school": "Évocation"}}
+  \`\`\``;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].spell);
+  t.is(result.instructions[0].spell?.action, 'learn');
+  t.is(result.instructions[0].spell?.name, 'Boule de feu');
+  t.is(result.instructions[0].spell?.level, 3);
+  t.is(result.instructions[0].spell?.school, 'Évocation');
+  
+  // Narrative should not contain the JSON block
+  t.false(result.narrative.includes('```json'));
+  t.false(result.narrative.includes('{"spell"'));
+  t.true(result.narrative.includes('Tu apprends'));
+});
+
+test('should extract spell instruction (cast)', (t) => {
+  const input = `Tu lances le sort avec succès! {"spell": {"action": "cast", "name": "Boule de feu"}}`;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].spell);
+  t.is(result.instructions[0].spell?.action, 'cast');
+  t.is(result.instructions[0].spell?.name, 'Boule de feu');
+});
+
+test('should extract inventory instruction (add)', (t) => {
+  const input = `Tu trouves une potion dans le coffre.
+  
+  \`\`\`json
+  {"inventory": {"action": "add", "name": "Potion de soin", "quantity": 1, "description": "Restaure 2d4+2 PV"}}
+  \`\`\``;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].inventory);
+  t.is(result.instructions[0].inventory?.action, 'add');
+  t.is(result.instructions[0].inventory?.name, 'Potion de soin');
+  t.is(result.instructions[0].inventory?.quantity, 1);
+  
+  // Narrative should not contain the JSON block
+  t.false(result.narrative.includes('```json'));
+  t.false(result.narrative.includes('{"inventory"'));
+  t.true(result.narrative.includes('Tu trouves'));
+});
+
+test('should extract inventory instruction (use)', (t) => {
+  const input = `Tu bois la potion et te sens mieux. {"inventory": {"action": "use", "name": "Potion de soin"}}`;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].inventory);
+  t.is(result.instructions[0].inventory?.action, 'use');
+  t.is(result.instructions[0].inventory?.name, 'Potion de soin');
+});
+
+test('should extract multiple mixed instructions', (t) => {
+  const input = `Tu defeats the goblin and finds treasure! {"xp": 50} {"inventory": {"action": "add", "name": "Gold coins", "quantity": 25}} {"spell": {"action": "learn", "name": "Magic Missile", "level": 1}}`;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 3);
+  t.is(result.instructions[0].xp, 50);
+  t.is(result.instructions[1].inventory?.action, 'add');
+  t.is(result.instructions[1].inventory?.name, 'Gold coins');
+  t.is(result.instructions[1].inventory?.quantity, 25);
+  t.is(result.instructions[2].spell?.action, 'learn');
+  t.is(result.instructions[2].spell?.name, 'Magic Missile');
+  t.is(result.instructions[2].spell?.level, 1);
+});

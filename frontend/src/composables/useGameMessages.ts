@@ -48,11 +48,40 @@ export function useGameMessages() {
     if (gameStore.isDead) gameStore.setDeathModalVisible(true);
   };
 
+  const handleSpellInstruction = (instr: any): void => {
+    if (instr.spell.action === 'learn') {
+      gameStore.appendMessage('System', `📖 Learned spell: ${instr.spell.name} (Level ${instr.spell.level})`);
+      gameStore.learnSpell(instr.spell);
+    } else if (instr.spell.action === 'cast') {
+      gameStore.appendMessage('System', `✨ Cast spell: ${instr.spell.name}`);
+    } else if (instr.spell.action === 'forget') {
+      gameStore.appendMessage('System', `🚫 Forgot spell: ${instr.spell.name}`);
+      gameStore.forgetSpell(instr.spell.name);
+    }
+  };
+
+  const handleInventoryInstruction = (instr: any): void => {
+    if (instr.inventory.action === 'add') {
+      const qty = instr.inventory.quantity || 1;
+      gameStore.appendMessage('System', `🎒 Added to inventory: ${instr.inventory.name} (x${qty})`);
+      gameStore.addInventoryItem(instr.inventory);
+    } else if (instr.inventory.action === 'remove') {
+      const qty = instr.inventory.quantity || 1;
+      gameStore.appendMessage('System', `🗑️ Removed from inventory: ${instr.inventory.name} (x${qty})`);
+      gameStore.removeInventoryItem(instr.inventory.name, qty);
+    } else if (instr.inventory.action === 'use') {
+      gameStore.appendMessage('System', `⚡ Used item: ${instr.inventory.name}`);
+      gameStore.useInventoryItem(instr.inventory.name);
+    }
+  };
+
   const processInstructions = (instructions: any[]): void => {
     instructions.forEach((instr) => {
       if (instr.roll) handleRollInstruction(instr);
       else if (instr.xp) handleXpInstruction(instr);
       else if (instr.hp) handleHpInstruction(instr);
+      else if (instr.spell) handleSpellInstruction(instr);
+      else if (instr.inventory) handleInventoryInstruction(instr);
     });
   };
 

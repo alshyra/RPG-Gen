@@ -11,7 +11,7 @@ export type ChatRole = "system" | "user" | "assistant";
  * Game instruction from backend parser
  */
 export interface GameInstruction {
-  type?: "roll" | "xp" | "hp";
+  type?: "roll" | "xp" | "hp" | "spell" | "inventory";
   data?: Record<string, unknown>;
   roll?: { 
     dices: string; 
@@ -20,6 +20,19 @@ export interface GameInstruction {
   };
   hp?: number; // HP change (positive or negative)
   xp?: number; // Experience points gained
+  spell?: {
+    action: "learn" | "cast" | "forget";
+    name: string;
+    level?: number;
+    school?: string;
+    description?: string;
+  };
+  inventory?: {
+    action: "add" | "remove" | "use";
+    name: string;
+    quantity?: number;
+    description?: string;
+  };
 }
 
 /**
