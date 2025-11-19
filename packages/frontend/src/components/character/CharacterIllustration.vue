@@ -48,13 +48,13 @@ const imgSrc = computed(() => {
   return `${baseUrl}images/${buildName()}.${ext}`;
 });
 
-  const onError = () => {
+const onError = () => {
   if (attemptIndex.value < exts.length - 1) {
     attemptIndex.value += 1;
   } else {
     errored.value = true;
   }
-}
+};
 
 // If props change (new class/race/gender), reset attempts so we try fresh images
 watch(() => [props.clazz, props.raceId, props.gender], () => {

@@ -130,9 +130,9 @@ const generate = async () => {
   error.value = null;
 
   try {
-  const charId = (props.character as any)?.characterId || (props.character as any)?.id;
+    const charId = (props.character as any)?.characterId || (props.character as any)?.id;
     if (!charId) throw new Error('Le personnage doit être sauvegardé avant de générer un avatar');
-  generatedAvatar.value = await imageServiceApi.generateAvatar(charId);
+    generatedAvatar.value = await imageServiceApi.generateAvatar(charId);
   } catch (err: any) {
     error.value = err.response?.data?.error || err.message || 'Erreur lors de la génération de l\'avatar';
   } finally {

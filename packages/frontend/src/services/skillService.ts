@@ -1,4 +1,4 @@
-import type { CharacterDto as CharacterDto } from "@rpg/shared";
+import type { CharacterDto as CharacterDto } from '@rpg/shared';
 
 /**
  * Get the bonus for a specific skill check
@@ -9,16 +9,16 @@ import type { CharacterDto as CharacterDto } from "@rpg/shared";
  */
 export const getSkillBonus = (
   character: CharacterDto | null,
-  skillNameWithCheck: string
+  skillNameWithCheck: string,
 ): number => {
   if (!character) return 0;
 
   // Extract skill name from "Skill Name Check" format
-  const skillName = skillNameWithCheck.replace(" Check", "").trim();
+  const skillName = skillNameWithCheck.replace(' Check', '').trim();
 
   // Try to find the skill in character's skills array
   if (character.skills && Array.isArray(character.skills)) {
-    const skill = character.skills.find((s) => s.name.toLowerCase() === skillName.toLowerCase());
+    const skill = character.skills.find(s => s.name.toLowerCase() === skillName.toLowerCase());
     if (skill) return skill.modifier;
   }
 
@@ -32,5 +32,5 @@ export const getSkillBonus = (
  * @param character The character to get skills from
  */
 export const getAvailableSkills = (
-  character: CharacterDto | null
+  character: CharacterDto | null,
 ): Array<{ name: string; modifier: number }> => character?.skills || [];

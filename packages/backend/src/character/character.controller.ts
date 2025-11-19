@@ -16,7 +16,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Character } from '../schemas/character.schema';
 import { UserDocument } from '../schemas/user.schema';
 import { CharacterService } from './character.service';
-import type { CharacterDto } from './dto/character.dto';
+import type { CharacterDto } from '@rpg/shared';
 
 @ApiTags('characters')
 @Controller('characters')

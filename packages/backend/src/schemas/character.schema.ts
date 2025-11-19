@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document, Schema as MongooseSchema } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type CharacterDocument = Character & Document;
 
@@ -108,11 +108,11 @@ export class Spell {
   prepared?: boolean;
 }
 
-export type Gender = "male" | "female";
+export type Gender = 'male' | 'female';
 
 @Schema({ timestamps: true })
 export class Character {
-  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "User" })
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
@@ -158,8 +158,8 @@ export class Character {
   @Prop({ required: true, default: 2 })
   proficiency: number;
 
-  @Prop({ required: true, default: "draft" })
-  state: "draft" | "created";
+  @Prop({ required: true, default: 'draft' })
+  state: 'draft' | 'created';
 
   @Prop({ required: false })
   spells: Spell[];

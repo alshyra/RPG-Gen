@@ -39,7 +39,7 @@ const send = async () => {
 const doRoll = async () => {
   error.value = '';
   try {
-  const res = await diceServiceApi.rollDice(props.expr);
+    const res = await diceServiceApi.rollDice(props.expr);
     // Use modifier if it's a number (skill bonus), otherwise use 0
     let bonus = props.pendingInstruction?.roll?.modifier || 0;
     const diceValue = res.data.result;

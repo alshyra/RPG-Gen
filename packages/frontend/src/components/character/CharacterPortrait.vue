@@ -40,10 +40,10 @@
 import { computed } from 'vue';
 import CharacterIllustration from './CharacterIllustration.vue';
 import UiXpBar from '../ui/UiXpBar.vue';
-import { useGameStore } from '../../composables/gameStore';
+import { useGame } from '../../composables/useGame';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 
-const gameStore = useGameStore();
+const gameStore = useGame();
 const character = computed(() => gameStore.session.character);
 
 const hp = computed(() => {

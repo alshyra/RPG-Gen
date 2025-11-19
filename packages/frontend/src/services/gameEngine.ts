@@ -1,7 +1,7 @@
-import type { GameInstruction } from "@rpg/shared";
-import type { ChatMessageDto as ChatMessage } from "@rpg/shared";
-import axios from "axios";
-import { authService } from "./authService";
+import type { GameInstruction } from '@rpg/shared';
+import type { ChatMessageDto as ChatMessage } from '@rpg/shared';
+import axios from 'axios';
+import { authService } from './authService';
 
 type GameResponse = {
   text: string;
@@ -26,15 +26,15 @@ apiClient.interceptors.request.use((config) => {
 
 // Handle auth errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  response => response,
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, logout and redirect to login
       authService.logout();
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export class GameEngine {
@@ -65,14 +65,14 @@ export class GameEngine {
    * Send a message to the game backend
    */
   async sendMessage(characterId: string, message: string): Promise<GameResponse> {
-    if (!this.characterId) throw new Error("Game not started. Call startGame first.");
+    if (!this.characterId) throw new Error('Game not started. Call startGame first.');
     const res = await apiClient.post(`/conversation/${characterId}/message`, {
       message,
     });
     const result = res?.data?.result || {};
 
     return {
-      text: result.text || "",
+      text: result.text || '',
       instructions: result.instructions || [],
       model: result.model,
       usage: result.usage,

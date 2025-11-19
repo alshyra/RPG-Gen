@@ -1,1 +1,1 @@
-export { useEventBus } from "@rpg/shared";
+export { useEventBus } from '@rpg/shared';

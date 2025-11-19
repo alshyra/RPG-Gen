@@ -50,7 +50,7 @@ const increment = () => {
   }
 
   emit('update:modelValue', newValue);
-}
+};
 
 const decrement = () => {
   if (props.disabled) return;
@@ -63,5 +63,5 @@ const decrement = () => {
   }
 
   emit('update:modelValue', newValue);
-}
+};
 </script>

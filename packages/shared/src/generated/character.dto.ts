@@ -24,7 +24,7 @@ export interface CharacterDto {
   portrait: string;
   gender?: Gender;
   proficiency: number;
-  state: "draft" | "created";
+  state: 'draft' | 'created';
   spells?: SpellDto[];
   inventory?: InventoryItemDto[];
   isDeceased: boolean;

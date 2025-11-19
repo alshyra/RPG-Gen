@@ -2,15 +2,20 @@
 <template>
   <form @submit.prevent="onSubmit">
     <!-- Form fields for character creation -->
-    <UiButton variant="primary" type="submit">Suivant</UiButton>
+    <UiButton
+      variant="primary"
+      type="submit"
+    >
+      Suivant
+    </UiButton>
   </form>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useWizardStore } from '@/composables/wizardStore';
+import { useWizard } from '@/composables/useWizard';
 
-const wizard = useWizardStore();
+const wizard = useWizard();
 
 // initialize local inputs from store state so component is re-entrant
 const name = ref(wizard.form.name ?? '');

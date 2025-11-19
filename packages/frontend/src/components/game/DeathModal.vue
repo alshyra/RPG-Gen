@@ -51,30 +51,26 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { getCurrentLevel } from '../../utils/dndLevels';
+import { useGame } from '@/composables/useGame';
 
 interface Props {
   isOpen: boolean;
   character?: any;
 }
 
-interface Emits {
-  confirm: [];
-  close: [];
-}
-
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   character: undefined,
 });
 
-const emit = defineEmits<Emits>();
+const gameStore = useGame();
 
-const characterName = computed(() => props.character?.name || 'Unknown');
+const characterName = computed(() => gameStore.session.character?.name || 'Unknown');
 const characterClass = computed(() => {
-  const classes = props.character?.classes || [];
+  const classes = gameStore.session.character?.classes || [];
   return classes.map((c: any) => `${c.name} ${c.level}`).join(', ') || '';
 });
-const characterXp = computed(() => props.character?.totalXp || 0);
-const characterLevel = computed(() => getCurrentLevel(props.character.totalXp).level);
+const characterXp = computed(() => gameStore.session.character?.totalXp || 0);
+const characterLevel = computed(() => getCurrentLevel(gameStore.session.character?.totalXp || 0).level);
 const diedDate = computed(() =>
   new Date().toLocaleDateString('fr-FR', {
     year: 'numeric',
@@ -85,8 +81,8 @@ const diedDate = computed(() =>
   }),
 );
 
-const close = () => emit('close');
-const confirmDeath = () => emit('confirm');
+const close = () => gameStore.setDeathModalVisible(false);
+const confirmDeath = () => gameStore.confirmDeath();
 </script>
 
 <style scoped></style>

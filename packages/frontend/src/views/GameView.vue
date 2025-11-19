@@ -116,9 +116,6 @@
           :rolls="rollData.rolls"
           :bonus="rollData.bonus"
           :total="rollData.total"
-          @confirm="confirmRoll"
-          @reroll="rerollDice"
-          @close="gameStore.setRollModalVisible(false)"
         />
       </aside>
     </div>
@@ -136,9 +133,6 @@
           :rolls="rollData.rolls"
           :bonus="rollData.bonus"
           :total="rollData.total"
-          @confirm="confirmRoll"
-          @reroll="rerollDice"
-          @close="gameStore.setRollModalVisible(false)"
         />
       </div>
     </div>
@@ -147,8 +141,6 @@
     <DeathModal
       :is-open="gameStore.showDeathModal"
       :character="gameStore.session.character"
-      @confirm="onDeathConfirm"
-      @close="gameStore.setDeathModalVisible(false)"
     />
   </div>
 </template>
@@ -163,25 +155,22 @@ import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
-import { useConversationStore } from '../stores/conversationStore';
+import { useConversationMessages } from '../composables/useConversationMessages';
 import { useEventBus } from '@rpg/shared';
 import { useConversation } from '../composables/useConversation';
 import { useGameRolls } from '../composables/useGameRolls';
-import { useGameSession } from '../composables/useGameSession';
-import { characterServiceApi } from '../services/characterServiceApi';
-import { gameEngine } from '../services/gameEngine';
-import { useGameStore } from '../composables/gameStore';
+import { useGame } from '../composables/useGame';
 
 // State
 const router = useRouter();
-const gameStore = useGameStore();
+const gameStore = useGame();
 const isSidebarOpen = ref(false);
 
 // Composables
-const { startGame } = useGameSession();
-const conversation = useConversationStore();
-const { sendMessage } = useConversation();
-const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls();
+const { startGame } = gameStore;
+const conversation = useConversationMessages();
+const { sendMessage, processInstructions } = useConversation();
+const { rollData, onDiceRolled } = useGameRolls();
 
 // DOM refs
 const messagesPane = ref<any>(null);
@@ -195,7 +184,7 @@ const toggleSidebar = () => {
 onMounted(async () => {
   try {
     const characterId = router.currentRoute.value.params.characterId as string;
-    await startGame(characterId);
+    await startGame(characterId, processInstructions);
   } catch (e) {
     conversation.appendMessage('Error', String(e));
   }
@@ -223,13 +212,4 @@ watch(
   },
   { deep: true },
 );
-
-// Handle character death
-const onDeathConfirm = async () => {
-  if (!gameStore.session.character?.characterId) return;
-  await characterServiceApi.killCharacter(gameStore.session.character.characterId, gameStore.session.worldName);
-  gameEngine.endGame();
-  gameStore.setDeathModalVisible(false);
-  router.push('/');
-};
 </script>

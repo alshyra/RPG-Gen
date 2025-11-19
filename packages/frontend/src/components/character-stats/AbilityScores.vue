@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useGameStore } from '../../composables/gameStore';
+import { useGame } from '../../composables/useGame';
 
 const abilities = {
   str: { short: 'STR', color: 'text-amber-400' },
@@ -40,21 +40,19 @@ const abilities = {
 type AbilityKey = keyof typeof abilities;
 type ScoreKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 
-const gameStore = useGameStore();
+const gameStore = useGame();
 const character = computed(() => gameStore.session.character);
 
-const isScoreKeyTypeGuard = (key: string): key is ScoreKey => {
-  return ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].includes(key);
-};
+const isScoreKeyTypeGuard = (key: string): key is ScoreKey => ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].includes(key);
 
 const getAbilityScore = (key: AbilityKey): number => {
   const capitalized = key.charAt(0).toUpperCase() + key.slice(1);
   const scores = character.value?.scores;
   if (!isScoreKeyTypeGuard(capitalized)) return 10;
   return scores?.[capitalized] ?? 10;
-}
+};
 
-const getModifier = (score: number): number =>  Math.floor((score - 10) / 2);
+const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 
 </script>
 

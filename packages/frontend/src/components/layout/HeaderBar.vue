@@ -25,10 +25,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameStore } from '../../composables/gameStore';
+import { useGame } from '../../composables/useGame';
 
 const route = useRoute();
-const gameStore = useGameStore();
+const gameStore = useGame();
 
 const worldMap: Record<string, string> = {
   dnd: 'Dungeons & Dragons',

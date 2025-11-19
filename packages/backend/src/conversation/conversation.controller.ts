@@ -22,8 +22,7 @@ import { parseGameResponse } from '../external/game-parser.util';
 import { UserDocument } from '../schemas/user.schema';
 import { ConversationService } from './conversation.service';
 import { Character } from 'src/schemas/character.schema';
-import type { CharacterDto } from '../character/dto/character.dto';
-import type { GameInstruction, GameMessage } from '../external/game-parser.util';
+import type { CharacterDto, GameInstruction } from '@rpg/shared';
 import type { ChatMessage } from '../schemas/conversation.schema';
 
 const TEMPLATE_PATH = path.join(__dirname, 'dnd.prompt.txt');

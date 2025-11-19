@@ -85,6 +85,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
+import { useGameRolls } from '@/composables/useGameRolls';
+import { useGame } from '@/composables/useGame';
 
 interface Props {
   isOpen: boolean;
@@ -95,23 +97,18 @@ interface Props {
   total: number;
 }
 
-interface Emits {
-  confirm: [];
-  reroll: [];
-  close: [];
-}
-
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
 
-// Check if first roll (d20 for checks) is 20 or 1
+const gameStore = useGame();
+const { confirmRoll, rerollDice } = useGameRolls();
+
 const firstRoll = computed(() => props.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
-const confirm = () => emit('confirm');
-const reroll = () => emit('reroll');
-const close = () => emit('close');
+const confirm = () => confirmRoll();
+const reroll = () => rerollDice();
+const close = () => gameStore.setRollModalVisible(false);
 </script>
 
 <style scoped></style>

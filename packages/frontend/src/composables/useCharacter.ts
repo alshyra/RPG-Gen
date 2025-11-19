@@ -1,9 +1,9 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
-import type { CharacterDto } from "@rpg/shared";
-import { characterServiceApi } from "@/services/characterServiceApi";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import type { CharacterDto } from '@rpg/shared';
+import { characterServiceApi } from '@/services/characterServiceApi';
 
-export const useCharacterStore = defineStore("character", () => {
+export const useCharacter = defineStore('character', () => {
   const currentCharacter = ref<Partial<CharacterDto>>({});
 
   const createCharacter = async (payload: Partial<CharacterDto>): Promise<CharacterDto> => {
@@ -13,7 +13,7 @@ export const useCharacterStore = defineStore("character", () => {
   };
 
   const updateCharacter = async (payload: Partial<CharacterDto>): Promise<void> => {
-    if (!payload.characterId) throw new Error("Character id required to update");
+    if (!payload.characterId) throw new Error('Character id required to update');
     // call API and update local state
     await characterServiceApi.updateCharacter(payload as CharacterDto);
     if (currentCharacter.value?.characterId === payload.characterId) {
@@ -41,8 +41,8 @@ export const useCharacterStore = defineStore("character", () => {
 
   const updateCharacterXp = (delta: number): void => {
     if (!currentCharacter.value) return;
-    (currentCharacter.value as CharacterDto).totalXp =
-      ((currentCharacter.value as CharacterDto).totalXp || 0) + delta;
+    (currentCharacter.value as CharacterDto).totalXp
+      = ((currentCharacter.value as CharacterDto).totalXp || 0) + delta;
   };
 
   const learnSpell = (spell: any): void => {
@@ -64,7 +64,7 @@ export const useCharacterStore = defineStore("character", () => {
     if (!(currentCharacter.value as CharacterDto).inventory)
       (currentCharacter.value as CharacterDto).inventory = [];
     const existing = (currentCharacter.value as CharacterDto).inventory!.find(
-      (i: any) => i.name === item.name
+      (i: any) => i.name === item.name,
     );
     if (existing) {
       existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
@@ -79,7 +79,7 @@ export const useCharacterStore = defineStore("character", () => {
   const removeInventoryItem = (itemName: string, quantity: number = 1): void => {
     if (!currentCharacter.value || !(currentCharacter.value as CharacterDto).inventory) return;
     const item = (currentCharacter.value as CharacterDto).inventory!.find(
-      (i: any) => i.name === itemName
+      (i: any) => i.name === itemName,
     );
     if (item) {
       item.quantity = (item.quantity || 1) - quantity;
@@ -94,7 +94,7 @@ export const useCharacterStore = defineStore("character", () => {
   const useInventoryItem = (itemName: string): void => {
     if (!currentCharacter.value || !(currentCharacter.value as CharacterDto).inventory) return;
     const item = (currentCharacter.value as CharacterDto).inventory!.find(
-      (i: any) => i.name === itemName
+      (i: any) => i.name === itemName,
     );
     if (item) {
       item.quantity = (item.quantity || 1) - 1;
