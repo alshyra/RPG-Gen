@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameStore } from '../../composables/gameStore';
+import { useGameStore } from '../../composables/useGameStore';
 
 const route = useRoute();
 const gameStore = useGameStore();

@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useGameStore } from '../../composables/gameStore';
+import { useGameStore } from '../../composables/useGameStore';
 
 const abilities = {
   str: { short: 'STR', color: 'text-amber-400' },

@@ -1,9 +1,9 @@
-import { useCharacterStore } from '@/composables/characterStore';
+import { useCharacterStore } from '@/composables/useCharacterStore';
 import { computed, ref, toRaw } from 'vue';
-import { useGameStore } from './gameStore';
-import { useConversationStore } from '@/composables/conversationStore';
+import { useGameStore } from './useGameStore';
+import { useConversationStore } from '@/composables/useConversationStore';
 import { useConversation } from '@/composables/useConversation';
-// useCharacterStore already imported from '@/composables/characterStore'
+// useCharacterStore already imported from '@/composables/useCharacterStore'
 import { gameEngine } from '../services/gameEngine';
 import { getSkillBonus } from '../services/skillService';
 import { useRouter } from 'vue-router';

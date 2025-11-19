@@ -88,7 +88,7 @@ import { DnDRulesService } from '@/services/dndRulesService';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DEFAULT_BASE_SCORES, useCharacterCreation } from '../../composables/useCharacterCreation';
-import { useWizardStore } from '@/composables/wizardStore';
+import { useWizardStore } from '@/composables/useWizardStore';
 import UiButton from '../ui/UiButton.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';

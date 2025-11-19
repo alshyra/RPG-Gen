@@ -155,12 +155,12 @@ import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
-import { useConversationStore } from '../composables/conversationStore';
+import { useConversationStore } from '../composables/useConversationStore';
 import { useEventBus } from '@rpg/shared';
 import { useConversation } from '../composables/useConversation';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
-import { useGameStore } from '../composables/gameStore';
+import { useGameStore } from '../composables/useGameStore';
 
 // State
 const router = useRouter();

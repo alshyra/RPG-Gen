@@ -1,9 +1,9 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { gameEngine } from '@/services/gameEngine';
-import { useConversationStore } from '@/composables/conversationStore';
-import { useGameStore } from '@/composables/gameStore';
-import { useCharacterStore } from '@/composables/characterStore';
+import { useConversationStore } from '@/composables/useConversationStore';
+import { useGameStore } from '@/composables/useGameStore';
+import { useCharacterStore } from '@/composables/useCharacterStore';
 
 export const useConversation = () => {
   const conversation = useConversationStore();

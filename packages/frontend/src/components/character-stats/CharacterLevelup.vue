@@ -136,7 +136,7 @@ import { characterServiceApi } from '../../services/characterServiceApi';
 import { gameEngine } from '../../services/gameEngine';
 import { useCharacterCreation } from '@/composables/useCharacterCreation';
 import { useRoute } from 'vue-router';
-import { useConversationStore } from '@/composables/conversationStore';
+import { useConversationStore } from '@/composables/useConversationStore';
 
 const router = useRouter();
 const route = useRoute();

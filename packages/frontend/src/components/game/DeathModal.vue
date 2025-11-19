@@ -51,7 +51,7 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { getCurrentLevel } from '../../utils/dndLevels';
-import { useGameStore } from '@/composables/gameStore';
+import { useGameStore } from '@/composables/useGameStore';
 
 interface Props {
   isOpen: boolean;

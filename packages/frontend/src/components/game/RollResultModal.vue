@@ -86,7 +86,7 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { useGameRolls } from '@/composables/useGameRolls';
-import { useGameStore } from '@/composables/gameStore';
+import { useGameStore } from '@/composables/useGameStore';
 
 interface Props {
   isOpen: boolean;

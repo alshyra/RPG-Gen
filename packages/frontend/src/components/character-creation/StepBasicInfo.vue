@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useWizardStore } from '@/composables/wizardStore';
+import { useWizardStore } from '@/composables/useWizardStore';
 
 const wizard = useWizardStore();
 

@@ -1,4 +1,4 @@
-import { useCharacterStore } from '@/composables/characterStore';
+import { useCharacterStore } from '@/composables/useCharacterStore';
 import { DnDRulesService } from '@/services/dndRulesService';
 import type { CharacterDto, GenderDto } from '@rpg/shared';
 import { storeToRefs } from 'pinia';

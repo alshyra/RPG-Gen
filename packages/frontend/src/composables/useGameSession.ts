@@ -1,11 +1,10 @@
 import { useRoute } from 'vue-router';
-import { useGameStore } from './gameStore';
-import { useUiStore } from '@/composables/uiStore';
-import { useConversationStore } from '@/composables/conversationStore';
-import { useCharacterStore } from '@/composables/characterStore';
+import { useGameStore } from './useGameStore';
+import { useConversationStore } from '@/composables/useConversationStore';
 import type { CharacterDto as CharacterDto } from '@rpg/shared';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { gameEngine } from '../services/gameEngine';
+import { useConversation } from './useConversation';
 
 const worldMap: Record<string, string> = {
   dnd: 'Dungeons & Dragons',
@@ -13,45 +12,26 @@ const worldMap: Record<string, string> = {
   cyberpunk: 'Cyberpunk',
 };
 
-const processInstructionInMessage = (instr: any, isLastMessage: boolean, gameStore: any): void => {
-  if (instr.roll) {
-    if (isLastMessage) gameStore.setPendingInstruction(instr);
-    const conversation = useConversationStore();
-    conversation.appendMessage(
-      'System',
-      `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`,
-    );
-  } else if (instr.xp) {
-    const conversation = useConversationStore();
-    const characterStore = useCharacterStore();
-    conversation.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-    // Centralized UI notification so other parts of the app (toast, status) can react
-    const uiStore = useUiStore();
-    uiStore.notify(`Gagné ${instr.xp} XP`);
-    characterStore.updateCharacterXp(instr.xp);
-  } else if (instr.hp) {
-    const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-    const conversation = useConversationStore();
-    const characterStore = useCharacterStore();
-    conversation.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-    const uiStore = useUiStore();
-    uiStore.notify(`HP ${hpChange}`);
-    characterStore.updateCharacterHp(instr.hp);
-  }
-};
-
-const processInitialMessages = (messages: any[], gameStore: any): any[] =>
+const processInitialMessages = (messages: any[], processInstructions: any): any[] =>
   messages.map((msg, i) => {
     const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
-    (msg as any).instructions?.forEach((instr: any) =>
-      processInstructionInMessage(instr, i === messages.length - 1, gameStore),
-    );
+    if ((msg as any).instructions && i === messages.length - 1) {
+      processInstructions((msg as any).instructions);
+    } else if ((msg as any).instructions) {
+      // For non-last messages, just process without setting pending instruction
+      (msg as any).instructions?.forEach((instr: any) => {
+        if (!instr.roll) {
+          processInstructions([instr]);
+        }
+      });
+    }
     return { role, text: msg.text };
   });
 
 export const useGameSession = () => {
   const route = useRoute();
   const gameStore = useGameStore();
+  const { processInstructions } = useConversation();
 
   const initializeGame = async (char: CharacterDto) => {
     try {
@@ -60,7 +40,7 @@ export const useGameSession = () => {
       const { messages: initialMessages } = await gameEngine.startGame(char.characterId);
       const conversation = useConversationStore();
       if (initialMessages?.length)
-        conversation.updateMessages(processInitialMessages(initialMessages, gameStore));
+        conversation.updateMessages(processInitialMessages(initialMessages, processInstructions));
     } catch (e: any) {
       const conversation = useConversationStore();
       conversation.appendMessage('Error', e?.response?.data?.error || e.message);
