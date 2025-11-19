@@ -104,7 +104,7 @@ const route = useRoute();
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
 
 // Use character creation composable
-const { currentCharacter , prepareForSave } = useCharacterCreation();
+const { currentCharacter, prepareForSave } = useCharacterCreation();
 
 // Small local adapters to match the older API the Wizard expects
 const character = currentCharacter;

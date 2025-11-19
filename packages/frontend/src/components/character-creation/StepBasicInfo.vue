@@ -2,7 +2,12 @@
 <template>
   <form @submit.prevent="onSubmit">
     <!-- Form fields for character creation -->
-    <UiButton variant="primary" type="submit">Suivant</UiButton>
+    <UiButton
+      variant="primary"
+      type="submit"
+    >
+      Suivant
+    </UiButton>
   </form>
 </template>
 

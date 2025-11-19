@@ -43,18 +43,16 @@ type ScoreKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 const gameStore = useGameStore();
 const character = computed(() => gameStore.session.character);
 
-const isScoreKeyTypeGuard = (key: string): key is ScoreKey => {
-  return ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].includes(key);
-};
+const isScoreKeyTypeGuard = (key: string): key is ScoreKey => ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].includes(key);
 
 const getAbilityScore = (key: AbilityKey): number => {
   const capitalized = key.charAt(0).toUpperCase() + key.slice(1);
   const scores = character.value?.scores;
   if (!isScoreKeyTypeGuard(capitalized)) return 10;
   return scores?.[capitalized] ?? 10;
-}
+};
 
-const getModifier = (score: number): number =>  Math.floor((score - 10) / 2);
+const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 
 </script>
 

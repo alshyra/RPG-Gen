@@ -1,14 +1,14 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-export const useWizardStore = defineStore("wizard", () => {
+export const useWizardStore = defineStore('wizard', () => {
   const currentStep = ref(1);
   const totalSteps = ref(5);
   const form = ref({
-    name: "",
-    gender: "",
-    race: "",
-    class: "",
+    name: '',
+    gender: '',
+    race: '',
+    class: '',
     abilities: {},
     skills: {},
     avatar: null,

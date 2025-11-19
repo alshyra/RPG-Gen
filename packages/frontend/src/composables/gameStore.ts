@@ -1,7 +1,11 @@
-import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import type { CharacterDto } from "@rpg/shared";
-import type { GameInstruction } from "@rpg/shared";
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import type { CharacterDto } from '@rpg/shared';
+import type { GameInstruction } from '@rpg/shared';
+import { characterServiceApi } from '@/services/characterServiceApi';
+import { gameEngine } from '@/services/gameEngine';
+import { useRouter } from 'vue-router';
+
 export interface GameSession {
   world: string;
   worldName: string;
@@ -20,7 +24,7 @@ const createActions = (s: any, p: any, pi: any, sr: any, dm: any) => ({
     p.value = text;
   },
   clearPlayerText: () => {
-    p.value = "";
+    p.value = '';
   },
   setPendingInstruction: (instruction: GameInstruction | null) => {
     pi.value = instruction;
@@ -38,22 +42,23 @@ const createActions = (s: any, p: any, pi: any, sr: any, dm: any) => ({
     dm.value = value;
   },
   reset: () => {
-    p.value = "";
+    p.value = '';
     pi.value = null;
     sr.value = false;
     dm.value = false;
   },
 });
 
-const gameStoreSession = ref<GameSession>({ world: "", worldName: "—", character: null });
-const gameStorePlayerText = ref("");
+const gameStoreSession = ref<GameSession>({ world: '', worldName: '—', character: null });
+const gameStorePlayerText = ref('');
 const gameStoreIsInitializing = ref(false);
 const gameStoreIsSending = ref(false);
 const gameStorePendingInstruction = ref<GameInstruction | null>(null);
 const gameStoreShowRollModal = ref(false);
 const gameStoreShowDeathModal = ref(false);
 
-export const useGameStore = defineStore("game", () => {
+export const useGameStore = defineStore('game', () => {
+  const router = useRouter();
   const charHpMax = computed(() => gameStoreSession.value.character?.hpMax || 12);
   const isDead = computed(() => (gameStoreSession.value.character?.hp || 0) === 0);
   const lastMessage = computed(() => null);
@@ -62,8 +67,20 @@ export const useGameStore = defineStore("game", () => {
     gameStorePlayerText,
     gameStorePendingInstruction,
     gameStoreShowRollModal,
-    gameStoreShowDeathModal
+    gameStoreShowDeathModal,
   );
+
+  const confirmDeath = async () => {
+    if (!gameStoreSession.value.character?.characterId) return;
+    await characterServiceApi.killCharacter(
+      gameStoreSession.value.character.characterId,
+      gameStoreSession.value.worldName,
+    );
+    gameEngine.endGame();
+    gameStoreShowDeathModal.value = false;
+    router.push('/');
+  };
+
   return {
     session: gameStoreSession,
     playerText: gameStorePlayerText,
@@ -75,6 +92,7 @@ export const useGameStore = defineStore("game", () => {
     charHpMax,
     isDead,
     lastMessage,
+    confirmDeath,
     ...actions,
   };
 });

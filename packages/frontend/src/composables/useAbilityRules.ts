@@ -42,14 +42,12 @@ export const applyLevelUpChange = (
   return { allowed: true, newAbilities: { ...abilities, [ability]: newValue } };
 };
 
-const useAbilityRules = () => {
-  return {
-    COST,
-    pointsUsed,
-    formatMod,
-    applyPointBuyChange,
-    applyLevelUpChange,
-  };
-}
+const useAbilityRules = () => ({
+  COST,
+  pointsUsed,
+  formatMod,
+  applyPointBuyChange,
+  applyLevelUpChange,
+});
 
 export default useAbilityRules;

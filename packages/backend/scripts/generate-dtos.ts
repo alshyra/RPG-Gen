@@ -2,14 +2,14 @@ import path from 'path';
 import fs from 'fs';
 import { Project, ClassDeclaration, SyntaxKind } from 'ts-morph';
 
-const repoRoot = path.resolve(__dirname, '..', '..');
-const schemasDir = path.join(repoRoot, 'backend', 'src', 'schemas');
+const repoRoot = path.resolve(__dirname, '..', '..', '..');
+const schemasDir = path.join(repoRoot, 'packages', 'backend', 'src', 'schemas');
 const outDir = path.join(repoRoot, 'packages', 'shared', 'src', 'generated');
 
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
 const project = new Project({
-  tsConfigFilePath: path.join(repoRoot, 'backend', 'tsconfig.json'),
+  tsConfigFilePath: path.join(repoRoot, 'packages', 'backend', 'tsconfig.json'),
 });
 
 // Add schema files

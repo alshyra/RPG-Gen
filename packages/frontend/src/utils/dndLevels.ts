@@ -24,16 +24,16 @@ export const DND_LEVELS = [
 type DndLevel = (typeof DND_LEVELS)[number];
 
 export const getCurrentLevel = (totalXp: number): DndLevel =>
-  [...DND_LEVELS].reverse().find((l) => totalXp >= l.totalXp) || DND_LEVELS[0];
+  [...DND_LEVELS].reverse().find(l => totalXp >= l.totalXp) || DND_LEVELS[0];
 
 export const getNextLevel = (totalXp: number): DndLevel | null => {
   const current = getCurrentLevel(totalXp);
-  const nextIndex = DND_LEVELS.findIndex((l) => l.level === current.level) + 1;
+  const nextIndex = DND_LEVELS.findIndex(l => l.level === current.level) + 1;
   return nextIndex < DND_LEVELS.length ? DND_LEVELS[nextIndex] : null;
 };
 
 export const getXpProgress = (
-  totalXp: number
+  totalXp: number,
 ): { current: number; next: number; percentage: number } => {
   const currentLevel = getCurrentLevel(totalXp);
   const nextLevel = getNextLevel(totalXp);
