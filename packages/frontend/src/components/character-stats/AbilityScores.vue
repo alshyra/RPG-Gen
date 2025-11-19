@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useGameStore } from '../../composables/useGameStore';
+import { useGame } from '../../composables/useGame';
 
 const abilities = {
   str: { short: 'STR', color: 'text-amber-400' },
@@ -40,7 +40,7 @@ const abilities = {
 type AbilityKey = keyof typeof abilities;
 type ScoreKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 
-const gameStore = useGameStore();
+const gameStore = useGame();
 const character = computed(() => gameStore.session.character);
 
 const isScoreKeyTypeGuard = (key: string): key is ScoreKey => ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].includes(key);

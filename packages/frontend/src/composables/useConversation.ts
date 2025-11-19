@@ -1,14 +1,14 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { gameEngine } from '@/services/gameEngine';
-import { useConversationStore } from '@/composables/useConversationStore';
-import { useGameStore } from '@/composables/useGameStore';
-import { useCharacterStore } from '@/composables/useCharacterStore';
+import { useConversationMessages } from '@/composables/useConversationMessages';
+import { useGame } from '@/composables/useGame';
+import { useCharacter } from '@/composables/useCharacter';
 
 export const useConversation = () => {
-  const conversation = useConversationStore();
-  const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
+  const conversation = useConversationMessages();
+  const gameStore = useGame();
+  const characterStore = useCharacter();
   const router = useRouter();
   const currentCharacterId = computed(() => router.currentRoute.value.params.characterId as string);
 

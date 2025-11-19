@@ -1,4 +1,4 @@
-import { useCharacterStore } from '@/composables/useCharacterStore';
+import { useCharacter } from '@/composables/useCharacter';
 import { DnDRulesService } from '@/services/dndRulesService';
 import type { CharacterDto, GenderDto } from '@rpg/shared';
 import { storeToRefs } from 'pinia';
@@ -40,7 +40,7 @@ export const isGenderTypeGuard = (value: unknown): value is GenderDto =>
 
 export const useCharacterCreation = () => {
   const route = useRoute();
-  const store = useCharacterStore();
+  const store = useCharacter();
   const { currentCharacter } = storeToRefs(store);
   const currentCharacterId = computed(() => {
     const id = route.params.characterId;

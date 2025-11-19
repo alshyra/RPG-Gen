@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useEventBus } from '@rpg/shared';
 
-export const useUiStore = defineStore('ui', () => {
+export const useUi = defineStore('ui', () => {
   const notifications = ref<string[]>([]);
 
   const pushNotification = (message: string) => {

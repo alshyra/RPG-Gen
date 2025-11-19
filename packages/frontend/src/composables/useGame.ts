@@ -4,13 +4,19 @@ import type { CharacterDto } from '@rpg/shared';
 import type { GameInstruction } from '@rpg/shared';
 import { characterServiceApi } from '@/services/characterServiceApi';
 import { gameEngine } from '@/services/gameEngine';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 export interface GameSession {
   world: string;
   worldName: string;
   character: CharacterDto | null;
 }
+
+const worldMap: Record<string, string> = {
+  dnd: 'Dungeons & Dragons',
+  vtm: 'Vampire: The Masquerade',
+  cyberpunk: 'Cyberpunk',
+};
 
 const createActions = (s: any, p: any, pi: any, sr: any, dm: any) => ({
   setWorld: (world: string, name: string) => {
@@ -57,8 +63,9 @@ const gameStorePendingInstruction = ref<GameInstruction | null>(null);
 const gameStoreShowRollModal = ref(false);
 const gameStoreShowDeathModal = ref(false);
 
-export const useGameStore = defineStore('game', () => {
+export const useGame = defineStore('game', () => {
   const router = useRouter();
+  const route = useRoute();
   const charHpMax = computed(() => gameStoreSession.value.character?.hpMax || 12);
   const isDead = computed(() => (gameStoreSession.value.character?.hp || 0) === 0);
   const lastMessage = computed(() => null);
@@ -81,6 +88,51 @@ export const useGameStore = defineStore('game', () => {
     router.push('/');
   };
 
+  // Merged from useGame
+  const processInitialMessages = (messages: any[], processInstructions: any): any[] =>
+    messages.map((msg, i) => {
+      const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
+      if ((msg as any).instructions && i === messages.length - 1) {
+        processInstructions((msg as any).instructions);
+      } else if ((msg as any).instructions) {
+        (msg as any).instructions?.forEach((instr: any) => {
+          if (!instr.roll) {
+            processInstructions([instr]);
+          }
+        });
+      }
+      return { role, text: msg.text };
+    });
+
+  const initializeGame = async (char: CharacterDto, processInstructions: any) => {
+    try {
+      actions.setCharacter(char);
+      if (isDead.value) actions.setDeathModalVisible(true);
+      const { messages: initialMessages } = await gameEngine.startGame(char.characterId);
+      // Import store dynamically to avoid circular dependency
+      const { useConversationMessages } = await import('./useConversationMessages');
+      const conversation = useConversationMessages();
+      if (initialMessages?.length)
+        conversation.updateMessages(processInitialMessages(initialMessages, processInstructions));
+    } catch (e: any) {
+      const { useConversationMessages } = await import('./useConversationMessages');
+      const conversation = useConversationMessages();
+      conversation.appendMessage('Error', e?.response?.data?.error || e.message);
+    }
+  };
+
+  const startGame = async (characterId: string, processInstructions: any): Promise<void> => {
+    const char = await characterServiceApi.getCharacterById(characterId);
+
+    actions.setWorld(
+      (route.params.world as string) || '',
+      worldMap[route.params.world as string] || (route.params.world as string),
+    );
+    actions.setInitializing(true);
+    await initializeGame(char, processInstructions);
+    actions.setInitializing(false);
+  };
+
   return {
     session: gameStoreSession,
     playerText: gameStorePlayerText,
@@ -93,6 +145,7 @@ export const useGameStore = defineStore('game', () => {
     isDead,
     lastMessage,
     confirmDeath,
+    startGame,
     ...actions,
   };
 });

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import type { CharacterDto } from '@rpg/shared';
 import { characterServiceApi } from '@/services/characterServiceApi';
 
-export const useCharacterStore = defineStore('character', () => {
+export const useCharacter = defineStore('character', () => {
   const currentCharacter = ref<Partial<CharacterDto>>({});
 
   const createCharacter = async (payload: Partial<CharacterDto>): Promise<CharacterDto> => {

@@ -1,9 +1,9 @@
-import { useCharacterStore } from '@/composables/useCharacterStore';
+import { useCharacter } from '@/composables/useCharacter';
 import { computed, ref, toRaw } from 'vue';
-import { useGameStore } from './useGameStore';
-import { useConversationStore } from '@/composables/useConversationStore';
+import { useGame } from './useGame';
+import { useConversationMessages } from '@/composables/useConversationMessages';
 import { useConversation } from '@/composables/useConversation';
-// useCharacterStore already imported from '@/composables/useCharacterStore'
+// useCharacter already imported from '@/composables/useCharacter'
 import { gameEngine } from '../services/gameEngine';
 import { getSkillBonus } from '../services/skillService';
 import { useRouter } from 'vue-router';
@@ -36,10 +36,10 @@ interface RollData {
 }
 
 export const useGameRolls = () => {
-  const gameStore = useGameStore();
-  const conversation = useConversationStore();
+  const gameStore = useGame();
+  const conversation = useConversationMessages();
   const { processInstructions } = useConversation();
-  const characterStore = useCharacterStore();
+  const characterStore = useCharacter();
   const router = useRouter();
 
   const currentCharacterId = computed(() => router.currentRoute.value.params.characterId as string);

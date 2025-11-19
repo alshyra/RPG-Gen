@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { GameMessage } from '@rpg/shared';
 
-export const useConversationStore = defineStore('conversation', () => {
+export const useConversationMessages = defineStore('conversation', () => {
   const messages = ref<GameMessage[]>([]);
   const lastMessage = computed(() => messages.value[messages.value.length - 1] || null);
   const actions = {

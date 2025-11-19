@@ -13,9 +13,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useWizardStore } from '@/composables/useWizardStore';
+import { useWizard } from '@/composables/useWizard';
 
-const wizard = useWizardStore();
+const wizard = useWizard();
 
 // initialize local inputs from store state so component is re-entrant
 const name = ref(wizard.form.name ?? '');

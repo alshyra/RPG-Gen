@@ -88,7 +88,7 @@ import { DnDRulesService } from '@/services/dndRulesService';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { DEFAULT_BASE_SCORES, useCharacterCreation } from '../../composables/useCharacterCreation';
-import { useWizardStore } from '@/composables/useWizardStore';
+import { useWizard } from '@/composables/useWizard';
 import UiButton from '../ui/UiButton.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -115,7 +115,7 @@ const selectedSkills = computed(() => (currentCharacter.value.skills || []).map(
 const isGeneratingAvatar = ref(false);
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
-const wizard = useWizardStore();
+const wizard = useWizard();
 const currentStep = computed({
   get: () => Math.min(wizard.currentStep - 1, steps.length - 1),
   set: (value: number) => wizard.setStep(value + 1),

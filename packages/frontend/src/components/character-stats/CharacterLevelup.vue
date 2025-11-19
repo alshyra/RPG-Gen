@@ -136,13 +136,13 @@ import { characterServiceApi } from '../../services/characterServiceApi';
 import { gameEngine } from '../../services/gameEngine';
 import { useCharacterCreation } from '@/composables/useCharacterCreation';
 import { useRoute } from 'vue-router';
-import { useConversationStore } from '@/composables/useConversationStore';
+import { useConversationMessages } from '@/composables/useConversationMessages';
 
 const router = useRouter();
 const route = useRoute();
 const { currentCharacter } = useCharacterCreation();
 
-const conversation = useConversationStore();
+const conversation = useConversationMessages();
 const isPending = ref(false);
 
 const character = computed(() => currentCharacter.value || {});

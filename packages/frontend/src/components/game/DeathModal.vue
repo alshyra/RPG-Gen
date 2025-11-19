@@ -51,7 +51,7 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { getCurrentLevel } from '../../utils/dndLevels';
-import { useGameStore } from '@/composables/useGameStore';
+import { useGame } from '@/composables/useGame';
 
 interface Props {
   isOpen: boolean;
@@ -62,7 +62,7 @@ withDefaults(defineProps<Props>(), {
   character: undefined,
 });
 
-const gameStore = useGameStore();
+const gameStore = useGame();
 
 const characterName = computed(() => gameStore.session.character?.name || 'Unknown');
 const characterClass = computed(() => {

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-export const useWizardStore = defineStore('wizard', () => {
+export const useWizard = defineStore('wizard', () => {
   const currentStep = ref(1);
   const totalSteps = ref(5);
   const form = ref({

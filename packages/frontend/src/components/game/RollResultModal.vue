@@ -86,7 +86,7 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { useGameRolls } from '@/composables/useGameRolls';
-import { useGameStore } from '@/composables/useGameStore';
+import { useGame } from '@/composables/useGame';
 
 interface Props {
   isOpen: boolean;
@@ -99,7 +99,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const gameStore = useGameStore();
+const gameStore = useGame();
 const { confirmRoll, rerollDice } = useGameRolls();
 
 const firstRoll = computed(() => props.rolls[0] || 0);
