@@ -31,17 +31,21 @@
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { useCharacterCreation } from '@/composables/useCharacterCreation';
+import type { SkillDto } from '@rpg/shared';
+// receive `characterStore` from the Wizard to avoid importing neighbor composables
 import { computed } from 'vue';
 import { DnDRulesService } from '@/services/dndRulesService';
 
-const { currentCharacter } = useCharacterCreation();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const props = defineProps<{ characterStore: any }>();
+const { currentCharacter } = useCharacterCreation(props.characterStore);
 
 const toggleSkill = (skill: string) => {
-  const skills = currentCharacter.value.skills || [];
+  const skills = (currentCharacter.value.skills || []) as SkillDto[];
   const isSelected = skills.some(s => s.name === skill);
   let newSkills;
   if (isSelected) {
-    newSkills = skills.filter(s => s.name !== skill);
+    newSkills = skills.filter((s: SkillDto) => s.name !== skill);
   } else {
     newSkills = [...skills, { name: skill, proficient: true, modifier: 0 }];
   }
@@ -51,5 +55,7 @@ const toggleSkill = (skill: string) => {
 const primaryClass = computed(() => currentCharacter.value.classes?.[0]?.name || '');
 const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
-const selectedSkills = computed(() => (currentCharacter.value.skills || []).map(s => s.name));
+const selectedSkills = computed(() =>
+  ((currentCharacter.value.skills || []) as SkillDto[]).map((skill: SkillDto) => skill.name),
+);
 </script>

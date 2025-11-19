@@ -187,7 +187,6 @@ export class DnDRulesService {
     className: string,
     raceModifiers: RaceModifiers,
     raceInfo: any,
-    worldInfo?: { world?: string; worldId?: string },
     selectedSkills?: string[],
   ): any {
     // Apply racial bonuses
@@ -216,8 +215,6 @@ export class DnDRulesService {
       totalXp: 0,
       proficiency,
       skills,
-      ...(worldInfo?.world && { world: worldInfo.world }),
-      ...(worldInfo?.worldId && { worldId: worldInfo.worldId }),
     };
   }
 }

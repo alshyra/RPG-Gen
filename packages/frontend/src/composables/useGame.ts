@@ -104,24 +104,34 @@ export const useGame = defineStore('game', () => {
       return { role, text: msg.text };
     });
 
-  const initializeGame = async (char: CharacterDto, processInstructions: any) => {
+  const initializeGame = async (
+    char: CharacterDto,
+    options?: {
+      processInstructions?: (instructions?: any[]) => void;
+      updateMessages?: (msgs: any[]) => void;
+      appendMessage?: (role: string, text: string) => void;
+    },
+  ) => {
     try {
       actions.setCharacter(char);
       if (isDead.value) actions.setDeathModalVisible(true);
       const { messages: initialMessages } = await gameEngine.startGame(char.characterId);
-      // Import store dynamically to avoid circular dependency
-      const { useConversationMessages } = await import('./useConversationMessages');
-      const conversation = useConversationMessages();
+      // Update messages using the injected callback to avoid importing neighboring composables
       if (initialMessages?.length)
-        conversation.updateMessages(processInitialMessages(initialMessages, processInstructions));
+        options?.updateMessages?.(processInitialMessages(initialMessages, options?.processInstructions));
     } catch (e: any) {
-      const { useConversationMessages } = await import('./useConversationMessages');
-      const conversation = useConversationMessages();
-      conversation.appendMessage('Error', e?.response?.data?.error || e.message);
+      options?.appendMessage?.('Error', e?.response?.data?.error || e.message);
     }
   };
 
-  const startGame = async (characterId: string, processInstructions: any): Promise<void> => {
+  const startGame = async (
+    characterId: string,
+    options?: {
+      processInstructions?: (instructions?: any[]) => void;
+      updateMessages?: (msgs: any[]) => void;
+      appendMessage?: (role: string, text: string) => void;
+    },
+  ): Promise<void> => {
     const char = await characterServiceApi.getCharacterById(characterId);
 
     actions.setWorld(
@@ -129,7 +139,7 @@ export const useGame = defineStore('game', () => {
       worldMap[route.params.world as string] || (route.params.world as string),
     );
     actions.setInitializing(true);
-    await initializeGame(char, processInstructions);
+    await initializeGame(char, options);
     actions.setInitializing(false);
   };
 

@@ -1,11 +1,12 @@
 <template>
   <div>
     <div class="grid grid-cols-4 gap-2">
-      <button
+      <div
         v-for="allowedRace in allowedRaces"
         :key="allowedRace.id"
-        :class="['p-2 rounded border', selected?.id===allowedRace.id ? 'border-indigo-500 bg-indigo-600/20' : 'border-slate-700']"
-        @click.prevent="select(allowedRace)"
+        variant="primary"
+        :class="['cursor-pointer p-2 rounded border', selected?.id === allowedRace.id ? 'border-indigo-500 bg-indigo-600/20' : 'border-slate-700']"
+        @click.prevent="onRaceUpdate(allowedRace)"
       >
         <div class="font-medium">
           {{ allowedRace.name }}
@@ -13,39 +14,35 @@
         <div class="text-xs text-slate-400">
           {{ summaryMods(allowedRace.mods) }}
         </div>
-      </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-const props = defineProps<{ allowedRaces: Array<any> }>();
-const emit = defineEmits<{
-  (e: 'update:race', val: any): void;
-}>();
+import { ALLOWED_RACES, useCharacterCreation } from '@/composables/useCharacterCreation';
+import { RaceDto } from '@rpg/shared';
+import { computed, ref } from 'vue';
 
-const selected = ref<any>(null);
+const allowedRaces = computed(() => ALLOWED_RACES);
+// receive store from parent wizard
+const props = defineProps<{ characterStore: any }>();
+const { currentCharacter } = useCharacterCreation(props.characterStore);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const updateCharacter = (props.characterStore as any).updateCharacter as (p: any) => void;
+const selected = ref<RaceDto>();
 
-const select = (r: any) => {
-  selected.value = r;
-  emit('update:race', r);
-};
-
-const summaryMods = (mods: any) => {
+const summaryMods = (mods: RaceDto['mods']) => {
   try {
-    return Object.entries(mods).map(([k, v]) => `${k}${(v as number) >= 0 ? '+' + (v as number) : v}`).join(' ');
+    return Object
+      .entries(mods)
+      .map(([attributeName, statAdjustment]) => `${attributeName}${(statAdjustment) >= 0 ? '+' + (statAdjustment) : statAdjustment}`)
+      .join(' ');
   } catch { return ''; }
 };
 
-watch(() => props.allowedRaces, (n) => {
-  if (n && n.length === 1) select(n[0]);
-}, {
-  immediate: true,
-});
-
-const allowedRaces = computed(() => props.allowedRaces || []);
+const onRaceUpdate = (race: RaceDto) => {
+  selected.value = race;
+  updateCharacter({ characterId: currentCharacter.characterId, race });
+};
 </script>
-
-<style scoped>
-</style>

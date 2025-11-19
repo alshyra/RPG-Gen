@@ -3,11 +3,12 @@ import { ref } from 'vue';
 import type { CharacterDto } from '@rpg/shared';
 import { characterServiceApi } from '@/services/characterServiceApi';
 
+/* eslint-disable max-statements */
 export const useCharacter = defineStore('character', () => {
   const currentCharacter = ref<Partial<CharacterDto>>({});
 
-  const createCharacter = async (payload: Partial<CharacterDto>): Promise<CharacterDto> => {
-    const created = await characterServiceApi.createCharacter(payload);
+  const createCharacter = async (world: 'dnd'): Promise<CharacterDto> => {
+    const created = await characterServiceApi.createCharacter({ world });
     currentCharacter.value = created;
     return created;
   };
@@ -16,12 +17,6 @@ export const useCharacter = defineStore('character', () => {
     if (!payload.characterId) throw new Error('Character id required to update');
     // call API and update local state
     await characterServiceApi.updateCharacter(payload as CharacterDto);
-    if (currentCharacter.value?.characterId === payload.characterId) {
-      currentCharacter.value = {
-        ...currentCharacter.value,
-        ...(payload as Partial<CharacterDto>),
-      } as Partial<CharacterDto>;
-    }
   };
 
   const fetchCharacterById = async (characterId: string): Promise<CharacterDto> => {

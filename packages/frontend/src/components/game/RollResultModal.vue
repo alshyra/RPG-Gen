@@ -85,8 +85,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
-import { useGameRolls } from '@/composables/useGameRolls';
-import { useGame } from '@/composables/useGame';
 
 interface Props {
   isOpen: boolean;
@@ -97,18 +95,32 @@ interface Props {
   total: number;
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props & {
+  onConfirm?: () => Promise<void> | void;
+  onReroll?: () => Promise<void> | void;
+  onClose?: () => void;
+}>();
 
-const gameStore = useGame();
-const { confirmRoll, rerollDice } = useGameRolls();
+// close handler injected from parent
+// Prefer parent-injected handlers to avoid importing neighbor composables.
+let confirmRoll: (() => Promise<void>) | undefined;
+let rerollDice: (() => Promise<void>) | undefined;
+if (props.onConfirm && props.onReroll) {
+  confirmRoll = async () => await props.onConfirm?.();
+  rerollDice = async () => await props.onReroll?.();
+} else {
+  // no parent handlers provided — component should not functionally trigger rolls
+  confirmRoll = async () => {};
+  rerollDice = async () => {};
+}
 
 const firstRoll = computed(() => props.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
-const confirm = () => confirmRoll();
-const reroll = () => rerollDice();
-const close = () => gameStore.setRollModalVisible(false);
+const confirm = () => confirmRoll?.();
+const reroll = () => rerollDice?.();
+const close = () => props.onClose?.();
 </script>
 
 <style scoped></style>

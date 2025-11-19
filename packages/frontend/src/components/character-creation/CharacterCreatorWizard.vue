@@ -26,17 +26,29 @@
     </div>
 
     <!-- Steps -->
-    <StepBasicInfo v-if="currentStep === 0" />
+    <StepBasicInfo
+      v-if="currentStep === 0"
+      :character-store="characterStore"
+    />
 
-    <StepRaceClass v-if="currentStep === 1" />
+    <StepRaceClass
+      v-if="currentStep === 1"
+      :character-store="characterStore"
+    />
 
-    <StepAbilityScores v-if="currentStep === 2" />
+    <StepAbilityScores
+      v-if="currentStep === 2"
+      :character-store="characterStore"
+    />
 
-    <StepSkills v-if="currentStep === 3" />
+    <StepSkills
+      v-if="currentStep === 3"
+      :character-store="characterStore"
+    />
 
     <StepAvatar
       v-if="currentStep === 4"
-      :is-generating="isGeneratingAvatar"
+      :character-store="characterStore"
     />
 
     <!-- Navigation buttons -->
@@ -44,7 +56,7 @@
       <UiButton
         variant="ghost"
         :disabled="currentStep === 0"
-        @click="previousStep"
+        @click="prev"
       >
         Retour
       </UiButton>
@@ -52,7 +64,7 @@
         v-if="currentStep < steps.length - 1"
         variant="primary"
         :disabled="!canProceed"
-        @click="nextStep"
+        @click="next"
       >
         Suivant
       </UiButton>
@@ -70,24 +82,15 @@
       <summary class="cursor-pointer p-3 lg:p-4 bg-slate-900 rounded border border-slate-700 hover:bg-slate-800 transition-colors">
         <span class="font-bold">Aperçu du personnage</span>
       </summary>
-      <CharacterPreview
-        :character="character"
-        :gender="gender"
-        :primary-class="primaryClass"
-        :base-scores="baseScores"
-        :selected-skills="selectedSkills"
-        :current-step="currentStep"
-      />
+      <CharacterPreview />
     </details>
   </div>
 </template>
 
 <script setup lang="ts">
 import { DnDRulesService } from '@/services/dndRulesService';
-// AbilityScoresDto unused in the wizard; individual steps use it instead
-import { computed, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { DEFAULT_BASE_SCORES, useCharacterCreation } from '../../composables/useCharacterCreation';
+import { computed } from 'vue';
+import { useCharacter } from '@/composables/useCharacter';
 import { useWizard } from '@/composables/useWizard';
 import UiButton from '../ui/UiButton.vue';
 import CharacterPreview from './CharacterPreview.vue';
@@ -96,47 +99,28 @@ import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
 import StepSkills from './steps/StepSkills.vue';
-
-const props = defineProps<{ world?: string; worldId?: string }>();
-const router = useRouter();
-const route = useRoute();
+import { storeToRefs } from 'pinia';
 
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
 
 // Use character creation composable
-const { currentCharacter, prepareForSave } = useCharacterCreation();
+const characterStore = useCharacter();
+const { currentCharacter } = storeToRefs(characterStore);
 
-// Small local adapters to match the older API the Wizard expects
-const character = currentCharacter;
-const primaryClass = computed(() => currentCharacter.value.classes?.[0]?.name || '');
-const baseScores = computed(() => currentCharacter.value.scores || DEFAULT_BASE_SCORES);
-const gender = computed(() => (currentCharacter.value.gender || ''));
 const selectedSkills = computed(() => (currentCharacter.value.skills || []).map(s => s.name));
-const isGeneratingAvatar = ref(false);
-const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
+const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(currentCharacter.value.classes?.[0]?.name || ''));
 
-const wizard = useWizard();
-const currentStep = computed({
-  get: () => Math.min(wizard.currentStep - 1, steps.length - 1),
-  set: (value: number) => wizard.setStep(value + 1),
-});
+const wizardstore = useWizard();
+const { currentStep } = storeToRefs(wizardstore);
 
-const routeStepInit = parseInt(route.params.step as string, 10);
-if (!isNaN(routeStepInit) && routeStepInit >= 1 && routeStepInit <= steps.length) {
-  wizard.setStep(routeStepInit);
-}
-
-watch(
-  () => wizard.currentStep,
-  (val: number) => router.push({ name: 'character-step', params: { step: val } }),
-);
+const { next, prev } = wizardstore;
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return character.value.name?.trim();
+      return currentCharacter.value.name?.trim();
     case 1:
-      return character.value.race && primaryClass.value;
+      return currentCharacter.value.race && currentCharacter.value.classes?.[0];
     case 2:
       return true;
     case 3:
@@ -147,18 +131,7 @@ const canProceed = computed(() => {
       return false;
   }
 });
-
-const nextStep = async () => {
-  if (wizard.currentStep >= steps.length) return;
-  wizard.next();
-};
-
-const previousStep = () => {
-  if (wizard.currentStep <= 1) return;
-  wizard.prev();
-};
-
-const finishCreation = async () =>
-  prepareForSave(props.world, props.worldId);
+const finishCreation = () =>
+  characterStore.updateCharacter({ characterId: currentCharacter.value.characterId, state: 'created' });
 
 </script>

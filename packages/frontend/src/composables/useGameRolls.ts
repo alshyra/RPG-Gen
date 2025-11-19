@@ -1,9 +1,7 @@
-import { useCharacter } from '@/composables/useCharacter';
+// NOTE: avoid importing neighboring composables inside this composable; inject them
+// from the caller using the options parameter.
 import { computed, ref, toRaw } from 'vue';
-import { useGame } from './useGame';
-import { useConversationMessages } from '@/composables/useConversationMessages';
-import { useConversation } from '@/composables/useConversation';
-// useCharacter already imported from '@/composables/useCharacter'
+// No import from other composables: require caller to pass in stores via options
 import { gameEngine } from '../services/gameEngine';
 import { getSkillBonus } from '../services/skillService';
 import { useRouter } from 'vue-router';
@@ -35,11 +33,18 @@ interface RollData {
   skillName: string;
 }
 
-export const useGameRolls = () => {
-  const gameStore = useGame();
-  const conversation = useConversationMessages();
-  const { processInstructions } = useConversation();
-  const characterStore = useCharacter();
+export const useGameRolls = (options?: {
+  appendMessage?: (role: string, text: string) => void;
+  processInstructions?: (instructions?: any[]) => void;
+  gameStore?: any;
+  characterStore?: any;
+}) => {
+  const gameStore = options?.gameStore;
+  if (!gameStore) throw new Error('useGameRolls requires a gameStore to be passed in options');
+  const appendMessage = options?.appendMessage ?? (() => {});
+  const processInstructions = options?.processInstructions ?? (() => {});
+  const characterStore = options?.characterStore;
+  if (!characterStore) throw new Error('useGameRolls requires a characterStore to be passed in options');
   const router = useRouter();
 
   const currentCharacterId = computed(() => router.currentRoute.value.params.characterId as string);
@@ -74,26 +79,26 @@ export const useGameRolls = () => {
 
   const handleAdditionalRoll = (instr: any): void => {
     gameStore.setPendingInstruction(instr);
-    conversation.appendMessage(
+    appendMessage(
       'System',
       `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`,
     );
   };
 
   const handleAdditionalXp = (instr: any): void => {
-    conversation.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+    appendMessage('System', `✨ Gained ${instr.xp} XP`);
     characterStore.updateCharacterXp(instr.xp);
   };
 
   const handleAdditionalHp = (instr: any): void => {
     const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-    conversation.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+    appendMessage('System', `❤️ HP changed: ${hpChange}`);
     characterStore.updateCharacterHp(instr.hp);
     if (gameStore.isDead) gameStore.setDeathModalVisible(true);
   };
 
   const handleRollResponse = async (response: any): Promise<void> => {
-    conversation.appendMessage('GM', response.text);
+    appendMessage('GM', response.text);
     gameStore.setPendingInstruction(null);
     gameStore.setRollModalVisible(false);
     response.instructions?.forEach((instr: any) => {
@@ -122,14 +127,14 @@ export const useGameRolls = () => {
     const { rolls, bonus, total, skillName } = rollData.value;
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
-    conversation.appendMessage(
+    appendMessage(
       'System',
       buildRollMessage(diceValue, bonus, skillName, total, criticalNote),
     );
     try {
       await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
     } catch (e: any) {
-      conversation.appendMessage('Error', 'Failed to send roll result: ' + e.message);
+      appendMessage('Error', 'Failed to send roll result: ' + e.message);
       gameStore.setRollModalVisible(false);
     }
   };

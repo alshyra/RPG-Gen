@@ -7,10 +7,15 @@
       Répartissez vos scores parmi les 6 capacités
     </p>
 
-    <AbilityScorePicker :proficiency="2" />
+    <AbilityScorePicker
+      :proficiency="2"
+      :character-store="props.characterStore"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import AbilityScorePicker from '../../character-stats/AbilityScorePicker.vue';
+const props = defineProps<{ characterStore: any }>();
+
 </script>

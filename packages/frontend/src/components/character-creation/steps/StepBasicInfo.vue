@@ -31,7 +31,8 @@ import UiInputText from '@/components/ui/UiInputText.vue';
 import UiButtonToggle from '@/components/ui/UiButtonToggle.vue';
 import { GENDERS, isGenderTypeGuard, useCharacterCreation } from '@/composables/useCharacterCreation';
 
-const { currentCharacter } = useCharacterCreation();
+const props = defineProps<{ characterStore: any }>();
+const { currentCharacter } = useCharacterCreation(props.characterStore);
 
 const updateGender = (newGender: unknown) => {
   if (!isGenderTypeGuard(newGender)) return;

@@ -135,14 +135,15 @@ import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { characterServiceApi } from '../../services/characterServiceApi';
 import { gameEngine } from '../../services/gameEngine';
 import { useCharacterCreation } from '@/composables/useCharacterCreation';
+import { useCharacter } from '@/composables/useCharacter';
 import { useRoute } from 'vue-router';
-import { useConversationMessages } from '@/composables/useConversationMessages';
+import { useConversation } from '@/composables/useConversation';
 
 const router = useRouter();
 const route = useRoute();
-const { currentCharacter } = useCharacterCreation();
+const { currentCharacter } = useCharacterCreation(useCharacter());
 
-const conversation = useConversationMessages();
+const conversation = useConversation();
 const isPending = ref(false);
 
 const character = computed(() => currentCharacter.value || {});

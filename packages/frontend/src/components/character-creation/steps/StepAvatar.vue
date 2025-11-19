@@ -13,45 +13,30 @@
         :model-value="currentCharacter?.physicalDescription"
         placeholder="Ex: Grand et musclé, cheveux noirs long, cicatrice sur la joue gauche..."
         :rows="4"
-        @update:model-value="updatePhysicalDescription"
+        @update:model-value="debouncedPhysicalDescription"
       />
-    </div>
-
-    <div
-      v-if="isGenerating"
-      class="mt-4 text-center text-slate-400"
-    >
-      <div class="animate-pulse">
-        Génération de l'avatar en cours...
-      </div>
-    </div>
-
-    <div
-      v-if="currentCharacter?.portrait"
-      class="mt-4"
-    >
-      <img
-        :src="currentCharacter?.portrait"
-        alt="Generated Avatar"
-        class="w-48 h-48 rounded border border-slate-600 object-cover"
-      >
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
-import { useCharacterCreation } from '@/composables/useCharacterCreation';
+import { useCharacter } from '@/composables/useCharacter';
+import _ from 'lodash';
+import { storeToRefs } from 'pinia';
 
-interface Props {
-  isGenerating: boolean;
-}
-
-const { isGenerating } = defineProps<Props>();
-
-const { currentCharacter } = useCharacterCreation();
+const characterStore = useCharacter();
+const { currentCharacter } = storeToRefs(characterStore);
 
 const updatePhysicalDescription = (val: string) => {
-  currentCharacter.value = { ...currentCharacter.value, physicalDescription: val };
+  currentCharacter.value.physicalDescription = val;
+  const currentCharacterId = currentCharacter.value?.characterId;
+
+  characterStore.updateCharacter({
+    characterId: currentCharacterId,
+    physicalDescription: val,
+  });
 };
+
+const debouncedPhysicalDescription = _.debounce(updatePhysicalDescription, 700);
 </script>

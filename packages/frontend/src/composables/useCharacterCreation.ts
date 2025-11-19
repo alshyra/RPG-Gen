@@ -1,11 +1,12 @@
-import { useCharacter } from '@/composables/useCharacter';
-import { DnDRulesService } from '@/services/dndRulesService';
-import type { CharacterDto, GenderDto } from '@rpg/shared';
+// No direct dependency on neighboring composable `useCharacter`.
+// `useCharacterCreation` now accepts a `characterStore` as an argument to avoid
+// composable-to-composable imports.
+import type { CharacterDto, GenderDto, RaceDto } from '@rpg/shared';
 import { storeToRefs } from 'pinia';
 import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-export const ALLOWED_RACES = [
+export const ALLOWED_RACES: readonly RaceDto[] = [
   { id: 'human', name: 'Humain', mods: { Str: 1, Dex: 1, Con: 1, Int: 1, Wis: 1, Cha: 1 } },
   { id: 'dwarf', name: 'Nain', mods: { Con: 2 } },
   { id: 'elf', name: 'Elfe', mods: { Dex: 2 } },
@@ -15,7 +16,7 @@ export const ALLOWED_RACES = [
   { id: 'half-orc', name: 'Demi-orc', mods: { Str: 2, Con: 1 } },
   { id: 'tiefling', name: 'Tieffelin', mods: { Cha: 2, Int: 1 } },
   { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } },
-] as const;
+];
 
 export const CLASSES_LIST = [
   'Barbarian',
@@ -38,9 +39,9 @@ export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10
 export const isGenderTypeGuard = (value: unknown): value is GenderDto =>
   value === 'male' || value === 'female';
 
-export const useCharacterCreation = () => {
+export const useCharacterCreation = (characterStore?: any) => {
   const route = useRoute();
-  const store = useCharacter();
+  const store = characterStore;
   const { currentCharacter } = storeToRefs(store);
   const currentCharacterId = computed(() => {
     const id = route.params.characterId;
@@ -53,31 +54,6 @@ export const useCharacterCreation = () => {
     await store.updateCharacter(characterData);
   const getCharacterById = async (characterId: string) =>
     await store.fetchCharacterById(characterId);
-
-  // Prepare character for saving by computing derived fields (hp, prof, skills)
-  const prepareForSave = (world?: string, worldId?: string) => {
-    const name = currentCharacter.value.name || '';
-    const baseScores = (currentCharacter.value.scores || DEFAULT_BASE_SCORES) as Record<
-      string,
-      number
-    >;
-    const className = currentCharacter.value.classes?.[0]?.name || 'Fighter';
-    const raceMods = currentCharacter.value.race?.mods || {};
-    const raceInfo = currentCharacter.value.race || undefined;
-    const worldInfo = { world, worldId };
-    const skillsList = (currentCharacter.value.skills || []).map(s => s.name);
-
-    const newChar = DnDRulesService.prepareNewCharacter(
-      name,
-      baseScores,
-      className,
-      raceMods,
-      raceInfo,
-      worldInfo,
-      skillsList,
-    );
-    currentCharacter.value = { ...currentCharacter.value, ...newChar } as any;
-  };
 
   // Auto-fetch when route ID changes
   watch(
@@ -94,7 +70,6 @@ export const useCharacterCreation = () => {
     createCharacter,
     updateCharacter,
     getCharacterById,
-    prepareForSave,
     currentCharacterId,
     currentCharacter,
   };

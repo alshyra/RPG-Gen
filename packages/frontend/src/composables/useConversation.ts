@@ -1,89 +1,38 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { gameEngine } from '@/services/gameEngine';
-import { useConversationMessages } from '@/composables/useConversationMessages';
-import { useGame } from '@/composables/useGame';
-import { useCharacter } from '@/composables/useCharacter';
+import { defineStore } from 'pinia';
+// gameEngine is used in services instead of directly in the composable
+import type { GameMessage } from '@rpg/shared';
+import { processGameInstructions } from '@/services/instructions.service';
+import { sendGameMessage } from '@/services/game-message.service';
 
-export const useConversation = () => {
-  const conversation = useConversationMessages();
-  const gameStore = useGame();
-  const characterStore = useCharacter();
+export const useConversation = defineStore('conversation', () => {
+  // composable-to-composable imports removed: heavy logic (store updates) happen
+  // in services, which import the stores. This keeps composables decoupled.
   const router = useRouter();
   const currentCharacterId = computed(() => router.currentRoute.value.params.characterId as string);
 
-  const processInstructions = (instructions: any[] = []) => {
-    instructions.forEach((instr: any) => {
-      if (instr.roll) {
-        gameStore.setPendingInstruction(instr);
-        conversation.appendMessage(
-          'System',
-          `🎲 Roll needed: ${instr.roll.dices}${
-            instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''
-          }`,
-        );
-      } else if (instr.xp) {
-        conversation.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-        characterStore.updateCharacterXp(instr.xp);
-      } else if (instr.hp) {
-        const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-        conversation.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-        characterStore.updateCharacterHp(instr.hp);
-        if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      } else if (instr.spell) {
-        if (instr.spell.action === 'learn') {
-          conversation.appendMessage(
-            'System',
-            `📖 Learned spell: ${instr.spell.name} (Level ${instr.spell.level})`,
-          );
-          characterStore.learnSpell(instr.spell);
-        } else if (instr.spell.action === 'cast') {
-          conversation.appendMessage('System', `✨ Cast spell: ${instr.spell.name}`);
-        } else if (instr.spell.action === 'forget') {
-          conversation.appendMessage('System', `🚫 Forgot spell: ${instr.spell.name}`);
-          characterStore.forgetSpell(instr.spell.name);
-        }
-      } else if (instr.inventory) {
-        if (instr.inventory.action === 'add') {
-          const qty = instr.inventory.quantity || 1;
-          conversation.appendMessage(
-            'System',
-            `🎒 Added to inventory: ${instr.inventory.name} (x${qty})`,
-          );
-          characterStore.addInventoryItem(instr.inventory);
-        } else if (instr.inventory.action === 'remove') {
-          const qty = instr.inventory.quantity || 1;
-          conversation.appendMessage(
-            'System',
-            `🗑️ Removed from inventory: ${instr.inventory.name} (x${qty})`,
-          );
-          characterStore.removeInventoryItem(instr.inventory.name, qty);
-        } else if (instr.inventory.action === 'use') {
-          conversation.appendMessage('System', `⚡ Used item: ${instr.inventory.name}`);
-          characterStore.useInventoryItem(instr.inventory.name);
-        }
-      }
-    });
-  };
+  const messages = ref<GameMessage[]>([]);
+  const lastMessage = computed(() => messages.value[messages.value.length - 1] || null);
+  const appendMessage = (role: string, text: string) => messages.value.push({ role, text });
+  const updateMessages = (newMessages: GameMessage[]) => (messages.value = newMessages);
+  const clearMessages = () => (messages.value = []);
+  const popLastMessage = () => messages.value.pop();
+
+  const processInstructions = (instructions: any[] = []) => processGameInstructions(instructions, appendMessage);
 
   const sendMessage = async (): Promise<void> => {
-    if (!gameStore.playerText) return;
-    conversation.appendMessage('Player', gameStore.playerText);
-    conversation.appendMessage('System', '...thinking...');
-    gameStore.setSending(true);
-    try {
-      const response = await gameEngine.sendMessage(currentCharacterId.value, gameStore.playerText);
-      gameStore.clearPlayerText();
-      conversation.popLastMessage();
-      conversation.appendMessage('GM', response.text);
-      processInstructions(response.instructions);
-    } catch (e: any) {
-      conversation.popLastMessage();
-      conversation.appendMessage('Error', e?.message || 'Failed to send message');
-    } finally {
-      gameStore.setSending(false);
-    }
+    await sendGameMessage(currentCharacterId.value, appendMessage, processInstructions);
   };
 
-  return { sendMessage, processInstructions };
-};
+  return {
+    messages,
+    lastMessage,
+    appendMessage,
+    updateMessages,
+    clearMessages,
+    popLastMessage,
+    sendMessage,
+    processInstructions,
+  };
+});

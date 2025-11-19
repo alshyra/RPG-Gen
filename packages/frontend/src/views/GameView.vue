@@ -116,6 +116,9 @@
           :rolls="rollData.rolls"
           :bonus="rollData.bonus"
           :total="rollData.total"
+          :on-confirm="confirmRoll"
+          :on-reroll="rerollDice"
+          :on-close="() => gameStore.setRollModalVisible(false)"
         />
       </aside>
     </div>
@@ -133,6 +136,9 @@
           :rolls="rollData.rolls"
           :bonus="rollData.bonus"
           :total="rollData.total"
+          :on-confirm="confirmRoll"
+          :on-reroll="rerollDice"
+          :on-close="() => gameStore.setRollModalVisible(false)"
         />
       </div>
     </div>
@@ -155,10 +161,11 @@ import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
-import { useConversationMessages } from '../composables/useConversationMessages';
-import { useEventBus } from '@rpg/shared';
 import { useConversation } from '../composables/useConversation';
+import { useEventBus } from '@rpg/shared';
+/* removed duplicate */
 import { useGameRolls } from '../composables/useGameRolls';
+import { useCharacter } from '@/composables/useCharacter';
 import { useGame } from '../composables/useGame';
 
 // State
@@ -168,9 +175,15 @@ const isSidebarOpen = ref(false);
 
 // Composables
 const { startGame } = gameStore;
-const conversation = useConversationMessages();
-const { sendMessage, processInstructions } = useConversation();
-const { rollData, onDiceRolled } = useGameRolls();
+const conversation = useConversation();
+const { sendMessage, processInstructions } = conversation;
+const characterStore = useCharacter();
+const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls({
+  appendMessage: conversation.appendMessage,
+  processInstructions: conversation.processInstructions,
+  gameStore,
+  characterStore,
+});
 
 // DOM refs
 const messagesPane = ref<any>(null);
@@ -184,7 +197,11 @@ const toggleSidebar = () => {
 onMounted(async () => {
   try {
     const characterId = router.currentRoute.value.params.characterId as string;
-    await startGame(characterId, processInstructions);
+    await startGame(characterId, {
+      processInstructions,
+      updateMessages: conversation.updateMessages,
+      appendMessage: conversation.appendMessage,
+    });
   } catch (e) {
     conversation.appendMessage('Error', String(e));
   }

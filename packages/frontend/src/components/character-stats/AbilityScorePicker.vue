@@ -57,13 +57,16 @@ const props = defineProps<{
   mode?: 'edit' | 'levelup';
   levelUpBudget?: number;
   initialScores?: Record<string, number>;
+  characterStore?: any;
 }>();
 
 const abilities = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'];
 const allocationMethod = ref<'pointbuy' | 'standard' | 'manual'>('pointbuy');
 
 // ability scores assigned to the character - keep synced with the composable
-const { currentCharacter } = useCharacterCreation();
+// accept the character store from parent to avoid importing neighboring composable
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const { currentCharacter } = useCharacterCreation(props.characterStore as any);
 const assignedScores = reactive<Record<string, number>>({
   Str: DEFAULT_BASE_SCORES.Str,
   Dex: DEFAULT_BASE_SCORES.Dex,

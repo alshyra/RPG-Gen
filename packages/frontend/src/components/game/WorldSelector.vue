@@ -59,14 +59,12 @@
 import { reactive } from 'vue';
 import UiButton from '../ui/UiButton.vue';
 import { useRouter } from 'vue-router';
-import { useCharacterCreation } from '@/composables/useCharacterCreation';
+import { useCharacter } from '@/composables/useCharacter';
 const router = useRouter();
-const { createCharacter } = useCharacterCreation();
+const { createCharacter } = useCharacter();
 
 const goToCharacterCreation = async (world: string) => {
-  const character = await createCharacter({
-    world,
-  });
+  const character = await createCharacter(world);
   router.push({ path: `/character/${character.characterId}/step/1` });
 };
 
