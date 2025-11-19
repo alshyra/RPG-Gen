@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import type { ChatMessage } from '../../../shared/types';
+import type { ChatMessageDto } from '@rpg/shared';
 import { Conversation, ConversationDocument } from '../schemas/conversation.schema';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ConversationService {
     @InjectModel(Conversation.name) private conversationHistoryModel: Model<ConversationDocument>,
   ) {}
 
-  async getHistory(userId: string, characterId: string): Promise<ChatMessage[]> {
+  async getHistory(userId: string, characterId: string): Promise<ChatMessageDto[]> {
     const history = await this.conversationHistoryModel.findOne({ userId, characterId }).exec();
 
     if (!history) return [];
@@ -22,11 +22,11 @@ export class ConversationService {
       role: m.role,
       text: m.text,
       timestamp: m.timestamp,
-      meta: (m.meta ? { ...m.meta } : undefined) as Record<string, unknown> | undefined,
-    })) as ChatMessage[];
+      meta: m.meta ? { usage: m.meta.usage, model: m.meta.model } : undefined,
+    }));
   }
 
-  async append(userId: string, characterId: string, msg: ChatMessage) {
+  async append(userId: string, characterId: string, msg: ChatMessageDto) {
     let history = await this.conversationHistoryModel.findOne({ userId, characterId });
 
     if (!history) {
@@ -49,7 +49,7 @@ export class ConversationService {
     this.logger.log(`💬 Saved message to character ${characterId} (${history.messages.length} messages)`);
   }
 
-  async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
+  async setHistory(userId: string, characterId: string, list: ChatMessageDto[]) {
     const truncated = list.slice(-this.MAX_MESSAGES);
 
     await this.conversationHistoryModel.findOneAndUpdate(

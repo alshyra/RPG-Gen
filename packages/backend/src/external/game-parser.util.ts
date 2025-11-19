@@ -2,23 +2,23 @@ const extractJsonBlocks = (text: string): string[] => {
   // Handle both actual newlines and escaped newlines (literal \n) in code blocks
   // Also handle spaces before/after the JSON
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
-  return jsonMatches.map((m) => m[1].trim()).filter(Boolean);
+  return jsonMatches.map(m => m[1].trim()).filter(Boolean);
 };
 
 // use shared type definitions produced by the DTO generator in @rpg/shared
-import type { GameInstruction, GameMessage, GameResponse } from "@rpg/shared";
+import type { GameInstruction, GameMessage, GameResponse } from '@rpg/shared';
 
 const parseNestedJson = (text: string): string[] => {
   const results: string[] = [];
   let depth = 0;
   let start = -1;
 
-  const chars = text.split("");
+  const chars = text.split('');
   chars.forEach((char, i) => {
-    if (char === "{") {
+    if (char === '{') {
       if (depth === 0) start = i;
       depth += 1;
-    } else if (char === "}") {
+    } else if (char === '}') {
       depth -= 1;
       if (depth === 0 && start !== -1) {
         results.push(text.substring(start, i + 1));
@@ -35,18 +35,18 @@ const parseNestedJson = (text: string): string[] => {
  * First, remove all code blocks to avoid matching JSON inside them
  */
 const extractInlineJson = (text: string): string[] => {
-  const textWithoutCodeBlocks = text.replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, "");
+  const textWithoutCodeBlocks = text.replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, '');
   return parseNestedJson(textWithoutCodeBlocks);
 };
 
 const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   // Check if object has type field with valid value
   if (
-    obj.type === "roll" ||
-    obj.type === "xp" ||
-    obj.type === "hp" ||
-    obj.type === "spell" ||
-    obj.type === "inventory"
+    obj.type === 'roll'
+    || obj.type === 'xp'
+    || obj.type === 'hp'
+    || obj.type === 'spell'
+    || obj.type === 'inventory'
   ) {
     return true;
   }
@@ -60,7 +60,7 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
 const parseJsonWithNewlines = (json: string) => {
   try {
     // Replace escaped newlines with actual newlines for parsing
-    const normalized = json.replace(/\\n/g, "\n");
+    const normalized = json.replace(/\\n/g, '\n');
     return JSON.parse(normalized) as Record<string, unknown>;
   } catch {
     return null;
@@ -70,14 +70,14 @@ const parseJsonWithNewlines = (json: string) => {
 const convertToGameInstruction = (obj: Record<string, unknown>): GameInstruction => {
   // If it has a type field, use the structured format
   if (
-    obj.type === "roll" ||
-    obj.type === "xp" ||
-    obj.type === "hp" ||
-    obj.type === "spell" ||
-    obj.type === "inventory"
+    obj.type === 'roll'
+    || obj.type === 'xp'
+    || obj.type === 'hp'
+    || obj.type === 'spell'
+    || obj.type === 'inventory'
   ) {
     return {
-      type: obj.type as "roll" | "xp" | "hp" | "spell" | "inventory",
+      type: obj.type as 'roll' | 'xp' | 'hp' | 'spell' | 'inventory',
       data: obj,
     } as GameInstruction;
   }
@@ -100,20 +100,20 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
 export const cleanNarrativeText = (narrative: string): string => {
   const cleaned = narrative
     // Remove JSON code blocks (both actual and escaped newlines, with possible spaces)
-    .replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, "")
+    .replace(/```json(?:\\n|\n|\s)[\s\S]*?(?:\\n|\n|\s)```/g, '')
     // Remove inline JSON objects (avoiding code blocks)
     .replace(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, (match) => {
       // Only remove if it's a game instruction
       try {
-        const obj = JSON.parse(match.replace(/\\n/g, "\n"));
-        if (isGameInstruction(obj)) return "";
+        const obj = JSON.parse(match.replace(/\\n/g, '\n'));
+        if (isGameInstruction(obj)) return '';
         return match;
       } catch {
         return match;
       }
     })
     // Normalize multiple spaces to single space
-    .replace(/\s+/g, " ")
+    .replace(/\s+/g, ' ')
     // Remove leading/trailing whitespace
     .trim();
 
@@ -121,7 +121,7 @@ export const cleanNarrativeText = (narrative: string): string => {
 };
 
 export const extractInstructions = (
-  narrative: string
+  narrative: string,
 ): {
   narrative: string;
   instructions: GameInstruction[];
