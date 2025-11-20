@@ -1,8 +1,9 @@
 import path from 'path';
 import fs from 'fs';
 import { Project, ClassDeclaration, SyntaxKind } from 'ts-morph';
-
-const repoRoot = path.resolve(__dirname, '..', '..', '..');
+const dirname = path.resolve();
+const repoRoot = path.resolve(dirname, '..', '..');
+console.log('Repo root:', repoRoot);
 const schemasDir = path.join(repoRoot, 'packages', 'backend', 'src', 'schemas');
 const outDir = path.join(repoRoot, 'packages', 'shared', 'src', 'generated');
 
