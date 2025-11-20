@@ -1,46 +1,20 @@
-const js = require('@eslint/js');
-const ts = require('typescript-eslint');
-const stylistic = require('@stylistic/eslint-plugin');
+/* eslint-env node */
+/* eslint-disable no-undef, no-redeclare */
+import shared from '../../eslint.shared.js';
+import ts from 'typescript-eslint';
 
-module.exports = [
-  {
-    ignores: ['dist', 'node_modules', '*.config.js', 'test/**']
-  },
-  js.configs.recommended,
-  ...ts.configs.recommended,
-  stylistic.configs.customize({
-    indent: 2,
-    quotes: 'single',
-    semi: true,
-    jsx: false,
-    braceStyle: '1tbs',
-    commaDangle: 'always-multiline',
-  }),
+const dirname = new URL('.', import.meta.url).pathname;
+
+export default [
+  ...shared,
+  // Backend-specific override: set tsconfigRootDir for TypeScript parser resolution
   {
     files: ['**/*.{js,ts}'],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parser: {...ts.parser, tsconfigRootDir: __dirname,},
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearTimeout: 'readonly',
-        clearInterval: 'readonly'
-      }
+      parser: { ...ts.parser, tsconfigRootDir: dirname },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'no-console': 'off',
-      'arrow-body-style': ['warn', 'as-needed'],
-      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-      'max-statements': ['warn', 10],
-      'prefer-object-spread': 'warn'
-    }
-  }
+      // backend can customize stricter rules if necessary
+    },
+  },
 ];

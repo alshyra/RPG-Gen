@@ -1,9 +1,11 @@
+/* eslint-env node */
+/* eslint-disable no-undef, no-redeclare */
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
 import vue from 'eslint-plugin-vue';
 import vueParser from 'vue-eslint-parser';
 import stylistic from '@stylistic/eslint-plugin';
-
+const dirname = new URL('.', import.meta.url).pathname;
 export default [
   {
     ignores: ['dist', 'node_modules', '.vite', 'coverage', '*.config.js', '*.config.cjs', 'cypress/**']
@@ -22,9 +24,9 @@ export default [
   {
     files: ['**/*.vue'],
     languageOptions: {
-      parser: {...vueParser, tsconfigRootDir: __dirname},
+      parser: vueParser,
       parserOptions: {
-        parser: ts.parser,
+        parser: { ...ts.parser, tsconfigRootDir: dirname },
         ecmaVersion: 'latest',
         sourceType: 'module'
       },
@@ -58,7 +60,7 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: {...ts.parser, tsconfigRootDir: __dirname},
+      parser: {...ts.parser, tsconfigRootDir: dirname},
       globals: {
         console: 'readonly',
         setTimeout: 'readonly',

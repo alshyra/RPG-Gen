@@ -17,7 +17,7 @@ test('should extract roll instruction from narrative text', (t) => {
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'constitution');
-  
+
   // Narrative should not contain the JSON block
   t.false(result.narrative.includes('```json'));
   t.false(result.narrative.includes('{"roll"'));
@@ -77,7 +77,7 @@ La rue est sombre.`;
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-  
+
   // Narrative should be clean
   t.true(result.narrative.includes('Tu quittes'));
   t.true(result.narrative.includes('La rue est sombre'));
@@ -93,7 +93,7 @@ test('should extract JSON with escaped newlines (\\n)', (t) => {
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-  
+
   // Narrative should be clean
   t.false(result.narrative.includes('```'));
   t.false(result.narrative.includes('roll'));
@@ -119,7 +119,7 @@ Pour observer les allées et venues discrètement, tu dois trouver une position 
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-  
+
   // Narrative should contain the story but not the JSON
   t.true(result.narrative.includes('Tu quittes l\'auberge'));
   t.true(result.narrative.includes('Cabaret'));
@@ -143,7 +143,7 @@ test('should extract spell instruction (learn)', (t) => {
   t.is(result.instructions[0].spell?.name, 'Boule de feu');
   t.is(result.instructions[0].spell?.level, 3);
   t.is(result.instructions[0].spell?.school, 'Évocation');
-  
+
   // Narrative should not contain the JSON block
   t.false(result.narrative.includes('```json'));
   t.false(result.narrative.includes('{"spell"'));
@@ -175,7 +175,7 @@ test('should extract inventory instruction (add)', (t) => {
   t.is(result.instructions[0].inventory?.action, 'add');
   t.is(result.instructions[0].inventory?.name, 'Potion de soin');
   t.is(result.instructions[0].inventory?.quantity, 1);
-  
+
   // Narrative should not contain the JSON block
   t.false(result.narrative.includes('```json'));
   t.false(result.narrative.includes('{"inventory"'));

@@ -46,6 +46,6 @@ test('compressImage should handle compression errors gracefully', async (t) => {
   const invalidImage = 'invalid-data';
 
   await t.throwsAsync(
-    async () => await compressImage(invalidImage)
+    async () => await compressImage(invalidImage),
   );
 });
