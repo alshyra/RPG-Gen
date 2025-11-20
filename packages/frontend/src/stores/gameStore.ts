@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { CharacterEntry, GameInstruction, GameMessage, Spell, InventoryItem } from '@rpg-gen/shared';
+import type { CharacterDto, GameInstruction, GameMessage, Spell, InventoryItem } from '@rpg-gen/shared';
 
 export interface GameSession {
   world: string;
   worldName: string;
-  character: CharacterEntry | null;
+  character: CharacterDto | null;
 }
 
 const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any) => ({
@@ -13,7 +13,7 @@ const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any
     s.value.world = world;
     s.value.worldName = name;
   },
-  setCharacter: (character: CharacterEntry | null) => {
+  setCharacter: (character: CharacterDto | null) => {
     s.value.character = character;
   },
   appendMessage: (role: string, text: string) => {

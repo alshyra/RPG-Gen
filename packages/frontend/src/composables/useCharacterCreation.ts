@@ -1,4 +1,5 @@
 import { ref, computed, Ref } from 'vue';
+import type { AbilityScoresDto } from '@rpg-gen/shared';
 import { useRouter } from 'vue-router';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { DnDRulesService } from '../services/dndRulesService';
@@ -12,7 +13,7 @@ interface CreationRace {
 interface CreatedCharacter {
   name: string;
   race: CreationRace | null;
-  scores: Record<string, number>;
+  scores: AbilityScoresDto;
   gender: 'male' | 'female';
   world?: string;
   worldId?: string;
@@ -72,7 +73,7 @@ const createMethods = (
   primaryClass: Ref<string>,
   secondaryClass: Ref<string>,
   multiclass: Ref<boolean>,
-  baseScores: Ref<Record<string, number>>,
+  baseScores: Ref<AbilityScoresDto>,
   gender: Ref<'male' | 'female'>,
   selectedSkills: Ref<string[]>,
   world?: string,
@@ -82,7 +83,7 @@ const createMethods = (
     const race = character.value.race;
     const calculated = DnDRulesService.prepareNewCharacter(
       character.value.name || 'Unnamed',
-      baseScores.value,
+      baseScores.value as any,
       primaryClass.value,
       race?.mods || {},
       race,
@@ -112,7 +113,7 @@ const createMethods = (
     );
     const calculated = DnDRulesService.prepareNewCharacter(
       character.value.name || 'Unnamed',
-      baseScores.value,
+      baseScores.value as any,
       primaryClass.value,
       character.value.race?.mods || {},
       character.value.race,
@@ -136,7 +137,7 @@ const createMethods = (
       return;
     }
     const latest = saved[0].data;
-    character.value = { ...character.value, ...latest };
+    character.value = { ...character.value, ...(latest as any) } as CreatedCharacter;
     primaryClass.value = latest.classes?.[0]?.name || primaryClass.value;
     secondaryClass.value = latest.classes?.[1]?.name || '';
     baseScores.value = { ...baseScores.value, ...latest.scores };

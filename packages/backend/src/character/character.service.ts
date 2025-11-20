@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Character, CharacterDocument } from '../schemas/character.schema';
-import type { CharacterEntry } from '@rpg-gen/shared';
+import type { CharacterDto } from '@rpg-gen/shared';
 
 @Injectable()
 export class CharacterService {
@@ -12,10 +12,10 @@ export class CharacterService {
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
   ) {}
 
-  async create(userId: string, characterData: CharacterEntry): Promise<CharacterDocument> {
+  async create(userId: string, characterData: CharacterDto): Promise<CharacterDocument> {
     const character = new this.characterModel({
       userId,
-      characterId: characterData.id,
+      characterId: characterData.characterId,
       name: characterData.name,
       race: characterData.race,
       scores: characterData.scores,
@@ -48,7 +48,7 @@ export class CharacterService {
     return this.characterModel.findOne({ userId, characterId }).exec();
   }
 
-  async update(userId: string, characterId: string, updates: Partial<CharacterEntry>): Promise<CharacterDocument> {
+  async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) {
       throw new NotFoundException(`Character ${characterId} not found`);
@@ -99,10 +99,11 @@ export class CharacterService {
     return this.characterModel.find({ userId, isDeceased: true }).sort({ diedAt: -1 }).exec();
   }
 
-  // Convert MongoDB document to frontend CharacterEntry format
-  toCharacterEntry(doc: CharacterDocument): CharacterEntry {
+  // Convert MongoDB document to frontend CharacterDto format
+  toCharacterDto(doc: CharacterDocument): CharacterDto {
     return {
-      id: doc.characterId,
+      characterId: doc.characterId,
+      userId: (doc.userId as any)?.toString?.() || String(doc.userId),
       name: doc.name,
       race: doc.race as any,
       scores: doc.scores as any,
@@ -115,6 +116,9 @@ export class CharacterService {
       portrait: doc.portrait,
       gender: doc.gender as 'male' | 'female',
       proficiency: doc.proficiency,
+      isDeceased: doc.isDeceased || false,
+      diedAt: doc.diedAt,
+      deathLocation: doc.deathLocation,
     };
   }
 }

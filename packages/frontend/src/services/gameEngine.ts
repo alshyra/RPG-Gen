@@ -42,7 +42,7 @@ export class GameEngine {
     const char = await characterServiceApi.getCurrentCharacter();
     if (!char)
       throw new Error('No current character found. Please create or load a character first.');
-    this.characterId = char.id;
+    this.characterId = (char as any).characterId || (char as any).id;
 
     const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
     const isNew = histRes?.data?.isNew || false;

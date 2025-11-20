@@ -21,7 +21,7 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: ts.parser,
+      parser: {...ts.parser, tsconfigRootDir: __dirname,},
       globals: {
         console: 'readonly',
         process: 'readonly',

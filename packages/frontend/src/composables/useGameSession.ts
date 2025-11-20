@@ -1,6 +1,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
-import { CharacterEntry } from '@rpg-gen/shared';
+import { CharacterDto } from '@rpg-gen/shared';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { gameEngine } from '../services/gameEngine';
 
@@ -39,7 +39,7 @@ export function useGameSession() {
   const router = useRouter();
   const gameStore = useGameStore();
 
-  const initializeGame = async (char: CharacterEntry) => {
+  const initializeGame = async (char: CharacterDto) => {
     try {
       gameStore.setCharacter(char);
       if (gameStore.isDead) gameStore.setDeathModalVisible(true);

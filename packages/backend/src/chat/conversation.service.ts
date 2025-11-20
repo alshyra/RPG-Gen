@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import type { ChatMessage } from '@rpg-gen/shared';
+import type { ChatMessage, MessageMetaDto } from '@rpg-gen/shared';
 import { ChatHistory, ChatHistoryDocument } from '../schemas/chat-history.schema';
 
 // Re-export for convenience
-export type { ChatMessage, ChatRole } from '@rpg-gen/shared';
+export type { ChatMessage } from '@rpg-gen/shared';
 
 @Injectable()
 export class ConversationService {
@@ -25,7 +25,7 @@ export class ConversationService {
       role: m.role,
       text: m.text,
       timestamp: m.timestamp,
-      meta: (m.meta ? { ...m.meta } : undefined) as Record<string, unknown> | undefined,
+      meta: (m.meta ? ({ ...m.meta } as MessageMetaDto) : undefined) as MessageMetaDto | undefined,
     })) as ChatMessage[];
   }
 

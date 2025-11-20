@@ -48,7 +48,7 @@ function getAbilityScore(key: string): number {
   // Try capitalized format (Str, Dex, etc.)
   const capitalized = key.charAt(0).toUpperCase() + key.slice(1);
 
-  return character.value.scores[capitalized];
+  return (character.value.scores as any)[capitalized] as number;
 }
 
 // Calculate D&D modifier from ability score

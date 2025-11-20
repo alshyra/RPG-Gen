@@ -22,7 +22,7 @@ export default [
   {
     files: ['**/*.vue'],
     languageOptions: {
-      parser: vueParser,
+      parser: {...vueParser, tsconfigRootDir: __dirname},
       parserOptions: {
         parser: ts.parser,
         ecmaVersion: 'latest',
@@ -58,7 +58,7 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: ts.parser,
+      parser: {...ts.parser, tsconfigRootDir: __dirname},
       globals: {
         console: 'readonly',
         setTimeout: 'readonly',
