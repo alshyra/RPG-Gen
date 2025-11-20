@@ -34,8 +34,9 @@ docker compose -f compose.dev.yml up -d
 ### Manual Setup
 
 **Backend:**
+
 ```bash
-cd backend
+cd packages/backend
 npm install
 cp .env.example .env
 # Edit .env with your API keys
@@ -43,20 +44,45 @@ npm run start:dev
 ```
 
 **Frontend:**
+
 ```bash
-cd frontend
+cd packages/frontend
 npm install
 npm run dev
 ```
+
+## Monorepo (NPM Workspaces)
+
+This repository uses NPM workspaces at the root. You can install and manage dependencies for all packages (backend, frontend, shared) from the root and run scripts across workspaces.
+
+Install dependencies for all workspaces:
+
+```bash
+npm install
+```
+
+Run backend and frontend concurrently (requires `concurrently`):
+
+```bash
+npm run start:dev
+```
+
+Run tests for backend and frontend from root:
+
+```bash
+npm test
+```
+
+If you only need to operate within a single package, navigate to its folder and run the usual commands (for example `cd packages/backend` and `npm run start:dev`).
 
 ## Deployment
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions to Google Cloud Run.
 
 **Key Points**:
+
 - Configure all required GitHub Secrets (see DEPLOYMENT.md)
 - Set `FRONTEND_URL` secret to your actual Cloud Run URL to prevent OAuth redirect issues
-
 
 ## Documentation
 

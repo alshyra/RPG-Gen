@@ -1,18 +1,20 @@
 FROM node:25.2.0-alpine3.22 AS base_node
 FROM base_node AS builder
 
-COPY . /app/
+# Copy the root package files and workspace packages to support npm workspaces
+WORKDIR /app
+COPY . .
 
-WORKDIR /app/backend
+# Install at root (workspace install) for proper workspace dependency resolution
+RUN npm ci
 
-RUN cd /app/backend &&\
-    npm ci && \
-    npm run build && \
-    npm prune --production
+# Build the backend workspace
+WORKDIR /app/packages/backend
+RUN npm --workspace rpg-gemini-backend run build && npm prune --production
 
 FROM base_node
 
-WORKDIR /app/backend
+WORKDIR /app/packages/backend
 
 COPY --from=builder /app/ /app
 
