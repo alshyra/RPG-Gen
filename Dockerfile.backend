@@ -3,8 +3,7 @@ FROM base_node AS builder
 
 # Copy the root package files and workspace packages to support npm workspaces
 WORKDIR /app
-COPY package*.json ./
-COPY packages ./packages
+COPY . .
 
 # Install at root (workspace install) for proper workspace dependency resolution
 RUN npm ci

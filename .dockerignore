@@ -1,4 +1,6 @@
 **
+!package.json
+!package-lock.json
 !packages/backend/chat.prompt.txt
 !packages/backend/src/**
 !packages/backend/package.json
