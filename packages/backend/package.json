@@ -42,6 +42,8 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
+    "tsimp": "^2.0.12",
+    "@ava/typescript": "^6.0.0",
     "@stylistic/eslint-plugin": "^5.5.0",
     "@types/node": "^24.10.1",
     "ava": "^6.4.1",
@@ -51,14 +53,11 @@
     "typescript-eslint": "^8.46.4"
   },
   "ava": {
-    "files": [
-      "test/**/*.test.ts"
-    ],
-    "require": [
-      "ts-node/register/transpile-only"
-    ],
-    "extensions": [
-      "ts"
+    "extensions": {
+      "ts": "module"
+    },
+    "nodeArguments": [
+      "--import=tsimp"
     ]
   }
 }
