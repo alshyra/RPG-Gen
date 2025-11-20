@@ -3,6 +3,7 @@
 !package-lock.json
 !packages/backend/chat.prompt.txt
 !packages/backend/src/**
+!packages/backend/scripts/**
 !packages/backend/package.json
 !packages/backend/package-lock.json
 !packages/backend/tsconfig*.json
