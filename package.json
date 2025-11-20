@@ -1,0 +1,21 @@
+{
+  "name": "rpg-gen-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "npm install",
+    "start:backend": "npm --workspace rpg-gemini-backend run start:dev",
+    "start:frontend": "npm --workspace rpg-gemini-frontend run dev",
+    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "test:backend": "npm --workspace rpg-gemini-backend run test",
+    "test:frontend": "npm --workspace rpg-gemini-frontend run test",
+    "test": "npm run test:backend && npm run test:frontend",
+    "lint": "npm --workspace rpg-gemini-backend run lint && npm --workspace rpg-gemini-frontend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

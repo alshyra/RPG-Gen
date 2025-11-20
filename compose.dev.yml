@@ -24,8 +24,8 @@ services:
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
     volumes:
-      - ./backend:/app/backend
-      - ./shared:/app/shared
+      - ./packages/backend:/app/backend
+      - ./packages/shared:/app/shared
       - backend_node_modules:/app/backend/node_modules
     env_file:
       - backend/.env
@@ -45,8 +45,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./frontend:/app/frontend
-      - ./shared:/app/shared
+      - ./packages/frontend:/app/frontend
+      - ./packages/shared:/app/shared
       - frontend_node_modules:/app/frontend/node_modules
     networks:
       - rpg-network

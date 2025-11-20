@@ -6,7 +6,7 @@
 import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@shared/types';
 
 // Re-export for convenience
-export type { SavedCharacterEntry, CharacterEntry, DeceasedCharacterEntry } from '../../../shared/types';
+export type { SavedCharacterEntry, CharacterEntry, DeceasedCharacterEntry } from '@shared/types';
 
 const STORAGE_KEYS = {
   savedCharacters: 'rpg-characters',

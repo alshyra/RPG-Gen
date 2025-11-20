@@ -1,0 +1,23 @@
+{
+  "name": "@rpg-gen/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for RPG-Gen frontend and backend",
+  "main": "types/index.ts",
+  "exports": {
+    ".": "./types/index.ts",
+    "./types": "./types/index.ts",
+    "./types/character": "./types/character.ts",
+    "./types/game": "./types/game.ts",
+    "./types/dnd": "./types/dnd.ts",
+    "./types/api": "./types/api.ts"
+  },
+  "files": [
+    "types"
+  ],
+  "keywords": [
+    "rpg",
+    "types",
+    "shared"
+  ],
+  "private": true
+}

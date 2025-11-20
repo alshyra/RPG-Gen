@@ -1,7 +1,8 @@
 FROM node:25.2.0-alpine3.22 AS base_node
 FROM base_node AS builder
 
-COPY . /app/
+COPY packages/backend /app/backend
+COPY packages/shared /app/shared
 
 WORKDIR /app/backend
 

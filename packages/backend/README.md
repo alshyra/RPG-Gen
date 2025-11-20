@@ -10,7 +10,7 @@ GOOGLE_API_KEY=AIza...your_api_key_here
 Then install and start in dev:
 
 ```bash
-cd backend
+cd packages/backend
 npm install
 npm run start:dev
 ```

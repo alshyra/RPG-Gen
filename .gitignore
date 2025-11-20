@@ -1,11 +1,8 @@
 node_modules
 dist
-backend/.env
-frontend/.env
-archives
-
-# MongoDB data
-mongo-data
+.env
+packages/backend/.env
+packages/frontend/.env
 
 # Cypress
 screenshots

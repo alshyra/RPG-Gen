@@ -20,20 +20,20 @@ jobs:
       - name: Set up frontend
         uses: actions/setup-node@v4
         with:
-          node-version: '25.2.0'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: packages/frontend/package-lock.json
       - name: Set up backend
         uses: actions/setup-node@v4
         with:
-          node-version: '25.2.0'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          node-version: "25.2.0"
+          cache: "npm"
+          cache-dependency-path: packages/backend/package-lock.json
       - name: Install shared dependencies
-        run: cd shared && npm ci
+        run: cd packages/shared && npm ci
       - name: Install frontend dependencies
-        run: cd frontend && npm ci
+        run: cd packages/frontend && npm ci
       - name: Install backend dependencies
-        run: cd backend && npm ci
+        run: cd packages/backend && npm ci
       - name: Install Cypress
-        run: cd frontend && npx cypress install
+        run: cd packages/frontend && npx cypress install

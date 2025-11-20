@@ -10,20 +10,19 @@
 
 ### Environment Configuration
 
+cd packages/backend
 The backend requires environment variables. Create a `.env` file in the `backend/` directory (do not commit):
 
 ```env
-# backend/.env
-GOOGLE_API_KEY=AIza...your_api_key_here
+
 ```
 
 ### Initial Setup
 
+cd packages/frontend
 **Backend:**
 
 ```bash
-cd backend
-npm install
 npm run start:dev
 ```
 
@@ -33,7 +32,7 @@ npm run start:dev
 **Frontend:**
 
 ```bash
-cd frontend
+cd packages/frontend
 npm install
 npm run dev
 ```
@@ -42,7 +41,7 @@ npm run dev
 - Proxies `/api/*` requests to backend (port 3001)
 
 **Shared Types:**
-Located in `shared/types/` - used by both frontend and backend for type safety.
+Located in `packages/shared/types/` - used by both frontend and backend for type safety.
 
 ## Architecture Overview
 

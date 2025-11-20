@@ -5,7 +5,7 @@
 Install and run (native tools):
 
 ```bash
-cd frontend
+cd packages/frontend
 npm install
 npm run dev
 ```
@@ -14,26 +14,30 @@ The dev server runs on http://localhost:5173 by default and proxies `/api` to `h
 
 ## Testing with Cypress
 
-Ce projet utilise Cypress pour les tests E2E et les tests de composants. 
+Ce projet utilise Cypress pour les tests E2E et les tests de composants.
 
 ### Quick Start
 
 1. **Installer les dépendances** (si ce n'est pas déjà fait):
+
 ```bash
 npm install
 ```
 
 2. **Lancer l'application en développement** (dans un terminal):
+
 ```bash
 npm run dev
 ```
 
 3. **Ouvrir Cypress** (dans un autre terminal):
+
 ```bash
 npm run test:e2e:open
 ```
 
 4. **Ou exécuter les tests en mode headless**:
+
 ```bash
 npm run test:e2e
 ```
