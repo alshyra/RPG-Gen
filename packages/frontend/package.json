@@ -17,7 +17,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@rpg-gen/shared": "file:../shared",
+    "@rpg-gen/shared": "*",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "eslint": "^9.39.1",

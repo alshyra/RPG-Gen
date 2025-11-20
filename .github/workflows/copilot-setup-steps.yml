@@ -30,10 +30,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: packages/backend/package-lock.json
       - name: Install shared dependencies
-        run: cd packages/shared && npm ci
+        run: npm ci
       - name: Install frontend dependencies
-        run: cd packages/frontend && npm ci
+        run: npm ci
       - name: Install backend dependencies
-        run: cd packages/backend && npm ci
+        run: npm ci
       - name: Install Cypress
-        run: cd packages/frontend && npx cypress install
+        run: npm --workspace rpg-gemini-frontend run cypress:install || npx cypress install

@@ -22,7 +22,7 @@ jobs:
           cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: ./packages/frontend
+        working-directory: ./
         run: npm ci
         env:
           CYPRESS_INSTALL_BINARY: 0
@@ -46,7 +46,7 @@ jobs:
           cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: ./packages/frontend
+        working-directory: ./
         run: npm ci
 
       - name: Run frontend unit tests (Vitest)
@@ -70,7 +70,7 @@ jobs:
           cache-dependency-path: packages/backend/package-lock.json
 
       - name: Install backend dependencies
-        working-directory: ./packages/backend
+        working-directory: ./
         run: npm ci
 
       - name: Run ESLint and TypeScript checks
@@ -92,7 +92,7 @@ jobs:
           cache-dependency-path: packages/backend/package-lock.json
 
       - name: Install backend dependencies
-        working-directory: ./packages/backend
+        working-directory: ./
         run: npm ci
 
       - name: Run unit tests
@@ -133,7 +133,8 @@ jobs:
 
       - name: Create backend .env for testing
         run: |
-          cat > backend/.env << 'EOF'
+          mkdir -p packages/backend
+          cat > packages/backend/.env << 'EOF'
           GOOGLE_API_KEY=test-key-will-be-mocked
           MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
           NODE_ENV=production
@@ -150,7 +151,7 @@ jobs:
           docker compose up --build -d mongodb backend frontend
 
       - name: Install Cypress dependencies (parallel with container startup)
-        working-directory: packages/frontend
+        working-directory: ./
         run: npm ci
 
       - name: Wait for services to be ready
@@ -232,7 +233,7 @@ jobs:
           cache-dependency-path: packages/frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: ./packages/frontend
+        working-directory: ./
         run: npm ci
 
       - name: Run component tests

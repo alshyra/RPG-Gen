@@ -14,7 +14,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import fs, { readFile } from 'fs/promises';
 import * as Joi from 'joi';
-import type { CharacterEntry, ChatRequest } from '../../../shared/types';
+import type { CharacterEntry, ChatRequest } from '@rpg-gen/shared';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
 import { GeminiTextService } from '../external/text/gemini-text.service';

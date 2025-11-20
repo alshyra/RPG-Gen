@@ -1,4 +1,4 @@
-import type { CharacterEntry } from '@shared/types';
+import type { CharacterEntry } from '@rpg-gen/shared';
 
 /**
  * Get the bonus for a specific skill check

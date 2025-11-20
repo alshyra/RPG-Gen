@@ -132,7 +132,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import type { LevelUpResult } from '@shared/types';
+import type { LevelUpResult } from '@rpg-gen/shared';
 import { useGameStore } from '../../stores/gameStore';
 import { characterServiceApi } from '../../services/characterServiceApi';
 import { gameEngine } from '../../services/gameEngine';

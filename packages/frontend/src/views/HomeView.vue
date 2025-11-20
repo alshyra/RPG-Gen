@@ -72,7 +72,7 @@ import { ref, onMounted } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../services/characterServiceApi';
-import type { SavedCharacterEntry, CharacterEntry } from '@shared/types';
+import type { SavedCharacterEntry, CharacterEntry } from '@rpg-gen/shared';
 
 const router = useRouter();
 const savedCharacters = ref<SavedCharacterEntry[]>([]);

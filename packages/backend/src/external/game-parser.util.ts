@@ -1,7 +1,7 @@
-import type { GameInstruction } from '../../../shared/types';
+import type { GameInstruction } from '@rpg-gen/shared';
 
 // Re-export for convenience
-export type { GameInstruction } from '../../../shared/types';
+export type { GameInstruction } from '@rpg-gen/shared';
 
 const extractJsonBlocks = (text: string): string[] => {
   // Handle both actual newlines and escaped newlines (literal \n) in code blocks

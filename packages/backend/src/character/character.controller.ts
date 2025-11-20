@@ -16,7 +16,7 @@ import { Request } from 'express';
 import { CharacterService } from './character.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDocument } from '../schemas/user.schema';
-import type { CharacterEntry } from '../../../shared/types';
+import type { CharacterEntry } from '@rpg-gen/shared';
 
 @ApiTags('characters')
 @Controller('characters')

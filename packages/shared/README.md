@@ -12,7 +12,7 @@ Shared TypeScript types and interfaces used across RPG-Gen frontend and backend.
 ### Frontend
 
 ```typescript
-import type { CharacterEntry, GameResponse } from "../../shared/types";
+import type { CharacterEntry, GameResponse } from "@rpg-gen/shared";
 
 const character: CharacterEntry = {
   /* ... */
@@ -22,7 +22,7 @@ const character: CharacterEntry = {
 ### Backend
 
 ```typescript
-import type { CharacterEntry, GameInstruction } from "../../shared/types";
+import type { CharacterEntry, GameInstruction } from "@rpg-gen/shared";
 
 interface ChatRequest {
   sessionId: string;

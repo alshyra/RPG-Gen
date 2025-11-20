@@ -4,7 +4,7 @@
 
 import axios from 'axios';
 import { authService } from './authService';
-import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@shared/types';
+import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
 
 const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 

@@ -1,6 +1,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
-import { CharacterEntry } from '@shared/types';
+import { CharacterEntry } from '@rpg-gen/shared';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { gameEngine } from '../services/gameEngine';
 

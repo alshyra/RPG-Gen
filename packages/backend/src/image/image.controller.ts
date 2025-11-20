@@ -7,7 +7,7 @@ import { ImageService } from './image.service';
 import { CharacterService } from '../character/character.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDocument } from '../schemas/user.schema';
-import type { ImageRequest, AvatarRequest } from '../../../shared/types';
+import type { ImageRequest, AvatarRequest } from '@rpg-gen/shared';
 import { CharacterDocument } from 'src/schemas/character.schema';
 
 const schema = Joi.object({

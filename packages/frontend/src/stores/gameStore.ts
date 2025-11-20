@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { CharacterEntry, GameInstruction, GameMessage, Spell, InventoryItem } from '@shared/types';
+import type { CharacterEntry, GameInstruction, GameMessage, Spell, InventoryItem } from '@rpg-gen/shared';
 
 export interface GameSession {
   world: string;

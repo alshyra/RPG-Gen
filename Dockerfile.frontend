@@ -2,20 +2,16 @@ FROM node:25.2.0-alpine3.22 AS builder
 
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY packages/frontend/package*.json ./frontend/
-COPY packages/shared ./shared
+# Copy root package files and workspace packages to support npm workspaces
+COPY package*.json ./
+COPY packages ./packages
 
-WORKDIR /app/frontend
-
-# Install dependencies
+# Install at root so workspace items are linked
 RUN npm ci
 
-# Copy source files
-COPY packages/frontend ./
-
-# Build the application
-RUN npm run build
+# Build the frontend workspace
+WORKDIR /app/packages/frontend
+RUN npm --workspace rpg-gemini-frontend run build
 
 FROM nginx:alpine
 

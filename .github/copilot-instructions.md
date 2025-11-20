@@ -99,7 +99,7 @@ Located in `shared/types/` - provides type safety across frontend and backend:
 
 - **`types/character.ts`**: Character, Race, Skills, SavedCharacterEntry
 - **`types/game.ts`**: GameInstruction, ChatMessage, GameResponse, RollResult
-- **Usage**: Import from relative path `../../shared/types` in both frontend and backend
+- **Usage**: Import from relative path `../rpg-gen/shared` in both frontend and backend
 - **Guidelines**:
   - Use `interface` for object types (not `type`)
   - Document with JSDoc comments

@@ -12,9 +12,6 @@
     "incremental": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../shared/*"]
-    }
   },
   "exclude": ["node_modules", "dist"]
 }

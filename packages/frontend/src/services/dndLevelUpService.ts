@@ -3,7 +3,7 @@
  * Handles HP gain, ASI, features, and spell slots
  */
 
-import type { LevelUpResult } from '@shared/types';
+import type { LevelUpResult } from '@rpg-gen/shared';
 
 interface ClassLevelUpRules {
   hpDie: number;

@@ -12,7 +12,7 @@
     "test": "ava"
   },
   "dependencies": {
-    "@rpg-gen/shared": "file:../shared",
+    "@rpg-gen/shared": "*",
     "@google/genai": "~1.29.1",
     "@nestjs/common": "^11.1.8",
     "@nestjs/core": "^11.1.8",

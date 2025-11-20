@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Character, CharacterDocument } from '../schemas/character.schema';
-import type { CharacterEntry } from '../../../shared/types';
+import type { CharacterEntry } from '@rpg-gen/shared';
 
 @Injectable()
 export class CharacterService {

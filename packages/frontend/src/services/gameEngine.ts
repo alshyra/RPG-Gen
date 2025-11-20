@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { characterServiceApi } from './characterServiceApi';
 import { authService } from './authService';
-import type { GameResponse, ChatMessage } from '@shared/types';
+import type { GameResponse, ChatMessage } from '@rpg-gen/shared';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
