@@ -5,6 +5,9 @@
 
 import { getCurrentLevel } from '../utils/dndLevels';
 
+export const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'] as const;
+export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 } as const;
+
 interface RaceModifiers {
   [key: string]: number;
 }
@@ -15,7 +18,7 @@ interface HitDieMap {
 
 interface Skill {
   name: string;
-  ability: 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
+  ability: typeof ABILITIES[number];
 }
 
 interface ClassProficiencies {
