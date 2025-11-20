@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: packages/frontend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install frontend dependencies
         working-directory: ./
@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: packages/frontend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install frontend dependencies
         working-directory: ./
@@ -67,7 +67,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: packages/backend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install backend dependencies
         working-directory: ./
@@ -89,7 +89,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: packages/backend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install backend dependencies
         working-directory: ./
@@ -129,7 +129,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Create backend .env for testing
         run: |
@@ -230,7 +230,7 @@ jobs:
         with:
           node-version: "25.2.0"
           cache: "npm"
-          cache-dependency-path: packages/frontend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install frontend dependencies
         working-directory: ./
