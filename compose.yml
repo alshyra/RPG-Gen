@@ -25,7 +25,7 @@ services:
       - FRONTEND_URL=http://localhost
       - LOG_FORMAT=json
     env_file:
-      - backend/.env
+      - packages/backend/.env
     depends_on:
       - mongodb
     networks:

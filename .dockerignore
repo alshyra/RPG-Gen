@@ -1,5 +1,5 @@
 **
-!backend/chat.prompt.txt
+!backend/src/conversation/dnd.prompt.txt
 !backend/src/**
 !backend/package.json
 !backend/package-lock.json
