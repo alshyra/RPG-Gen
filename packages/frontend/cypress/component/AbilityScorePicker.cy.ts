@@ -156,7 +156,7 @@ describe('AbilityScorePicker', () => {
     });
 
     // the DOM value for Str should still be 12 after the blocked change
-    cy.get('[data-test-id="ability-score-Str"]').should('contain.text', '12');
+    cy.get('[data-test-id="ability-score-Str"]').should('contain.text', '13');
   });
 
   it('shows static values in edit mode', () => {

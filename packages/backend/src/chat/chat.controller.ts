@@ -128,7 +128,12 @@ Character Information:
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
   @ApiBody({ type: ChatRequest })
-  async chat(@Req() req: Request, @Param('characterId') characterId: string, @Body('message') message: string) {
+  async chat(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: unknown,
+    @Body('message') message: string,
+  ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     this.logger.log(`Received chat request for characterId ${characterId} with message: ${message}...`);

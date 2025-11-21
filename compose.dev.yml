@@ -42,6 +42,7 @@ services:
     working_dir: /app
     command: sh -c "npm --workspace rpg-gemini-frontend run dev -- --port 80"
     environment:
+      - DNS_RESOLVER=127.0.0.11
       - NODE_ENV=development
     ports:
       - "80:80"
