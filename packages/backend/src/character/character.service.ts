@@ -16,18 +16,9 @@ export class CharacterService {
     const character = new this.characterModel({
       userId,
       characterId: characterData.characterId,
-      name: characterData.name,
-      race: characterData.race,
-      scores: characterData.scores,
-      hp: characterData.hp,
-      hpMax: characterData.hpMax,
-      totalXp: characterData.totalXp || 0,
-      classes: characterData.classes,
-      skills: characterData.skills,
-      world: characterData.world,
-      portrait: characterData.portrait,
-      gender: characterData.gender,
-      proficiency: characterData.proficiency || 2,
+      totalXp: 0,
+      proficiency: 2,
+      state: 'draft',
       isDeceased: false,
     });
 
@@ -119,6 +110,7 @@ export class CharacterService {
       isDeceased: doc.isDeceased || false,
       diedAt: doc.diedAt,
       deathLocation: doc.deathLocation,
+      state: doc.state,
     };
   }
 }

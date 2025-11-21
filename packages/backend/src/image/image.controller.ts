@@ -7,7 +7,7 @@ import { ImageService } from './image.service.js';
 import { CharacterService } from '../character/character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { ImageRequest, AvatarRequestWithCharacterId } from '@rpg-gen/shared';
+import type { ImageRequest } from '@rpg-gen/shared';
 import { CharacterDocument } from '../schemas/character.schema.js';
 
 const schema = Joi.object({
@@ -15,6 +15,11 @@ const schema = Joi.object({
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
+
+class CharacterIdBody {
+  characterId: string;
+}
+
 @ApiTags('image')
 @Controller('image')
 export class ImageController {
@@ -40,13 +45,12 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-  @ApiBody({ schema: { type: 'object' } })
-  async generateAvatar(@Req() req: Request, @Body() body: AvatarRequestWithCharacterId) {
+  @ApiBody({ type: [CharacterIdBody] })
+  async generateAvatar(@Req() req: Request, @Body() body: CharacterIdBody) {
     if (!body.characterId) throw new BadRequestException('characterId is required');
-    const characterId = body.characterId as string;
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const character = await this.characterService.findByCharacterId(userId, body.characterId);
     return await this.handleGenerateAvatar(userId, character);
   }
 
@@ -66,7 +70,6 @@ export class ImageController {
 
       return {
         imageUrl: compressedImage,
-        compressed: true,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate avatar';
@@ -80,12 +83,6 @@ export class ImageController {
       portrait: compressedImage,
     });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
-  }
-
-  private validateAvatarRequest(body: AvatarRequestWithCharacterId) {
-    if (!body.description || typeof body.description !== 'string') {
-      throw new BadRequestException('Description is required and must be a string');
-    }
   }
 
   private buildAvatarPrompt(character: CharacterDocument): string {

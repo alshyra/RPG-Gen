@@ -30,25 +30,39 @@
 
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
+import { DnDRulesService } from '@/services/dndRulesService';
+import { computed } from 'vue';
 
-interface Props {
-  primaryClass: string;
-  selectedSkills: string[];
-  availableSkills: string[];
-  skillsToChoose: number;
-}
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
-interface Emits {
-  (e: 'update:selected-skills', value: string[]): void;
-}
+const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
+const selectedSkills = computed(() => (currentCharacter.value?.skills || []).filter((s: any) => s.proficient).map((s: any) => s.name));
+const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
+const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const toggleSkill = async (skill: string) => {
+  if (!currentCharacter.value) return;
 
-const toggleSkill = (skill: string) => {
-  const newSkills = props.selectedSkills.includes(skill)
-    ? props.selectedSkills.filter(s => s !== skill)
-    : [...props.selectedSkills, skill];
-  emit('update:selected-skills', newSkills);
+  const existingSkills = currentCharacter.value.skills || [];
+  let newSkills: any[];
+
+  if (selectedSkills.value.includes(skill)) {
+    newSkills = existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
+  } else {
+    // add skill or toggle proficient
+    const present = existingSkills.find((s: any) => s.name === skill);
+    if (present) {
+      newSkills = existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: true } : s));
+    } else {
+      newSkills = [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
+    }
+  }
+  currentCharacter.value.skills = newSkills as any;
+
+  if (!currentCharacter.value.characterId) return
+  await characterStore.updateCharacter(currentCharacter.value.characterId, { skills: newSkills });
 };
 </script>

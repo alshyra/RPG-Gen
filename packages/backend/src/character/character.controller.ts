@@ -38,10 +38,7 @@ export class CharacterController {
     }
 
     const character = await this.characterService.create(userId, characterData);
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
   }
 
   @Get()

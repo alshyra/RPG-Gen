@@ -7,25 +7,21 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block font-medium mb-2">Race</label>
-        <RacePicker
-          :model-value="character.race"
-          :allowed-races="allowedRaces"
-          @update:race="(race: Race | null) => updateCharacter({ ...character, race })"
-        />
+        <RacePicker />
       </div>
 
       <div>
         <label class="block font-medium mb-2">Classe</label>
         <UiSelect
-          :model-value="primaryClass"
-          @update:model-value="updateClass"
+          :model-value="currentCharacter?.classes?.[0]?.name ?? ''"
+          @update:model-value="updateClass($event)"
         >
           <option
-            v-for="c in classList"
-            :key="c"
-            :value="c"
+            v-for="rpg_classe in CLASSES_LIST"
+            :key="rpg_classe"
+            :value="rpg_classe"
           >
-            {{ c }}
+            {{ rpg_classe }}
           </option>
         </UiSelect>
       </div>
@@ -34,42 +30,25 @@
 </template>
 
 <script setup lang="ts">
-import RacePicker from '../RacePicker.vue';
+import { CLASSES_LIST } from '@/composables/useCharacterCreation';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
 import UiSelect from '../../ui/UiSelect.vue';
+import RacePicker from '../RacePicker.vue';
 
-interface Race {
-  id: string;
-  name: string;
-  mods: Record<string, number>;
-}
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
-interface Character {
-  name: string;
-  race: Race | null;
-  scores: Record<string, number>;
-  [key: string]: any;
-}
 
-interface Props {
-  character: Character;
-  primaryClass: string;
-  allowedRaces: Race[];
-  classList: string[];
-}
+const updateClass = async (newClass: string) => {
+  if (!currentCharacter.value) return;
+  currentCharacter.value.classes[0] = { 
+     name: newClass,
+     level: 1
+  };
 
-interface Emits {
-  (e: 'update:character', value: Character): void;
-  (e: 'update:primary-class', value: string): void;
-}
+  if (!currentCharacter.value.characterId) return
 
-defineProps<Props>();
-const emit = defineEmits<Emits>();
-
-const updateCharacter = (newCharacter: Character) => {
-  emit('update:character', newCharacter);
-};
-
-const updateClass = (newClass: string) => {
-  emit('update:primary-class', newClass);
+  await characterStore.updateCharacter(currentCharacter.value.characterId, { classes: currentCharacter.value.classes });
 };
 </script>

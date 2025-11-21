@@ -5,6 +5,9 @@
 
 import { getCurrentLevel } from '../utils/dndLevels';
 
+export const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'] as const;
+export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 } as const;
+
 interface RaceModifiers {
   [key: string]: number;
 }
@@ -15,7 +18,7 @@ interface HitDieMap {
 
 interface Skill {
   name: string;
-  ability: 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
+  ability: typeof ABILITIES[number];
 }
 
 interface ClassProficiencies {
@@ -43,6 +46,35 @@ const SKILLS: Skill[] = [
   { name: 'Stealth', ability: 'Dex' },
   { name: 'Survival', ability: 'Wis' },
 ];
+
+export const ALLOWED_RACES = [
+  { id: 'human', name: 'Humain', mods: { Str: 1, Dex: 1, Con: 1, Int: 1, Wis: 1, Cha: 1 } },
+  { id: 'dwarf', name: 'Nain', mods: { Con: 2 } },
+  { id: 'elf', name: 'Elfe', mods: { Dex: 2 } },
+  { id: 'halfling', name: 'Halfelin', mods: { Dex: 2 } },
+  { id: 'gnome', name: 'Gnome', mods: { Int: 2 } },
+  { id: 'half-elf', name: 'Demi-elfe', mods: { Cha: 2 } },
+  { id: 'half-orc', name: 'Demi-orc', mods: { Str: 2, Con: 1 } },
+  { id: 'tiefling', name: 'Tieffelin', mods: { Cha: 2, Int: 1 } },
+  { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } },
+] as const;
+
+export const CLASSES_LIST = [
+  'Barbarian',
+  'Bard',
+  'Cleric',
+  'Druid',
+  'Fighter',
+  'Monk',
+  'Paladin',
+  'Ranger',
+  'Rogue',
+  'Sorcerer',
+  'Warlock',
+  'Wizard',
+] as const;
+export const GENDERS = ['male', 'female'] as const;
+export const DEFAULT_RACE = ALLOWED_RACES[0];
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
@@ -187,7 +219,6 @@ export class DnDRulesService {
     className: string,
     raceModifiers: RaceModifiers,
     raceInfo: any,
-    worldInfo?: { world?: string; worldId?: string },
     selectedSkills?: string[],
   ): any {
     // Apply racial bonuses
@@ -216,8 +247,6 @@ export class DnDRulesService {
       totalXp: 0,
       proficiency,
       skills,
-      ...(worldInfo?.world && { world: worldInfo.world }),
-      ...(worldInfo?.worldId && { worldId: worldInfo.worldId }),
     };
   }
 }

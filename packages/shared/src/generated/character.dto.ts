@@ -24,6 +24,7 @@ export interface CharacterDto {
   isDeceased: boolean;
   diedAt: Date;
   deathLocation: string;
+  state: 'draft' | 'created';
 }
 export type CreateCharacterDto = Omit<CharacterDto, 'userId' | 'characterId'>;
 export type UpdateCharacterDto = Partial<CreateCharacterDto>;

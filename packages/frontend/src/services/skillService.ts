@@ -26,13 +26,3 @@ export function getSkillBonus(
   console.warn(`Skill "${skillName}" not found for character`);
   return 0;
 }
-
-/**
- * Get all available skills for a character
- * @param character The character to get skills from
- */
-export function getAvailableSkills(
-  character: CharacterDto | null,
-): Array<{ name: string; modifier: number }> {
-  return character?.skills || [];
-}

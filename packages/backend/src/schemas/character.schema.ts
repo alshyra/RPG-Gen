@@ -112,6 +112,9 @@ export class Character {
 
   @Prop()
   deathLocation: string;
+
+  @Prop({ required: true, default: 'draft' })
+  state: 'draft' | 'created';
 }
 
 export const CharacterSchema = SchemaFactory.createForClass(Character);

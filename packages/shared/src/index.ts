@@ -15,7 +15,6 @@ export type ChatRole = 'user' | 'assistant' | 'system';
 export type DiceRequest = any;
 export type ImageRequest = any;
 export type AvatarRequest = any;
-export type AvatarRequestWithCharacterId = AvatarRequest & { characterId?: string };
 export type ChatRequest = any;
 export type GameResponse = any;
 export type GameMessage = any;
