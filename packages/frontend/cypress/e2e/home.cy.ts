@@ -97,8 +97,8 @@ describe('Home Page', () => {
     // For now, we just verify the page structure is correct
     // Use data-cy selector to choose a world and assert we navigate to the character creation flow
     cy.dataCy('world-start-dnd').click();
-    // Should navigate to the character creation route for DnD
-    cy.url().should('include', '/character/dnd/step/1');
+    // Should navigate to the character creation route (with generated characterId)
+    cy.url().should('match', /\/character\/[^/]+\/step\/1/);
     // Confirm the character creation wizard header is visible
     cy.contains('Création de personnage').should('be.visible');
   });

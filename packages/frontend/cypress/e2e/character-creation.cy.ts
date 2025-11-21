@@ -12,7 +12,7 @@ describe('Character Creation', () => {
 
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    cy.url().should("include", "/character/dnd/step/1");
+    cy.url().should("match", /\/character\/[^/]+\/step\/1/);
     cy.contains("Informations de base").should("be.visible");
 
     cy.get('input[placeholder="Ex: Aragorn"]').type("TestHero");
@@ -20,7 +20,7 @@ describe('Character Creation', () => {
     cy.contains("♂️ Homme").click();
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/2");
+    cy.url().should("match", /\/character\/[^/]+\/step\/2/);
 
     cy.contains("Race & Classe").should("be.visible");
 
@@ -29,12 +29,12 @@ describe('Character Creation', () => {
     cy.get("select").select("Barbarian");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/3");
+    cy.url().should("match", /\/character\/[^/]+\/step\/3/);
 
     cy.contains("Capacités").should("be.visible");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/4");
+    cy.url().should("match", /\/character\/[^/]+\/step\/4/);
 
     cy.contains("Compétences").should("be.visible");
 
@@ -42,13 +42,13 @@ describe('Character Creation', () => {
     cy.get('input[type="checkbox"]').eq(1).check();
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/5");
+    cy.url().should("match", /\/character\/[^/]+\/step\/5/);
 
     cy.contains("Avatar").should("be.visible");
 
     cy.contains("button", "Terminer").click();
 
-    cy.url().should("include", "/game/dnd");
+    cy.url().should("match", /\/game\/[^/]+/);
     cy.contains("Dungeons & Dragons").should("be.visible");
   });
 
@@ -80,11 +80,11 @@ describe('Character Creation', () => {
     cy.wait(600);
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/2");
+    cy.url().should("match", /\/character\/[^/]+\/step\/2/);
 
     cy.reload();
 
-    cy.url().should("include", "/character/dnd/step/2");
+    cy.url().should("match", /\/character\/[^/]+\/step\/2/);
     cy.contains("Race & Classe").should("be.visible");
   });
 
@@ -95,10 +95,10 @@ describe('Character Creation', () => {
     cy.get('input[placeholder="Ex: Aragorn"]').type("BackHero");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/2");
+    cy.url().should("match", /\/character\/[^/]+\/step\/2/);
 
     cy.contains("button", "Retour").click();
-    cy.url().should("include", "/character/dnd/step/1");
+    cy.url().should("match", /\/character\/[^/]+\/step\/1/);
 
     cy.get('input[placeholder="Ex: Aragorn"]').should("have.value", "BackHero");
   });
@@ -122,13 +122,13 @@ describe('Character Creation', () => {
     cy.contains("♂️ Homme").click();
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/2");
+    cy.url().should("match", /\/character\/[^/]+\/step\/2/);
 
     cy.contains("Humain").click();
     cy.get("select").select("Fighter");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("include", "/character/dnd/step/3");
+    cy.url().should("match", /\/character\/[^/]+\/step\/3/);
     cy.contains("Capacités").should("be.visible");
 
     cy.get('[data-test-id="ability-score-Str"]').contains("-").click();
@@ -145,7 +145,7 @@ describe('Character Creation', () => {
 
     cy.reload();
 
-    cy.url().should("include", "/character/dnd/step/3");
+    cy.url().should("match", /\/character\/[^/]+\/step\/3/);
     cy.contains("Capacités").should("be.visible");
 
     cy.get('[data-test-id=ability-score-Str] [data-test-id=ability-score]').should('contain', '14');
@@ -176,7 +176,7 @@ describe('Character Creation', () => {
     cy.get('input[type="checkbox"]').eq(1).check();
     cy.contains("button", "Suivant").click();
 
-    cy.url().should("include", "/character/dnd/step/5");
+    cy.url().should("match", /\/character\/[^/]+\/step\/5/);
     cy.contains("Générer un Avatar").should("be.visible");
 
     cy.get("textarea").type("Un grand guerrier musclé aux cheveux noirs");
@@ -203,6 +203,6 @@ describe('Character Creation', () => {
       expect(interception.request.headers.authorization).to.contain('Bearer');
     });
 
-    cy.url().should("include", "/game/dnd");
+    cy.url().should("match", /\/game\/[^/]+/);
   });
 });
