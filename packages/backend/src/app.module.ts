@@ -10,28 +10,8 @@ import { AuthModule } from './auth/auth.module.js';
 import { CharacterModule } from './character/character.module.js';
 import { HealthModule } from './health/health.module.js';
 
-// Create pino logger instance
-const getPinoLogger = () => {
-  if (process.env.LOG_FORMAT === 'json') {
-    return pino();
-  }
-  // Use pino-pretty for pretty-printing in development
-  return pino(
-    pretty({
-      colorize: true,
-      singleLine: false,
-      sync: true,
-    }),
-  );
-};
-
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: {
-        logger: getPinoLogger(),
-      },
-    }),
     MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/rpggen', {
       retryAttempts: 5,
       retryDelay: 3000,
