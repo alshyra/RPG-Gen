@@ -1,7 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { Injectable, Logger } from '@nestjs/common';
 
 type GeminiResponse = Record<string, unknown>;
 
@@ -97,13 +95,12 @@ export class GeminiTextService {
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
   }
 
-  getOrCreateChat(
+  initializeChatSession(
     sessionId: string,
     systemInstruction: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialHistory: any[] = [],
   ) {
-    if (this.chatClients.has(sessionId)) return this.chatClients.get(sessionId);
+    if (this.chatClients.has(sessionId)) return;
 
     this.logger.debug(`Creating new chat client for session ${sessionId}`);
     const chat = this.client.chats.create({
@@ -114,9 +111,7 @@ export class GeminiTextService {
         temperature: 0.7,
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.chatClients.set(sessionId, chat as any);
-    return chat;
   }
 
   private extractResponseMetadata = (
@@ -126,7 +121,6 @@ export class GeminiTextService {
     modelVersion: this.model,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleChatMessage(chat: any, message: string): Promise<GeminiMessage> {
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
     const response = await chat.sendMessage({ message });

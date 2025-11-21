@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[94vh] p-2 lg:p-4 gap-2">
+  <div class="flex flex-col h-[88vh] p-2 lg:p-4 gap-2">
     <!-- Mobile Menu Toggle Button (only visible on mobile) -->
     <UiButton
       variant="ghost"

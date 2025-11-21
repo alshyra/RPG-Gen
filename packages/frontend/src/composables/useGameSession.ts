@@ -44,8 +44,8 @@ export function useGameSession() {
     try {
       gameStore.setCharacter(char);
       if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      const { messages: history } = await gameEngine.startGame(char);
-      if (history?.length) gameStore.updateMessages(processHistoryMessages(history, gameStore));
+      const messages = await gameEngine.startGame(char);
+      if (messages?.length) gameStore.updateMessages(processHistoryMessages(messages, gameStore));
     } catch (e: any) {
       gameStore.appendMessage('Error', e?.response?.data?.error || e.message);
     }

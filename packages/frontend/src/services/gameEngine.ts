@@ -36,15 +36,12 @@ export class GameEngine {
    * Start game linked to current character
    * Each character gets its own conversation history using their UUID as characterId
    */
-  async startGame(character: CharacterDto): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
+  async startGame(character: CharacterDto) {
     if (!character) throw new Error('No character provided to startGame.');
     this.characterId = character.characterId;
 
-    const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
-    const isNew = histRes?.data?.isNew || false;
-    const history = histRes?.data?.history || [];
-
-    return { isNew, messages: history };
+    const histRes = await apiClient.get<ChatMessage[]>(`/chat/${this.characterId}/history`);
+    return histRes.data;
   }
 
   /**
@@ -52,11 +49,9 @@ export class GameEngine {
    */
   async sendMessage(message: string): Promise<GameResponse> {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
-    const res = await apiClient.post('/chat', {
-      message,
-      characterId: this.characterId,
-    });
-    const result = res?.data?.result || {};
+    const res = await apiClient.post(`/chat/${this.characterId}`, { message });
+    console.log(res);
+    const result = res?.data;
 
     return {
       text: result.text || '',
