@@ -1,5 +1,5 @@
 import test from 'ava';
-import { rollDiceExpr } from '../src/dice/dice.util';
+import { rollDiceExpr } from '../src/dice/dice.util.js';
 
 test('rollDiceExpr parses and rolls correctly with deterministic RNG', (t) => {
   const seq = [0.1, 0.2];

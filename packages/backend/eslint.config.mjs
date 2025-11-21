@@ -1,9 +1,5 @@
-/* eslint-env node */
-/* eslint-disable no-undef, no-redeclare */
 import shared from '../../eslint.shared.js';
 import ts from 'typescript-eslint';
-
-const dirname = new URL('.', import.meta.url).pathname;
 
 export default [
   ...shared,
@@ -11,7 +7,7 @@ export default [
   {
     files: ['**/*.{js,ts}'],
     languageOptions: {
-      parser: { ...ts.parser, tsconfigRootDir: dirname },
+      parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
     },
     rules: {
       // backend can customize stricter rules if necessary

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { compressImage as compressImageUtil, validateImage as validateImageUtil } from './image.util';
+import { compressImage as compressImageUtil, validateImage as validateImageUtil } from './image.util.js';
 
 @Injectable()
 export class ImageService {

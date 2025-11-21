@@ -15,11 +15,11 @@ import { Request } from 'express';
 import fs, { readFile } from 'fs/promises';
 import * as Joi from 'joi';
 import type { CharacterDto, ChatRequest } from '@rpg-gen/shared';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
-import { GeminiTextService } from '../external/text/gemini-text.service';
-import { UserDocument } from '../schemas/user.schema';
-import { ChatMessage, ConversationService } from './conversation.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { GameInstruction, parseGameResponse } from '../external/game-parser.util.js';
+import { GeminiTextService } from '../external/text/gemini-text.service.js';
+import { UserDocument } from '../schemas/user.schema.js';
+import { ChatMessage, ConversationService } from './conversation.service.js';
 
 const schema = Joi.object({
   message: Joi.string().allow('').optional(),

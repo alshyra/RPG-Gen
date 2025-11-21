@@ -53,11 +53,23 @@
     "typescript-eslint": "^8.46.4"
   },
   "ava": {
-    "extensions": {
-      "ts": "module"
-    },
+    "files": [
+      "test/**/*.test.ts"
+    ],
+    "extensions": [
+      "ts"
+    ],
     "nodeArguments": [
-      "--import=tsimp"
-    ]
+      "--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node",
+      "--enable-source-maps",
+      "--no-warnings"
+    ],
+    "failFast": true
+  },
+  "ts-node": {
+    "esm": true,
+    "preferTsExts": true,
+    "transpileOnly": true
   }
 }

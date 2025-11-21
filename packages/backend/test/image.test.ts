@@ -1,5 +1,5 @@
 import test from 'ava';
-import { compressImage, validateImage } from '../src/image/image.util';
+import { compressImage, validateImage } from '../src/image/image.util.js';
 
 test('compressImage should compress base64 image', async (t) => {
   // Create a small test image (1x1 red pixel PNG)

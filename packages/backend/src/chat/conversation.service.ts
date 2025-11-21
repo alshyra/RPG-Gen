@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import type { ChatMessage, MessageMetaDto } from '@rpg-gen/shared';
-import { ChatHistory, ChatHistoryDocument } from '../schemas/chat-history.schema';
+import { ChatHistory, ChatHistoryDocument } from '../schemas/chat-history.schema.js';
 
 // Re-export for convenience
 export type { ChatMessage } from '@rpg-gen/shared';
