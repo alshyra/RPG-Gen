@@ -51,7 +51,7 @@ const getAllSavedCharacters = async () => {
 
 const saveCharacter = async (characterId: string, character: Partial<CharacterDto>) => {
   try {
-    const res = await apiClient.post<CharacterDto>(`/characters/${characterId}`, character);
+    const res = await apiClient.put<CharacterDto>(`/characters/${characterId}`, character);
     return res.data;
   } catch (e) {
     console.error('Failed to save character to API', e);

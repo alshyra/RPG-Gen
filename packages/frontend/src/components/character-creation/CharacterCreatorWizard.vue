@@ -145,8 +145,10 @@ const previousStep = () => {
 const finishCreation = async () => {
   if (!currentCharacter.value) return;
   isLoading.value = true;
+  console.log('Finishing character creation for', currentCharacter.value);
   await updateCharacter(currentCharacter.value.characterId, { state: 'created' });
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
+  console.log('Avatar generated');
   router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });
   isLoading.value = false;
 };

@@ -156,8 +156,8 @@
 <script setup lang="ts">
 import UiMarkdown from '../components/ui/UiMarkdown.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
 import SkillsPanel from '../components/character-stats/SkillsPanel.vue';
 import CharacterPortrait from '../components/character/CharacterPortrait.vue';
@@ -173,8 +173,10 @@ import { useGameStore } from '../stores/gameStore';
 
 // State
 const router = useRouter();
+const route = useRoute();
 const gameStore = useGameStore();
 const isSidebarOpen = ref(false);
+const characterId = computed(() => route.params.characterId);
 
 // Composables
 const { startGame } = useGameSession();
@@ -214,7 +216,7 @@ watch(
 // Handle character death
 const onDeathConfirm = async () => {
   if (!gameStore.session.character?.characterId) return;
-  await characterServiceApi.killCharacter(gameStore.session.character.characterId, gameStore.session.worldName);
+  await characterServiceApi.killCharacter(characterId, gameStore.session.worldName);
   gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');

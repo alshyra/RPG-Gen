@@ -1,5 +1,5 @@
 import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
 import type { Request } from 'express';
 import Joi from 'joi';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
@@ -17,6 +17,7 @@ const schema = Joi.object({
 });
 
 class CharacterIdBody {
+  @ApiProperty({ description: 'UUID of the character' })
   characterId: string;
 }
 
@@ -45,13 +46,22 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-  @ApiBody({ type: [CharacterIdBody] })
-  async generateAvatar(@Req() req: Request, @Body() body: CharacterIdBody) {
-    if (!body.characterId) throw new BadRequestException('characterId is required');
+
+  @ApiBody({ type: CharacterIdBody })
+  async generateAvatar(@Req() req: Request, @Body() body: any) {
+    this.logger.log(`Received avatar generation request payload: ${JSON.stringify(body)}`);
+
+    // Accept a few variations of payloads: { characterId }, [{ characterId }], or a raw string id
+    if (!body) throw new BadRequestException('characterId is required');
+    let characterId: string | undefined;
+    if (typeof body === 'string') characterId = body;
+    else if (Array.isArray(body) && body.length > 0) characterId = body[0]?.characterId;
+    else if (typeof body === 'object') characterId = body.characterId;
+    if (!characterId || typeof characterId !== 'string') throw new BadRequestException('characterId is required');
 
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    const character = await this.characterService.findByCharacterId(userId, body.characterId);
+    const character = await this.characterService.findByCharacterId(userId, characterId);
 
     if (!character) throw new BadRequestException('Character not found');
 

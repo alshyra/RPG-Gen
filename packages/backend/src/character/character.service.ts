@@ -39,6 +39,7 @@ export class CharacterService {
     return this.characterModel.findOne({ userId, characterId }).exec();
   }
 
+  // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) {
@@ -53,6 +54,13 @@ export class CharacterService {
     if (updates.skills !== undefined) character.skills = updates.skills as any;
     if (updates.portrait !== undefined) character.portrait = updates.portrait;
     if (updates.scores !== undefined) character.scores = updates.scores as any;
+    if (updates.name !== undefined) character.name = updates.name;
+    if (updates.race !== undefined) character.race = updates.race as any;
+    if (updates.gender !== undefined) character.gender = updates.gender as any;
+    if (updates.proficiency !== undefined) character.proficiency = updates.proficiency;
+    if (updates.isDeceased !== undefined) character.isDeceased = updates.isDeceased;
+    if (updates.physicalDescription !== undefined) character.physicalDescription = updates.physicalDescription;
+    if (updates.state !== undefined) character.state = updates.state;
 
     const saved = await character.save();
     this.logger.log(`Character updated: ${saved.name} (${saved.characterId})`);
@@ -109,6 +117,7 @@ export class CharacterService {
       isDeceased: doc.isDeceased || false,
       diedAt: doc.diedAt,
       deathLocation: doc.deathLocation,
+      physicalDescription: doc.physicalDescription,
       state: doc.state,
     };
   }

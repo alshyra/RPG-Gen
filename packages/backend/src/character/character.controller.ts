@@ -92,10 +92,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.update(userId, characterId, updates);
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
   }
 
   @Delete(':characterId')
