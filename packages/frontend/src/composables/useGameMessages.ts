@@ -22,7 +22,7 @@ export function useGameMessages() {
     gameStore.appendMessage('System', '...thinking...');
     gameStore.setSending(true);
     try {
-      const response = await gameEngine.sendMessage(gameStore.playerText, gameStore.session.character);
+      const response = await gameEngine.sendMessage(gameStore.playerText);
       gameStore.clearPlayerText();
       handleMessageResponse(response);
     } catch (e: any) {

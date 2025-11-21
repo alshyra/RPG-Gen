@@ -50,13 +50,11 @@ export class GameEngine {
   /**
    * Send a message to the game backend
    */
-  async sendMessage(message: string, character?: CharacterDto): Promise<GameResponse> {
-    if (!this.characterId && !character?.characterId) throw new Error('Game not started. Call startGame first.');
-    const char = character ?? { characterId: this.characterId };
+  async sendMessage(message: string): Promise<GameResponse> {
+    if (!this.characterId) throw new Error('Game not started. Call startGame first.');
     const res = await apiClient.post('/chat', {
       message,
-      characterId: this.characterId || char.characterId,
-      character: char,
+      characterId: this.characterId,
     });
     const result = res?.data?.result || {};
 

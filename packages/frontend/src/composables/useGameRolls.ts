@@ -1,8 +1,8 @@
-import { RollModalData } from '@rpg-gen/shared';
 import { ref, toRaw } from 'vue';
 import { gameEngine } from '../services/gameEngine';
 import { getSkillBonus } from '../services/skillService';
 import { useGameStore } from '../stores/gameStore';
+import { GameInstruction, GameResponse, RollModalData, RollResult } from '@rpg-gen/shared';
 
 const getCriticalNote = (diceValue: number): string =>
   diceValue === 20
@@ -22,7 +22,10 @@ const buildRollMessage = (
     bonus !== 0 ? ` + ${bonus}` : ''
   } (${skillName}) = **${total}**${criticalNote}`;
 
-const handleAdditionalRoll = (instr: any, gameStore: any): void => {
+type GameStore = ReturnType<typeof useGameStore>;
+
+const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): void => {
+  if (!instr.roll) return;
   gameStore.setPendingInstruction(instr);
   gameStore.appendMessage(
     'System',
@@ -30,12 +33,14 @@ const handleAdditionalRoll = (instr: any, gameStore: any): void => {
   );
 };
 
-const handleAdditionalXp = (instr: any, gameStore: any): void => {
+const handleAdditionalXp = (instr: GameInstruction, gameStore: GameStore): void => {
+  if (typeof instr.xp !== 'number') return;
   gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
   gameStore.updateCharacterXp(instr.xp);
 };
 
-const handleAdditionalHp = (instr: any, gameStore: any): void => {
+const handleAdditionalHp = (instr: GameInstruction, gameStore: GameStore): void => {
+  if (typeof instr.hp !== 'number') return;
   const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
   gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
   gameStore.updateCharacterHp(instr.hp);
@@ -52,7 +57,9 @@ export function useGameRolls() {
     skillName: '',
   });
 
-  const onDiceRolled = async (rollResult: any): Promise<void> => {
+  type RolledPayload = { diceValue: number; bonus?: number; total: number };
+
+  const onDiceRolled = async (rollResult: RolledPayload): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
     const instr = gameStore.pendingInstruction.roll;
     const skillName = typeof instr.modifier === 'string' ? instr.modifier : 'Roll';
@@ -73,11 +80,11 @@ export function useGameRolls() {
     gameStore.setRollModalVisible(true);
   };
 
-  const handleRollResponse = async (response: any): Promise<void> => {
+  const handleRollResponse = async (response: GameResponse): Promise<void> => {
     gameStore.appendMessage('GM', response.text);
     gameStore.setPendingInstruction(null);
     gameStore.setRollModalVisible(false);
-    response.instructions?.forEach((instr: any) => {
+    response.instructions?.forEach((instr: GameInstruction) => {
       if (instr.roll) handleAdditionalRoll(instr, gameStore);
       else if (instr.xp) handleAdditionalXp(instr, gameStore);
       else if (instr.hp) handleAdditionalHp(instr, gameStore);
@@ -85,14 +92,12 @@ export function useGameRolls() {
   };
 
   const sendRollResult = async (
-    rollResult: any,
+    rollResult: RollResult | { rolls: number[]; total: number; bonus: number; advantage?: boolean },
     skillName: string,
     criticalNote: string,
   ): Promise<void> => {
-    const rollResultMsg = `[${skillName}] Roll result: ${JSON.stringify(
-      rollResult,
-    )}${criticalNote}`;
-    const response = await gameEngine.sendMessage(rollResultMsg, gameStore.session.character);
+    const rollResultMsg = `[${skillName}] Roll result: ${JSON.stringify(rollResult)}${criticalNote}`;
+    const response = await gameEngine.sendMessage(rollResultMsg);
     await handleRollResponse(response);
   };
 
@@ -107,8 +112,9 @@ export function useGameRolls() {
     );
     try {
       await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
-    } catch (e: any) {
-      gameStore.appendMessage('Error', 'Failed to send roll result: ' + e.message);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      gameStore.appendMessage('Error', 'Failed to send roll result: ' + message);
       gameStore.setRollModalVisible(false);
     }
   };

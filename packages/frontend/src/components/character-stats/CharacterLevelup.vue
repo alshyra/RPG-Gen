@@ -211,7 +211,7 @@ const executeLevelUp = async (): Promise<void> => {
 
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await gameEngine.sendMessage(levelupMsg, character.value);
+  await gameEngine.sendMessage(levelupMsg);
   gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
 
   // Return to game

@@ -25,7 +25,7 @@
               :min="8"
               :max="15"
               :disabled="mode === 'edit'"
-              @update:model-value="(val) => applyPointBuyChange(ability, val, mode === 'levelup' ? levelUpBudget : undefined, mode === 'levelup' ? initialScores : undefined)"
+              @update:model-value="(val) => applyPointBuyChange(ability, val)"
             />
           </div>
         </div>
@@ -35,14 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
-import { ABILITIES, DnDRulesService } from '@/services/dndRulesService';
-import { storeToRefs } from 'pinia';
 import useAbilityScores from '@/composables/useAbilityScores';
+import { ABILITIES } from '@/services/dndRulesService';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
 import UiInputNumber from '../ui/UiInputNumber.vue';
 
 const props = defineProps<{ mode?: 'edit' | 'levelup' | 'point-buy'; levelUpBudget?: number; proficiency?: number; initialScores?: Record<string, number> }>();
-const { mode = 'point-buy', levelUpBudget = 27, proficiency = 1, initialScores = undefined } = props;
+const { mode = 'point-buy', proficiency = 1 } = props;
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
