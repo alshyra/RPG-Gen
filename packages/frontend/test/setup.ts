@@ -2,8 +2,14 @@ import 'whatwg-fetch';
 import { vi } from 'vitest';
 import { reactive } from 'vue';
 
-// Provide a minimal localStorage implementation for tests
-if (!globalThis.localStorage) {
+let shouldMockLocalStorage = true;
+try {
+  if (typeof globalThis.localStorage !== 'undefined') shouldMockLocalStorage = false;
+} catch {
+  shouldMockLocalStorage = true;
+}
+
+if (shouldMockLocalStorage) {
   const storage: Record<string, string> = {};
   globalThis.localStorage = {
     getItem: (key: string) => (Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null),
