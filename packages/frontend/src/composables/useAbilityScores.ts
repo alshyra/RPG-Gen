@@ -24,14 +24,27 @@ const useAbilityScores = () => {
     ability: keyof CharacterDto['scores'],
     newValue: number,
     maxBudget = 27,
+    initialScores?: CharacterDto['scores'],
   ) => {
     if (!currentCharacter.value) return { allowed: false };
 
     const current = characterScores.value[ability] ?? 8;
-    const prevCost = COST[current as keyof typeof COST] || 0;
-    const newCost = COST[newValue as keyof typeof COST] || 0;
-    const newUsed = pointsUsed.value - prevCost + newCost;
-    if (newUsed > maxBudget) return { allowed: false };
+    let newUsed = 0;
+    if (initialScores) {
+      // Level-up mode: budget is the number of direct +1 increases available above initial scores
+      const currentIncrease = (current - (initialScores[ability] ?? 8)) || 0;
+      const currentUsed = Object.keys(initialScores)
+        .map(k => Math.max(0, characterScores.value[k as keyof typeof initialScores] - initialScores[k as keyof typeof initialScores]))
+        .reduce((s, v) => s + v, 0);
+      const newIncrease = Math.max(0, newValue - (initialScores[ability] ?? 8));
+      newUsed = currentUsed - currentIncrease + newIncrease;
+      if (newUsed > maxBudget) return { allowed: false };
+    } else {
+      const prevCost = COST[current as keyof typeof COST] || 0;
+      const newCost = COST[newValue as keyof typeof COST] || 0;
+      newUsed = pointsUsed.value - prevCost + newCost;
+      if (newUsed > maxBudget) return { allowed: false };
+    }
 
     currentCharacter.value = {
       ...currentCharacter.value,

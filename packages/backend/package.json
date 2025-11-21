@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node dist/backend/src/main.js",
-    "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "start": "nest start --watch",
+    "start:prod": "node dist/main",
+    "build": "nest build",
     "lint": "tsc -p tsconfig.json && eslint .",
     "lint:fix": "eslint . --fix",
     "test": "ava",
-    "generate:dtos": "ts-node ./scripts/generate-dtos.ts",
+    "generate:dtos": "ts-node ./src/scripts/generate-dtos.ts",
     "postinstall": "npm run generate:dtos"
   },
   "dependencies": {
@@ -18,6 +18,7 @@
     "@nestjs/common": "^11.1.8",
     "@nestjs/core": "^11.1.8",
     "@nestjs/jwt": "^11.0.1",
+    "@nestjs/schematics": "^11.0.0",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.8",
@@ -28,6 +29,7 @@
     "class-validator": "^0.14.2",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
+    "express": "^5.1.0",
     "joi": "^18.0.1",
     "mongoose": "^8.19.3",
     "nestjs-pino": "^4.4.1",
@@ -39,14 +41,15 @@
     "reflect-metadata": "^0.2.2",
     "rimraf": "^6.1.0",
     "sharp": "^0.34.5",
-    "ts-morph": "^27.0.2"
+    "ts-morph": "^27.0.2",
+    "tsconfig-paths": "^4.1.0"
   },
   "devDependencies": {
-    "tsimp": "^2.0.12",
     "@ava/typescript": "^6.0.0",
     "@stylistic/eslint-plugin": "^5.5.0",
     "@types/node": "^24.10.1",
     "ava": "^6.4.1",
+    "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
@@ -66,10 +69,5 @@
       "--no-warnings"
     ],
     "failFast": true
-  },
-  "ts-node": {
-    "esm": true,
-    "preferTsExts": true,
-    "transpileOnly": true
   }
 }

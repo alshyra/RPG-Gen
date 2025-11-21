@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 type GeminiResponse = Record<string, unknown>;
 
@@ -83,9 +85,8 @@ function textFromResponse(data: unknown): string {
 @Injectable()
 export class GeminiTextService {
   private readonly logger = new Logger(GeminiTextService.name);
-  private client: GoogleGenAI | null = null;
+  private client: GoogleGenAI;
   private model = 'gemini-2.5-flash';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
   constructor() {
@@ -94,23 +95,6 @@ export class GeminiTextService {
       process.env.GOOGLE_API_KEY ? '***' : 'no API key',
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
-  }
-
-  private isMock() {
-    return process.env.MOCK_GEMINI === 'true';
-  }
-
-  private mockText(prompt: string): GeminiMessage {
-    const text = `[[MOCK GEMINI - ${this.model}]]\n\n${prompt.slice(0, 1000)}`;
-    const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-    const genTokens = Math.max(20, Math.min(1500, Math.ceil(text.length / 4)));
-    const usage = {
-      promptTokenCount: promptTokens,
-      candidatesTokenCount: genTokens,
-      totalTokenCount: promptTokens + genTokens,
-    };
-    const raw = { candidates: [{ content: [{ text }] }], modelVersion: this.model };
-    return { text, raw, usage, modelVersion: this.model };
   }
 
   getOrCreateChat(
@@ -154,9 +138,9 @@ export class GeminiTextService {
   }
 
   async sendMessage(sessionId: string, message: string): Promise<GeminiMessage> {
-    if (this.isMock()) return this.mockText(message);
-    const chat = this.chatClients.get(sessionId) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
+
     try {
       return await this.handleChatMessage(chat, message);
     } catch (e) {

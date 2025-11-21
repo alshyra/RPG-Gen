@@ -1,7 +1,7 @@
 import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
-import * as Joi from 'joi';
+import type { Request } from 'express';
+import Joi from 'joi';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { ImageService } from './image.service.js';
 import { CharacterService } from '../character/character.service.js';
@@ -48,9 +48,13 @@ export class ImageController {
   @ApiBody({ type: [CharacterIdBody] })
   async generateAvatar(@Req() req: Request, @Body() body: CharacterIdBody) {
     if (!body.characterId) throw new BadRequestException('characterId is required');
+
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, body.characterId);
+
+    if (!character) throw new BadRequestException('Character not found');
+
     return await this.handleGenerateAvatar(userId, character);
   }
 

@@ -1,5 +1,7 @@
 import { defineConfig } from 'cypress';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   e2e: {
@@ -26,9 +28,14 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
-        plugins: [vue()],
+        plugins: [tailwindcss(), vue()],
         server: {
           port: 5173,
+        },
+        resolve: {
+          alias: {
+            '@': fileURLToPath(new URL('./src', import.meta.url)),
+          },
         },
       },
     },

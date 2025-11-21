@@ -5,10 +5,10 @@ export type CharacterDocument = Character & Document;
 
 @Schema({ _id: false })
 class Race {
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   name: string;
 
   @Prop({ type: Object })
@@ -17,43 +17,43 @@ class Race {
 
 @Schema({ _id: false })
 class CharacterClass {
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   level: number;
 }
 
 @Schema({ _id: false })
 class Skill {
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Boolean })
   proficient: boolean;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   modifier: number;
 }
 
 @Schema({ _id: false })
 class AbilityScores {
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Str: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Dex: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Con: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Int: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Wis: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   Cha: number;
 }
 
@@ -62,13 +62,13 @@ export class Character {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: MongooseSchema.Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   characterId: string; // UUID for client-side compatibility
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   name: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: String })
   physicalDescription: string;
 
   @Prop({ type: Race, required: true })
@@ -77,13 +77,13 @@ export class Character {
   @Prop({ type: AbilityScores, required: true })
   scores: AbilityScores;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   hp: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   hpMax: number;
 
-  @Prop({ required: true, default: 0 })
+  @Prop({ required: true, default: 0, type: Number })
   totalXp: number;
 
   @Prop({ type: [CharacterClass], required: true })
@@ -92,28 +92,28 @@ export class Character {
   @Prop({ type: [Skill], required: true })
   skills: Skill[];
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   world: string;
 
-  @Prop()
+  @Prop({ type: String })
   portrait: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   gender: string;
 
-  @Prop({ required: true, default: 2 })
+  @Prop({ required: true, default: 2, type: Number })
   proficiency: number;
 
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   isDeceased: boolean;
 
-  @Prop()
+  @Prop({ type: Date })
   diedAt: Date;
 
-  @Prop()
+  @Prop({ type: String })
   deathLocation: string;
 
-  @Prop({ required: true, default: 'draft' })
+  @Prop({ required: true, default: 'draft', type: String })
   state: 'draft' | 'created';
 }
 

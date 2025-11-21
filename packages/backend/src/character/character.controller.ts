@@ -12,7 +12,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { CharacterService } from './character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';

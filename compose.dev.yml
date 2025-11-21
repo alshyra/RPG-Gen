@@ -18,14 +18,13 @@ services:
     container_name: rpg-gen-backend
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci && npm --workspace rpg-gemini-backend run start:dev"
+    command: sh -c "npm --workspace rpg-gemini-backend run start"
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
     volumes:
-      - ./packages/backend:/app/backend
-      - ./packages/shared:/app/shared
+      - ./:/app/
       - backend_node_modules:/app/backend/node_modules
     env_file:
       - packages/backend/.env

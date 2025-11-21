@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { authService } from './authService';
-import type { GameResponse, ChatMessage } from '@rpg-gen/shared';
+import type { GameResponse, ChatMessage, CharacterDto } from '@rpg-gen/shared';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
@@ -36,11 +36,9 @@ export class GameEngine {
    * Start game linked to current character
    * Each character gets its own conversation history using their UUID as characterId
    */
-  async startGame(character: ChatMessage | any): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
-    // Expect the caller to pass the current Character DTO instead of calling the API here
+  async startGame(character: CharacterDto): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
     if (!character) throw new Error('No character provided to startGame.');
-    // characterId normalization
-    this.characterId = (character as any).characterId || (character as any).id;
+    this.characterId = character.characterId;
 
     const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
     const isNew = histRes?.data?.isNew || false;
@@ -52,7 +50,7 @@ export class GameEngine {
   /**
    * Send a message to the game backend
    */
-  async sendMessage(message: string, character?: any): Promise<GameResponse> {
+  async sendMessage(message: string, character?: CharacterDto): Promise<GameResponse> {
     if (!this.characterId && !character?.characterId) throw new Error('Game not started. Call startGame first.');
     const char = character ?? { characterId: this.characterId };
     const res = await apiClient.post('/chat', {

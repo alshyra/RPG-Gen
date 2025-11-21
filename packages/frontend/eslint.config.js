@@ -30,6 +30,7 @@ export default [
       'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['error', 10],
       'prefer-object-spread': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
     }
   },
 ];
