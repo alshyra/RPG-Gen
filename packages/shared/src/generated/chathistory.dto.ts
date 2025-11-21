@@ -3,10 +3,9 @@
 import { ChatMessageDto } from './chatmessage.dto';
 
 export interface ChatHistoryDto {
-  userId: string;
   characterId: string;
   messages: ChatMessageDto[];
   lastUpdated: Date;
 }
-export type CreateChatHistoryDto = Omit<ChatHistoryDto, 'userId' | 'characterId'>;
+export type CreateChatHistoryDto = Omit<ChatHistoryDto, 'userId'>;
 export type UpdateChatHistoryDto = Partial<CreateChatHistoryDto>;

@@ -1,28 +1,23 @@
 import shared from '../../eslint.shared.js';
 import ts from 'typescript-eslint';
+import * as vueParserPkg from 'vue-eslint-parser';
+import pluginVue from 'eslint-plugin-vue'
+import globals from 'globals';
 
 export default [
   ...shared,
+  ...pluginVue.configs['flat/recommended'],
     {
     files: ['**/*.vue'],
     languageOptions: {
-      parser: vueParser,
       parserOptions: {
-        parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
+        parser: ts.parser,
+        tsconfigRootDir: new URL('.', import.meta.url).pathname,
         ecmaVersion: 'latest',
         sourceType: 'module'
       },
       globals: {
-        console: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearTimeout: 'readonly',
-        clearInterval: 'readonly',
-        crypto: 'readonly',
-        localStorage: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly'
+      ...globals.browser
       }
     },
     rules: {

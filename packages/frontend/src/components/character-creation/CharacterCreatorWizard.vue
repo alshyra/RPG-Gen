@@ -34,7 +34,7 @@
 
     <StepSkills v-if="currentStep === 3" />
 
-    <StepAvatar v-if="currentStep === 4"/>
+    <StepAvatar v-if="currentStep === 4" />
 
     <!-- Navigation buttons -->
     <div class="flex justify-end gap-2 mt-4 lg:mt-6 sticky bottom-0 bg-slate-900/95 py-3 -mx-2 px-2 lg:mx-0 lg:px-0 lg:bg-transparent lg:static">
@@ -56,8 +56,8 @@
       <UiButton
         v-if="currentStep === steps.length - 1"
         variant="primary"
-        @click="finishCreation"
         :disabled="isLoading"
+        @click="finishCreation"
       >
         Terminer
       </UiButton>
@@ -143,10 +143,10 @@ const previousStep = () => {
 const finishCreation = async () => {
   if (!currentCharacter.value) return;
   isLoading.value = true;
-  await updateCharacter(currentCharacter.value.characterId, { state: 'created' })
-  await characterServiceApi.generateAvatar(currentCharacter.value.characterId)
-  router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } })
+  await updateCharacter(currentCharacter.value.characterId, { state: 'created' });
+  await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
+  router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });
   isLoading.value = false;
-}
+};
 
 </script>

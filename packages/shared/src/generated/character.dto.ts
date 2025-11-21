@@ -6,7 +6,6 @@ import { SkillDto } from './skill.dto';
 import { AbilityScoresDto } from './abilityscores.dto';
 
 export interface CharacterDto {
-  userId: string;
   characterId: string;
   name: string;
   physicalDescription?: string;
@@ -26,7 +25,7 @@ export interface CharacterDto {
   deathLocation: string;
   state: 'draft' | 'created';
 }
-export type CreateCharacterDto = Omit<CharacterDto, 'userId' | 'characterId'>;
+export type CreateCharacterDto = Omit<CharacterDto, 'userId'>;
 export type UpdateCharacterDto = Partial<CreateCharacterDto>;
 
 export type GenderDto = CharacterDto['gender'];

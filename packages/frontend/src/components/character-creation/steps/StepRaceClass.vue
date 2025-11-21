@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { CLASSES_LIST } from '@/composables/useCharacterCreation';
+import { CLASSES_LIST } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import UiSelect from '../../ui/UiSelect.vue';
@@ -39,16 +39,15 @@ import RacePicker from '../RacePicker.vue';
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-
 const updateClass = async (newClass: string) => {
   if (!currentCharacter.value) return;
-  currentCharacter.value.classes[0] = { 
-     name: newClass,
-     level: 1
+  currentCharacter.value.classes[0] = {
+    name: newClass,
+    level: 1,
   };
 
-  if (!currentCharacter.value.characterId) return
-
-  await characterStore.updateCharacter(currentCharacter.value.characterId, { classes: currentCharacter.value.classes });
+  const charId = currentCharacter.value.characterId;
+  if (!charId) return;
+  await characterStore.updateCharacter(charId, { classes: currentCharacter.value.classes });
 };
 </script>

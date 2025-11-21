@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { characterServiceApi } from './characterServiceApi';
 import { authService } from './authService';
 import type { GameResponse, ChatMessage } from '@rpg-gen/shared';
 
@@ -37,12 +36,11 @@ export class GameEngine {
    * Start game linked to current character
    * Each character gets its own conversation history using their UUID as characterId
    */
-  async startGame(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
-    // Get current character's UUID - this becomes the characterId for conversation
-    const char = await characterServiceApi.getCurrentCharacter();
-    if (!char)
-      throw new Error('No current character found. Please create or load a character first.');
-    this.characterId = (char as any).characterId || (char as any).id;
+  async startGame(character: ChatMessage | any): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
+    // Expect the caller to pass the current Character DTO instead of calling the API here
+    if (!character) throw new Error('No character provided to startGame.');
+    // characterId normalization
+    this.characterId = (character as any).characterId || (character as any).id;
 
     const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
     const isNew = histRes?.data?.isNew || false;
@@ -54,13 +52,12 @@ export class GameEngine {
   /**
    * Send a message to the game backend
    */
-  async sendMessage(message: string): Promise<GameResponse> {
-    if (!this.characterId) throw new Error('Game not started. Call startGame first.');
-
-    const char = await characterServiceApi.getCurrentCharacter();
+  async sendMessage(message: string, character?: any): Promise<GameResponse> {
+    if (!this.characterId && !character?.characterId) throw new Error('Game not started. Call startGame first.');
+    const char = character ?? { characterId: this.characterId };
     const res = await apiClient.post('/chat', {
       message,
-      characterId: this.characterId,
+      characterId: this.characterId || char.characterId,
       character: char,
     });
     const result = res?.data?.result || {};

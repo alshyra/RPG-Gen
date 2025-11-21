@@ -1,8 +1,8 @@
+import { RollModalData } from '@rpg-gen/shared';
 import { ref, toRaw } from 'vue';
-import { useGameStore } from '../stores/gameStore';
 import { gameEngine } from '../services/gameEngine';
-import { type RollModalData } from '../services/rollTypes';
 import { getSkillBonus } from '../services/skillService';
+import { useGameStore } from '../stores/gameStore';
 
 const getCriticalNote = (diceValue: number): string =>
   diceValue === 20
@@ -92,7 +92,7 @@ export function useGameRolls() {
     const rollResultMsg = `[${skillName}] Roll result: ${JSON.stringify(
       rollResult,
     )}${criticalNote}`;
-    const response = await gameEngine.sendMessage(rollResultMsg);
+    const response = await gameEngine.sendMessage(rollResultMsg, gameStore.session.character);
     await handleRollResponse(response);
   };
 

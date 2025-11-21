@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ALLOWED_RACES } from '@/composables/useCharacterCreation';
+import { ALLOWED_RACES } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { RaceDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
@@ -28,14 +28,13 @@ import { computed } from 'vue';
 
 const allowedRaces = computed(() => ALLOWED_RACES);
 
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
-const characterStore = useCharacterStore()
-const { currentCharacter } = storeToRefs(characterStore)
-
-const additionalSelectedClass = (allowedRace: RaceDto) => 
-  currentCharacter.value?.race?.id === allowedRace.id 
-  ? 'border-indigo-500 bg-indigo-600/20' 
-  : 'border-slate-700'
+const additionalSelectedClass = (allowedRace: RaceDto) =>
+  currentCharacter.value?.race?.id === allowedRace.id
+    ? 'border-indigo-500 bg-indigo-600/20'
+    : 'border-slate-700';
 
 const summaryMods = (mods: RaceDto['mods']) => {
   try {

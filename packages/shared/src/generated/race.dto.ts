@@ -6,5 +6,5 @@ export interface RaceDto {
   name: string;
   mods: Record<string, number>;
 }
-export type CreateRaceDto = Omit<RaceDto, 'id'>;
+export type CreateRaceDto = Partial<RaceDto>;
 export type UpdateRaceDto = Partial<CreateRaceDto>;

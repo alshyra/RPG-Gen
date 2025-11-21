@@ -25,16 +25,17 @@ const useAbilityScores = () => {
     newValue: number,
     maxBudget = 27,
   ) => {
+    if (!currentCharacter.value) return { allowed: false };
+
     const current = characterScores.value[ability] ?? 8;
     const prevCost = COST[current as keyof typeof COST] || 0;
     const newCost = COST[newValue as keyof typeof COST] || 0;
     const newUsed = pointsUsed.value - prevCost + newCost;
     if (newUsed > maxBudget) return { allowed: false };
 
-    // @ts-ignore
-    currentCharacter.value = { 
+    currentCharacter.value = {
       ...currentCharacter.value,
-      scores: { ...characterScores.value, [ability]: newValue }
+      scores: { ...characterScores.value, [ability]: newValue },
     };
     return { allowed: true };
   };

@@ -38,7 +38,7 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const genderOptions = computed(() =>
-  GENDERS.map((g) => ({
+  GENDERS.map(g => ({
     value: g,
     label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
   })),
@@ -52,18 +52,17 @@ const onUpdateName = async (name: string) => {
 
   if (!charId) return;
 
-  await characterStore.updateCharacter(charId, { name: name } as any);
+  await characterStore.updateCharacter(charId, { name: name });
 };
 
 const onUpdateGender = async (gender: typeof GENDERS[number]) => {
   if (!currentCharacter.value) return;
 
-  currentCharacter.value.gender = String(gender) as any;
+  currentCharacter.value.gender = gender;
   const charId = currentCharacter.value.characterId;
   if (!charId) return;
 
-  await characterStore.updateCharacter(charId, { gender: String(gender) } as any);
+  await characterStore.updateCharacter(charId, { gender: String(gender) });
 };
-
 
 </script>

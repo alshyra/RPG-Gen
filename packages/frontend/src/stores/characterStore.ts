@@ -19,7 +19,7 @@ export const useCharacterStore = defineStore('character', () => {
   const updateCharacter = async (characterId: string, character: Partial<CharacterDto>) => {
     if (!characterId) return;
     try {
-      await characterServiceApi.updateCurrentCharacter(characterId, character);
+      await characterServiceApi.saveCharacter(characterId, character);
     } catch (e) {
       console.error('Failed to update character', e);
       throw e;

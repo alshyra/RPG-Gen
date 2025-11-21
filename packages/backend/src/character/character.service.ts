@@ -94,7 +94,6 @@ export class CharacterService {
   toCharacterDto(doc: CharacterDocument): CharacterDto {
     return {
       characterId: doc.characterId,
-      userId: (doc.userId as any)?.toString?.() || String(doc.userId),
       name: doc.name,
       race: doc.race as any,
       scores: doc.scores as any,

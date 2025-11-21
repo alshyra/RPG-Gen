@@ -8,8 +8,8 @@ import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 describe('useAbilityScores', () => {
   beforeEach(() => {
     // Créer une nouvelle instance Pinia pour chaque test
-    setActivePinia(createPinia())
-  })
+    setActivePinia(createPinia());
+  });
   it('calculates points used by the point-buy table', () => {
     const abilities = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
     const characterStore = useCharacterStore();
@@ -37,7 +37,6 @@ describe('useAbilityScores', () => {
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
     currentCharacter.value = { scores: abilities.value } as CharacterDto;
-
 
     const { pointsUsed, applyPointBuyChange } = useAbilityScores();
 

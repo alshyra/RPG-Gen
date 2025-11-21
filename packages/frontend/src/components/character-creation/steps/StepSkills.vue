@@ -34,6 +34,7 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { computed } from 'vue';
+import type { SkillDto, CharacterDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -43,26 +44,28 @@ const selectedSkills = computed(() => (currentCharacter.value?.skills || []).fil
 const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
+const saveCurrent = async () => {
+  if (!currentCharacter.value) return;
+  const charId = currentCharacter.value.characterId as string | undefined;
+  if (!charId) return;
+  await characterStore.updateCharacter(charId, { skills: currentCharacter.value.skills } as Partial<CharacterDto>);
+};
+
+const computeUpdatedSkills = (skill: string, existingSkills: any[]): SkillDto[] => {
+  if (selectedSkills.value.includes(skill)) {
+    return existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
+  }
+  const present = existingSkills.find((s: any) => s.name === skill);
+  if (present) {
+    return existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: true } : s));
+  }
+  return [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
+};
+
 const toggleSkill = async (skill: string) => {
   if (!currentCharacter.value) return;
-
   const existingSkills = currentCharacter.value.skills || [];
-  let newSkills: any[];
-
-  if (selectedSkills.value.includes(skill)) {
-    newSkills = existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
-  } else {
-    // add skill or toggle proficient
-    const present = existingSkills.find((s: any) => s.name === skill);
-    if (present) {
-      newSkills = existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: true } : s));
-    } else {
-      newSkills = [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
-    }
-  }
-  currentCharacter.value.skills = newSkills as any;
-
-  if (!currentCharacter.value.characterId) return
-  await characterStore.updateCharacter(currentCharacter.value.characterId, { skills: newSkills });
+  currentCharacter.value.skills = computeUpdatedSkills(skill, existingSkills);
+  await saveCurrent();
 };
 </script>

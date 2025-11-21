@@ -28,8 +28,8 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const updateDescription = async (physicalDescription: string) => {
-  if (!currentCharacter.value) return
+  if (!currentCharacter.value) return;
   currentCharacter.value.physicalDescription = physicalDescription;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {physicalDescription });
+  await characterStore.updateCharacter(currentCharacter.value.characterId, { physicalDescription });
 };
 </script>

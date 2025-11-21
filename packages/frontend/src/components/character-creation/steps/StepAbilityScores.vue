@@ -1,4 +1,3 @@
-
 <template>
   <div class="space-y-4">
     <h2 class="text-xl font-bold">
@@ -8,7 +7,7 @@
       Répartissez vos scores parmi les 6 capacités
     </p>
 
-    <AbilityScorePicker/>
+    <AbilityScorePicker />
   </div>
 </template>
 <script setup lang="ts">
