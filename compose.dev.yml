@@ -38,14 +38,13 @@ services:
     container_name: rpg-gen-frontend
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci && npm --workspace rpg-gemini-frontend run dev -- --port 80"
+    command: sh -c "npm --workspace rpg-gemini-frontend run dev -- --port 80"
     environment:
       - NODE_ENV=development
     ports:
       - "80:80"
     volumes:
-      - ./packages/frontend:/app/frontend
-      - ./packages/shared:/app/shared
+      - ./:/app/
       - frontend_node_modules:/app/frontend/node_modules
     networks:
       - rpg-network

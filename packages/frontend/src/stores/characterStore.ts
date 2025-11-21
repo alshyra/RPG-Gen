@@ -30,7 +30,7 @@ export const useCharacterStore = defineStore('character', () => {
     if (!id) return;
     const res = await characterServiceApi.getCharacterById(id);
     currentCharacter.value = res || undefined;
-  });
+  }, { immediate: true });
 
   return {
     currentCharacter,
@@ -38,10 +38,3 @@ export const useCharacterStore = defineStore('character', () => {
     updateCharacter,
   };
 });
-
-// usage example à supprimer
-// const characterStore = useCharacterStore();
-// const { currentCharacter } = storeToRefs(characterStore);
-// currentCharacter.value?.classes
-// currentCharacter.value?.hp
-// ...

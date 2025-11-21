@@ -10,6 +10,7 @@ import {
   UseGuards,
   Logger,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -48,10 +49,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.findByUserId(userId);
-    return {
-      ok: true,
-      characters: characters.map(c => this.characterService.toCharacterDto(c)),
-    };
+    return characters.map(c => this.characterService.toCharacterDto(c));
   }
 
   @Get('deceased')
@@ -78,14 +76,9 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
-      return { ok: false, message: 'Character not found' };
-    }
+    if (!character) throw new NotFoundException('Character not found');
 
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
   }
 
   @Put(':characterId')
