@@ -14,12 +14,12 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import fs, { readFile } from 'fs/promises';
 import * as Joi from 'joi';
-import type { CharacterEntry, ChatRequest } from '@rpg-gen/shared';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { GameInstruction, parseGameResponse } from '../external/game-parser.util';
-import { GeminiTextService } from '../external/text/gemini-text.service';
-import { UserDocument } from '../schemas/user.schema';
-import { ChatMessage, ConversationService } from './conversation.service';
+import type { CharacterDto, ChatRequest } from '@rpg-gen/shared';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { GameInstruction, parseGameResponse } from '../external/game-parser.util.js';
+import { GeminiTextService } from '../external/text/gemini-text.service.js';
+import { UserDocument } from '../schemas/user.schema.js';
+import { ChatMessage, ConversationService } from './conversation.service.js';
 
 const schema = Joi.object({
   message: Joi.string().allow('').optional(),
@@ -48,7 +48,7 @@ export class ChatController {
     }
   }
 
-  private getAbilityScore(character: CharacterEntry, key: string): number {
+  private getAbilityScore(character: CharacterDto, key: string): number {
     let score = character[key];
     if (typeof score === 'number') return score;
     score = character[key.toLowerCase()];
@@ -59,7 +59,7 @@ export class ChatController {
     return typeof score === 'number' ? score : 10;
   }
 
-  private buildCharacterSummary(character: CharacterEntry): string {
+  private buildCharacterSummary(character: CharacterDto): string {
     let summary = `
 Character Information:
 - Name: ${character.name || 'Unknown'}
@@ -78,13 +78,14 @@ Character Information:
 `;
 
     // Add spells if character has any
-    if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
+    const charAny = character as any;
+    if (charAny.spells && charAny.spells.length > 0) {
+      summary += `- Spells Known: ${charAny.spells.map((s: any) => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
     }
 
     // Add inventory if character has any
-    if (character.inventory && character.inventory.length > 0) {
-      summary += `- Inventory: ${character.inventory.map(i => `${i.name} (x${i.quantity || 1})`).join(', ')}\n`;
+    if (charAny.inventory && charAny.inventory.length > 0) {
+      summary += `- Inventory: ${charAny.inventory.map((i: any) => `${i.name} (x${i.quantity || 1})`).join(', ')}\n`;
     }
 
     return summary;
@@ -94,7 +95,7 @@ Character Information:
     userId: string,
     characterId: string,
     systemPrompt: string,
-    character?: CharacterEntry,
+    character?: CharacterDto,
   ): Promise<ChatMessage> {
     this.logger.log(`Starting chat for character ${characterId} (user: ${userId})`);
     this.gemini.getOrCreateChat(characterId, systemPrompt || undefined, []);
@@ -164,7 +165,7 @@ Character Information:
     userId: string,
     characterId: string,
     message: string,
-    character: CharacterEntry | undefined,
+    character: CharacterDto | undefined,
   ): Promise<{ characterId: string; result: Record<string, unknown> }> {
     const systemPrompt = await this.loadSystemPrompt();
     const history = await this.conv.getHistory(userId, characterId);
@@ -193,7 +194,7 @@ Character Information:
         userId,
         value.characterId as string,
         value.message || '',
-        value.character as CharacterEntry | undefined,
+        value.character as CharacterDto | undefined,
       );
       return { ok: true, characterId: value.characterId, result };
     } catch (e) {
@@ -230,10 +231,10 @@ Character Information:
     }
   }
 
-  private parseCharacterFromQuery(character?: string): CharacterEntry | undefined {
+  private parseCharacterFromQuery(character?: string): CharacterDto | undefined {
     if (!character || typeof character !== 'string') return undefined;
     try {
-      return JSON.parse(character) as CharacterEntry;
+      return JSON.parse(character) as CharacterDto;
     } catch {
       return undefined;
     }
@@ -260,7 +261,7 @@ Character Information:
     userId: string,
     characterId: string,
     systemPrompt: string,
-    charData: CharacterEntry | undefined,
+    charData: CharacterDto | undefined,
   ): Promise<{ ok: boolean; characterId: string; isNew: boolean; history: ChatMessage[] }> {
     const initMsg = await this.startChat(userId, characterId, systemPrompt, charData);
     return { ok: true, characterId, isNew: true, history: [initMsg] };

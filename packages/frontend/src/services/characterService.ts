@@ -3,10 +3,10 @@
  * Single source of truth: localStorage with UUID-based character IDs
  */
 
-import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
+import type { CharacterDto, SavedCharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
 
 // Re-export for convenience
-export type { SavedCharacterEntry, CharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
+export type { SavedCharacterEntry, CharacterDto as CharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
 
 const STORAGE_KEYS = {
   savedCharacters: 'rpg-characters',
@@ -26,7 +26,7 @@ const getAllSavedCharacters = (): SavedCharacterEntry[] => {
   }
 };
 
-const loadCharacter = (): CharacterEntry | null => {
+const loadCharacter = (): CharacterDto | null => {
   const currentCharId = localStorage.getItem(STORAGE_KEYS.currentCharacterId);
   if (currentCharId) {
     const saved = getAllSavedCharacters();
@@ -39,16 +39,16 @@ const loadCharacter = (): CharacterEntry | null => {
   return null;
 };
 
-const ensureCharacterHp = (character: CharacterEntry): void => {
+const ensureCharacterHp = (character: CharacterDto): void => {
   if (!character.hpMax && character.hp) character.hpMax = character.hp;
   if (!character.hpMax) character.hpMax = 12;
 };
 
-const saveCharacter = (character: CharacterEntry): string => {
+const saveCharacter = (character: CharacterDto): string => {
   const charId = generateUUID();
   ensureCharacterHp(character);
   const saved = getAllSavedCharacters();
-  saved.unshift({ id: charId, data: character });
+  saved.unshift({ id: charId, data: { ...character, characterId: charId } });
   try {
     localStorage.setItem(STORAGE_KEYS.savedCharacters, JSON.stringify(saved));
     localStorage.setItem(STORAGE_KEYS.currentCharacterId, charId);
@@ -58,7 +58,7 @@ const saveCharacter = (character: CharacterEntry): string => {
   return charId;
 };
 
-const updateCurrentCharacter = (character: CharacterEntry): void => {
+const updateCurrentCharacter = (character: CharacterDto): void => {
   const saved = getAllSavedCharacters();
 
   if (saved.length === 0) return;
@@ -72,7 +72,7 @@ const updateCurrentCharacter = (character: CharacterEntry): void => {
   }
 };
 
-const getCurrentCharacter = (): CharacterEntry | null => {
+const getCurrentCharacter = (): CharacterDto | null => {
   const saved = getAllSavedCharacters();
   if (saved.length === 0) return null;
   const currentCharId = localStorage.getItem('rpg-character-id');
@@ -81,16 +81,17 @@ const getCurrentCharacter = (): CharacterEntry | null => {
   if (!charData) return null;
 
   // Ensure required fields exist with defaults
-  const result: CharacterEntry = {
+  const result: CharacterDto = {
     ...charData,
-    id: currentCharId,
+    characterId: currentCharId,
     hp: charData.hp !== undefined ? charData.hp : charData.hpMax || 12,
     hpMax: charData.hpMax || charData.hp || 12,
     totalXp: charData.totalXp || 0,
     proficiency: charData.proficiency || 2,
     gender: charData.gender || 'male',
-    spells: charData.spells || [],
-    inventory: charData.inventory || [],
+    // Preserve optional fields if present; cast to any to satisfy DTO typing
+    ...(charData as any).spells ? { spells: (charData as any).spells } : {},
+    ...(charData as any).inventory ? { inventory: (charData as any).inventory } : {},
   };
 
   return result;

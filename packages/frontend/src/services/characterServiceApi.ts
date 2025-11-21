@@ -4,7 +4,7 @@
 
 import axios from 'axios';
 import { authService } from './authService';
-import type { CharacterEntry, SavedCharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
+import type { CharacterDto, SavedCharacterEntry, DeceasedCharacterEntry } from '@rpg-gen/shared';
 
 const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
@@ -40,8 +40,8 @@ const getAllSavedCharacters = async (): Promise<SavedCharacterEntry[]> => {
   try {
     const response = await apiClient.get('/characters');
     const characters = response.data.characters || [];
-    return characters.map((char: CharacterEntry) => ({
-      id: char.id,
+    return characters.map((char: CharacterDto) => ({
+      id: char.characterId,
       data: char,
     }));
   } catch (e) {
@@ -50,10 +50,10 @@ const getAllSavedCharacters = async (): Promise<SavedCharacterEntry[]> => {
   }
 };
 
-const saveCharacter = async (character: CharacterEntry): Promise<string> => {
+const saveCharacter = async (character: CharacterDto): Promise<string> => {
   try {
-    const charId = character.id || generateUUID();
-    const charWithId = { ...character, id: charId };
+    const charId = character.characterId || generateUUID();
+    const charWithId = { ...character, characterId: charId };
 
     await apiClient.post('/characters', charWithId);
 
@@ -67,20 +67,20 @@ const saveCharacter = async (character: CharacterEntry): Promise<string> => {
   }
 };
 
-const updateCurrentCharacter = async (character: CharacterEntry): Promise<void> => {
+const updateCurrentCharacter = async (character: CharacterDto): Promise<void> => {
   try {
-    if (!character.id) {
+    if (!character.characterId) {
       throw new Error('Character must have an ID to update');
     }
 
-    await apiClient.put(`/characters/${character.id}`, character);
+    await apiClient.put(`/characters/${character.characterId}`, character);
   } catch (e) {
     console.error('Failed to update character in API', e);
     throw e;
   }
 };
 
-const getCurrentCharacter = async (): Promise<CharacterEntry | null> => {
+const getCurrentCharacter = async (): Promise<CharacterDto | null> => {
   try {
     const currentCharId = localStorage.getItem('rpg-character-id');
     if (!currentCharId) return null;
@@ -147,7 +147,7 @@ const getDeceasedCharacters = async (): Promise<DeceasedCharacterEntry[]> => {
     const response = await apiClient.get('/characters/deceased');
     const characters = response.data.characters || [];
     return characters.map((char: any) => ({
-      id: char.id,
+      id: char.characterId,
       character: char,
       diedAt: char.diedAt,
       location: char.deathLocation || 'Unknown location',
@@ -198,7 +198,7 @@ const clearDraft = (): void => {
 };
 
 // Synchronous version for compatibility with existing code
-const loadCharacter = (): CharacterEntry | null =>
+const loadCharacter = (): CharacterDto | null =>
   // This is a synchronous wrapper that returns cached data
   // The actual data should be loaded asynchronously using getCurrentCharacter()
   null

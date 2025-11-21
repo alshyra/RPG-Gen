@@ -2,24 +2,19 @@ import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } f
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import * as Joi from 'joi';
-import { GeminiImageService } from '../external/image/gemini-image.service';
-import { ImageService } from './image.service';
-import { CharacterService } from '../character/character.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { UserDocument } from '../schemas/user.schema';
-import type { ImageRequest, AvatarRequest } from '@rpg-gen/shared';
-import { CharacterDocument } from 'src/schemas/character.schema';
+import { GeminiImageService } from '../external/image/gemini-image.service.js';
+import { ImageService } from './image.service.js';
+import { CharacterService } from '../character/character.service.js';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { UserDocument } from '../schemas/user.schema.js';
+import type { ImageRequest, AvatarRequestWithCharacterId } from '@rpg-gen/shared';
+import { CharacterDocument } from '../schemas/character.schema.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
-
-interface AvatarRequestWithCharacterId extends AvatarRequest {
-  characterId?: string; // Optional character ID to save avatar to
-}
-
 @ApiTags('image')
 @Controller('image')
 export class ImageController {
@@ -46,9 +41,9 @@ export class ImageController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
   @ApiBody({ schema: { type: 'object' } })
-  async generateAvatar(@Req() req: Request, @Body() body: { characterId?: string }) {
+  async generateAvatar(@Req() req: Request, @Body() body: AvatarRequestWithCharacterId) {
     if (!body.characterId) throw new BadRequestException('characterId is required');
-    const characterId = body.characterId;
+    const characterId = body.characterId as string;
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
@@ -87,7 +82,7 @@ export class ImageController {
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 
-  private validateAvatarRequest(body: AvatarRequest) {
+  private validateAvatarRequest(body: AvatarRequestWithCharacterId) {
     if (!body.description || typeof body.description !== 'string') {
       throw new BadRequestException('Description is required and must be a string');
     }

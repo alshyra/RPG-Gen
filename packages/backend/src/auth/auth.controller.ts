@@ -1,10 +1,10 @@
 import { Controller, Get, Req, Res, UseGuards, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { GoogleAuthGuard } from './google-auth.guard';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { AuthService } from './auth.service';
-import { UserDocument } from '../schemas/user.schema';
+import { GoogleAuthGuard } from './google-auth.guard.js';
+import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { AuthService } from './auth.service.js';
+import { UserDocument } from '../schemas/user.schema.js';
 
 @ApiTags('auth')
 @Controller('auth')

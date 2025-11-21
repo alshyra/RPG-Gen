@@ -18,7 +18,7 @@ test('JWT payload structure', (t) => {
 test('Character ID generation', (t) => {
   // Test UUID format (basic check)
   const uuid = crypto.randomUUID();
-  
+
   t.is(typeof uuid, 'string');
   t.is(uuid.length, 36); // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
   t.regex(uuid, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
@@ -69,7 +69,7 @@ test('Session ID validation', (t) => {
 
   // Valid UUID check
   t.regex(validUuid, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-  
+
   // Invalid UUID check
   t.notRegex(invalidId, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 });

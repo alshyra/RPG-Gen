@@ -1,11 +1,9 @@
-const js = require('@eslint/js');
-const ts = require('typescript-eslint');
-const stylistic = require('@stylistic/eslint-plugin');
+import js from '@eslint/js';
+import ts from 'typescript-eslint';
+import stylistic from '@stylistic/eslint-plugin';
 
-module.exports = [
-  {
-    ignores: ['dist', 'node_modules', '*.config.js', 'test/**']
-  },
+export default [
+  { ignores: ['dist', 'node_modules', '.vite', 'coverage', '*.config.js', '*.config.cjs', 'cypress/**'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   stylistic.configs.customize({
@@ -21,7 +19,7 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: ts.parser,
+      parser: { ...ts.parser },
       globals: {
         console: 'readonly',
         process: 'readonly',
@@ -29,8 +27,8 @@ module.exports = [
         setTimeout: 'readonly',
         setInterval: 'readonly',
         clearTimeout: 'readonly',
-        clearInterval: 'readonly'
-      }
+        clearInterval: 'readonly',
+      },
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -40,7 +38,7 @@ module.exports = [
       'arrow-body-style': ['warn', 'as-needed'],
       'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['warn', 10],
-      'prefer-object-spread': 'warn'
-    }
-  }
+      'prefer-object-spread': 'warn',
+    },
+  },
 ];

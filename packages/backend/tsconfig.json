@@ -1,17 +1,30 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "target": "es2019",
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "outDir": "dist",
+    "outDir": "./dist",
+    "baseUrl": "./",
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
+    "types": ["node", "ava"],
+    "lib": ["ES2020"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "ts-node": {
+    "esm": true,
+    "preferTsExts": true
   },
   "exclude": ["node_modules", "dist"]
 }

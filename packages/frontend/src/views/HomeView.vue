@@ -72,12 +72,12 @@ import { ref, onMounted } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../services/characterServiceApi';
-import type { SavedCharacterEntry, CharacterEntry } from '@rpg-gen/shared';
+import type { SavedCharacterEntry, CharacterDto } from '@rpg-gen/shared';
 
 const router = useRouter();
 const savedCharacters = ref<SavedCharacterEntry[]>([]);
 
-function getCharSummary(character: CharacterEntry): string {
+function getCharSummary(character: CharacterDto): string {
   if (!character) return '';
   const classes = character.classes || [];
   return classes.map((c: any) => (c?.name ? `${c.name} Niveau ${c.level}` : '')).filter(Boolean).join(', ');
