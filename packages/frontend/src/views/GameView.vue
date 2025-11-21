@@ -176,7 +176,7 @@ const router = useRouter();
 const route = useRoute();
 const gameStore = useGameStore();
 const isSidebarOpen = ref(false);
-const characterId = computed(() => route.params.characterId);
+const characterId = computed(() => route.params.characterId as string);
 
 // Composables
 const { startGame } = useGameSession();
@@ -216,7 +216,7 @@ watch(
 // Handle character death
 const onDeathConfirm = async () => {
   if (!gameStore.session.character?.characterId) return;
-  await characterServiceApi.killCharacter(characterId, gameStore.session.worldName);
+  await characterServiceApi.killCharacter(characterId.value, gameStore.session.worldName);
   gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');
