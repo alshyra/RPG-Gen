@@ -48,7 +48,7 @@ Cypress.Commands.add("clearAuth", () => {
 Cypress.Commands.add("setupApiMocks", () => {
   // Mock a character that can be used for testing
   const mockCharacter = {
-    id: "test-char-id-123",
+    characterId: "test-char-id-123",
     name: "TestHero",
     race: { id: "human", name: "Humain", mods: {} },
     scores: { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 },
@@ -61,6 +61,7 @@ Cypress.Commands.add("setupApiMocks", () => {
     portrait: "",
     gender: "male",
     proficiency: 2,
+    state: "draft",
   };
 
   // Auth endpoints

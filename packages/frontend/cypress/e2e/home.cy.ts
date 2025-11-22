@@ -32,7 +32,7 @@ describe('Home Page', () => {
     // Mock API with characters
     const mockCharacters = [
       {
-        id: 'char-1',
+        characterId: 'char-1',
         name: 'Aragorn',
         race: { id: 'human', name: 'Humain', mods: {} },
         scores: { Str: 16, Dex: 14, Con: 15, Int: 12, Wis: 13, Cha: 14 },
@@ -45,9 +45,10 @@ describe('Home Page', () => {
         portrait: '',
         gender: 'male',
         proficiency: 2,
+        state: 'created',
       },
       {
-        id: 'char-2',
+        characterId: 'char-2',
         name: 'Gandalf',
         race: { id: 'human', name: 'Humain', mods: {} },
         scores: { Str: 10, Dex: 12, Con: 14, Int: 18, Wis: 16, Cha: 15 },
@@ -60,6 +61,7 @@ describe('Home Page', () => {
         portrait: '',
         gender: 'male',
         proficiency: 3,
+        state: 'created',
       }
     ];
 
