@@ -74,11 +74,13 @@
 </template>
 
 <script setup lang="ts">
+import { characterServiceApi } from '@/services/characterServiceApi';
+import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useGameStore } from '@/stores/gameStore';
 import UiButton from '../ui/UiButton.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -86,8 +88,6 @@ import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
 import StepSkills from './steps/StepSkills.vue';
-import { DnDRulesService } from '@/services/dndRulesService';
-import { characterServiceApi } from '@/services/characterServiceApi';
 
 const router = useRouter();
 const route = useRoute();
@@ -146,10 +146,19 @@ const previousStep = () => {
 const gameStore = useGameStore();
 
 const finishCreation = async () => {
-  if (!currentCharacter.value) return;
+  if (!currentCharacter.value
+    || !currentCharacter.value.classes?.[0].name
+    || !currentCharacter.value.scores?.Con
+  ) return;
   isLoading.value = true;
   console.log('Finishing character creation for', currentCharacter.value);
-  await updateCharacter(currentCharacter.value.characterId, { state: 'created' });
+  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores?.Con);
+  await updateCharacter(currentCharacter.value.characterId, {
+    ...currentCharacter.value,
+    state: 'created',
+    hpMax,
+    hp: hpMax,
+  });
   gameStore.setWorld('dnd', 'Dungeons & Dragons');
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
   console.log('Avatar generated');

@@ -67,8 +67,6 @@
             />
             <div class="border-t border-slate-600 mt-3" />
             <SkillsPanel
-              v-if="gameStore.session.character"
-              :character="gameStore.session.character"
               class="mt-3"
             />
           </div>
@@ -147,7 +145,6 @@
     <!-- Death modal -->
     <DeathModal
       :is-open="gameStore.showDeathModal"
-      :character="gameStore.session.character"
       @confirm="onDeathConfirm"
       @close="gameStore.setDeathModalVisible(false)"
     />
