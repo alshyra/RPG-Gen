@@ -31,9 +31,9 @@ import UiButtonToggle from '@/components/ui/UiButtonToggle.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
 import { GENDERS } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
@@ -44,16 +44,15 @@ const genderOptions = computed(() =>
   })),
 );
 
-const onUpdateName = async (name: string) => {
+const onUpdateName = useDebounceFn(async (name: string) => {
   if (!currentCharacter.value) return;
-
   currentCharacter.value.name = name;
   const charId = currentCharacter.value.characterId;
 
   if (!charId) return;
 
   await characterStore.updateCharacter(charId, { name: name });
-};
+}, 300);
 
 const onUpdateGender = async (gender: typeof GENDERS[number]) => {
   if (!currentCharacter.value) return;

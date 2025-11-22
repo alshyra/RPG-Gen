@@ -22,14 +22,15 @@
 <script setup lang="ts">
 import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const updateDescription = async (physicalDescription: string) => {
+const updateDescription = useDebounceFn(async (physicalDescription: string) => {
   if (!currentCharacter.value) return;
   currentCharacter.value.physicalDescription = physicalDescription;
   await characterStore.updateCharacter(currentCharacter.value.characterId, { physicalDescription });
-};
+}, 1000);
 </script>

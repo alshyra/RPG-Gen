@@ -74,7 +74,10 @@
 </template>
 
 <script setup lang="ts">
+import { characterServiceApi } from '@/services/characterServiceApi';
+import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -85,8 +88,6 @@ import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
 import StepSkills from './steps/StepSkills.vue';
-import { DnDRulesService } from '@/services/dndRulesService';
-import { characterServiceApi } from '@/services/characterServiceApi';
 
 const router = useRouter();
 const route = useRoute();
@@ -113,14 +114,14 @@ const currentStep = computed({
   },
 });
 
-const chosenSkills = computed(() => currentCharacter.value?.skills.filter(skill => !!skill.proficient).length || 0);
+const chosenSkills = computed(() => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
       return currentCharacter.value?.name?.trim();
     case 1:
-      return currentCharacter.value?.race && currentCharacter.value?.classes[0];
+      return currentCharacter.value?.race && currentCharacter.value?.classes?.[0];
     case 2:
       return true;
     case 3:
@@ -142,11 +143,23 @@ const previousStep = () => {
   currentStep.value--;
 };
 
+const gameStore = useGameStore();
+
 const finishCreation = async () => {
-  if (!currentCharacter.value) return;
+  if (!currentCharacter.value
+    || !currentCharacter.value.classes?.[0].name
+    || !currentCharacter.value.scores?.Con
+  ) return;
   isLoading.value = true;
   console.log('Finishing character creation for', currentCharacter.value);
-  await updateCharacter(currentCharacter.value.characterId, { state: 'created' });
+  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores?.Con);
+  await updateCharacter(currentCharacter.value.characterId, {
+    ...currentCharacter.value,
+    state: 'created',
+    hpMax,
+    hp: hpMax,
+  });
+  gameStore.setWorld('dnd', 'Dungeons & Dragons');
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
   console.log('Avatar generated');
   router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });

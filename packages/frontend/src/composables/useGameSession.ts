@@ -5,12 +5,6 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { gameEngine } from '../services/gameEngine';
 import { storeToRefs } from 'pinia';
 
-const worldMap: Record<string, string> = {
-  dnd: 'Dungeons & Dragons',
-  vtm: 'Vampire: The Masquerade',
-  cyberpunk: 'Cyberpunk',
-};
-
 const processInstructionInMessage = (instr: any, isLastMessage: boolean, gameStore: any): void => {
   if (instr.roll) {
     if (isLastMessage) gameStore.setPendingInstruction(instr);
@@ -36,35 +30,23 @@ const processHistoryMessages = (history: any[], gameStore: any): any[] =>
   });
 
 export function useGameSession() {
-  const route = useRoute();
   const router = useRouter();
   const gameStore = useGameStore();
+  const characterStore = useCharacterStore();
+  const { currentCharacter } = storeToRefs(characterStore);
 
-  const initializeGame = async (char: CharacterDto) => {
+  const startGame = async () => {
+    if (!currentCharacter?.value) return await router.push('/home');
+    gameStore.setWorld('dnd', 'Dungeons & Dragons');
+    gameStore.setInitializing(true);
     try {
-      gameStore.setCharacter(char);
-      if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      const messages = await gameEngine.startGame(char);
+      gameStore.setCharacter(currentCharacter.value);
+      if (currentCharacter.value.isDeceased) gameStore.setDeathModalVisible(true);
+      const messages = await gameEngine.startGame(currentCharacter.value);
       if (messages?.length) gameStore.updateMessages(processHistoryMessages(messages, gameStore));
     } catch (e: any) {
       gameStore.appendMessage('Error', e?.response?.data?.error || e.message);
     }
-  };
-  const startGame = async (): Promise<void> => {
-    // Check if character exists in the store, redirect to home if not
-    const characterStore = useCharacterStore();
-    const { currentCharacter } = storeToRefs(characterStore);
-    if (!currentCharacter?.value) {
-      await router.push('/home');
-      return;
-    }
-
-    gameStore.setWorld(
-      (route.params.world as string) || '',
-      worldMap[route.params.world as string] || (route.params.world as string),
-    );
-    gameStore.setInitializing(true);
-    await initializeGame(currentCharacter.value);
     gameStore.setInitializing(false);
   };
 

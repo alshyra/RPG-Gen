@@ -30,15 +30,11 @@ export class CharacterController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
-  async create(@Req() req: Request, @Body() characterData: CharacterDto) {
+  async create(@Req() req: Request, @Body('world') world: string) {
     const user = req.user as UserDocument;
+
     const userId = user._id.toString();
-
-    if (!characterData.characterId) {
-      throw new BadRequestException('Character must have an id');
-    }
-
-    const character = await this.characterService.create(userId, characterData);
+    const character = await this.characterService.create(userId, world);
     return this.characterService.toCharacterDto(character);
   }
 
