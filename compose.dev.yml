@@ -27,7 +27,7 @@ services:
       - FRONTEND_URL=http://localhost
     volumes:
       - ./:/app/
-      - backend_node_modules:/app/backend/node_modules
+      - backend_node_modules:/app/node_modules
     env_file:
       - packages/backend/.env
     depends_on:
@@ -40,7 +40,7 @@ services:
     container_name: rpg-gen-frontend
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm --workspace rpg-gemini-frontend run dev -- --port 80"
+    command: sh -c "npm --workspace rpg-gemini-frontend run dev"
     environment:
       - DNS_RESOLVER=127.0.0.11
       - NODE_ENV=development
@@ -48,7 +48,7 @@ services:
       - "80:80"
     volumes:
       - ./:/app/
-      - frontend_node_modules:/app/frontend/node_modules
+      - frontend_node_modules:/app/node_modules
     networks:
       - rpg-network
     depends_on:

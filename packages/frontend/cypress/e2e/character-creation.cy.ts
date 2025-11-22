@@ -3,9 +3,8 @@ describe('Character Creation', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.setupApiMocks();
-    // Visit first to establish window context, then mock auth
-    cy.visit("/home");
     cy.mockAuth();
+    cy.visit('/home');
   });
 
   it("should navigate through all character creation steps", () => {

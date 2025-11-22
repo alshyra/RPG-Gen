@@ -1,25 +1,32 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { Character, CharacterDocument } from '../schemas/character.schema.js';
 import type { CharacterDto } from '@rpg-gen/shared';
 
 @Injectable()
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
+  private readonly DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 };
 
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
   ) {}
 
-  async create(userId: string, characterData: CharacterDto): Promise<CharacterDocument> {
+  generateCharacterId(): string {
+    return crypto.randomUUID();
+  }
+
+  async create(userId: string, world: string): Promise<CharacterDocument> {
     const character = new this.characterModel({
       userId,
-      characterId: characterData.characterId,
+      characterId: this.generateCharacterId(),
       totalXp: 0,
       proficiency: 2,
+      world,
       state: 'draft',
       isDeceased: false,
+      scores: this.DEFAULT_BASE_SCORES,
     });
 
     const saved = await character.save();
