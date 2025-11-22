@@ -46,20 +46,20 @@ Cypress.Commands.add("clearAuth", () => {
 
 // Helper to setup API mocks - call this in beforeEach of each test
 Cypress.Commands.add("setupApiMocks", () => {
-  // Mock a character that can be used for testing
-  const mockCharacter = {
+  // Mock a character that can be used for testing - use a mutable object to track state
+  let currentCharacter = {
     characterId: "test-char-id-123",
-    name: "TestHero",
-    race: { id: "human", name: "Humain", mods: {} },
+    name: "",
+    race: { id: "", name: "", mods: {} },
     scores: { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 },
     hp: 12,
     hpMax: 12,
     totalXp: 0,
-    classes: [{ name: "Fighter", level: 1 }],
+    classes: [],
     skills: [],
     world: "dnd",
     portrait: "",
-    gender: "male",
+    gender: "",
     proficiency: 2,
     state: "draft",
   };
@@ -77,21 +77,25 @@ Cypress.Commands.add("setupApiMocks", () => {
   }).as("getCharacters");
 
   cy.intercept("POST", "**/api/characters", (req) => {
+    currentCharacter = { ...currentCharacter, ...req.body };
     req.reply({
       statusCode: 200,
-      body: { ...mockCharacter, ...req.body },
+      body: currentCharacter,
     });
   }).as("createCharacter");
 
-  cy.intercept("GET", "**/api/characters/*", {
-    statusCode: 200,
-    body: mockCharacter,
+  cy.intercept("GET", "**/api/characters/*", (req) => {
+    req.reply({
+      statusCode: 200,
+      body: currentCharacter,
+    });
   }).as("getCharacter");
 
   cy.intercept("PUT", "**/api/characters/*", (req) => {
+    currentCharacter = { ...currentCharacter, ...req.body };
     req.reply({
       statusCode: 200,
-      body: { ...mockCharacter, ...req.body },
+      body: currentCharacter,
     });
   }).as("updateCharacter");
 
@@ -100,9 +104,11 @@ Cypress.Commands.add("setupApiMocks", () => {
     body: null,
   }).as("deleteCharacter");
 
-  cy.intercept("POST", "**/api/characters/*/kill", {
-    statusCode: 200,
-    body: mockCharacter,
+  cy.intercept("POST", "**/api/characters/*/kill", (req) => {
+    req.reply({
+      statusCode: 200,
+      body: currentCharacter,
+    });
   }).as("killCharacter");
 
   cy.intercept("GET", "**/api/characters/deceased", {

@@ -15,7 +15,7 @@ describe('Character Creation', () => {
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
     cy.contains("Informations de base").should("be.visible");
 
-    cy.get('input[placeholder="Ex: Aragorn"]').type("TestHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("TestHero");
 
     cy.contains("♂️ Homme").click();
 
@@ -57,7 +57,7 @@ describe('Character Creation', () => {
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
-    cy.get('input[placeholder="Ex: Aragorn"]').type("DraftHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("DraftHero");
     cy.contains("♀️ Femme").click();
 
     cy.wait(500);
@@ -71,7 +71,8 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    cy.get('input[placeholder="Ex: Aragorn"]').type("RefreshHero");
+    cy.url().should("match", /\/character\/[^/]+\/step\/1/);
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("RefreshHero");
     cy.contains("♀️ Femme").click();
 
     cy.wait(600);
@@ -89,7 +90,8 @@ describe('Character Creation', () => {
     cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
-    cy.get('input[placeholder="Ex: Aragorn"]').type("BackHero");
+    cy.url().should("match", /\/character\/[^/]+\/step\/1/);
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("BackHero");
 
     cy.contains("button", "Suivant").click();
     cy.url().should("match", /\/character\/[^/]+\/step\/2/);
@@ -110,7 +112,7 @@ describe('Character Creation', () => {
     cy.contains("button", "Suivant").should("be.disabled");
 
     // Fill in the name
-    cy.get('input[placeholder="Ex: Aragorn"]').type("ValidationHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("ValidationHero");
 
     // Button should now be enabled after name is filled
     cy.contains("button", "Suivant").should("not.be.disabled");
@@ -121,7 +123,7 @@ describe('Character Creation', () => {
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
-    cy.get('input[placeholder="Ex: Aragorn"]').type("ScorePersistHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("ScorePersistHero");
     cy.contains("♂️ Homme").click();
 
     cy.contains("button", "Suivant").click();
@@ -159,7 +161,7 @@ describe('Character Creation', () => {
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
-    cy.get('input[placeholder="Ex: Aragorn"]').type("AutoAvatarHero");
+    cy.get('input[placeholder="Ex: Aragorn"]').clear().type("AutoAvatarHero");
     cy.contains("♂️ Homme").click();
     cy.contains("button", "Suivant").click();
 
