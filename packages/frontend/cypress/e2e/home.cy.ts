@@ -65,7 +65,7 @@ describe('Home Page', () => {
 
     cy.intercept('GET', '**/api/characters', {
       statusCode: 200,
-      body: { ok: true, characters: mockCharacters }
+      body: mockCharacters
     }).as('getCharactersWithData');
 
     cy.visit('/home');

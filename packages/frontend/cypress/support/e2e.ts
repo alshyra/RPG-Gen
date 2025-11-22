@@ -72,41 +72,41 @@ Cypress.Commands.add("setupApiMocks", () => {
   // Character CRUD endpoints
   cy.intercept("GET", "**/api/characters", {
     statusCode: 200,
-    body: { ok: true, characters: [] },
+    body: [],
   }).as("getCharacters");
 
   cy.intercept("POST", "**/api/characters", (req) => {
     req.reply({
       statusCode: 200,
-      body: { ok: true, character: { ...mockCharacter, ...req.body } },
+      body: { ...mockCharacter, ...req.body },
     });
   }).as("createCharacter");
 
   cy.intercept("GET", "**/api/characters/*", {
     statusCode: 200,
-    body: { ok: true, character: mockCharacter },
+    body: mockCharacter,
   }).as("getCharacter");
 
   cy.intercept("PUT", "**/api/characters/*", (req) => {
     req.reply({
       statusCode: 200,
-      body: { ok: true, character: { ...mockCharacter, ...req.body } },
+      body: { ...mockCharacter, ...req.body },
     });
   }).as("updateCharacter");
 
   cy.intercept("DELETE", "**/api/characters/*", {
     statusCode: 200,
-    body: { ok: true, message: "Character deleted" },
+    body: null,
   }).as("deleteCharacter");
 
   cy.intercept("POST", "**/api/characters/*/kill", {
     statusCode: 200,
-    body: { ok: true, character: mockCharacter },
+    body: mockCharacter,
   }).as("killCharacter");
 
   cy.intercept("GET", "**/api/characters/deceased", {
     statusCode: 200,
-    body: { ok: true, characters: [] },
+    body: [],
   }).as("getDeceasedCharacters");
 
   // Chat/Game endpoints
