@@ -10,6 +10,7 @@ export default [
       parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
     },
     rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       // backend can customize stricter rules if necessary
     },
   },

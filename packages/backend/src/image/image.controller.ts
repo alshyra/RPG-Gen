@@ -1,13 +1,13 @@
 import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
-import * as Joi from 'joi';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import type { Request } from 'express';
+import Joi from 'joi';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { ImageService } from './image.service.js';
 import { CharacterService } from '../character/character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { ImageRequest, AvatarRequestWithCharacterId } from '@rpg-gen/shared';
+import type { ImageRequest } from '@rpg-gen/shared';
 import { CharacterDocument } from '../schemas/character.schema.js';
 
 const schema = Joi.object({
@@ -15,6 +15,12 @@ const schema = Joi.object({
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
+
+class CharacterIdBody {
+  @ApiProperty({ description: 'UUID of the character' })
+  characterId: string;
+}
+
 @ApiTags('image')
 @Controller('image')
 export class ImageController {
@@ -40,13 +46,25 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-  @ApiBody({ schema: { type: 'object' } })
-  async generateAvatar(@Req() req: Request, @Body() body: AvatarRequestWithCharacterId) {
-    if (!body.characterId) throw new BadRequestException('characterId is required');
-    const characterId = body.characterId as string;
+
+  @ApiBody({ type: CharacterIdBody })
+  async generateAvatar(@Req() req: Request, @Body() body: any) {
+    this.logger.log(`Received avatar generation request payload: ${JSON.stringify(body)}`);
+
+    // Accept a few variations of payloads: { characterId }, [{ characterId }], or a raw string id
+    if (!body) throw new BadRequestException('characterId is required');
+    let characterId: string | undefined;
+    if (typeof body === 'string') characterId = body;
+    else if (Array.isArray(body) && body.length > 0) characterId = body[0]?.characterId;
+    else if (typeof body === 'object') characterId = body.characterId;
+    if (!characterId || typeof characterId !== 'string') throw new BadRequestException('characterId is required');
+
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
+
+    if (!character) throw new BadRequestException('Character not found');
+
     return await this.handleGenerateAvatar(userId, character);
   }
 
@@ -66,7 +84,6 @@ export class ImageController {
 
       return {
         imageUrl: compressedImage,
-        compressed: true,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate avatar';
@@ -80,12 +97,6 @@ export class ImageController {
       portrait: compressedImage,
     });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
-  }
-
-  private validateAvatarRequest(body: AvatarRequestWithCharacterId) {
-    if (!body.description || typeof body.description !== 'string') {
-      throw new BadRequestException('Description is required and must be a string');
-    }
   }
 
   private buildAvatarPrompt(character: CharacterDocument): string {

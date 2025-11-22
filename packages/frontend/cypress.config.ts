@@ -1,9 +1,11 @@
 import { defineConfig } from 'cypress';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL || 'http://127.0.0.1',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:80',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.ts',
     video: process.env.CI ? true : false,
@@ -26,9 +28,14 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
-        plugins: [vue()],
+        plugins: [tailwindcss(), vue()],
         server: {
           port: 5173,
+        },
+        resolve: {
+          alias: {
+            '@': fileURLToPath(new URL('./src', import.meta.url)),
+          },
         },
       },
     },

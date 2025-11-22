@@ -30,25 +30,42 @@
 
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
+import { DnDRulesService } from '@/services/dndRulesService';
+import { computed } from 'vue';
+import type { SkillDto, CharacterDto } from '@rpg-gen/shared';
 
-interface Props {
-  primaryClass: string;
-  selectedSkills: string[];
-  availableSkills: string[];
-  skillsToChoose: number;
-}
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
-interface Emits {
-  (e: 'update:selected-skills', value: string[]): void;
-}
+const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
+const selectedSkills = computed(() => (currentCharacter.value?.skills || []).filter((s: any) => s.proficient).map((s: any) => s.name));
+const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
+const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const saveCurrent = async () => {
+  if (!currentCharacter.value) return;
+  const charId = currentCharacter.value.characterId as string | undefined;
+  if (!charId) return;
+  await characterStore.updateCharacter(charId, { skills: currentCharacter.value.skills } as Partial<CharacterDto>);
+};
 
-const toggleSkill = (skill: string) => {
-  const newSkills = props.selectedSkills.includes(skill)
-    ? props.selectedSkills.filter(s => s !== skill)
-    : [...props.selectedSkills, skill];
-  emit('update:selected-skills', newSkills);
+const computeUpdatedSkills = (skill: string, existingSkills: any[]): SkillDto[] => {
+  if (selectedSkills.value.includes(skill)) {
+    return existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
+  }
+  const present = existingSkills.find((s: any) => s.name === skill);
+  if (present) {
+    return existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: true } : s));
+  }
+  return [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
+};
+
+const toggleSkill = async (skill: string) => {
+  if (!currentCharacter.value) return;
+  const existingSkills = currentCharacter.value.skills || [];
+  currentCharacter.value.skills = computeUpdatedSkills(skill, existingSkills);
+  await saveCurrent();
 };
 </script>

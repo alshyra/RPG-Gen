@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { characterServiceApi } from './characterServiceApi';
 import { authService } from './authService';
-import type { GameResponse, ChatMessage } from '@rpg-gen/shared';
+import type { GameResponse, ChatMessage, CharacterDto } from '@rpg-gen/shared';
 
 // Create axios instance with auth interceptor
 const apiClient = axios.create({
@@ -37,18 +36,12 @@ export class GameEngine {
    * Start game linked to current character
    * Each character gets its own conversation history using their UUID as characterId
    */
-  async startGame(): Promise<{ isNew: boolean; messages: ChatMessage[] }> {
-    // Get current character's UUID - this becomes the characterId for conversation
-    const char = await characterServiceApi.getCurrentCharacter();
-    if (!char)
-      throw new Error('No current character found. Please create or load a character first.');
-    this.characterId = (char as any).characterId || (char as any).id;
+  async startGame(character: CharacterDto) {
+    if (!character) throw new Error('No character provided to startGame.');
+    this.characterId = character.characterId;
 
-    const histRes = await apiClient.get(`/chat/history?characterId=${this.characterId}`);
-    const isNew = histRes?.data?.isNew || false;
-    const history = histRes?.data?.history || [];
-
-    return { isNew, messages: history };
+    const histRes = await apiClient.get<ChatMessage[]>(`/chat/${this.characterId}/history`);
+    return histRes.data;
   }
 
   /**
@@ -56,14 +49,9 @@ export class GameEngine {
    */
   async sendMessage(message: string): Promise<GameResponse> {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
-
-    const char = await characterServiceApi.getCurrentCharacter();
-    const res = await apiClient.post('/chat', {
-      message,
-      characterId: this.characterId,
-      character: char,
-    });
-    const result = res?.data?.result || {};
+    const res = await apiClient.post(`/chat/${this.characterId}`, { message });
+    console.log(res);
+    const result = res?.data;
 
     return {
       text: result.text || '',

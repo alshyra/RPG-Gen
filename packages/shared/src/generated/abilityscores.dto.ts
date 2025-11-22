@@ -2,12 +2,12 @@
 
 
 export interface AbilityScoresDto {
-  Str: number;
-  Dex: number;
-  Con: number;
-  Int: number;
-  Wis: number;
-  Cha: number;
+  Str?: number;
+  Dex?: number;
+  Con?: number;
+  Int?: number;
+  Wis?: number;
+  Cha?: number;
 }
 export type CreateAbilityScoresDto = Partial<AbilityScoresDto>;
 export type UpdateAbilityScoresDto = Partial<CreateAbilityScoresDto>;

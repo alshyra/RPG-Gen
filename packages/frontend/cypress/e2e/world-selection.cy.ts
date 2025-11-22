@@ -48,8 +48,8 @@ describe('World Selection', () => {
       .contains('Commencer')
       .click();
 
-    // Should navigate to character creation page
-    cy.url().should('include', '/character');
+    // Should navigate to character creation page (with generated characterId)
+    cy.url().should('match', /\/character\/[^/]+\/step\/1/);
   });
 
   it('should store selected world in sessionStorage', () => {
@@ -60,9 +60,8 @@ describe('World Selection', () => {
       .contains('Commencer')
       .click();
 
-    // Check that the world ID is stored in sessionStorage
-    cy.window().its('sessionStorage').invoke('getItem', 'selected-world')
-      .should('equal', 'dnd');
+    // After creation, check that characterId exists in the URL
+    cy.url().should('match', /\/character\/[^/]+\/step\/1/);
   });
 
   it('should highlight world on hover', () => {

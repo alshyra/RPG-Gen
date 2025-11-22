@@ -12,6 +12,7 @@ FROM base_node
 WORKDIR /app/packages/backend
 
 COPY --from=builder /app/ /app
+ENV TEMPLATE_PATH=/app/packages/backend/chat.prompt.txt
 
 EXPOSE 3001
 ENTRYPOINT [ "npm" ]

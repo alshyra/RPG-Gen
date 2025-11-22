@@ -10,9 +10,10 @@ import {
   UseGuards,
   Logger,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { CharacterService } from './character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
@@ -29,19 +30,12 @@ export class CharacterController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
-  async create(@Req() req: Request, @Body() characterData: CharacterDto) {
+  async create(@Req() req: Request, @Body('world') world: string) {
     const user = req.user as UserDocument;
+
     const userId = user._id.toString();
-
-    if (!characterData.characterId) {
-      throw new BadRequestException('Character must have an id');
-    }
-
-    const character = await this.characterService.create(userId, characterData);
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    const character = await this.characterService.create(userId, world);
+    return this.characterService.toCharacterDto(character);
   }
 
   @Get()
@@ -51,10 +45,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.findByUserId(userId);
-    return {
-      ok: true,
-      characters: characters.map(c => this.characterService.toCharacterDto(c)),
-    };
+    return characters.map(c => this.characterService.toCharacterDto(c));
   }
 
   @Get('deceased')
@@ -81,14 +72,9 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
-      return { ok: false, message: 'Character not found' };
-    }
+    if (!character) throw new NotFoundException('Character not found');
 
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
   }
 
   @Put(':characterId')
@@ -102,10 +88,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.update(userId, characterId, updates);
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
   }
 
   @Delete(':characterId')

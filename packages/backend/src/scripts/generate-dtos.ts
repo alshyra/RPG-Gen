@@ -82,7 +82,10 @@ schemaClasses.forEach((cls) => {
   const name = cls.getName();
   if (!name) return;
   const interfaceName = dtoNameForClass(name);
-  const props: string[] = [];
+  // Collect all schema property metadata. We'll keep server-managed fields out of the public interface
+  // but still use them when building Create/Update DTOs (so we always omit them on create/update).
+  const allPropsMeta: { name: string; optional: boolean; typeText: string; line: string }[] = [];
+  const publicPropsMeta: { name: string; optional: boolean; typeText: string; line: string }[] = [];
 
   cls.getProperties().forEach((prop) => {
     const propName = prop.getName();
@@ -104,8 +107,18 @@ schemaClasses.forEach((cls) => {
     let typeText = typeNode ? typeNode.getText() : prop.getType().getText();
     typeText = mapType(typeText, knownSchemaNames);
 
-    props.push(`${propName}${optional ? '?' : ''}: ${typeText};`);
+    const line = `${propName}${optional ? '?' : ''}: ${typeText};`;
+    allPropsMeta.push({ name: propName, optional, typeText, line });
   });
+
+  // Server-managed fields to exclude from public DTOs (the objects we return to the frontend)
+  const serverManagedFields = ['_id', 'createdAt', 'updatedAt', 'userId'];
+
+  // Build the public props list (exclude server-managed fields)
+  allPropsMeta.forEach((p) => {
+    if (!serverManagedFields.includes(p.name)) publicPropsMeta.push(p);
+  });
+  const props: string[] = publicPropsMeta.map(p => p.line);
 
   const outPath = path.join(outDir, `${name.toLowerCase()}.dto.ts`);
   const header = [`// GENERATED FROM backend/src/schemas - do not edit manually`, ``];
@@ -139,8 +152,9 @@ schemaClasses.forEach((cls) => {
 
   // Add helper Create / Update types:
   // Heuristic: omit typical server-managed fields when building CreateXxxDto
-  const serverManagedFields = ['_id', 'id', 'createdAt', 'updatedAt', 'userId', 'characterId'];
-  const presentFields = props.map(p => p.split(/[?:]/)[0].trim());
+  // Compute presentFields from the full schema props (allPropsMeta) so we know what to omit even if we
+  // removed those fields from the public interface
+  const presentFields = allPropsMeta.map(p => p.name);
   const fieldsToOmit = serverManagedFields.filter(f => presentFields.includes(f));
   if (fieldsToOmit.length > 0) {
     const omitUnion = fieldsToOmit.map(f => `'${f}'`).join(' | ');

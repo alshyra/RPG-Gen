@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[94vh] p-2 lg:p-4 gap-2">
+  <div class="flex flex-col h-[88vh] p-2 lg:p-4 gap-2">
     <!-- Mobile Menu Toggle Button (only visible on mobile) -->
     <UiButton
       variant="ghost"
@@ -67,8 +67,6 @@
             />
             <div class="border-t border-slate-600 mt-3" />
             <SkillsPanel
-              v-if="gameStore.session.character"
-              :character="gameStore.session.character"
               class="mt-3"
             />
           </div>
@@ -147,7 +145,6 @@
     <!-- Death modal -->
     <DeathModal
       :is-open="gameStore.showDeathModal"
-      :character="gameStore.session.character"
       @confirm="onDeathConfirm"
       @close="gameStore.setDeathModalVisible(false)"
     />
@@ -156,8 +153,8 @@
 <script setup lang="ts">
 import UiMarkdown from '../components/ui/UiMarkdown.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
 import SkillsPanel from '../components/character-stats/SkillsPanel.vue';
 import CharacterPortrait from '../components/character/CharacterPortrait.vue';
@@ -173,8 +170,10 @@ import { useGameStore } from '../stores/gameStore';
 
 // State
 const router = useRouter();
+const route = useRoute();
 const gameStore = useGameStore();
 const isSidebarOpen = ref(false);
+const characterId = computed(() => route.params.characterId as string);
 
 // Composables
 const { startGame } = useGameSession();
@@ -214,7 +213,7 @@ watch(
 // Handle character death
 const onDeathConfirm = async () => {
   if (!gameStore.session.character?.characterId) return;
-  await characterServiceApi.killCharacter(gameStore.session.character.characterId, gameStore.session.worldName);
+  await characterServiceApi.killCharacter(characterId.value, gameStore.session.worldName);
   gameEngine.endGame();
   gameStore.setDeathModalVisible(false);
   router.push('/');

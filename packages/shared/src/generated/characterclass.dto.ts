@@ -2,8 +2,8 @@
 
 
 export interface CharacterClassDto {
-  name: string;
-  level: number;
+  name?: string;
+  level?: number;
 }
 export type CreateCharacterClassDto = Partial<CharacterClassDto>;
 export type UpdateCharacterClassDto = Partial<CreateCharacterClassDto>;

@@ -35,32 +35,38 @@ Cypress.Commands.add("mockAuth", () => {
     picture: "https://via.placeholder.com/150",
   };
 
-  localStorage.setItem("rpg-auth-token", mockToken);
-  localStorage.setItem("rpg-user-data", JSON.stringify(mockUser));
+  // Set items that will be automatically applied on next visit
+  cy.window().then((win) => {
+    win.localStorage.setItem("rpg-auth-token", mockToken);
+    win.localStorage.setItem("rpg-user-data", JSON.stringify(mockUser));
+  });
 });
 
 Cypress.Commands.add("clearAuth", () => {
-  localStorage.removeItem("rpg-auth-token");
-  localStorage.removeItem("rpg-user-data");
+  cy.window().then((win) => {
+    win.localStorage.removeItem("rpg-auth-token");
+    win.localStorage.removeItem("rpg-user-data");
+  });
 });
 
 // Helper to setup API mocks - call this in beforeEach of each test
 Cypress.Commands.add("setupApiMocks", () => {
-  // Mock a character that can be used for testing
-  const mockCharacter = {
-    id: "test-char-id-123",
-    name: "TestHero",
-    race: { id: "human", name: "Humain", mods: {} },
+  // Mock a character that can be used for testing - use a mutable object to track state
+  let currentCharacter = {
+    characterId: "test-char-id-123",
+    name: "",
+    race: { id: "", name: "", mods: {} },
     scores: { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 },
     hp: 12,
     hpMax: 12,
     totalXp: 0,
-    classes: [{ name: "Fighter", level: 1 }],
+    classes: [],
     skills: [],
     world: "dnd",
     portrait: "",
-    gender: "male",
+    gender: "",
     proficiency: 2,
+    state: "draft",
   };
 
   // Auth endpoints
@@ -72,50 +78,64 @@ Cypress.Commands.add("setupApiMocks", () => {
   // Character CRUD endpoints
   cy.intercept("GET", "**/api/characters", {
     statusCode: 200,
-    body: { ok: true, characters: [] },
+    body: [],
   }).as("getCharacters");
 
   cy.intercept("POST", "**/api/characters", (req) => {
+    currentCharacter = { ...currentCharacter, ...req.body };
     req.reply({
       statusCode: 200,
-      body: { ok: true, character: { ...mockCharacter, ...req.body } },
+      body: currentCharacter,
     });
   }).as("createCharacter");
 
-  cy.intercept("GET", "**/api/characters/*", {
-    statusCode: 200,
-    body: { ok: true, character: mockCharacter },
+  cy.intercept("GET", "**/api/characters/*", (req) => {
+    req.reply({
+      statusCode: 200,
+      body: currentCharacter,
+    });
   }).as("getCharacter");
 
   cy.intercept("PUT", "**/api/characters/*", (req) => {
+    currentCharacter = { ...currentCharacter, ...req.body };
     req.reply({
       statusCode: 200,
-      body: { ok: true, character: { ...mockCharacter, ...req.body } },
+      body: currentCharacter,
     });
   }).as("updateCharacter");
 
   cy.intercept("DELETE", "**/api/characters/*", {
     statusCode: 200,
-    body: { ok: true, message: "Character deleted" },
+    body: null,
   }).as("deleteCharacter");
 
-  cy.intercept("POST", "**/api/characters/*/kill", {
-    statusCode: 200,
-    body: { ok: true, character: mockCharacter },
+  cy.intercept("POST", "**/api/characters/*/kill", (req) => {
+    req.reply({
+      statusCode: 200,
+      body: currentCharacter,
+    });
   }).as("killCharacter");
 
   cy.intercept("GET", "**/api/characters/deceased", {
     statusCode: 200,
-    body: { ok: true, characters: [] },
+    body: [],
   }).as("getDeceasedCharacters");
 
   // Chat/Game endpoints
   // Match both trailing slash and query-string variants of /api/chat/history
+  // Also intercept dynamic chat routes which include characterId: /api/chat/:characterId/history
   cy.intercept("GET", "**/api/chat/history*", {
     statusCode: 200,
     body: { isNew: true, history: [] },
   }).as("getChatHistory");
 
+  // Intercept dynamic history route: /api/chat/:characterId/history
+  cy.intercept("GET", "**/api/chat/*/history*", {
+    statusCode: 200,
+    body: { isNew: true, history: [] },
+  }).as("getChatHistoryById");
+
+  // Intercept both POST /api/chat and dynamic POST /api/chat/:characterId
   cy.intercept("POST", "**/api/chat", {
     statusCode: 200,
     body: {
@@ -125,6 +145,19 @@ Cypress.Commands.add("setupApiMocks", () => {
       },
     },
   }).as("sendChat");
+
+  cy.intercept("POST", "**/api/chat/*", (req) => {
+    // Return the same mocked shape for dynamic character-specific chat posts
+    req.reply({
+      statusCode: 200,
+      body: {
+        result: {
+          text: "Mock game response",
+          instructions: [],
+        },
+      },
+    });
+  }).as("sendChatById");
 
   // Image generation endpoint - match generate-avatar exactly and any additional path variants
   cy.intercept("POST", "**/api/image/generate-avatar*", {

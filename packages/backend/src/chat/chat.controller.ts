@@ -5,29 +5,28 @@ import {
   Get,
   InternalServerErrorException,
   Logger,
+  Param,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
-import fs, { readFile } from 'fs/promises';
-import * as Joi from 'joi';
-import type { CharacterDto, ChatRequest } from '@rpg-gen/shared';
+import type { CharacterDto } from '@rpg-gen/shared';
+import type { Request } from 'express';
+import { readFile } from 'fs/promises';
+import path from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { GameInstruction, parseGameResponse } from '../external/game-parser.util.js';
+import { CharacterService } from '../character/character.service.js';
+import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ChatMessage, ConversationService } from './conversation.service.js';
 
-const schema = Joi.object({
-  message: Joi.string().allow('').optional(),
-  characterId: Joi.string().optional(),
-  character: Joi.string().optional(),
-});
+const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 
-const TEMPLATE_PATH = process.cwd() + '/chat.prompt.txt';
+class ChatRequest {
+  message: string;
+}
 
 @ApiTags('chat')
 @Controller('chat')
@@ -35,13 +34,23 @@ const TEMPLATE_PATH = process.cwd() + '/chat.prompt.txt';
 @ApiBearerAuth()
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
+  private systemPrompt: string;
   constructor(
     private readonly gemini: GeminiTextService,
     private readonly conv: ConversationService,
-  ) {}
+    private readonly characterService: CharacterService,
+  ) {
+    this.loadSystemPrompt().then((systemPrompt) => {
+      this.systemPrompt = systemPrompt;
+      this.logger.log(
+        `System prompt loaded (${systemPrompt.length} chars)`,
+      );
+    });
+  }
 
   private async loadSystemPrompt(): Promise<string> {
     try {
+      this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
       return await readFile(TEMPLATE_PATH, 'utf8');
     } catch {
       return '';
@@ -91,47 +100,17 @@ Character Information:
     return summary;
   }
 
-  private async startChat(
-    userId: string,
-    characterId: string,
-    systemPrompt: string,
-    character?: CharacterDto,
-  ): Promise<ChatMessage> {
-    this.logger.log(`Starting chat for character ${characterId} (user: ${userId})`);
-    this.gemini.getOrCreateChat(characterId, systemPrompt || undefined, []);
-    const initMessage = character
-      ? (this.logger.debug(`Character data received:`, JSON.stringify(character, null, 2)),
-        `${systemPrompt}\n\n${this.buildCharacterSummary(character)}`)
-      : systemPrompt;
-    if (character)
-      this.logger.log(`Chat ${characterId} started with character: ${character.name}`);
-    const initResp = await this.gemini.sendMessage(characterId, initMessage);
-    const initMsg: ChatMessage = {
-      role: 'assistant',
-      text: initResp.text || '',
-      timestamp: Date.now(),
-      meta: { usage: initResp.usage || null, model: initResp.modelVersion || '' },
-    };
-    await this.conv.append(userId, characterId, initMsg);
-    this.logger.log(`Chat ${characterId} started with ${initMsg.text.length} chars`);
-    return initMsg;
-  }
-
   private async processUserMessage(
     userId: string,
     characterId: string,
     userText: string,
-    _systemPrompt: string,
-  ): Promise<{ userMsg: ChatMessage; assistantMsg: ChatMessage }> {
+  ) {
     this.logger.log(
       `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`,
     );
-
-    // Append user message to history
     const userMsg: ChatMessage = { role: 'user', text: userText, timestamp: Date.now() };
     await this.conv.append(userId, characterId, userMsg);
 
-    // Send via chat (context handled automatically)
     const resp = await this.gemini.sendMessage(characterId, userText);
 
     // Save assistant response
@@ -139,173 +118,101 @@ Character Information:
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
-      meta: { usage: resp.usage || null, model: resp.modelVersion || '' },
+      meta: { usage: resp.usage || {}, model: resp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, assistantMsg);
 
-    return { userMsg, assistantMsg };
+    return assistantMsg;
   }
 
-  private formatChatResponse(
-    responseText: string,
-    model: string,
-    usage: Record<string, unknown> | null,
-  ) {
-    const { narrative, instructions } = parseGameResponse(responseText);
-    return {
-      text: narrative,
-      instructions,
-      model: model || 'unknown',
-      usage: usage || null,
-      raw: null,
-    };
-  }
-
-  private async handleChat(
-    userId: string,
-    characterId: string,
-    message: string,
-    character: CharacterDto | undefined,
-  ): Promise<{ characterId: string; result: Record<string, unknown> }> {
-    const systemPrompt = await this.loadSystemPrompt();
-    const history = await this.conv.getHistory(userId, characterId);
-    if (history.length === 0) await this.startChat(userId, characterId, systemPrompt, character);
-    const { assistantMsg } = await this.processUserMessage(userId, characterId, message || '', systemPrompt);
-    const result = this.formatChatResponse(
-      assistantMsg.text,
-      (assistantMsg.meta?.model || '') as string,
-      (assistantMsg.meta?.usage || null) as Record<string, unknown> | null,
-    );
-    this.logger.log(`Chat response ready for character ${characterId}`);
-    return { characterId, result };
-  }
-
-  @Post()
+  @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
-  @ApiBody({ schema: { type: 'object' } })
-  async chat(@Req() req: Request, @Body() body: ChatRequest) {
+  @ApiBody({ type: ChatRequest })
+  async chat(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: unknown,
+    @Body('message') message: string,
+  ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    const value = this.validateChatBody(body);
+    this.logger.log(`Received chat request for characterId ${characterId} with message: ${message}...`);
+    if (!message) throw new BadRequestException('message required');
+    if (!characterId) throw new BadRequestException('characterId required');
+
     try {
-      if (!value.characterId || typeof value.characterId !== 'string')
-        throw new BadRequestException('characterId required');
-      const { result } = await this.handleChat(
-        userId,
-        value.characterId as string,
-        value.message || '',
-        value.character as CharacterDto | undefined,
-      );
-      return { ok: true, characterId: value.characterId, result };
+      const assistantMsg = await this.processUserMessage(userId, characterId, message || '');
+      const { narrative, instructions } = parseGameResponse(assistantMsg.text);
+      return {
+        text: narrative,
+        instructions,
+        model: assistantMsg.meta?.model || 'unknown',
+        usage: assistantMsg.meta?.usage || null,
+        raw: null,
+      };
     } catch (e) {
-      this.logger.error('Chat failed', (e as Error)?.stack || e, 'ChatController');
       throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
     }
   }
 
-  private validateChatBody(body: ChatRequest) {
-    const { error, value } = schema.validate(body);
-    if (error) throw new BadRequestException(error.message);
-    return value as Record<string, unknown> & ChatRequest;
+  private async startChat(
+    userId: string,
+    characterId: string,
+  ): Promise<ChatMessage> {
+    this.gemini.initializeChatSession(characterId, this.systemPrompt, []);
+
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    if (!character)
+      throw new BadRequestException('Character not found for chat initialization');
+    const initMessage = `${this.systemPrompt}\n\n${this.buildCharacterSummary(character)}`;
+
+    const initResp = await this.gemini.sendMessage(characterId, initMessage);
+    const initMsg: ChatMessage = {
+      role: 'assistant',
+      text: initResp.text || '',
+      timestamp: Date.now(),
+      meta: {
+        model: initResp.modelVersion,
+        usage: initResp.usage || {},
+      },
+    };
+
+    await this.conv.append(userId, characterId, initMsg);
+    return initMsg;
   }
 
-  @Post('template')
-  @ApiOperation({ summary: 'Update developer prompt template (dev only)' })
-  @ApiBody({ schema: { type: 'object' } })
-  async updateTemplate(@Body() body: Record<string, unknown>) {
-    const text = body?.template;
-    if (typeof text !== 'string') throw new BadRequestException('template required');
-    const fs = await import('fs/promises');
-    await fs.writeFile(TEMPLATE_PATH, text, 'utf8');
-    return { ok: true };
-  }
-
-  @Post('template/get')
-  @ApiOperation({ summary: 'Get developer prompt template (dev only)' })
-  async getTemplate() {
-    try {
-      const txt = await fs.readFile(TEMPLATE_PATH, 'utf8');
-      return { ok: true, template: txt };
-    } catch {
-      return { ok: true, template: '' };
-    }
-  }
-
-  private parseCharacterFromQuery(character?: string): CharacterDto | undefined {
-    if (!character || typeof character !== 'string') return undefined;
-    try {
-      return JSON.parse(character) as CharacterDto;
-    } catch {
-      return undefined;
-    }
-  }
-
-  private buildSdkHistory(
-    history: ChatMessage[],
-  ): Array<{ role: string; parts: Array<{ text: string }> }> {
-    return history.map(m => ({
-      role: m.role === 'assistant' ? 'model' : m.role,
-      parts: [{ text: m.text }],
-    }));
-  }
-
-  private addInstructionsToHistory(
-    history: ChatMessage[],
-  ): Array<ChatMessage & { instructions?: GameInstruction[] }> {
+  private respondToChat(characterId: string, history: ChatMessage[]) {
+    this.gemini.initializeChatSession(
+      characterId,
+      this.systemPrompt,
+      history.map(m => ({
+        role: m.role === 'assistant' ? 'model' : m.role,
+        parts: [{ text: m.text }],
+      })),
+    );
+    this.logger.log(`History loaded for character ${characterId}: ${history.length} messages`);
     return history.map(msg =>
       msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg,
     );
   }
 
-  private async handleNewChatHistory(
-    userId: string,
-    characterId: string,
-    systemPrompt: string,
-    charData: CharacterDto | undefined,
-  ): Promise<{ ok: boolean; characterId: string; isNew: boolean; history: ChatMessage[] }> {
-    const initMsg = await this.startChat(userId, characterId, systemPrompt, charData);
-    return { ok: true, characterId, isNew: true, history: [initMsg] };
-  }
-
-  private async handleExistingChatHistory(
-    characterId: string,
-    systemPrompt: string,
-    history: ChatMessage[],
-  ): Promise<{
-    ok: boolean;
-    characterId: string;
-    isNew: boolean;
-    history: Array<ChatMessage & { instructions?: GameInstruction[] }>;
-  }> {
-    this.gemini.getOrCreateChat(
-      characterId,
-      systemPrompt || undefined,
-      this.buildSdkHistory(history),
-    );
-    const historyWithInstructions = this.addInstructionsToHistory(history);
-    this.logger.log(`History loaded for character ${characterId}: ${history.length} messages`);
-    return { ok: true, characterId, isNew: false, history: historyWithInstructions };
-  }
-
-  @Get('history')
+  @Get('/:characterId/history')
   @ApiOperation({ summary: 'Get conversation history for a character' })
+
   async getHistory(
     @Req() req: Request,
-    @Query('character') character?: string,
-    @Query('characterId') characterId?: string,
+    @Param('characterId') characterId: string,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
     if (!characterId) throw new BadRequestException('characterId required');
     try {
-      // characterId is the conversation key for history
       const history = await this.conv.getHistory(userId, characterId);
-      const systemPrompt = await this.loadSystemPrompt();
-      const charData = this.parseCharacterFromQuery(character);
-      return history.length === 0
-        ? this.handleNewChatHistory(userId, characterId, systemPrompt, charData)
-        : this.handleExistingChatHistory(characterId, systemPrompt, history);
+      if (history.length === 0) {
+        return await this.startChat(userId, characterId);
+      }
+      return this.respondToChat(characterId, history);
     } catch (e) {
       this.logger.error('History retrieval failed', (e as Error)?.stack || e, 'ChatController');
       throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve history');

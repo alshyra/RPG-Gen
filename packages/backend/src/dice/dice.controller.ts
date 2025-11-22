@@ -1,6 +1,6 @@
 import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import * as Joi from 'joi';
+import Joi from 'joi';
 import { rollDiceExpr } from './dice.util.js';
 import type { DiceRequest } from '@rpg-gen/shared';
 

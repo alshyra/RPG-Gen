@@ -1,14 +1,9 @@
 import { useRoute, useRouter } from 'vue-router';
 import { useGameStore } from '../stores/gameStore';
 import { CharacterDto } from '@rpg-gen/shared';
-import { characterServiceApi } from '../services/characterServiceApi';
+import { useCharacterStore } from '@/stores/characterStore';
 import { gameEngine } from '../services/gameEngine';
-
-const worldMap: Record<string, string> = {
-  dnd: 'Dungeons & Dragons',
-  vtm: 'Vampire: The Masquerade',
-  cyberpunk: 'Cyberpunk',
-};
+import { storeToRefs } from 'pinia';
 
 const processInstructionInMessage = (instr: any, isLastMessage: boolean, gameStore: any): void => {
   if (instr.roll) {
@@ -35,34 +30,23 @@ const processHistoryMessages = (history: any[], gameStore: any): any[] =>
   });
 
 export function useGameSession() {
-  const route = useRoute();
   const router = useRouter();
   const gameStore = useGameStore();
+  const characterStore = useCharacterStore();
+  const { currentCharacter } = storeToRefs(characterStore);
 
-  const initializeGame = async (char: CharacterDto) => {
+  const startGame = async () => {
+    if (!currentCharacter?.value) return await router.push('/home');
+    gameStore.setWorld('dnd', 'Dungeons & Dragons');
+    gameStore.setInitializing(true);
     try {
-      gameStore.setCharacter(char);
-      if (gameStore.isDead) gameStore.setDeathModalVisible(true);
-      const { messages: history } = await gameEngine.startGame();
-      if (history?.length) gameStore.updateMessages(processHistoryMessages(history, gameStore));
+      gameStore.setCharacter(currentCharacter.value);
+      if (currentCharacter.value.isDeceased) gameStore.setDeathModalVisible(true);
+      const messages = await gameEngine.startGame(currentCharacter.value);
+      if (messages?.length) gameStore.updateMessages(processHistoryMessages(messages, gameStore));
     } catch (e: any) {
       gameStore.appendMessage('Error', e?.response?.data?.error || e.message);
     }
-  };
-  const startGame = async (): Promise<void> => {
-    // Check if character exists, redirect to home if not
-    const char = await characterServiceApi.getCurrentCharacter();
-    if (!char) {
-      await router.push('/home');
-      return;
-    }
-
-    gameStore.setWorld(
-      (route.params.world as string) || '',
-      worldMap[route.params.world as string] || (route.params.world as string),
-    );
-    gameStore.setInitializing(true);
-    await initializeGame(char);
     gameStore.setInitializing(false);
   };
 

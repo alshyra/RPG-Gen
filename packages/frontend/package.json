@@ -19,13 +19,15 @@
   "dependencies": {
     "@rpg-gen/shared": "*",
     "@tailwindcss/vite": "^4.1.17",
+    "@vueuse/core": "^14.0.0",
     "axios": "^1.13.2",
     "eslint": "^9.39.1",
     "marked": "^17.0.0",
     "pinia": "^3.0.4",
     "vite-plugin-vue-devtools": "^8.0.3",
     "vue": "^3.5.24",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "whatwg-fetch": "^3.6.20"
   },
   "devDependencies": {
     "@cypress/vite-dev-server": "^7.0.1",
@@ -38,6 +40,7 @@
     "cypress": "^15.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.5.1",
+    "jsdom": "^27.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",

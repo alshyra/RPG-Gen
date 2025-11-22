@@ -24,25 +24,26 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { DnDRulesService } from '../../services/dndRulesService';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
 
-interface CharacterData {
-  skills?: { name: string; proficient: boolean; modifier: number }[];
-  scores?: { [key: string]: number };
-  proficiency?: number;
-}
-
-const props = defineProps<{ character: CharacterData }>();
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
 const skills = computed(() => {
-  if (!props.character.scores || !props.character.skills) return [];
+  if (
+    currentCharacter.value == null
+    || !currentCharacter.value?.scores
+    || !currentCharacter.value.skills?.length
+  ) return [];
 
-  return props.character.skills.map(skill => ({
+  return currentCharacter.value.skills.map(skill => ({
     ...skill,
     modifier: DnDRulesService.calculateSkillModifier(
-      skill.name,
-      props.character.scores || {},
-      props.character.proficiency || 2,
-      skill.proficient,
+      skill.name!,
+      currentCharacter.value!.scores!,
+      currentCharacter.value!.proficiency!,
+      skill.proficient!,
     ),
   }));
 });

@@ -7,6 +7,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: rpgadmin
       MONGO_INITDB_ROOT_PASSWORD: rpgpass123
       MONGO_INITDB_DATABASE: rpggen
+    ports:
+      - 27017:27017
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
@@ -23,7 +25,6 @@ services:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
-      - LOG_FORMAT=json
     env_file:
       - packages/backend/.env
     depends_on:
@@ -40,6 +41,7 @@ services:
       - "80:80"
     environment:
       - BACKEND_URL=http://backend:3001
+      - DNS_RESOLVER=127.0.0.11
     networks:
       - rpg-network
     depends_on:
