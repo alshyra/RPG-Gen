@@ -78,6 +78,7 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useGameStore } from '@/stores/gameStore';
 import UiButton from '../ui/UiButton.vue';
 import CharacterPreview from './CharacterPreview.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -113,14 +114,14 @@ const currentStep = computed({
   },
 });
 
-const chosenSkills = computed(() => currentCharacter.value?.skills.filter(skill => !!skill.proficient).length || 0);
+const chosenSkills = computed(() => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
       return currentCharacter.value?.name?.trim();
     case 1:
-      return currentCharacter.value?.race && currentCharacter.value?.classes[0];
+      return currentCharacter.value?.race && currentCharacter.value?.classes?.[0];
     case 2:
       return true;
     case 3:
@@ -142,11 +143,14 @@ const previousStep = () => {
   currentStep.value--;
 };
 
+const gameStore = useGameStore();
+
 const finishCreation = async () => {
   if (!currentCharacter.value) return;
   isLoading.value = true;
   console.log('Finishing character creation for', currentCharacter.value);
   await updateCharacter(currentCharacter.value.characterId, { state: 'created' });
+  gameStore.setWorld('dnd', 'Dungeons & Dragons');
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
   console.log('Avatar generated');
   router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });

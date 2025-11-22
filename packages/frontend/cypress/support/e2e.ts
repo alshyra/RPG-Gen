@@ -123,11 +123,19 @@ Cypress.Commands.add("setupApiMocks", () => {
 
   // Chat/Game endpoints
   // Match both trailing slash and query-string variants of /api/chat/history
+  // Also intercept dynamic chat routes which include characterId: /api/chat/:characterId/history
   cy.intercept("GET", "**/api/chat/history*", {
     statusCode: 200,
     body: { isNew: true, history: [] },
   }).as("getChatHistory");
 
+  // Intercept dynamic history route: /api/chat/:characterId/history
+  cy.intercept("GET", "**/api/chat/*/history*", {
+    statusCode: 200,
+    body: { isNew: true, history: [] },
+  }).as("getChatHistoryById");
+
+  // Intercept both POST /api/chat and dynamic POST /api/chat/:characterId
   cy.intercept("POST", "**/api/chat", {
     statusCode: 200,
     body: {
@@ -137,6 +145,19 @@ Cypress.Commands.add("setupApiMocks", () => {
       },
     },
   }).as("sendChat");
+
+  cy.intercept("POST", "**/api/chat/*", (req) => {
+    // Return the same mocked shape for dynamic character-specific chat posts
+    req.reply({
+      statusCode: 200,
+      body: {
+        result: {
+          text: "Mock game response",
+          instructions: [],
+        },
+      },
+    });
+  }).as("sendChatById");
 
   // Image generation endpoint - match generate-avatar exactly and any additional path variants
   cy.intercept("POST", "**/api/image/generate-avatar*", {

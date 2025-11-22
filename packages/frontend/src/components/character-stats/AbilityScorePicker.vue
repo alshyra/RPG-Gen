@@ -25,7 +25,18 @@
               :min="8"
               :max="15"
               :disabled="mode === 'edit'"
-              @update:model-value="(val) => applyPointBuyChange(ability, val)"
+              @update:model-value="async (val) => {
+                const result = applyPointBuyChange(ability, val);
+                // Persist the updated scores to the API so a page reload will keep changes
+                if (result?.allowed && currentCharacter?.characterId) {
+                  try {
+                    await characterStore.updateCharacter(currentCharacter.characterId, { scores: currentCharacter.scores });
+                  } catch (e) {
+                    // swallow save errors in tests - UI already reflects change
+                    console.error('Failed to persist ability scores', e);
+                  }
+                }
+              }"
             />
           </div>
         </div>

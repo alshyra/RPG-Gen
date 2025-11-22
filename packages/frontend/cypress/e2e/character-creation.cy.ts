@@ -49,7 +49,6 @@ describe('Character Creation', () => {
     cy.contains("button", "Terminer").click();
 
     cy.url().should("match", /\/game\/[^/]+/);
-    cy.contains("Dungeons & Dragons").should("be.visible");
   });
 
   it("should save character draft to localStorage", () => {

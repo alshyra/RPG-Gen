@@ -19,6 +19,7 @@
   "dependencies": {
     "@rpg-gen/shared": "*",
     "@tailwindcss/vite": "^4.1.17",
+    "@vueuse/core": "^14.0.0",
     "axios": "^1.13.2",
     "eslint": "^9.39.1",
     "marked": "^17.0.0",

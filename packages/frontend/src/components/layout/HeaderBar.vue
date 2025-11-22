@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameStore } from '../../stores/gameStore';
+import { useGameStore } from '@/stores/gameStore';
 
 const route = useRoute();
 const gameStore = useGameStore();
@@ -45,8 +45,10 @@ const subtitle = computed(() => {
     return worldMap[world] || 'Créateur de personnage';
   }
   if (routeName === 'game') {
-    const world = (route.params.world as string) || '';
-    return worldMap[world] || 'Aventure';
+    const worldParam = (route.params.world as string) || (route.query.world as string) || '';
+    const worldFromStore = gameStore.session?.world || '';
+    const worldKey = worldParam || worldFromStore || '';
+    return worldMap[worldKey] || gameStore.session?.worldName || 'Aventure';
   }
 
   return undefined;

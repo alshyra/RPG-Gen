@@ -2,8 +2,8 @@
 
 
 export interface RaceDto {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   mods: Record<string, number>;
 }
 export type CreateRaceDto = Partial<RaceDto>;
