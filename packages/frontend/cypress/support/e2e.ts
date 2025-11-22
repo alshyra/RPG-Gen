@@ -35,13 +35,18 @@ Cypress.Commands.add("mockAuth", () => {
     picture: "https://via.placeholder.com/150",
   };
 
-  localStorage.setItem("rpg-auth-token", mockToken);
-  localStorage.setItem("rpg-user-data", JSON.stringify(mockUser));
+  // Set items that will be automatically applied on next visit
+  cy.window().then((win) => {
+    win.localStorage.setItem("rpg-auth-token", mockToken);
+    win.localStorage.setItem("rpg-user-data", JSON.stringify(mockUser));
+  });
 });
 
 Cypress.Commands.add("clearAuth", () => {
-  localStorage.removeItem("rpg-auth-token");
-  localStorage.removeItem("rpg-user-data");
+  cy.window().then((win) => {
+    win.localStorage.removeItem("rpg-auth-token");
+    win.localStorage.removeItem("rpg-user-data");
+  });
 });
 
 // Helper to setup API mocks - call this in beforeEach of each test

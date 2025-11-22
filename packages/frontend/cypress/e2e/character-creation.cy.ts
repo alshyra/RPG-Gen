@@ -3,11 +3,12 @@ describe('Character Creation', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.setupApiMocks();
+    // Visit first to establish window context, then mock auth
+    cy.visit("/home");
     cy.mockAuth();
   });
 
   it("should navigate through all character creation steps", () => {
-    cy.visit("/home");
     cy.contains("RPG Gemini").should("be.visible");
 
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
@@ -53,7 +54,6 @@ describe('Character Creation', () => {
   });
 
   it("should save character draft to localStorage", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
@@ -68,7 +68,6 @@ describe('Character Creation', () => {
   });
 
   it("should restore draft on page refresh", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
@@ -87,7 +86,6 @@ describe('Character Creation', () => {
   });
 
   it("should go back to previous step", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
@@ -103,7 +101,6 @@ describe('Character Creation', () => {
   });
 
   it("should validate step completion before allowing next", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
@@ -119,7 +116,6 @@ describe('Character Creation', () => {
   });
 
   it("should persist ability scores (character.scores) on page refresh", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
@@ -157,7 +153,6 @@ describe('Character Creation', () => {
   });
 
   it("should auto-generate and save avatar when finishing character creation", () => {
-    cy.visit("/home");
     cy.contains("Dungeons & Dragons").closest(".tpl").find("button").contains("Commencer").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/1/);
