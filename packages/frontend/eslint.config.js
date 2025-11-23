@@ -1,5 +1,5 @@
 import shared from '../../eslint.shared.js';
-import ts from 'typescript-eslint';
+import vueParser from 'vue-eslint-parser';
 import pluginVue from 'eslint-plugin-vue'
 import globals from 'globals';
 
@@ -9,8 +9,9 @@ export default [
     {
     files: ['**/*.vue'],
     languageOptions: {
+      parser: vueParser,
       parserOptions: {
-        parser: ts.parser,
+        parser: '@typescript-eslint/parser',
         tsconfigRootDir: new URL('.', import.meta.url).pathname,
         ecmaVersion: 'latest',
         sourceType: 'module'

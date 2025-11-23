@@ -11,7 +11,7 @@
               {{ ability }}
             </div>
             <div class="text-xs text-slate-400">
-              {{ formatMod(currentCharacter.scores[ability]) }} • PB {{ proficiency }}
+              {{ formatMod(currentCharacter.scores?.[ability] ?? 8) }} • PB {{ proficiency }}
             </div>
           </div>
           <div
@@ -26,7 +26,9 @@
               :max="15"
               :disabled="mode === 'edit'"
               @update:model-value="async (val) => {
-                const result = applyPointBuyChange(ability, val);
+                // val might be undefined from the input binding; coerce to number and pass typed ability
+                const v = (val ?? (currentCharacter?.scores?.[ability] ?? 8)) as number;
+                const result = applyPointBuyChange(ability as typeof ABILITIES[number], v);
                 // Persist the updated scores to the API so a page reload will keep changes
                 if (result?.allowed && currentCharacter?.characterId) {
                   try {

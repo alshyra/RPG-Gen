@@ -18,8 +18,8 @@ export function getSkillBonus(
 
   // Try to find the skill in character's skills array
   if (character.skills && Array.isArray(character.skills)) {
-    const skill = character.skills.find(s => s.name.toLowerCase() === skillName.toLowerCase());
-    if (skill) return skill.modifier;
+    const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+    if (skill) return skill.modifier ?? 0;
   }
 
   // Fallback: return 0 if skill not found

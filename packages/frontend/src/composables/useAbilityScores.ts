@@ -12,7 +12,7 @@ const useAbilityScores = () => {
   const characterScores = computed(() => currentCharacter.value?.scores || DEFAULT_BASE_SCORES);
 
   const pointsUsed = computed(() => ABILITIES
-    .map(score => characterScores.value[score])
+    .map(score => (characterScores.value[score] ?? 8))
     .reduce((sum, value) => sum + COST[value as keyof typeof COST], 0));
 
   const formatMod = (score: number): string => {
@@ -21,7 +21,7 @@ const useAbilityScores = () => {
   };
 
   const applyPointBuyChange = (
-    ability: keyof CharacterDto['scores'],
+    ability: typeof ABILITIES[number],
     newValue: number,
     maxBudget = 27,
     initialScores?: CharacterDto['scores'],
@@ -32,11 +32,11 @@ const useAbilityScores = () => {
     let newUsed = 0;
     if (initialScores) {
       // Level-up mode: budget is the number of direct +1 increases available above initial scores
-      const currentIncrease = (current - (initialScores[ability] ?? 8)) || 0;
+      const currentIncrease = (current - (initialScores?.[ability] ?? 8)) || 0;
       const currentUsed = Object.keys(initialScores)
-        .map(k => Math.max(0, characterScores.value[k as keyof typeof initialScores] - initialScores[k as keyof typeof initialScores]))
+        .map(k => Math.max(0, (characterScores.value[k as keyof typeof initialScores] ?? 8) - ((initialScores as any)[k] ?? 8)))
         .reduce((s, v) => s + v, 0);
-      const newIncrease = Math.max(0, newValue - (initialScores[ability] ?? 8));
+      const newIncrease = Math.max(0, newValue - (initialScores?.[ability] ?? 8));
       newUsed = currentUsed - currentIncrease + newIncrease;
       if (newUsed > maxBudget) return { allowed: false };
     } else {

@@ -61,8 +61,6 @@
     <div class="max-w-2xl w-full mx-auto mt-8">
       <WorldSelector />
     </div>
-
-    <div />
   </div>
 </template>
 
