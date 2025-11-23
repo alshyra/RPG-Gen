@@ -1,38 +1,39 @@
-<script setup lang="ts">
-interface Character {
-  name: string;
-  race: any;
-  scores: Record<string, number>;
-  [key: string]: any;
-}
-
-interface Props {
-  character: Character;
-  gender: string;
-  primaryClass: string;
-  baseScores: Record<string, number>;
-  selectedSkills: string[];
-  currentStep: number;
-}
-
-defineProps<Props>();
-</script>
-
 <template>
   <div class="p-3 lg:p-4 bg-slate-900/50 rounded-b border-x border-b border-slate-700">
     <div class="text-sm text-slate-300 space-y-1">
-      <div><strong>Nom:</strong> {{ character.name || '—' }}</div>
-      <div><strong>Genre:</strong> {{ gender }}</div>
-      <div><strong>Race:</strong> {{ character.race?.name || '—' }}</div>
-      <div><strong>Classe:</strong> {{ primaryClass }}</div>
-      <div v-if="currentStep >= 2">
-        <strong>Scores:</strong> STR {{ baseScores.Str }} | DEX {{ baseScores.Dex
-        }} | CON {{ baseScores.Con }} | INT {{ baseScores.Int }} | WIS {{ baseScores.Wis }} | CHA {{
-          baseScores.Cha }}
+      <div v-if="currentCharacter?.name">
+        <strong>Nom:</strong> {{ currentCharacter.name }}
       </div>
-      <div v-if="currentStep >= 3">
-        <strong>Compétences:</strong> {{ selectedSkills.join(', ') || '—' }}
+      <div v-if="currentCharacter?.gender">
+        <strong>Genre:</strong> {{ currentCharacter.gender }}
+      </div>
+      <div v-if="currentCharacter?.race">
+        <strong>Race:</strong> {{ currentCharacter.race?.name }}
+      </div>
+      <div v-if="currentCharacter?.classes?.length">
+        <strong>Classe:</strong> {{ currentCharacter.classes[0].name }}
+      </div>
+      <div v-if="currentCharacter?.scores">
+        <strong>Scores:</strong> STR {{ currentCharacter.scores.Str }} | DEX {{ currentCharacter.scores.Dex
+        }} | CON {{ currentCharacter.scores.Con }} | INT {{ currentCharacter.scores.Int }} | WIS {{ currentCharacter.scores.Wis }} | CHA {{
+          currentCharacter.scores.Cha }}
+      </div>
+      <div v-if="currentCharacter?.skills?.length">
+        <strong>Compétences:</strong> {{ skills }}
       </div>
     </div>
   </div>
 </template>
+<script setup lang="ts">
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
+
+const skills = computed(() => (currentCharacter.value?.skills || [])
+  .filter((s: any) => s.proficient)
+  .map((s: any) => s.name)
+  .join(', '));
+</script>

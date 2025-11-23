@@ -3,34 +3,35 @@
     <label class="muted">Choisir un univers</label>
     <div class="space-y-3 mt-2">
       <div
-        v-for="w in worlds"
-        :key="w.id"
+        v-for="world in worlds"
+        :key="world.id"
         class="tpl flex items-center justify-between p-3 rounded-md bg-slate-800/50 hover:bg-slate-800/70"
       >
         <div class="flex items-start gap-3">
           <div
             class="logo flex items-center justify-center w-12 h-12 rounded-md text-white font-bold shrink-0"
-            :class="w.bgClass"
+            :class="world.bgClass"
           >
             <!-- simple initials as logo -->
-            {{ w.logo }}
+            {{ world.logo }}
           </div>
           <div class="text-left">
             <div class="text-sm font-semibold text-purple-300">
-              {{ w.name }}
+              {{ world.name }}
             </div>
             <div class="text-xs text-slate-400">
-              {{ w.desc }}
+              {{ world.desc }}
             </div>
           </div>
         </div>
 
         <div>
           <UiButton
-            variant="ghost"
+            :variant="world.enabled ? 'primary' : 'ghost'"
+            :disabled="!world.enabled"
             class="flex items-center gap-2"
-            :data-cy="`world-start-${w.id}`"
-            @click="$emit('select', w.id)"
+            :data-cy="`world-start-${world.id}`"
+            @click="goToCharacterCreation(world.id)"
           >
             <span>Commencer</span>
             <svg
@@ -57,14 +58,19 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import UiButton from '../ui/UiButton.vue';
+import { useCharacterStore } from '@/stores/characterStore';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const { createCharacter } = useCharacterStore();
 
-defineEmits<{
-  (e: 'select', id: string): void;
-}>();
+const goToCharacterCreation = async (world: string) => {
+  const character = await createCharacter(world);
+  router.push({ path: `/character/${character.characterId}/step/1` });
+};
 
 const worlds = reactive([
-  { id: 'dnd', logo: 'D', bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500', name: 'Dungeons & Dragons', desc: 'High fantasy, parties, and epic quests.' },
-  { id: 'vtm', logo: 'V', bgClass: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500', name: 'Vampire: The Masquerade', desc: 'Gothic-punk political roleplay among vampires.' },
-  { id: 'cyberpunk', logo: 'C', bgClass: 'bg-gradient-to-tr from-cyan-400 to-indigo-500', name: 'Cyberpunk', desc: 'Near-future neon dystopia with tech & megacorps.' },
+  { id: 'dnd', enabled: true, logo: 'D', bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500', name: 'Dungeons & Dragons', desc: 'High fantasy, parties, and epic quests.' },
+  { id: 'vtm', enabled: false, logo: 'V', bgClass: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500', name: 'Vampire: The Masquerade', desc: 'Gothic-punk political roleplay among vampires.' },
+  { id: 'cyberpunk', enabled: false, logo: 'C', bgClass: 'bg-gradient-to-tr from-cyan-400 to-indigo-500', name: 'Cyberpunk', desc: 'Near-future neon dystopia with tech & megacorps.' },
 ]);
 </script>

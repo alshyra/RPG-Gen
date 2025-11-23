@@ -4,7 +4,7 @@ import { GenerateContentResponse, GoogleGenAI } from '@google/genai';
 @Injectable()
 export class GeminiImageService {
   private readonly logger = new Logger(GeminiImageService.name);
-  private client: GoogleGenAI | null = null;
+  private client: GoogleGenAI;
   private model = 'gemini-2.5-flash-image';
 
   constructor() {

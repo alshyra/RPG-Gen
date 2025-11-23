@@ -23,30 +23,25 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useGameStore } from '../../stores/gameStore';
 
 const route = useRoute();
-const gameStore = useGameStore();
 
-const worldMap: Record<string, string> = {
-  dnd: 'Dungeons & Dragons',
-  vtm: 'Vampire: The Masquerade',
-  cyberpunk: 'Cyberpunk',
-};
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
 const subtitle = computed(() => {
   const routeName = route.name as string;
 
   if (routeName === 'home') return 'Bienvenue Aventurier';
   if (routeName === 'character-step') {
-    const world = (route.params.world as string) || '';
-    return worldMap[world] || 'Créateur de personnage';
+    return 'Créateur de personnage';
   }
   if (routeName === 'game') {
-    const world = (route.params.world as string) || '';
-    return worldMap[world] || 'Aventure';
+    return `Votre Aventure - ${currentCharacter.value?.name || ''}`;
   }
 
   return undefined;
@@ -60,9 +55,6 @@ const description = computed(() => {
     const action = route.query.action as string;
     if (action === 'levelup') return 'Montée de niveau';
     return 'Création de personnage';
-  }
-  if (routeName === 'game') {
-    return gameStore.isInitializing ? 'Initialisation...' : 'Session active';
   }
 
   return undefined;

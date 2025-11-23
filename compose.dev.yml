@@ -7,6 +7,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: rpgadmin
       MONGO_INITDB_ROOT_PASSWORD: rpgpass123
       MONGO_INITDB_DATABASE: rpggen
+    ports:
+      - 27017:27017
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
@@ -18,15 +20,15 @@ services:
     container_name: rpg-gen-backend
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci && npm --workspace rpg-gemini-backend run start:dev"
+    user: "${UID}:${GID}"
+    command: sh -c "npm --workspace rpg-gemini-backend run start"
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
     volumes:
-      - ./packages/backend:/app/backend
-      - ./packages/shared:/app/shared
-      - backend_node_modules:/app/backend/node_modules
+      - ./:/app/
+      - backend_node_modules:/app/node_modules
     env_file:
       - packages/backend/.env
     depends_on:
@@ -39,15 +41,16 @@ services:
     container_name: rpg-gen-frontend
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci && npm --workspace rpg-gemini-frontend run dev -- --port 80"
+    command: sh -c "npm --workspace rpg-gemini-frontend run dev"
     environment:
+      - DNS_RESOLVER=127.0.0.11
       - NODE_ENV=development
     ports:
       - "80:80"
+    user: "${UID}:${GID}"
     volumes:
-      - ./packages/frontend:/app/frontend
-      - ./packages/shared:/app/shared
-      - frontend_node_modules:/app/frontend/node_modules
+      - ./:/app/
+      - frontend_node_modules:/app/node_modules
     networks:
       - rpg-network
     depends_on:

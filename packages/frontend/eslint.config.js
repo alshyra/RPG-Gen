@@ -1,46 +1,23 @@
-/* eslint-env node */
-/* eslint-disable no-undef, no-redeclare */
-import js from '@eslint/js';
-import ts from 'typescript-eslint';
-import vue from 'eslint-plugin-vue';
+import shared from '../../eslint.shared.js';
 import vueParser from 'vue-eslint-parser';
-import stylistic from '@stylistic/eslint-plugin';
-const dirname = new URL('.', import.meta.url).pathname;
+import pluginVue from 'eslint-plugin-vue'
+import globals from 'globals';
+
 export default [
-  {
-    ignores: ['dist', 'node_modules', '.vite', 'coverage', '*.config.js', '*.config.cjs', 'cypress/**']
-  },
-  js.configs.recommended,
-  ...ts.configs.recommended,
-  ...vue.configs['flat/recommended'],
-  stylistic.configs.customize({
-    indent: 2,
-    quotes: 'single',
-    semi: true,
-    jsx: false,
-    braceStyle: '1tbs',
-    commaDangle: 'always-multiline',
-  }),
-  {
+  ...pluginVue.configs['flat/recommended'],
+  ...shared,
+    {
     files: ['**/*.vue'],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: { ...ts.parser, tsconfigRootDir: dirname },
+        parser: '@typescript-eslint/parser',
+        tsconfigRootDir: new URL('.', import.meta.url).pathname,
         ecmaVersion: 'latest',
         sourceType: 'module'
       },
       globals: {
-        console: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearTimeout: 'readonly',
-        clearInterval: 'readonly',
-        crypto: 'readonly',
-        localStorage: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly'
+      ...globals.browser
       }
     },
     rules: {
@@ -53,33 +30,7 @@ export default [
       'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['error', 10],
       'prefer-object-spread': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
     }
   },
-  {
-    files: ['**/*.{js,ts}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parser: {...ts.parser, tsconfigRootDir: dirname},
-      globals: {
-        console: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearTimeout: 'readonly',
-        clearInterval: 'readonly',
-        crypto: 'readonly',
-        localStorage: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly'
-      }
-    },
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      'arrow-body-style': ['error', 'as-needed'],
-      'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-      'max-statements': ['error', 10],
-      'prefer-object-spread': 'error',
-    }
-  }
 ];

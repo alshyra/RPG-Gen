@@ -26,51 +26,15 @@
     </div>
 
     <!-- Steps -->
-    <StepBasicInfo
-      v-if="currentStep === 0"
-      :character="character"
-      :gender="gender"
-      :world="world"
-      :genders="genders"
-      @update:character="updateCharacter($event); saveDraftNow()"
-      @update:gender="(g: any) => { gender = g; saveDraftNow(); }"
-    />
+    <StepBasicInfo v-if="currentStep === 0" />
 
-    <StepRaceClass
-      v-if="currentStep === 1"
-      :character="character"
-      :primary-class="primaryClass"
-      :allowed-races="allowedRaces"
-      :class-list="classesList"
-      @update:character="updateCharacter($event); saveDraftNow()"
-      @update:primary-class="primaryClass = $event; saveDraftNow()"
-    />
+    <StepRaceClass v-if="currentStep === 1" />
 
-    <StepAbilityScores
-      v-if="currentStep === 2"
-      :base-scores="baseScores"
-      @update:base-scores="(scores: any) => { baseScores = scores; saveDraftNow(); }"
-    />
+    <StepAbilityScores v-if="currentStep === 2" />
 
-    <StepSkills
-      v-if="currentStep === 3"
-      :primary-class="primaryClass"
-      :selected-skills="selectedSkills"
-      :available-skills="availableSkills"
-      :skills-to-choose="skillsToChoose"
-      @update:selected-skills="(skills: any) => { selectedSkills.splice(0, selectedSkills.length, ...skills); saveDraftNow(); }"
-    />
+    <StepSkills v-if="currentStep === 3" />
 
-    <StepAvatar
-      v-if="currentStep === 4"
-      :character="character"
-      :gender="gender"
-      :primary-class="primaryClass"
-      :generated-avatar="generatedAvatar"
-      :is-generating="isGeneratingAvatar"
-      :avatar-description="avatarDescription"
-      @update:avatar-description="avatarDescription = $event; saveDraftNow()"
-    />
+    <StepAvatar v-if="currentStep === 4" />
 
     <!-- Navigation buttons -->
     <div class="flex justify-end gap-2 mt-4 lg:mt-6 sticky bottom-0 bg-slate-900/95 py-3 -mx-2 px-2 lg:mx-0 lg:px-0 lg:bg-transparent lg:static">
@@ -92,6 +56,7 @@
       <UiButton
         v-if="currentStep === steps.length - 1"
         variant="primary"
+        :disabled="isLoading"
         @click="finishCreation"
       >
         Terminer
@@ -103,84 +68,63 @@
       <summary class="cursor-pointer p-3 lg:p-4 bg-slate-900 rounded border border-slate-700 hover:bg-slate-800 transition-colors">
         <span class="font-bold">Aperçu du personnage</span>
       </summary>
-      <CharacterPreview
-        :character="character"
-        :gender="gender"
-        :primary-class="primaryClass"
-        :base-scores="baseScores"
-        :selected-skills="selectedSkills"
-        :current-step="currentStep"
-      />
+      <CharacterPreview />
     </details>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import { characterServiceApi } from '@/services/characterServiceApi';
+import { DnDRulesService } from '@/services/dndRulesService';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
+import CharacterPreview from './CharacterPreview.vue';
+import StepAbilityScores from './steps/StepAbilityScores.vue';
+import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
-import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepSkills from './steps/StepSkills.vue';
-import StepAvatar from './steps/StepAvatar.vue';
-import CharacterPreview from './CharacterPreview.vue';
-import { useCharacterCreation } from '../../composables/useCharacterCreation';
-import { characterServiceApi } from '../../services/characterServiceApi';
 
-const props = defineProps<{ world?: string; worldId?: string }>();
 const router = useRouter();
 const route = useRoute();
 
+const isLoading = ref(false);
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
 
-// Use character creation composable
-const {
-  character,
-  primaryClass,
-  baseScores,
-  gender,
-  selectedSkills,
-  avatarDescription,
-  generatedAvatar,
-  isGeneratingAvatar,
-  allowedRaces,
-  classesList,
-  genders,
-  availableSkills,
-  skillsToChoose,
-  applyAndSave,
-  getDraftCurrentStep,
-  saveDraftWithStep,
-  saveDraftNow,
-} = useCharacterCreation(props.world, props.worldId);
+const characterStore = useCharacterStore();
+const { updateCharacter } = characterStore;
+const { currentCharacter } = storeToRefs(characterStore);
+const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || ''));
 
 // Get current step from route, or from draft if no route param
 const currentStep = computed({
   get: () => {
     const routeStep = parseInt(route.params.step as string, 10);
-    if (!isNaN(routeStep)) {
-      return Math.min(routeStep - 1, steps.length - 1);
-    }
-    // Fall back to draft step if available
-    return getDraftCurrentStep();
+    if (isNaN(routeStep)) return 0;
+
+    return Math.min(routeStep - 1, steps.length - 1);
   },
   set: (value: number) => {
-    router.push({ name: 'character-step', params: { world: props.world, step: value + 1 } });
+    const charId = (route.params.characterId as string) || currentCharacter.value?.characterId;
+    router.push({ name: 'character-step', params: { characterId: charId, step: value + 1 } });
   },
 });
+
+const chosenSkills = computed(() => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return character.value.name?.trim();
+      return currentCharacter.value?.name?.trim();
     case 1:
-      return character.value.race && primaryClass.value;
+      return currentCharacter.value?.race && currentCharacter.value?.classes?.[0];
     case 2:
       return true;
     case 3:
-      return selectedSkills.value.length === skillsToChoose.value;
+      return chosenSkills.value === skillsToChoose.value;
     case 4:
       return true;
     default:
@@ -190,69 +134,33 @@ const canProceed = computed(() => {
 
 const nextStep = async () => {
   if (currentStep.value >= steps.length - 1) return;
-
-  saveDraftWithStep(currentStep.value + 1);
   currentStep.value++;
-
-  // Auto-generate avatar when entering the avatar step (step 4)
-  if (currentStep.value === 4 && avatarDescription.value.trim() && !generatedAvatar.value) {
-    await generateAvatar();
-  }
 };
 
 const previousStep = () => {
   if (currentStep.value <= 0) return;
-
-  saveDraftWithStep(currentStep.value - 1);
   currentStep.value--;
 };
 
-const updateCharacter = (updates: any) => character.value = { ...character.value, ...updates };
-
-const ensureCharacterId = () => {
-  let charId = character.value.id;
-  if (!charId) {
-    charId = characterServiceApi.generateUUID();
-    character.value.id = charId;
-  }
-  return charId;
-};
-
-const requestAvatar = async (charId: string) => {
-  const response = await axios.post('/api/image/generate-avatar', {
-    character: {
-      name: character.value.name,
-      gender: gender.value,
-      race: character.value.race,
-      classes: [{ name: primaryClass.value }],
-    },
-    description: avatarDescription.value,
-    characterId: charId, // Pass character ID to save avatar
-  });
-
-  generatedAvatar.value = response.data.imageUrl;
-  saveDraftNow(); // Save draft with new avatar
-};
-
-const generateAvatar = async () => {
-  if (!avatarDescription.value.trim()) return;
-
-  isGeneratingAvatar.value = true;
-  try {
-    // Ensure the character has an ID before requesting an avatar
-    const charId = ensureCharacterId();
-    await requestAvatar(charId);
-  } catch (error) {
-    console.error('Avatar generation error:', error);
-  } finally {
-    isGeneratingAvatar.value = false;
-  }
-};
-
 const finishCreation = async () => {
-  if (avatarDescription.value.trim() && !generatedAvatar.value && !isGeneratingAvatar.value) {
-    await generateAvatar();
-  }
-  await applyAndSave();
+  if (!currentCharacter.value
+    || !currentCharacter.value.classes?.[0].name
+    || !currentCharacter.value.scores?.Con
+  ) return;
+  isLoading.value = true;
+  console.log('Finishing character creation for', currentCharacter.value);
+  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores?.Con);
+  await updateCharacter(currentCharacter.value.characterId, {
+    ...currentCharacter.value,
+    state: 'created',
+    hpMax,
+    hp: hpMax,
+    skills: currentCharacter.value.skills,
+  });
+  await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
+  console.log('Avatar generated');
+  router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });
+  isLoading.value = false;
 };
+
 </script>

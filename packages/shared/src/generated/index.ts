@@ -7,3 +7,4 @@ export * from './messagemeta.dto';
 export * from './chatmessage.dto';
 export * from './chathistory.dto';
 export * from './user.dto';
+export * from './dicethrow.dto';

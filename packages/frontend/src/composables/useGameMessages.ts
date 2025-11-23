@@ -1,5 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
-import { gameEngine } from '../services/gameEngine';
+import { useCharacterStore } from '../stores/characterStore';
+import { conversationService } from '../services/conversationService';
 
 // eslint-disable-next-line max-statements
 export function useGameMessages() {
@@ -20,44 +21,46 @@ export function useGameMessages() {
     if (!gameStore.playerText) return;
     gameStore.appendMessage('Player', gameStore.playerText);
     gameStore.appendMessage('System', '...thinking...');
-    gameStore.setSending(true);
+    gameStore.sending = true;
     try {
-      const response = await gameEngine.sendMessage(gameStore.playerText);
-      gameStore.clearPlayerText();
+      const response = await conversationService.sendMessage(gameStore.playerText);
+      gameStore.playerText = '';
       handleMessageResponse(response);
     } catch (e: any) {
       handleMessageError(e);
     } finally {
-      gameStore.setSending(false);
+      gameStore.sending = false;
     }
   };
 
   const handleRollInstruction = (instr: any): void => {
-    gameStore.setPendingInstruction(instr);
+    gameStore.pendingInstruction = instr;
     gameStore.appendMessage('System', `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`);
   };
 
   const handleXpInstruction = (instr: any): void => {
+    const characterStore = useCharacterStore();
     gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-    gameStore.updateCharacterXp(instr.xp);
+    characterStore.updateXp(instr.xp);
   };
 
   const handleHpInstruction = (instr: any): void => {
     const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
     gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-    gameStore.updateCharacterHp(instr.hp);
-    if (gameStore.isDead) gameStore.setDeathModalVisible(true);
+    const characterStore = useCharacterStore();
+    characterStore.updateHp(instr.hp);
+    if (characterStore.isDead) characterStore.showDeathModal = true;
   };
 
   const handleSpellInstruction = (instr: any): void => {
     if (instr.spell.action === 'learn') {
       gameStore.appendMessage('System', `📖 Learned spell: ${instr.spell.name} (Level ${instr.spell.level})`);
-      gameStore.learnSpell(instr.spell);
+      useCharacterStore().learnSpell(instr.spell);
     } else if (instr.spell.action === 'cast') {
       gameStore.appendMessage('System', `✨ Cast spell: ${instr.spell.name}`);
     } else if (instr.spell.action === 'forget') {
       gameStore.appendMessage('System', `🚫 Forgot spell: ${instr.spell.name}`);
-      gameStore.forgetSpell(instr.spell.name);
+      useCharacterStore().forgetSpell(instr.spell.name);
     }
   };
 
@@ -65,14 +68,14 @@ export function useGameMessages() {
     if (instr.inventory.action === 'add') {
       const qty = instr.inventory.quantity || 1;
       gameStore.appendMessage('System', `🎒 Added to inventory: ${instr.inventory.name} (x${qty})`);
-      gameStore.addInventoryItem(instr.inventory);
+      useCharacterStore().addInventoryItem(instr.inventory);
     } else if (instr.inventory.action === 'remove') {
       const qty = instr.inventory.quantity || 1;
       gameStore.appendMessage('System', `🗑️ Removed from inventory: ${instr.inventory.name} (x${qty})`);
-      gameStore.removeInventoryItem(instr.inventory.name, qty);
+      useCharacterStore().removeInventoryItem(instr.inventory.name, qty);
     } else if (instr.inventory.action === 'use') {
       gameStore.appendMessage('System', `⚡ Used item: ${instr.inventory.name}`);
-      gameStore.useInventoryItem(instr.inventory.name);
+      useCharacterStore().useInventoryItem(instr.inventory.name);
     }
   };
 

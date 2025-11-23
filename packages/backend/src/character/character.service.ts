@@ -1,34 +1,32 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { Character, CharacterDocument } from '../schemas/character.schema.js';
 import type { CharacterDto } from '@rpg-gen/shared';
 
 @Injectable()
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
+  private readonly DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 };
 
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
   ) {}
 
-  async create(userId: string, characterData: CharacterDto): Promise<CharacterDocument> {
+  generateCharacterId(): string {
+    return crypto.randomUUID();
+  }
+
+  async create(userId: string, world: string): Promise<CharacterDocument> {
     const character = new this.characterModel({
       userId,
-      characterId: characterData.characterId,
-      name: characterData.name,
-      race: characterData.race,
-      scores: characterData.scores,
-      hp: characterData.hp,
-      hpMax: characterData.hpMax,
-      totalXp: characterData.totalXp || 0,
-      classes: characterData.classes,
-      skills: characterData.skills,
-      world: characterData.world,
-      portrait: characterData.portrait,
-      gender: characterData.gender,
-      proficiency: characterData.proficiency || 2,
+      characterId: this.generateCharacterId(),
+      totalXp: 0,
+      proficiency: 2,
+      world,
+      state: 'draft',
       isDeceased: false,
+      scores: this.DEFAULT_BASE_SCORES,
     });
 
     const saved = await character.save();
@@ -48,6 +46,7 @@ export class CharacterService {
     return this.characterModel.findOne({ userId, characterId }).exec();
   }
 
+  // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) {
@@ -62,6 +61,13 @@ export class CharacterService {
     if (updates.skills !== undefined) character.skills = updates.skills as any;
     if (updates.portrait !== undefined) character.portrait = updates.portrait;
     if (updates.scores !== undefined) character.scores = updates.scores as any;
+    if (updates.name !== undefined) character.name = updates.name;
+    if (updates.race !== undefined) character.race = updates.race as any;
+    if (updates.gender !== undefined) character.gender = updates.gender as any;
+    if (updates.proficiency !== undefined) character.proficiency = updates.proficiency;
+    if (updates.isDeceased !== undefined) character.isDeceased = updates.isDeceased;
+    if (updates.physicalDescription !== undefined) character.physicalDescription = updates.physicalDescription;
+    if (updates.state !== undefined) character.state = updates.state;
 
     const saved = await character.save();
     this.logger.log(`Character updated: ${saved.name} (${saved.characterId})`);
@@ -103,7 +109,6 @@ export class CharacterService {
   toCharacterDto(doc: CharacterDocument): CharacterDto {
     return {
       characterId: doc.characterId,
-      userId: (doc.userId as any)?.toString?.() || String(doc.userId),
       name: doc.name,
       race: doc.race as any,
       scores: doc.scores as any,
@@ -119,6 +124,8 @@ export class CharacterService {
       isDeceased: doc.isDeceased || false,
       diedAt: doc.diedAt,
       deathLocation: doc.deathLocation,
+      physicalDescription: doc.physicalDescription,
+      state: doc.state,
     };
   }
 }

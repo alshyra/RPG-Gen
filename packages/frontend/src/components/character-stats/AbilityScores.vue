@@ -26,8 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useGameStore } from '../../stores/gameStore';
+import { useCharacterStore } from '@/stores/characterStore';
+import { storeToRefs } from 'pinia';
+
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
 const abilities = {
   str: { short: 'STR', color: 'text-amber-400' },
@@ -38,23 +41,16 @@ const abilities = {
   cha: { short: 'CHA', color: 'text-pink-400' },
 };
 
-const gameStore = useGameStore();
-const character = computed(() => gameStore.session.character);
-
-// Get ability score from character (tries multiple formats)
-function getAbilityScore(key: string): number {
-  if (!character.value) return 10;
+const getAbilityScore = (key: string): number => {
+  if (!currentCharacter.value) return 10;
 
   // Try capitalized format (Str, Dex, etc.)
   const capitalized = key.charAt(0).toUpperCase() + key.slice(1);
 
-  return (character.value.scores as any)[capitalized] as number;
-}
+  return (currentCharacter.value.scores as any)[capitalized] as number;
+};
 
-// Calculate D&D modifier from ability score
-function getModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
+const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 </script>
 
 <style scoped></style>

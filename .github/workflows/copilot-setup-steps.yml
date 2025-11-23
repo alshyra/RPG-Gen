@@ -9,6 +9,9 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
+env:
+  CYPRESS_BASE_URL: http://localhost:5173
+
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
@@ -20,20 +23,8 @@ jobs:
       - name: Set up frontend
         uses: actions/setup-node@v4
         with:
-          node-version: "25.2.0"
+          node-version: "25.2.1"
           cache: "npm"
-          cache-dependency-path: packages/frontend/package-lock.json
-      - name: Set up backend
-        uses: actions/setup-node@v4
-        with:
-          node-version: "25.2.0"
-          cache: "npm"
-          cache-dependency-path: packages/backend/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install shared dependencies
         run: npm ci
-      - name: Install frontend dependencies
-        run: npm ci
-      - name: Install backend dependencies
-        run: npm ci
-      - name: Install Cypress
-        run: npm --workspace rpg-gemini-frontend run cypress:install || npx cypress install

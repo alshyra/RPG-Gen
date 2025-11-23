@@ -1,149 +1,54 @@
+import { rollDice } from '@/services/diceService';
+import type { ChatMessage, DiceThrowDto, GameInstruction } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import type { CharacterDto, GameInstruction, GameMessage, Spell, InventoryItem } from '@rpg-gen/shared';
+import { ref } from 'vue';
 
-export interface GameSession {
-  world: string;
-  worldName: string;
-  character: CharacterDto | null;
-}
+// eslint-disable-next-line max-statements
+export const useGameStore = defineStore('gameStore', () => {
+  const rolls = ref<Array<DiceThrowDto>>([]);
+  const latestRoll = ref<DiceThrowDto | null>(null);
 
-const createActions = (s: any, m: any, p: any, pi: any, sr: any, dm: any, c: any) => ({
-  setWorld: (world: string, name: string) => {
-    s.value.world = world;
-    s.value.worldName = name;
-  },
-  setCharacter: (character: CharacterDto | null) => {
-    s.value.character = character;
-  },
-  appendMessage: (role: string, text: string) => {
-    m.value.push({ role, text });
-  },
-  updateMessages: (newMessages: GameMessage[]) => {
-    m.value = newMessages;
-  },
-  clearMessages: () => {
-    m.value = [];
-  },
-  setPlayerText: (text: string) => {
-    p.value = text;
-  },
-  clearPlayerText: () => {
-    p.value = '';
-  },
-  updateCharacterHp: (delta: number) => {
-    if (s.value.character) {
-      const h = Math.max(0, Math.min(c.value, s.value.character.hp + delta));
-      s.value.character.hp = h;
-    }
-  },
-  updateCharacterXp: (delta: number) => {
-    if (s.value.character) s.value.character.totalXp = (s.value.character.totalXp || 0) + delta;
-  },
-  learnSpell: (spell: any) => {
-    if (s.value.character) {
-      if (!s.value.character.spells) s.value.character.spells = [];
-      s.value.character.spells.push(spell);
-    }
-  },
-  forgetSpell: (spellName: string) => {
-    if (s.value.character && s.value.character.spells) {
-      s.value.character.spells = s.value.character.spells.filter((sp: Spell) => sp.name !== spellName);
-    }
-  },
-  addInventoryItem: (item: any) => {
-    if (s.value.character) {
-      if (!s.value.character.inventory) s.value.character.inventory = [];
-      const existing = s.value.character.inventory.find((i: InventoryItem) => i.name === item.name);
-      if (existing) {
-        existing.quantity = (existing.quantity || 1) + (item.quantity || 1);
-      } else {
-        s.value.character.inventory.push({ ...item, quantity: item.quantity || 1 });
-      }
-    }
-  },
-  removeInventoryItem: (itemName: string, quantity: number = 1) => {
-    if (s.value.character && s.value.character.inventory) {
-      const item = s.value.character.inventory.find((i: InventoryItem) => i.name === itemName);
-      if (item) {
-        item.quantity = (item.quantity || 1) - quantity;
-        if (item.quantity <= 0) {
-          s.value.character.inventory = s.value.character.inventory.filter((i: InventoryItem) => i.name !== itemName);
-        }
-      }
-    }
-  },
-  useInventoryItem: (itemName: string) => {
-    if (s.value.character && s.value.character.inventory) {
-      const item = s.value.character.inventory.find((i: InventoryItem) => i.name === itemName);
-      if (item) {
-        item.quantity = (item.quantity || 1) - 1;
-        if (item.quantity <= 0) {
-          s.value.character.inventory = s.value.character.inventory.filter((i: InventoryItem) => i.name !== itemName);
-        }
-      }
-    }
-  },
-  setPendingInstruction: (instruction: GameInstruction | null) => {
-    pi.value = instruction;
-  },
-  setInitializing: (value: boolean) => {
-    s.initializing = value;
-  },
-  setSending: (value: boolean) => {
-    s.sending = value;
-  },
-  setRollModalVisible: (value: boolean) => {
-    sr.value = value;
-  },
-  setDeathModalVisible: (value: boolean) => {
-    dm.value = value;
-  },
-  reset: () => {
-    m.value = [];
-    p.value = '';
-    pi.value = null;
-    sr.value = false;
-    dm.value = false;
-  },
-});
+  // Minimal game session/message/pending instruction state used across app
+  const messages = ref<ChatMessage[]>([]);
+  const pendingInstruction = ref<GameInstruction | null>(null);
+  const playerText = ref('');
+  const isInitializing = ref(false);
+  const sending = ref(false);
+  const showRollModal = ref(false);
 
-const gameStoreSession = ref<GameSession>({ world: '', worldName: '—', character: null });
-const gameStoreMessages = ref<GameMessage[]>([]);
-const gameStorePlayerText = ref('');
-const gameStoreIsInitializing = ref(false);
-const gameStoreIsSending = ref(false);
-const gameStorePendingInstruction = ref<GameInstruction | null>(null);
-const gameStoreShowRollModal = ref(false);
-const gameStoreShowDeathModal = ref(false);
+  const doRoll = async (expr: string) => {
+    // Call diceService which uses the backend API and returns the roll result
+    const res: DiceThrowDto = await rollDice(expr);
+    const payload: DiceThrowDto = { rolls: res.rolls, mod: res.mod, total: res.total };
+    rolls.value.push(payload);
+    latestRoll.value = payload;
+    return payload;
+  };
 
-export const useGameStore = defineStore('game', () => {
-  const charHpMax = computed(() => gameStoreSession.value.character?.hpMax || 12);
-  const isDead = computed(() => (gameStoreSession.value.character?.hp || 0) === 0);
-  const lastMessage = computed(
-    () => gameStoreMessages.value[gameStoreMessages.value.length - 1] || null,
-  );
-  const actions = createActions(
-    gameStoreSession,
-    gameStoreMessages,
-    gameStorePlayerText,
-    gameStorePendingInstruction,
-    gameStoreShowRollModal,
-    gameStoreShowDeathModal,
-    charHpMax,
-  );
+  // Basic helpers expected by many composables / components
+  const appendMessage = (role: string, text: string) => messages.value.push({ role, text, timestamp: Date.now() } as ChatMessage);
+
+  const updateMessages = (list: Array<{ role: string; text: string }>) => {
+    messages.value = list as unknown as ChatMessage[];
+  };
+
   return {
-    session: gameStoreSession,
-    messages: gameStoreMessages,
-    playerText: gameStorePlayerText,
-    isInitializing: gameStoreIsInitializing,
-    isSending: gameStoreIsSending,
-    pendingInstruction: gameStorePendingInstruction,
-    showRollModal: gameStoreShowRollModal,
-    showDeathModal: gameStoreShowDeathModal,
-    charHpMax,
-    isDead,
-    lastMessage,
-    ...actions,
+    // roll API
+    rolls,
+    latestRoll,
+    doRoll,
+
+    // session / UI state
+    messages,
+    pendingInstruction,
+    playerText,
+    isInitializing,
+    showRollModal,
+
+    // helpers
+    appendMessage,
+    // status
+    sending,
+    updateMessages,
   };
 });

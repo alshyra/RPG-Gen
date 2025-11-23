@@ -129,13 +129,12 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterStore } from '@/stores/characterStore';
+import type { LevelUpResult } from '@rpg-gen/shared';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import type { LevelUpResult } from '@rpg-gen/shared';
-import { useGameStore } from '../../stores/gameStore';
-import { characterServiceApi } from '../../services/characterServiceApi';
-import { gameEngine } from '../../services/gameEngine';
+import { conversationService } from '../../services/conversationService';
 
 interface Props {
   world?: string;
@@ -148,7 +147,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const router = useRouter();
-const gameStore = useGameStore();
+// const gameStore = useGameStore();
 
 // State
 const isPending = ref(false);
@@ -203,13 +202,16 @@ const executeLevelUp = async (): Promise<void> => {
     hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
   };
 
-  // Save to backend
-  await characterServiceApi.updateCurrentCharacter(updatedCharacter as any);
+  // Save to backend using the character store
+  const characterStore = useCharacterStore();
+  if (updatedCharacter.characterId) {
+    await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+  }
 
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await gameEngine.sendMessage(levelupMsg);
-  gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
+  await conversationService.sendMessage(levelupMsg);
+  // gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
 
   // Return to game
   setTimeout(() => {
@@ -219,15 +221,15 @@ const executeLevelUp = async (): Promise<void> => {
 
 const handleConfirm = async (): Promise<void> => {
   if (!levelUpReward.value.success) {
-    gameStore.appendMessage('Error', 'Cannot level up further');
+    // gameStore.appendMessage('Error', 'Cannot level up further');
     return;
   }
 
   isPending.value = true;
   try {
     await executeLevelUp();
-  } catch (error: any) {
-    gameStore.appendMessage('Error', `Level up failed: ${error.message}`);
+  } catch {
+    // gameStore.appendMessage('Error', `Level up failed: ${error.message}`);
   } finally {
     isPending.value = false;
   }

@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
+import { Injectable, Logger } from '@nestjs/common';
 
 type GeminiResponse = Record<string, unknown>;
 
@@ -83,9 +83,8 @@ function textFromResponse(data: unknown): string {
 @Injectable()
 export class GeminiTextService {
   private readonly logger = new Logger(GeminiTextService.name);
-  private client: GoogleGenAI | null = null;
+  private client: GoogleGenAI;
   private model = 'gemini-2.5-flash';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private chatClients = new Map<string, any>();
 
   constructor() {
@@ -96,30 +95,12 @@ export class GeminiTextService {
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
   }
 
-  private isMock() {
-    return process.env.MOCK_GEMINI === 'true';
-  }
-
-  private mockText(prompt: string): GeminiMessage {
-    const text = `[[MOCK GEMINI - ${this.model}]]\n\n${prompt.slice(0, 1000)}`;
-    const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-    const genTokens = Math.max(20, Math.min(1500, Math.ceil(text.length / 4)));
-    const usage = {
-      promptTokenCount: promptTokens,
-      candidatesTokenCount: genTokens,
-      totalTokenCount: promptTokens + genTokens,
-    };
-    const raw = { candidates: [{ content: [{ text }] }], modelVersion: this.model };
-    return { text, raw, usage, modelVersion: this.model };
-  }
-
-  getOrCreateChat(
+  initializeChatSession(
     sessionId: string,
     systemInstruction: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialHistory: any[] = [],
   ) {
-    if (this.chatClients.has(sessionId)) return this.chatClients.get(sessionId);
+    if (this.chatClients.has(sessionId)) return;
 
     this.logger.debug(`Creating new chat client for session ${sessionId}`);
     const chat = this.client.chats.create({
@@ -130,9 +111,7 @@ export class GeminiTextService {
         temperature: 0.7,
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.chatClients.set(sessionId, chat as any);
-    return chat;
   }
 
   private extractResponseMetadata = (
@@ -142,7 +121,6 @@ export class GeminiTextService {
     modelVersion: this.model,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleChatMessage(chat: any, message: string): Promise<GeminiMessage> {
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
     const response = await chat.sendMessage({ message });
@@ -154,9 +132,9 @@ export class GeminiTextService {
   }
 
   async sendMessage(sessionId: string, message: string): Promise<GeminiMessage> {
-    if (this.isMock()) return this.mockText(message);
-    const chat = this.chatClients.get(sessionId) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
+
     try {
       return await this.handleChatMessage(chat, message);
     } catch (e) {
