@@ -58,6 +58,21 @@ class Item {
 }
 
 @Schema({ _id: false })
+class Spell {
+  @Prop({ required: true, type: String })
+  name: string;
+
+  @Prop({ required: false, type: Number })
+  level: number;
+
+  @Prop({ required: false, type: String })
+  description: string;
+
+  @Prop({ type: Object })
+  meta: Record<string, any>;
+}
+
+@Schema({ _id: false })
 class AbilityScores {
   @Prop({ required: false, type: Number })
   Str: number;
@@ -142,6 +157,9 @@ export class Character {
 
   @Prop({ type: [Item], required: false, default: [] })
   inventory: Item[];
+
+  @Prop({ type: [Spell], required: false, default: [] })
+  spells: Spell[];
 }
 
 export const CharacterSchema = SchemaFactory.createForClass(Character);

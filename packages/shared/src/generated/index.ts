@@ -2,6 +2,7 @@ export * from './race.dto';
 export * from './characterclass.dto';
 export * from './skill.dto';
 export * from './item.dto';
+export * from './spell.dto';
 export * from './abilityscores.dto';
 export * from './character.dto';
 export * from './messagemeta.dto';

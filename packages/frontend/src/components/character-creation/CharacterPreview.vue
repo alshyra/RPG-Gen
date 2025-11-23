@@ -21,6 +21,9 @@
       <div v-if="currentCharacter?.skills?.length">
         <strong>Compétences:</strong> {{ skills }}
       </div>
+      <div class="mt-2">
+        <InventoryPanel />
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +31,7 @@
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import InventoryPanel from '../character-stats/InventoryPanel.vue';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);

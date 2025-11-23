@@ -4,6 +4,7 @@ import { RaceDto } from './race.dto';
 import { CharacterClassDto } from './characterclass.dto';
 import { SkillDto } from './skill.dto';
 import { ItemDto } from './item.dto';
+import { SpellDto } from './spell.dto';
 import { AbilityScoresDto } from './abilityscores.dto';
 
 export interface CharacterDto {
@@ -27,6 +28,7 @@ export interface CharacterDto {
   deathLocation: string;
   state: 'draft' | 'created';
   inventory?: ItemDto[];
+  spells?: SpellDto[];
 }
 export type CreateCharacterDto = Omit<CharacterDto, 'userId'>;
 export type UpdateCharacterDto = Partial<CreateCharacterDto>;
