@@ -121,4 +121,58 @@ export class CharacterController {
       character: this.characterService.toCharacterDto(character),
     };
   }
+
+  @Post(':characterId/inspiration/grant')
+  @ApiOperation({ summary: 'Grant inspiration point(s) to a character' })
+  async grantInspiration(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: { amount?: number },
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+    const amount = body.amount || 1;
+
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    if (!character) throw new NotFoundException('Character not found');
+
+    const newPoints = (character.inspirationPoints || 0) + amount;
+    const updated = await this.characterService.update(userId, characterId, {
+      inspirationPoints: newPoints,
+    });
+
+    return {
+      ok: true,
+      inspirationPoints: updated.inspirationPoints,
+      character: this.characterService.toCharacterDto(updated),
+    };
+  }
+
+  @Post(':characterId/inspiration/spend')
+  @ApiOperation({ summary: 'Spend an inspiration point' })
+  async spendInspiration(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    if (!character) throw new NotFoundException('Character not found');
+
+    const currentPoints = character.inspirationPoints || 0;
+    if (currentPoints <= 0) {
+      throw new BadRequestException('No inspiration points available');
+    }
+
+    const updated = await this.characterService.update(userId, characterId, {
+      inspirationPoints: currentPoints - 1,
+    });
+
+    return {
+      ok: true,
+      inspirationPoints: updated.inspirationPoints,
+      character: this.characterService.toCharacterDto(updated),
+    };
+  }
 }

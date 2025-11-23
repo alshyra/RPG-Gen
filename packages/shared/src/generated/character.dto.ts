@@ -20,6 +20,7 @@ export interface CharacterDto {
   portrait: string;
   gender?: string;
   proficiency?: number;
+  inspirationPoints?: number;
   isDeceased: boolean;
   diedAt: Date;
   deathLocation: string;
