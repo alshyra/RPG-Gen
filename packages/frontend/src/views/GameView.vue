@@ -180,9 +180,9 @@ const { rollData, confirmRoll, rollWithAdvantage, rollWithDisadvantage } = useGa
 
 // Computed
 const inspirationPoints = computed(() => characterStore.currentCharacter?.inspirationPoints || 0);
-const showInspirationOptions = computed(() => {
-  return rollData.value.diceNotation === '1d20' && (!rollData.value.advantage || rollData.value.advantage === 'none');
-});
+const showInspirationOptions = computed(() =>
+  rollData.value.diceNotation === '1d20' && rollData.value.advantage === 'none',
+);
 
 // DOM refs
 const messagesPane = ref<any>(null);

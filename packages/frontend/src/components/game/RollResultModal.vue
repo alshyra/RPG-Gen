@@ -157,7 +157,10 @@ const isCriticalFailure = computed(() => firstRoll.value === 1);
 const canUseInspiration = computed(() => (props.inspirationPoints || 0) > 0);
 
 const isDiscardedRoll = (roll: number) => {
-  if (!props.rollData.discardedRoll) return false;
+  if (!props.rollData.discardedRoll || !props.rollData.advantage || props.rollData.advantage === 'none') return false;
+  // For advantage/disadvantage, we have exactly 2 rolls
+  // If both rolls are the same value, neither should be marked as discarded
+  if (props.rollData.rolls[0] === props.rollData.rolls[1]) return false;
   return roll === props.rollData.discardedRoll;
 };
 

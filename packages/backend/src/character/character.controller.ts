@@ -133,10 +133,17 @@ export class CharacterController {
     const userId = user._id.toString();
     const amount = body.amount || 1;
 
+    // Validate amount
+    if (typeof amount !== 'number' || amount <= 0 || amount > 5) {
+      throw new BadRequestException('Amount must be a positive number between 1 and 5');
+    }
+
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character) throw new NotFoundException('Character not found');
 
-    const newPoints = (character.inspirationPoints || 0) + amount;
+    // Cap inspiration points at 5 (D&D 5e rule)
+    const currentPoints = character.inspirationPoints || 0;
+    const newPoints = Math.min(currentPoints + amount, 5);
     const updated = await this.characterService.update(userId, characterId, {
       inspirationPoints: newPoints,
     });
