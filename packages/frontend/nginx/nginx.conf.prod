@@ -53,7 +53,7 @@ server {
     # Proxy /api requests to backend
     location ~ ^/api/ {
         # Use variable to force dynamic DNS resolution
-        set $backend_url "${https://rpggen-back-469869562907.europe-west1.run.app}";
+        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
         proxy_pass $backend_url$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
