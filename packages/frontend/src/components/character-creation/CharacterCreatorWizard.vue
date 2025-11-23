@@ -77,7 +77,6 @@
 import { characterServiceApi } from '@/services/characterServiceApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
-import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -104,13 +103,13 @@ const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(cu
 const currentStep = computed({
   get: () => {
     const routeStep = parseInt(route.params.step as string, 10);
-    if (!isNaN(routeStep)) {
-      return Math.min(routeStep - 1, steps.length - 1);
-    }
-    return 0;
+    if (isNaN(routeStep)) return 0;
+
+    return Math.min(routeStep - 1, steps.length - 1);
   },
   set: (value: number) => {
-    router.push({ name: 'character-step', params: { step: value + 1 } });
+    const charId = (route.params.characterId as string) || currentCharacter.value?.characterId;
+    router.push({ name: 'character-step', params: { characterId: charId, step: value + 1 } });
   },
 });
 
@@ -143,8 +142,6 @@ const previousStep = () => {
   currentStep.value--;
 };
 
-const gameStore = useGameStore();
-
 const finishCreation = async () => {
   if (!currentCharacter.value
     || !currentCharacter.value.classes?.[0].name
@@ -158,8 +155,8 @@ const finishCreation = async () => {
     state: 'created',
     hpMax,
     hp: hpMax,
+    skills: currentCharacter.value.skills,
   });
-  gameStore.setWorld('dnd', 'Dungeons & Dragons');
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
   console.log('Avatar generated');
   router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });

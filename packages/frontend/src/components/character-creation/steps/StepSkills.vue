@@ -14,8 +14,8 @@
         class="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-slate-800 transition"
       >
         <UiInputCheckbox
-          :checked="selectedSkills.includes(skill)"
-          :disabled="selectedSkills.length >= skillsToChoose && !selectedSkills.includes(skill)"
+          :checked="proficientSkills.includes(skill)"
+          :disabled="proficientSkills.length >= skillsToChoose && !proficientSkills.includes(skill)"
           @change="toggleSkill(skill)"
         />
         <span>{{ skill }}</span>
@@ -23,36 +23,39 @@
     </div>
 
     <div class="text-sm text-slate-400">
-      Sélectionnés: {{ selectedSkills.length }}/{{ skillsToChoose }}
+      Sélectionnés: {{ proficientSkills.length }}/{{ skillsToChoose }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
-import { useCharacterStore } from '@/stores/characterStore';
-import { storeToRefs } from 'pinia';
 import { DnDRulesService } from '@/services/dndRulesService';
+import { useCharacterStore } from '@/stores/characterStore';
+import type { SkillDto } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import type { SkillDto, CharacterDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const selectedSkills = computed(() => (currentCharacter.value?.skills || []).filter((s: any) => s.proficient).map((s: any) => s.name));
+const proficientSkills = computed(() => (currentCharacter.value?.skills || []).filter((s: any) => s.proficient).map((s: any) => s.name));
 const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
 const saveCurrent = async () => {
   if (!currentCharacter.value) return;
-  const charId = currentCharacter.value.characterId as string | undefined;
-  if (!charId) return;
-  await characterStore.updateCharacter(charId, { skills: currentCharacter.value.skills } as Partial<CharacterDto>);
+
+  if (!currentCharacter.value.characterId) return;
+
+  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    skills: currentCharacter.value.skills,
+  });
 };
 
 const computeUpdatedSkills = (skill: string, existingSkills: any[]): SkillDto[] => {
-  if (selectedSkills.value.includes(skill)) {
+  if (proficientSkills.value.includes(skill)) {
     return existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
   }
   const present = existingSkills.find((s: any) => s.name === skill);

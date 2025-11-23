@@ -1,8 +1,9 @@
-import { ref, toRaw } from 'vue';
-import { gameEngine } from '../services/gameEngine';
+import { DiceThrowDto, GameInstruction, GameResponse, RollModalData, RollResult } from '@rpg-gen/shared';
+import { ref, watch } from 'vue';
+import { conversationService } from '../services/conversationService';
 import { getSkillBonus } from '../services/skillService';
+import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
-import { GameInstruction, GameResponse, RollModalData, RollResult } from '@rpg-gen/shared';
 
 const getCriticalNote = (diceValue: number): string =>
   diceValue === 20
@@ -26,29 +27,38 @@ type GameStore = ReturnType<typeof useGameStore>;
 
 const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): void => {
   if (!instr.roll) return;
-  gameStore.setPendingInstruction(instr);
+  gameStore.pendingInstruction = instr;
   gameStore.appendMessage(
     'System',
     `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`,
   );
 };
 
-const handleAdditionalXp = (instr: GameInstruction, gameStore: GameStore): void => {
+const handleAdditionalXp = (
+  instr: GameInstruction,
+  gameStore: GameStore,
+  characterStore: ReturnType<typeof useCharacterStore>,
+): void => {
   if (typeof instr.xp !== 'number') return;
   gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-  gameStore.updateCharacterXp(instr.xp);
+  characterStore.updateXp(instr.xp);
 };
 
-const handleAdditionalHp = (instr: GameInstruction, gameStore: GameStore): void => {
+const handleAdditionalHp = (
+  instr: GameInstruction,
+  gameStore: GameStore,
+  characterStore: ReturnType<typeof useCharacterStore>,
+): void => {
   if (typeof instr.hp !== 'number') return;
   const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
   gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-  gameStore.updateCharacterHp(instr.hp);
-  if (gameStore.isDead) gameStore.setDeathModalVisible(true);
+  characterStore.updateHp(instr.hp);
+  if (characterStore.isDead) characterStore.showDeathModal = true;
 };
 
 export function useGameRolls() {
   const gameStore = useGameStore();
+  const characterStore = useCharacterStore();
   const rollData = ref<RollModalData>({
     rolls: [],
     total: 0,
@@ -57,37 +67,42 @@ export function useGameRolls() {
     skillName: '',
   });
 
-  type RolledPayload = { diceValue: number; bonus?: number; total: number };
-
-  const onDiceRolled = async (rollResult: RolledPayload): Promise<void> => {
+  const onDiceRolled = async (rollResult: DiceThrowDto): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
     const instr = gameStore.pendingInstruction.roll;
     const skillName = typeof instr.modifier === 'string' ? instr.modifier : 'Roll';
     const skillBonus
       = typeof instr.modifier === 'string'
-        ? getSkillBonus(gameStore.session.character, skillName)
+        ? getSkillBonus(characterStore.currentCharacter ?? null, skillName)
         : typeof instr.modifier === 'number'
           ? instr.modifier
           : 0;
-    const diceValue = rollResult.diceValue || 0;
     rollData.value = {
       skillName,
-      rolls: [diceValue],
+      rolls: rollResult.rolls,
       bonus: skillBonus,
-      total: diceValue + skillBonus,
+      total: rollResult.total + skillBonus,
       diceNotation: instr.dices,
     };
-    gameStore.setRollModalVisible(true);
+    gameStore.showRollModal = true;
   };
+
+  watch(
+    () => gameStore.latestRoll,
+    (latest) => {
+      if (!latest) return;
+      onDiceRolled(latest);
+    },
+  );
 
   const handleRollResponse = async (response: GameResponse): Promise<void> => {
     gameStore.appendMessage('GM', response.text);
-    gameStore.setPendingInstruction(null);
-    gameStore.setRollModalVisible(false);
+    gameStore.pendingInstruction = null;
+    gameStore.showRollModal = false;
     response.instructions?.forEach((instr: GameInstruction) => {
       if (instr.roll) handleAdditionalRoll(instr, gameStore);
-      else if (instr.xp) handleAdditionalXp(instr, gameStore);
-      else if (instr.hp) handleAdditionalHp(instr, gameStore);
+      else if (instr.xp) handleAdditionalXp(instr, gameStore, characterStore);
+      else if (instr.hp) handleAdditionalHp(instr, gameStore, characterStore);
     });
   };
 
@@ -97,7 +112,7 @@ export function useGameRolls() {
     criticalNote: string,
   ): Promise<void> => {
     const rollResultMsg = `[${skillName}] Roll result: ${JSON.stringify(rollResult)}${criticalNote}`;
-    const response = await gameEngine.sendMessage(rollResultMsg);
+    const response = await conversationService.sendMessage(rollResultMsg);
     await handleRollResponse(response);
   };
 
@@ -115,28 +130,22 @@ export function useGameRolls() {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       gameStore.appendMessage('Error', 'Failed to send roll result: ' + message);
-      gameStore.setRollModalVisible(false);
+      gameStore.showRollModal = false;
     }
   };
 
   const rerollDice = async (): Promise<void> => {
+    // Re-run the dice expression through the backend RNG via the game store
     if (!gameStore.pendingInstruction?.roll) return;
-    const instr = gameStore.pendingInstruction.roll;
-    const skillName = typeof instr.modifier === 'string' ? instr.modifier : 'Roll';
-    const diceValue = toRaw(gameEngine.rollDice(instr.dices)).total;
-    const skillBonus
-      = typeof instr.modifier === 'string'
-        ? getSkillBonus(gameStore.session.character, skillName)
-        : typeof instr.modifier === 'number'
-          ? instr.modifier
-          : 0;
-    rollData.value = {
-      skillName,
-      rolls: [diceValue],
-      bonus: skillBonus,
-      total: diceValue + skillBonus,
-      diceNotation: instr.dices,
-    };
+    const expr = gameStore.pendingInstruction.roll.dices;
+    try {
+      const payload = await gameStore.doRoll(expr);
+      // onDiceRolled handles mapping payload -> UI modal
+      await onDiceRolled(payload as DiceThrowDto);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      gameStore.appendMessage('Error', 'Reroll failed: ' + msg);
+    }
   };
 
   return { rollData, onDiceRolled, confirmRoll, rerollDice };

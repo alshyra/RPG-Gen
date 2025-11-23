@@ -59,10 +59,10 @@
         ]"
       >
         <div class="p-2 lg:p-0 h-full flex flex-col gap-2 overflow-hidden">
-          <CharacterPortrait class="flex-shrink-0" />
+          <CharacterPortrait class="shrink-0" />
           <div class="card flex-1 overflow-auto min-h-0">
             <AbilityScores
-              :character="gameStore.session.character"
+              :character="characterStore.currentCharacter"
               class="mt-3"
             />
             <div class="border-t border-slate-600 mt-3" />
@@ -100,9 +100,8 @@
           :player-text="gameStore.playerText"
           :pending-instruction="gameStore.pendingInstruction"
           :is-thinking="gameStore.isInitializing"
-          @update:player-text="gameStore.setPlayerText($event)"
+          @update:player-text="(v) => (gameStore.playerText = v)"
           @send="sendMessage"
-          @rolled="onDiceRolled"
         />
       </div>
 
@@ -110,14 +109,9 @@
       <aside class="hidden lg:block lg:col-span-3 lg:row-span-1">
         <RollResultModal
           :is-open="gameStore.showRollModal"
-          :skill-name="rollData.skillName"
-          :dice-notation="rollData.diceNotation"
-          :rolls="rollData.rolls"
-          :bonus="rollData.bonus"
-          :total="rollData.total"
+          :roll-data="rollData"
           @confirm="confirmRoll"
-          @reroll="rerollDice"
-          @close="gameStore.setRollModalVisible(false)"
+          @close="() => (gameStore.showRollModal = false)"
         />
       </aside>
     </div>
@@ -130,29 +124,22 @@
       <div class="w-full max-w-md">
         <RollResultModal
           :is-open="true"
-          :skill-name="rollData.skillName"
-          :dice-notation="rollData.diceNotation"
-          :rolls="rollData.rolls"
-          :bonus="rollData.bonus"
-          :total="rollData.total"
+          :roll-data="rollData"
           @confirm="confirmRoll"
-          @reroll="rerollDice"
-          @close="gameStore.setRollModalVisible(false)"
+          @close="() => (gameStore.showRollModal = false)"
         />
       </div>
     </div>
 
     <!-- Death modal -->
     <DeathModal
-      :is-open="gameStore.showDeathModal"
+      :is-open="characterStore.showDeathModal"
       @confirm="onDeathConfirm"
-      @close="gameStore.setDeathModalVisible(false)"
+      @close="() => (characterStore.showDeathModal = false)"
     />
   </div>
 </template>
 <script setup lang="ts">
-import UiMarkdown from '../components/ui/UiMarkdown.vue';
-import UiButton from '../components/ui/UiButton.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
@@ -161,24 +148,27 @@ import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
+import UiButton from '../components/ui/UiButton.vue';
+import UiMarkdown from '../components/ui/UiMarkdown.vue';
 import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
 import { characterServiceApi } from '../services/characterServiceApi';
-import { gameEngine } from '../services/gameEngine';
+import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 
 // State
 const router = useRouter();
 const route = useRoute();
 const gameStore = useGameStore();
+const characterStore = useCharacterStore();
 const isSidebarOpen = ref(false);
 const characterId = computed(() => route.params.characterId as string);
 
 // Composables
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
-const { rollData, onDiceRolled, confirmRoll, rerollDice } = useGameRolls();
+const { rollData, confirmRoll } = useGameRolls();
 
 // DOM refs
 const messagesPane = ref<any>(null);
@@ -212,10 +202,9 @@ watch(
 
 // Handle character death
 const onDeathConfirm = async () => {
-  if (!gameStore.session.character?.characterId) return;
-  await characterServiceApi.killCharacter(characterId.value, gameStore.session.worldName);
-  gameEngine.endGame();
-  gameStore.setDeathModalVisible(false);
+  if (!characterStore.currentCharacter?.characterId) return;
+  await characterServiceApi.killCharacter(characterId.value, characterStore.currentCharacter.world);
+  characterStore.showDeathModal = false;
   router.push('/');
 };
 </script>

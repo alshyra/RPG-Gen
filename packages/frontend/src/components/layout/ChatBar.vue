@@ -19,7 +19,6 @@
           :pending-instruction="pendingInstruction"
           expr="1d20"
           @send="send"
-          @rolled="onRolled"
         />
       </div>
     </div>
@@ -61,7 +60,6 @@ interface Props {
 interface Emits {
   (e: 'update:playerText', value: string): void;
   (e: 'send'): void;
-  (e: 'rolled', payload: any): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -78,7 +76,7 @@ const playerText = computed({
 const isRolling = computed(() => !!props.pendingInstruction?.roll);
 
 const send = () => emit('send');
-const onRolled = (payload: any) => emit('rolled', payload);
+// rolled events are handled centrally via store.latestRoll — no local rebroadcast
 </script>
 
 <style scoped>

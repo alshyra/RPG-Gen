@@ -9,13 +9,13 @@
         🎲 Roll Result
       </h2>
       <div class="text-sm text-slate-400">
-        {{ diceNotation }}
+        {{ rollData.diceNotation }}
       </div>
       <div
-        v-if="skillName"
+        v-if="rollData.skillName"
         class="text-xs text-slate-500 mt-1"
       >
-        {{ skillName }}
+        {{ rollData.skillName }}
       </div>
     </div>
 
@@ -23,7 +23,7 @@
     <div class="bg-slate-700/50 rounded-lg p-4 mb-6">
       <div class="flex justify-center gap-2 mb-4">
         <div
-          v-for="(roll, idx) in rolls"
+          v-for="(roll, idx) in rollData.rolls"
           :key="idx"
           class="w-12 h-12 bg-slate-600 rounded-lg flex items-center justify-center text-lg font-bold text-amber-300 border-2 border-amber-400"
         >
@@ -34,19 +34,19 @@
       <!-- Calculation -->
       <div class="text-center text-sm space-y-2">
         <div class="text-slate-300">
-          {{ rolls.join(' + ') }} <span class="text-slate-500">(dé)</span>
+          {{ rollData.rolls.join(' + ') }} <span class="text-slate-500">(dé)</span>
         </div>
         <div
-          v-if="bonus !== 0"
+          v-if="rollData.bonus !== 0"
           class="text-slate-300"
         >
-          + {{ bonus }} <span class="text-slate-500">(bonus)</span>
+          + {{ rollData.bonus }} <span class="text-slate-500">(bonus)</span>
         </div>
         <div class="border-t border-slate-600 pt-2 mt-2">
           <div
             :class="['text-xl font-bold', isCriticalSuccess ? 'text-green-400' : isCriticalFailure ? 'text-red-400' : 'text-green-400']"
           >
-            Total: {{ total }}
+            Total: {{ rollData.total }}
           </div>
           <div
             v-if="isCriticalSuccess"
@@ -86,26 +86,22 @@
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 
-interface Props {
-  isOpen: boolean;
-  skillName: string;
-  diceNotation: string;
-  rolls: number[];
-  bonus: number;
-  total: number;
-}
-
 interface Emits {
   confirm: [];
   reroll: [];
   close: [];
 }
 
-const props = defineProps<Props>();
+import type { RollModalData } from '@rpg-gen/shared';
+
+const props = defineProps<{ isOpen: boolean; rollData: RollModalData }>();
+
+console.log(props.rollData);
+
 const emit = defineEmits<Emits>();
 
 // Check if first roll (d20 for checks) is 20 or 1
-const firstRoll = computed(() => props.rolls[0] || 0);
+const firstRoll = computed(() => props.rollData.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 

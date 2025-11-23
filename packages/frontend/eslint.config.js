@@ -1,12 +1,11 @@
 import shared from '../../eslint.shared.js';
 import ts from 'typescript-eslint';
-import * as vueParserPkg from 'vue-eslint-parser';
 import pluginVue from 'eslint-plugin-vue'
 import globals from 'globals';
 
 export default [
-  ...shared,
   ...pluginVue.configs['flat/recommended'],
+  ...shared,
     {
     files: ['**/*.vue'],
     languageOptions: {
