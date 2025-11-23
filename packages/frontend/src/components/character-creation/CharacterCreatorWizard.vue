@@ -25,6 +25,14 @@
       </div>
     </div>
 
+    <!-- Loading / init -->
+    <div
+      v-if="(route.params.characterId && !currentCharacter) || isLoading"
+      class="py-16"
+    >
+      <UiLoader />
+    </div>
+
     <!-- Steps -->
     <StepBasicInfo v-if="currentStep === 0" />
 
@@ -34,7 +42,9 @@
 
     <StepSkills v-if="currentStep === 3" />
 
-    <StepAvatar v-if="currentStep === 4" />
+    <StepInventory v-if="currentStep === 4" />
+
+    <StepAvatar v-if="currentStep === 5" />
 
     <!-- Navigation buttons -->
     <div class="flex justify-end gap-2 mt-4 lg:mt-6 sticky bottom-0 bg-slate-900/95 py-3 -mx-2 px-2 lg:mx-0 lg:px-0 lg:bg-transparent lg:static">
@@ -87,12 +97,14 @@ import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
 import StepSkills from './steps/StepSkills.vue';
+import StepInventory from './steps/StepInventory.vue';
+import UiLoader from '../ui/UiLoader.vue';
 
 const router = useRouter();
 const route = useRoute();
 
 const isLoading = ref(false);
-const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Avatar'];
+const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Inventaire', 'Avatar'];
 
 const characterStore = useCharacterStore();
 const { updateCharacter } = characterStore;
@@ -126,6 +138,9 @@ const canProceed = computed(() => {
     case 3:
       return chosenSkills.value === skillsToChoose.value;
     case 4:
+      // Inventory is optional during creation — allow proceeding
+      return true;
+    case 5:
       return true;
     default:
       return false;
@@ -156,6 +171,8 @@ const finishCreation = async () => {
     hpMax,
     hp: hpMax,
     skills: currentCharacter.value.skills,
+    // include chosen inventory on creation
+    ...(currentCharacter.value.inventory ? { inventory: currentCharacter.value.inventory } : {}),
   });
   await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
   console.log('Avatar generated');
