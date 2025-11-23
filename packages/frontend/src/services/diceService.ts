@@ -1,11 +1,11 @@
-import axios from 'axios';
 import type { DiceThrowDto } from '@rpg-gen/shared';
+import apiClient from './axiosClient';
 
 export const rollDice = async (
   expr: string,
   advantage?: 'advantage' | 'disadvantage' | 'none',
 ): Promise<DiceThrowDto> => {
-  const res = await axios.post<DiceThrowDto>('/api/dice', {
+  const res = await apiClient.post<DiceThrowDto>('/api/dice', {
     expr,
     advantage: advantage || 'none',
   });

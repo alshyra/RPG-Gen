@@ -38,24 +38,31 @@ export const useCharacterStore = defineStore('character', () => {
     (currentCharacter.value as any).spells = ((currentCharacter.value as any).spells || []).filter((s: any) => s.name !== name);
   };
 
-  const addInventoryItem = (item: any) => {
-    if (!currentCharacter.value) return;
-    const inv = (currentCharacter.value as any).inventory = (currentCharacter.value as any).inventory || [];
-    const f = inv.find((i: any) => i.name === item.name);
-    if (f) f.qty = (f.qty || 0) + (item.quantity || 1);
-    else inv.push({ ...item, qty: item.quantity || 1 });
+  const addInventoryItem = async (item: any) => {
+    if (!currentCharacter.value?.characterId) return;
+    try {
+      const updated = await characterServiceApi.addInventoryItem(currentCharacter.value.characterId, { name: item.name, qty: item.quantity || item.qty || 1, description: item.description, equipped: item.equipped, meta: item.meta });
+      currentCharacter.value = updated;
+    } catch (e) {
+      console.error('Failed to add inventory item', e);
+      // keep local state unchanged — caller can inspect http error
+    }
   };
 
-  const removeInventoryItem = (name: string, qty = 1) => {
-    if (!currentCharacter.value) return;
-    const inv = (currentCharacter.value as any).inventory = (currentCharacter.value as any).inventory || [];
+  const removeInventoryItem = async (name: string, qty = 1) => {
+    if (!currentCharacter.value?.characterId) return;
+    const inv = (currentCharacter.value as any).inventory || [];
     const f = inv.find((i: any) => i.name === name);
     if (!f) return;
-    f.qty = Math.max(0, (f.qty || 0) - qty);
-    if (f.qty <= 0) (currentCharacter.value as any).inventory = inv.filter((i: any) => i.name !== name);
+    try {
+      const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, f._id || f.id || String(f.name), qty);
+      currentCharacter.value = updated;
+    } catch (e) {
+      console.error('Failed to remove inventory item', e);
+    }
   };
 
-  const useInventoryItem = (name: string) => removeInventoryItem(name, 1);
+  const useInventoryItem = async (name: string) => removeInventoryItem(name, 1);
 
   const grantInspiration = async (amount = 1) => {
     if (!currentCharacter.value?.characterId) return;

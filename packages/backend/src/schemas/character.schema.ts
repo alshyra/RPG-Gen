@@ -37,6 +37,27 @@ class Skill {
 }
 
 @Schema({ _id: false })
+class Item {
+  @Prop({ required: false, type: String })
+  _id: string;
+
+  @Prop({ required: true, type: String })
+  name: string;
+
+  @Prop({ required: true, default: 1, type: Number })
+  qty: number;
+
+  @Prop({ required: false, type: String })
+  description: string;
+
+  @Prop({ required: false, default: false, type: Boolean })
+  equipped: boolean;
+
+  @Prop({ type: Object })
+  meta: Record<string, any>;
+}
+
+@Schema({ _id: false })
 class AbilityScores {
   @Prop({ required: false, type: Number })
   Str: number;
@@ -118,6 +139,9 @@ export class Character {
 
   @Prop({ required: true, default: 'draft', type: String })
   state: 'draft' | 'created';
+
+  @Prop({ type: [Item], required: false, default: [] })
+  inventory: Item[];
 }
 
 export const CharacterSchema = SchemaFactory.createForClass(Character);

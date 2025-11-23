@@ -30,10 +30,10 @@ function getAbilityModifier(score: number): number {
  * @returns The skill bonus modifier
  */
 // eslint-disable-next-line max-statements
-export function getSkillBonus(
+export const getSkillBonus = (
   character: CharacterDto | null,
   skillNameWithCheck: string,
-): number {
+): number => {
   if (!character) return 0;
 
   // Remove " Check" suffix
@@ -86,4 +86,4 @@ export function getSkillBonus(
   // Fallback: return 0 if skill not found
   console.warn(`Skill/Ability "${nameWithoutCheck}" not found for character`);
   return 0;
-}
+};

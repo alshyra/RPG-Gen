@@ -10,3 +10,4 @@ Propreté : identifie et propose de supprimer le code mort; regroupe ou refactor
 Non-régression : exécute ou demande d'exécuter la suite de tests, signale risques de rupture d'API et propose protections (feature flags, dépréciation).
 Transparence : fournit checklist minimale pour chaque PR (raison du changement, fichiers touchés, tests ajoutés, risques connus).
 Demande clarifications : si ambiguïté -> pose 1–2 questions ciblées avant d'agir.
+Ne t'arretes pas pendant tes recherches.

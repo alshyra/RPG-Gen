@@ -138,4 +138,33 @@ export const characterServiceApi = {
   getDeceasedCharacters,
   grantInspiration,
   spendInspiration,
+  // Inventory API
+  addInventoryItem: async (characterId: string, item: Partial<any>) => {
+    try {
+      const res = await apiClient.post<CharacterDto>(`/characters/${characterId}/inventory`, item);
+      return res.data;
+    } catch (e) {
+      console.error('Failed to add inventory item', e);
+      throw e;
+    }
+  },
+  updateInventoryItem: async (characterId: string, itemId: string, updates: Partial<any>) => {
+    try {
+      const res = await apiClient.patch<CharacterDto>(`/characters/${characterId}/inventory/${itemId}`, updates);
+      return res.data;
+    } catch (e) {
+      console.error('Failed to update inventory item', e);
+      throw e;
+    }
+  },
+  removeInventoryItem: async (characterId: string, itemId: string, qty?: number) => {
+    try {
+      // axios.delete with body requires specifying data in config
+      const res = await apiClient.delete<CharacterDto>(`/characters/${characterId}/inventory/${itemId}`, { data: { qty } });
+      return res.data;
+    } catch (e) {
+      console.error('Failed to remove inventory item', e);
+      throw e;
+    }
+  },
 };
