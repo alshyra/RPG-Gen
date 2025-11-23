@@ -1,5 +1,5 @@
 # DNS resolver configuration
-resolver ${DNS_RESOLVER} valid=10s;
+resolver 127.0.0.11 valid=10s;
 resolver_timeout 5s;
 
 server {
@@ -14,7 +14,7 @@ server {
 
     # Proxy /docs (Swagger UI)
     location /docs {
-        set $backend_url "${BACKEND_URL}";
+        set $backend_url "backend:3001";
         proxy_pass $backend_url$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
@@ -35,7 +35,7 @@ server {
 
     # Proxy Swagger assets
     location ~ ^/docs/ {
-        set $backend_url "${BACKEND_URL}";
+        set $backend_url "backend:3001";
         proxy_pass $backend_url$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
@@ -57,7 +57,7 @@ server {
     # Proxy /api requests to backend
     location ~ ^/api/ {
         # Use variable to force dynamic DNS resolution
-        set $backend_url "${BACKEND_URL}";
+        set $backend_url "backend:3001";
         proxy_pass $backend_url$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;

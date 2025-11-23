@@ -1,0 +1,103 @@
+server {
+    listen 80;
+    server_name localhost;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    # Proxy /docs (Swagger UI)
+    location /docs {
+        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
+        proxy_pass $backend_url$request_uri;
+        # Enable SNI when backend uses HTTPS
+        proxy_ssl_server_name on;
+        # Improve TLS defaults
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        # Trust system CA store for validating upstream certificates (Cloud Run uses public CA)
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_http_version 1.1;
+        # Forward the upstream host (so Cloud Run sees the backend domain)
+        proxy_set_header Host $proxy_host;
+        # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
+        proxy_ssl_name $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Proxy Swagger assets
+    location ~ ^/docs/ {
+        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
+        proxy_pass $backend_url$request_uri;
+        # Enable SNI when backend uses HTTPS
+        proxy_ssl_server_name on;
+        # Improve TLS defaults
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        # Trust system CA store for validating upstream certificates (Cloud Run uses public CA)
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_http_version 1.1;
+        # Forward the upstream host (so Cloud Run sees the backend domain)
+        proxy_set_header Host $proxy_host;
+        # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
+        proxy_ssl_name $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Proxy /api requests to backend
+    location ~ ^/api/ {
+        # Use variable to force dynamic DNS resolution
+        set $backend_url "${https://rpggen-back-469869562907.europe-west1.run.app}";
+        proxy_pass $backend_url$request_uri;
+        # Enable SNI when backend uses HTTPS
+        proxy_ssl_server_name on;
+        # Improve TLS defaults
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        # Trust system CA store for validating upstream certificates (Cloud Run uses public CA)
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_verify on;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        # Forward the upstream host (so Cloud Run sees the backend domain)
+        proxy_set_header Host $proxy_host;
+        # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
+        proxy_ssl_name $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeout settings for long-running requests
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # SPA routing - serve index.html for all routes
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Disable access to hidden files
+    location ~ /\. {
+        deny all;
+    }
+}

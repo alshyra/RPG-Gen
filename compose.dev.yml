@@ -42,14 +42,12 @@ services:
     restart: unless-stopped
     working_dir: /app
     command: sh -c "npm --workspace rpg-gemini-frontend run dev"
-    environment:
-      - DNS_RESOLVER=127.0.0.11
-      - NODE_ENV=development
     ports:
       - "80:80"
     user: "${UID}:${GID}"
     volumes:
       - ./:/app/
+      - packages/frontend/nginx/nginx.conf.dev:/etc/nginx/conf.d/default.conf:ro
       - frontend_node_modules:/app/node_modules
     networks:
       - rpg-network

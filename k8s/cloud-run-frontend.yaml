@@ -21,6 +21,3 @@ spec:
             limits:
               cpu: "1"
               memory: 512Mi
-          env:
-            - name: BACKEND_URL
-              value: "https://rpggen-back-469869562907.europe-west1.run.app"
