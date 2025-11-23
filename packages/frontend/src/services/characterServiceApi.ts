@@ -107,6 +107,26 @@ const generateAvatar = async (characterId: string): Promise<string> => {
   }
 };
 
+const grantInspiration = async (characterId: string, amount = 1): Promise<CharacterDto> => {
+  try {
+    const response = await apiClient.post<{ character: CharacterDto }>(`/characters/${characterId}/inspiration/grant`, { amount });
+    return response.data.character;
+  } catch (e) {
+    console.error('Failed to grant inspiration to character', e);
+    throw e;
+  }
+};
+
+const spendInspiration = async (characterId: string): Promise<CharacterDto> => {
+  try {
+    const response = await apiClient.post<{ character: CharacterDto }>(`/characters/${characterId}/inspiration/spend`);
+    return response.data.character;
+  } catch (e) {
+    console.error('Failed to spend inspiration for character', e);
+    throw e;
+  }
+};
+
 export const characterServiceApi = {
   generateAvatar,
   getCharacterById,
@@ -116,4 +136,6 @@ export const characterServiceApi = {
   deleteCharacter,
   killCharacter,
   getDeceasedCharacters,
+  grantInspiration,
+  spendInspiration,
 };

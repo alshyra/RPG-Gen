@@ -16,10 +16,10 @@ export const useGameStore = defineStore('gameStore', () => {
   const sending = ref(false);
   const showRollModal = ref(false);
 
-  const doRoll = async (expr: string) => {
+  const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
-    const res: DiceThrowDto = await rollDice(expr);
-    const payload: DiceThrowDto = { rolls: res.rolls, mod: res.mod, total: res.total };
+    const res: DiceThrowDto = await rollDice(expr, advantage);
+    const payload: DiceThrowDto = { rolls: res.rolls, mod: res.mod, total: res.total, advantage: res.advantage, keptRoll: res.keptRoll, discardedRoll: res.discardedRoll };
     rolls.value.push(payload);
     latestRoll.value = payload;
     return payload;

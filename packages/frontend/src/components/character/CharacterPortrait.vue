@@ -23,6 +23,9 @@
         <div class="text-red-400 font-bold text-sm mb-2">
           ❤️ {{ hp }}
         </div>
+        <div class="text-purple-400 font-bold text-sm">
+          ✨ {{ inspirationPoints }}
+        </div>
       </div>
 
       <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2">
@@ -63,6 +66,8 @@ const xpPercent = computed(() => {
   const progress = getXpProgress(xp);
   return progress.percentage;
 });
+
+const inspirationPoints = computed(() => currentCharacter.value?.inspirationPoints || 0);
 </script>
 
 <style scoped>

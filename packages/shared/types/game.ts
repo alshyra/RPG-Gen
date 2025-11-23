@@ -84,7 +84,9 @@ export interface RollResult {
   bonus: number; // Skill/ability modifier applied
   diceNotation: string; // e.g. "1d20"
   skillName: string; // Name of the skill/check (e.g. "Perception Check")
-  advantage?: boolean; // Optional advantage flag
+  advantage?: 'advantage' | 'disadvantage' | 'none'; // Optional advantage flag
+  keptRoll?: number; // For advantage/disadvantage, the roll that was kept
+  discardedRoll?: number; // For advantage/disadvantage, the roll that was discarded
 }
 
 /**

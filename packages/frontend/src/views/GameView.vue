@@ -110,8 +110,12 @@
         <RollResultModal
           :is-open="gameStore.showRollModal"
           :roll-data="rollData"
+          :inspiration-points="inspirationPoints"
+          :show-inspiration-options="showInspirationOptions"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
+          @use-advantage="rollWithAdvantage"
+          @use-disadvantage="rollWithDisadvantage"
         />
       </aside>
     </div>
@@ -125,8 +129,12 @@
         <RollResultModal
           :is-open="true"
           :roll-data="rollData"
+          :inspiration-points="inspirationPoints"
+          :show-inspiration-options="showInspirationOptions"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
+          @use-advantage="rollWithAdvantage"
+          @use-disadvantage="rollWithDisadvantage"
         />
       </div>
     </div>
@@ -168,7 +176,13 @@ const characterId = computed(() => route.params.characterId as string);
 // Composables
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
-const { rollData, confirmRoll } = useGameRolls();
+const { rollData, confirmRoll, rollWithAdvantage, rollWithDisadvantage } = useGameRolls();
+
+// Computed
+const inspirationPoints = computed(() => characterStore.currentCharacter?.inspirationPoints || 0);
+const showInspirationOptions = computed(() => {
+  return rollData.value.diceNotation === '1d20' && (!rollData.value.advantage || rollData.value.advantage === 'none');
+});
 
 // DOM refs
 const messagesPane = ref<any>(null);
