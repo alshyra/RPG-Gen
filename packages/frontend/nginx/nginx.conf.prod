@@ -10,8 +10,12 @@ server {
 
     # Proxy /docs (Swagger UI)
     location /docs {
-        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
-        proxy_pass $backend_url$request_uri;
+        # Use a literal URL in proxy_pass instead of a variable.
+        # Using a variable requires an explicit `resolver` in prod and can
+        # cause DNS/502 issues when not configured. A literal URL lets
+        # nginx resolve the hostname at startup which matches how the
+        # frontend image behaves in production.
+        proxy_pass https://rpggen-back-469869562907.europe-west1.run.app$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
         # Improve TLS defaults
@@ -21,9 +25,10 @@ server {
         proxy_ssl_verify on;
         proxy_http_version 1.1;
         # Forward the upstream host (so Cloud Run sees the backend domain)
-        proxy_set_header Host $proxy_host;
+        # Make sure the Host header and SNI match the actual Cloud Run host
+        proxy_set_header Host rpggen-back-469869562907.europe-west1.run.app;
         # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
-        proxy_ssl_name $proxy_host;
+        proxy_ssl_name rpggen-back-469869562907.europe-west1.run.app;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -31,8 +36,7 @@ server {
 
     # Proxy Swagger assets
     location ~ ^/docs/ {
-        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
-        proxy_pass $backend_url$request_uri;
+        proxy_pass https://rpggen-back-469869562907.europe-west1.run.app$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
         # Improve TLS defaults
@@ -42,9 +46,9 @@ server {
         proxy_ssl_verify on;
         proxy_http_version 1.1;
         # Forward the upstream host (so Cloud Run sees the backend domain)
-        proxy_set_header Host $proxy_host;
+        proxy_set_header Host rpggen-back-469869562907.europe-west1.run.app;
         # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
-        proxy_ssl_name $proxy_host;
+        proxy_ssl_name rpggen-back-469869562907.europe-west1.run.app;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -52,9 +56,8 @@ server {
 
     # Proxy /api requests to backend
     location ~ ^/api/ {
-        # Use variable to force dynamic DNS resolution
-        set $backend_url "https://rpggen-back-469869562907.europe-west1.run.app";
-        proxy_pass $backend_url$request_uri;
+        # Use literal target to avoid variable-based DNS resolution issues
+        proxy_pass https://rpggen-back-469869562907.europe-west1.run.app$request_uri;
         # Enable SNI when backend uses HTTPS
         proxy_ssl_server_name on;
         # Improve TLS defaults
@@ -66,9 +69,9 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         # Forward the upstream host (so Cloud Run sees the backend domain)
-        proxy_set_header Host $proxy_host;
+        proxy_set_header Host rpggen-back-469869562907.europe-west1.run.app;
         # Enable SNI for HTTPS upstreams and set the SNI name to the upstream host
-        proxy_ssl_name $proxy_host;
+        proxy_ssl_name rpggen-back-469869562907.europe-west1.run.app;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
