@@ -41,8 +41,6 @@ spec:
               value: "production"
             - name: SERVER_PORT
               value: "3001"
-            - name: LOG_FORMAT
-              value: "json"
             - name: FRONTEND_URL
               value: "https://rpggen-front-469869562907.europe-west1.run.app"
             - name: MONGODB_URI
