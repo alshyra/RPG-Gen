@@ -111,8 +111,6 @@
           :is-open="gameStore.showRollModal"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
-          @use-advantage="rollWithAdvantage"
-          @use-disadvantage="rollWithDisadvantage"
         />
       </aside>
     </div>
@@ -127,8 +125,6 @@
           :is-open="true"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
-          @use-advantage="rollWithAdvantage"
-          @use-disadvantage="rollWithDisadvantage"
         />
       </div>
     </div>
@@ -170,7 +166,7 @@ const characterId = computed(() => route.params.characterId as string);
 // Composables
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
-const { confirmRoll, rollWithAdvantage, rollWithDisadvantage } = useGameRolls();
+const { confirmRoll } = useGameRolls();
 
 // DOM refs
 const messagesPane = ref<any>(null);

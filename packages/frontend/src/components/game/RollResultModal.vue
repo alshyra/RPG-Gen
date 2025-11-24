@@ -83,30 +83,6 @@
       </div>
     </div>
 
-    <!-- Inspiration Options (shown only for normal 1d20 rolls without advantage) -->
-    <div
-      v-if="showInspirationOptions && canUseInspiration"
-      class="bg-purple-900/30 rounded-lg p-3 mb-4 border border-purple-500"
-    >
-      <div class="text-center text-sm text-purple-300 mb-2">
-        ✨ Use Inspiration Point? ({{ inspirationPoints }} available)
-      </div>
-      <div class="flex gap-2">
-        <button
-          class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-3 rounded-lg transition"
-          @click="useAdvantage"
-        >
-          ↑ Advantage
-        </button>
-        <button
-          class="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-2 px-3 rounded-lg transition"
-          @click="useDisadvantage"
-        >
-          ↓ Disadvantage
-        </button>
-      </div>
-    </div>
-
     <!-- Action Buttons -->
     <div class="flex gap-3">
       <button
@@ -128,15 +104,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useGameRolls } from '@/composables/useGameRolls';
 
 interface Emits {
   confirm: [];
   reroll: [];
   close: [];
-  useAdvantage: [];
-  useDisadvantage: [];
 }
 
 defineProps<{
@@ -145,21 +118,13 @@ defineProps<{
 
 const emit = defineEmits<Emits>();
 
-// Get data from stores
-const characterStore = useCharacterStore();
+// Get data from composable
 const { rollData } = useGameRolls();
-
-// Computed properties from stores
-const inspirationPoints = computed(() => characterStore.currentCharacter?.inspirationPoints || 0);
-const showInspirationOptions = computed(() =>
-  rollData.value.diceNotation === '1d20' && rollData.value.advantage === 'none',
-);
 
 // Check if first roll (d20 for checks) is 20 or 1
 const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
-const canUseInspiration = computed(() => inspirationPoints.value > 0);
 
 const isDiscardedRoll = (roll: number) => {
   if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;
@@ -172,8 +137,6 @@ const isDiscardedRoll = (roll: number) => {
 const confirm = () => emit('confirm');
 const reroll = () => emit('reroll');
 const close = () => emit('close');
-const useAdvantage = () => emit('useAdvantage');
-const useDisadvantage = () => emit('useDisadvantage');
 </script>
 
 <style scoped></style>

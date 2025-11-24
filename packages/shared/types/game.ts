@@ -17,6 +17,7 @@ export interface GameInstruction {
     dices: string; 
     modifier?: string | number; 
     description?: string;
+    advantage?: 'advantage' | 'disadvantage' | 'none';
   };
   hp?: number; // HP change (positive or negative)
   xp?: number; // Experience points gained

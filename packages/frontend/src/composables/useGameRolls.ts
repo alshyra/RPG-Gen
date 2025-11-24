@@ -28,10 +28,13 @@ type GameStore = ReturnType<typeof useGameStore>;
 const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): void => {
   if (!instr.roll) return;
   gameStore.pendingInstruction = instr;
-  gameStore.appendMessage(
-    'System',
-    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`,
-  );
+  let message = `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`;
+  if (instr.roll.advantage === 'advantage') {
+    message += ' (with ADVANTAGE ↑)';
+  } else if (instr.roll.advantage === 'disadvantage') {
+    message += ' (with DISADVANTAGE ↓)';
+  }
+  gameStore.appendMessage('System', message);
 };
 
 const handleAdditionalXp = (
@@ -66,7 +69,6 @@ export function useGameRolls() {
     diceNotation: '',
     skillName: '',
   });
-  const currentAdvantage = ref<'advantage' | 'disadvantage' | 'none'>('none');
 
   const onDiceRolled = async (rollResult: DiceThrowDto): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
@@ -88,7 +90,6 @@ export function useGameRolls() {
       keptRoll: rollResult.keptRoll,
       discardedRoll: rollResult.discardedRoll,
     };
-    currentAdvantage.value = rollResult.advantage || 'none';
     gameStore.showRollModal = true;
   };
 
@@ -142,9 +143,12 @@ export function useGameRolls() {
   const rerollDice = async (): Promise<void> => {
     // Re-run the dice expression through the backend RNG via the game store
     if (!gameStore.pendingInstruction?.roll) return;
-    const expr = gameStore.pendingInstruction.roll.dices;
+    const instr = gameStore.pendingInstruction.roll;
+    const expr = instr.dices;
+    // Use the advantage/disadvantage from the instruction if specified
+    const advantage = instr.advantage || 'none';
     try {
-      const payload = await gameStore.doRoll(expr, currentAdvantage.value);
+      const payload = await gameStore.doRoll(expr, advantage);
       // onDiceRolled handles mapping payload -> UI modal
       await onDiceRolled(payload as DiceThrowDto);
     } catch (e) {
@@ -153,33 +157,5 @@ export function useGameRolls() {
     }
   };
 
-  const rollWithAdvantage = async (): Promise<void> => {
-    if (!gameStore.pendingInstruction?.roll) return;
-    const expr = gameStore.pendingInstruction.roll.dices;
-    try {
-      await characterStore.spendInspiration();
-      currentAdvantage.value = 'advantage';
-      const payload = await gameStore.doRoll(expr, 'advantage');
-      await onDiceRolled(payload as DiceThrowDto);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Failed to roll with advantage: ' + msg);
-    }
-  };
-
-  const rollWithDisadvantage = async (): Promise<void> => {
-    if (!gameStore.pendingInstruction?.roll) return;
-    const expr = gameStore.pendingInstruction.roll.dices;
-    try {
-      await characterStore.spendInspiration();
-      currentAdvantage.value = 'disadvantage';
-      const payload = await gameStore.doRoll(expr, 'disadvantage');
-      await onDiceRolled(payload as DiceThrowDto);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Failed to roll with disadvantage: ' + msg);
-    }
-  };
-
-  return { rollData, onDiceRolled, confirmRoll, rerollDice, rollWithAdvantage, rollWithDisadvantage };
+  return { rollData, onDiceRolled, confirmRoll, rerollDice };
 }

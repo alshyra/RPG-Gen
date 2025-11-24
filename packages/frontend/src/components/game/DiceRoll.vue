@@ -26,7 +26,9 @@ const send = async () => emit('send');
 
 const onClick = async () => {
   if (props.pendingInstruction?.roll) {
-    await gameStore.doRoll(props.expr);
+    // Get advantage/disadvantage from the game instruction
+    const advantage = props.pendingInstruction.roll.advantage || 'none';
+    await gameStore.doRoll(props.expr, advantage);
   } else {
     await send();
   }
