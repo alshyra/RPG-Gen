@@ -11,6 +11,7 @@ Core rules
 
 - Always read the relevant code, tests and CI workflow before acting. Avoid taking irreversible actions without confirmation.
 - Keep PRs atomic: one feature/fix per PR, include motivation, files touched and tests added/updated.
+- No unnecessary comments: remove dead code, consolidate duplicates, and refactor into shared utilities.
 
 Project-specific tips
 

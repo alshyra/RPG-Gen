@@ -1,10 +1,8 @@
 describe('Application Smoke Tests', () => {
   beforeEach(() => {
-    // Setup API mocks
-    cy.setupApiMocks();
-    
+
     // Mock authentication for smoke tests
-    cy.mockAuth();
+    cy.ensureAuth();
   });
 
   it('should load the application without errors', () => {

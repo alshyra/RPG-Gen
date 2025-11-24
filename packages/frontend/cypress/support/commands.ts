@@ -18,10 +18,12 @@ declare global {
       dataCy(value: string): Chainable<JQuery<HTMLElement>>;
       
       /**
-       * Mock authentication by setting token and user in localStorage
-       * @example cy.mockAuth()
+       * Ensure the client is authenticated for a test run by contacting the real
+       * backend's /api/auth/profile and storing a session token/profile locally.
+       * This will fail if the backend isn't available or the profile endpoint
+       * doesn't return a 200 response.
        */
-      mockAuth(): Chainable<void>;
+      ensureAuth(): Chainable<void>;
       
       /**
        * Clear authentication tokens from localStorage
@@ -29,11 +31,7 @@ declare global {
        */
       clearAuth(): Chainable<void>;
       
-      /**
-       * Setup API mocks to prevent timeouts
-       * @example cy.setupApiMocks()
-       */
-      setupApiMocks(): Chainable<void>;
+      // setupApiMocks is removed — tests should call real backend endpoints for E2E.
     }
   }
 }

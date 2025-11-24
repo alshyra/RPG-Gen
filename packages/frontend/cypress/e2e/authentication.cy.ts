@@ -1,7 +1,5 @@
 describe('Authentication Flow', () => {
   beforeEach(() => {
-    // Setup API mocks first
-    cy.setupApiMocks();
     
     // Clear all storage before each test
     cy.clearLocalStorage();
@@ -69,8 +67,8 @@ describe('Authentication Flow', () => {
 
   describe('With mocked authentication', () => {
     beforeEach(() => {
-      // Use the custom mockAuth command
-      cy.mockAuth();
+      // Use the custom ensureAuth command (real backend required)
+      cy.ensureAuth();
     });
 
     it('should access home page (world selector) when authenticated', () => {
@@ -133,9 +131,9 @@ describe('Authentication Flow', () => {
 
   describe('OAuth callback handling', () => {
     it('should handle auth callback route', () => {
-      // Intercept any API calls during callback
-      cy.intercept('POST', '/api/**', { statusCode: 200 });
-      cy.intercept('GET', '/api/**', { statusCode: 200 });
+      // Spy on API calls during callback and allow the real backend to handle them
+      cy.intercept('POST', '/api/**').as('apiPost');
+      cy.intercept('GET', '/api/**').as('apiGet');
       
       // Visit callback route with a mock token
       cy.visit('/auth/callback?token=mock-token-123', { failOnStatusCode: false });
@@ -145,9 +143,9 @@ describe('Authentication Flow', () => {
     });
 
     it('should show error when callback has no token', () => {
-      // Intercept any API calls
-      cy.intercept('POST', '/api/**', { statusCode: 200 });
-      cy.intercept('GET', '/api/**', { statusCode: 200 });
+      // Spy on API calls (we're not stubbing success responses anymore)
+      cy.intercept('POST', '/api/**').as('apiPost2');
+      cy.intercept('GET', '/api/**').as('apiGet2');
       
       cy.visit('/auth/callback', { failOnStatusCode: false });
       
@@ -158,8 +156,8 @@ describe('Authentication Flow', () => {
 
   describe('Session persistence', () => {
     it('should persist authentication across page reloads', () => {
-      // Set up authentication
-      cy.mockAuth();
+      // Set up authentication using real backend
+      cy.ensureAuth();
       
       cy.visit('/home');
       cy.contains('Test User').should('be.visible');
@@ -173,8 +171,8 @@ describe('Authentication Flow', () => {
     });
 
     it('should clear authentication when token is removed', () => {
-      // Set up authentication
-      cy.mockAuth();
+      // Set up authentication using real backend
+      cy.ensureAuth();
       
       cy.visit('/home');
       

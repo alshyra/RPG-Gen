@@ -14,19 +14,19 @@ class FakeCharacterModel {
   }
 }
 
-test('create assigns starter pack inventory and spells for spellcasters', async (t) => {
+test('create returns a draft character with empty inventory (no starter pack)', async (t) => {
   const svc = new CharacterService(FakeCharacterModel as any);
-  const character = await svc.create('user-1', { world: 'dnd', classes: [{ name: 'Wizard', level: 1 }], starterPack: 'mage' } as any);
+  // create is intended to initialize a draft; it takes (userId, world)
+  const character = await svc.create('user-1', 'dnd');
 
-  t.truthy(character.inventory && character.inventory.length > 0, 'inventory assigned');
-  t.truthy(character.spells && character.spells.length > 0, 'spells assigned for wizard');
-  t.true(character.spells.some((s: any) => s.name.toLowerCase().includes('magic')));
+  t.true(!character.inventory || character.inventory.length === 0, 'no inventory assigned on create');
+  t.true(!character.spells || character.spells.length === 0, 'no spells assigned on create');
 });
 
-test('create uses basic pack and no spells for non-spellcasters', async (t) => {
+test('create returns draft character for non-spellcasters (no starter pack applied)', async (t) => {
   const svc = new CharacterService(FakeCharacterModel as any);
-  const character = await svc.create('user-2', { world: 'dnd', classes: [{ name: 'Fighter', level: 1 }], starterPack: 'basic' } as any);
+  const character = await svc.create('user-2', 'dnd');
 
-  t.truthy(character.inventory && character.inventory.length > 0, 'inventory assigned');
-  t.true(!character.spells || character.spells.length === 0, 'no spells for fighter');
+  t.true(!character.inventory || character.inventory.length === 0, 'no inventory assigned on create');
+  t.true(!character.spells || character.spells.length === 0, 'no spells assigned on create');
 });

@@ -22,7 +22,7 @@
     >
       <li
         v-for="it in items"
-        :key="it._id ?? it.name"
+        :key="it.name"
         class="p-2 bg-slate-800/40 rounded border border-slate-700/30 flex items-start gap-3"
       >
         <div class="flex-1">
@@ -31,7 +31,7 @@
               {{ it.name }}
             </div>
             <div class="text-xs text-slate-300">
-              x{{ it.qty ?? it.quantity ?? 1 }}
+              x{{ it.qty ?? 1 }}
             </div>
           </div>
           <div

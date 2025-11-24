@@ -144,9 +144,13 @@ jobs:
           JWT_SECRET=test-jwt-secret-for-e2e-tests
           JWT_EXPIRES_IN=7d
           FRONTEND_URL=http://localhost
+          # Enable auth bypass for E2E tests in CI (safe for CI only)
+          DISABLE_AUTH_FOR_E2E=true
           EOF
 
       - name: Start production Docker containers
+        env:
+          DISABLE_AUTH_FOR_E2E: "true"
         run: |
           docker compose up --build -d mongodb backend frontend
 

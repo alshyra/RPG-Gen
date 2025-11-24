@@ -42,6 +42,34 @@ npm run test:e2e:open
 npm run test:e2e
 ```
 
+### Run E2E against a live backend
+
+E2E tests now run against a live backend by default. To run them locally or in CI you must ensure the backend is running and configured for test-mode:
+
+- Set the backend environment variable DISABLE_AUTH_FOR_E2E=true so the server will accept requests originating from tests without requiring full OAuth/JWT verification.
+- Start Cypress normally For example:
+
+```bash
+# ensure backend is running and DISABLE_AUTH_FOR_E2E=true is set on the backend process
+cd packages/frontend
+npx cypress run
+```
+
+Note: individual tests may still call `cy.intercept()` to simulate error responses or exceptional cases — this is allowed, but successful responses should use the real backend.
+
+### E2E timing / profiling helper
+
+If you're seeing slow E2E runs locally (eg. ~20s/test) you can collect per-test run durations which are written to:
+
+    packages/frontend/test-reports/cypress-test-durations.json
+
+Run the headless suite the usual way (or use the new script):
+
+```bash
+# run (instrumentation runs automatically via cypress.config.ts)
+npm run test:e2e
+```
+
 ### CI/CD
 
 Les tests Cypress s'exécutent automatiquement via GitHub Actions sur chaque push et pull request vers les branches `main` et `develop`. Les screenshots et vidéos sont disponibles en tant qu'artifacts en cas d'échec.

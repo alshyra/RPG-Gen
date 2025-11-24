@@ -4,6 +4,9 @@ dist
 packages/backend/.env
 packages/frontend/.env
 
+# Cypress test reports created during instrumented runs
+packages/frontend/test-reports
+
 # Cypress
 screenshots
 videos
