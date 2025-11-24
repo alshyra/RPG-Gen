@@ -3,10 +3,15 @@ describe('Home Page', () => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
     
-    
-    // Authenticate using the real backend (needs DISABLE_AUTH_FOR_E2E=true in backend)
     cy.ensureAuth();
     
+    // Create test characters via the repo helper — this uses the DISABLE_AUTH_FOR_E2E bypass
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    cy.prepareE2EDb({ count: 2 }).then((r:any) => {
+      expect(r?.ok).to.equal(true);
+    });
+
     cy.visit('/home');
   });
 
@@ -39,11 +44,8 @@ describe('Home Page', () => {
   });
 
   it('should display character list when characters exist', () => {
-    // Mock API with characters
-      // The mockCharacters array has been removed. Tests should use live backend data.
 
-    // Spy on characters request and forward to backend (no stub). We'll wait for the
-    // actual request so the UI has loaded characters if present.
+    // Spy on characters request and wait for the UI to fetch updated characters
     cy.intercept('GET', '**/api/characters').as('getCharacters');
 
     cy.visit('/home');
@@ -72,6 +74,9 @@ describe('Home Page', () => {
     // At least one action button should be available for existing characters
     cy.get('button').filter(':contains("Reprendre")').should('have.length.gte', 1);
     cy.get('button').filter(':contains("Supprimer")').should('have.length.gte', 1);
+
+    // Clean up: ensure we didn't leave extra test characters behind - optional but helpful.
+    // We'll leave characters in CI for debugging; if you prefer cleanup, we could delete them here.
   });
 
   it('should navigate to character creation when world is selected', () => {

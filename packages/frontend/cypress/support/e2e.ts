@@ -36,3 +36,12 @@ Cypress.Commands.add('ensureAuth', () => {
   });
 });
 
+// Helper wrappers exposing the node tasks for DB prep/cleanup
+Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string }) => {
+  return cy.task('prepareE2EDb', opts || { count: 2 });
+});
+
+Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => {
+  return cy.task('cleanupE2EDb', opts || {});
+});
+

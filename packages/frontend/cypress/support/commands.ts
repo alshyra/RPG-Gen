@@ -30,12 +30,23 @@ declare global {
        * @example cy.clearAuth()
        */
       clearAuth(): Chainable<void>;
+
+      /**
+       * Prepare the E2E DB using the node script (creates characters).
+       * @param opts.count number of characters to create
+       * @param opts.url optional API url
+       */
+      prepareE2EDb(opts?: { count?: number; url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
+
+      /**
+       * Cleanup the E2E DB (remove characters created for tests)
+       */
+      cleanupE2EDb(opts?: { url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
       
       // setupApiMocks is removed — tests should call real backend endpoints for E2E.
     }
   }
 }
-
 // Custom command to select elements by data-cy attribute
 Cypress.Commands.add('dataCy', (value: string) => cy.get(`[data-cy="${value}"]`));
 
