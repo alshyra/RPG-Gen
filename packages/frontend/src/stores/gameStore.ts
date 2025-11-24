@@ -1,5 +1,5 @@
 import { rollDice } from '@/services/diceService';
-import type { ChatMessage, DiceThrowDto, GameInstruction } from '@rpg-gen/shared';
+import type { ChatMessage, DiceThrowDto, GameInstruction, RollModalData } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -7,6 +7,13 @@ import { ref } from 'vue';
 export const useGameStore = defineStore('gameStore', () => {
   const rolls = ref<Array<DiceThrowDto>>([]);
   const latestRoll = ref<DiceThrowDto | null>(null);
+  const rollData = ref<RollModalData>({
+    rolls: [],
+    total: 0,
+    bonus: 0,
+    diceNotation: '',
+    skillName: '',
+  });
 
   // Minimal game session/message/pending instruction state used across app
   const messages = ref<ChatMessage[]>([]);
@@ -36,6 +43,7 @@ export const useGameStore = defineStore('gameStore', () => {
     // roll API
     rolls,
     latestRoll,
+    rollData,
     doRoll,
 
     // session / UI state

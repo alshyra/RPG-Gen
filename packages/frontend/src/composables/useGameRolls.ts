@@ -1,5 +1,5 @@
-import { DiceThrowDto, GameInstruction, GameResponse, RollModalData, RollResult } from '@rpg-gen/shared';
-import { ref, watch } from 'vue';
+import { DiceThrowDto, GameInstruction, GameResponse, RollResult } from '@rpg-gen/shared';
+import { watch } from 'vue';
 import { conversationService } from '../services/conversationService';
 import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
@@ -62,13 +62,6 @@ const handleAdditionalHp = (
 export function useGameRolls() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const rollData = ref<RollModalData>({
-    rolls: [],
-    total: 0,
-    bonus: 0,
-    diceNotation: '',
-    skillName: '',
-  });
 
   const onDiceRolled = async (rollResult: DiceThrowDto): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
@@ -80,7 +73,7 @@ export function useGameRolls() {
         : typeof instr.modifier === 'number'
           ? instr.modifier
           : 0;
-    rollData.value = {
+    gameStore.rollData = {
       skillName,
       rolls: rollResult.rolls,
       bonus: skillBonus,
@@ -124,7 +117,7 @@ export function useGameRolls() {
 
   const confirmRoll = async (): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
-    const { rolls, bonus, total, skillName } = rollData.value;
+    const { rolls, bonus, total, skillName } = gameStore.rollData;
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage(
@@ -157,5 +150,5 @@ export function useGameRolls() {
     }
   };
 
-  return { rollData, onDiceRolled, confirmRoll, rerollDice };
+  return { onDiceRolled, confirmRoll, rerollDice };
 }

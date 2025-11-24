@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
-import { useGameRolls } from '@/composables/useGameRolls';
+import { useGameStore } from '@/stores/gameStore';
 
 interface Emits {
   confirm: [];
@@ -118,8 +118,9 @@ defineProps<{
 
 const emit = defineEmits<Emits>();
 
-// Get data from composable
-const { rollData } = useGameRolls();
+// Get data from store
+const gameStore = useGameStore();
+const rollData = computed(() => gameStore.rollData);
 
 // Check if first roll (d20 for checks) is 20 or 1
 const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
