@@ -239,8 +239,16 @@ describe('Character Creation', () => {
     cy.url().should("match", /\/character\/[^/]+\/step\/6/);
     cy.contains("Avatar").should("be.visible");
 
+    // stub avatar generation and wait for the final character save
+    cy.intercept('POST', '/api/image/generate-avatar', { statusCode: 200, body: { imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=' } }).as('generateAvatar');
+    cy.intercept('PUT', '**/api/characters/*').as('updateCharacterFinish');
+
     // The avatar step allows optional description
     cy.contains("button", "Terminer").click();
+
+    // ensure avatar generation and server save happen before navigation
+    cy.wait('@generateAvatar');
+    cy.wait('@updateCharacterFinish');
 
     // Should navigate to game after finishing
     cy.url().should("match", /\/game\/[^/]+/);
