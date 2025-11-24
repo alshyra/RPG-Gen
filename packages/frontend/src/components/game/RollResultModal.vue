@@ -169,7 +169,8 @@ const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
-// Normalize dice value to 1-6 range for 3D visualization (D6 representation)
+// Convert any dice roll value (e.g., D20 result 1-20) to D6 range (1-6) for 3D visual representation
+// The actual numeric result is displayed separately; this is only for the 3D dice face shown
 const normalizedDiceValue = (roll: number): number => ((roll - 1) % 6) + 1;
 
 const isDiscardedRoll = (roll: number) => {

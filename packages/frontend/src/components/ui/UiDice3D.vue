@@ -79,9 +79,13 @@ const drawFaceOnCanvas = (ctx: CanvasRenderingContext2D, value: number) => {
 };
 
 const createFaceTexture = (canvas: HTMLCanvasElement): THREE.CanvasTexture => {
-  const texture = new THREE.CanvasTexture(canvas.cloneNode(true) as HTMLCanvasElement);
-  const clonedCtx = (texture.image as HTMLCanvasElement).getContext('2d')!;
+  // Clone canvas to preserve face content since we reuse the same canvas for all faces
+  const clonedCanvas = document.createElement('canvas');
+  clonedCanvas.width = canvas.width;
+  clonedCanvas.height = canvas.height;
+  const clonedCtx = clonedCanvas.getContext('2d')!;
   clonedCtx.drawImage(canvas, 0, 0);
+  const texture = new THREE.CanvasTexture(clonedCanvas);
   texture.needsUpdate = true;
   return texture;
 };
@@ -156,8 +160,9 @@ const updateRollingAnimation = (diceObj: THREE.Mesh, progress: number) => {
 
 const settleToFinalPosition = (diceObj: THREE.Mesh): boolean => {
   const target = faceRotations[targetValue] || faceRotations[1];
-  diceObj.rotation.x = THREE.MathUtils.lerp(diceObj.rotation.x % (Math.PI * 2), target.x, 0.15);
-  diceObj.rotation.y = THREE.MathUtils.lerp(diceObj.rotation.y % (Math.PI * 2), target.y, 0.15);
+  // Use direct lerp toward target without modulo to avoid wrap-around issues
+  diceObj.rotation.x = THREE.MathUtils.lerp(diceObj.rotation.x, target.x, 0.15);
+  diceObj.rotation.y = THREE.MathUtils.lerp(diceObj.rotation.y, target.y, 0.15);
   diceObj.rotation.z = THREE.MathUtils.lerp(diceObj.rotation.z, 0, 0.15);
   const isSettled = Math.abs(diceObj.rotation.x - target.x) < 0.01
     && Math.abs(diceObj.rotation.y - target.y) < 0.01
@@ -212,10 +217,12 @@ const cleanupRenderer = () => {
 
 const cleanupDice = () => {
   if (!dice) return;
-  if (Array.isArray(dice.material)) {
-    dice.material.forEach(m => m.dispose());
-  } else {
-    dice.material.dispose();
+  if (dice.material) {
+    if (Array.isArray(dice.material)) {
+      dice.material.forEach(m => m.dispose());
+    } else {
+      dice.material.dispose();
+    }
   }
   dice.geometry.dispose();
 };
