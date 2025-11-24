@@ -1,5 +1,5 @@
-import { DiceThrowDto, GameInstruction, GameResponse, RollModalData, RollResult } from '@rpg-gen/shared';
-import { ref, watch } from 'vue';
+import { DiceThrowDto, GameInstruction, GameResponse, RollResult } from '@rpg-gen/shared';
+import { watch } from 'vue';
 import { conversationService } from '../services/conversationService';
 import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
@@ -28,10 +28,13 @@ type GameStore = ReturnType<typeof useGameStore>;
 const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): void => {
   if (!instr.roll) return;
   gameStore.pendingInstruction = instr;
-  gameStore.appendMessage(
-    'System',
-    `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`,
-  );
+  let message = `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`;
+  if (instr.roll.advantage === 'advantage') {
+    message += ' (with ADVANTAGE ↑)';
+  } else if (instr.roll.advantage === 'disadvantage') {
+    message += ' (with DISADVANTAGE ↓)';
+  }
+  gameStore.appendMessage('System', message);
 };
 
 const handleAdditionalXp = (
@@ -59,13 +62,6 @@ const handleAdditionalHp = (
 export function useGameRolls() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const rollData = ref<RollModalData>({
-    rolls: [],
-    total: 0,
-    bonus: 0,
-    diceNotation: '',
-    skillName: '',
-  });
 
   const onDiceRolled = async (rollResult: DiceThrowDto): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
@@ -77,12 +73,15 @@ export function useGameRolls() {
         : typeof instr.modifier === 'number'
           ? instr.modifier
           : 0;
-    rollData.value = {
+    gameStore.rollData = {
       skillName,
       rolls: rollResult.rolls,
       bonus: skillBonus,
       total: rollResult.total + skillBonus,
       diceNotation: instr.dices,
+      advantage: rollResult.advantage,
+      keptRoll: rollResult.keptRoll,
+      discardedRoll: rollResult.discardedRoll,
     };
     gameStore.showRollModal = true;
   };
@@ -118,7 +117,7 @@ export function useGameRolls() {
 
   const confirmRoll = async (): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
-    const { rolls, bonus, total, skillName } = rollData.value;
+    const { rolls, bonus, total, skillName } = gameStore.rollData;
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage(
@@ -137,9 +136,12 @@ export function useGameRolls() {
   const rerollDice = async (): Promise<void> => {
     // Re-run the dice expression through the backend RNG via the game store
     if (!gameStore.pendingInstruction?.roll) return;
-    const expr = gameStore.pendingInstruction.roll.dices;
+    const instr = gameStore.pendingInstruction.roll;
+    const expr = instr.dices;
+    // Use the advantage/disadvantage from the instruction if specified
+    const advantage = instr.advantage || 'none';
     try {
-      const payload = await gameStore.doRoll(expr);
+      const payload = await gameStore.doRoll(expr, advantage);
       // onDiceRolled handles mapping payload -> UI modal
       await onDiceRolled(payload as DiceThrowDto);
     } catch (e) {
@@ -148,5 +150,5 @@ export function useGameRolls() {
     }
   };
 
-  return { rollData, onDiceRolled, confirmRoll, rerollDice };
+  return { onDiceRolled, confirmRoll, rerollDice };
 }

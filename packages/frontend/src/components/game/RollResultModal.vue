@@ -17,6 +17,13 @@
       >
         {{ rollData.skillName }}
       </div>
+      <div
+        v-if="rollData.advantage && rollData.advantage !== 'none'"
+        class="text-xs font-semibold mt-1"
+        :class="rollData.advantage === 'advantage' ? 'text-green-400' : 'text-red-400'"
+      >
+        {{ rollData.advantage === 'advantage' ? '↑ ADVANTAGE' : '↓ DISADVANTAGE' }}
+      </div>
     </div>
 
     <!-- Rolls Display -->
@@ -25,7 +32,10 @@
         <div
           v-for="(roll, idx) in rollData.rolls"
           :key="idx"
-          class="w-12 h-12 bg-slate-600 rounded-lg flex items-center justify-center text-lg font-bold text-amber-300 border-2 border-amber-400"
+          :class="[
+            'w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold border-2',
+            isDiscardedRoll(roll) ? 'bg-slate-800 text-slate-500 border-slate-600 line-through' : 'bg-slate-600 text-amber-300 border-amber-400'
+          ]"
         >
           {{ roll }}
         </div>
@@ -33,7 +43,16 @@
 
       <!-- Calculation -->
       <div class="text-center text-sm space-y-2">
-        <div class="text-slate-300">
+        <div
+          v-if="rollData.advantage && rollData.advantage !== 'none'"
+          class="text-slate-300"
+        >
+          {{ rollData.advantage === 'advantage' ? 'Kept best' : 'Kept worst' }}: {{ rollData.keptRoll }} <span class="text-slate-500">(dé)</span>
+        </div>
+        <div
+          v-else
+          class="text-slate-300"
+        >
           {{ rollData.rolls.join(' + ') }} <span class="text-slate-500">(dé)</span>
         </div>
         <div
@@ -85,6 +104,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
+import { useGameStore } from '@/stores/gameStore';
 
 interface Emits {
   confirm: [];
@@ -92,18 +112,28 @@ interface Emits {
   close: [];
 }
 
-import type { RollModalData } from '@rpg-gen/shared';
-
-const props = defineProps<{ isOpen: boolean; rollData: RollModalData }>();
-
-console.log(props.rollData);
+defineProps<{
+  isOpen: boolean;
+}>();
 
 const emit = defineEmits<Emits>();
 
+// Get data from store
+const gameStore = useGameStore();
+const rollData = computed(() => gameStore.rollData);
+
 // Check if first roll (d20 for checks) is 20 or 1
-const firstRoll = computed(() => props.rollData.rolls[0] || 0);
+const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
+
+const isDiscardedRoll = (roll: number) => {
+  if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;
+  // For advantage/disadvantage, we have exactly 2 rolls
+  // If both rolls are the same value, neither should be marked as discarded
+  if (rollData.value.rolls[0] === rollData.value.rolls[1]) return false;
+  return roll === rollData.value.discardedRoll;
+};
 
 const confirm = () => emit('confirm');
 const reroll = () => emit('reroll');

@@ -109,7 +109,6 @@
       <aside class="hidden lg:block lg:col-span-3 lg:row-span-1">
         <RollResultModal
           :is-open="gameStore.showRollModal"
-          :roll-data="rollData"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
         />
@@ -124,7 +123,6 @@
       <div class="w-full max-w-md">
         <RollResultModal
           :is-open="true"
-          :roll-data="rollData"
           @confirm="confirmRoll"
           @close="() => (gameStore.showRollModal = false)"
         />
@@ -168,7 +166,7 @@ const characterId = computed(() => route.params.characterId as string);
 // Composables
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
-const { rollData, confirmRoll } = useGameRolls();
+const { confirmRoll } = useGameRolls();
 
 // DOM refs
 const messagesPane = ref<any>(null);

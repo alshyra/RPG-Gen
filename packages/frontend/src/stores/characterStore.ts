@@ -57,6 +57,28 @@ export const useCharacterStore = defineStore('character', () => {
 
   const useInventoryItem = (name: string) => removeInventoryItem(name, 1);
 
+  const grantInspiration = async (amount = 1) => {
+    if (!currentCharacter.value?.characterId) return;
+    try {
+      const updated = await characterServiceApi.grantInspiration(currentCharacter.value.characterId, amount);
+      currentCharacter.value = updated;
+    } catch (e) {
+      console.error('Failed to grant inspiration', e);
+      throw e;
+    }
+  };
+
+  const spendInspiration = async () => {
+    if (!currentCharacter.value?.characterId) return;
+    try {
+      const updated = await characterServiceApi.spendInspiration(currentCharacter.value.characterId);
+      currentCharacter.value = updated;
+    } catch (e) {
+      console.error('Failed to spend inspiration', e);
+      throw e;
+    }
+  };
+
   const createCharacter = async (world: string) => {
     const newChar = await characterServiceApi.createCharacter({ world });
     currentCharacter.value = newChar;
@@ -92,5 +114,7 @@ export const useCharacterStore = defineStore('character', () => {
     addInventoryItem,
     removeInventoryItem,
     useInventoryItem,
+    grantInspiration,
+    spendInspiration,
   };
 });

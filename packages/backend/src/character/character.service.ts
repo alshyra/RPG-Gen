@@ -65,6 +65,7 @@ export class CharacterService {
     if (updates.race !== undefined) character.race = updates.race as any;
     if (updates.gender !== undefined) character.gender = updates.gender as any;
     if (updates.proficiency !== undefined) character.proficiency = updates.proficiency;
+    if (updates.inspirationPoints !== undefined) character.inspirationPoints = updates.inspirationPoints;
     if (updates.isDeceased !== undefined) character.isDeceased = updates.isDeceased;
     if (updates.physicalDescription !== undefined) character.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) character.state = updates.state;
@@ -121,6 +122,7 @@ export class CharacterService {
       portrait: doc.portrait,
       gender: doc.gender as 'male' | 'female',
       proficiency: doc.proficiency,
+      inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
       diedAt: doc.diedAt,
       deathLocation: doc.deathLocation,

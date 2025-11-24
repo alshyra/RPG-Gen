@@ -104,6 +104,9 @@ export class Character {
   @Prop({ required: false, default: 2, type: Number })
   proficiency: number;
 
+  @Prop({ required: false, default: 1, type: Number })
+  inspirationPoints: number;
+
   @Prop({ default: false, type: Boolean })
   isDeceased: boolean;
 
