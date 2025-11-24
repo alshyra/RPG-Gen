@@ -128,6 +128,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
+import { useCharacterStore } from '@/stores/characterStore';
+import { useGameRolls } from '@/composables/useGameRolls';
 
 interface Emits {
   confirm: [];
@@ -137,31 +139,34 @@ interface Emits {
   useDisadvantage: [];
 }
 
-import type { RollModalData } from '@rpg-gen/shared';
-
-const props = defineProps<{
+defineProps<{
   isOpen: boolean;
-  rollData: RollModalData;
-  inspirationPoints?: number;
-  showInspirationOptions?: boolean;
 }>();
-
-console.log(props.rollData);
 
 const emit = defineEmits<Emits>();
 
+// Get data from stores
+const characterStore = useCharacterStore();
+const { rollData } = useGameRolls();
+
+// Computed properties from stores
+const inspirationPoints = computed(() => characterStore.currentCharacter?.inspirationPoints || 0);
+const showInspirationOptions = computed(() =>
+  rollData.value.diceNotation === '1d20' && rollData.value.advantage === 'none',
+);
+
 // Check if first roll (d20 for checks) is 20 or 1
-const firstRoll = computed(() => props.rollData.keptRoll || props.rollData.rolls[0] || 0);
+const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
-const canUseInspiration = computed(() => (props.inspirationPoints || 0) > 0);
+const canUseInspiration = computed(() => inspirationPoints.value > 0);
 
 const isDiscardedRoll = (roll: number) => {
-  if (!props.rollData.discardedRoll || !props.rollData.advantage || props.rollData.advantage === 'none') return false;
+  if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;
   // For advantage/disadvantage, we have exactly 2 rolls
   // If both rolls are the same value, neither should be marked as discarded
-  if (props.rollData.rolls[0] === props.rollData.rolls[1]) return false;
-  return roll === props.rollData.discardedRoll;
+  if (rollData.value.rolls[0] === rollData.value.rolls[1]) return false;
+  return roll === rollData.value.discardedRoll;
 };
 
 const confirm = () => emit('confirm');
