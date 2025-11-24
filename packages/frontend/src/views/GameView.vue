@@ -97,10 +97,6 @@
       <!-- Chat Bar (aligned with messages in grid) -->
       <div class="lg:col-start-4 lg:col-span-9">
         <ChatBar
-          :player-text="gameStore.playerText"
-          :pending-instruction="gameStore.pendingInstruction"
-          :is-thinking="gameStore.isInitializing"
-          @update:player-text="(v) => (gameStore.playerText = v)"
           @send="sendMessage"
         />
       </div>

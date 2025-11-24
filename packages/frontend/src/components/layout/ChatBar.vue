@@ -16,7 +16,7 @@
       <!-- Dice Roll / Send button -->
       <div class="flex gap-2 flex-shrink-0">
         <DiceRoll
-          :pending-instruction="pendingInstruction"
+          :pending-instruction="gameStore.pendingInstruction"
           expr="1d20"
           @send="send"
         />
@@ -25,22 +25,22 @@
 
     <!-- Status indicators (compact) -->
     <div
-      v-if="isThinking || isRolling"
+      v-if="gameStore.isInitializing || isRolling"
       class="mt-2 flex items-center gap-3 text-xs"
     >
       <div
-        v-if="isThinking"
+        v-if="gameStore.isInitializing"
         class="text-slate-400 flex items-center gap-1"
       >
         <span class="animate-pulse">⏳</span>
         <span>Réflexion en cours...</span>
       </div>
       <div
-        v-if="isRolling && pendingInstruction?.roll"
+        v-if="isRolling && gameStore.pendingInstruction?.roll"
         class="bg-amber-900/50 text-amber-200 px-2 py-1 rounded border border-amber-700/50"
       >
-        🎲 {{ pendingInstruction.roll.dices }}{{ pendingInstruction.roll.modifier ? ` +
-                ${pendingInstruction.roll.modifier}` : '' }}
+        🎲 {{ gameStore.pendingInstruction.roll.dices }}{{ gameStore.pendingInstruction.roll.modifier ? ` +
+                ${gameStore.pendingInstruction.roll.modifier}` : '' }}
       </div>
     </div>
   </div>
@@ -49,31 +49,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
-import { type GameInstruction } from '@rpg-gen/shared';
-
-interface Props {
-  playerText: string;
-  pendingInstruction: GameInstruction | null;
-  isThinking?: boolean;
-}
+import { useGameStore } from '@/stores/gameStore';
 
 interface Emits {
-  (e: 'update:playerText', value: string): void;
   (e: 'send'): void;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isThinking: false,
-});
-
 const emit = defineEmits<Emits>();
+const gameStore = useGameStore();
 
 const playerText = computed({
-  get: () => props.playerText,
-  set: (value: string) => emit('update:playerText', value),
+  get: () => gameStore.playerText,
+  set: (value: string) => { gameStore.playerText = value; },
 });
 
-const isRolling = computed(() => !!props.pendingInstruction?.roll);
+const isRolling = computed(() => !!gameStore.pendingInstruction?.roll);
 
 const send = () => emit('send');
 // rolled events are handled centrally via store.latestRoll — no local rebroadcast
