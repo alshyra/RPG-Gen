@@ -43,13 +43,15 @@
   * **JSON Format (Strict) :** Tous les objets JSON doivent être à la **fin de votre message**, **séparés** de la narration par au moins une ligne, et en **anglais**.
       * **Demander un jet de dés :**
         ```json
-        {"roll": {"dices": "1d20", "modifier": "competence_ou_sauvegarde"}}
+        {"roll": {"dices": "1d20", "modifier": "competence_ou_sauvegarde", "advantage": "none"}}
         ```
-        *(Où "competence\_ou\_sauvegarde" est le jet spécifique : "Wisdom Saving Throw", "Perception Check", "Attack Roll".)*
+        *(Où "competence\_ou\_sauvegarde" est le jet spécifique : "Wisdom Saving Throw", "Perception Check", "Attack Roll", ou "Strength (Athletics) Check" pour un test de compétence avec l'attribut entre parenthèses.)*
+        *(Le champ "advantage" peut être "advantage" pour un avantage, "disadvantage" pour un désavantage, ou "none" par défaut.)*
       * **Reconnaître les résultats du jet :**
         ```json
-        {"rolls": [18], "total": 23, "bonus": 5, "advantage": false}
+        {"rolls": [18, 15], "total": 23, "bonus": 5, "advantage": "advantage", "keptRoll": 18, "discardedRoll": 15}
         ```
+        *(Pour un jet simple sans avantage/désavantage, utiliser : `{"rolls": [18], "total": 23, "bonus": 5, "advantage": "none"}`)*
       * **Gagner de l'XP :**
         ```json
         {"xp": 150}
