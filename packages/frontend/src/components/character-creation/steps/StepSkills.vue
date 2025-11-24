@@ -33,6 +33,7 @@ import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import type { SkillDto } from '@rpg-gen/shared';
+import { computeUpdatedSkills } from './skillsUtils';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
@@ -54,16 +55,7 @@ const saveCurrent = async () => {
   });
 };
 
-const computeUpdatedSkills = (skill: string, existingSkills: any[]): SkillDto[] => {
-  if (proficientSkills.value.includes(skill)) {
-    return existingSkills.map((s: any) => ({ ...s, proficient: s.name !== skill }));
-  }
-  const present = existingSkills.find((s: any) => s.name === skill);
-  if (present) {
-    return existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: true } : s));
-  }
-  return [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
-};
+// computeUpdatedSkills now lives in skillsUtils.ts
 
 const toggleSkill = async (skill: string) => {
   if (!currentCharacter.value) return;
