@@ -17,6 +17,7 @@
       <div class="flex gap-2 flex-shrink-0">
         <DiceRoll
           :pending-instruction="pendingInstruction"
+          :is-sending="isSending"
           expr="1d20"
           @send="send"
         />
@@ -55,6 +56,7 @@ interface Props {
   playerText: string;
   pendingInstruction: GameInstruction | null;
   isThinking?: boolean;
+  isSending?: boolean;
 }
 
 interface Emits {
@@ -64,6 +66,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   isThinking: false,
+  isSending: false,
 });
 
 const emit = defineEmits<Emits>();

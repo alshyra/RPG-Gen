@@ -66,6 +66,7 @@
       <UiButton
         v-if="currentStep === steps.length - 1"
         variant="primary"
+        :is-loading="isLoading"
         :disabled="isLoading"
         @click="finishCreation"
       >

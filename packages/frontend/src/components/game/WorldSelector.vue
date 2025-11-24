@@ -29,6 +29,7 @@
           <UiButton
             :variant="world.enabled ? 'primary' : 'ghost'"
             :disabled="!world.enabled"
+            :is-loading="loadingWorldId === world.id"
             class="flex items-center gap-2"
             :data-cy="`world-start-${world.id}`"
             @click="goToCharacterCreation(world.id)"
@@ -56,16 +57,24 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import UiButton from '../ui/UiButton.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const { createCharacter } = useCharacterStore();
 
+const loadingWorldId = ref<string | null>(null);
+
 const goToCharacterCreation = async (world: string) => {
-  const character = await createCharacter(world);
-  router.push({ path: `/character/${character.characterId}/step/1` });
+  if (loadingWorldId.value) return;
+  loadingWorldId.value = world;
+  try {
+    const character = await createCharacter(world);
+    router.push({ path: `/character/${character.characterId}/step/1` });
+  } finally {
+    loadingWorldId.value = null;
+  }
 };
 
 const worlds = reactive([

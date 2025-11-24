@@ -100,6 +100,7 @@
           :player-text="gameStore.playerText"
           :pending-instruction="gameStore.pendingInstruction"
           :is-thinking="gameStore.isInitializing"
+          :is-sending="gameStore.sending"
           @update:player-text="(v) => (gameStore.playerText = v)"
           @send="sendMessage"
         />
