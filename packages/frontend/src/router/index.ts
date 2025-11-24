@@ -7,12 +7,14 @@ import CharacterLevelupView from '../views/CharacterLevelupView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
 import LoginView from '../views/LoginView.vue';
 import AuthCallbackView from '../views/AuthCallbackView.vue';
+import DiceDemo from '../views/DiceDemo.vue';
 import { authService } from '../services/authService';
 
 const routes = [
   { path: '/', name: 'landing', component: LandingView, meta: { public: true } },
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/auth/callback', name: 'auth-callback', component: AuthCallbackView, meta: { public: true } },
+  { path: '/dice-demo', name: 'dice-demo', component: DiceDemo, meta: { public: true } },
   { path: '/home', name: 'home', component: HomeView },
   { path: '/game/:characterId', name: 'game', component: GameView },
   {
