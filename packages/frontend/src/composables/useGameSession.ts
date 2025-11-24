@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { characterServiceApi } from '@/services/characterServiceApi';
 import { conversationService } from '../services/conversationService';
 import { useGameStore } from '../stores/gameStore';
 
@@ -40,7 +41,20 @@ export const useGameSession = () => {
     });
 
   const startGame = async () => {
-    if (!currentCharacter?.value) return await router.push('/home');
+    // If the character isn't loaded in-memory yet, try to fetch it from the API
+    if (!currentCharacter?.value) {
+      const route = useRoute();
+      const charId = String(route.params.characterId || '');
+      if (!charId) return await router.push('/home');
+      try {
+        const fetched = await characterServiceApi.getCharacterById(charId);
+        if (!fetched) return await router.push('/home');
+        // update the reactive ref so other consumers see the loaded character
+        currentCharacter.value = fetched as any;
+      } catch (e) {
+        return await router.push('/home');
+      }
+    }
     isInitializing.value = true;
     try {
       if (currentCharacter.value.isDeceased) showDeathModal.value = true;

@@ -5,7 +5,7 @@
     </h3>
 
     <div
-      v-if="!character"
+      v-if="!currentCharacter"
       class="text-sm text-slate-400"
     >
       Aucun personnage sélectionné.
@@ -27,18 +27,19 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
-              :checked="true"
+              :model-value="true"
               disabled
               class="accent-indigo-500"
-            />
-            <div class="flex-1">
-              <div class="font-medium">
-                {{ item.name.replace(/ \(x.*\)$/, '') }}
+            >
+              <div class="flex-1">
+                <div class="font-medium">
+                  {{ item.name.replace(/ \(x.*\)$/, '') }}
+                </div>
+                <div class="text-xs text-slate-400">
+                  {{ item.description }}
+                </div>
               </div>
-              <div class="text-xs text-slate-400">
-                {{ item.description }}
-              </div>
-            </div>
+            </UiInputCheckbox>
             <div class="flex items-center gap-2">
               <UiInputNumber
                 v-model="quantities[item.name]"
@@ -66,18 +67,20 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
-              :checked="isSelected(item)"
+              size="md"
+              :model-value="isSelected(item)"
               class="accent-indigo-500"
-              @change="() => toggle(item, !isSelected(item))"
-            />
-            <div class="flex-1">
-              <div class="font-medium">
-                {{ item.name }}
+              @update:model-value="(val: boolean) => toggle(item, val)"
+            >
+              <div class="flex-1">
+                <div class="font-medium">
+                  {{ item.name }}
+                </div>
+                <div class="text-xs text-slate-400">
+                  {{ item.description }}
+                </div>
               </div>
-              <div class="text-xs text-slate-400">
-                {{ item.description }}
-              </div>
-            </div>
+            </UiInputCheckbox>
             <div
               v-if="isSelected(item)"
               class="flex items-center gap-2"
@@ -107,17 +110,18 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
-              :checked="weaponIsSelected(w)"
-              @change="() => chooseWeapon(w)"
-            />
-            <div class="flex-1">
-              <div class="font-medium">
-                {{ w.name }}
+              :model-value="weaponIsSelected(w)"
+              @update:model-value="(val: boolean) => { if (val !== weaponIsSelected(w)) chooseWeapon(w); }"
+            >
+              <div class="flex-1">
+                <div class="font-medium">
+                  {{ w.name }}
+                </div>
+                <div class="text-xs text-slate-400">
+                  {{ w.description }}
+                </div>
               </div>
-              <div class="text-xs text-slate-400">
-                {{ w.description }}
-              </div>
-            </div>
+            </UiInputCheckbox>
           </div>
         </div>
       </div>
@@ -130,9 +134,10 @@ import { reactive } from 'vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import UiInputNumber from '../../ui/UiInputNumber.vue';
 import UiInputCheckbox from '../../ui/UiInputCheckbox.vue';
+import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();
-const character: any = characterStore.currentCharacter; // ref from the store (typed any for template usage)
+const { currentCharacter } = storeToRefs(characterStore);
 
 // Small curated starter pack — default items are pre-selected for new characters
 const availableItems = [
@@ -158,10 +163,10 @@ const quantities = reactive<Record<string, number>>({});
 const basePack = availableItems.slice(0, 3);
 const optionalItems = availableItems.slice(3);
 
-const isSelected = (it: any) => (character.value?.inventory || []).some((i: any) => i.name === it.name || i.name === it.name.replace(/ \(x.*\)$/, ''));
+const isSelected = (it: any) => (currentCharacter.value?.inventory || []).some((i: any) => i.name === it.name || i.name === it.name.replace(/ \(x.*\)$/, ''));
 
 const toggle = (it: any, val: boolean) => {
-  const inv = (character.value as any).inventory = (character.value as any).inventory || [];
+  const inv = (currentCharacter.value as any).inventory = (currentCharacter.value as any).inventory || [];
   if (val) {
     const qty = quantities[it.name] || (it.name.includes('x') ? parseInt(it.name.split('x').pop() || '1', 10) : 1);
     quantities[it.name] = qty;
@@ -178,33 +183,33 @@ const toggle = (it: any, val: boolean) => {
 };
 
 // Initialize default pack for a new character if empty
-if (character.value && (!character.value.inventory || (character.value.inventory || []).length === 0)) {
+if (currentCharacter.value && (!currentCharacter.value.inventory || (currentCharacter.value.inventory || []).length === 0)) {
   const defaultItems = ['Sac à dos', 'Torche (x3)', 'Rations (x5)'];
-  character.value.inventory = [];
+  currentCharacter.value.inventory = [];
   defaultItems.forEach((name) => {
     const it = availableItems.find(a => a.name === name);
     if (it) {
       const sanitized = it.name.replace(/ \(x.*\)$/, '');
       const qty = it.name.includes('x') ? parseInt(it.name.split('x').pop() || '1', 10) : 1;
       // include minimal meta object to satisfy types
-      character.value.inventory.push({ name: sanitized, qty, description: it.description, meta: {} });
+      currentCharacter.value!.inventory!.push({ name: sanitized, qty, description: it.description, meta: {} });
       quantities[it.name] = qty;
     }
   });
 }
 
 // Weapon selection helpers — ensure only one weapon selected at a time
-const weaponIsSelected = (w: any) => (character.value?.inventory || []).some((i: any) => ['Épée', 'Rapière', 'Bâton de mage'].includes(i.name) && i.name === w.name);
+const weaponIsSelected = (w: any) => (currentCharacter.value?.inventory || []).some((i: any) => ['Épée', 'Rapière', 'Bâton de mage'].includes(i.name) && i.name === w.name);
 
 const chooseWeapon = (w: any) => {
-  const inv = (character.value as any).inventory = (character.value as any).inventory || [];
+  const inv = (currentCharacter.value as any).inventory = (currentCharacter.value as any).inventory || [];
   // remove any previously selected weapon using filter
   const filtered = inv.filter((i: any) => !['Épée', 'Rapière', 'Bâton de mage'].includes(i.name));
   // If the weapon was already selected, this toggles it off
   const already = inv.some((i: any) => i.name === w.name);
-  character.value.inventory = filtered;
+  currentCharacter!.value!.inventory = filtered;
   if (!already) {
-    character.value.inventory.push({ name: w.name, qty: 1, description: w.description, meta: {} });
+    currentCharacter!.value!.inventory!.push({ name: w.name, qty: 1, description: w.description, meta: {} });
   }
 };
 </script>

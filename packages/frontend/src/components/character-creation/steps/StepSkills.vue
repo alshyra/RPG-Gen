@@ -8,18 +8,20 @@
     </p>
 
     <div class="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto p-2">
-      <label
+      <div
         v-for="skill in availableSkills"
         :key="skill"
-        class="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-slate-800 transition"
+        class="p-2 rounded transition hover:bg-slate-800"
       >
         <UiInputCheckbox
-          :checked="proficientSkills.includes(skill)"
+          size="md"
+          :model-value="proficientSkills.includes(skill)"
           :disabled="proficientSkills.length >= skillsToChoose && !proficientSkills.includes(skill)"
-          @change="toggleSkill(skill)"
-        />
-        <span>{{ skill }}</span>
-      </label>
+          @update:model-value="(val: boolean) => setSkillProficiency(skill, val)"
+        >
+          <span class="ml-2">{{ skill }}</span>
+        </UiInputCheckbox>
+      </div>
     </div>
 
     <div class="text-sm text-slate-400">
@@ -33,7 +35,6 @@ import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import type { SkillDto } from '@rpg-gen/shared';
-import { computeUpdatedSkills } from './skillsUtils';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
@@ -57,10 +58,23 @@ const saveCurrent = async () => {
 
 // computeUpdatedSkills now lives in skillsUtils.ts
 
-const toggleSkill = async (skill: string) => {
+const setSkillProficiency = async (skill: string, isProficient: boolean) => {
   if (!currentCharacter.value) return;
   const existingSkills = currentCharacter.value.skills || [];
-  currentCharacter.value.skills = computeUpdatedSkills(skill, existingSkills);
+
+  // If skill exists, update its proficient flag; otherwise add it when setting true
+  const present = existingSkills.find((s: any) => s.name === skill);
+  let updated: SkillDto[];
+  if (present) {
+    updated = existingSkills.map((s: any) => (s.name === skill ? { ...s, proficient: isProficient } : s));
+  } else if (isProficient) {
+    updated = [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
+  } else {
+    // not present and setting to false — no-op
+    updated = existingSkills;
+  }
+
+  currentCharacter.value.skills = updated as any;
   await saveCurrent();
 };
 </script>

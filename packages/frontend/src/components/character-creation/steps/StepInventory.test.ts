@@ -14,7 +14,7 @@ vi.mock('@/stores/characterStore', () => ({
 
 describe('StepInventory', () => {
   it('mounts and shows base pack and weapons', async () => {
-    const wrapper = mount(StepInventory, { global: { stubs: ['UiInputNumber', 'UiInputCheckbox'] } });
+    const wrapper = mount(StepInventory, { global: { stubs: ['UiInputNumber'] } });
     expect(wrapper.exists()).toBe(true);
     // Header
     expect(wrapper.text()).toContain('Choisissez votre équipement de départ');

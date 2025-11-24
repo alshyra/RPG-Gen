@@ -69,3 +69,21 @@ test('rollDiceExpr advantage only applies to 1d20', (t) => {
   t.is(res.rolls.length, 2);
   t.is(res.advantage, 'none');
 });
+
+test('roll endpoint accepts expr property in body', (t) => {
+  const controller = new DiceController();
+  const res = controller.roll({ expr: '2d6+1' } as any);
+  t.truthy(Array.isArray(res.rolls));
+  t.is(res.rolls.length, 2);
+  t.is(res.mod, 1);
+});
+
+test('roll endpoint accepts dices property and advantage flag', (t) => {
+  const controller = new DiceController();
+  const res = controller.roll({ dices: '1d20', advantage: 'advantage' } as any);
+  // advantage on 1d20 should roll 2 d20s
+  t.truthy(Array.isArray(res.rolls));
+  t.is(res.rolls.length, 2);
+  t.is(res.advantage, 'advantage');
+  t.truthy(typeof res.keptRoll === 'number' && typeof res.discardedRoll === 'number');
+});

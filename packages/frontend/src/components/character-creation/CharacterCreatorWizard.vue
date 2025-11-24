@@ -25,9 +25,15 @@
       </div>
     </div>
 
-    <!-- Loading / init -->
+    <!-- Loading states: show a full-page overlay for finalizing creation, otherwise a small inline loader while fetching -->
+    <FullPageLoader
+      v-if="isLoading"
+      :title="loadingTitle"
+      :subtitle="loadingSubtitle"
+    />
+
     <div
-      v-if="(route.params.characterId && !currentCharacter) || isLoading"
+      v-else-if="route.params.characterId && !currentCharacter"
       class="py-16"
     >
       <UiLoader />
@@ -86,25 +92,29 @@
 
 <script setup lang="ts">
 import { characterServiceApi } from '@/services/characterServiceApi';
+import { conversationService } from '@/services/conversationService';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
+import UiLoader from '../ui/UiLoader.vue';
 import CharacterPreview from './CharacterPreview.vue';
+import FullPageLoader from '@/components/ui/FullPageLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
+import StepInventory from './steps/StepInventory.vue';
 import StepRaceClass from './steps/StepRaceClass.vue';
 import StepSkills from './steps/StepSkills.vue';
-import StepInventory from './steps/StepInventory.vue';
-import UiLoader from '../ui/UiLoader.vue';
 
 const router = useRouter();
 const route = useRoute();
 
 const isLoading = ref(false);
+const loadingTitle = ref('');
+const loadingSubtitle = ref('');
 const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Inventaire', 'Avatar'];
 
 const characterStore = useCharacterStore();
@@ -158,26 +168,65 @@ const previousStep = () => {
   currentStep.value--;
 };
 
+// --- helper functions extracted from finishCreation for readability ---
+const saveFinalCharacter = async () => {
+  console.log('Finishing character creation for', currentCharacter.value);
+  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value!.classes![0].name!, currentCharacter.value!.scores!.Con!);
+  await updateCharacter(currentCharacter.value!.characterId, {
+    ...currentCharacter.value,
+    state: 'created',
+    hpMax,
+    hp: hpMax,
+    skills: currentCharacter.value!.skills,
+    ...(currentCharacter.value!.inventory ? { inventory: currentCharacter.value!.inventory } : {}),
+  });
+};
+
+const generateAndApplyAvatar = async () => {
+  try {
+    const imageUrl = await characterServiceApi.generateAvatar(currentCharacter.value!.characterId);
+    console.log('Avatar generated');
+    try {
+      const refreshed = await characterServiceApi.getCharacterById(currentCharacter.value!.characterId);
+      if (refreshed) currentCharacter.value = refreshed as any;
+      else currentCharacter.value!.portrait = imageUrl;
+    } catch {
+      currentCharacter.value!.portrait = imageUrl;
+    }
+  } catch (e) {
+    console.warn('Avatar generation failed — continuing to game', e);
+  }
+};
+
+const initConversationForCharacter = async () => {
+  try {
+    loadingTitle.value = 'Création de l\'univers...';
+    loadingSubtitle.value = 'Préparation du premier prompt du Maître de Jeu...';
+    if (currentCharacter.value) await conversationService.startGame(currentCharacter.value);
+  } catch (e) {
+    console.warn('Failed to initialize conversation/history', e);
+  }
+};
+
+const navigateToGame = async () => {
+  await router.push({ name: 'game', params: { characterId: currentCharacter.value!.characterId } });
+};
+
 const finishCreation = async () => {
   if (!currentCharacter.value
     || !currentCharacter.value.classes?.[0].name
     || !currentCharacter.value.scores?.Con
   ) return;
+
   isLoading.value = true;
-  console.log('Finishing character creation for', currentCharacter.value);
-  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores?.Con);
-  await updateCharacter(currentCharacter.value.characterId, {
-    ...currentCharacter.value,
-    state: 'created',
-    hpMax,
-    hp: hpMax,
-    skills: currentCharacter.value.skills,
-    // include chosen inventory on creation
-    ...(currentCharacter.value.inventory ? { inventory: currentCharacter.value.inventory } : {}),
-  });
-  await characterServiceApi.generateAvatar(currentCharacter.value.characterId);
-  console.log('Avatar generated');
-  router.push({ name: 'game', params: { characterId: currentCharacter.value.characterId } });
+  loadingTitle.value = 'Invocation de votre avatar...';
+  loadingSubtitle.value = 'Génération de l\'image et préparation du monde de jeu...';
+
+  await saveFinalCharacter();
+  await generateAndApplyAvatar();
+  await initConversationForCharacter();
+  await navigateToGame();
+
   isLoading.value = false;
 };
 
