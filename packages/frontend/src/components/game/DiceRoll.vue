@@ -2,7 +2,7 @@
   <div>
     <UiButton
       variant="primary"
-      :is-loading="isLoading || props.isSending"
+      :is-loading="isLoading || gameStore.sending"
       @click="onClick"
     >
       {{ props.pendingInstruction?.roll ? 'Roll 🎲' : 'Envoyer' }}
@@ -20,7 +20,7 @@ const emit = defineEmits<{
   (e: 'send'): void;
 }>();
 
-const props = defineProps<{ pendingInstruction?: GameInstruction | null; expr: string; isSending?: boolean }>();
+const props = defineProps<{ pendingInstruction?: GameInstruction | null; expr: string }>();
 
 const gameStore = useGameStore();
 const isLoading = ref(false);
