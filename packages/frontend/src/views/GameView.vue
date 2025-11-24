@@ -66,9 +66,9 @@
               class="mt-3"
             />
             <div class="border-t border-slate-600 mt-3" />
-            <SkillsPanel
-              class="mt-3"
-            />
+            <SkillsPanel class="mt-3" />
+            <div class="border-t border-slate-600 mt-3" />
+            <InventoryPanel class="mt-3" />
           </div>
         </div>
       </aside>
@@ -142,6 +142,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
 import SkillsPanel from '../components/character-stats/SkillsPanel.vue';
+import InventoryPanel from '../components/character-stats/InventoryPanel.vue';
 import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';

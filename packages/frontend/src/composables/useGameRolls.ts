@@ -59,7 +59,7 @@ const handleAdditionalHp = (
   if (characterStore.isDead) characterStore.showDeathModal = true;
 };
 
-export function useGameRolls() {
+export const useGameRolls = () => {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
 
@@ -151,4 +151,4 @@ export function useGameRolls() {
   };
 
   return { onDiceRolled, confirmRoll, rerollDice };
-}
+};

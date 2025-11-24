@@ -18,26 +18,35 @@ declare global {
       dataCy(value: string): Chainable<JQuery<HTMLElement>>;
       
       /**
-       * Mock authentication by setting token and user in localStorage
-       * @example cy.mockAuth()
+       * Ensure the client is authenticated for a test run by contacting the real
+       * backend's /api/auth/profile and storing a session token/profile locally.
+       * This will fail if the backend isn't available or the profile endpoint
+       * doesn't return a 200 response.
        */
-      mockAuth(): Chainable<void>;
+      ensureAuth(): Chainable<void>;
       
       /**
        * Clear authentication tokens from localStorage
        * @example cy.clearAuth()
        */
       clearAuth(): Chainable<void>;
-      
+
       /**
-       * Setup API mocks to prevent timeouts
-       * @example cy.setupApiMocks()
+       * Prepare the E2E DB using the node script (creates characters).
+       * @param opts.count number of characters to create
+       * @param opts.url optional API url
        */
-      setupApiMocks(): Chainable<void>;
+      prepareE2EDb(opts?: { count?: number; url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
+
+      /**
+       * Cleanup the E2E DB (remove characters created for tests)
+       */
+      cleanupE2EDb(opts?: { url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
+      
+      // setupApiMocks is removed — tests should call real backend endpoints for E2E.
     }
   }
 }
-
 // Custom command to select elements by data-cy attribute
 Cypress.Commands.add('dataCy', (value: string) => cy.get(`[data-cy="${value}"]`));
 

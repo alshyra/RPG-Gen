@@ -91,7 +91,7 @@ const getCurrentCharacter = (): CharacterDto | null => {
     gender: charData.gender || 'male',
     // Preserve optional fields if present; cast to any to satisfy DTO typing
     ...(charData as any).spells ? { spells: (charData as any).spells } : {},
-    ...(charData as any).inventory ? { inventory: (charData as any).inventory } : {},
+    ...charData.inventory ? { inventory: (charData as any).inventory } : {},
   };
 
   return result;

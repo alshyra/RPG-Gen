@@ -78,7 +78,7 @@ describe('AbilityScorePicker', () => {
     // assert store and DOM reflect the change
     cy.then(() => {
       const store = useCharacterStore();
-      expect(store.currentCharacter?.scores.Str).to.equal(14);
+      expect(store.currentCharacter?.scores?.Str).to.equal(14);
     });
 
     // after freeing points, try to increase Wis (10 -> 11)
@@ -134,7 +134,7 @@ describe('AbilityScorePicker', () => {
 
     cy.then(() => {
       const store = useCharacterStore();
-      expect(store.currentCharacter?.scores.Str).to.equal(11);
+      expect(store.currentCharacter?.scores?.Str).to.equal(11);
     });
 
     // Second increment should be allowed
@@ -144,7 +144,7 @@ describe('AbilityScorePicker', () => {
 
     cy.then(() => {
       const store = useCharacterStore();
-      expect(store.currentCharacter?.scores.Str).to.equal(12);
+      expect(store.currentCharacter?.scores?.Str).to.equal(12);
     });
 
     // Third increment exceeds budget and should be prevented

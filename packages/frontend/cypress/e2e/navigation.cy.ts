@@ -1,10 +1,8 @@
 describe("Navigation", () => {
   beforeEach(() => {
-    // Setup API mocks
-    cy.setupApiMocks();
     
     // Mock authentication for navigation tests
-    cy.mockAuth();
+    cy.ensureAuth();
   });
 
   it("should navigate between routes", () => {

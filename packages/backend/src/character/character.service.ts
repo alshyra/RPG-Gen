@@ -26,6 +26,7 @@ export class CharacterService {
       world,
       state: 'draft',
       isDeceased: false,
+      inventory: [],
       scores: this.DEFAULT_BASE_SCORES,
     });
 
@@ -69,6 +70,7 @@ export class CharacterService {
     if (updates.isDeceased !== undefined) character.isDeceased = updates.isDeceased;
     if (updates.physicalDescription !== undefined) character.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) character.state = updates.state;
+    if (updates.inventory !== undefined) character.inventory = updates.inventory as any;
 
     const saved = await character.save();
     this.logger.log(`Character updated: ${saved.name} (${saved.characterId})`);
@@ -102,6 +104,73 @@ export class CharacterService {
     return saved;
   }
 
+  async addInventoryItem(userId: string, characterId: string, item: Partial<any>) {
+    const character = await this.characterModel.findOne({ userId, characterId });
+    if (!character) throw new NotFoundException(`Character ${characterId} not found`);
+
+    // Find by id or name
+    const existing = (character.inventory || []).find((it: any) => (item._id && it._id === item._id) || (it.name === item.name));
+    if (existing) {
+      existing.qty = (existing.qty || 0) + (item.qty || 1);
+    } else {
+      const newItem = {
+        _id: crypto.randomUUID(),
+        name: item.name || 'item',
+        qty: item.qty || 1,
+        description: item.description,
+        equipped: item.equipped || false,
+        meta: item.meta || {},
+      };
+      character.inventory = character.inventory || [];
+      character.inventory.push(newItem as any);
+    }
+
+    const saved = await character.save();
+    this.logger.log(`Inventory updated for ${characterId}`);
+    return saved;
+  }
+
+  async updateInventoryItem(userId: string, characterId: string, itemId: string, updates: Partial<any>) {
+    const character = await this.characterModel.findOne({ userId, characterId });
+    if (!character) throw new NotFoundException(`Character ${characterId} not found`);
+
+    const item = (character.inventory || []).find((it: any) => it._id === itemId);
+    if (!item) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
+
+    if (updates.name !== undefined) item.name = updates.name;
+    if (updates.qty !== undefined) item.qty = updates.qty;
+    if (updates.description !== undefined) item.description = updates.description;
+    if (updates.equipped !== undefined) item.equipped = updates.equipped;
+    if (updates.meta !== undefined) item.meta = updates.meta;
+
+    const saved = await character.save();
+    this.logger.log(`Inventory item ${itemId} updated for ${characterId}`);
+    return saved;
+  }
+
+  async removeInventoryItem(userId: string, characterId: string, itemId: string, qtyToRemove = 0) {
+    const character = await this.characterModel.findOne({ userId, characterId });
+    if (!character) throw new NotFoundException(`Character ${characterId} not found`);
+
+    const idx = (character.inventory || []).findIndex((it: any) => it._id === itemId);
+    if (idx === -1) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
+
+    if (qtyToRemove > 0) {
+      const current = character.inventory[idx].qty || 0;
+      if (qtyToRemove >= current) {
+        character.inventory.splice(idx, 1);
+      } else {
+        character.inventory[idx].qty = current - qtyToRemove;
+      }
+    } else {
+      character.inventory.splice(idx, 1);
+    }
+
+    const saved = await character.save();
+    this.logger.log(`Inventory item ${itemId} removed for ${characterId}`);
+    return saved;
+  }
+
   async getDeceasedCharacters(userId: string): Promise<CharacterDocument[]> {
     return this.characterModel.find({ userId, isDeceased: true }).sort({ diedAt: -1 }).exec();
   }
@@ -124,6 +193,7 @@ export class CharacterService {
       proficiency: doc.proficiency,
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
+      inventory: doc.inventory as any,
       diedAt: doc.diedAt,
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,

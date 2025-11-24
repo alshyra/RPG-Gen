@@ -1,19 +1,6 @@
-// ***********************************************************
-// This file is processed and loaded automatically before your e2e test files.
-//
-// You can change the location of this file or turn off loading
-// support files with the 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
-
-// Import commands.js using ES2015 syntax:
 import "./commands";
 
-// Prevent uncaught exceptions from failing tests (like network errors to backend)
 Cypress.on("uncaught:exception", (err) => {
-  // Ignore network errors and Google OAuth redirect errors during tests
   if (
     err.message.includes("Network") ||
     err.message.includes("fetch") ||
@@ -21,25 +8,7 @@ Cypress.on("uncaught:exception", (err) => {
   ) {
     return false;
   }
-  // Let other errors fail the test
   return true;
-});
-
-// Set up authentication mocking utilities
-Cypress.Commands.add("mockAuth", () => {
-  const mockToken = "test-jwt-token-cypress-mock";
-  const mockUser = {
-    id: "test-user-123",
-    email: "test@example.com",
-    displayName: "Test User",
-    picture: "https://via.placeholder.com/150",
-  };
-
-  // Set items that will be automatically applied on next visit
-  cy.window().then((win) => {
-    win.localStorage.setItem("rpg-auth-token", mockToken);
-    win.localStorage.setItem("rpg-user-data", JSON.stringify(mockUser));
-  });
 });
 
 Cypress.Commands.add("clearAuth", () => {
@@ -49,142 +18,30 @@ Cypress.Commands.add("clearAuth", () => {
   });
 });
 
-// Helper to setup API mocks - call this in beforeEach of each test
-Cypress.Commands.add("setupApiMocks", () => {
-  // Mock a character that can be used for testing - use a mutable object to track state
-  let currentCharacter = {
-    characterId: "test-char-id-123",
-    name: "",
-    race: { id: "", name: "", mods: {} },
-    scores: { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 },
-    hp: 12,
-    hpMax: 12,
-    totalXp: 0,
-    classes: [],
-    skills: [],
-    world: "dnd",
-    portrait: "",
-    gender: "",
-    proficiency: 2,
-    state: "draft",
-  };
-
-  // Auth endpoints
-  cy.intercept("GET", "**/api/auth/profile", {
-    statusCode: 200,
-    body: { id: "test", email: "test@example.com", displayName: "Test User" },
+Cypress.Commands.add('ensureAuth', () => {
+  cy.window().then((win) => {
+    win.localStorage.setItem('rpg-auth-token', 'e2e-bypass-token');
   });
 
-  // Character CRUD endpoints
-  cy.intercept("GET", "**/api/characters", {
-    statusCode: 200,
-    body: [],
-  }).as("getCharacters");
+  // Request real profile — fail if not present so tests don't silently pass with a mock.
+  cy.request({ url: '/api/auth/profile', failOnStatusCode: false }).then((resp) => {
+    if (resp?.status === 200 && resp?.body) {
+      cy.window().then((win) => {
+        win.localStorage.setItem('rpg-user-data', JSON.stringify(resp.body));
+      });
+      return;
+    }
 
-  cy.intercept("POST", "**/api/characters", (req) => {
-    currentCharacter = { ...currentCharacter, ...req.body };
-    req.reply({
-      statusCode: 200,
-      body: currentCharacter,
-    });
-  }).as("createCharacter");
-
-  cy.intercept("GET", "**/api/characters/*", (req) => {
-    req.reply({
-      statusCode: 200,
-      body: currentCharacter,
-    });
-  }).as("getCharacter");
-
-  cy.intercept("PUT", "**/api/characters/*", (req) => {
-    currentCharacter = { ...currentCharacter, ...req.body };
-    req.reply({
-      statusCode: 200,
-      body: currentCharacter,
-    });
-  }).as("updateCharacter");
-
-  cy.intercept("DELETE", "**/api/characters/*", {
-    statusCode: 200,
-    body: null,
-  }).as("deleteCharacter");
-
-  cy.intercept("POST", "**/api/characters/*/kill", (req) => {
-    req.reply({
-      statusCode: 200,
-      body: currentCharacter,
-    });
-  }).as("killCharacter");
-
-  cy.intercept("GET", "**/api/characters/deceased", {
-    statusCode: 200,
-    body: [],
-  }).as("getDeceasedCharacters");
-
-  // Chat/Game endpoints
-  // Match both trailing slash and query-string variants of /api/chat/history
-  // Also intercept dynamic chat routes which include characterId: /api/chat/:characterId/history
-  cy.intercept("GET", "**/api/chat/history*", {
-    statusCode: 200,
-    body: { isNew: true, history: [] },
-  }).as("getChatHistory");
-
-  // Intercept dynamic history route: /api/chat/:characterId/history
-  cy.intercept("GET", "**/api/chat/*/history*", {
-    statusCode: 200,
-    body: { isNew: true, history: [] },
-  }).as("getChatHistoryById");
-
-  // Intercept both POST /api/chat and dynamic POST /api/chat/:characterId
-  cy.intercept("POST", "**/api/chat", {
-    statusCode: 200,
-    body: {
-      result: {
-        text: "Mock game response",
-        instructions: [],
-      },
-    },
-  }).as("sendChat");
-
-  cy.intercept("POST", "**/api/chat/*", (req) => {
-    // Return the same mocked shape for dynamic character-specific chat posts
-    req.reply({
-      statusCode: 200,
-      body: {
-        result: {
-          text: "Mock game response",
-          instructions: [],
-        },
-      },
-    });
-  }).as("sendChatById");
-
-  // Image generation endpoint - match generate-avatar exactly and any additional path variants
-  cy.intercept("POST", "**/api/image/generate-avatar*", {
-    statusCode: 200,
-    body: {
-      imageUrl:
-        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCfAAf/2Q==",
-      compressed: true,
-    },
-  }).as("generateAvatar");
-
-  // Also add a broader intercept to catch any image endpoints if the exact route changes
-  cy.intercept("POST", "**/api/image/**", {
-    statusCode: 200,
-    body: {
-      imageUrl:
-        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCfAAf/2Q==",
-      compressed: true,
-    },
-  }).as("generateAvatar");
-
-  // Fallback for any other POST requests
-  cy.intercept("POST", "**/api/**", {
-    statusCode: 200,
-    body: { success: true },
+    throw new Error('ensureAuth failed: /api/auth/profile did not return a profile. Ensure backend is up and DISABLE_AUTH_FOR_E2E=true.');
   });
 });
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+// Helper wrappers exposing the node tasks for DB prep/cleanup
+Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string }) => {
+  return cy.task('prepareE2EDb', opts || { count: 2 });
+});
+
+Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => {
+  return cy.task('cleanupE2EDb', opts || {});
+});
+

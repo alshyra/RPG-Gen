@@ -1,7 +1,9 @@
-import { defineConfig } from 'cypress';
-import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
+import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'cypress';
 import { fileURLToPath, URL } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 export default defineConfig({
   e2e: {
@@ -21,6 +23,43 @@ export default defineConfig({
     retries: {
       runMode: 0,
       openMode: 0,
+    },
+    setupNodeEvents(on, config) {
+      // provide tasks to call the repository's e2e DB helper script
+      const execFileAsync = promisify(execFile);
+
+      on('task', {
+        async prepareE2EDb(opts) {
+          const args: string[] = [];
+          if (opts?.count) {
+            args.push('--count', String(opts.count));
+          }
+          if (opts?.url) {
+            args.push('--url', opts.url);
+          }
+          try {
+            const { stdout } = await execFileAsync('node', ['../../scripts/prepare-e2e-db.mjs', ...args], { cwd: config.projectRoot });
+            return { ok: true, output: stdout };
+          } catch (err) {
+            return { ok: false, error: String(err) };
+          }
+        },
+
+        async cleanupE2EDb(opts) {
+          const args: string[] = ['--cleanup'];
+          if (opts?.url) {
+            args.push('--url', opts.url);
+          }
+          try {
+            const { stdout } = await execFileAsync('node', ['../../scripts/prepare-e2e-db.mjs', ...args], { cwd: config.projectRoot });
+            return { ok: true, output: stdout };
+          } catch (err) {
+            return { ok: false, error: String(err) };
+          }
+        },
+      });
+
+      return config;
     },
   },
   component: {

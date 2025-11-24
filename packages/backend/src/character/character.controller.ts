@@ -11,6 +11,7 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -55,14 +56,11 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.getDeceasedCharacters(userId);
-    return {
-      ok: true,
-      characters: characters.map(c => ({
-        ...this.characterService.toCharacterDto(c),
-        diedAt: c.diedAt?.toISOString(),
-        deathLocation: c.deathLocation,
-      })),
-    };
+    return characters.map(c => ({
+      ...this.characterService.toCharacterDto(c),
+      diedAt: c.diedAt?.toISOString(),
+      deathLocation: c.deathLocation,
+    }));
   }
 
   @Get(':characterId')
@@ -98,7 +96,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     await this.characterService.delete(userId, characterId);
-    return { ok: true, message: 'Character deleted' };
+    return { message: 'Character deleted' };
   }
 
   @Post(':characterId/kill')
@@ -116,10 +114,51 @@ export class CharacterController {
       characterId,
       body.deathLocation,
     );
-    return {
-      ok: true,
-      character: this.characterService.toCharacterDto(character),
-    };
+    return this.characterService.toCharacterDto(character);
+  }
+
+  @Post(':characterId/inventory')
+  @ApiOperation({ summary: 'Add an item to character\'s inventory' })
+  async addInventory(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() item: Partial<any>,
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
+    const character = await this.characterService.addInventoryItem(userId, characterId, item);
+    return this.characterService.toCharacterDto(character);
+  }
+
+  @Patch(':characterId/inventory/:itemId')
+  @ApiOperation({ summary: 'Update an item in character\'s inventory' })
+  async updateInventory(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Param('itemId') itemId: string,
+    @Body() updates: Partial<any>,
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
+    const character = await this.characterService.updateInventoryItem(userId, characterId, itemId, updates);
+    return this.characterService.toCharacterDto(character);
+  }
+
+  @Delete(':characterId/inventory/:itemId')
+  @ApiOperation({ summary: 'Remove an item from character\'s inventory' })
+  async removeInventory(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Param('itemId') itemId: string,
+    @Body() body: { qty?: number },
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
+    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body?.qty || 0);
+    return this.characterService.toCharacterDto(character);
   }
 
   @Post(':characterId/inspiration/grant')

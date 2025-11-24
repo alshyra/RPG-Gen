@@ -153,6 +153,45 @@ npm run test:e2e              # Headless mode
 npm run test:e2e:open         # Interactive mode
 ```
 
+You can also run the E2E suite against a running backend (no API mocks):
+
+1. Ensure your backend service is running (Docker Compose or locally) and enable
+   the DISABLE_AUTH_FOR_E2E flag for the backend process so the server will
+   accept unauthenticated test requests and inject a test user. There are two
+   easy and safe ways to enable this for local/CI testing; use one of the
+   following options — do NOT enable this variable in production.
+
+Option A — set the value in the backend .env file (recommended)
+
+1. Edit `packages/backend/.env` (create it from `.env.example` if needed) and
+   add the line:
+
+   ```env
+   DISABLE_AUTH_FOR_E2E=true
+   ```
+
+2. Restart just the backend service so the container picks up the new env:
+
+   ```bash
+   docker compose -f compose.dev.yml up -d --no-deps --force-recreate backend
+   ```
+
+Option B — pass the env var at compose time (ephemeral)
+
+- This is useful for quick one-off runs without touching files. The variable
+  will be applied to newly-created containers only.
+
+```bash
+DISABLE_AUTH_FOR_E2E=true docker compose -f compose.dev.yml up -d --no-deps --force-recreate backend
+```
+
+Note: exporting the variable directly inside an already-running container
+will not affect a running process (so the `docker exec` trick won't work
+reliably if the server process is already running). Always restart the
+backend container after changing its environment.
+
+Note: Tests may need the backend to be seeded with test data for certain flows. E2E tests now run against a live backend by default; individual tests may still call `cy.intercept()` to simulate error conditions (that is allowed), but global mock helpers are not used.
+
 ### Component Tests (Cypress)
 
 ```bash

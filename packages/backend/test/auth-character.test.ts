@@ -41,9 +41,11 @@ test('Character data structure', (t) => {
     gender: 'male',
     proficiency: 2,
     isDeceased: false,
+    inventory: [],
   };
 
   t.is(typeof characterData.name, 'string');
+  t.true(Array.isArray(characterData.inventory));
   t.is(typeof characterData.hp, 'number');
   t.is(typeof characterData.isDeceased, 'boolean');
   t.true(characterData.hp > 0);

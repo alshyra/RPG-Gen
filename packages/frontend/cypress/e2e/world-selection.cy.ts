@@ -3,11 +3,9 @@ describe('World Selection', () => {
     cy.clearLocalStorage();
     cy.clearCookies();
     
-    // Setup API mocks
-    cy.setupApiMocks();
     
-    // Mock authentication
-    cy.mockAuth();
+    // Authenticate via real backend for E2E runs
+    cy.ensureAuth();
     
     cy.visit('/home');
   });
