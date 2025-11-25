@@ -13,7 +13,23 @@
           <div class="text-xs text-slate-400 font-medium">
             {{ m.role }}
           </div>
-          <UiMarkdown :text="m.text" />
+          <template v-if="isLoadingMessage(m)">
+            <div class="space-y-2 mt-2">
+              <UiSkeleton variant="text" />
+              <UiSkeleton
+                variant="text"
+                class="w-4/5"
+              />
+              <UiSkeleton
+                variant="text"
+                class="w-3/5"
+              />
+            </div>
+          </template>
+          <UiMarkdown
+            v-else
+            :text="m.text"
+          />
         </div>
       </div>
     </div>
@@ -23,10 +39,15 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import UiMarkdown from '@/components/ui/UiMarkdown.vue';
+import UiSkeleton from '@/components/ui/UiSkeleton.vue';
 import { useGameStore } from '@/stores/gameStore';
+import type { ChatMessage } from '@rpg-gen/shared';
 
 const gameStore = useGameStore();
-const messagesPane = ref<any>(null);
+const messagesPane = ref<HTMLElement | null>(null);
+
+const isLoadingMessage = (message: ChatMessage): boolean =>
+  message.role === 'System' && message.text === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(
