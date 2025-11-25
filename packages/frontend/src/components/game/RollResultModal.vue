@@ -16,6 +16,7 @@
           v-for="(roll, idx) in rollData.rolls"
           :key="idx"
           :value="clampedDiceValue(roll)"
+          :dice-type="diceType"
           :is-rolling="isAnimating"
           :size="100"
           @roll-complete="onDiceRollComplete"
@@ -57,6 +58,7 @@
           v-for="(roll, idx) in rollData.rolls"
           :key="idx"
           :value="clampedDiceValue(roll)"
+          :dice-type="diceType"
           :is-rolling="false"
           :size="80"
         />
@@ -144,6 +146,8 @@ import UiModal from '../ui/UiModal.vue';
 import UiDice3D from '../ui/UiDice3D.vue';
 import { useGameStore } from '@/stores/gameStore';
 
+type DiceType = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20';
+
 interface Emits {
   confirm: [];
   reroll: [];
@@ -164,18 +168,32 @@ const completedDice = ref(0);
 const gameStore = useGameStore();
 const rollData = computed(() => gameStore.rollData);
 
-// Check if first roll (d20 for checks) is 20 or 1
+// Parse dice notation to determine dice type (e.g., "1d20" -> "d20", "2d6" -> "d6")
+const diceType = computed<DiceType>(() => {
+  const notation = rollData.value.diceNotation || '1d20';
+  const match = notation.match(/d(\d+)/i);
+  if (match) {
+    const faces = parseInt(match[1], 10);
+    if ([4, 6, 8, 10, 12, 20].includes(faces)) {
+      return `d${faces}` as DiceType;
+    }
+  }
+  return 'd20'; // Default to d20
+});
+
+// Get max value for current dice type
+const diceMax = computed(() => parseInt(diceType.value.slice(1), 10));
+
+// Check if first roll (d20 for checks) is max or 1
 const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
-const isCriticalSuccess = computed(() => firstRoll.value === 20);
+const isCriticalSuccess = computed(() => firstRoll.value === diceMax.value);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
-// Clamp D20 roll value to 1-20 range for 3D D20 visualization
-const clampedDiceValue = (roll: number): number => Math.max(1, Math.min(20, roll));
+// Clamp roll value to valid range for the dice type
+const clampedDiceValue = (roll: number): number => Math.max(1, Math.min(diceMax.value, roll));
 
 const isDiscardedRoll = (roll: number) => {
   if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;
-  // For advantage/disadvantage, we have exactly 2 rolls
-  // If both rolls are the same value, neither should be marked as discarded
   if (rollData.value.rolls[0] === rollData.value.rolls[1]) return false;
   return roll === rollData.value.discardedRoll;
 };
