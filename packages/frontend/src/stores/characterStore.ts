@@ -1,13 +1,12 @@
 import { characterServiceApi } from '@/services/characterServiceApi';
-import { CharacterDto } from '@rpg-gen/shared';
+import { CharacterDto, ItemDto, SpellDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-// eslint-disable-next-line max-statements
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();
-  const currentCharacterId = computed(() => route.params.characterId as string || undefined);
+  const currentCharacterId = computed(() => typeof route.params.characterId === 'string' ? route.params.characterId : undefined);
 
   const currentCharacter = ref<CharacterDto>();
   const showDeathModal = ref(false);
@@ -27,42 +26,71 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   // inventory/spells helpers (simple implementations)
-  const learnSpell = (spell: any) => {
+  const learnSpell = (spell: SpellDto) => {
     if (!currentCharacter.value) return;
-    (currentCharacter.value as any).spells = (currentCharacter.value as any).spells || [];
-    (currentCharacter.value as any).spells.push(spell);
+    // immutable update to avoid forced casts
+    currentCharacter.value = {
+      ...currentCharacter.value,
+      spells: [
+        ...(currentCharacter.value.spells || []),
+        spell,
+      ],
+    };
   };
 
   const forgetSpell = (name: string) => {
     if (!currentCharacter.value) return;
-    (currentCharacter.value as any).spells = ((currentCharacter.value as any).spells || []).filter((s: any) => s.name !== name);
+    currentCharacter.value = {
+      ...currentCharacter.value,
+      spells: (currentCharacter.value.spells || [])
+        .filter(s => s.name !== name),
+    };
   };
 
-  const addInventoryItem = async (item: any) => {
-    if (!currentCharacter.value?.characterId) return;
-    try {
-      const updated = await characterServiceApi.addInventoryItem(currentCharacter.value.characterId, { name: item.name, qty: item.quantity || item.qty || 1, description: item.description, equipped: item.equipped, meta: item.meta });
-      currentCharacter.value = updated;
-    } catch (e) {
-      console.error('Failed to add inventory item', e);
-      // keep local state unchanged — caller can inspect http error
-    }
-  };
+  const removeInventoryItem = async (definitionId: ItemDto['definitionId'], quantity: number = 1) => {
+    if (!currentCharacter.value?.characterId || !definitionId) return;
+    currentCharacter.value.inventory = currentCharacter.value.inventory
+      ?.map((item) => {
+        if (item.definitionId !== definitionId) return item;
 
-  const removeInventoryItem = async (name: string, qty = 1) => {
-    if (!currentCharacter.value?.characterId) return;
-    const inv = (currentCharacter.value as any).inventory || [];
-    const f = inv.find((i: any) => i.name === name);
-    if (!f) return;
+        return {
+          ...item,
+          qty: item.qty - quantity,
+        };
+      }).filter(i => i.qty > 0);
+
     try {
-      const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, f._id || f.id || String(f.name), qty);
+      const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
       currentCharacter.value = updated;
     } catch (e) {
       console.error('Failed to remove inventory item', e);
+      throw e;
     }
   };
 
-  const useInventoryItem = async (name: string) => removeInventoryItem(name, 1);
+  const addInventoryItem = async (item: Partial<ItemDto>) => {
+    if (!currentCharacter.value?.characterId || !item) return;
+    try {
+      const updated = await characterServiceApi.addInventoryItem(currentCharacter.value.characterId, item);
+      currentCharacter.value = updated;
+    } catch (e) {
+      console.error('Failed to add inventory item', e);
+      throw e;
+    }
+  };
+
+  const useInventoryItem = async (itemIdentifier: string) => {
+    if (!currentCharacter.value) return;
+    const inventory = currentCharacter.value?.inventory ?? [];
+    const item = inventory.find(i => (i as any)._id === itemIdentifier || i.definitionId === itemIdentifier || i.name === itemIdentifier);
+    if (!item) return;
+
+    const usable = !!item.meta?.usable || !!item.meta?.consumable;
+
+    if (usable) return removeInventoryItem((item as any)._id || (item.definitionId as string), 1);
+
+    return undefined;
+  };
 
   const grantInspiration = async (amount = 1) => {
     if (!currentCharacter.value?.characterId) return;

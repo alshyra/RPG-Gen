@@ -28,7 +28,9 @@ export class DiceController {
       const discardedRoll = advantage === 'advantage' ? Math.min(roll1, roll2) : Math.max(roll1, roll2);
       const total = keptRoll + mod;
       return {
-        rolls: [roll1, roll2],
+        rolls: [
+          roll1, roll2,
+        ],
         mod,
         total,
         advantage,
@@ -47,8 +49,7 @@ export class DiceController {
   @ApiOperation({ summary: 'Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20' })
   @ApiBody({ type: DiceRequest })
   @ApiResponse({ status: 200, description: 'Dice throw result' })
-  roll(@Body() body: DiceRequest): DiceThrowDto {
-    const { expr: expression, advantage = 'none' } = body;
+  roll(@Body('expr') expression: string, @Body('advantage') advantage: 'advantage' | 'disadvantage' | 'none' = 'none'): DiceThrowDto {
     if (!expression || typeof expression !== 'string') {
       throw new BadRequestException('Missing or invalid dice expression');
     }

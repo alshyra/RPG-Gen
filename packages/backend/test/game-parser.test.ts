@@ -100,6 +100,17 @@ test('should extract JSON with escaped newlines (\\n)', (t) => {
   t.false(result.narrative.includes('{'));
 });
 
+test('should normalize localized modifier strings (French) to canonical form', (t) => {
+  const input = 'Un monstre apparaît. {"roll": {"dices": "1d20", "modifier": "Sagesse (Perception)"}} Que fais-tu ?';
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].roll);
+  t.is(result.instructions[0].roll?.dices, '1d20');
+  // Modifier should be normalized to the skill name only
+  t.is(result.instructions[0].roll?.modifier, 'Perception');
+});
 test('should handle complex narrative with multiple paragraphs and JSON', (t) => {
   const input = `Tu quittes l'auberge et te fonds dans la nuit parisienne. La rue Saint-Denis est un dédale de ruelles étroites et sombres, éclairées par de rares lanternes tremblotantes. L'air est lourd de l'odeur de la misère et de la débauche. Tu te faufiles entre les prostituées racoleuses, les ivrognes titubants et les mendiants faméliques.
 

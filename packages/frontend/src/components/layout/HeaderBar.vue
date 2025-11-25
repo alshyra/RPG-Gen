@@ -1,64 +1,17 @@
 <template>
   <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2 min-h-14">
-    <!-- Title - centered on desktop, top on mobile -->
-    <div class="text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2 order-first lg:order-none">
-      <h1 class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
-        RPG Gemini
-      </h1>
-    </div>
-
-    <!-- Subtitle and description - below title on mobile, left side on desktop -->
-    <div
-      v-if="subtitle && description"
-      class="flex-none text-center lg:text-left"
-    >
-      <h2 class="text-lg lg:text-xl font-semibold">
-        {{ subtitle }}
-      </h2>
-      <p class="text-xs lg:text-sm text-slate-400">
-        {{ description }}
-      </p>
+    <!-- Title - left aligned (no subtitle by default) -->
+    <div class="flex-none text-left order-first lg:order-0">
+      <router-link
+        :to="{ name: 'home' }"
+        class="inline-block"
+      >
+        <h1 class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500">
+          RPG Gemini
+        </h1>
+      </router-link>
     </div>
   </header>
 </template>
-
-<script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
-import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-
-const route = useRoute();
-
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
-
-const subtitle = computed(() => {
-  const routeName = route.name as string;
-
-  if (routeName === 'home') return 'Bienvenue Aventurier';
-  if (routeName === 'character-step') {
-    return 'Créateur de personnage';
-  }
-  if (routeName === 'game') {
-    return `Votre Aventure - ${currentCharacter.value?.name || ''}`;
-  }
-
-  return undefined;
-});
-
-const description = computed(() => {
-  const routeName = route.name as string;
-
-  if (routeName === 'home') return 'Choisissez votre univers !';
-  if (routeName === 'character-step') {
-    const action = route.query.action as string;
-    if (action === 'levelup') return 'Montée de niveau';
-    return 'Création de personnage';
-  }
-
-  return undefined;
-});
-</script>
 
 <style scoped></style>

@@ -15,9 +15,9 @@ test('JwtAuthGuard bypasses auth and injects user when DISABLE_AUTH_FOR_E2E=true
   const guard = new JwtAuthGuard();
   const ctx = fakeContext();
 
-  const ok = guard.canActivate(ctx as any);
+  const ok = guard.canActivate(ctx);
   t.true(ok === true);
-  const req = (ctx as any).switchToHttp().getRequest();
+  const req = (ctx).switchToHttp().getRequest();
   t.truthy(req.user);
   t.is(req.user.sub, 'e2e-test-user');
 });
@@ -27,9 +27,9 @@ test('GoogleAuthGuard bypasses auth and injects user when DISABLE_AUTH_FOR_E2E=t
   const guard = new GoogleAuthGuard();
   const ctx = fakeContext();
 
-  const ok = guard.canActivate(ctx as any);
+  const ok = guard.canActivate(ctx);
   t.true(ok === true);
-  const req = (ctx as any).switchToHttp().getRequest();
+  const req = (ctx).switchToHttp().getRequest();
   t.truthy(req.user);
   t.is(req.user.sub, 'e2e-google-user');
 });

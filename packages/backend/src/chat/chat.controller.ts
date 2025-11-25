@@ -77,24 +77,24 @@ Character Information:
 - Gender: ${character.gender || 'Unknown'}
 - HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
 - XP: ${character.totalXp || 0}
-- Stats: STR ${this.getAbilityScore(character, 'Str')}, DEX ${this.getAbilityScore(
-  character,
-  'Dex',
-)}, CON ${this.getAbilityScore(character, 'Con')}, INT ${this.getAbilityScore(
-  character,
-  'Int',
-)}, WIS ${this.getAbilityScore(character, 'Wis')}, CHA ${this.getAbilityScore(character, 'Cha')}
+- Level: 1
+- Stats:
+STR ${this.getAbilityScore(character, 'Str')},
+DEX ${this.getAbilityScore(character, 'Dex')},
+CON ${this.getAbilityScore(character, 'Con')},
+INT ${this.getAbilityScore(character, 'Int')},
+WIS ${this.getAbilityScore(character, 'Wis')},
+CHA ${this.getAbilityScore(character, 'Cha')}
 `;
 
     // Add spells if character has any
-    const charAny = character as any;
-    if (charAny.spells && charAny.spells.length > 0) {
-      summary += `- Spells Known: ${charAny.spells.map((s: any) => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
+    if (character.spells && character.spells.length > 0) {
+      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
     }
 
     // Add inventory if character has any
-    if (charAny.inventory && charAny.inventory.length > 0) {
-      summary += `- Inventory: ${charAny.inventory.map((i: any) => `${i.name} (x${i.quantity || 1})`).join(', ')}\n`;
+    if (character.inventory && character.inventory.length > 0) {
+      summary += `- Inventory: ${character.inventory.map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`).join(', ')}\n`;
     }
 
     return summary;
@@ -111,6 +111,7 @@ Character Information:
     const userMsg: ChatMessage = { role: 'user', text: userText, timestamp: Date.now() };
     await this.conv.append(userId, characterId, userMsg);
 
+    await this.ensureChatSession(userId, characterId);
     const resp = await this.gemini.sendMessage(characterId, userText);
 
     // Save assistant response
@@ -194,6 +195,15 @@ Character Information:
     return history.map(msg =>
       msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg,
     );
+  }
+
+  private async ensureChatSession(userId: string, characterId: string) {
+    const history = await this.conv.getHistory(userId, characterId);
+    const chatHistory = history.map(m => ({
+      role: m.role === 'assistant' ? 'model' : m.role,
+      parts: [{ text: m.text }],
+    }));
+    this.gemini.initializeChatSession(characterId, this.systemPrompt, chatHistory);
   }
 
   @Get('/:characterId/history')

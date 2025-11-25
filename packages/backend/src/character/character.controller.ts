@@ -16,6 +16,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CharacterService } from './character.service.js';
+import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import type { CharacterDto } from '@rpg-gen/shared';
@@ -122,7 +123,7 @@ export class CharacterController {
   async addInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() item: Partial<any>,
+    @Body() item: CreateInventoryItemDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();

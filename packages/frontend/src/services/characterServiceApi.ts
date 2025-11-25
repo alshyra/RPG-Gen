@@ -167,4 +167,13 @@ export const characterServiceApi = {
       throw e;
     }
   },
+  getItemDefinitions: async () => {
+    try {
+      const res = await apiClient.get('/items');
+      return res.data;
+    } catch (e) {
+      console.error('Failed to load item definitions', e);
+      return [];
+    }
+  },
 };

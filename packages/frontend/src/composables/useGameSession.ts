@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { characterServiceApi } from '@/services/characterServiceApi';
 import { conversationService } from '../services/conversationService';
 import { useGameStore } from '../stores/gameStore';
 
@@ -33,18 +35,51 @@ export const useGameSession = () => {
   const processHistoryMessages = (history: any[]): any[] =>
     history.map((msg, i) => {
       const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
-      (msg as any).instructions?.forEach((instr: any) =>
+      (msg).instructions?.forEach((instr: any) =>
         processInstructionInMessage(instr, i === history.length - 1),
       );
       return { role, text: msg.text };
     });
 
+  const getCharIdFromRoute = (): string | undefined => {
+    const route = useRoute();
+    const charId = String(route.params.characterId || '');
+    return charId || undefined;
+  };
+
+  const fetchAndSetCharacter = async (charId: string) => {
+    try {
+      const fetched = await characterServiceApi.getCharacterById(charId);
+      if (!fetched) return undefined;
+      currentCharacter.value = fetched;
+      return fetched;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const ensureCharacterLoaded = async () => {
+    if (currentCharacter?.value) return currentCharacter.value;
+    const charId = getCharIdFromRoute();
+    if (!charId) {
+      await router.push('/home');
+      return undefined;
+    }
+    const fetched = await fetchAndSetCharacter(charId);
+    if (!fetched) {
+      await router.push('/home');
+      return undefined;
+    }
+    return fetched;
+  };
+
   const startGame = async () => {
-    if (!currentCharacter?.value) return await router.push('/home');
+    const char = await ensureCharacterLoaded();
+    if (!char) return;
     isInitializing.value = true;
     try {
-      if (currentCharacter.value.isDeceased) showDeathModal.value = true;
-      const messages = await conversationService.startGame(currentCharacter.value);
+      if (char.isDeceased) showDeathModal.value = true;
+      const messages = await conversationService.startGame(char);
       if (messages?.length) gameStore.updateMessages(processHistoryMessages(messages));
     } catch (e: any) {
       gameStore.appendMessage('Error', e?.response?.data?.error || e.message);

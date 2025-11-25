@@ -143,7 +143,7 @@ export const useGameRolls = () => {
     try {
       const payload = await gameStore.doRoll(expr, advantage);
       // onDiceRolled handles mapping payload -> UI modal
-      await onDiceRolled(payload as DiceThrowDto);
+      await onDiceRolled(payload);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       gameStore.appendMessage('Error', 'Reroll failed: ' + msg);

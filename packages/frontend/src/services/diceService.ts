@@ -5,7 +5,7 @@ export const rollDice = async (
   expr: string,
   advantage?: 'advantage' | 'disadvantage' | 'none',
 ): Promise<DiceThrowDto> => {
-  const res = await apiClient.post<DiceThrowDto>('/api/dice', {
+  const res = await apiClient.post<DiceThrowDto>('/dice', {
     expr,
     advantage: advantage || 'none',
   });

@@ -26,12 +26,12 @@ if (shouldMockLocalStorage) {
     get length() {
       return Object.keys(storage).length;
     },
-  } as any;
+  };
 }
 
 // Basic matchMedia stub
 if (typeof window !== 'undefined' && !window.matchMedia) {
-  window.matchMedia = function matchMedia() {
+  (window as any).matchMedia = function matchMedia() {
     return {
       matches: false,
       addEventListener: () => {},
@@ -40,13 +40,13 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       addListener: () => {},
       removeListener: () => {},
       dispatchEvent: () => false,
-    } as any;
+    };
   };
 }
 
 // Ensure window.URLSearchParams exists
 if (typeof window !== 'undefined' && !window.URLSearchParams) {
-  (window as any).URLSearchParams = globalThis.URLSearchParams;
+  (window).URLSearchParams = globalThis.URLSearchParams;
 }
 
 // Mock vue-router composables to avoid `useRoute()` failures in tests
@@ -54,7 +54,7 @@ vi.mock('vue-router', () => {
   const route = reactive({ params: {} });
   return {
     useRoute: () => route,
-    useRouter: () => ({ push: (_: any) => {} }),
+    useRouter: () => ({ push: () => {} }),
     RouterLink: {},
   };
 });

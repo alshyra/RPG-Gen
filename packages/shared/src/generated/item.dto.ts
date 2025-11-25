@@ -5,6 +5,7 @@ export interface ItemDto {
   name: string;
   qty: number;
   description?: string;
+  definitionId?: string;
   equipped?: boolean;
   meta: Record<string, any>;
 }

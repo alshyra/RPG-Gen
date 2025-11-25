@@ -2,6 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LandingView from '../views/LandingView.vue';
 import HomeView from '../views/HomeView.vue';
 import GameView from '../views/GameView.vue';
+import MessagesView from '../views/game/MessagesView.vue';
+import InventoryView from '../views/game/InventoryView.vue';
+import SkillsView from '../views/game/SkillsView.vue';
+import SpellsView from '../views/game/SpellsView.vue';
+import QuestView from '../views/game/QuestView.vue';
 import CharacterCreatorView from '../views/CharacterCreatorView.vue';
 import CharacterLevelupView from '../views/CharacterLevelupView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
@@ -14,7 +19,17 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
   { path: '/auth/callback', name: 'auth-callback', component: AuthCallbackView, meta: { public: true } },
   { path: '/home', name: 'home', component: HomeView },
-  { path: '/game/:characterId', name: 'game', component: GameView },
+  {
+    path: '/game/:characterId',
+    component: GameView,
+    children: [
+      { path: '', name: 'game', component: MessagesView },
+      { path: 'inventory', name: 'game-inventory', component: InventoryView },
+      { path: 'skills', name: 'game-skills', component: SkillsView },
+      { path: 'spells', name: 'game-spells', component: SpellsView },
+      { path: 'quest', name: 'game-quest', component: QuestView },
+    ],
+  },
   {
     path: '/character/:characterId/step/:step',
     name: 'character-step',

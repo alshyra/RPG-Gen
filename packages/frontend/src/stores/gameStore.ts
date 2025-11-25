@@ -3,7 +3,6 @@ import type { ChatMessage, DiceThrowDto, GameInstruction, RollModalData } from '
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-// eslint-disable-next-line max-statements
 export const useGameStore = defineStore('gameStore', () => {
   const rolls = ref<Array<DiceThrowDto>>([]);
   const latestRoll = ref<DiceThrowDto | null>(null);

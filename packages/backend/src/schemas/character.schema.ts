@@ -37,7 +37,7 @@ class Skill {
 }
 
 @Schema({ _id: false })
-class Item {
+export class Item {
   @Prop({ required: false, type: String })
   _id: string;
 
@@ -49,6 +49,9 @@ class Item {
 
   @Prop({ required: false, type: String })
   description: string;
+
+  @Prop({ required: false, type: String })
+  definitionId: string;
 
   @Prop({ required: false, default: false, type: Boolean })
   equipped: boolean;

@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  frontend-lint:
-    name: Frontend - ESLint & TypeScript
+  lint:
+    name: ESLint & TypeScript
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,18 +21,16 @@ jobs:
           cache: "npm"
           cache-dependency-path: ./package-lock.json
 
-      - name: Install frontend dependencies
-        working-directory: ./
+      - name: Install dependencies
         run: npm ci
         env:
           CYPRESS_INSTALL_BINARY: 0
 
       - name: Run ESLint and TypeScript checks
-        working-directory: ./packages/frontend
         run: npm run lint
 
-  frontend-vitest:
-    name: Frontend - Vitest
+  unit-tests:
+    name: unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,37 +43,14 @@ jobs:
           cache: "npm"
           cache-dependency-path: ./package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install dependencies
         working-directory: ./
         run: npm ci
 
       - name: Run frontend unit tests (Vitest)
-        working-directory: ./packages/frontend
         run: npm run test
         env:
           CI: true
-
-  backend-lint:
-    name: Backend - ESLint & TypeScript
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "25.2.0"
-          cache: "npm"
-          cache-dependency-path: ./package-lock.json
-
-      - name: Install backend dependencies
-        working-directory: ./
-        run: npm ci
-
-      - name: Run ESLint and TypeScript checks
-        working-directory: ./packages/backend
-        run: npm run lint
 
   backend-tests:
     name: Backend - Unit Tests

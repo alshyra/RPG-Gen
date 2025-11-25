@@ -18,30 +18,30 @@
 
     <ul
       v-else
-      class="space-y-2 max-h-40 overflow-auto"
+      class="space-y-2 overflow-auto"
     >
       <li
-        v-for="it in items"
-        :key="it.name"
+        v-for="item in items"
+        :key="item.name"
         class="p-2 bg-slate-800/40 rounded border border-slate-700/30 flex items-start gap-3"
       >
         <div class="flex-1">
           <div class="flex items-center justify-between">
             <div class="font-medium text-sm text-slate-100">
-              {{ it.name }}
+              {{ item.name }}
             </div>
             <div class="text-xs text-slate-300">
-              x{{ it.qty ?? 1 }}
+              x{{ item.qty ?? 1 }}
             </div>
           </div>
           <div
-            v-if="it.description"
+            v-if="item.description"
             class="text-xs text-slate-400 mt-1"
           >
-            {{ it.description }}
+            {{ item.description }}
           </div>
           <div
-            v-if="it.equipped"
+            v-if="item.equipped"
             class="text-xs text-amber-300 mt-1"
           >
             Équipé
@@ -64,7 +64,3 @@ const items = computed(() => (currentCharacter.value?.inventory || []));
 const hasItems = computed(() => items.value.length > 0);
 const itemsCount = computed(() => items.value.length || 0);
 </script>
-
-<style scoped>
-/* keep styles minimal — use Tailwind classes above */
-</style>

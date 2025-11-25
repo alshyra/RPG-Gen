@@ -1,3 +1,4 @@
+export * from './itemdefinition.dto';
 export * from './race.dto';
 export * from './characterclass.dto';
 export * from './skill.dto';
@@ -10,3 +11,4 @@ export * from './chatmessage.dto';
 export * from './chathistory.dto';
 export * from './user.dto';
 export * from './dicethrow.dto';
+export * from './createinventoryitem.dto';

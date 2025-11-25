@@ -4,7 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
-  plugins: [tailwindcss(), vue()],
+  plugins: [
+    tailwindcss(), vue(),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

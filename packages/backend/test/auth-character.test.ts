@@ -62,7 +62,9 @@ test('Chat message structure', (t) => {
   t.is(typeof message.role, 'string');
   t.is(typeof message.text, 'string');
   t.is(typeof message.timestamp, 'number');
-  t.true(['user', 'assistant'].includes(message.role));
+  t.true([
+    'user', 'assistant',
+  ].includes(message.role));
 });
 
 test('Session ID validation', (t) => {

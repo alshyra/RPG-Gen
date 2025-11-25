@@ -40,6 +40,7 @@
               </UiButton>
               <UiButton
                 variant="ghost"
+                :is-loading="deletingCharacterId === character.characterId"
                 @click="deleteCharacter(character)"
               >
                 Supprimer
@@ -74,6 +75,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const characters = ref<Partial<CharacterDto>[]>([]);
+const deletingCharacterId = ref<string | null>(null);
 
 const getCharSummary = (character: Partial<CharacterDto>): string => {
   const classes = character.classes || [];
@@ -94,8 +96,13 @@ const resumeCharacter = (character: Partial<CharacterDto>) => {
 const deleteCharacter = async (character: Partial<CharacterDto>) => {
   if (!character.characterId) return;
   if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
-    await characterServiceApi.deleteCharacter(character.characterId);
-    await loadCharacters();
+    deletingCharacterId.value = character.characterId;
+    try {
+      await characterServiceApi.deleteCharacter(character.characterId);
+      await loadCharacters();
+    } finally {
+      deletingCharacterId.value = null;
+    }
   }
 };
 
