@@ -1,10 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Character, CharacterDocument } from '../schemas/character.schema.js';
-import { ItemDefinitionService } from './item-definition.service.js';
-import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
 import type { CharacterDto } from '@rpg-gen/shared';
+import { Model } from 'mongoose';
+import { Character, CharacterDocument, Item } from '../schemas/character.schema.js';
+import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
+import { ItemDefinitionService } from './item-definition.service.js';
 
 @Injectable()
 export class CharacterService {
@@ -113,23 +113,30 @@ export class CharacterService {
     return saved;
   }
 
-  async addInventoryItem(userId: string, characterId: string, item: CreateInventoryItemDto) {
+  async addInventoryItem(userId: string, characterId: string, createItem: CreateInventoryItemDto) {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
-    if (!item.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
+    if (!createItem.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
 
-    const existing = (character.inventory || []).find((it: any) =>
-      (item._id && it._id === item._id)
-      || (item.definitionId && it.definitionId === item.definitionId),
-    );
-    if (existing) {
-      existing.qty = (existing.qty || 0) + (item.qty || 1);
-      const saved = await character.save();
-      this.logger.log(`Inventory updated for ${characterId}`);
-      return saved;
-    }
+    const foundItem = (character.inventory || []).find(item =>
+      item.definitionId && item.definitionId === createItem.definitionId);
+    if (foundItem) return this.mergeIntoExistingItem(character, foundItem, createItem);
+    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(createItem.definitionId);
+    return this.addNewItemToCharacter(character, createItem, itemDefinition, characterId);
+  }
 
-    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(item.definitionId);
+  private async mergeIntoExistingItem(character: CharacterDocument, foundItem: Item, item: CreateInventoryItemDto) {
+    foundItem.qty = foundItem.qty + (item.qty || 1);
+    character.inventory = [
+      ...character.inventory.filter(i => i.definitionId !== foundItem.definitionId),
+      foundItem,
+    ];
+    const saved = await character.save();
+    this.logger.log(`Inventory updated for ${character.characterId}`);
+    return saved;
+  }
+
+  private async addNewItemToCharacter(character: CharacterDocument, item: CreateInventoryItemDto, itemDefinition: any, characterId: string) {
     const newItem: any = {
       _id: crypto.randomUUID(),
       name: item.name || itemDefinition?.name,

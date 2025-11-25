@@ -37,7 +37,7 @@ class Skill {
 }
 
 @Schema({ _id: false })
-class Item {
+export class Item {
   @Prop({ required: false, type: String })
   _id: string;
 
