@@ -32,12 +32,12 @@ describe('characterStore inventory persistence', () => {
 
   it('calls API and updates store on removeInventoryItem', async () => {
     const store = useCharacterStore();
-    store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false, inventory: [{ _id: 'i1', name: 'Sword', qty: 2 }] } as any;
+    store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false, inventory: [{ _id: 'i1', definitionId: 'weapon-sword', name: 'Sword', qty: 2 }] } as any;
 
     const mockUpdated = { ...store.currentCharacter, inventory: [] } as any;
     const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue(mockUpdated);
 
-    await store.removeInventoryItem('Sword', 2);
+    await store.removeInventoryItem('weapon-sword', 2);
 
     expect(spy).toHaveBeenCalledOnce();
     expect(store.currentCharacter?.inventory?.length).toBe(0);
@@ -45,7 +45,9 @@ describe('characterStore inventory persistence', () => {
 
   it('uses inventory item only if it is usable (consumable)', async () => {
     const store = useCharacterStore();
-    store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false, inventory: [{ _id: 'i1', name: 'Potion', qty: 2, meta: { usable: true } }, { _id: 'i2', name: 'Tent', qty: 1, meta: {} }] } as any;
+    store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false, inventory: [
+      { _id: 'i1', name: 'Potion', qty: 2, meta: { usable: true } }, { _id: 'i2', name: 'Tent', qty: 1, meta: {} },
+    ] } as any;
 
     const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue({ ...store.currentCharacter, inventory: [{ _id: 'i2', name: 'Tent', qty: 1, meta: {} }] } as any);
 
@@ -64,10 +66,11 @@ describe('characterStore inventory persistence', () => {
     const store = useCharacterStore();
     store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false } as any;
 
-    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem').mockImplementation(async (cid: string, payload: any) => {
-      expect(payload.definitionId).toBe('weapon-sword');
-      return { ...store.currentCharacter, inventory: [{ _id: 'i1', name: 'Épée', qty: 1, definitionId: 'weapon-sword' }] } as any;
-    });
+    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem')
+      .mockImplementation(async (_cid: string, payload: any) => {
+        expect(payload.definitionId).toBe('weapon-sword');
+        return { ...store.currentCharacter, inventory: [{ _id: 'i1', name: 'Épée', qty: 1, definitionId: 'weapon-sword' }] } as any;
+      });
 
     await store.addInventoryItem({ name: 'Épée', definitionId: 'weapon-sword', qty: 1 } as any);
     expect(spy).toHaveBeenCalled();

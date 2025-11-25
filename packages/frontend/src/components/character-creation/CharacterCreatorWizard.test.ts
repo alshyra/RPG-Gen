@@ -41,13 +41,15 @@ vi.mock('@/services/conversationService', async () => ({
 describe('CharacterCreatorWizard finish flow', () => {
   it('generates avatar, refreshes store and navigates to game', async () => {
     // ensure we are on last step
-    const route = useRoute() as any;
+    const route = useRoute();
     route.params.step = '6';
     route.params.characterId = 'c1';
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
-        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton'],
+        stubs: [
+          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton',
+        ],
       },
     });
 
@@ -80,7 +82,9 @@ describe('CharacterCreatorWizard finish flow', () => {
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
-        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader'],
+        stubs: [
+          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader',
+        ],
       },
     });
 

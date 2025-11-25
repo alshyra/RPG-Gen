@@ -15,7 +15,9 @@ const ensureBasePack = vi.fn(async () => {
 });
 const chooseStarterWeapon = vi.fn(async (weaponName: string) => {
   // simulate removing other starters and adding the chosen one
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter((i: any) => !['Épée', 'Rapière', 'Dague', 'Bâton de mage'].includes(i.name));
+  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter((i: any) => ![
+    'Épée', 'Rapière', 'Dague', 'Bâton de mage',
+  ].includes(i.name));
   currentCharacter.value.inventory.push({ name: weaponName, qty: 1 });
 });
 vi.mock('@/stores/characterStore', () => ({

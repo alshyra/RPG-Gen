@@ -2,7 +2,6 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { conversationService } from '../services/conversationService';
 
-// eslint-disable-next-line max-statements
 export function useGameMessages() {
   const gameStore = useGameStore();
 
