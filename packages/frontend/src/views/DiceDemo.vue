@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-slate-900 p-8">
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold text-amber-400 mb-8 text-center">
-        🎲 3D Dice Demo
+        🎲 3D D20 Dice Demo
       </h1>
 
       <div class="bg-slate-800 rounded-lg p-8 mb-6">
@@ -34,7 +34,7 @@
             :disabled="isRolling"
             @click="rollDice"
           >
-            {{ isRolling ? 'Rolling...' : 'Roll Dice 🎲' }}
+            {{ isRolling ? 'Rolling...' : 'Roll D20 🎲' }}
           </button>
 
           <button
@@ -55,7 +55,7 @@
       </div>
 
       <div class="text-center text-slate-400 text-sm">
-        This component uses Three.js to render realistic 3D dice with rolling animation.
+        This component uses Three.js to render realistic 3D D20 dice with rolling animation.
       </div>
     </div>
   </div>
@@ -65,15 +65,15 @@
 import { ref } from 'vue';
 import UiDice3D from '../components/ui/UiDice3D.vue';
 
-const diceValues = ref([3, 5]);
+const diceValues = ref([12, 7]);
 const isRolling = ref(false);
 let completedCount = 0;
 
 const rollDice = () => {
   isRolling.value = true;
   completedCount = 0;
-  // Generate random values for each die
-  diceValues.value = diceValues.value.map(() => Math.floor(Math.random() * 6) + 1);
+  // Generate random values for each D20 (1-20)
+  diceValues.value = diceValues.value.map(() => Math.floor(Math.random() * 20) + 1);
 };
 
 const onRollComplete = () => {
@@ -85,7 +85,7 @@ const onRollComplete = () => {
 
 const addDie = () => {
   if (diceValues.value.length < 5) {
-    diceValues.value.push(Math.floor(Math.random() * 6) + 1);
+    diceValues.value.push(Math.floor(Math.random() * 20) + 1);
   }
 };
 

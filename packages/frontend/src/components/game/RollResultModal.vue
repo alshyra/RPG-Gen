@@ -15,7 +15,7 @@
         <UiDice3D
           v-for="(roll, idx) in rollData.rolls"
           :key="idx"
-          :value="normalizedDiceValue(roll)"
+          :value="clampedDiceValue(roll)"
           :is-rolling="isAnimating"
           :size="100"
           @roll-complete="onDiceRollComplete"
@@ -56,7 +56,7 @@
         <UiDice3D
           v-for="(roll, idx) in rollData.rolls"
           :key="idx"
-          :value="normalizedDiceValue(roll)"
+          :value="clampedDiceValue(roll)"
           :is-rolling="false"
           :size="80"
         />
@@ -169,9 +169,8 @@ const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
-// Convert any dice roll value (e.g., D20 result 1-20) to D6 range (1-6) for 3D visual representation
-// The actual numeric result is displayed separately; this is only for the 3D dice face shown
-const normalizedDiceValue = (roll: number): number => ((roll - 1) % 6) + 1;
+// Clamp D20 roll value to 1-20 range for 3D D20 visualization
+const clampedDiceValue = (roll: number): number => Math.max(1, Math.min(20, roll));
 
 const isDiscardedRoll = (roll: number) => {
   if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;

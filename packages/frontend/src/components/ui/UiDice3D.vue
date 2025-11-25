@@ -34,76 +34,89 @@ let renderer: THREE.WebGLRenderer | null = null;
 let dice: THREE.Mesh | null = null;
 let animationId: number | null = null;
 
-// Target rotations for each dice face (to show 1-6)
-const faceRotations: Record<number, { x: number; y: number }> = {
-  1: { x: 0, y: 0 },
-  2: { x: 0, y: Math.PI / 2 },
-  3: { x: -Math.PI / 2, y: 0 },
-  4: { x: Math.PI / 2, y: 0 },
-  5: { x: 0, y: -Math.PI / 2 },
-  6: { x: Math.PI, y: 0 },
+// D20 face order (opposite faces sum to 21)
+const FACE_ORDER = [1, 20, 2, 19, 3, 18, 4, 17, 5, 16, 6, 15, 7, 14, 8, 13, 9, 12, 10, 11];
+
+// Pre-computed face orientations for D20 (icosahedron)
+const faceQuaternions: THREE.Quaternion[] = [];
+
+const computeFaceNormal = (pos: THREE.BufferAttribute, idx: number): THREE.Vector3 => {
+  const v0 = new THREE.Vector3().fromBufferAttribute(pos, idx);
+  const v1 = new THREE.Vector3().fromBufferAttribute(pos, idx + 1);
+  const v2 = new THREE.Vector3().fromBufferAttribute(pos, idx + 2);
+  const edge1 = new THREE.Vector3().subVectors(v1, v0);
+  const edge2 = new THREE.Vector3().subVectors(v2, v0);
+  return new THREE.Vector3().crossVectors(edge1, edge2).normalize();
 };
 
-// Pip layout configurations for each dice face value
-const pipLayouts: Record<number, Array<[number, number]>> = {
-  1: [[0, 0]],
-  2: [[-1, -1], [1, 1]],
-  3: [[-1, -1], [0, 0], [1, 1]],
-  4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
-  5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
-  6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]],
-};
-
-const getPipPositions = (value: number): { x: number; y: number }[] => {
-  const center = 64;
-  const offset = 32;
-  const layout = pipLayouts[value] || pipLayouts[1];
-  return layout.map(([dx, dy]) => ({ x: center + dx * offset, y: center + dy * offset }));
-};
-
-const drawFaceOnCanvas = (ctx: CanvasRenderingContext2D, value: number) => {
-  const gradient = ctx.createLinearGradient(0, 0, 128, 128);
-  gradient.addColorStop(0, '#4a1d6e');
-  gradient.addColorStop(1, '#2d1045');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 128, 128);
-  ctx.strokeStyle = '#a855f7';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(4, 4, 120, 120);
-  ctx.fillStyle = '#fbbf24';
-  getPipPositions(value).forEach((pos) => {
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-    ctx.fill();
+const computeFaceQuaternions = (geometry: THREE.IcosahedronGeometry) => {
+  const position = geometry.attributes.position as THREE.BufferAttribute;
+  const targetDir = new THREE.Vector3(0, 0, 1);
+  const faceCount = position.count / 3;
+  Array.from({ length: faceCount }).forEach((_, i) => {
+    const normal = computeFaceNormal(position, i * 3);
+    faceQuaternions.push(new THREE.Quaternion().setFromUnitVectors(normal, targetDir));
   });
 };
 
-const createFaceTexture = (canvas: HTMLCanvasElement): THREE.CanvasTexture => {
-  // Clone canvas to preserve face content since we reuse the same canvas for all faces
-  const clonedCanvas = document.createElement('canvas');
-  clonedCanvas.width = canvas.width;
-  clonedCanvas.height = canvas.height;
-  const clonedCtx = clonedCanvas.getContext('2d')!;
-  clonedCtx.drawImage(canvas, 0, 0);
-  const texture = new THREE.CanvasTexture(clonedCanvas);
+const createCanvasContext = (): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  return { canvas, ctx: canvas.getContext('2d')! };
+};
+
+const createTriangleGradient = (ctx: CanvasRenderingContext2D): CanvasGradient => {
+  const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gradient.addColorStop(0, '#6b21a8');
+  gradient.addColorStop(1, '#3b0764');
+  return gradient;
+};
+
+const drawTrianglePath = (ctx: CanvasRenderingContext2D) => {
+  ctx.beginPath();
+  ctx.moveTo(64, 10);
+  ctx.lineTo(118, 100);
+  ctx.lineTo(10, 100);
+  ctx.closePath();
+};
+
+const drawTriangleBackground = (ctx: CanvasRenderingContext2D) => {
+  ctx.fillStyle = createTriangleGradient(ctx);
+  drawTrianglePath(ctx);
+  ctx.fill();
+  ctx.strokeStyle = '#a855f7';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+};
+
+const drawNumberOnCanvas = (ctx: CanvasRenderingContext2D, value: number) => {
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 36px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(value.toString(), 64, 60);
+};
+
+const createD20Texture = (value: number): THREE.CanvasTexture => {
+  const { canvas, ctx } = createCanvasContext();
+  drawTriangleBackground(ctx);
+  drawNumberOnCanvas(ctx, value);
+  const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
   return texture;
 };
 
-const createDiceMaterial = (): THREE.Material[] => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const ctx = canvas.getContext('2d')!;
-  const faceValues = [1, 6, 2, 5, 3, 4]; // Standard D6 face order
-  return faceValues.map((value) => {
-    drawFaceOnCanvas(ctx, value);
-    return new THREE.MeshStandardMaterial({ map: createFaceTexture(canvas), roughness: 0.3, metalness: 0.1 });
-  });
-};
+const createD20Materials = (): THREE.Material[] =>
+  FACE_ORDER.map(value => new THREE.MeshStandardMaterial({
+    map: createD20Texture(value),
+    roughness: 0.3,
+    metalness: 0.2,
+    side: THREE.DoubleSide,
+  }));
 
 const setupLighting = (targetScene: THREE.Scene) => {
-  targetScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  targetScene.add(new THREE.AmbientLight(0xffffff, 0.7));
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
   directionalLight.position.set(2, 2, 5);
   targetScene.add(directionalLight);
@@ -112,9 +125,29 @@ const setupLighting = (targetScene: THREE.Scene) => {
   targetScene.add(pointLight);
 };
 
-const createDiceMesh = (): THREE.Mesh => {
-  const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-  const diceMesh = new THREE.Mesh(geometry, createDiceMaterial());
+const assignUVsToFaces = (geometry: THREE.IcosahedronGeometry) => {
+  const uvAttribute = geometry.attributes.uv;
+  const faceCount = geometry.attributes.position.count / 3;
+  Array.from({ length: faceCount }).forEach((_, i) => {
+    const idx = i * 3;
+    uvAttribute.setXY(idx, 0.5, 0.1);
+    uvAttribute.setXY(idx + 1, 0.9, 0.9);
+    uvAttribute.setXY(idx + 2, 0.1, 0.9);
+  });
+  uvAttribute.needsUpdate = true;
+};
+
+const assignMaterialGroups = (geometry: THREE.IcosahedronGeometry) => {
+  geometry.clearGroups();
+  Array.from({ length: 20 }).forEach((_, i) => geometry.addGroup(i * 3, 3, i));
+};
+
+const createD20Mesh = (): THREE.Mesh => {
+  const geometry = new THREE.IcosahedronGeometry(1.2, 0);
+  computeFaceQuaternions(geometry);
+  assignUVsToFaces(geometry);
+  assignMaterialGroups(geometry);
+  const diceMesh = new THREE.Mesh(geometry, createD20Materials());
   const edges = new THREE.EdgesGeometry(geometry);
   diceMesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xa855f7, linewidth: 2 })));
   return diceMesh;
@@ -134,16 +167,17 @@ const initScene = () => {
   camera.position.z = 4;
   setupRenderer();
   setupLighting(scene);
-  dice = createDiceMesh();
+  dice = createD20Mesh();
   scene.add(dice);
   setDiceToValue(props.value);
 };
 
 const setDiceToValue = (value: number) => {
-  if (!dice) return;
-  const rotation = faceRotations[value] || faceRotations[1];
-  dice.rotation.x = rotation.x;
-  dice.rotation.y = rotation.y;
+  if (!dice || faceQuaternions.length === 0) return;
+  const faceIndex = FACE_ORDER.indexOf(value);
+  if (faceIndex >= 0 && faceIndex < faceQuaternions.length) {
+    dice.quaternion.copy(faceQuaternions[faceIndex]);
+  }
 };
 
 let rollStartTime = 0;
@@ -159,20 +193,15 @@ const updateRollingAnimation = (diceObj: THREE.Mesh, progress: number) => {
 };
 
 const settleToFinalPosition = (diceObj: THREE.Mesh): boolean => {
-  const target = faceRotations[targetValue] || faceRotations[1];
-  // Use direct lerp toward target without modulo to avoid wrap-around issues
-  diceObj.rotation.x = THREE.MathUtils.lerp(diceObj.rotation.x, target.x, 0.15);
-  diceObj.rotation.y = THREE.MathUtils.lerp(diceObj.rotation.y, target.y, 0.15);
-  diceObj.rotation.z = THREE.MathUtils.lerp(diceObj.rotation.z, 0, 0.15);
-  const isSettled = Math.abs(diceObj.rotation.x - target.x) < 0.01
-    && Math.abs(diceObj.rotation.y - target.y) < 0.01
-    && Math.abs(diceObj.rotation.z) < 0.01;
-  if (isSettled) {
-    diceObj.rotation.x = target.x;
-    diceObj.rotation.y = target.y;
-    diceObj.rotation.z = 0;
+  const faceIndex = FACE_ORDER.indexOf(targetValue);
+  if (faceIndex < 0 || faceIndex >= faceQuaternions.length) return true;
+  const targetQuat = faceQuaternions[faceIndex];
+  diceObj.quaternion.slerp(targetQuat, 0.15);
+  if (diceObj.quaternion.angleTo(targetQuat) < 0.01) {
+    diceObj.quaternion.copy(targetQuat);
+    return true;
   }
-  return isSettled;
+  return false;
 };
 
 const animate = () => {
