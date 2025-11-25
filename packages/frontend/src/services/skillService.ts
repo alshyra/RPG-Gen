@@ -1,4 +1,5 @@
 import type { CharacterDto } from '@rpg-gen/shared';
+import { DnDRulesService } from './dndRulesService';
 
 /**
  * Map ability names to their score keys in the character
@@ -39,31 +40,46 @@ export const getSkillBonus = (
   // Remove " Check" suffix
   const nameWithoutCheck = skillNameWithCheck.replace(' Check', '').trim();
 
-  // Check for format "Ability (Skill)" e.g. "Strength (Athletics)"
-  const abilitySkillMatch = nameWithoutCheck.match(/^(\w+)\s*\((\w+)\)$/);
+  // Check for format "Ability (Skill)" e.g. "Strength (Athletics)" — allow unicode and spaces
+  const abilitySkillMatch = nameWithoutCheck.match(/^(.+?)\s*\((.+?)\)$/u);
 
   if (abilitySkillMatch) {
-    const abilityName = abilitySkillMatch[1].toLowerCase();
-    const skillName = abilitySkillMatch[2];
+    const abilityNameRaw = abilitySkillMatch[1].trim();
+    const skillName = abilitySkillMatch[2].trim();
 
-    // Get the ability score
+    // Prefer to resolve the skill using the DnD mapping (handles canonical skill->ability mapping)
+    const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === skillName.toLowerCase());
+    if (rulesSkill && character.scores) {
+      // compute from the ability tied to the skill
+      const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
+      let modifier = getAbilityModifier(abilityScore);
+
+      // if character has this skill and is proficient, add proficiency
+      if (character.skills && Array.isArray(character.skills)) {
+        const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+        if (skill && skill.proficient) modifier += character.proficiency ?? 2;
+      }
+      return modifier;
+    }
+
+    // Fallback: try to map ability name to internal ability key (expect english keys)
+    const abilityName = abilityNameRaw.toLowerCase();
     const abilityKey = abilityMap[abilityName];
-    if (!abilityKey || !character.scores) return 0;
+    if (!abilityKey || !character.scores) {
+      // If still unknown, attempt to resolve the skill itself in the character's skills array
+      if (character.skills && Array.isArray(character.skills)) {
+        const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+        if (skill) return skill.modifier ?? 0;
+      }
+      return 0;
+    }
 
     const abilityScore = (character.scores as Record<string, number>)[abilityKey] ?? 10;
     let modifier = getAbilityModifier(abilityScore);
-
-    // Check if character is proficient in this skill
     if (character.skills && Array.isArray(character.skills)) {
-      const skill = character.skills.find(s =>
-        (s.name ?? '').toLowerCase() === skillName.toLowerCase(),
-      );
-      if (skill && skill.proficient) {
-        // Add proficiency bonus
-        modifier += character.proficiency ?? 2;
-      }
+      const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+      if (skill && skill.proficient) modifier += character.proficiency ?? 2;
     }
-
     return modifier;
   }
 
@@ -80,7 +96,21 @@ export const getSkillBonus = (
     const skill = character.skills.find(s =>
       (s.name ?? '').toLowerCase() === nameWithoutCheck.toLowerCase(),
     );
-    if (skill) return skill.modifier ?? 0;
+    if (skill) {
+      // If an explicit modifier is present, use it. Otherwise compute based on ability + proficiency.
+      if (typeof skill.modifier === 'number') return skill.modifier;
+
+      // Compute using rules mapping
+      const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === nameWithoutCheck.toLowerCase());
+      if (rulesSkill && character.scores) {
+        const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
+        let modifier = getAbilityModifier(abilityScore);
+        if (skill.proficient) modifier += character.proficiency ?? 2;
+        return modifier;
+      }
+
+      return skill.modifier ?? 0;
+    }
   }
 
   // Fallback: return 0 if skill not found

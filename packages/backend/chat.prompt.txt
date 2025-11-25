@@ -48,8 +48,11 @@ Le joueur est seul. Vous devez adapter les menaces en fonction de son **Niveau a
 Tous les objets JSON doivent être à la **fin de votre message**, **séparés** de la narration par au moins une ligne, et en **anglais** :
 
   * **Demander un jet de dés (Output MJ) :**
+    - IMPORTANT: all values in the JSON payload MUST be canonical English identifiers. The `modifier` field must be a canonical skill or ability name in English — prefer skill names such as "Perception", "Athletics", "Stealth". If you include both ability and skill, use the English format `"ability (Skill)"` (e.g. "wisdom (Perception)"). Do NOT output localized names such as "Sagesse".
     ```json
-    {"roll": {"dices": "1d20", "modifier": "competence_ou_sauvegarde", "advantage": "none"}}
+    {"roll": {"dices": "1d20", "modifier": "Perception", "advantage": "none"}}
+    OR
+    {"roll": {"dices": "1d20", "modifier": "Athletics", "advantage": "advantage"}}
     ```
   * **Reconnaître les résultats du jet (Input Système reçu) :**
     ```json

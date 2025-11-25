@@ -13,6 +13,8 @@ Core rules
 - Keep PRs atomic: one feature/fix per PR, include motivation, files touched and tests added/updated.
 - No unnecessary comments: remove dead code, consolidate duplicates, and refactor into shared utilities.
 
+- Controllers must remain strict and explicit about request shapes. Do NOT try to accept multiple payload shapes in a controller method (e.g. both `expr` and `dices`). Validation/normalization belongs to DTOs, pipes, middleware, or higher-level adapters (e.g. the Gemini adapter). Add tests that assert strict behavior.
+
 Project-specific tips
 
 - Development: start everything with Docker Compose (root):

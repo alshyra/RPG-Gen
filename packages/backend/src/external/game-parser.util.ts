@@ -1,11 +1,6 @@
 import type { GameInstruction } from '@rpg-gen/shared';
 
-// Re-export for convenience
-export type { GameInstruction } from '@rpg-gen/shared';
-
 const extractJsonBlocks = (text: string): string[] => {
-  // Handle both actual newlines and escaped newlines (literal \n) in code blocks
-  // Also handle spaces before/after the JSON
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
   return jsonMatches.map(m => m[1].trim()).filter(Boolean);
 };
@@ -78,6 +73,17 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
     });
 };
 
+const normalizeModifier = (mod: unknown): unknown => {
+  if (typeof mod !== 'string') return mod;
+  const s = mod.replace(/\s+Check$/i, '').trim();
+
+  // If format "Ability (Skill)" -> prefer skill name only
+  const m = s.match(/^(.+?)\s*\((.+?)\)$/u);
+  if (m) return m[2].trim();
+
+  return s;
+};
+
 export const cleanNarrativeText = (narrative: string): string => {
   const cleaned = narrative
     // Remove JSON code blocks (both actual and escaped newlines, with possible spaces)
@@ -101,13 +107,16 @@ export const cleanNarrativeText = (narrative: string): string => {
   return cleaned;
 };
 
-export const parseGameResponse = extractInstructions;
-
-export function extractInstructions(narrative: string): {
+export const parseGameResponse = (narrative: string): {
   narrative: string;
   instructions: GameInstruction[];
-} {
-  const instructions = parseGameInstructions(narrative);
+} => {
+  const instructions = parseGameInstructions(narrative).map((instr) => {
+    if (instr.roll && instr.roll.modifier) {
+      (instr.roll as any).modifier = normalizeModifier(instr.roll.modifier);
+    }
+    return instr;
+  });
   const cleanedNarrative = cleanNarrativeText(narrative);
   return { narrative: cleanedNarrative, instructions };
-}
+};
