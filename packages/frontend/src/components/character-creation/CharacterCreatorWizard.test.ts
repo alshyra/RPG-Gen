@@ -47,7 +47,7 @@ describe('CharacterCreatorWizard finish flow', () => {
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
-        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'CharacterPreview', 'UiLoader', 'UiButton'],
+        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton'],
       },
     });
 
@@ -66,17 +66,21 @@ describe('CharacterCreatorWizard finish flow', () => {
     // Override mocks to return pending promises so we can assert the loader is visible
     const api = await import('@/services/characterServiceApi');
     let genResolve: (v?: any) => void = () => {};
-    const genPromise = new Promise<string>((resolve) => { genResolve = resolve; });
+    const genPromise = new Promise<string>((resolve) => {
+      genResolve = resolve;
+    });
     (api.characterServiceApi.generateAvatar as any).mockImplementation(() => genPromise);
 
     const conv = await import('@/services/conversationService');
     let startResolve: (v?: any) => void = () => {};
-    const startPromise = new Promise<any>((resolve) => { startResolve = resolve; });
+    const startPromise = new Promise<any>((resolve) => {
+      startResolve = resolve;
+    });
     (conv.conversationService.startGame as any).mockImplementation(() => startPromise);
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
-        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'CharacterPreview', 'UiLoader', 'UiButton', 'FullPageLoader'],
+        stubs: ['StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader'],
       },
     });
 

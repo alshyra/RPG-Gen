@@ -79,18 +79,11 @@
         Terminer
       </UiButton>
     </div>
-
-    <!-- Character Preview - collapsible on mobile -->
-    <details class="mt-4 lg:mt-8">
-      <summary class="cursor-pointer p-3 lg:p-4 bg-slate-900 rounded border border-slate-700 hover:bg-slate-800 transition-colors">
-        <span class="font-bold">Aperçu du personnage</span>
-      </summary>
-      <CharacterPreview />
-    </details>
   </div>
 </template>
 
 <script setup lang="ts">
+import FullPageLoader from '@/components/ui/FullPageLoader.vue';
 import { characterServiceApi } from '@/services/characterServiceApi';
 import { conversationService } from '@/services/conversationService';
 import { DnDRulesService } from '@/services/dndRulesService';
@@ -100,8 +93,6 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
 import UiLoader from '../ui/UiLoader.vue';
-import CharacterPreview from './CharacterPreview.vue';
-import FullPageLoader from '@/components/ui/FullPageLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';

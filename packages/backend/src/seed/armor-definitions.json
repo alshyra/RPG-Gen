@@ -1,0 +1,18 @@
+[
+  {"definitionId":"armor-padded","name":"Padded","description":"Armure légère, rembourrée; faible protection et bruyante.","meta":{"type":"armor","class":"Light Armor","cost":"5 gp","ac":"11 + Dex modifier","strength":"—","stealth":"Disadvantage","weight":"8 lb"}},
+  {"definitionId":"armor-leather","name":"Leather","description":"Armure en cuir, légère et pratique.","meta":{"type":"armor","class":"Light Armor","cost":"10 gp","ac":"11 + Dex modifier","strength":"—","stealth":"—","weight":"10 lb"}},
+  {"definitionId":"armor-studded-leather","name":"Studded Leather","description":"Armure légère renforcée par des disques métalliques.","meta":{"type":"armor","class":"Light Armor","cost":"45 gp","ac":"12 + Dex modifier","strength":"—","stealth":"—","weight":"13 lb"}},
+
+  {"definitionId":"armor-hide","name":"Hide","description":"Armure en peaux assemblées; protection moyenne.","meta":{"type":"armor","class":"Medium Armor","cost":"10 gp","ac":"12 + Dex modifier (max 2)","strength":"—","stealth":"—","weight":"12 lb"}},
+  {"definitionId":"armor-chain-shirt","name":"Chain Shirt","description":"Chemise de mailles portée sous les vêtements; protection moyenne.","meta":{"type":"armor","class":"Medium Armor","cost":"50 gp","ac":"13 + Dex modifier (max 2)","strength":"—","stealth":"—","weight":"20 lb"}},
+  {"definitionId":"armor-scale-mail","name":"Scale Mail","description":"Armure composée d'écailles métalliques; assez robuste.","meta":{"type":"armor","class":"Medium Armor","cost":"50 gp","ac":"14 + Dex modifier (max 2)","strength":"—","stealth":"Disadvantage","weight":"45 lb"}},
+  {"definitionId":"armor-breastplate","name":"Breastplate","description":"Plastron offrant une bonne protection sans gêner la mobilité.","meta":{"type":"armor","class":"Medium Armor","cost":"400 gp","ac":"14 + Dex modifier (max 2)","strength":"—","stealth":"—","weight":"20 lb"}},
+  {"definitionId":"armor-half-plate","name":"Half Plate","description":"Demi-armure en plaques offrant une forte protection.","meta":{"type":"armor","class":"Medium Armor","cost":"750 gp","ac":"15 + Dex modifier (max 2)","strength":"—","stealth":"Disadvantage","weight":"40 lb"}},
+
+  {"definitionId":"armor-ring-mail","name":"Ring Mail","description":"Armure avec anneaux; protection correcte, encombrante.","meta":{"type":"armor","class":"Heavy Armor","cost":"30 gp","ac":"14","strength":"—","stealth":"Disadvantage","weight":"40 lb"}},
+  {"definitionId":"armor-chain-mail","name":"Chain Mail","description":"Cotte de mailles; nécessite force pour porter confortablement.","meta":{"type":"armor","class":"Heavy Armor","cost":"75 gp","ac":"16","strength":"Str 13","stealth":"Disadvantage","weight":"55 lb"}},
+  {"definitionId":"armor-splint","name":"Splint","description":"Plaques rigides reliées; forte protection lourde.","meta":{"type":"armor","class":"Heavy Armor","cost":"200 gp","ac":"17","strength":"Str 15","stealth":"Disadvantage","weight":"60 lb"}},
+  {"definitionId":"armor-plate","name":"Plate","description":"Armure complète en plaques; la meilleure protection disponible.","meta":{"type":"armor","class":"Heavy Armor","cost":"1,500 gp","ac":"18","strength":"Str 15","stealth":"Disadvantage","weight":"65 lb"}},
+
+  {"definitionId":"armor-shield","name":"Shield","description":"Bouclier, porté à la main; confère un bonus à la CA.","meta":{"type":"armor","class":"Shield","cost":"10 gp","ac":"+2","strength":"—","stealth":"—","weight":"6 lb","starter":true}}
+]

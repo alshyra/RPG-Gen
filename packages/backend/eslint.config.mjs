@@ -11,6 +11,7 @@ export default [
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      '@stylistic/array-bracket-newline': ['error', { minItems: 2 }],
       // backend can customize stricter rules if necessary
     },
   },

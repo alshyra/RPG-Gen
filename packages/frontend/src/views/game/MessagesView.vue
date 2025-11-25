@@ -1,6 +1,9 @@
 <template>
   <main class="flex flex-col min-h-0 overflow-hidden">
-    <div ref="messagesPane" class="flex-1 overflow-auto">
+    <div
+      ref="messagesPane"
+      class="flex-1 overflow-auto"
+    >
       <div class="space-y-3 p-2">
         <div
           v-for="(m, idx) in gameStore.messages"

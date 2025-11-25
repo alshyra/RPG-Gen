@@ -1,0 +1,38 @@
+[
+  {
+    "definitionId": "pack-backpack",
+    "name": "Sac à dos",
+    "description": "Contient divers petits outils et rations",
+    "meta": { "type": "pack" }
+  },
+  {
+    "definitionId": "generic-torch",
+    "name": "Torche",
+    "description": "Éclairage temporaire",
+    "meta": { "type": "consumable" }
+  },
+  {
+    "definitionId": "potion-health",
+    "name": "Potion de soin",
+    "description": "Soigne un peu de PV",
+    "meta": { "type": "consumable", "usable": true }
+  },
+  {
+    "definitionId": "food-rations",
+    "name": "Rations",
+    "description": "Portion pour un repas",
+    "meta": { "type": "consumable", "usable": true }
+  },
+  {
+    "definitionId": "rope-15m",
+    "name": "Corde (15m)",
+    "description": "Utilitaire polyvalent",
+    "meta": { "type": "tool" }
+  },
+  {
+    "definitionId": "tent-1-2",
+    "name": "Tente",
+    "description": "Abri pour 1-2 personnes",
+    "meta": { "type": "tool" }
+  }
+]

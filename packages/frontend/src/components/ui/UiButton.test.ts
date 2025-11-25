@@ -34,7 +34,7 @@ describe('UiButton', () => {
         default: 'Loading...',
       },
     });
-    expect(wrapper.find('svg').exists()).toBe(true);
+    expect(wrapper.find('.animate-spin').exists()).toBe(true);
     expect(wrapper.find('button').attributes('disabled')).toBeDefined();
   });
 
@@ -87,6 +87,6 @@ describe('UiButton', () => {
         default: 'Click me',
       },
     });
-    expect(wrapper.find('svg').exists()).toBe(false);
+    expect(wrapper.find('.animate-spin').exists()).toBe(false);
   });
 });

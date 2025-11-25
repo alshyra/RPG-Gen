@@ -15,11 +15,41 @@ Core rules
 
 - Controllers must remain strict and explicit about request shapes. Do NOT try to accept multiple payload shapes in a controller method (e.g. both `expr` and `dices`). Validation/normalization belongs to DTOs, pipes, middleware, or higher-level adapters (e.g. the Gemini adapter). Add tests that assert strict behavior.
 
-Project-specific tips
+- Avoid `any`: Do not use the `any` type in production code. Prefer concrete types, DTOs or interfaces from `packages/shared` (generated `ItemDto`, `CharacterDto`, etc.). In tests or quick prototypes you may use `any` if absolutely necessary.
+
+- Avoid using `as` type casting. Let TypeScript infer types where possible, use proper types/interfaces instead of forcing types with `as`.
+
+Strict rule: Do not use `as` casting in production code.
+
+- Rationale: `as` (and patterns like `as unknown as Type`) bypass the TypeScript type system and hides real type mismatches, which can lead to runtime errors. The project does not allow wholesale use of `as`.
+- Alternatives and preferred patterns:
+
+  - Use non-null checks, inference, and immutable updates rather than casting. Example:
+    ```ts
+    if (!currentCharacter.value) return;
+    currentCharacter.value = {
+      ...currentCharacter.value,
+      spells: [...(currentCharacter.value.spells || []), spell],
+    };
+    ```
+  - Use a typed helper or small type-guard (type predicate) instead of `as`.
+    ```ts
+    // type guard example
+    const ensureSpells = (c: CharacterDto): asserts c is CharacterDto & { spells: SpellDto[] } => {
+      if (!c.spells) c.spells = [];
+    };
+    // usage
+    if (!currentCharacter.value) return;
+    ensureSpells(currentCharacter.value);
+    currentCharacter.value.spells.push(spell);
+    ```
+  - Use immutability to update typed objects, as in the first example, rather than mutating casts.
+
+- Special cases: If there is a compelling, unavoidable reason to use `as` (third-party untyped libs, incremental migration), open a short PR for discussion and request a reviewer to explicitly approve this temporary exception; do not leave in-code `as` usage unreviewed. Avoid documenting the exception via inline comments in code; track the exception in the PR description and remediate later.
 
 - Development: start everything with Docker Compose (root):
   - docker compose -f compose.dev.yml up -d
-  - frontend: http://localhost:5173, backend: http://localhost:3001/docs
+  - frontend: http://localhost, backend: http://localhost/api/docs
 - Workspace scripts (root):
   - npm run start:dev to run backend+frontend concurrently
   - npm test to run backend + frontend tests

@@ -13,6 +13,7 @@ export default [
     jsx: false,
     braceStyle: '1tbs',
     commaDangle: 'always-multiline',
+    quoteProps: 'consistent-as-needed',
   }),
   {
     files: ['**/*.{js,ts}'],
@@ -34,12 +35,14 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'no-console': 'off',
       'arrow-body-style': ['warn', 'as-needed'],
       'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-      'max-statements': ['warn', 10],
+      'max-statements': ['warn', 15],
       'prefer-object-spread': 'warn',
+      '@stylistic/array-bracket-newline': ['error', { 'minItems': 2 }]
     },
   },
 ];

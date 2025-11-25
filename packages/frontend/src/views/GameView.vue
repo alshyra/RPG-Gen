@@ -67,26 +67,41 @@
             />
             <div class="border-t border-slate-600 mt-3" />
             <nav class="p-3 space-y-2">
-              <router-link
+              <UiButton
+                variant="ghost"
                 :to="{ name: 'game' , params: { characterId: characterId }}"
-                class="block px-3 py-2 rounded bg-slate-800/40 hover:bg-slate-800/60 text-slate-100"
-              >Messages</router-link>
-              <router-link
+                class="w-full text-left px-3 py-2"
+              >
+                Messages
+              </UiButton>
+              <UiButton
+                variant="ghost"
                 :to="{ name: 'game-inventory', params: { characterId: characterId }}"
-                class="block px-3 py-2 rounded bg-slate-800/40 hover:bg-slate-800/60 text-slate-100"
-              >Inventaire</router-link>
-              <router-link
+                class="w-full text-left px-3 py-2"
+              >
+                Inventaire
+              </UiButton>
+              <UiButton
+                variant="ghost"
                 :to="{ name: 'game-skills', params: { characterId: characterId }}"
-                class="block px-3 py-2 rounded bg-slate-800/40 hover:bg-slate-800/60 text-slate-100"
-              >Compétences</router-link>
-              <router-link
+                class="w-full text-left px-3 py-2"
+              >
+                Compétences
+              </UiButton>
+              <UiButton
+                variant="ghost"
                 :to="{ name: 'game-spells', params: { characterId: characterId }}"
-                class="block px-3 py-2 rounded bg-slate-800/40 hover:bg-slate-800/60 text-slate-100"
-              >Sorts</router-link>
-              <router-link
+                class="w-full text-left px-3 py-2"
+              >
+                Sorts
+              </UiButton>
+              <UiButton
+                variant="ghost"
                 :to="{ name: 'game-quest', params: { characterId: characterId }}"
-                class="block px-3 py-2 rounded bg-slate-800/40 hover:bg-slate-800/60 text-slate-100"
-              >Journal</router-link>
+                class="w-full text-left px-3 py-2"
+              >
+                Journal
+              </UiButton>
             </nav>
           </div>
         </div>
@@ -164,7 +179,6 @@ const characterId = computed(() => route.params.characterId as string);
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { confirmRoll } = useGameRolls();
-
 
 // Toggle sidebar for mobile
 const toggleSidebar = () => {

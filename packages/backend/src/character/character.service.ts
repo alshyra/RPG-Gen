@@ -1,7 +1,9 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { Character, CharacterDocument } from '../schemas/character.schema.js';
+import { ItemDefinitionService } from './item-definition.service.js';
+import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
 import type { CharacterDto } from '@rpg-gen/shared';
 
 @Injectable()
@@ -11,6 +13,7 @@ export class CharacterService {
 
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
+    private itemDefinitionService: ItemDefinitionService,
   ) {}
 
   generateCharacterId(): string {
@@ -49,32 +52,38 @@ export class CharacterService {
 
   // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const updateDoc: any = {};
+    
+    // Build update document
+    if (updates.hp !== undefined) updateDoc.hp = updates.hp;
+    if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
+    if (updates.totalXp !== undefined) updateDoc.totalXp = updates.totalXp;
+    if (updates.classes !== undefined) updateDoc.classes = updates.classes;
+    if (updates.skills !== undefined) updateDoc.skills = updates.skills;
+    if (updates.portrait !== undefined) updateDoc.portrait = updates.portrait;
+    if (updates.scores !== undefined) updateDoc.scores = updates.scores;
+    if (updates.name !== undefined) updateDoc.name = updates.name;
+    if (updates.race !== undefined) updateDoc.race = updates.race;
+    if (updates.gender !== undefined) updateDoc.gender = updates.gender;
+    if (updates.proficiency !== undefined) updateDoc.proficiency = updates.proficiency;
+    if (updates.inspirationPoints !== undefined) updateDoc.inspirationPoints = updates.inspirationPoints;
+    if (updates.isDeceased !== undefined) updateDoc.isDeceased = updates.isDeceased;
+    if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
+    if (updates.state !== undefined) updateDoc.state = updates.state;
+    if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
+
+    const character = await this.characterModel.findOneAndUpdate(
+      { userId, characterId },
+      { $set: updateDoc },
+      { new: true, runValidators: true }
+    );
+
     if (!character) {
       throw new NotFoundException(`Character ${characterId} not found`);
     }
 
-    // Update fields
-    if (updates.hp !== undefined) character.hp = updates.hp;
-    if (updates.hpMax !== undefined) character.hpMax = updates.hpMax;
-    if (updates.totalXp !== undefined) character.totalXp = updates.totalXp;
-    if (updates.classes !== undefined) character.classes = updates.classes as any;
-    if (updates.skills !== undefined) character.skills = updates.skills as any;
-    if (updates.portrait !== undefined) character.portrait = updates.portrait;
-    if (updates.scores !== undefined) character.scores = updates.scores as any;
-    if (updates.name !== undefined) character.name = updates.name;
-    if (updates.race !== undefined) character.race = updates.race as any;
-    if (updates.gender !== undefined) character.gender = updates.gender as any;
-    if (updates.proficiency !== undefined) character.proficiency = updates.proficiency;
-    if (updates.inspirationPoints !== undefined) character.inspirationPoints = updates.inspirationPoints;
-    if (updates.isDeceased !== undefined) character.isDeceased = updates.isDeceased;
-    if (updates.physicalDescription !== undefined) character.physicalDescription = updates.physicalDescription;
-    if (updates.state !== undefined) character.state = updates.state;
-    if (updates.inventory !== undefined) character.inventory = updates.inventory as any;
-
-    const saved = await character.save();
-    this.logger.log(`Character updated: ${saved.name} (${saved.characterId})`);
-    return saved;
+    this.logger.log(`Character updated: ${character.name} (${character.characterId})`);
+    return character;
   }
 
   async delete(userId: string, characterId: string): Promise<void> {
@@ -104,27 +113,33 @@ export class CharacterService {
     return saved;
   }
 
-  async addInventoryItem(userId: string, characterId: string, item: Partial<any>) {
+  async addInventoryItem(userId: string, characterId: string, item: CreateInventoryItemDto) {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
+    if (!item.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
 
-    // Find by id or name
-    const existing = (character.inventory || []).find((it: any) => (item._id && it._id === item._id) || (it.name === item.name));
+    const existing = (character.inventory || []).find((it: any) => 
+      item.definitionId && it.definitionId === item.definitionId
+    );
     if (existing) {
       existing.qty = (existing.qty || 0) + (item.qty || 1);
-    } else {
-      const newItem = {
-        _id: crypto.randomUUID(),
-        name: item.name || 'item',
-        qty: item.qty || 1,
-        description: item.description,
-        equipped: item.equipped || false,
-        meta: item.meta || {},
-      };
-      character.inventory = character.inventory || [];
-      character.inventory.push(newItem as any);
+      const saved = await character.save();
+      this.logger.log(`Inventory updated for ${characterId}`);
+      return saved;
     }
 
+    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(item.definitionId);
+    const newItem: any = {
+      _id: crypto.randomUUID(),
+      name: item.name || itemDefinition?.name,
+      definitionId: item.definitionId || (itemDefinition?.definitionId),
+      qty: item.qty || 1,
+      description: item.description ?? itemDefinition?.description,
+      equipped: item.equipped || false,
+      meta: { ...(itemDefinition?.meta || {}), ...(item.meta || {}) },
+    };
+    character.inventory = character.inventory || [];
+    character.inventory.push(newItem);
     const saved = await character.save();
     this.logger.log(`Inventory updated for ${characterId}`);
     return saved;
