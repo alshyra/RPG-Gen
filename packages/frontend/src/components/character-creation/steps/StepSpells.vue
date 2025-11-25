@@ -59,7 +59,10 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const availableSpells = computed(() => DnDRulesService.getAvailableSpellsForClass(primaryClass.value));
+const availableSpells = computed(() => DnDRulesService
+  .getAvailableSpellsForClass(primaryClass.value)
+  .filter(s => s.level <= 1),
+);
 
 const spellIsSelected = (name: string) => (currentCharacter.value?.spells || []).some(s => s.name === name);
 
