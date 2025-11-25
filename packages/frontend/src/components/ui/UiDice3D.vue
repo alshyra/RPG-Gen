@@ -2,7 +2,6 @@
   <div
     ref="containerRef"
     class="dice-container"
-    :class="{ rolling: isRolling }"
   />
 </template>
 
@@ -74,29 +73,31 @@ const computeFaceQuaternionsForGeometry = (geometry: THREE.BufferGeometry, verti
 
 const createCanvasContext = (): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } => {
   const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
+  canvas.width = 256;
+  canvas.height = 256;
   return { canvas, ctx: canvas.getContext('2d')! };
 };
 
 const drawD6Background = (ctx: CanvasRenderingContext2D) => {
-  const gradient = ctx.createLinearGradient(0, 0, 128, 128);
-  gradient.addColorStop(0, '#6b21a8');
-  gradient.addColorStop(1, '#3b0764');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 128, 128);
-  ctx.strokeStyle = '#a855f7';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(4, 4, 120, 120);
+  // Solid opaque background
+  ctx.fillStyle = '#4c1d95';
+  ctx.fillRect(0, 0, 256, 256);
+  // Border
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(8, 8, 240, 240);
 };
 
 const drawPips = (ctx: CanvasRenderingContext2D, value: number) => {
   ctx.fillStyle = '#fbbf24';
+  ctx.shadowColor = '#000000';
+  ctx.shadowBlur = 4;
   getPipPositions(value).forEach((pos) => {
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
     ctx.fill();
   });
+  ctx.shadowBlur = 0;
 };
 
 // D6 - Cube with pips
@@ -110,8 +111,8 @@ const createD6Texture = (value: number): THREE.CanvasTexture => {
 };
 
 const getPipPositions = (value: number): { x: number; y: number }[] => {
-  const center = 64;
-  const offset = 32;
+  const center = 128;
+  const offset = 56;
   const layouts: Record<number, Array<[number, number]>> = {
     1: [[0, 0]],
     2: [[-1, -1], [1, 1]],
@@ -125,9 +126,9 @@ const getPipPositions = (value: number): { x: number; y: number }[] => {
 
 const drawTrianglePath = (ctx: CanvasRenderingContext2D) => {
   ctx.beginPath();
-  ctx.moveTo(64, 8);
-  ctx.lineTo(120, 110);
-  ctx.lineTo(8, 110);
+  ctx.moveTo(128, 16);
+  ctx.lineTo(240, 220);
+  ctx.lineTo(16, 220);
   ctx.closePath();
 };
 
@@ -147,41 +148,40 @@ const drawShapePath = (ctx: CanvasRenderingContext2D, shape: 'triangle' | 'penta
   if (shape === 'triangle') {
     drawTrianglePath(ctx);
   } else if (shape === 'pentagon') {
-    drawPentagon(ctx, 64, 64, 56);
+    drawPentagon(ctx, 128, 128, 112);
   } else {
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillRect(0, 0, 256, 256);
   }
 };
 
-const setupGradient = (ctx: CanvasRenderingContext2D): CanvasGradient => {
-  const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gradient.addColorStop(0, '#6b21a8');
-  gradient.addColorStop(1, '#3b0764');
-  return gradient;
-};
+const getBackgroundColor = (): string => '#4c1d95';
 
 const drawNumber = (ctx: CanvasRenderingContext2D, value: number, yPos: number) => {
-  ctx.fillStyle = '#fbbf24';
-  ctx.font = 'bold 32px Arial';
+  // Draw text shadow for better readability
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 72px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(value.toString(), 64, yPos);
+  ctx.fillText(value.toString(), 130, yPos + 2);
+  // Draw main text
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillText(value.toString(), 128, yPos);
 };
 
 const applyShapeStroke = (ctx: CanvasRenderingContext2D) => {
-  ctx.strokeStyle = '#a855f7';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 6;
   ctx.stroke();
 };
 
 // Generic numbered face texture (for D4, D8, D10, D12, D20)
 const createNumberTexture = (value: number, shape: 'triangle' | 'pentagon' | 'square'): THREE.CanvasTexture => {
   const { canvas, ctx } = createCanvasContext();
-  ctx.fillStyle = setupGradient(ctx);
+  ctx.fillStyle = getBackgroundColor();
   drawShapePath(ctx, shape);
   ctx.fill();
   applyShapeStroke(ctx);
-  drawNumber(ctx, value, shape === 'triangle' ? 70 : 64);
+  drawNumber(ctx, value, shape === 'triangle' ? 150 : 128);
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
   return texture;
@@ -237,27 +237,30 @@ const createDiceMaterials = (diceType: DiceType): THREE.Material[] => {
   if (diceType === 'd6') {
     return config.faceOrder.map(value => new THREE.MeshStandardMaterial({
       map: createD6Texture(value),
-      roughness: 0.3,
-      metalness: 0.1,
+      roughness: 0.6,
+      metalness: 0.0,
     }));
   }
   const shape = getTextureShape(diceType);
   return config.faceOrder.map(value => new THREE.MeshStandardMaterial({
     map: createNumberTexture(value, shape),
-    roughness: 0.3,
-    metalness: 0.2,
-    side: THREE.DoubleSide,
+    roughness: 0.6,
+    metalness: 0.0,
+    side: THREE.FrontSide,
   }));
 };
 
 const setupLighting = (targetScene: THREE.Scene) => {
-  targetScene.add(new THREE.AmbientLight(0xffffff, 0.7));
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  // Brighter ambient light for better visibility
+  targetScene.add(new THREE.AmbientLight(0xffffff, 1.2));
+  // Strong directional light
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
   directionalLight.position.set(2, 2, 5);
   targetScene.add(directionalLight);
-  const pointLight = new THREE.PointLight(0xa855f7, 0.5, 10);
-  pointLight.position.set(-2, 2, 3);
-  targetScene.add(pointLight);
+  // Secondary light from opposite side
+  const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  backLight.position.set(-2, -2, -3);
+  targetScene.add(backLight);
 };
 
 const assignMaterialGroups = (geometry: THREE.BufferGeometry, faceCount: number, vertsPerFace: number) => {
@@ -265,26 +268,29 @@ const assignMaterialGroups = (geometry: THREE.BufferGeometry, faceCount: number,
   Array.from({ length: faceCount }).forEach((_, i) => geometry.addGroup(i * vertsPerFace, vertsPerFace, i));
 };
 
+const addEdgesToMesh = (diceMesh: THREE.Mesh, geometry: THREE.BufferGeometry) => {
+  const edges = new THREE.EdgesGeometry(geometry, 1);
+  const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 3 });
+  diceMesh.add(new THREE.LineSegments(edges, edgeMaterial));
+};
+
 const createDiceMesh = (): THREE.Mesh => {
   const config = DICE_CONFIGS[props.diceType];
   faceOrder = config.faceOrder;
-
   const geometry = createDiceGeometry(props.diceType);
   const vertsPerFace = getVerticesPerFace(props.diceType);
-
   computeFaceQuaternionsForGeometry(geometry, vertsPerFace);
   assignMaterialGroups(geometry, config.faces, vertsPerFace);
-
   const diceMesh = new THREE.Mesh(geometry, createDiceMaterials(props.diceType));
-  const edges = new THREE.EdgesGeometry(geometry);
-  diceMesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xa855f7, linewidth: 2 })));
+  addEdgesToMesh(diceMesh, geometry);
   return diceMesh;
 };
 
 const setupRenderer = () => {
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer.setClearColor(0x1e293b, 1); // Dark slate background
   renderer.setSize(props.size, props.size);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   containerRef.value!.appendChild(renderer.domElement);
 };
 
@@ -311,21 +317,24 @@ const setDiceToValue = (value: number) => {
 let rollStartTime = 0;
 const rollDuration = 2000;
 let targetValue = 1;
+let rollSeed = { x: 0, y: 0, z: 0 };
 
 const updateRollingAnimation = (diceObj: THREE.Mesh, progress: number) => {
+  // Smooth ease-out without random jitter
   const easeOut = 1 - Math.pow(1 - progress, 3);
-  const rollSpeed = (1 - easeOut) * 0.3;
-  diceObj.rotation.x += rollSpeed * (1 + Math.random() * 0.5);
-  diceObj.rotation.y += rollSpeed * (0.8 + Math.random() * 0.5);
-  diceObj.rotation.z += rollSpeed * 0.3;
+  const rollSpeed = (1 - easeOut) * 0.25;
+  diceObj.rotation.x += rollSpeed * rollSeed.x;
+  diceObj.rotation.y += rollSpeed * rollSeed.y;
+  diceObj.rotation.z += rollSpeed * rollSeed.z;
 };
 
 const settleToFinalPosition = (diceObj: THREE.Mesh): boolean => {
   const faceIndex = faceOrder.indexOf(targetValue);
   if (faceIndex < 0 || faceIndex >= faceQuaternions.length) return true;
   const targetQuat = faceQuaternions[faceIndex];
-  diceObj.quaternion.slerp(targetQuat, 0.15);
-  if (diceObj.quaternion.angleTo(targetQuat) < 0.01) {
+  // Smoother settling with higher interpolation factor
+  diceObj.quaternion.slerp(targetQuat, 0.12);
+  if (diceObj.quaternion.angleTo(targetQuat) < 0.005) {
     diceObj.quaternion.copy(targetQuat);
     return true;
   }
@@ -349,6 +358,12 @@ const animate = () => {
 const startRolling = (finalValue: number) => {
   targetValue = finalValue;
   rollStartTime = Date.now();
+  // Generate consistent random seed for this roll
+  rollSeed = {
+    x: 1 + Math.random() * 0.5,
+    y: 0.8 + Math.random() * 0.5,
+    z: 0.3 + Math.random() * 0.3,
+  };
 };
 
 watch(
@@ -402,22 +417,7 @@ defineExpose({ startRolling, setDiceToValue });
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.dice-container.rolling {
-  animation: shake 0.1s infinite;
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-2px) translateY(1px);
-  }
-  75% {
-    transform: translateX(2px) translateY(-1px);
-  }
+  border-radius: 8px;
+  overflow: hidden;
 }
 </style>
