@@ -1,5 +1,5 @@
 <template>
-  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2 min-h-14">
+  <header class="flex flex-col lg:items-center lg:justify-between p-2 gap-2 min-h-14">
     <div class="flex items-center justify-between w-full">
       <router-link
         :to="{ name: 'home' }"

@@ -12,6 +12,7 @@ FROM base_node
 WORKDIR /app/packages/backend
 
 COPY --from=builder /app/ /app
+ENV SCENARIO_PATH=/app/packages/backend/assets/scenarii/chat.scenario.txt
 ENV TEMPLATE_PATH=/app/packages/backend/chat.prompt.txt
 ENV NODE_ENV=production
 

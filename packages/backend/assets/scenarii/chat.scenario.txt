@@ -1,0 +1,238 @@
+# 📜 Le Secret du Val-Clair : GUIDE DE JEU DIRECTIF
+
+## 📌 RÈGLES GÉNÉRALES DU MJ (RAPPEL)
+
+- Respecter le **Contrat JSON** (jets en anglais, fin de message, etc.).
+- Difficulté calibrée pour un joueur **Niveau 1 Solo**.
+- Ne **JAMAIS** révéler le DD (Difficulté du jet) au joueur.
+
+---
+
+## I. 🛑 Le Crochet : L'Auberge et le Désespoir
+
+### A. La Mise en Scène (L'Arrivée Forcée)
+
+**Narration d'Ouverture :**
+
+Le chemin poussiéreux se transforme en une allée boueuse alors que tu approches du village de **Val-Clair**. Des champs moissonnés s'étendent à perte de vue, bordés par l'ombre dense et sombre de la Forêt Noire.
+
+**Décris la scène en insistant sur l'atmosphère crépusculaire, la fatigue du voyage et l'odeur de terre mouillée. Confirme que la route vers la capitale est impraticable pour au moins 48 heures.**
+
+Tu as besoin d'un endroit pour te reposer.
+
+**Fais remarquer au joueur que la seule option est l'auberge. Termine cette séquence en lui demandant explicitement son plan d'action pour le reste de la soirée.**
+
+### B. Dans l'Auberge (Le Chêne Fidèle)
+
+**Poursuite de la Scène :**
+
+Le joueur entre dans **Le Chêne Fidèle**.
+
+**Décris l'ambiance intérieure : chaleur réconfortante contrastant avec le silence inhabituel et la tension palpable chez les rares clients. Décris le PNJ Elara, ses yeux rougis, et son geste d'essuyage machinal des verres.**
+
+**Déclencheur d'Action :**
+
+Elara lève les yeux vers toi un instant, ses traits sont tirés, mais elle **ne dit rien**. Elle attend que tu agisses.
+
+**Génère immédiatement le jet de dés pour l'évaluation de l'ambiance.**
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "wisdom (Perception)", "advantage": "none" } }
+```
+
+**Résolution du jet de Perception (À appliquer après réception du résultat) :**
+
+- _Si Réussite (DD 10) :_ **Révèle** le murmure : _"Si ce que Jorin a vu est revenu, il faut le retrouver avant la nuit."_
+- _Si Échec (DD 10) :_ **Décris** l'ambiance comme simplement morose.
+
+### C. L'Offre de Quête
+
+**Déclencheur :** Le joueur s'approche d'Elara ou tente de commander.
+
+**Dialogue d'Elara :**
+
+**Révèle** le désespoir d'Elara. Elle lui tend le panier de Jorin. **Déclame** l'offre : **150 pièces d'or** et une **Potion de Soin** si Jorin est ramené vivant.
+
+**Déclencheur d'Indice (Si le joueur accepte) :**
+
+**Génère** le jet pour examiner le panier.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "wisdom (Survival)", "advantage": "none" } }
+```
+
+**Résolution du jet de Survie (À appliquer après réception du résultat) :**
+
+- _Si Réussite (DD 12) :_ **Révèle** que la terre sur le panier est de la boue argileuse, typique de la lisière de la forêt.
+
+**Termine la séquence par la question : "Que fais-tu maintenant ? (Aller enquêter, chercher des informations auprès des villageois, etc.)"**
+
+---
+
+## II. 🌲 L'Exploration : La Lisière
+
+### A. Le Vieux Puits
+
+**Narration :**
+
+Le joueur se rend au Vieux Puits. **Décris** le puits ancien, la mousse noire et le silence.
+
+**Déclencheur d'Action (Recherche d'indices) :**
+
+**Génère** le jet pour trouver les pistes principales.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "intelligence (Investigation)", "advantage": "none" } }
+```
+
+**Résolution du jet d'Investigation (À appliquer après réception du résultat) :**
+
+- _Si Réussite (DD 13) :_ **Révèle** les **empreintes de pas d'adolescent** (Jorin) allant vers la forêt et les **traces de griffes** sur un chêne (trop hautes pour un loup).
+- _Si Échec (DD 13) :_ **Révèle** seulement les empreintes de Jorin, le joueur perd la piste des griffes.
+
+**PNJ Optionnel (Le Bûcheron) :**
+
+**Décris** le Bûcheron Gérald travaillant à proximité. S'il est interrogé gentiment, **Génère** le jet social.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "charisma (Persuasion)", "advantage": "none" } }
+```
+
+- _Si Réussite (DD 10) :_ Gérald révèle les **"gloussements étouffés"** et une odeur de viande avariée près du puits.
+
+### B. Le Piège de la Forêt (Combat)
+
+**Narration :**
+
+La piste mène à un poste d'observation mal dissimulé. **Décris** la présence de créatures.
+
+**Ennemis :** **2 Gobelins (CR 1/4)**.
+
+**Déclenche** le combat. **Rappelle** au joueur les règles de combat solo (ne submergez pas le joueur).
+
+**Butin Clé (Après Combat) :**
+
+**Décris** la découverte de l'écharpe de Jorin et de la note. **Génère** le jet pour déchiffrer.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "intelligence (Arcana)", "advantage": "none" } }
+```
+
+- _Si Réussite (DD 14) :_ Le joueur déchiffre le mot "**Cachette**" et le nom : "**Krot-Shok**".
+- _XP :_ `{"xp": 100}`
+
+**Termine la séquence par la question : "Quelle est ta prochaine action ?"**
+
+---
+
+## III. 🧭 Le Cœur du Mystère : La Grotte
+
+### A. L'Accès et le Rituel
+
+**Narration :**
+
+La piste s'arrête devant une petite **cascade asséchée** cachant une crevasse sombre.
+
+**Déclencheur d'Accès :**
+
+**Génère** le jet pour se hisser.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "strength (Athletics)", "advantage": "none" } }
+```
+
+**Résolution du jet d'Athlétisme (À appliquer après réception du résultat) :**
+
+- _Si Échec (DD 10) :_ Le joueur prend **1d4 dégâts contondants** (`{"hp": -X}`).
+
+**À l'Intérieur :**
+
+**Décris** l'odeur d'humidité et de sang séché. **Décris** les symboles peints au charbon.
+
+**Déclencheur de Révélation :**
+
+**Génère** le jet de Religion pour identifier le culte.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "intelligence (Religion)", "advantage": "none" } }
+```
+
+- _Si Réussite (DD 12) :_ **Révèle** les glyphes comme étant liés au **Culte de la Chair** des Marais.
+
+**Révélation Finale :**
+
+**Révèle** que Jorin n'est plus là, mais qu'un message hâtif a été laissé : "**Le Maître attend au lieu de la Haute Pierre. Le sang coule bientôt.**"
+
+### B. Le Choix Crucial (Urgence)
+
+**Narration :**
+
+**Décris** les deux chemins de sortie (A : Sûr/Lent, B : Dangereux/Rapide avec traces de sang).
+
+**Force** le joueur à choisir, en insistant sur l'urgence du message.
+
+---
+
+## IV. 🔥 Le Climax : Le Sacrificateur de la Haute Pierre
+
+### A. La Scène Finale
+
+**Narration :**
+
+Le joueur arrive à la clairière isolée. **Décris** la **Haute Pierre** (l'autel), Jorin ligoté, et le **Sacrificateur Krot-Shok** (Hobgobelin / Acolyte Modifié) brandissant son couteau rituel.
+
+**Déclenche** le combat immédiatement.
+
+### B. Le Combat (Règles Spéciales)
+
+**Antagoniste :** Krot-Shok (PV 15, CA 14, Dague 1d4+2 dégâts).
+
+**Règle de Pression :**
+
+**Commence le compte à rebours :** Le joueur a **3 tours maximum** avant que Krot-Shok n'utilise son action pour tenter d'achever Jorin.
+
+**Action Alternative (Risque/Récompense) :**
+
+Si le joueur tente de faire tomber la Haute Pierre :
+
+**Génère** le jet de Force.
+
+```json
+{ "roll": { "dices": "1d20", "modifier": "strength (Athletics)", "advantage": "none" } }
+```
+
+- _Si Réussite (DD 15) :_ La pierre vacille et fait tomber Krot-Shok, mettant fin au combat.
+
+**Termine chaque tour du MJ par la question : "Que fais-tu ce tour ?"**
+
+---
+
+## V. 🎉 L'Épilogue et l'Accroche
+
+### A. Réussite Totale
+
+**Narration :**
+
+Décris la libération de Jorin et le retour triomphal à Val-Clair.
+
+**Distribution des Récompenses :**
+
+Elara paie la récompense et la potion.
+
+```json
+{"xp": 300}
+{"inventory": {"action": "add", "name": "Gold", "quantity": 150}}
+{"inventory": {"action": "add", "name": "Potion of Healing", "quantity": 1}}
+```
+
+**Accroche :**
+
+**Révèle** les indices (Culte et Marais) comme la menace de niveau 2.
+
+### B. Échec Partiel (Conséquences)
+
+**Narration :**
+
+Si Krot-Shok s'échappe, il devient un ennemi juré. Si Jorin est sauvé mais blessé, **Réduit** la récompense à 75 PO.
+
+**Termine la partie par : "L'aventure continue..."**

@@ -23,6 +23,7 @@ import { UserDocument } from '../schemas/user.schema.js';
 import { ChatMessage, ConversationService } from './conversation.service.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
+const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
 
 class ChatRequest {
   message: string;
@@ -35,6 +36,7 @@ class ChatRequest {
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
   private systemPrompt: string;
+  private scenarioPrompt: string;
   constructor(
     private readonly gemini: GeminiTextService,
     private readonly conv: ConversationService,
@@ -46,12 +48,27 @@ export class ChatController {
         `System prompt loaded (${systemPrompt.length} chars)`,
       );
     });
+    this.loadScenarii().then((scenarioPrompt) => {
+      this.scenarioPrompt = scenarioPrompt;
+      this.logger.log(
+        `Scenario prompt loaded (${scenarioPrompt.length} chars)`,
+      );
+    });
   }
 
   private async loadSystemPrompt(): Promise<string> {
     try {
       this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
       return await readFile(TEMPLATE_PATH, 'utf8');
+    } catch {
+      return '';
+    }
+  }
+
+  private async loadScenarii(): Promise<string> {
+    try {
+      this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
+      return await readFile(SCENARIO_PATH, 'utf8');
     } catch {
       return '';
     }
@@ -165,7 +182,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character)
       throw new BadRequestException('Character not found for chat initialization');
-    const initMessage = `${this.systemPrompt}\n\n${this.buildCharacterSummary(character)}`;
+    const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
 
     const initResp = await this.gemini.sendMessage(characterId, initMessage);
     const initMsg: ChatMessage = {

@@ -1,6 +1,7 @@
 **
 !package.json
 !package-lock.json
+!packages/backend/assets/scenarii/chat.scenario.txt
 !packages/backend/chat.prompt.txt
 !packages/backend/src/**
 !packages/backend/scripts/**
