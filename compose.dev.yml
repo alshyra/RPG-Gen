@@ -28,7 +28,6 @@ services:
       - FRONTEND_URL=http://localhost
     volumes:
       - ./:/app/
-      - backend_node_modules:/app/node_modules
     env_file:
       - packages/backend/.env
     depends_on:
@@ -48,7 +47,6 @@ services:
     volumes:
       - ./:/app/
       - ./packages/frontend/nginx/nginx.conf.dev:/etc/nginx/conf.d/default.conf:ro
-      - frontend_node_modules:/app/node_modules
     networks:
       - rpg-network
     depends_on:

@@ -2,7 +2,7 @@
   <div class="relative w-full">
     <!-- Portrait -->
     <div
-      class="relative rounded-lg overflow-hidden bg-slate-800 border border-slate-700 aspect-square h-64 mx-auto"
+      class="relative rounded-lg overflow-hidden bg-slate-800 border border-slate-700 aspect-square mx-auto"
     >
       <CharacterIllustration
         :clazz="currentCharacter?.classes?.[0]?.name || ''"
@@ -19,7 +19,7 @@
           {{ currentCharacter?.classes?.[0]?.name }} Lvl {{ currentCharacter?.classes?.[0]?.level || 1 }}
         </div>
       </div>
-      <div class="absolute top-0 left-100 right-0 p-2">
+      <div class="absolute top-0 right-0 p-2">
         <div class="text-red-400 font-bold text-sm mb-2">
           ❤️ {{ hp }}
         </div>
