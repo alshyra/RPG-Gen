@@ -38,11 +38,25 @@ describe("Navigation", () => {
       expect(r?.ok).to.equal(true);
     });
 
-    cy.visit('/home');
+    // Intercept before visiting so we capture the initial characters request
     cy.intercept('GET', '**/api/characters').as('getCharacters');
+    cy.visit('/home');
     cy.wait('@getCharacters');
     // Resume the first character
     cy.get('button').contains('Reprendre').first().click();
+
+    // If the character is in draft state the resume button leads to character-step;
+    // if so, navigate to /game/:characterId explicitly; otherwise we should already be in /game/:id.
+    cy.url().then((u) => {
+      const url = u.toString();
+      const m = url.match(/\/character\/([^/]+)\/step\//);
+      if (m) {
+        const id = m[1];
+        cy.intercept('GET', `**/api/characters/${id}`).as('getCharacter');
+        cy.visit(`/game/${id}`);
+        cy.wait('@getCharacter');
+      }
+    });
 
     // Ensure we are on /game/:id
     cy.url().should('match', /\/game\/[A-Za-z0-9-]+.*$/);

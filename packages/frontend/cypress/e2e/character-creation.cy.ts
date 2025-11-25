@@ -37,8 +37,8 @@ describe('Character Creation', () => {
 
     cy.contains("Compétences").should("be.visible");
 
-    cy.get('input[type="checkbox"]').first().check();
-    cy.get('input[type="checkbox"]').eq(1).check();
+    cy.get('input[type="checkbox"]').first().scrollIntoView().check({ force: true });
+    cy.get('input[type="checkbox"]').eq(1).scrollIntoView().check({ force: true });
 
     cy.contains("button", "Suivant").click();
     cy.url().should("match", /\/character\/[^/]+\/step\/5/);
@@ -227,8 +227,8 @@ describe('Character Creation', () => {
     cy.contains("button", "Suivant").click();
 
     cy.url().should("match", /\/character\/[^/]+\/step\/4/);
-    cy.get('input[type="checkbox"]').first().check();
-    cy.get('input[type="checkbox"]').eq(1).check();
+    cy.get('input[type="checkbox"]').first().scrollIntoView().check({ force: true });
+    cy.get('input[type="checkbox"]').eq(1).scrollIntoView().check({ force: true });
     cy.contains("button", "Suivant").click();
 
     // Inventory step -> then proceed to Avatar

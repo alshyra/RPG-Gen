@@ -9,12 +9,26 @@ describe('Game detail pages', () => {
   });
 
   it('should navigate to inventory page from sidebar', () => {
+    // Intercept before navigation so we can catch the initial request
+    cy.intercept('GET', '**/api/characters').as('getCharacters');
     cy.visit('/home');
     // Wait for characters to load and resume the first one
-    cy.intercept('GET', '**/api/characters').as('getCharacters');
     cy.wait('@getCharacters');
     // Click the first resume button
     cy.get('button').contains('Reprendre').first().click();
+
+    // Some test accounts may be in draft state and resume leads to character-step. Ensure we are on the game view
+    cy.url().then((u) => {
+      const url = u.toString();
+      const m = url.match(/\/character\/([^/]+)\/step\//);
+      if (m) {
+        const id = m[1];
+        // ensure we fetch the character when visiting the game route
+        cy.intercept('GET', `**/api/characters/${id}`).as('getCharacter');
+        cy.visit(`/game/${id}`);
+        cy.wait('@getCharacter');
+      }
+    });
 
     // We should be in the game route now
     cy.url().should('match', /\/game\/[A-Za-z0-9-]+$/);
@@ -32,10 +46,22 @@ describe('Game detail pages', () => {
   });
 
   it('should navigate to spells page and show placeholder', () => {
-    cy.visit('/home');
+    // Intercept before page load
     cy.intercept('GET', '**/api/characters').as('getCharacters');
+    cy.visit('/home');
     cy.wait('@getCharacters');
     cy.get('button').contains('Reprendre').first().click();
+    // ensure we are on the game view (if resume navigates to character-step, visit game explicitely)
+    cy.url().then((u) => {
+      const url = u.toString();
+      const m = url.match(/\/character\/([^/]+)\/step\//);
+      if (m) {
+        const id = m[1];
+        cy.intercept('GET', `**/api/characters/${id}`).as('getCharacter');
+        cy.visit(`/game/${id}`);
+        cy.wait('@getCharacter');
+      }
+    });
 
     // Click Spells in the sidebar
     cy.contains('Sorts').click();
