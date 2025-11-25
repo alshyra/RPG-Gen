@@ -86,7 +86,7 @@ export function useGameCommands() {
       return;
     }
 
-    gameStore.appendMessage('Player', `I use ${item.name}`);
+    gameStore.appendMessage('Player', `I use ${item.name}!`);
     gameStore.appendMessage('System', '...thinking...');
     gameStore.sending = true;
 
@@ -119,7 +119,7 @@ export function useGameCommands() {
       return;
     }
 
-    gameStore.appendMessage('Player', `I equip ${item.name}`);
+    gameStore.appendMessage('Player', `I equip ${item.name}!`);
     gameStore.appendMessage('System', '...thinking...');
     gameStore.sending = true;
 
