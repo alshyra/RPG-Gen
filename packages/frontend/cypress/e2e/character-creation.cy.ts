@@ -25,7 +25,7 @@ describe('Character Creation', () => {
 
     cy.contains("Humain").click();
 
-    cy.get("select").select("Barbarian");
+    cy.get("select").select("Wizard");
 
     cy.contains("button", "Suivant").click();
     cy.url().should("match", /\/character\/[^/]+\/step\/3/);
@@ -40,12 +40,17 @@ describe('Character Creation', () => {
     cy.get('input[type="checkbox"]').first().scrollIntoView().check({ force: true });
     cy.get('input[type="checkbox"]').eq(1).scrollIntoView().check({ force: true });
 
-    cy.contains("button", "Suivant").click();
-    cy.url().should("match", /\/character\/[^/]+\/step\/5/);
-    cy.contains("Inventaire").should("be.visible");
+      cy.contains("button", "Suivant").click();
+      cy.url().should("match", /\/character\/[^/]+\/step\/5/);
+      cy.contains("Sorts").should("be.visible");
+      // select some spells if available
+      cy.get('[data-testid="ui-checkbox"]').first().scrollIntoView().click({ force: true });
+      cy.contains("button", "Suivant").click();
+      cy.url().should("match", /\/character\/[^/]+\/step\/6/);
+      cy.contains("Inventaire").should("be.visible");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("match", /\/character\/[^/]+\/step\/6/);
+    cy.url().should("match", /\/character\/[^/]+\/step\/7/);
     cy.contains("Avatar").should("be.visible");
 
 
@@ -220,7 +225,7 @@ describe('Character Creation', () => {
 
     cy.url().should("match", /\/character\/[^/]+\/step\/2/);
     cy.contains("Humain").click();
-    cy.get("select").select("Barbarian");
+    cy.get("select").select("Wizard");
     cy.contains("button", "Suivant").click();
     
     cy.url().should("match", /\/character\/[^/]+\/step\/3/);
@@ -231,12 +236,17 @@ describe('Character Creation', () => {
     cy.get('input[type="checkbox"]').eq(1).scrollIntoView().check({ force: true });
     cy.contains("button", "Suivant").click();
 
-    // Inventory step -> then proceed to Avatar
+    // Sorts step -> Inventory -> Avatar
     cy.url().should("match", /\/character\/[^/]+\/step\/5/);
+    cy.contains("Sorts").should("be.visible");
+    // Optionally pick a spell if available
+    cy.get('[data-testid="ui-checkbox"]').first().scrollIntoView().click({ force: true });
+    cy.contains("button", "Suivant").click();
+    cy.url().should("match", /\/character\/[^/]+\/step\/6/);
     cy.contains("Inventaire").should("be.visible");
 
     cy.contains("button", "Suivant").click();
-    cy.url().should("match", /\/character\/[^/]+\/step\/6/);
+    cy.url().should("match", /\/character\/[^/]+\/step\/7/);
     cy.contains("Avatar").should("be.visible");
 
     // stub avatar generation and wait for the final character save

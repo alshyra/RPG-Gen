@@ -23,6 +23,10 @@
         />
       </div>
     </div>
+    <div>
+      <label class="block font-medium mb-2">Race</label>
+      <RacePicker />
+    </div>
   </div>
 </template>
 
@@ -34,6 +38,7 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import RacePicker from '../RacePicker.vue';
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
