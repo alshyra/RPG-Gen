@@ -28,7 +28,9 @@ export class DiceController {
       const discardedRoll = advantage === 'advantage' ? Math.min(roll1, roll2) : Math.max(roll1, roll2);
       const total = keptRoll + mod;
       return {
-        rolls: [roll1, roll2],
+        rolls: [
+          roll1, roll2,
+        ],
         mod,
         total,
         advantage,

@@ -82,19 +82,19 @@ Character Information:
 STR ${this.getAbilityScore(character, 'Str')},
 DEX ${this.getAbilityScore(character, 'Dex')},
 CON ${this.getAbilityScore(character, 'Con')},
-INT ${this.getAbilityScore( character, 'Int')},
+INT ${this.getAbilityScore(character, 'Int')},
 WIS ${this.getAbilityScore(character, 'Wis')},
 CHA ${this.getAbilityScore(character, 'Cha')}
 `;
 
     // Add spells if character has any
     if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells.map((s) => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
+      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
     }
 
     // Add inventory if character has any
     if (character.inventory && character.inventory.length > 0) {
-      summary += `- Inventory: ${character.inventory.map((item) => `${item.name} (x${item.qty || 1}) ${item.meta}`).join(', ')}\n`;
+      summary += `- Inventory: ${character.inventory.map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`).join(', ')}\n`;
     }
 
     return summary;

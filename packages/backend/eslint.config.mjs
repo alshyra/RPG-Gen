@@ -8,6 +8,10 @@ export default [
     files: ['**/*.{js,ts}'],
     languageOptions: {
       parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+        project: './tsconfig.json',
+      },
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

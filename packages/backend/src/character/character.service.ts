@@ -53,7 +53,7 @@ export class CharacterService {
   // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
     const updateDoc: any = {};
-    
+
     // Build update document
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
@@ -75,7 +75,7 @@ export class CharacterService {
     const character = await this.characterModel.findOneAndUpdate(
       { userId, characterId },
       { $set: updateDoc },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!character) {
@@ -118,8 +118,9 @@ export class CharacterService {
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
     if (!item.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
 
-    const existing = (character.inventory || []).find((it: any) => 
-      item.definitionId && it.definitionId === item.definitionId
+    const existing = (character.inventory || []).find((it: any) =>
+      (item._id && it._id === item._id)
+      || (item.definitionId && it.definitionId === item.definitionId),
     );
     if (existing) {
       existing.qty = (existing.qty || 0) + (item.qty || 1);

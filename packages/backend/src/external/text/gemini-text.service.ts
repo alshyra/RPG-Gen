@@ -1,14 +1,5 @@
-import { Candidate, Chat, Content, GenerateContentResponse, GenerateContentResponseUsageMetadata, GoogleGenAI, Part } from '@google/genai';
+import { Candidate, Chat, Content, GenerateContentResponse, GoogleGenAI, Part } from '@google/genai';
 import { Injectable, Logger } from '@nestjs/common';
-
-type GeminiResponse = Record<string, unknown>;
-
-interface GeminiMessage {
-  text: string;
-  raw: GeminiResponse;
-  usage: Record<string, unknown> | null;
-  modelVersion: string;
-}
 
 const extractTextFromParts = (parts?: Part[]): string => parts?.[0]?.text || '';
 
@@ -67,7 +58,7 @@ const textFromResponse = (data: GenerateContentResponse) => {
   }
   if (data.candidates && Array.isArray(data.candidates) && data.candidates.length)
     return extractFromCandidate(data.candidates);
-}
+};
 
 @Injectable()
 export class GeminiTextService {

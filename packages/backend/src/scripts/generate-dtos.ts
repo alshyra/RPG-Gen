@@ -98,7 +98,9 @@ function propLineFor(propName: string, typeText: string, optional: boolean) {
 }
 
 function isServerManaged(fieldName: string) {
-  const serverFields = ['_id', 'createdAt', 'updatedAt', 'userId'];
+  const serverFields = [
+    '_id', 'createdAt', 'updatedAt', 'userId',
+  ];
   return serverFields.includes(fieldName);
 }
 
@@ -142,7 +144,9 @@ for (const cls of schemaClasses) {
 
   // Build file content
   const outPath = path.join(outDir, `${name.toLowerCase()}.dto.ts`);
-  const header = ['// GENERATED FROM backend/src/schemas - do not edit manually', ''];
+  const header = [
+    '// GENERATED FROM backend/src/schemas - do not edit manually', '',
+  ];
 
   // Determine imports for nested DTOs
   const imports: string[] = [];
@@ -159,11 +163,15 @@ for (const cls of schemaClasses) {
     if (propLines.join(' ').includes(ta.name)) imports.push(`import { ${ta.name} } from './types.dto';`);
   }
 
-  let fileContent = [...header, ...imports, '', `export interface ${interfaceName} {`, ...propLines.map(p => `  ${p}`), '}', ''].join('\n');
+  let fileContent = [
+    ...header, ...imports, '', `export interface ${interfaceName} {`, ...propLines.map(p => `  ${p}`), '}', '',
+  ].join('\n');
 
   // Create helper Create/Update types using server-managed field heuristic
   const presentNames = allProps.map(p => p.name);
-  const fieldsToOmit = ['_id', 'createdAt', 'updatedAt', 'userId'].filter(f => presentNames.includes(f));
+  const fieldsToOmit = [
+    '_id', 'createdAt', 'updatedAt', 'userId',
+  ].filter(f => presentNames.includes(f));
   const baseName = interfaceName.replace(/Dto$/, '');
   if (fieldsToOmit.length > 0) {
     const union = fieldsToOmit.map(f => `'${f}'`).join(' | ');
@@ -203,7 +211,9 @@ for (const cls of extraDtoClasses) {
   // Build file content for this DTO
   const base = interfaceName.replace(/Dto$/, '');
   const outPath = path.join(outDir, `${base.toLowerCase()}.dto.ts`);
-  const header = ['// GENERATED FROM backend - do not edit manually', ''];
+  const header = [
+    '// GENERATED FROM backend - do not edit manually', '',
+  ];
   // imports: check known schema/alias usage
   const imports: string[] = [];
   for (const candidate of Array.from(knownSchemaNames)) {
@@ -212,7 +222,9 @@ for (const cls of extraDtoClasses) {
   }
   for (const ta of typeAliases) if (props.join(' ').includes(ta.name)) imports.push(`import { ${ta.name} } from './types.dto';`);
 
-  const fileContent = [...header, ...imports, '', `export interface ${interfaceName} {`, ...props.map(p => `  ${p}`), '}', ''].join('\n');
+  const fileContent = [
+    ...header, ...imports, '', `export interface ${interfaceName} {`, ...props.map(p => `  ${p}`), '}', '',
+  ].join('\n');
   fs.writeFileSync(outPath, fileContent, { encoding: 'utf8' });
   console.log(`Wrote extra DTO ${outPath}`);
   // make sure this DTO is exported in the barrel below
@@ -229,7 +241,9 @@ console.log(`Wrote ${indexPath}`);
 
 const typesPath = path.join(outDir, 'types.dto.ts');
 if (typeAliases.length > 0) {
-  const content = ['// GENERATED FROM backend/src/schemas - shared simple types', '', ...typeAliases.map(t => t.text), ''].join('\n');
+  const content = [
+    '// GENERATED FROM backend/src/schemas - shared simple types', '', ...typeAliases.map(t => t.text), '',
+  ].join('\n');
   fs.writeFileSync(typesPath, content, { encoding: 'utf8' });
   console.log(`Wrote ${typesPath}`);
 }

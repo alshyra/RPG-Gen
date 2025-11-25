@@ -21,7 +21,7 @@ test('chat.chat initializes session when missing and replies', async (t) => {
     findByCharacterId: async () => ({ name: 'Hero', classes: [{ name: 'Fighter', level: 1 }], scores: { Con: 12 } }),
   };
 
-  const controller = new ChatController(gemini as any, conv as any, characterService as any);
+  const controller = new ChatController(gemini, conv, characterService);
 
   const req: any = { user: { _id: { toString: () => 'u1' } } };
 
@@ -39,11 +39,13 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
 
   const conv: any = {
     append: async () => {},
-    getHistory: async () => [{ role: 'user', text: 'u1', timestamp: Date.now() }, { role: 'assistant', text: 'a1', timestamp: Date.now() }],
+    getHistory: async () => [
+      { role: 'user', text: 'u1', timestamp: Date.now() }, { role: 'assistant', text: 'a1', timestamp: Date.now() },
+    ],
   };
 
   const characterService: any = { findByCharacterId: async () => ({}) };
-  const controller = new ChatController(gemini as any, conv as any, characterService as any);
+  const controller = new ChatController(gemini, conv, characterService);
 
   // call private helper via any cast to verify initialization behavior
   await (controller as any).ensureChatSession('u1', 'char2');

@@ -18,7 +18,11 @@ import { User, UserSchema } from '../schemas/user.schema.js';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
-  exports: [AuthService, JwtModule, PassportModule],
+  providers: [
+    AuthService, JwtStrategy, GoogleStrategy,
+  ],
+  exports: [
+    AuthService, JwtModule, PassportModule,
+  ],
 })
 export class AuthModule {}

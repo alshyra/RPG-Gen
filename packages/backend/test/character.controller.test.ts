@@ -21,7 +21,7 @@ class FakeCharacterService {
     } as any;
   }
 
-  async removeInventoryItem(_userId: string, characterId: string, itemId: string) {
+  async removeInventoryItem(_userId: string, characterId: string) {
     return {
       characterId,
       name: 'Test',
@@ -30,11 +30,9 @@ class FakeCharacterService {
   }
 
   toCharacterDto(doc: any) {
-    return doc as any;
+    return doc;
   }
 }
-
-const fakeReq = { user: { _id: 'user1' } } as any;
 
 test('addInventory creates item and returns character shape', async (t) => {
   try {
@@ -60,7 +58,7 @@ test('updateInventory updates item and returns character shape', async (t) => {
 
 test('removeInventory removes item and returns character shape', async (t) => {
   try {
-    const res = await new FakeCharacterService().removeInventoryItem('user1', 'character-1', 'item-1');
+    const res = await new FakeCharacterService().removeInventoryItem('user1', 'character-1');
     t.truthy(res);
     t.true(Array.isArray(res.inventory));
     t.is(res.inventory.length, 0);

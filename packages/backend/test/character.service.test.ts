@@ -1,6 +1,5 @@
 import test from 'ava';
 import { CharacterService } from '../src/character/character.service.js';
-import { ItemDefinitionService } from '../src/character/item-definition.service.js';
 
 // Minimal fake model to emulate Mongoose document constructor + save
 class FakeCharacterModel {
@@ -52,11 +51,11 @@ test('addInventoryItem with definitionId uses ItemDefinitionService and persists
       definitionId: id,
       name: 'Potion de soin',
       description: 'Soigne un peu de PV',
-      meta: { type: 'consumable', usable: true }
+      meta: { type: 'consumable', usable: true },
     }),
   };
 
-  const svc = new CharacterService(FakeModel as any, FakeItemDefSvc as any);
+  const svc = new CharacterService(FakeModel, FakeItemDefSvc);
   const updated = await svc.addInventoryItem('user-1', 'char-1', { definitionId: 'potion-health' } as any);
 
   t.true(Array.isArray(updated.inventory), 'inventory is an array');
@@ -69,13 +68,55 @@ test('addInventoryItem with definitionId uses ItemDefinitionService and persists
   t.is(added.qty, 1, 'qty defaults to 1');
 });
 
+test('addInventoryItem merges by _id if provided', async (t) => {
+  const fakeDoc: any = {
+    userId: 'user-1',
+    characterId: 'char-1',
+    inventory: [{ _id: 'item-123', definitionId: 'potion-health', qty: 2 }],
+    save: async function () { return this; },
+  };
+  const FakeModel: any = {
+    findOne: async function () { return fakeDoc; },
+  };
+  const FakeItemDefSvc: any = {
+    findByDefinitionId: async (id: string) => ({
+      definitionId: id,
+      name: 'Potion de soin',
+      description: 'Soigne un peu de PV',
+      meta: { type: 'consumable', usable: true },
+    }),
+  };
+  const svc = new CharacterService(FakeModel, FakeItemDefSvc);
+  const updated = await svc.addInventoryItem('user-1', 'char-1', { _id: 'item-123', qty: 3 } as any);
+  t.is(updated.inventory.length, 1, 'one item in inventory');
+  t.is(updated.inventory[0].qty, 5, 'quantities merged by _id');
+});
+
+test('addInventoryItem with only name does NOT merge', async (t) => {
+  const fakeDoc: any = {
+    userId: 'user-1',
+    characterId: 'char-1',
+    inventory: [{ _id: 'item-abc', name: 'Torch', qty: 1 }],
+    save: async function () { return this; },
+  };
+  const FakeModel: any = {
+    findOne: async function () { return fakeDoc; },
+  };
+  const FakeItemDefSvc: any = {
+    findByDefinitionId: async () => null,
+  };
+  const svc = new CharacterService(FakeModel, FakeItemDefSvc);
+  const updated = await svc.addInventoryItem('user-1', 'char-1', { name: 'Torch', qty: 2 } as any);
+  t.is(updated.inventory.length, 2, 'does not merge by name only');
+  const added = updated.inventory.find((it: any) => it.name === 'Torch' && it._id !== 'item-abc');
+  t.truthy(added, 'new item with same name added separately');
+});
+
 test('addInventoryItem merges when existing item has the same definitionId', async (t) => {
   const fakeDoc: any = {
     userId: 'user-1',
     characterId: 'char-2',
-    inventory: [
-      { _id: 'existing-1', definitionId: 'torch-def', name: 'Torch', qty: 1, meta: {} },
-    ],
+    inventory: [{ _id: 'existing-1', definitionId: 'torch-def', name: 'Torch', qty: 1, meta: {} }],
     save: async function () { return this; },
   };
 
@@ -83,7 +124,7 @@ test('addInventoryItem merges when existing item has the same definitionId', asy
     findOne: async function () { return fakeDoc; },
   };
 
-  const svc = new CharacterService(FakeModel as any, {} as any);
+  const svc = new CharacterService(FakeModel, {} as any);
   const updated = await svc.addInventoryItem('user-1', 'char-2', { definitionId: 'torch-def', qty: 1 } as any);
 
   t.is(updated.inventory.length, 1, 'still a single item');
@@ -94,9 +135,7 @@ test('addInventoryItem adds new item when definitionId is different', async (t) 
   const fakeDoc: any = {
     userId: 'user-3',
     characterId: 'char-3',
-    inventory: [
-      { _id: 'i-1', definitionId: 'torch-def', name: 'Torch', qty: 1, meta: {} },
-    ],
+    inventory: [{ _id: 'i-1', definitionId: 'torch-def', name: 'Torch', qty: 1, meta: {} }],
     save: async function () { return this; },
   };
 
@@ -109,11 +148,11 @@ test('addInventoryItem adds new item when definitionId is different', async (t) 
       definitionId: id,
       name: 'Rope',
       description: 'A rope',
-      meta: {}
+      meta: {},
     }),
   };
 
-  const svc = new CharacterService(FakeModel as any, FakeItemDefSvc as any);
+  const svc = new CharacterService(FakeModel, FakeItemDefSvc);
   const updated = await svc.addInventoryItem('user-3', 'char-3', { definitionId: 'rope-def', qty: 1 } as any);
 
   t.is(updated.inventory.length, 2, 'should add a separate item');
@@ -130,7 +169,7 @@ test('addInventoryItem throws when definitionId is missing', async (t) => {
   const FakeModel: any = {
     findOne: async function () { return fakeDoc; },
   };
-  const svc = new CharacterService(FakeModel as any, {} as any);
+  const svc = new CharacterService(FakeModel, {} as any);
   await t.throwsAsync(async () => {
     await svc.addInventoryItem('user-1', 'char-1', { name: 'No Def' } as any);
   });

@@ -49,7 +49,9 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
 export const parseGameInstructions = (narrative: string): GameInstruction[] => {
   const jsonBlocks = extractJsonBlocks(narrative);
   const inlineJsons = extractInlineJson(narrative);
-  const allJsons = [...jsonBlocks, ...inlineJsons];
+  const allJsons = [
+    ...jsonBlocks, ...inlineJsons,
+  ];
 
   return allJsons
     .map((json) => {
@@ -66,7 +68,7 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
     .map((obj) => {
       // If it has a type field, use the structured format
       if (obj.type === 'roll' || obj.type === 'xp' || obj.type === 'hp' || obj.type === 'spell' || obj.type === 'inventory') {
-        return { type: obj.type as 'roll' | 'xp' | 'hp' | 'spell' | 'inventory', data: obj } as GameInstruction;
+        return { type: obj.type, data: obj } as GameInstruction;
       }
       // Otherwise, use the direct format (backward compatibility)
       return obj as GameInstruction;
@@ -113,7 +115,7 @@ export const parseGameResponse = (narrative: string): {
 } => {
   const instructions = parseGameInstructions(narrative).map((instr) => {
     if (instr.roll && instr.roll.modifier) {
-      (instr.roll as any).modifier = normalizeModifier(instr.roll.modifier);
+      (instr.roll).modifier = normalizeModifier(instr.roll.modifier);
     }
     return instr;
   });

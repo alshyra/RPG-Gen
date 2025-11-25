@@ -8,14 +8,18 @@ import { ItemDefinition, ItemDefinitionSchema } from './item-definition.schema.j
 import { Character, CharacterSchema } from '../schemas/character.schema.js';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Character.name, schema: CharacterSchema },
-      { name: ItemDefinition.name, schema: ItemDefinitionSchema },
-    ]),
+  imports: [MongooseModule.forFeature([
+    { name: Character.name, schema: CharacterSchema },
+    { name: ItemDefinition.name, schema: ItemDefinitionSchema },
+  ])],
+  controllers: [
+    CharacterController, ItemDefinitionController,
   ],
-  controllers: [CharacterController, ItemDefinitionController],
-  providers: [CharacterService, ItemDefinitionService],
-  exports: [CharacterService, ItemDefinitionService],
+  providers: [
+    CharacterService, ItemDefinitionService,
+  ],
+  exports: [
+    CharacterService, ItemDefinitionService,
+  ],
 })
 export class CharacterModule {}

@@ -25,7 +25,7 @@ export class ConversationService {
       role: m.role,
       text: m.text,
       timestamp: m.timestamp,
-      meta: (m.meta ? ({ ...m.meta } as MessageMetaDto) : undefined) as MessageMetaDto | undefined,
+      meta: (m.meta ? ({ ...m.meta } as MessageMetaDto) : undefined),
     })) as ChatMessage[];
   }
 
