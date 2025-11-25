@@ -12,10 +12,8 @@ import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
   variant?: 'text' | 'avatar' | 'card';
-  lines?: number;
 }>(), {
   variant: 'text',
-  lines: 1,
 });
 
 const sizeClasses = computed(() => {
