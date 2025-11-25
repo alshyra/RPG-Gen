@@ -46,9 +46,8 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-
   @ApiBody({ type: CharacterIdBody })
-  async generateAvatar(@Req() req: Request, @Body() characterId: string) {
+  async generateAvatar(@Req() req: Request, @Body('characterId') characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 
     if (!characterId || typeof characterId !== 'string') throw new BadRequestException('characterId is required');
