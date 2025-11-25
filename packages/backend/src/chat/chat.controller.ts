@@ -111,6 +111,7 @@ Character Information:
     const userMsg: ChatMessage = { role: 'user', text: userText, timestamp: Date.now() };
     await this.conv.append(userId, characterId, userMsg);
 
+    await this.ensureChatSession(userId, characterId);
     const resp = await this.gemini.sendMessage(characterId, userText);
 
     // Save assistant response
@@ -194,6 +195,15 @@ Character Information:
     return history.map(msg =>
       msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg,
     );
+  }
+
+  private async ensureChatSession(userId: string, characterId: string) {
+    const history = await this.conv.getHistory(userId, characterId);
+    const chatHistory = history.map(m => ({
+      role: m.role === 'assistant' ? 'model' : m.role,
+      parts: [{ text: m.text }],
+    }));
+    this.gemini.initializeChatSession(characterId, this.systemPrompt, chatHistory);
   }
 
   @Get('/:characterId/history')
