@@ -115,7 +115,7 @@
       <!-- Chat Bar (aligned with messages in grid) -->
       <div class="lg:col-start-4 lg:col-span-9">
         <ChatBar
-          @send="sendMessage"
+          @send="handleSendMessage"
         />
       </div>
 
@@ -160,9 +160,11 @@ import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
 import UiButton from '../components/ui/UiButton.vue';
+import { useGameCommands } from '../composables/useGameCommands';
 import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
+import { isCommand } from '../utils/chatCommands';
 import { characterServiceApi } from '../services/characterServiceApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
@@ -179,6 +181,22 @@ const characterId = computed(() => route.params.characterId as string);
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { confirmRoll } = useGameRolls();
+const { handleInput } = useGameCommands();
+
+/**
+ * Handle sending a message - either as a command or regular message
+ */
+const handleSendMessage = async () => {
+  const input = gameStore.playerText.trim();
+  if (!input) return;
+
+  if (isCommand(input)) {
+    gameStore.playerText = '';
+    await handleInput(input);
+  } else {
+    await sendMessage();
+  }
+};
 
 // Toggle sidebar for mobile
 const toggleSidebar = () => {
