@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full overflow-y-auto">
+  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full flex flex-col max-h-screen overflow-hidden">
     <!-- Header with restore draft button -->
     <div class="flex justify-between mb-3 lg:mb-4">
       <div class="flex-1">
@@ -40,44 +40,57 @@
     </div>
 
     <!-- Steps -->
-    <StepBasicInfo v-if="currentStep === 0" />
-
-    <StepRaceClass v-if="currentStep === 1" />
-
-    <StepAbilityScores v-if="currentStep === 2" />
-
-    <StepSkills v-if="currentStep === 3" />
-
-    <StepInventory v-if="currentStep === 4" />
-
-    <StepAvatar v-if="currentStep === 5" />
+    <div class="flex-1 overflow-auto">
+      <div class="h-full">
+        <div class="h-full">
+          <StepBasicInfo v-if="currentStep === 0" />
+        </div>
+        <div class="h-full">
+          <StepAbilityScores v-if="currentStep === 1" />
+        </div>
+        <div class="h-full">
+          <StepSkills v-if="currentStep === 2" />
+        </div>
+        <div class="h-full">
+          <StepSpells v-if="currentStep === 3" />
+        </div>
+        <div class="h-full">
+          <StepInventory v-if="currentStep === 4" />
+        </div>
+        <div class="h-full">
+          <StepAvatar v-if="currentStep === 5" />
+        </div>
+      </div>
+    </div>
 
     <!-- Navigation buttons -->
-    <div class="flex justify-end gap-2 mt-4 lg:mt-6 sticky bottom-0 bg-slate-900/95 py-3 -mx-2 px-2 lg:mx-0 lg:px-0 lg:bg-transparent lg:static">
-      <UiButton
-        variant="ghost"
-        :disabled="currentStep === 0"
-        @click="previousStep"
-      >
-        Retour
-      </UiButton>
-      <UiButton
-        v-if="currentStep < steps.length - 1"
-        variant="primary"
-        :disabled="!canProceed"
-        @click="nextStep"
-      >
-        Suivant
-      </UiButton>
-      <UiButton
-        v-if="currentStep === steps.length - 1"
-        variant="primary"
-        :is-loading="isLoading"
-        :disabled="isLoading"
-        @click="finishCreation"
-      >
-        Terminer
-      </UiButton>
+    <div class="flex justify-end gap-2 mt-4 lg:mt-6 fixed bottom-0 left-0 right-0 bg-slate-900/95 py-3 px-2 lg:px-4 z-10">
+      <div class="max-w-4xl w-full mx-auto flex justify-end gap-2">
+        <UiButton
+          variant="ghost"
+          :disabled="currentStep === 0"
+          @click="previousStep"
+        >
+          Retour
+        </UiButton>
+        <UiButton
+          v-if="currentStep < steps.length - 1"
+          variant="primary"
+          :disabled="!canProceed"
+          @click="nextStep"
+        >
+          Suivant
+        </UiButton>
+        <UiButton
+          v-if="currentStep === steps.length - 1"
+          variant="primary"
+          :is-loading="isLoading"
+          :disabled="isLoading"
+          @click="finishCreation"
+        >
+          Terminer
+        </UiButton>
+      </div>
     </div>
   </div>
 </template>
@@ -97,7 +110,7 @@ import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
 import StepInventory from './steps/StepInventory.vue';
-import StepRaceClass from './steps/StepRaceClass.vue';
+import StepSpells from './steps/StepSpells.vue';
 import StepSkills from './steps/StepSkills.vue';
 
 const router = useRouter();
@@ -106,7 +119,7 @@ const route = useRoute();
 const isLoading = ref(false);
 const loadingTitle = ref('');
 const loadingSubtitle = ref('');
-const steps = ['Informations', 'Race & Classe', 'Capacités', 'Compétences', 'Inventaire', 'Avatar'];
+const steps = ['Informations', 'Classe et Capacités', 'Compétences', 'Sorts', 'Inventaire', 'Avatar'];
 
 const characterStore = useCharacterStore();
 const { updateCharacter } = characterStore;
@@ -136,11 +149,10 @@ const canProceed = computed(() => {
     case 1:
       return currentCharacter.value?.race && currentCharacter.value?.classes?.[0];
     case 2:
-      return true;
-    case 3:
       return chosenSkills.value === skillsToChoose.value;
+    case 3:
+      return true;
     case 4:
-      // Inventory is optional during creation — allow proceeding
       return true;
     case 5:
       return true;
@@ -179,7 +191,7 @@ const generateAndApplyAvatar = async () => {
     console.log('Avatar generated');
     try {
       const refreshed = await characterServiceApi.getCharacterById(currentCharacter.value!.characterId);
-      if (refreshed) currentCharacter.value = refreshed as any;
+      if (refreshed) currentCharacter.value = refreshed;
       else currentCharacter.value!.portrait = imageUrl;
     } catch {
       currentCharacter.value!.portrait = imageUrl;

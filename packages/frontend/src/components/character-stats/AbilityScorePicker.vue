@@ -1,6 +1,6 @@
 <template>
   <div class="p-2 bg-slate-800/40 rounded">
-    <div class="mt-3 grid grid-cols-2 gap-2">
+    <div class="mt-3 grid grid-cols-2 gap-5">
       <div
         v-for="ability in ABILITIES"
         :key="ability"
@@ -25,20 +25,8 @@
               :min="8"
               :max="15"
               :disabled="mode === 'edit'"
-              @update:model-value="async (val) => {
-                // val might be undefined from the input binding; coerce to number and pass typed ability
-                const v = (val ?? (currentCharacter?.scores?.[ability] ?? 8)) as number;
-                const result = applyPointBuyChange(ability as typeof ABILITIES[number], v);
-                // Persist the updated scores to the API so a page reload will keep changes
-                if (result?.allowed && currentCharacter?.characterId) {
-                  try {
-                    await characterStore.updateCharacter(currentCharacter.characterId, { scores: currentCharacter.scores });
-                  } catch (e) {
-                    // swallow save errors in tests - UI already reflects change
-                    console.error('Failed to persist ability scores', e);
-                  }
-                }
-              }"
+              class="justify-around"
+              @update:model-value="(val) => onUpdateAbilityValue(ability, val)"
             />
           </div>
         </div>
@@ -60,5 +48,12 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const { formatMod, applyPointBuyChange } = useAbilityScores();
+
+const onUpdateAbilityValue = async (ability: typeof ABILITIES[number], val: number) => {
+  const value = (val ?? (currentCharacter?.value?.scores?.[ability] ?? 8));
+  const result = applyPointBuyChange(ability as typeof ABILITIES[number], value);
+  if (!result?.allowed || !currentCharacter?.value?.characterId) return;
+  await characterStore.updateCharacter(currentCharacter.value.characterId, { scores: currentCharacter.value.scores });
+};
 
 </script>

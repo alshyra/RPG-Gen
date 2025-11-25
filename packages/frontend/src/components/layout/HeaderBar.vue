@@ -1,7 +1,6 @@
 <template>
   <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between p-2 gap-2 min-h-14">
-    <!-- Title - left aligned (no subtitle by default) -->
-    <div class="flex-none text-left order-first lg:order-0">
+    <div class="flex items-center justify-between w-full">
       <router-link
         :to="{ name: 'home' }"
         class="inline-block"
@@ -10,8 +9,12 @@
           RPG Gemini
         </h1>
       </router-link>
+      <UserProfile />
     </div>
   </header>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import UserProfile from './UserProfile.vue';
+
+</script>

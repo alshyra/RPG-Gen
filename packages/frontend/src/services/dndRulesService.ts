@@ -6,7 +6,9 @@
 import { AbilityScoresDto } from '@rpg-gen/shared';
 import { getCurrentLevel } from '../utils/dndLevels';
 
-export const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'] as const;
+export const ABILITIES = [
+  'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
+] as const;
 export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 } as const;
 
 interface RaceModifiers {
@@ -74,23 +76,49 @@ export const CLASSES_LIST = [
   'Warlock',
   'Wizard',
 ] as const;
-export const GENDERS = ['male', 'female'] as const;
+export const GENDERS = [
+  'male', 'female',
+] as const;
 export const DEFAULT_RACE = ALLOWED_RACES[0];
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
-  Barbarian: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
-  Bard: ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'],
-  Cleric: ['Insight', 'Medicine', 'Persuasion', 'Religion'],
-  Druid: ['Arcana', 'Animal Handling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
-  Fighter: ['Acrobatics', 'Animal Handling', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception'],
-  Monk: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
-  Paladin: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
-  Ranger: ['Animal Handling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
-  Rogue: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth'],
-  Sorcerer: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
-  Warlock: ['Arcana', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
-  Wizard: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+  Barbarian: [
+    'Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival',
+  ],
+  Bard: [
+    'Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival',
+  ],
+  Cleric: [
+    'Insight', 'Medicine', 'Persuasion', 'Religion',
+  ],
+  Druid: [
+    'Arcana', 'Animal Handling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival',
+  ],
+  Fighter: [
+    'Acrobatics', 'Animal Handling', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception',
+  ],
+  Monk: [
+    'Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth',
+  ],
+  Paladin: [
+    'Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion',
+  ],
+  Ranger: [
+    'Animal Handling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival',
+  ],
+  Rogue: [
+    'Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth',
+  ],
+  Sorcerer: [
+    'Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion',
+  ],
+  Warlock: [
+    'Arcana', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Nature', 'Religion',
+  ],
+  Wizard: [
+    'Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion',
+  ],
 };
 
 // How many skills can be chosen per class
@@ -196,6 +224,42 @@ export class DnDRulesService {
    */
   static getAllSkills(): Skill[] {
     return SKILLS;
+  }
+
+  /**
+   * Return a small sample list of spells for a class. This is intentionally small
+   * and used for character creation UI only.
+   */
+  static getAvailableSpellsForClass(className: string) {
+    const base: { name: string; level: number; description?: string }[] = [];
+    switch (className) {
+      case 'Wizard':
+        base.push({ name: 'Magic Missile', level: 1, description: 'Un missile magique qui touche automatiquement.' });
+        base.push({ name: 'Fireball', level: 3, description: 'Une explosion de feu qui inflige des dégâts.' });
+        base.push({ name: 'Mage Armor', level: 1, description: 'Une armure magique protectrice.' });
+        break;
+      case 'Cleric':
+        base.push({ name: 'Cure Wounds', level: 1, description: 'Soigne une créature proche.' });
+        base.push({ name: 'Bless', level: 1, description: 'Augmente l\'attaque et le jet de sauvegarde d\'alliés.' });
+        base.push({ name: 'Spiritual Weapon', level: 2, description: 'Crée une arme spirituelle qui attaque.' });
+        break;
+      case 'Druid':
+        base.push({ name: 'Entangle', level: 1, description: 'Enracine les ennemis au sol.' });
+        base.push({ name: 'Produce Flame', level: 0, description: 'Une flamme facile qui attaque à distance.' });
+        break;
+      case 'Bard':
+        base.push({ name: 'Vicious Mockery', level: 0, description: 'Une insulte magique qui inflige des dégâts psychiques.' });
+        base.push({ name: 'Healing Word', level: 1, description: 'Un soin à distance.' });
+        break;
+      case 'Sorcerer':
+        base.push({ name: 'Shield', level: 1, description: 'Bouclier magique instantané.' });
+        base.push({ name: 'Magic Missile', level: 1, description: 'Un missile magique qui touche automatiquement.' });
+        break;
+      default:
+        return [];
+    }
+
+    return base;
   }
 
   /**

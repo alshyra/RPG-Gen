@@ -42,13 +42,13 @@ describe('CharacterCreatorWizard finish flow', () => {
   it('generates avatar, refreshes store and navigates to game', async () => {
     // ensure we are on last step
     const route = useRoute();
-    route.params.step = '6';
+    route.params.step = '7';
     route.params.characterId = 'c1';
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton',
+          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton',
         ],
       },
     });
@@ -62,7 +62,7 @@ describe('CharacterCreatorWizard finish flow', () => {
 
   it('shows full page loader while avatar and first prompt are prepared', async () => {
     const route = useRoute() as any;
-    route.params.step = '6';
+    route.params.step = '7';
     route.params.characterId = 'c1';
 
     // Override mocks to return pending promises so we can assert the loader is visible
@@ -83,7 +83,7 @@ describe('CharacterCreatorWizard finish flow', () => {
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader',
+          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader',
         ],
       },
     });

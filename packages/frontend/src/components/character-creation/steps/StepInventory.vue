@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 lg:p-4">
+  <div class="p-2 lg:p-4 max-h-[calc(100vh-220px)] lg:max-h-145 overflow-y-auto">
     <h3 class="font-semibold mb-2">
       Choisissez votre équipement
     </h3>
@@ -24,7 +24,7 @@
           <div
             v-for="item in basePack"
             :key="item.definitionId"
-            class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
+            class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center justify-between gap-3"
           >
             <UiInputCheckbox
               :model-value="true"
