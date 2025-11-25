@@ -38,6 +38,7 @@ describe('AbilityScorePicker', () => {
   it('prevents overspend in point-buy and allows cost reductions', () => {
     // no onUpdate prop used; component updates the store directly.
     // default values use 27 points, so decreasing one frees budget
+    cy.intercept('PUT', '**/characters/*', { statusCode: 200, body: {} }).as('saveCharacter');
     const pinia2 = createPinia();
     const router2 = createRouter({ history: createMemoryHistory(), routes: [] });
     cy.mount(AbilityScorePicker, {
@@ -91,6 +92,7 @@ describe('AbilityScorePicker', () => {
 
   it('enforces level-up budget in levelup mode', () => {
     // In levelup mode, we pass levelUpBudget prop and verify store updates are limited by budget
+    cy.intercept('PUT', '**/characters/*', { statusCode: 200, body: {} }).as('saveCharacter');
     const initialScores = { Str: 10, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 };
     const pinia3 = createPinia();
     const router3 = createRouter({ history: createMemoryHistory(), routes: [] });
