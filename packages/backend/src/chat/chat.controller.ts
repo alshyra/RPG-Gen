@@ -16,6 +16,7 @@ import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { calculateArmorClass } from '../character/armor-class.util.js';
 import { CharacterService } from '../character/character.service.js';
 import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
@@ -86,6 +87,7 @@ export class ChatController {
   }
 
   private buildCharacterSummary(character: CharacterDto): string {
+    const armorClass = calculateArmorClass(character);
     let summary = `
 Character Information:
 - Name: ${character.name || 'Unknown'}
@@ -93,6 +95,7 @@ Character Information:
 - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
 - Gender: ${character.gender || 'Unknown'}
 - HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
+- AC: ${armorClass}
 - XP: ${character.totalXp || 0}
 - Level: 1
 - Stats:
