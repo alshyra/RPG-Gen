@@ -2,6 +2,9 @@
 // Re-export all generated DTOs
 export * from './generated';
 
+// Re-export OpenAPI types for use with openapi-fetch
+export type { paths, components, operations } from './api-types';
+
 // Re-export proper types from the types folder (replacing 'any' fallbacks)
 export type {
   GameInstruction,
