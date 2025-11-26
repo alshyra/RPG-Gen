@@ -1,17 +1,3 @@
-/**
- * Script to generate TypeScript types from OpenAPI spec
- *
- * This script fetches the OpenAPI spec from the running backend server
- * and generates TypeScript types using openapi-typescript.
- *
- * Usage:
- *   npm run generate:openapi
- *
- * Prerequisites:
- *   - Backend server must be running at http://localhost:3001
- *   - Alternatively, set OPENAPI_URL environment variable
- */
-
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

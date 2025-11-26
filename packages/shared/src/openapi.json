@@ -1,0 +1,678 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Initiate Google OAuth login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleAuthRedirect",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Google OAuth callback",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get current user profile",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Logout (client should clear token)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/chat/{characterId}": {
+      "post": {
+        "operationId": "ChatController_chat",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send prompt to Gemini (chat)",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/chat/{characterId}/history": {
+      "get": {
+        "operationId": "ChatController_getHistory",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get conversation history for a character",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/characters": {
+      "post": {
+        "operationId": "CharacterController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new character",
+        "tags": [
+          "characters"
+        ]
+      },
+      "get": {
+        "operationId": "CharacterController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all characters for the current user",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/deceased": {
+      "get": {
+        "operationId": "CharacterController_getDeceased",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all deceased characters",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}": {
+      "get": {
+        "operationId": "CharacterController_findOne",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a specific character by ID",
+        "tags": [
+          "characters"
+        ]
+      },
+      "put": {
+        "operationId": "CharacterController_update",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a character",
+        "tags": [
+          "characters"
+        ]
+      },
+      "delete": {
+        "operationId": "CharacterController_delete",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a character",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/kill": {
+      "post": {
+        "operationId": "CharacterController_kill",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a character as deceased",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/inventory": {
+      "post": {
+        "operationId": "CharacterController_addInventory",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInventoryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an item to character's inventory",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/inventory/{itemId}": {
+      "patch": {
+        "operationId": "CharacterController_updateInventory",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an item in character's inventory",
+        "tags": [
+          "characters"
+        ]
+      },
+      "delete": {
+        "operationId": "CharacterController_removeInventory",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an item from character's inventory",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/inspiration/grant": {
+      "post": {
+        "operationId": "CharacterController_grantInspiration",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant inspiration point(s) to a character",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/inspiration/spend": {
+      "post": {
+        "operationId": "CharacterController_spendInspiration",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Spend an inspiration point",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/items": {
+      "get": {
+        "operationId": "ItemDefinitionController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ItemDefinition"
+        ]
+      }
+    },
+    "/api/items/{definitionId}": {
+      "get": {
+        "operationId": "ItemDefinitionController_get",
+        "parameters": [
+          {
+            "name": "definitionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ItemDefinition"
+        ]
+      }
+    },
+    "/api/dice": {
+      "post": {
+        "operationId": "DiceController_roll",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dice throw result"
+          }
+        },
+        "summary": "Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20",
+        "tags": [
+          "dice"
+        ]
+      }
+    },
+    "/api/image": {
+      "post": {
+        "operationId": "ImageController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Generate image from prompt",
+        "tags": [
+          "image"
+        ]
+      }
+    },
+    "/api/image/generate-avatar": {
+      "post": {
+        "operationId": "ImageController_generateAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CharacterIdBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate character avatar from description",
+        "tags": [
+          "image"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "RPG Gemini Portal",
+    "description": "Prototype API for RPG portal using Gemini tokens",
+    "version": "0.1",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "ChatRequest": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Inventory item id (UUID). If provided, attempt to merge with existing item"
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Canonical definition id for this item"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for this inventory item"
+          },
+          "qty": {
+            "type": "number",
+            "description": "Quantity for this item"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description / notes"
+          },
+          "equipped": {
+            "type": "boolean",
+            "description": "If true this item is equipped"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Arbitrary item meta"
+          }
+        },
+        "required": [
+          "definitionId"
+        ]
+      },
+      "DiceRequest": {
+        "type": "object",
+        "properties": {}
+      },
+      "CharacterIdBody": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "UUID of the character"
+          }
+        },
+        "required": [
+          "characterId"
+        ]
+      }
+    }
+  }
+}
