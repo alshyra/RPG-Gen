@@ -130,7 +130,7 @@ export const getArgumentSuggestions = (
     case 'cast':
       // Filter spells by character level (spell level must be <= character level)
       return spells
-        .filter(spell => {
+        .filter((spell) => {
           const spellLevel = spell.level || 0;
           const matchesName = spell.name.toLowerCase().includes(partial);
           const matchesLevel = spellLevel <= characterLevel;
@@ -145,7 +145,7 @@ export const getArgumentSuggestions = (
     case 'use':
       // Only show usable/consumable items for /use command
       return inventory
-        .filter(item => {
+        .filter((item) => {
           const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
           const matchesName = item.name.toLowerCase().includes(partial);
           return isUsable && matchesName;

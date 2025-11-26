@@ -119,9 +119,7 @@ const getItemClass = (index: number): string[] => [
     : 'hover:bg-slate-700 text-slate-200',
 ];
 
-const getArgumentIcon = (type: 'spell' | 'item'): string => {
-  return type === 'spell' ? '✨' : '🎒';
-};
+const getArgumentIcon = (type: 'spell' | 'item'): string => type === 'spell' ? '✨' : '🎒';
 
 // Expose methods for keyboard navigation from parent
 const navigateUp = () => {
