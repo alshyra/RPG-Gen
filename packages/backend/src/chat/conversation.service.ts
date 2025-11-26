@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { ChatMessage as SharedChatMessage } from '@rpg-gen/shared';
+import type { ChatMessage } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
-import { ChatHistory, ChatHistoryDocument, ChatMessage as SchemaChatMessage } from '../schemas/chat-history.schema.js';
+import * as Schema from '../schemas/chat-history.schema.js';
 
 // Re-export the shared ChatMessage type for convenience
 export type { ChatMessage } from '@rpg-gen/shared';
@@ -13,10 +13,10 @@ export class ConversationService {
   private readonly MAX_MESSAGES = Number(process.env.CONV_MAX_MESSAGES || '60');
 
   constructor(
-    @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>,
+    @InjectModel(Schema.ChatHistory.name) private chatHistoryModel: Model<Schema.ChatHistoryDocument>,
   ) {}
 
-  async getHistory(userId: string, characterId: string): Promise<SharedChatMessage[]> {
+  async getHistory(userId: string, characterId: string): Promise<ChatMessage[]> {
     const history = await this.chatHistoryModel.findOne({ userId, characterId }).exec();
 
     if (!history) return [];
@@ -29,11 +29,11 @@ export class ConversationService {
     }));
   }
 
-  async append(userId: string, characterId: string, msg: SharedChatMessage) {
+  async append(userId: string, characterId: string, msg: ChatMessage) {
     let history = await this.chatHistoryModel.findOne({ userId, characterId });
 
     // Convert shared message type to schema message type
-    const schemaMsg: SchemaChatMessage = {
+    const schemaMsg: Schema.ChatMessage = {
       role: msg.role,
       text: msg.text,
       timestamp: msg.timestamp,
@@ -62,9 +62,9 @@ export class ConversationService {
     this.logger.log(`💬 Saved message to character ${characterId} (${history.messages.length} messages)`);
   }
 
-  async setHistory(userId: string, characterId: string, list: SharedChatMessage[]) {
+  async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
     // Convert shared messages to schema messages
-    const schemaMessages: SchemaChatMessage[] = list.map(msg => ({
+    const schemaMessages: Schema.ChatMessage[] = list.map(msg => ({
       role: msg.role,
       text: msg.text,
       timestamp: msg.timestamp,
