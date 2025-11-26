@@ -37,7 +37,7 @@ export const characterApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify({ world }),
     });
@@ -76,7 +76,7 @@ export const characterApi = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify(updates),
     });
@@ -102,7 +102,7 @@ export const characterApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify({ deathLocation }),
     });
@@ -138,7 +138,7 @@ export const characterApi = {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify(updates),
     });
@@ -155,7 +155,7 @@ export const characterApi = {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify({ qty }),
     });
@@ -172,7 +172,7 @@ export const characterApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
       },
       body: JSON.stringify({ amount }),
     });
