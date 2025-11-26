@@ -140,10 +140,17 @@ const playerText = computed({
 
 const isRolling = computed(() => !!gameStore.pendingInstruction?.roll);
 
+// Calculate character's total level from all classes
+const characterLevel = computed(() => {
+  const classes = characterStore.currentCharacter?.classes || [];
+  return classes.reduce((total, cls) => total + (cls.level || 0), 0) || 1;
+});
+
 const suggestionResult = computed(() => getAllSuggestions(
   playerText.value,
   characterStore.currentCharacter?.spells || [],
   characterStore.currentCharacter?.inventory || [],
+  characterLevel.value,
 ));
 
 const totalSuggestions = computed(() =>

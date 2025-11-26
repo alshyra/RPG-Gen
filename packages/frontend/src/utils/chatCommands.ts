@@ -111,19 +111,31 @@ export function parseActiveCommand(input: string): { command: CommandType | null
 
 /**
  * Get argument suggestions based on the active command and available spells/items
+ * @param command - The active command type
+ * @param partialArg - Partial argument text for filtering
+ * @param spells - Available spells
+ * @param inventory - Available inventory items
+ * @param characterLevel - Character's total level (for spell filtering)
  */
 export function getArgumentSuggestions(
   command: CommandType,
   partialArg: string,
   spells: SpellDto[] = [],
   inventory: ItemDto[] = [],
+  characterLevel: number = 1,
 ): ArgumentSuggestion[] {
   const partial = partialArg.toLowerCase();
 
   switch (command) {
     case 'cast':
+      // Filter spells by character level (spell level must be <= character level)
       return spells
-        .filter(spell => spell.name.toLowerCase().includes(partial))
+        .filter(spell => {
+          const spellLevel = spell.level || 0;
+          const matchesName = spell.name.toLowerCase().includes(partial);
+          const matchesLevel = spellLevel <= characterLevel;
+          return matchesName && matchesLevel;
+        })
         .map(spell => ({
           name: spell.name,
           description: spell.description || `Niveau ${spell.level || 0}`,
@@ -131,7 +143,21 @@ export function getArgumentSuggestions(
         }));
 
     case 'use':
+      // Only show usable/consumable items for /use command
+      return inventory
+        .filter(item => {
+          const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
+          const matchesName = item.name.toLowerCase().includes(partial);
+          return isUsable && matchesName;
+        })
+        .map(item => ({
+          name: item.name,
+          description: item.description || (item.qty > 1 ? `x${item.qty}` : undefined),
+          type: 'item' as const,
+        }));
+
     case 'equip':
+      // Show all items for /equip command
       return inventory
         .filter(item => item.name.toLowerCase().includes(partial))
         .map(item => ({
@@ -151,11 +177,16 @@ export function getArgumentSuggestions(
 
 /**
  * Get all suggestions (commands or arguments) based on the input and character data
+ * @param input - The current input text
+ * @param spells - Available spells
+ * @param inventory - Available inventory items
+ * @param characterLevel - Character's total level (for spell filtering)
  */
 export function getAllSuggestions(
   input: string,
   spells: SpellDto[] = [],
   inventory: ItemDto[] = [],
+  characterLevel: number = 1,
 ): SuggestionResult {
   const trimmed = input.trim();
 
@@ -184,7 +215,7 @@ export function getAllSuggestions(
   const { command, argumentPartial } = parseActiveCommand(input);
 
   if (command) {
-    const argumentSuggestions = getArgumentSuggestions(command, argumentPartial, spells, inventory);
+    const argumentSuggestions = getArgumentSuggestions(command, argumentPartial, spells, inventory, characterLevel);
     return {
       type: 'argument',
       commandSuggestions: [],

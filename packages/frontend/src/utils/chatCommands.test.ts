@@ -167,47 +167,64 @@ describe('chatCommands', () => {
       { name: 'Fireball', level: 3, description: 'A ball of fire', meta: {} },
       { name: 'Ice Storm', level: 4, description: 'Freezing storm', meta: {} },
       { name: 'Fire Shield', level: 4, meta: {} },
+      { name: 'Magic Missile', level: 1, meta: {} },
     ];
 
     const mockInventory = [
-      { name: 'Health Potion', qty: 3, description: 'Restores HP', meta: {} },
+      { name: 'Health Potion', qty: 3, description: 'Restores HP', meta: { consumable: true } },
       { name: 'Sword', qty: 1, meta: {} },
       { name: 'Shield', qty: 1, description: 'Blocks attacks', meta: {} },
+      { name: 'Scroll of Fire', qty: 1, meta: { usable: true } },
     ];
 
-    it('returns spell suggestions for /cast command', () => {
-      const suggestions = getArgumentSuggestions('cast', '', mockSpells, mockInventory);
-      expect(suggestions).toHaveLength(3);
+    it('returns spell suggestions for /cast command filtered by character level', () => {
+      // Level 5 character can cast all spells up to level 5
+      const suggestions = getArgumentSuggestions('cast', '', mockSpells, mockInventory, 5);
+      expect(suggestions).toHaveLength(4);
       expect(suggestions.every(s => s.type === 'spell')).toBe(true);
     });
 
-    it('filters spells by partial name', () => {
-      const suggestions = getArgumentSuggestions('cast', 'fire', mockSpells, mockInventory);
+    it('filters spells by character level', () => {
+      // Level 3 character can only cast spells up to level 3
+      const suggestions = getArgumentSuggestions('cast', '', mockSpells, mockInventory, 3);
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map(s => s.name)).toContain('Fireball');
+      expect(suggestions.map(s => s.name)).toContain('Magic Missile');
+      expect(suggestions.map(s => s.name)).not.toContain('Ice Storm');
+      expect(suggestions.map(s => s.name)).not.toContain('Fire Shield');
+    });
+
+    it('filters spells by partial name and level', () => {
+      const suggestions = getArgumentSuggestions('cast', 'fire', mockSpells, mockInventory, 5);
       expect(suggestions).toHaveLength(2);
       expect(suggestions.map(s => s.name)).toContain('Fireball');
       expect(suggestions.map(s => s.name)).toContain('Fire Shield');
     });
 
-    it('returns item suggestions for /use command', () => {
-      const suggestions = getArgumentSuggestions('use', '', mockSpells, mockInventory);
-      expect(suggestions).toHaveLength(3);
+    it('returns only usable/consumable items for /use command', () => {
+      const suggestions = getArgumentSuggestions('use', '', mockSpells, mockInventory, 5);
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.every(s => s.type === 'item')).toBe(true);
+      expect(suggestions.map(s => s.name)).toContain('Health Potion');
+      expect(suggestions.map(s => s.name)).toContain('Scroll of Fire');
+      expect(suggestions.map(s => s.name)).not.toContain('Sword');
+      expect(suggestions.map(s => s.name)).not.toContain('Shield');
+    });
+
+    it('returns all items for /equip command', () => {
+      const suggestions = getArgumentSuggestions('equip', '', mockSpells, mockInventory, 5);
+      expect(suggestions).toHaveLength(4);
       expect(suggestions.every(s => s.type === 'item')).toBe(true);
     });
 
-    it('returns item suggestions for /equip command', () => {
-      const suggestions = getArgumentSuggestions('equip', '', mockSpells, mockInventory);
-      expect(suggestions).toHaveLength(3);
-      expect(suggestions.every(s => s.type === 'item')).toBe(true);
-    });
-
-    it('filters items by partial name', () => {
-      const suggestions = getArgumentSuggestions('use', 'shield', mockSpells, mockInventory);
+    it('filters usable items by partial name', () => {
+      const suggestions = getArgumentSuggestions('use', 'potion', mockSpells, mockInventory, 5);
       expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].name).toBe('Shield');
+      expect(suggestions[0].name).toBe('Health Potion');
     });
 
     it('returns empty array for /attack command', () => {
-      const suggestions = getArgumentSuggestions('attack', '', mockSpells, mockInventory);
+      const suggestions = getArgumentSuggestions('attack', '', mockSpells, mockInventory, 5);
       expect(suggestions).toHaveLength(0);
     });
   });
@@ -218,18 +235,18 @@ describe('chatCommands', () => {
     ];
 
     const mockInventory = [
-      { name: 'Health Potion', qty: 1, meta: {} },
+      { name: 'Health Potion', qty: 1, meta: { consumable: true } },
     ];
 
     it('returns command suggestions for partial command', () => {
-      const result = getAllSuggestions('/ca', mockSpells, mockInventory);
+      const result = getAllSuggestions('/ca', mockSpells, mockInventory, 5);
       expect(result.type).toBe('command');
       expect(result.commandSuggestions).toHaveLength(1);
       expect(result.argumentSuggestions).toHaveLength(0);
     });
 
     it('returns argument suggestions after command with space', () => {
-      const result = getAllSuggestions('/cast ', mockSpells, mockInventory);
+      const result = getAllSuggestions('/cast ', mockSpells, mockInventory, 5);
       expect(result.type).toBe('argument');
       expect(result.commandSuggestions).toHaveLength(0);
       expect(result.argumentSuggestions).toHaveLength(1);
@@ -237,16 +254,36 @@ describe('chatCommands', () => {
     });
 
     it('returns filtered argument suggestions', () => {
-      const result = getAllSuggestions('/cast fire', mockSpells, mockInventory);
+      const result = getAllSuggestions('/cast fire', mockSpells, mockInventory, 5);
       expect(result.type).toBe('argument');
       expect(result.argumentSuggestions).toHaveLength(1);
       expect(result.argumentSuggestions[0].name).toBe('Fireball');
     });
 
     it('returns empty suggestions for non-command input', () => {
-      const result = getAllSuggestions('hello', mockSpells, mockInventory);
+      const result = getAllSuggestions('hello', mockSpells, mockInventory, 5);
       expect(result.commandSuggestions).toHaveLength(0);
       expect(result.argumentSuggestions).toHaveLength(0);
+    });
+
+    it('filters spells by character level in getAllSuggestions', () => {
+      const spells = [
+        { name: 'Fireball', level: 3, meta: {} },
+        { name: 'Meteor Swarm', level: 9, meta: {} },
+      ];
+      const result = getAllSuggestions('/cast ', spells, mockInventory, 3);
+      expect(result.argumentSuggestions).toHaveLength(1);
+      expect(result.argumentSuggestions[0].name).toBe('Fireball');
+    });
+
+    it('filters items by usable/consumable in getAllSuggestions for /use', () => {
+      const items = [
+        { name: 'Health Potion', qty: 1, meta: { consumable: true } },
+        { name: 'Sword', qty: 1, meta: {} },
+      ];
+      const result = getAllSuggestions('/use ', mockSpells, items, 5);
+      expect(result.argumentSuggestions).toHaveLength(1);
+      expect(result.argumentSuggestions[0].name).toBe('Health Potion');
     });
   });
 });
