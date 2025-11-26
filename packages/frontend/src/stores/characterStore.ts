@@ -1,4 +1,4 @@
-import { characterServiceApi } from '@/services/characterServiceApi';
+import { characterServiceApi } from '@/services/characterApi';
 import { CharacterDto, ItemDto, SpellDto, SpellInstruction } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
@@ -122,7 +122,7 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   const createCharacter = async (world: string) => {
-    const newChar = await characterServiceApi.createCharacter({ world });
+    const newChar = await characterServiceApi.createCharacter(world);
     currentCharacter.value = newChar;
     return newChar;
   };

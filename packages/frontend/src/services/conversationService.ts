@@ -13,8 +13,15 @@ export class ConversationService {
     if (!character) throw new Error('No character provided to startGame.');
     this.characterId = character.characterId;
 
-    const histRes = await apiClient.GET(`/api/chat/{characterId}/history`, { params: { path: { characterId: this.characterId } } });
-    return histRes.data;
+    const { data, error } = await apiClient.GET('/api/chat/{characterId}/history', {
+      params: { path: { characterId: this.characterId } },
+    });
+
+    if (error) {
+      throw new Error('Failed to load conversation history');
+    }
+
+    return data;
   }
 
   /**
@@ -22,15 +29,21 @@ export class ConversationService {
    */
   async sendMessage(message: string): Promise<GameResponse> {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
-    const res = await apiClient.post(`/chat/${this.characterId}`, { message });
-    console.log(res);
-    const result = res?.data;
+
+    const { data, error } = await apiClient.POST('/api/chat/{characterId}', {
+      params: { path: { characterId: this.characterId } },
+      body: { message },
+    });
+
+    if (error || !data) {
+      throw new Error('Failed to send message');
+    }
 
     return {
-      text: result.text || '',
-      instructions: result.instructions || [],
-      model: result.model,
-      usage: result.usage,
+      text: data.text || '',
+      instructions: data.instructions || [],
+      model: data.model,
+      usage: data.usage,
     };
   }
 }

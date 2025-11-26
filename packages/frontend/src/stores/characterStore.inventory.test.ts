@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useCharacterStore } from './characterStore';
-import { characterServiceApi } from '@/services/characterServiceApi';
+import { characterServiceApi } from '@/services/characterApi';
 
 describe('characterStore inventory persistence', () => {
   beforeEach(() => {

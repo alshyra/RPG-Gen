@@ -2,7 +2,7 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterDto, CreateInventoryItemDto, components } from '@rpg-gen/shared';
+import type { CharacterDto, ItemDto, components } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Type alias for OpenAPI inventory item type
@@ -16,8 +16,8 @@ const getData = <T>(response: { data?: T; error?: unknown }): T => {
   return response.data as T;
 };
 
-// Convert shared DTO to OpenAPI format
-const toOpenApiInventoryItem = (item: Partial<CreateInventoryItemDto>): OpenApiInventoryItem => ({
+// Convert ItemDto to OpenAPI CreateInventoryItemDto format
+const toOpenApiInventoryItem = (item: Partial<ItemDto>): OpenApiInventoryItem => ({
   definitionId: item.definitionId ?? '',
   _id: item._id,
   name: item.name,
@@ -121,7 +121,7 @@ export const characterApi = {
   /**
    * Add an item to character's inventory
    */
-  addInventoryItem: async (characterId: string, item: Partial<CreateInventoryItemDto>): Promise<CharacterDto> => {
+  addInventoryItem: async (characterId: string, item: Partial<ItemDto>): Promise<CharacterDto> => {
     const response = await api.POST('/api/characters/{characterId}/inventory', {
       params: { path: { characterId } },
       body: toOpenApiInventoryItem(item),
@@ -132,7 +132,7 @@ export const characterApi = {
   /**
    * Update an item in character's inventory
    */
-  updateInventoryItem: async (characterId: string, itemId: string, updates: Partial<CreateInventoryItemDto>): Promise<CharacterDto> => {
+  updateInventoryItem: async (characterId: string, itemId: string, updates: Partial<ItemDto>): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
     const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inventory/${itemId}`, {
       method: 'PATCH',

@@ -21,7 +21,7 @@ vi.mock('@/stores/characterStore', () => ({
   }),
 }));
 
-vi.mock('@/services/characterServiceApi', async () => ({
+vi.mock('@/services/characterApi', async () => ({
   characterServiceApi: {
     generateAvatar: vi.fn(async (_: string) => 'data:image/png;base64,avatar'),
     getCharacterById: vi.fn(async (_: string) => ({ ...currentCharacter.value, portrait: 'data:image/png;base64,avatar' })),
@@ -66,7 +66,7 @@ describe('CharacterCreatorWizard finish flow', () => {
     route.params.characterId = 'c1';
 
     // Override mocks to return pending promises so we can assert the loader is visible
-    const api = await import('@/services/characterServiceApi');
+    const api = await import('@/services/characterApi');
     let genResolve: (v?: any) => void = () => {};
     const genPromise = new Promise<string>((resolve) => {
       genResolve = resolve;
