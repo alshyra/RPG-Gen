@@ -54,7 +54,7 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
  * @param input - The partial input (e.g., "/ca" or "/")
  * @returns Array of matching command definitions
  */
-export function getCommandSuggestions(input: string): CommandDefinition[] {
+export const getCommandSuggestions = (input: string): CommandDefinition[] => {
   const trimmed = input.trim().toLowerCase();
 
   // Only provide suggestions if input starts with /
@@ -79,12 +79,12 @@ export function getCommandSuggestions(input: string): CommandDefinition[] {
   return COMMAND_DEFINITIONS.filter(def =>
     def.command.startsWith(partial),
   );
-}
+};
 
 /**
  * Parse the current command from input to determine what type of argument is expected
  */
-export function parseActiveCommand(input: string): { command: CommandType | null; argumentPartial: string } {
+export const parseActiveCommand = (input: string): { command: CommandType | null; argumentPartial: string } => {
   const trimmed = input.trim().toLowerCase();
 
   if (!trimmed.startsWith('/')) {
@@ -107,7 +107,7 @@ export function parseActiveCommand(input: string): { command: CommandType | null
     command: type as CommandType,
     argumentPartial: arg || '',
   };
-}
+};
 
 /**
  * Get argument suggestions based on the active command and available spells/items
@@ -117,13 +117,13 @@ export function parseActiveCommand(input: string): { command: CommandType | null
  * @param inventory - Available inventory items
  * @param characterLevel - Character's total level (for spell filtering)
  */
-export function getArgumentSuggestions(
+export const getArgumentSuggestions = (
   command: CommandType,
   partialArg: string,
   spells: SpellDto[] = [],
   inventory: ItemDto[] = [],
   characterLevel: number = 1,
-): ArgumentSuggestion[] {
+): ArgumentSuggestion[] => {
   const partial = partialArg.toLowerCase();
 
   switch (command) {
@@ -173,7 +173,7 @@ export function getArgumentSuggestions(
     default:
       return [];
   }
-}
+};
 
 /**
  * Get all suggestions (commands or arguments) based on the input and character data
@@ -182,12 +182,12 @@ export function getArgumentSuggestions(
  * @param inventory - Available inventory items
  * @param characterLevel - Character's total level (for spell filtering)
  */
-export function getAllSuggestions(
+export const getAllSuggestions = (
   input: string,
   spells: SpellDto[] = [],
   inventory: ItemDto[] = [],
   characterLevel: number = 1,
-): SuggestionResult {
+): SuggestionResult => {
   const trimmed = input.trim();
 
   // Not a command
@@ -229,21 +229,21 @@ export function getAllSuggestions(
     commandSuggestions: [],
     argumentSuggestions: [],
   };
-}
+};
 
 /**
  * Check if the input is a valid chat command
  */
-export function isCommand(input: string): boolean {
+export const isCommand = (input: string): boolean => {
   return input.startsWith('/');
-}
+};
 
 /**
  * Parse a chat command string into a structured command object
  * @param input - The raw input string (e.g., "/cast fireball")
  * @returns ParsedCommand if valid, null otherwise
  */
-export function parseCommand(input: string): ParsedCommand | null {
+export const parseCommand = (input: string): ParsedCommand | null => {
   const trimmed = input.trim();
   if (!isCommand(trimmed)) {
     return null;
@@ -265,32 +265,32 @@ export function parseCommand(input: string): ParsedCommand | null {
     type: type as CommandType,
     target: target.trim(),
   };
-}
+};
 
 /**
  * Generate a command string for using an item
  */
-export function generateUseCommand(itemName: string): string {
+export const generateUseCommand = (itemName: string): string => {
   return `/use ${itemName}`;
-}
+};
 
 /**
  * Generate a command string for casting a spell
  */
-export function generateCastCommand(spellName: string): string {
+export const generateCastCommand = (spellName: string): string => {
   return `/cast ${spellName}`;
-}
+};
 
 /**
  * Generate a command string for equipping an item
  */
-export function generateEquipCommand(itemName: string): string {
+export const generateEquipCommand = (itemName: string): string => {
   return `/equip ${itemName}`;
-}
+};
 
 /**
  * Generate a command string for attacking a target
  */
-export function generateAttackCommand(target: string): string {
+export const generateAttackCommand = (target: string): string => {
   return `/attack ${target}`;
-}
+};
