@@ -62,9 +62,9 @@ export const useCharacterStore = defineStore('character', () => {
 
         return {
           ...item,
-          qty: item.qty - quantity,
+          qty: (item.qty ?? 1) - quantity,
         };
-      }).filter(i => i.qty > 0);
+      }).filter(i => (i.qty ?? 0) > 0);
 
     try {
       const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);

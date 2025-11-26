@@ -47,7 +47,7 @@ const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
 const isLoadingMessage = (message: ChatMessage): boolean =>
-  message.role === 'System' && message.text === '...thinking...';
+  message.role === 'system' && message.text === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(

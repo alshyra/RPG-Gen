@@ -1,4 +1,4 @@
-import type { GameInstruction } from '@rpg-gen/shared';
+import type { GameInstruction, RollInstruction } from '@rpg-gen/shared';
 
 const extractJsonBlocks = (text: string): string[] => {
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
@@ -46,7 +46,12 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   return false;
 };
 
-export const parseGameInstructions = (narrative: string): GameInstruction[] => {
+// Extended GameInstruction type that uses the proper RollInstruction with string | number modifier
+type ParsedGameInstruction = Omit<GameInstruction, 'roll'> & {
+  roll?: RollInstruction;
+};
+
+export const parseGameInstructions = (narrative: string): ParsedGameInstruction[] => {
   const jsonBlocks = extractJsonBlocks(narrative);
   const inlineJsons = extractInlineJson(narrative);
   const allJsons = [
@@ -68,10 +73,10 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
     .map((obj) => {
       // If it has a type field, use the structured format
       if (obj.type === 'roll' || obj.type === 'xp' || obj.type === 'hp' || obj.type === 'spell' || obj.type === 'inventory') {
-        return { type: obj.type, data: obj } as GameInstruction;
+        return { type: obj.type, data: obj } as ParsedGameInstruction;
       }
       // Otherwise, use the direct format (backward compatibility)
-      return obj as GameInstruction;
+      return obj as ParsedGameInstruction;
     });
 };
 
@@ -111,11 +116,11 @@ export const cleanNarrativeText = (narrative: string): string => {
 
 export const parseGameResponse = (narrative: string): {
   narrative: string;
-  instructions: GameInstruction[];
+  instructions: ParsedGameInstruction[];
 } => {
   const instructions = parseGameInstructions(narrative).map((instr) => {
     if (instr.roll && instr.roll.modifier) {
-      (instr.roll).modifier = normalizeModifier(instr.roll.modifier);
+      instr.roll.modifier = normalizeModifier(instr.roll.modifier);
     }
     return instr;
   });

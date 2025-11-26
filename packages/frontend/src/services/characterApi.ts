@@ -2,7 +2,7 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterDto, DeceasedCharacterEntry, CreateInventoryItemDto, components } from '@rpg-gen/shared';
+import type { CharacterDto, CreateInventoryItemDto, components } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Type alias for OpenAPI inventory item type
@@ -113,9 +113,9 @@ export const characterApi = {
   /**
    * Get all deceased characters
    */
-  getDeceasedCharacters: async (): Promise<DeceasedCharacterEntry[]> => {
+  getDeceasedCharacters: async (): Promise<CharacterDto[]> => {
     const response = await api.GET('/api/characters/deceased');
-    return getData<DeceasedCharacterEntry[]>(response);
+    return getData<CharacterDto[]>(response);
   },
 
   /**

@@ -208,7 +208,7 @@ onMounted(async () => {
   try {
     await startGame();
   } catch (e) {
-    gameStore.appendMessage('Error', String(e));
+    gameStore.appendMessage('system', `Error: ${String(e)}`);
   }
 });
 

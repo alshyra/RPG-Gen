@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useCharacterStore } from '@/stores/characterStore';
+import type { GameInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import { characterServiceApi } from '@/services/characterServiceApi';
@@ -15,19 +16,19 @@ export const useGameSession = () => {
 
   const { isInitializing } = storeToRefs(gameStore);
 
-  const processInstructionInMessage = (instr: any, isLastMessage: boolean): void => {
+  const processInstructionInMessage = (instr: GameInstruction, isLastMessage: boolean): void => {
     if (instr.roll) {
       if (isLastMessage) gameStore.pendingInstruction = instr;
       gameStore.appendMessage(
-        'System',
+        'system',
         `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`,
       );
     } else if (instr.xp) {
-      gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+      gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
       characterStore.updateXp(instr.xp);
     } else if (instr.hp) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-      gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+      gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
       characterStore.updateHp(instr.hp);
     }
   };
@@ -81,8 +82,9 @@ export const useGameSession = () => {
       if (char.isDeceased) showDeathModal.value = true;
       const messages = await conversationService.startGame(char);
       if (messages?.length) gameStore.updateMessages(processHistoryMessages(messages));
-    } catch (e: any) {
-      gameStore.appendMessage('Error', e?.response?.data?.error || e.message);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      gameStore.appendMessage('system', `Error: ${msg}`);
     }
     isInitializing.value = false;
   };

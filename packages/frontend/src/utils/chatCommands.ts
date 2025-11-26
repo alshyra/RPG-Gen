@@ -147,22 +147,24 @@ export const getArgumentSuggestions = (
       return inventory
         .filter((item) => {
           const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
-          const matchesName = item.name.toLowerCase().includes(partial);
+          const matchesName = (item.name ?? '').toLowerCase().includes(partial);
           return isUsable && matchesName;
         })
+        .filter(item => item.name !== undefined)
         .map(item => ({
-          name: item.name,
-          description: item.description || (item.qty > 1 ? `x${item.qty}` : undefined),
+          name: item.name!,
+          description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
           type: 'item' as const,
         }));
 
     case 'equip':
       // Show all items for /equip command
       return inventory
-        .filter(item => item.name.toLowerCase().includes(partial))
+        .filter(item => (item.name ?? '').toLowerCase().includes(partial))
+        .filter(item => item.name !== undefined)
         .map(item => ({
-          name: item.name,
-          description: item.description || (item.qty > 1 ? `x${item.qty}` : undefined),
+          name: item.name!,
+          description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
           type: 'item' as const,
         }));
 

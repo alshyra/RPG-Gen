@@ -182,9 +182,10 @@ CHA ${this.getAbilityScore(character, 'Cha')}
   ): Promise<ChatMessage> {
     this.gemini.initializeChatSession(characterId, this.systemPrompt, []);
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character)
+    const characterDoc = await this.characterService.findByCharacterId(userId, characterId);
+    if (!characterDoc)
       throw new BadRequestException('Character not found for chat initialization');
+    const character = this.characterService.toCharacterDto(characterDoc);
     const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
 
     const initResp = await this.gemini.sendMessage(characterId, initMessage);

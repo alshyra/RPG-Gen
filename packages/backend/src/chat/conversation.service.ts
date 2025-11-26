@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { ChatMessage } from '@rpg-gen/shared';
+import type { ChatMessage, ChatRole } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
 import * as Schema from '../schemas/chat-history.schema.js';
 
@@ -22,7 +22,7 @@ export class ConversationService {
     if (!history) return [];
 
     return history.messages.map(m => ({
-      role: m.role,
+      role: m.role as ChatRole,
       text: m.text,
       timestamp: m.timestamp,
       meta: m.meta ? { usage: m.meta.usage, model: m.meta.model } : undefined,

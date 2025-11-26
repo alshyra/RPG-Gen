@@ -128,7 +128,7 @@ export const useGameRolls = () => {
       await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Failed to send roll result: ' + message);
+      gameStore.appendMessage('system', 'Failed to send roll result: ' + message);
       gameStore.showRollModal = false;
     }
   };
@@ -146,7 +146,7 @@ export const useGameRolls = () => {
       await onDiceRolled(payload);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Reroll failed: ' + msg);
+      gameStore.appendMessage('system', 'Reroll failed: ' + msg);
     }
   };
 
