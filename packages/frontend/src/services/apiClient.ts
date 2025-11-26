@@ -1,6 +1,9 @@
 /**
  * OpenAPI-fetch based API client
  * This replaces the axios-based client with type-safe API calls
+ *
+ * Note: Until the backend controllers are updated with proper @ApiResponse decorators,
+ * we use the shared types for response typing and openapi-fetch for the request handling.
  */
 import createClient from 'openapi-fetch';
 import type { paths } from '@rpg-gen/shared';
