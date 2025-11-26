@@ -20,7 +20,15 @@ Cypress.Commands.add("clearAuth", () => {
 
 Cypress.Commands.add('ensureAuth', () => {
   cy.window().then((win) => {
-    win.localStorage.setItem('rpg-auth-token', 'e2e-bypass-token');
+    // Create a valid JWT-like token with a far-future expiration for E2E tests
+    // This is a mock token that will pass client-side validation
+    // Format: header.payload.signature (base64url encoded)
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    // Set expiration to year 2100 (4102444800 seconds since epoch)
+    const payload = btoa(JSON.stringify({ sub: 'e2e-test-user', exp: 4102444800 }));
+    const signature = 'e2e-bypass-signature';
+    const e2eToken = `${header}.${payload}.${signature}`;
+    win.localStorage.setItem('rpg-auth-token', e2eToken);
   });
 
   // Request real profile — fail if not present so tests don't silently pass with a mock.
