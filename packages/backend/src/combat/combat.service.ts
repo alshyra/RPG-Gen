@@ -12,9 +12,21 @@ import type {
   TurnResult,
 } from './combat.types.js';
 
+/**
+ * Service managing combat state and mechanics.
+ *
+ * NOTE: Combat state is currently stored in-memory, which means:
+ * - State is lost on server restart
+ * - State is not shared across multiple server instances
+ *
+ * For production use, consider persisting combat state to the database
+ * (e.g., a CombatSession collection) to ensure durability and scalability.
+ */
 @Injectable()
 export class CombatService {
   private readonly logger = new Logger(CombatService.name);
+
+  // In-memory combat state storage - see class-level comment about production considerations
   private combatStates = new Map<string, CombatState>();
   private diceController = new DiceController();
 

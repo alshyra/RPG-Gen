@@ -82,28 +82,70 @@ export interface TurnResult {
 }
 
 /**
+ * Enemy definition in combat start instruction
+ */
+export interface CombatStartEnemy {
+  name: string;
+  hp: number;
+  ac: number;
+  attack_bonus?: number;
+  damage_dice?: string;
+  damage_bonus?: number;
+}
+
+/**
  * Combat start instruction from Gemini
  */
 export interface CombatStartInstruction {
-  combat_start: {
-    name: string;
-    hp: number;
-    ac: number;
-    attack_bonus?: number;
-    damage_dice?: string;
-    damage_bonus?: number;
-  }[];
+  combat_start: CombatStartEnemy[];
+}
+
+/**
+ * Combat end data
+ */
+export interface CombatEndData {
+  victory: boolean;
+  xp_gained: number;
+  player_hp: number;
+  enemies_defeated: string[];
+  fled?: boolean;
 }
 
 /**
  * Combat end instruction
  */
 export interface CombatEndInstruction {
-  combat_end: {
-    victory: boolean;
-    xp_gained: number;
-    player_hp: number;
-    enemies_defeated: string[];
-    fled?: boolean;
-  };
+  combat_end: CombatEndData;
+}
+
+/**
+ * Type guard for combat start instruction
+ */
+export function isCombatStartInstruction(obj: unknown): obj is CombatStartInstruction {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const record = obj as Record<string, unknown>;
+  if (!Array.isArray(record.combat_start)) return false;
+
+  return record.combat_start.every((enemy: unknown) => {
+    if (typeof enemy !== 'object' || enemy === null) return false;
+    const e = enemy as Record<string, unknown>;
+    return typeof e.name === 'string'
+      && typeof e.hp === 'number'
+      && typeof e.ac === 'number';
+  });
+}
+
+/**
+ * Type guard for combat end instruction
+ */
+export function isCombatEndInstruction(obj: unknown): obj is CombatEndInstruction {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const record = obj as Record<string, unknown>;
+  if (typeof record.combat_end !== 'object' || record.combat_end === null) return false;
+
+  const combatEnd = record.combat_end as Record<string, unknown>;
+  return typeof combatEnd.victory === 'boolean'
+    && typeof combatEnd.xp_gained === 'number'
+    && typeof combatEnd.player_hp === 'number'
+    && Array.isArray(combatEnd.enemies_defeated);
 }

@@ -2,11 +2,17 @@ import type { GameInstruction, GameResponse } from '@rpg-gen/shared';
 import { conversationService } from '../apis/conversationApi';
 import { combatService } from '../services/combatService';
 import type { CombatStartInstruction } from '../services/combatTypes';
+import {
+  isCombatEndInstruction,
+  isCombatStartInstruction,
+  type CombatEndInstruction
+} from '../services/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 
 export function useGameMessages() {
   const gameStore = useGameStore();
+  const combat = useCombat();
 
   const handleMessageResponse = (response: GameResponse): void => {
     gameStore.messages.pop();
@@ -119,7 +125,7 @@ export function useGameMessages() {
     }
   };
 
-  const handleCombatEndInstruction = (instr: { combat_end: { victory: boolean; xp_gained: number; player_hp: number; enemies_defeated: string[] } }): void => {
+  const handleCombatEndInstruction = (instr: CombatEndInstruction): void => {
     const { victory, xp_gained, enemies_defeated } = instr.combat_end;
 
     if (victory) {
@@ -136,13 +142,10 @@ export function useGameMessages() {
     }
   };
 
-  const processInstructions = (instructions: GameInstruction[]): void => {
+  const processInstructions = (instructions: unknown[]): void => {
+    if (!Array.isArray(instructions)) return;
+
     instructions.forEach((item) => {
-      if (item.roll) handleRollInstruction(item);
-      else if (item.xp !== undefined) handleXpInstruction(item);
-      else if (item.hp !== undefined) handleHpInstruction(item);
-      else if (item.spell) handleSpellInstruction(item);
-      else if (item.inventory) handleInventoryInstruction(item);
       const instr = item as Record<string, unknown>;
       if (instr.roll) {
         handleRollInstruction(instr);
@@ -154,10 +157,16 @@ export function useGameMessages() {
         handleSpellInstruction(instr);
       } else if (instr.inventory) {
         handleInventoryInstruction(instr);
-      } else if (instr.combat_start && Array.isArray(instr.combat_start)) {
-        handleCombatStartInstruction({ combat_start: instr.combat_start } as CombatStartInstruction);
-      } else if (instr.combat_end) {
-        handleCombatEndInstruction(instr as { combat_end: { victory: boolean; xp_gained: number; player_hp: number; enemies_defeated: string[] } });
+      } else if (isCombatStartInstruction(item)) {
+        // Delegate to combat composable
+        combat.initializeCombat(item);
+      } else if (isCombatEndInstruction(item)) {
+        // Delegate to combat composable
+        combat.handleCombatEnd(
+          item.combat_end.victory,
+          item.combat_end.xp_gained,
+          item.combat_end.enemies_defeated,
+        );
       }
     });
   };

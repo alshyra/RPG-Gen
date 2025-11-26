@@ -2,6 +2,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { conversationService } from '../apis/conversationApi';
 import { combatService } from '../services/combatService';
+import { isCombatStartInstruction, isCombatEndInstruction } from '../services/combatTypes';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 
 export function useGameCommands() {
@@ -235,20 +236,19 @@ export function useGameCommands() {
           gameStore.appendMessage('System', `⚡ Used item: ${inventory.name}`);
           characterStore.useInventoryItem(inventory.name || '');
         }
-      } else if (instr.combat_start && Array.isArray(instr.combat_start)) {
-        // Combat start handled by useGameMessages, just show message
-        const enemies = instr.combat_start as { name: string }[];
-        const enemyNames = enemies.map(e => e.name).join(', ');
+      } else if (isCombatStartInstruction(item)) {
+        // Combat start - display enemy names (main handling is in useGameMessages)
+        const enemyNames = item.combat_start.map(e => e.name).join(', ');
         gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
-      } else if (instr.combat_end && typeof instr.combat_end === 'object') {
-        const combatEnd = instr.combat_end as { victory: boolean; xp_gained: number; enemies_defeated: string[] };
-        if (combatEnd.victory) {
+      } else if (isCombatEndInstruction(item)) {
+        // Combat end - display results (main handling is in useGameMessages)
+        if (item.combat_end.victory) {
           gameStore.appendMessage('System', '🏆 Victoire!');
-          if (combatEnd.enemies_defeated?.length > 0) {
-            gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${combatEnd.enemies_defeated.join(', ')}`);
+          if (item.combat_end.enemies_defeated?.length > 0) {
+            gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${item.combat_end.enemies_defeated.join(', ')}`);
           }
-          if (combatEnd.xp_gained > 0) {
-            characterStore.updateXp(combatEnd.xp_gained);
+          if (item.combat_end.xp_gained > 0) {
+            characterStore.updateXp(item.combat_end.xp_gained);
           }
         } else {
           gameStore.appendMessage('System', '💀 Combat terminé.');
