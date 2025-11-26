@@ -21,7 +21,7 @@ vi.mock('@/stores/characterStore', () => ({
   }),
 }));
 
-vi.mock('@/services/characterApi', async () => ({
+vi.mock('@/apis/characterApi', async () => ({
   characterServiceApi: {
     generateAvatar: vi.fn(async (_: string) => 'data:image/png;base64,avatar'),
     getCharacterById: vi.fn(async (_: string) => ({ ...currentCharacter.value, portrait: 'data:image/png;base64,avatar' })),
@@ -32,7 +32,7 @@ vi.mock('@/services/dndRulesService', () => ({
   DnDRulesService: { calculateHpForLevel1: () => 10 },
 }));
 
-vi.mock('@/services/conversationService', async () => ({
+vi.mock('@/apis/conversationApi', async () => ({
   conversationService: {
     startGame: vi.fn(async () => []),
   },
