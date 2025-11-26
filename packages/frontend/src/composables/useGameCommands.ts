@@ -141,6 +141,30 @@ export function useGameCommands() {
   };
 
   /**
+   * Handle attack in combat mode via backend
+   */
+  const handleCombatAttack = async (characterId: string, target: string): Promise<void> => {
+    const attackResponse = await combatService.attack(characterId, target);
+
+    // Display combat narrative
+    gameStore.appendMessage('GM', attackResponse.narrative);
+
+    // Process any instructions (HP changes, XP, etc.)
+    if (attackResponse.instructions) {
+      processInstructions(attackResponse.instructions);
+    }
+
+    // Handle combat end
+    if (attackResponse.combatEnded) {
+      if (attackResponse.victory) {
+        gameStore.appendMessage('System', '🏆 Combat terminé - Victoire!');
+      } else if (attackResponse.defeat) {
+        gameStore.appendMessage('System', '💀 Combat terminé - Défaite...');
+      }
+    }
+  };
+
+  /**
    * Execute an attack command - uses backend combat system when in combat
    */
   const executeAttackCommand = async (target: string): Promise<void> => {
@@ -155,25 +179,7 @@ export function useGameCommands() {
       const statusResponse = await combatService.getStatus(character.characterId);
 
       if (statusResponse.inCombat) {
-        // Use backend combat system
-        const attackResponse = await combatService.attack(character.characterId, target);
-
-        // Display combat narrative
-        gameStore.appendMessage('GM', attackResponse.narrative);
-
-        // Process any instructions (HP changes, XP, etc.)
-        if (attackResponse.instructions) {
-          processInstructions(attackResponse.instructions);
-        }
-
-        // Handle combat end
-        if (attackResponse.combatEnded) {
-          if (attackResponse.victory) {
-            gameStore.appendMessage('System', '🏆 Combat terminé - Victoire!');
-          } else if (attackResponse.defeat) {
-            gameStore.appendMessage('System', '💀 Combat terminé - Défaite...');
-          }
-        }
+        await handleCombatAttack(character.characterId, target);
       } else {
         // Not in combat, send to Gemini for narrative handling
         gameStore.appendMessage('System', '...thinking...');

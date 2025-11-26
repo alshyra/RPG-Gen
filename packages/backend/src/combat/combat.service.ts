@@ -324,8 +324,45 @@ export class CombatService {
       return turnResult;
     }
 
-    // Enemy attacks
-    for (const enemy of aliveEnemies) {
+    // Enemy attacks - process each enemy and check for defeat
+    const defeatResult = this.processEnemyAttacks(state, aliveEnemies, enemyAttacks, narrativeParts, playerAttacks);
+    if (defeatResult) {
+      return defeatResult;
+    }
+
+    // Increment round
+    state.roundNumber++;
+
+    const turnResult: TurnResult = {
+      turnNumber: state.currentTurnIndex,
+      roundNumber: state.roundNumber,
+      playerAttacks,
+      enemyAttacks,
+      combatEnded: false,
+      victory: false,
+      defeat: false,
+      remainingEnemies: aliveEnemies,
+      playerHp: state.player.hp,
+      playerHpMax: state.player.hpMax,
+      narrative: narrativeParts.join('\n\n') + '\n\nUtilisez /attack [nom_ennemi] pour continuer le combat.',
+    };
+
+    return turnResult;
+  }
+
+  /**
+   * Process enemy attacks and return defeat result if player is defeated
+   */
+  private processEnemyAttacks(
+    state: CombatState,
+    aliveEnemies: CombatEnemy[],
+    enemyAttacks: AttackResult[],
+    narrativeParts: string[],
+    playerAttacks: AttackResult[],
+  ): TurnResult | null {
+    let defeatResult: TurnResult | null = null;
+
+    aliveEnemies.some((enemy) => {
       const enemyAttack = this.performAttack(
         {
           name: enemy.name,
@@ -349,7 +386,7 @@ export class CombatService {
       // Check for defeat
       if (state.player.hp <= 0) {
         state.inCombat = false;
-        const turnResult: TurnResult = {
+        defeatResult = {
           turnNumber: state.currentTurnIndex,
           roundNumber: state.roundNumber,
           playerAttacks,
@@ -364,28 +401,13 @@ export class CombatService {
         };
 
         this.logger.log(`Combat ended for ${state.characterId}: Defeat`);
-        return turnResult;
+        return true; // Stop processing further enemies
       }
-    }
 
-    // Increment round
-    state.roundNumber++;
+      return false; // Continue processing
+    });
 
-    const turnResult: TurnResult = {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks,
-      enemyAttacks,
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      remainingEnemies: aliveEnemies,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: narrativeParts.join('\n\n') + '\n\nUtilisez /attack [nom_ennemi] pour continuer le combat.',
-    };
-
-    return turnResult;
+    return defeatResult;
   }
 
   /**
