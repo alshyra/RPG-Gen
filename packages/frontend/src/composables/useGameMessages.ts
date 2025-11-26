@@ -18,12 +18,13 @@ export function useGameMessages() {
 
   const sendMessage = async (): Promise<void> => {
     if (!gameStore.playerText) return;
-    gameStore.appendMessage('Player', gameStore.playerText);
+    const messageText = gameStore.playerText;
+    gameStore.playerText = '';
+    gameStore.appendMessage('Player', messageText);
     gameStore.appendMessage('System', '...thinking...');
     gameStore.sending = true;
     try {
-      const response = await conversationService.sendMessage(gameStore.playerText);
-      gameStore.playerText = '';
+      const response = await conversationService.sendMessage(messageText);
       handleMessageResponse(response);
     } catch (e: any) {
       handleMessageError(e);
