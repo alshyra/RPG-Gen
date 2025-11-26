@@ -5,6 +5,8 @@ export * from './generated';
 // Re-export proper types from the types folder (replacing 'any' fallbacks)
 export type {
   GameInstruction,
+  SpellInstruction,
+  InventoryInstruction,
   RollInstruction,
   ChatMessage,
   MessageMeta,

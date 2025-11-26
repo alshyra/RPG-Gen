@@ -9,8 +9,10 @@ export type ChatRole = "system" | "user" | "assistant";
 
 /**
  * Extended role type for UI display (includes GM, Player, Error, etc.)
+ * Includes known roles explicitly for autocomplete, with string fallback
+ * for backwards compatibility with database records.
  */
-export type DisplayRole = ChatRole | "GM" | "Player" | "Error" | "model" | string;
+export type DisplayRole = ChatRole | "GM" | "Player" | "Error" | "model" | "System" | (string & Record<never, never>);
 
 /**
  * Game instruction from backend parser
@@ -26,19 +28,29 @@ export interface GameInstruction {
   };
   hp?: number; // HP change (positive or negative)
   xp?: number; // Experience points gained
-  spell?: {
-    action: "learn" | "cast" | "forget";
-    name: string;
-    level?: number;
-    school?: string;
-    description?: string;
-  };
-  inventory?: {
-    action: "add" | "remove" | "use";
-    name: string;
-    quantity?: number;
-    description?: string;
-  };
+  spell?: SpellInstruction;
+  inventory?: InventoryInstruction;
+}
+
+/**
+ * Spell instruction from game parser
+ */
+export interface SpellInstruction {
+  action: "learn" | "cast" | "forget";
+  name: string;
+  level?: number;
+  school?: string;
+  description?: string;
+}
+
+/**
+ * Inventory instruction from game parser
+ */
+export interface InventoryInstruction {
+  action: "add" | "remove" | "use";
+  name: string;
+  quantity?: number;
+  description?: string;
 }
 
 /**

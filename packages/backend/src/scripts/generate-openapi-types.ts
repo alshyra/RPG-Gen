@@ -59,7 +59,11 @@ const generateOpenApiTypes = async () => {
 
     console.log('🎉 Done!');
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
+    const isConnectionError = error
+      && typeof error === 'object'
+      && 'code' in error
+      && error.code === 'ECONNREFUSED';
+    if (isConnectionError) {
       console.error('❌ Error: Could not connect to the backend server.');
       console.error('   Make sure the backend is running at:', OPENAPI_URL.replace('/docs-json', ''));
       console.error('   You can start it with: npm run start:backend');

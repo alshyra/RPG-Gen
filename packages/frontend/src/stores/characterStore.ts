@@ -1,17 +1,8 @@
 import { characterServiceApi } from '@/services/characterServiceApi';
-import { CharacterDto, ItemDto, SpellDto } from '@rpg-gen/shared';
+import { CharacterDto, ItemDto, SpellDto, SpellInstruction } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-
-// Type for spell instructions from game parser
-interface SpellInstruction {
-  action: 'learn' | 'cast' | 'forget';
-  name: string;
-  level?: number;
-  school?: string;
-  description?: string;
-}
 
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();

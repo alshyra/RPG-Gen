@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { ChatHistory, ChatHistoryDocument, ChatMessage as SchemaChatMessage } from '../schemas/chat-history.schema.js';
 
 // Re-export the shared ChatMessage type for convenience
-export type { ChatMessage as ChatMessage } from '@rpg-gen/shared';
+export type { ChatMessage } from '@rpg-gen/shared';
 
 @Injectable()
 export class ConversationService {
