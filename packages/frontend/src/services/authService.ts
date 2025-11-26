@@ -62,8 +62,12 @@ const decodeToken = (token: string): { exp?: number } | null => {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
-    const payload = parts[1];
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    // Convert base64url to base64 and add padding if needed
+    let payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    // Add padding to make the length a multiple of 4
+    const paddingNeeded = (4 - (payload.length % 4)) % 4;
+    payload += '='.repeat(paddingNeeded);
+    const decoded = atob(payload);
     return JSON.parse(decoded);
   } catch {
     return null;
@@ -84,11 +88,17 @@ const isTokenExpired = (token: string): boolean => {
 
 /**
  * Checks if the user is authenticated with a valid (non-expired) token.
+ * If the token is expired, it will be cleared automatically.
  */
 const isAuthenticated = (): boolean => {
   const token = getToken();
   if (!token) return false;
-  return !isTokenExpired(token);
+  if (isTokenExpired(token)) {
+    // Clear expired token so user can log in fresh
+    clearToken();
+    return false;
+  }
+  return true;
 };
 
 const logout = (): void => {
