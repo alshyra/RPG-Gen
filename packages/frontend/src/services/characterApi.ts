@@ -48,9 +48,9 @@ export const characterApi = {
   /**
    * Get all characters for the current user
    */
-  getAllCharacters: async (): Promise<CharacterDto[]> => {
+  getAllCharacters: async () => {
     const response = await api.GET('/api/characters');
-    return getData<CharacterDto[]>(response);
+    return getData(response);
   },
 
   /**

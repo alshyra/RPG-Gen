@@ -1,6 +1,6 @@
-import type { CharacterDto, ChatMessage, GameResponse } from '@rpg-gen/shared';
+import type { CharacterDto, GameResponse } from '@rpg-gen/shared';
 
-import apiClient from './axiosClient';
+import apiClient from './apiClient';
 
 export class ConversationService {
   private characterId: string | null = null;
@@ -13,7 +13,7 @@ export class ConversationService {
     if (!character) throw new Error('No character provided to startGame.');
     this.characterId = character.characterId;
 
-    const histRes = await apiClient.get<ChatMessage[]>(`/chat/${this.characterId}/history`);
+    const histRes = await apiClient.GET(`/api/chat/{characterId}/history`, { params: { path: { characterId: this.characterId } } });
     return histRes.data;
   }
 
