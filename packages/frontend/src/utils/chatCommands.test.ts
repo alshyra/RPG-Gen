@@ -6,6 +6,8 @@ import {
   generateCastCommand,
   generateEquipCommand,
   generateAttackCommand,
+  getCommandSuggestions,
+  COMMAND_DEFINITIONS,
 } from './chatCommands';
 
 describe('chatCommands', () => {
@@ -83,6 +85,53 @@ describe('chatCommands', () => {
 
     it('generates attack command', () => {
       expect(generateAttackCommand('goblin')).toBe('/attack goblin');
+    });
+  });
+
+  describe('getCommandSuggestions', () => {
+    it('returns all commands when input is just /', () => {
+      const suggestions = getCommandSuggestions('/');
+      expect(suggestions).toHaveLength(COMMAND_DEFINITIONS.length);
+      expect(suggestions).toEqual(COMMAND_DEFINITIONS);
+    });
+
+    it('returns matching commands for partial input', () => {
+      const suggestions = getCommandSuggestions('/ca');
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].command).toBe('cast');
+    });
+
+    it('returns multiple matches when applicable', () => {
+      const suggestions = getCommandSuggestions('/a');
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].command).toBe('attack');
+    });
+
+    it('returns empty array for non-command input', () => {
+      expect(getCommandSuggestions('hello')).toEqual([]);
+      expect(getCommandSuggestions('')).toEqual([]);
+    });
+
+    it('returns empty array when command has argument', () => {
+      expect(getCommandSuggestions('/cast fireball')).toEqual([]);
+      expect(getCommandSuggestions('/use potion')).toEqual([]);
+    });
+
+    it('is case insensitive', () => {
+      const suggestionsLower = getCommandSuggestions('/ca');
+      const suggestionsUpper = getCommandSuggestions('/CA');
+      expect(suggestionsLower).toEqual(suggestionsUpper);
+    });
+
+    it('returns commands matching prefix', () => {
+      const suggestions = getCommandSuggestions('/e');
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].command).toBe('equip');
+    });
+
+    it('returns empty array when no command matches', () => {
+      expect(getCommandSuggestions('/xyz')).toEqual([]);
+      expect(getCommandSuggestions('/jump')).toEqual([]);
     });
   });
 });

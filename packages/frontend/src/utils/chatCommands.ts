@@ -10,9 +10,57 @@ export interface ParsedCommand {
   target: string;
 }
 
+export interface CommandDefinition {
+  command: CommandType;
+  description: string;
+  usage: string;
+}
+
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 
 const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'attack', 'use'];
+
+/**
+ * Available commands with their descriptions for autocompletion
+ */
+export const COMMAND_DEFINITIONS: CommandDefinition[] = [
+  { command: 'attack', description: 'Attaquer une cible', usage: '/attack <cible>' },
+  { command: 'cast', description: 'Lancer un sort', usage: '/cast <sort>' },
+  { command: 'equip', description: 'Équiper un objet', usage: '/equip <objet>' },
+  { command: 'use', description: 'Utiliser un objet', usage: '/use <objet>' },
+];
+
+/**
+ * Get command suggestions that match the input
+ * @param input - The partial input (e.g., "/ca" or "/")
+ * @returns Array of matching command definitions
+ */
+export function getCommandSuggestions(input: string): CommandDefinition[] {
+  const trimmed = input.trim().toLowerCase();
+
+  // Only provide suggestions if input starts with /
+  if (!trimmed.startsWith('/')) {
+    return [];
+  }
+
+  // Remove the leading slash and get the partial command
+  const partial = trimmed.slice(1);
+
+  // If empty after slash, return all commands
+  if (partial === '') {
+    return COMMAND_DEFINITIONS;
+  }
+
+  // Check if input contains a space (command has argument)
+  if (partial.includes(' ')) {
+    return [];
+  }
+
+  // Filter commands that start with the partial input
+  return COMMAND_DEFINITIONS.filter(def =>
+    def.command.startsWith(partial),
+  );
+}
 
 /**
  * Check if the input is a valid chat command
