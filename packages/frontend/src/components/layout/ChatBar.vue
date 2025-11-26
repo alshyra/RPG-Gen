@@ -5,12 +5,12 @@
     <div class="relative flex items-center gap-2">
       <!-- Command suggestions dropdown -->
       <div
-        v-if="showSuggestions && suggestions.length > 0"
+        v-if="showSuggestions && suggestionResult.commandSuggestions.length > 0"
         class="absolute bottom-full left-0 right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-hidden z-10"
       >
         <ul class="py-1">
           <li
-            v-for="(suggestion, index) in suggestions"
+            v-for="(suggestion, index) in suggestionResult.commandSuggestions"
             :key="suggestion.command"
             :class="[
               'px-3 py-2 cursor-pointer transition-colors',
@@ -18,7 +18,7 @@
                 ? 'bg-purple-600 text-white'
                 : 'hover:bg-slate-700 text-slate-200'
             ]"
-            @click="selectSuggestion(suggestion)"
+            @click="selectCommandSuggestion(suggestion)"
             @mouseenter="selectedIndex = index"
           >
             <div class="flex items-center gap-2">
@@ -27,6 +27,36 @@
             </div>
             <div class="text-xs text-slate-500 mt-0.5">
               {{ suggestion.usage }}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Argument suggestions dropdown (spells/items) -->
+      <div
+        v-if="showSuggestions && suggestionResult.argumentSuggestions.length > 0"
+        class="absolute bottom-full left-0 right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-hidden z-10 max-h-48 overflow-y-auto"
+      >
+        <ul class="py-1">
+          <li
+            v-for="(suggestion, index) in suggestionResult.argumentSuggestions"
+            :key="suggestion.name"
+            :class="[
+              'px-3 py-2 cursor-pointer transition-colors',
+              index === selectedIndex
+                ? 'bg-purple-600 text-white'
+                : 'hover:bg-slate-700 text-slate-200'
+            ]"
+            @click="selectArgumentSuggestion(suggestion)"
+            @mouseenter="selectedIndex = index"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-sm">{{ suggestion.type === 'spell' ? '✨' : '🎒' }}</span>
+              <span class="font-medium text-sm">{{ suggestion.name }}</span>
+              <span
+                v-if="suggestion.description"
+                class="text-slate-400 text-sm"
+              >{{ suggestion.description }}</span>
             </div>
           </li>
         </ul>
@@ -81,7 +111,12 @@
 import { computed, ref, watch } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
 import { useGameStore } from '@/stores/gameStore';
-import { getCommandSuggestions, type CommandDefinition } from '@/utils/chatCommands';
+import { useCharacterStore } from '@/stores/characterStore';
+import {
+  getAllSuggestions,
+  type CommandDefinition,
+  type ArgumentSuggestion,
+} from '@/utils/chatCommands';
 
 /** Delay in ms before hiding suggestions on blur to allow click events to process */
 const SUGGESTION_BLUR_DELAY_MS = 150;
@@ -92,6 +127,7 @@ interface Emits {
 
 const emit = defineEmits<Emits>();
 const gameStore = useGameStore();
+const characterStore = useCharacterStore();
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const selectedIndex = ref(0);
@@ -104,39 +140,67 @@ const playerText = computed({
 
 const isRolling = computed(() => !!gameStore.pendingInstruction?.roll);
 
-const suggestions = computed(() => getCommandSuggestions(playerText.value));
+const suggestionResult = computed(() => getAllSuggestions(
+  playerText.value,
+  characterStore.currentCharacter?.spells || [],
+  characterStore.currentCharacter?.inventory || [],
+));
+
+const totalSuggestions = computed(() =>
+  suggestionResult.value.commandSuggestions.length
+  + suggestionResult.value.argumentSuggestions.length,
+);
 
 // Watch for changes to update suggestion visibility
-watch(suggestions, (newSuggestions) => {
-  showSuggestions.value = newSuggestions.length > 0;
+watch(totalSuggestions, (newTotal) => {
+  showSuggestions.value = newTotal > 0;
   // Reset selection when suggestions change
-  if (selectedIndex.value >= newSuggestions.length) {
+  if (selectedIndex.value >= newTotal) {
     selectedIndex.value = 0;
   }
 });
 
-const selectSuggestion = (suggestion: CommandDefinition) => {
+const selectCommandSuggestion = (suggestion: CommandDefinition) => {
   playerText.value = `/${suggestion.command} `;
   showSuggestions.value = false;
+  selectedIndex.value = 0;
+  // Focus input after selecting
+  inputRef.value?.focus();
+};
+
+const selectArgumentSuggestion = (suggestion: ArgumentSuggestion) => {
+  const { activeCommand } = suggestionResult.value;
+  if (activeCommand) {
+    playerText.value = `/${activeCommand} ${suggestion.name}`;
+  }
+  showSuggestions.value = false;
+  selectedIndex.value = 0;
   // Focus input after selecting
   inputRef.value?.focus();
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
-  if (showSuggestions.value && suggestions.value.length > 0) {
+  const { commandSuggestions, argumentSuggestions } = suggestionResult.value;
+  const hasSuggestions = commandSuggestions.length > 0 || argumentSuggestions.length > 0;
+
+  if (showSuggestions.value && hasSuggestions) {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        selectedIndex.value = (selectedIndex.value + 1) % suggestions.value.length;
+        selectedIndex.value = (selectedIndex.value + 1) % totalSuggestions.value;
         break;
       case 'ArrowUp':
         event.preventDefault();
-        selectedIndex.value = (selectedIndex.value - 1 + suggestions.value.length) % suggestions.value.length;
+        selectedIndex.value = (selectedIndex.value - 1 + totalSuggestions.value) % totalSuggestions.value;
         break;
       case 'Tab':
       case 'Enter':
         event.preventDefault();
-        selectSuggestion(suggestions.value[selectedIndex.value]);
+        if (commandSuggestions.length > 0) {
+          selectCommandSuggestion(commandSuggestions[selectedIndex.value]);
+        } else if (argumentSuggestions.length > 0) {
+          selectArgumentSuggestion(argumentSuggestions[selectedIndex.value]);
+        }
         break;
       case 'Escape':
         event.preventDefault();
