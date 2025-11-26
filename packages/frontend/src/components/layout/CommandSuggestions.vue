@@ -8,12 +8,7 @@
       <li
         v-for="(suggestion, index) in suggestionResult.commandSuggestions"
         :key="suggestion.command"
-        :class="[
-          'px-3 py-2 cursor-pointer transition-colors',
-          index === selectedIndex
-            ? 'bg-purple-600 text-white'
-            : 'hover:bg-slate-700 text-slate-200'
-        ]"
+        :class="getItemClass(index)"
         @click="selectCommand(suggestion)"
         @mouseenter="selectedIndex = index"
       >
@@ -37,17 +32,12 @@
       <li
         v-for="(suggestion, index) in suggestionResult.argumentSuggestions"
         :key="suggestion.name"
-        :class="[
-          'px-3 py-2 cursor-pointer transition-colors',
-          index === selectedIndex
-            ? 'bg-purple-600 text-white'
-            : 'hover:bg-slate-700 text-slate-200'
-        ]"
+        :class="getItemClass(index)"
         @click="selectArgument(suggestion)"
         @mouseenter="selectedIndex = index"
       >
         <div class="flex items-center gap-2">
-          <span class="text-sm">{{ suggestion.type === 'spell' ? '✨' : '🎒' }}</span>
+          <span class="text-sm">{{ getArgumentIcon(suggestion.type) }}</span>
           <span class="font-medium text-sm">{{ suggestion.name }}</span>
           <span
             v-if="suggestion.description"
@@ -119,6 +109,18 @@ const selectArgument = (suggestion: ArgumentSuggestion) => {
     emit('selectArgument', activeCommand, suggestion.name);
   }
   selectedIndex.value = 0;
+};
+
+// Helper methods to keep template clean
+const getItemClass = (index: number): string[] => [
+  'px-3 py-2 cursor-pointer transition-colors',
+  index === selectedIndex.value
+    ? 'bg-purple-600 text-white'
+    : 'hover:bg-slate-700 text-slate-200',
+];
+
+const getArgumentIcon = (type: 'spell' | 'item'): string => {
+  return type === 'spell' ? '✨' : '🎒';
 };
 
 // Expose methods for keyboard navigation from parent
