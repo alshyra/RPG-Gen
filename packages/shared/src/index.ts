@@ -20,7 +20,7 @@ export type DiceThrow = import('./api-types').components['schemas']['DiceThrowDt
 export type CreateInventoryItemDto = import('./api-types').components['schemas']['CreateInventoryItemDto'];
 export type ImageRequest = import('./api-types').components['schemas']['ImageRequestDto'];
 export type ChatRequest = import('./api-types').components['schemas']['ChatRequestDto'];
-
+export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
 // Legacy alias for backward compatibility
 export type DiceThrowDto = DiceThrow;
 

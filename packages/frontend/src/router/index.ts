@@ -12,7 +12,7 @@ import CharacterLevelupView from '../views/CharacterLevelupView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
 import LoginView from '../views/LoginView.vue';
 import AuthCallbackView from '../views/AuthCallbackView.vue';
-import { authService } from '../services/authService';
+import { authService } from '../apis/authApi';
 
 const routes = [
   { path: '/', name: 'landing', component: LandingView, meta: { public: true } },

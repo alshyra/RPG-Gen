@@ -134,7 +134,7 @@ import type { LevelUpResult } from '@rpg-gen/shared';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import { conversationService } from '../../services/conversationService';
+import { conversationService } from '../../apis/conversationApi';
 
 interface Props {
   world?: string;

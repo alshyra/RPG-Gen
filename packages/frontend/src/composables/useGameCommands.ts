@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
-import { conversationService } from '../services/conversationService';
+import { conversationService } from '../apis/conversationApi';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 
 export function useGameCommands() {

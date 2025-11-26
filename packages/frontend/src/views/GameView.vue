@@ -165,7 +165,7 @@ import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
 import { isCommand } from '../utils/chatCommands';
-import { characterServiceApi } from '../services/characterApi';
+import { characterServiceApi } from '../apis/characterApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 

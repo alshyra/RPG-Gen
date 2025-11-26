@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
-import { conversationService } from '../services/conversationService';
+import { conversationService } from '../apis/conversationApi';
 import type { GameInstruction, GameResponse } from '@rpg-gen/shared';
 
 export function useGameMessages() {

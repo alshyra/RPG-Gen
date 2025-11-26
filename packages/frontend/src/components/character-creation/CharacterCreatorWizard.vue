@@ -97,8 +97,8 @@
 
 <script setup lang="ts">
 import FullPageLoader from '@/components/ui/FullPageLoader.vue';
-import { characterServiceApi } from '@/services/characterApi';
-import { conversationService } from '@/services/conversationService';
+import { characterServiceApi } from '@/apis/characterApi';
+import { conversationService } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';

@@ -66,14 +66,14 @@ describe('CharacterCreatorWizard finish flow', () => {
     route.params.characterId = 'c1';
 
     // Override mocks to return pending promises so we can assert the loader is visible
-    const api = await import('@/services/characterApi');
+    const api = await import('@/apis/characterApi');
     let genResolve: (v?: any) => void = () => {};
     const genPromise = new Promise<string>((resolve) => {
       genResolve = resolve;
     });
     (api.characterServiceApi.generateAvatar as any).mockImplementation(() => genPromise);
 
-    const conv = await import('@/services/conversationService');
+    const conv = await import('@/apis/conversationApi');
     let startResolve: (v?: any) => void = () => {};
     const startPromise = new Promise<any>((resolve) => {
       startResolve = resolve;

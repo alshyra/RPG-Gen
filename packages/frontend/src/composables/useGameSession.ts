@@ -4,8 +4,8 @@ import { useCharacterStore } from '@/stores/characterStore';
 import type { GameInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
-import { characterServiceApi } from '@/services/characterApi';
-import { conversationService } from '../services/conversationService';
+import { characterServiceApi } from '@/apis/characterApi';
+import { conversationService } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
 export const useGameSession = () => {

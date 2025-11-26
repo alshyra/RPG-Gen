@@ -346,6 +346,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AuthProfileDto: {
+            /** @description Id de l'utilisateur */
+            id: string;
+            /** @description Email de l'utilisateur */
+            email: string;
+            /** @description Nom affiché de l'utilisateur */
+            displayName: string;
+            /** @description URL de la photo de profil de l'utilisateur */
+            picture: string;
+        };
         ChatRequestDto: {
             /** @description User message to send to the AI */
             message: string;
@@ -753,11 +763,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description List of characters */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthProfileDto"];
+                };
             };
         };
     };

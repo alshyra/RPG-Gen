@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { authService } from '../services/authService';
+import { authService } from '../apis/authApi';
 import UiButton from '../components/ui/UiButton.vue';
 
 const router = useRouter();

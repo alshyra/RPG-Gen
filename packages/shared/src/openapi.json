@@ -37,7 +37,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "List of characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProfileDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get current user profile",
@@ -829,6 +836,33 @@
       }
     },
     "schemas": {
+      "AuthProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id de l'utilisateur"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email de l'utilisateur"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nom affiché de l'utilisateur"
+          },
+          "picture": {
+            "type": "string",
+            "description": "URL de la photo de profil de l'utilisateur"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "picture"
+        ]
+      },
       "ChatRequestDto": {
         "type": "object",
         "properties": {

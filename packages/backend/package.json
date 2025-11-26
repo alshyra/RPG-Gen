@@ -10,7 +10,7 @@
     "lint": "tsc -p tsconfig.json && eslint .",
     "lint:fix": "eslint . --fix",
     "test": "ava",
-    "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts",
+    "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts"
   },
   "dependencies": {
     "@google/genai": "~1.29.1",

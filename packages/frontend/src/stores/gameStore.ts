@@ -1,4 +1,4 @@
-import { rollDice } from '@/services/diceService';
+import { rollDice } from '@/apis/diceApi';
 import type { ChatMessage, DiceThrow, GameInstruction, RollModalData } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';

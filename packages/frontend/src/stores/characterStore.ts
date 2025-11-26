@@ -1,4 +1,4 @@
-import { characterServiceApi } from '@/services/characterApi';
+import { characterServiceApi } from '@/apis/characterApi';
 import { CharacterDto, ItemDto, SpellDto, SpellInstruction } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';

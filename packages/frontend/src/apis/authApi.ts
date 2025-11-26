@@ -2,15 +2,10 @@
  * AuthService - Manages authentication state and tokens
  */
 
+import { AuthProfileDto } from '@rpg-gen/shared';
+import { api } from './apiClient';
 const TOKEN_KEY = 'rpg-auth-token';
 const USER_KEY = 'rpg-user-data';
-
-export interface User {
-  id: string;
-  email: string;
-  displayName: string;
-  picture?: string;
-}
 
 const getToken = (): string | null => {
   try {
@@ -37,7 +32,7 @@ const clearToken = (): void => {
   }
 };
 
-const getUser = (): User | null => {
+const getUser = (): AuthProfileDto | null => {
   try {
     const userData = localStorage.getItem(USER_KEY);
     return userData ? JSON.parse(userData) : null;
@@ -46,7 +41,7 @@ const getUser = (): User | null => {
   }
 };
 
-const setUser = (user: User): void => {
+const setUser = (user: AuthProfileDto): void => {
   try {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   } catch (e) {
@@ -106,19 +101,17 @@ const logout = (): void => {
 };
 
 // Fetch user profile from backend
-const fetchUserProfile = async (token: string): Promise<User | null> => {
+const fetchUserProfile = async (token: string): Promise<AuthProfileDto | null> => {
   try {
-    const response = await fetch('/api/auth/profile', {
+    const response = await api.GET('/api/auth/profile', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (response.ok) {
-      const userData = await response.json();
-      setUser(userData);
-      return userData;
-    }
-    return null;
+    if (response.error) return null;
+    const userData = response.data;
+    setUser(userData);
+    return userData;
   } catch (e) {
     console.error('Failed to fetch user profile', e);
     return null;

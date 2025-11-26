@@ -1,6 +1,6 @@
 import { DiceThrowDto, GameInstruction, GameResponse, RollResult } from '@rpg-gen/shared';
 import { watch } from 'vue';
-import { conversationService } from '../services/conversationService';
+import { conversationService } from '../apis/conversationApi';
 import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';

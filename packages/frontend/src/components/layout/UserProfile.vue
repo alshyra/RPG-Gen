@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { authService, type User } from '../../services/authService';
+import { authService, type User } from '../../apis/authApi';
 
 const router = useRouter();
 const user = ref<User | null>(null);
