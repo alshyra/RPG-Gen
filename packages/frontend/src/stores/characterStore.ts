@@ -4,6 +4,15 @@ import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+// Type for spell instructions from game parser
+interface SpellInstruction {
+  action: 'learn' | 'cast' | 'forget';
+  name: string;
+  level?: number;
+  school?: string;
+  description?: string;
+}
+
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();
   const currentCharacterId = computed(() => typeof route.params.characterId === 'string' ? route.params.characterId : undefined);
@@ -26,14 +35,21 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   // inventory/spells helpers (simple implementations)
-  const learnSpell = (spell: SpellDto) => {
+  const learnSpell = (spell: SpellInstruction | SpellDto) => {
     if (!currentCharacter.value) return;
+    // Convert instruction to SpellDto format
+    const spellDto: SpellDto = {
+      name: spell.name,
+      level: spell.level,
+      description: spell.description,
+      meta: {},
+    };
     // immutable update to avoid forced casts
     currentCharacter.value = {
       ...currentCharacter.value,
       spells: [
         ...(currentCharacter.value.spells || []),
-        spell,
+        spellDto,
       ],
     };
   };

@@ -1,19 +1,21 @@
 import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { conversationService } from '../services/conversationService';
+import type { GameInstruction, GameResponse } from '@rpg-gen/shared';
 
 export function useGameMessages() {
   const gameStore = useGameStore();
 
-  const handleMessageResponse = (response: any): void => {
+  const handleMessageResponse = (response: GameResponse): void => {
     gameStore.messages.pop();
     gameStore.appendMessage('GM', response.text);
     processInstructions(response.instructions);
   };
 
-  const handleMessageError = (e: any): void => {
+  const handleMessageError = (e: Error | unknown): void => {
     gameStore.messages.pop();
-    gameStore.appendMessage('Error', e?.message || 'Failed to send message');
+    const message = e instanceof Error ? e.message : 'Failed to send message';
+    gameStore.appendMessage('Error', message);
   };
 
   const sendMessage = async (): Promise<void> => {
@@ -26,33 +28,40 @@ export function useGameMessages() {
     try {
       const response = await conversationService.sendMessage(messageText);
       handleMessageResponse(response);
-    } catch (e: any) {
+    } catch (e: unknown) {
       handleMessageError(e);
     } finally {
       gameStore.sending = false;
     }
   };
 
-  const handleRollInstruction = (instr: any): void => {
+  const handleRollInstruction = (instr: GameInstruction): void => {
     gameStore.pendingInstruction = instr;
-    gameStore.appendMessage('System', `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`);
+    if (instr.roll) {
+      gameStore.appendMessage('System', `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` + ${instr.roll.modifier}` : ''}`);
+    }
   };
 
-  const handleXpInstruction = (instr: any): void => {
+  const handleXpInstruction = (instr: GameInstruction): void => {
     const characterStore = useCharacterStore();
-    gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
-    characterStore.updateXp(instr.xp);
+    if (instr.xp !== undefined) {
+      gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+      characterStore.updateXp(instr.xp);
+    }
   };
 
-  const handleHpInstruction = (instr: any): void => {
-    const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-    gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
-    const characterStore = useCharacterStore();
-    characterStore.updateHp(instr.hp);
-    if (characterStore.isDead) characterStore.showDeathModal = true;
+  const handleHpInstruction = (instr: GameInstruction): void => {
+    if (instr.hp !== undefined) {
+      const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
+      gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+      const characterStore = useCharacterStore();
+      characterStore.updateHp(instr.hp);
+      if (characterStore.isDead) characterStore.showDeathModal = true;
+    }
   };
 
-  const handleSpellInstruction = (instr: any): void => {
+  const handleSpellInstruction = (instr: GameInstruction): void => {
+    if (!instr.spell) return;
     if (instr.spell.action === 'learn') {
       gameStore.appendMessage('System', `📖 Learned spell: ${instr.spell.name} (Level ${instr.spell.level})`);
       useCharacterStore().learnSpell(instr.spell);
@@ -64,7 +73,8 @@ export function useGameMessages() {
     }
   };
 
-  const handleInventoryInstruction = (instr: any): void => {
+  const handleInventoryInstruction = (instr: GameInstruction): void => {
+    if (!instr.inventory) return;
     if (instr.inventory.action === 'add') {
       const qty = instr.inventory.quantity || 1;
       gameStore.appendMessage('System', `🎒 Added to inventory: ${instr.inventory.name} (x${qty})`);
@@ -79,11 +89,11 @@ export function useGameMessages() {
     }
   };
 
-  const processInstructions = (instructions: any[]): void => {
+  const processInstructions = (instructions: GameInstruction[]): void => {
     instructions.forEach((instr) => {
       if (instr.roll) handleRollInstruction(instr);
-      else if (instr.xp) handleXpInstruction(instr);
-      else if (instr.hp) handleHpInstruction(instr);
+      else if (instr.xp !== undefined) handleXpInstruction(instr);
+      else if (instr.hp !== undefined) handleHpInstruction(instr);
       else if (instr.spell) handleSpellInstruction(instr);
       else if (instr.inventory) handleInventoryInstruction(instr);
     });
