@@ -79,14 +79,27 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChatRequest"
+                "$ref": "#/components/schemas/ChatRequestDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Chat response with narrative and instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Chat processing failed"
           }
         },
         "security": [
@@ -115,7 +128,23 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Conversation history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "History retrieval failed"
           }
         },
         "security": [
@@ -133,9 +162,26 @@
       "post": {
         "operationId": "CharacterController_create",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCharacterBodyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Character created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -153,7 +199,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "List of characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -173,7 +229,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "List of deceased characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeceasedCharacterResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -202,7 +268,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Character found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -229,7 +305,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Character updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -256,7 +342,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Character deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -283,9 +379,29 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KillCharacterBodyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Character marked as deceased",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -324,7 +440,17 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Item added to inventory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -361,7 +487,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Inventory item updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character or item not found"
           }
         },
         "security": [
@@ -394,9 +530,29 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveInventoryBodyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Item removed from inventory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Character or item not found"
           }
         },
         "security": [
@@ -423,9 +579,32 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantInspirationBodyDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Inspiration granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspirationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid amount"
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -454,7 +633,20 @@
         ],
         "responses": {
           "201": {
-            "description": ""
+            "description": "Inspiration spent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InspirationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No inspiration points available"
+          },
+          "404": {
+            "description": "Character not found"
           }
         },
         "security": [
@@ -521,7 +713,17 @@
         },
         "responses": {
           "200": {
-            "description": "Dice throw result"
+            "description": "Dice throw result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiceThrowDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid dice expression"
           }
         },
         "summary": "Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20",
@@ -539,14 +741,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/ImageRequestDto"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "400": {
+            "description": "Image generation not implemented"
           }
         },
         "summary": "Generate image from prompt",
@@ -564,14 +766,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CharacterIdBody"
+                "$ref": "#/components/schemas/CharacterIdBodyDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Avatar generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or avatar generation failed"
           }
         },
         "security": [
@@ -617,9 +829,667 @@
       }
     },
     "schemas": {
-      "ChatRequest": {
+      "ChatRequestDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "User message to send to the AI"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "RollInstructionDto": {
+        "type": "object",
+        "properties": {
+          "dices": {
+            "type": "string",
+            "description": "Dice expression (e.g., 1d20+5)"
+          },
+          "modifier": {
+            "type": "object",
+            "description": "Modifier"
+          },
+          "description": {
+            "type": "string",
+            "description": "Roll description"
+          },
+          "advantage": {
+            "type": "string",
+            "description": "Advantage type",
+            "enum": [
+              "advantage",
+              "disadvantage",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "dices"
+        ]
+      },
+      "SpellInstructionDataDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Spell action",
+            "enum": [
+              "learn",
+              "cast",
+              "forget"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Spell name"
+          },
+          "level": {
+            "type": "number",
+            "description": "Spell level"
+          },
+          "school": {
+            "type": "string",
+            "description": "Spell school"
+          },
+          "description": {
+            "type": "string",
+            "description": "Spell description"
+          }
+        },
+        "required": [
+          "action",
+          "name"
+        ]
+      },
+      "InventoryInstructionDataDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Inventory action",
+            "enum": [
+              "add",
+              "remove",
+              "use"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description"
+          }
+        },
+        "required": [
+          "action",
+          "name"
+        ]
+      },
+      "GameInstructionDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "roll",
+              "xp",
+              "hp",
+              "spell",
+              "inventory"
+            ]
+          },
+          "roll": {
+            "description": "Roll instruction data",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RollInstructionDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "HP change"
+          },
+          "xp": {
+            "type": "number",
+            "description": "XP gained"
+          },
+          "spell": {
+            "description": "Spell instruction",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpellInstructionDataDto"
+              }
+            ]
+          },
+          "inventory": {
+            "description": "Inventory instruction",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InventoryInstructionDataDto"
+              }
+            ]
+          }
+        }
+      },
+      "ChatResponseDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Narrative text from the AI (cleaned)"
+          },
+          "instructions": {
+            "description": "Game instructions extracted from the response",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameInstructionDto"
+            }
+          },
+          "model": {
+            "type": "string",
+            "description": "AI model used"
+          },
+          "usage": {
+            "type": "object",
+            "description": "Token usage statistics",
+            "additionalProperties": true
+          },
+          "raw": {
+            "type": "object",
+            "description": "Raw response (null by default)"
+          }
+        },
+        "required": [
+          "text",
+          "instructions",
+          "model"
+        ]
+      },
+      "MessageMetaDto": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "AI model version used"
+          },
+          "usage": {
+            "type": "object",
+            "description": "Token usage statistics",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ChatMessageDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Message role",
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "description": "Message text content"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Unix timestamp of the message"
+          },
+          "meta": {
+            "description": "Message metadata",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MessageMetaDto"
+              }
+            ]
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative text (for assistant messages)"
+          },
+          "instructions": {
+            "description": "Game instructions (for assistant messages)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameInstructionDto"
+            }
+          }
+        },
+        "required": [
+          "role",
+          "text",
+          "timestamp"
+        ]
+      },
+      "CreateCharacterBodyDto": {
+        "type": "object",
+        "properties": {
+          "world": {
+            "type": "string",
+            "description": "Game world (e.g., dnd, vtm)"
+          }
+        },
+        "required": [
+          "world"
+        ]
+      },
+      "RaceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Race ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Race name"
+          },
+          "mods": {
+            "type": "object",
+            "description": "Ability score modifiers",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "mods"
+        ]
+      },
+      "AbilityScoresResponseDto": {
+        "type": "object",
+        "properties": {
+          "Str": {
+            "type": "number",
+            "description": "Strength score"
+          },
+          "Dex": {
+            "type": "number",
+            "description": "Dexterity score"
+          },
+          "Con": {
+            "type": "number",
+            "description": "Constitution score"
+          },
+          "Int": {
+            "type": "number",
+            "description": "Intelligence score"
+          },
+          "Wis": {
+            "type": "number",
+            "description": "Wisdom score"
+          },
+          "Cha": {
+            "type": "number",
+            "description": "Charisma score"
+          }
+        }
+      },
+      "CharacterClassResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Class name"
+          },
+          "level": {
+            "type": "number",
+            "description": "Class level"
+          }
+        }
+      },
+      "SkillResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Skill name"
+          },
+          "proficient": {
+            "type": "boolean",
+            "description": "Is proficient in this skill"
+          },
+          "modifier": {
+            "type": "number",
+            "description": "Skill modifier"
+          }
+        }
+      },
+      "ItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Item ID"
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Definition ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name"
+          },
+          "qty": {
+            "type": "number",
+            "description": "Quantity"
+          },
+          "description": {
+            "type": "string",
+            "description": "Item description"
+          },
+          "equipped": {
+            "type": "boolean",
+            "description": "Is equipped"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Item metadata",
+            "additionalProperties": true
+          }
+        }
+      },
+      "SpellResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Spell name"
+          },
+          "level": {
+            "type": "number",
+            "description": "Spell level"
+          },
+          "description": {
+            "type": "string",
+            "description": "Spell description"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Spell metadata",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CharacterResponseDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "Unique character ID (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Character name"
+          },
+          "physicalDescription": {
+            "type": "string",
+            "description": "Physical description of the character"
+          },
+          "race": {
+            "description": "Character race",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceResponseDto"
+              }
+            ]
+          },
+          "scores": {
+            "description": "Ability scores",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AbilityScoresResponseDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "totalXp": {
+            "type": "number",
+            "description": "Total experience points"
+          },
+          "classes": {
+            "description": "Character classes",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterClassResponseDto"
+            }
+          },
+          "skills": {
+            "description": "Character skills",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponseDto"
+            }
+          },
+          "world": {
+            "type": "string",
+            "description": "Game world (e.g., dnd, vtm)"
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Character portrait URL or base64"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character gender"
+          },
+          "proficiency": {
+            "type": "number",
+            "description": "Proficiency bonus"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Inspiration points"
+          },
+          "isDeceased": {
+            "type": "boolean",
+            "description": "Whether character is deceased"
+          },
+          "diedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Date of death (ISO string)"
+          },
+          "deathLocation": {
+            "type": "string",
+            "description": "Location where character died"
+          },
+          "state": {
+            "type": "string",
+            "description": "Character state",
+            "enum": [
+              "draft",
+              "created"
+            ]
+          },
+          "inventory": {
+            "description": "Character inventory",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponseDto"
+            }
+          },
+          "spells": {
+            "description": "Character spells",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          }
+        },
+        "required": [
+          "characterId",
+          "world",
+          "portrait",
+          "isDeceased",
+          "state"
+        ]
+      },
+      "DeceasedCharacterResponseDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "Unique character ID (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Character name"
+          },
+          "physicalDescription": {
+            "type": "string",
+            "description": "Physical description of the character"
+          },
+          "race": {
+            "description": "Character race",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceResponseDto"
+              }
+            ]
+          },
+          "scores": {
+            "description": "Ability scores",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AbilityScoresResponseDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "totalXp": {
+            "type": "number",
+            "description": "Total experience points"
+          },
+          "classes": {
+            "description": "Character classes",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterClassResponseDto"
+            }
+          },
+          "skills": {
+            "description": "Character skills",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponseDto"
+            }
+          },
+          "world": {
+            "type": "string",
+            "description": "Game world (e.g., dnd, vtm)"
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Character portrait URL or base64"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character gender"
+          },
+          "proficiency": {
+            "type": "number",
+            "description": "Proficiency bonus"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Inspiration points"
+          },
+          "isDeceased": {
+            "type": "boolean",
+            "description": "Whether character is deceased"
+          },
+          "diedAt": {
+            "type": "string",
+            "description": "Date of death (ISO string)"
+          },
+          "deathLocation": {
+            "type": "string",
+            "description": "Location where character died"
+          },
+          "state": {
+            "type": "string",
+            "description": "Character state",
+            "enum": [
+              "draft",
+              "created"
+            ]
+          },
+          "inventory": {
+            "description": "Character inventory",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponseDto"
+            }
+          },
+          "spells": {
+            "description": "Character spells",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          }
+        },
+        "required": [
+          "characterId",
+          "world",
+          "portrait",
+          "isDeceased",
+          "state"
+        ]
+      },
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Response message"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "KillCharacterBodyDto": {
+        "type": "object",
+        "properties": {
+          "deathLocation": {
+            "type": "string",
+            "description": "Location where character died"
+          }
+        }
       },
       "CreateInventoryItemDto": {
         "type": "object",
@@ -657,11 +1527,135 @@
           "definitionId"
         ]
       },
+      "RemoveInventoryBodyDto": {
+        "type": "object",
+        "properties": {
+          "qty": {
+            "type": "number",
+            "description": "Quantity to remove (0 = remove all)"
+          }
+        }
+      },
+      "GrantInspirationBodyDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Amount of inspiration to grant (1-5)",
+            "default": 1
+          }
+        }
+      },
+      "InspirationResponseDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Operation success status"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Updated inspiration points count"
+          },
+          "character": {
+            "description": "Updated character",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CharacterResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "inspirationPoints",
+          "character"
+        ]
+      },
       "DiceRequest": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Dice expression (e.g., 1d20+5, 2d6, 1d8-2)"
+          },
+          "advantage": {
+            "type": "string",
+            "description": "Advantage type for d20 rolls",
+            "enum": [
+              "advantage",
+              "disadvantage",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "expr"
+        ]
       },
-      "CharacterIdBody": {
+      "DiceThrowDto": {
+        "type": "object",
+        "properties": {
+          "rolls": {
+            "description": "Individual dice roll results",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "mod": {
+            "type": "number",
+            "description": "Modifier applied to the total"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total result (sum of rolls + modifier)"
+          },
+          "advantage": {
+            "type": "string",
+            "description": "Advantage type used for this roll",
+            "enum": [
+              "advantage",
+              "disadvantage",
+              "none"
+            ]
+          },
+          "keptRoll": {
+            "type": "number",
+            "description": "The roll that was kept (when using advantage/disadvantage)"
+          },
+          "discardedRoll": {
+            "type": "number",
+            "description": "The roll that was discarded (when using advantage/disadvantage)"
+          }
+        },
+        "required": [
+          "rolls",
+          "mod",
+          "total"
+        ]
+      },
+      "ImageRequestDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "API token (optional)"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Image prompt"
+          },
+          "model": {
+            "type": "string",
+            "description": "Model to use"
+          }
+        },
+        "required": [
+          "prompt"
+        ]
+      },
+      "CharacterIdBodyDto": {
         "type": "object",
         "properties": {
           "characterId": {
@@ -671,6 +1665,18 @@
         },
         "required": [
           "characterId"
+        ]
+      },
+      "AvatarResponseDto": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "description": "Generated avatar image URL or base64 data"
+          }
+        },
+        "required": [
+          "imageUrl"
         ]
       }
     }
