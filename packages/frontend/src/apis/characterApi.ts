@@ -33,7 +33,7 @@ export const characterApi = {
    */
   createCharacter: async (world: string): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export const characterApi = {
    */
   saveCharacter: async (characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters/${characterId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export const characterApi = {
    */
   killCharacter: async (characterId: string, deathLocation?: string): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters/${characterId}/kill`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/kill`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export const characterApi = {
    */
   updateInventoryItem: async (characterId: string, itemId: string, updates: Partial<ItemDto>): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters/${characterId}/inventory/${itemId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inventory/${itemId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export const characterApi = {
    */
   removeInventoryItem: async (characterId: string, itemId: string, qty?: number): Promise<CharacterDto> => {
     // Use fetch with body in DELETE request
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters/${characterId}/inventory/${itemId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inventory/${itemId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export const characterApi = {
    */
   grantInspiration: async (characterId: string, amount = 1): Promise<CharacterDto> => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/characters/${characterId}/inspiration/grant`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inspiration/grant`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
