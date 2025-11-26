@@ -32,15 +32,19 @@ describe("API Integration", () => {
     cy.contains("RPG Gemini").should("be.visible");
   });
 
-  it("should work offline (no backend)", () => {
+  it("should display world selector when backend is unavailable", () => {
     // Simulate a backend outage by forcing network errors for any API requests.
     cy.intercept('GET', '/api/**', { forceNetworkError: true }).as('offlineGet');
     cy.intercept('POST', '/api/**', { forceNetworkError: true }).as('offlinePost');
 
     // We need the client to be considered authenticated so /home doesn't redirect to /login.
-    // Instead of global mocks we set a lightweight local session state for this test only.
+    // Use a valid JWT-like token with a far-future expiration to pass client-side validation.
     cy.window().then((win) => {
-      win.localStorage.setItem('rpg-auth-token', 'offline-test-token');
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ sub: 'offline-user', exp: 4102444800 })); // year 2100
+      const signature = 'test-signature';
+      const token = `${header}.${payload}.${signature}`;
+      win.localStorage.setItem('rpg-auth-token', token);
       win.localStorage.setItem('rpg-user-data', JSON.stringify({ id: 'offline-user', displayName: 'Offline Tester' }));
     });
 
