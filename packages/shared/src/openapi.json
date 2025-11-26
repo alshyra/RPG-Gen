@@ -305,11 +305,23 @@
             "name": "characterId",
             "required": true,
             "in": "path",
+            "description": "ID of the character to update",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "description": "Fields to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CharacterResponseDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Character updated",
@@ -492,6 +504,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInventoryItemDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Inventory item updated",

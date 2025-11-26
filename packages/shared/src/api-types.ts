@@ -965,11 +965,17 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description ID of the character to update */
                 characterId: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        /** @description Fields to update */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CharacterResponseDto"];
+            };
+        };
         responses: {
             /** @description Character updated */
             200: {
@@ -1128,7 +1134,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInventoryItemDto"];
+            };
+        };
         responses: {
             /** @description Inventory item updated */
             200: {

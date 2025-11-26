@@ -13,7 +13,7 @@ import {
   NotFoundException,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CharacterService } from './character.service.js';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
@@ -96,6 +96,8 @@ export class CharacterController {
   @ApiOperation({ summary: 'Update a character' })
   @ApiResponse({ status: 200, description: 'Character updated', type: CharacterResponseDto })
   @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiParam({ name: 'characterId', description: 'ID of the character to update' })
+  @ApiBody({ description: 'Fields to update', type: CharacterResponseDto })
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -161,6 +163,7 @@ export class CharacterController {
   @ApiOperation({ summary: 'Update an item in character\'s inventory' })
   @ApiResponse({ status: 200, description: 'Inventory item updated', type: CharacterResponseDto })
   @ApiResponse({ status: 404, description: 'Character or item not found' })
+  @ApiBody({ type: CreateInventoryItemDto })
   async updateInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,

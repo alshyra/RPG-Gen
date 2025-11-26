@@ -21,6 +21,7 @@ export type CreateInventoryItemDto = import('./api-types').components['schemas']
 export type ImageRequest = import('./api-types').components['schemas']['ImageRequestDto'];
 export type ChatRequest = import('./api-types').components['schemas']['ChatRequestDto'];
 export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
+
 // Legacy alias for backward compatibility
 export type DiceThrowDto = DiceThrow;
 

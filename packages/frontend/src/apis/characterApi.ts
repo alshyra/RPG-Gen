@@ -2,7 +2,7 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterDto, ItemDto, components } from '@rpg-gen/shared';
+import type { CharacterDto, CreateInventoryItemDto, ItemDto, components } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Type alias for OpenAPI inventory item type
@@ -31,18 +31,13 @@ export const characterApi = {
   /**
    * Create a new character
    */
-  createCharacter: async (world: string): Promise<CharacterDto> => {
+  createCharacter: async (world: string) => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify({ world }),
+    const response = await api.POST('/api/characters', {
+      body: { world },
     });
-    if (!response.ok) throw new Error('Failed to create character');
-    return response.json();
+    if (response.error) throw new Error('Failed to create character');
+    return response.data;
   },
 
   /**
@@ -70,18 +65,12 @@ export const characterApi = {
   /**
    * Update a character
    */
-  saveCharacter: async (characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDto> => {
-    // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify(updates),
+  saveCharacter: async (characterId: string, updates: CharacterDto): Promise<CharacterDto> => {
+    const response = await api.PUT('/api/characters/{characterId}', {
+      params: { path: { characterId } },
+      body: updates,
     });
-    if (!response.ok) throw new Error('Failed to save character');
-    return response.json();
+    return getData(response);
   },
 
   /**
@@ -97,17 +86,11 @@ export const characterApi = {
    * Mark a character as deceased
    */
   killCharacter: async (characterId: string, deathLocation?: string): Promise<CharacterDto> => {
-    // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/kill`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify({ deathLocation }),
+    const response = await api.POST('/api/characters/{characterId}/kill', {
+      params: { path: { characterId } },
+      body: { deathLocation },
     });
-    if (!response.ok) throw new Error('Failed to kill character');
-    return response.json();
+    return getData<CharacterDto>(response);
   },
 
   /**
@@ -132,52 +115,34 @@ export const characterApi = {
   /**
    * Update an item in character's inventory
    */
-  updateInventoryItem: async (characterId: string, itemId: string, updates: Partial<ItemDto>): Promise<CharacterDto> => {
-    // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inventory/${itemId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify(updates),
+  updateInventoryItem: async (characterId: string, itemId: string, updates: CreateInventoryItemDto): Promise<CharacterDto> => {
+    const response = await api.PATCH('/api/characters/{characterId}/inventory/{itemId}', {
+      params: { path: { characterId, itemId } },
+      body: updates,
     });
-    if (!response.ok) throw new Error('Failed to update inventory item');
-    return response.json();
+    return getData<CharacterDto>(response);
   },
 
   /**
    * Remove an item from character's inventory
    */
   removeInventoryItem: async (characterId: string, itemId: string, qty?: number): Promise<CharacterDto> => {
-    // Use fetch with body in DELETE request
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inventory/${itemId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify({ qty }),
+    const response = await api.DELETE('/api/characters/{characterId}/inventory/{itemId}', {
+      params: { path: { characterId, itemId } },
+      body: { qty },
     });
-    if (!response.ok) throw new Error('Failed to remove inventory item');
-    return response.json();
+    return getData<CharacterDto>(response);
   },
 
   /**
    * Grant inspiration point(s) to a character
    */
   grantInspiration: async (characterId: string, amount = 1): Promise<CharacterDto> => {
-    // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await fetch(`${import.meta.env.VITE_API_URL || `${window.location.origin}/api`}/characters/${characterId}/inspiration/grant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('rpg-auth-token') || ''}`,
-      },
-      body: JSON.stringify({ amount }),
+    const response = await api.POST('/api/characters/{characterId}/inspiration/grant', {
+      params: { path: { characterId } },
+      body: { amount },
     });
-    if (!response.ok) throw new Error('Failed to grant inspiration');
-    const result = await response.json();
+    const result = getData<{ character: CharacterDto }>(response);
     return result.character;
   },
 
