@@ -18,6 +18,7 @@ export type {
 // Game mechanics types
 export type {
   ChatRole,
+  DisplayRole,
   GameInstruction,
   RollInstruction,
   ChatMessage,

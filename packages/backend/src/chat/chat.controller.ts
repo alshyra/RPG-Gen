@@ -139,7 +139,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
-      meta: { usage: resp.usage || {}, model: resp.modelVersion || '' },
+      meta: { usage: resp.usage ? { ...resp.usage } : undefined, model: resp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, assistantMsg);
 
@@ -194,7 +194,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
       timestamp: Date.now(),
       meta: {
         model: initResp.modelVersion,
-        usage: initResp.usage || {},
+        usage: initResp.usage ? { ...initResp.usage } : undefined,
       },
     };
 

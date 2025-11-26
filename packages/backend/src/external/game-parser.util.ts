@@ -75,7 +75,7 @@ export const parseGameInstructions = (narrative: string): GameInstruction[] => {
     });
 };
 
-const normalizeModifier = (mod: unknown): unknown => {
+const normalizeModifier = (mod: string | number): string | number => {
   if (typeof mod !== 'string') return mod;
   const s = mod.replace(/\s+Check$/i, '').trim();
 

@@ -3,9 +3,14 @@
  */
 
 /**
- * Chat message role types
+ * Chat message role types for Gemini API
  */
 export type ChatRole = "system" | "user" | "assistant";
+
+/**
+ * Extended role type for UI display (includes GM, Player, Error, etc.)
+ */
+export type DisplayRole = ChatRole | "GM" | "Player" | "Error" | "model" | string;
 
 /**
  * Game instruction from backend parser
@@ -45,13 +50,21 @@ export interface RollInstruction {
 }
 
 /**
+ * Message metadata (model/usage info from API)
+ */
+export interface MessageMeta {
+  usage?: Record<string, unknown>;
+  model?: string;
+}
+
+/**
  * Chat message with metadata
  */
 export interface ChatMessage {
-  role: ChatRole;
+  role: DisplayRole;
   text: string;
-  timestamp?: number;
-  meta?: Record<string, unknown>;
+  timestamp: number;
+  meta?: MessageMeta;
   instructions?: GameInstruction[];
 }
 
