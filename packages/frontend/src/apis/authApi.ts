@@ -4,6 +4,10 @@
 
 import { AuthProfileDto } from '@rpg-gen/shared';
 import { api } from './apiClient';
+
+// Export User as alias for AuthProfileDto for backward compatibility
+export type User = AuthProfileDto;
+
 const TOKEN_KEY = 'rpg-auth-token';
 const USER_KEY = 'rpg-user-data';
 
