@@ -218,3 +218,56 @@ test('should extract multiple mixed instructions', (t) => {
   t.is(result.instructions[2].spell?.name, 'Magic Missile');
   t.is(result.instructions[2].spell?.level, 1);
 });
+
+test('should extract combat_start instruction', (t) => {
+  const input = `Un groupe de gobelins vous attaque!
+
+  \`\`\`json
+  {"combat_start": [{"name": "Goblin 1", "hp": 7, "ac": 13}, {"name": "Goblin 2", "hp": 7, "ac": 13}]}
+  \`\`\``;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].combat_start);
+  t.is(result.instructions[0].combat_start.length, 2);
+  t.is(result.instructions[0].combat_start[0].name, 'Goblin 1');
+  t.is(result.instructions[0].combat_start[0].hp, 7);
+  t.is(result.instructions[0].combat_start[0].ac, 13);
+  t.is(result.instructions[0].combat_start[1].name, 'Goblin 2');
+
+  // Narrative should not contain the JSON block
+  t.false(result.narrative.includes('```json'));
+  t.false(result.narrative.includes('combat_start'));
+  t.true(result.narrative.includes('gobelins'));
+});
+
+test('should extract combat_end instruction', (t) => {
+  const input = `Victoire! {"combat_end": {"victory": true, "xp_gained": 100, "player_hp": 15, "enemies_defeated": ["Goblin 1", "Goblin 2"]}}`;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].combat_end);
+  t.is(result.instructions[0].combat_end.victory, true);
+  t.is(result.instructions[0].combat_end.xp_gained, 100);
+  t.is(result.instructions[0].combat_end.player_hp, 15);
+  t.deepEqual(result.instructions[0].combat_end.enemies_defeated, ['Goblin 1', 'Goblin 2']);
+});
+
+test('should extract combat_start with attack stats', (t) => {
+  const input = `Un orc furieux vous barre la route!
+  {"combat_start": [{"name": "Orc", "hp": 15, "ac": 13, "attack_bonus": 5, "damage_dice": "1d12", "damage_bonus": 3}]}`;
+
+  const result = parseGameResponse(input);
+
+  t.is(result.instructions.length, 1);
+  t.truthy(result.instructions[0].combat_start);
+  const orc = result.instructions[0].combat_start[0];
+  t.is(orc.name, 'Orc');
+  t.is(orc.hp, 15);
+  t.is(orc.ac, 13);
+  t.is(orc.attack_bonus, 5);
+  t.is(orc.damage_dice, '1d12');
+  t.is(orc.damage_bonus, 3);
+});

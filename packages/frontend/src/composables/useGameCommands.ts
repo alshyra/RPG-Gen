@@ -1,6 +1,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { conversationService } from '../apis/conversationApi';
+import { combatService } from '../services/combatService';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 
 export function useGameCommands() {
@@ -139,21 +140,50 @@ export function useGameCommands() {
   };
 
   /**
-   * Execute an attack command
+   * Execute an attack command - uses backend combat system when in combat
    */
   const executeAttackCommand = async (target: string): Promise<void> => {
-    gameStore.appendMessage('Player', `I attack ${target}!`);
-    gameStore.appendMessage('System', '...thinking...');
+    const character = characterStore.currentCharacter;
+    if (!character) return;
+
+    gameStore.appendMessage('Player', `J'attaque ${target}!`);
     gameStore.sending = true;
 
     try {
-      const response = await conversationService.sendMessage(`I attack ${target}`);
-      gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
-      processInstructions(response.instructions);
-    } catch {
-      gameStore.messages.pop();
-      gameStore.appendMessage('System', `❌ Failed to attack: ${target}`);
+      // Check if we're in combat mode
+      const statusResponse = await combatService.getStatus(character.characterId);
+
+      if (statusResponse.inCombat) {
+        // Use backend combat system
+        const attackResponse = await combatService.attack(character.characterId, target);
+
+        // Display combat narrative
+        gameStore.appendMessage('GM', attackResponse.narrative);
+
+        // Process any instructions (HP changes, XP, etc.)
+        if (attackResponse.instructions) {
+          processInstructions(attackResponse.instructions);
+        }
+
+        // Handle combat end
+        if (attackResponse.combatEnded) {
+          if (attackResponse.victory) {
+            gameStore.appendMessage('System', '🏆 Combat terminé - Victoire!');
+          } else if (attackResponse.defeat) {
+            gameStore.appendMessage('System', '💀 Combat terminé - Défaite...');
+          }
+        }
+      } else {
+        // Not in combat, send to Gemini for narrative handling
+        gameStore.appendMessage('System', '...thinking...');
+        const response = await conversationService.sendMessage(`I attack ${target}`);
+        gameStore.messages.pop();
+        gameStore.appendMessage('GM', response.text);
+        processInstructions(response.instructions);
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
+      gameStore.appendMessage('System', `❌ Erreur: ${errorMsg}`);
     } finally {
       gameStore.sending = false;
     }
@@ -204,6 +234,24 @@ export function useGameCommands() {
         } else if (inventory.action === 'use') {
           gameStore.appendMessage('System', `⚡ Used item: ${inventory.name}`);
           characterStore.useInventoryItem(inventory.name || '');
+        }
+      } else if (instr.combat_start && Array.isArray(instr.combat_start)) {
+        // Combat start handled by useGameMessages, just show message
+        const enemies = instr.combat_start as { name: string }[];
+        const enemyNames = enemies.map(e => e.name).join(', ');
+        gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
+      } else if (instr.combat_end && typeof instr.combat_end === 'object') {
+        const combatEnd = instr.combat_end as { victory: boolean; xp_gained: number; enemies_defeated: string[] };
+        if (combatEnd.victory) {
+          gameStore.appendMessage('System', '🏆 Victoire!');
+          if (combatEnd.enemies_defeated?.length > 0) {
+            gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${combatEnd.enemies_defeated.join(', ')}`);
+          }
+          if (combatEnd.xp_gained > 0) {
+            characterStore.updateXp(combatEnd.xp_gained);
+          }
+        } else {
+          gameStore.appendMessage('System', '💀 Combat terminé.');
         }
       }
     });

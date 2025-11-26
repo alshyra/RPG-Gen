@@ -1,7 +1,9 @@
-import { useGameStore } from '../stores/gameStore';
-import { useCharacterStore } from '../stores/characterStore';
-import { conversationService } from '../apis/conversationApi';
 import type { GameInstruction, GameResponse } from '@rpg-gen/shared';
+import { conversationService } from '../apis/conversationApi';
+import { combatService } from '../services/combatService';
+import type { CombatStartInstruction } from '../services/combatTypes';
+import { useCharacterStore } from '../stores/characterStore';
+import { useGameStore } from '../stores/gameStore';
 
 export function useGameMessages() {
   const gameStore = useGameStore();
@@ -69,7 +71,7 @@ export function useGameMessages() {
       gameStore.appendMessage('System', `✨ Cast spell: ${instr.spell.name}`);
     } else if (instr.spell.action === 'forget') {
       gameStore.appendMessage('System', `🚫 Forgot spell: ${instr.spell.name}`);
-      useCharacterStore().forgetSpell(instr.spell.name);
+      useCharacterStore().forgetSpell(instr.spell.name || '');
     }
   };
 
@@ -85,17 +87,78 @@ export function useGameMessages() {
       useCharacterStore().removeInventoryItem(instr.inventory.name, qty);
     } else if (instr.inventory.action === 'use') {
       gameStore.appendMessage('System', `⚡ Used item: ${instr.inventory.name}`);
-      useCharacterStore().useInventoryItem(instr.inventory.name);
+      useCharacterStore().useInventoryItem(instr.inventory.name || '');
+    }
+  };
+
+  const handleCombatStartInstruction = async (instr: CombatStartInstruction): Promise<void> => {
+    const characterStore = useCharacterStore();
+    const character = characterStore.currentCharacter;
+    if (!character) return;
+
+    const enemies = instr.combat_start;
+    const enemyNames = enemies.map(e => e.name).join(', ');
+    gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
+
+    try {
+      const combatState = await combatService.startCombat(character.characterId, instr);
+
+      if (combatState.narrative) {
+        gameStore.appendMessage('System', combatState.narrative);
+      }
+
+      // Display initiative order
+      const initiativeOrder = combatState.turnOrder
+        .map(c => `${c.name} (${c.initiative})`)
+        .join(' → ');
+      gameStore.appendMessage('System', `📋 Ordre d'initiative: ${initiativeOrder}`);
+      gameStore.appendMessage('System', 'Utilisez /attack [nom_ennemi] pour attaquer.');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
+      gameStore.appendMessage('System', `❌ Erreur de combat: ${errorMsg}`);
+    }
+  };
+
+  const handleCombatEndInstruction = (instr: { combat_end: { victory: boolean; xp_gained: number; player_hp: number; enemies_defeated: string[] } }): void => {
+    const { victory, xp_gained, enemies_defeated } = instr.combat_end;
+
+    if (victory) {
+      gameStore.appendMessage('System', '🏆 Victoire!');
+      if (enemies_defeated.length > 0) {
+        gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${enemies_defeated.join(', ')}`);
+      }
+      if (xp_gained > 0) {
+        gameStore.appendMessage('System', `✨ XP gagnés: ${xp_gained}`);
+        useCharacterStore().updateXp(xp_gained);
+      }
+    } else {
+      gameStore.appendMessage('System', '💀 Combat terminé.');
     }
   };
 
   const processInstructions = (instructions: GameInstruction[]): void => {
-    instructions.forEach((instr) => {
-      if (instr.roll) handleRollInstruction(instr);
-      else if (instr.xp !== undefined) handleXpInstruction(instr);
-      else if (instr.hp !== undefined) handleHpInstruction(instr);
-      else if (instr.spell) handleSpellInstruction(instr);
-      else if (instr.inventory) handleInventoryInstruction(instr);
+    instructions.forEach((item) => {
+      if (item.roll) handleRollInstruction(item);
+      else if (item.xp !== undefined) handleXpInstruction(item);
+      else if (item.hp !== undefined) handleHpInstruction(item);
+      else if (item.spell) handleSpellInstruction(item);
+      else if (item.inventory) handleInventoryInstruction(item);
+      const instr = item as Record<string, unknown>;
+      if (instr.roll) {
+        handleRollInstruction(instr);
+      } else if (typeof instr.xp === 'number') {
+        handleXpInstruction(instr as { xp: number });
+      } else if (typeof instr.hp === 'number') {
+        handleHpInstruction(instr as { hp: number });
+      } else if (instr.spell) {
+        handleSpellInstruction(instr);
+      } else if (instr.inventory) {
+        handleInventoryInstruction(instr);
+      } else if (instr.combat_start && Array.isArray(instr.combat_start)) {
+        handleCombatStartInstruction({ combat_start: instr.combat_start } as CombatStartInstruction);
+      } else if (instr.combat_end) {
+        handleCombatEndInstruction(instr as { combat_end: { victory: boolean; xp_gained: number; player_hp: number; enemies_defeated: string[] } });
+      }
     });
   };
 

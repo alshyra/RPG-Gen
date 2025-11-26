@@ -43,6 +43,10 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
   if (obj.roll || obj.xp !== undefined || obj.hp !== undefined || obj.spell || obj.inventory) {
     return true;
   }
+  // Check for combat instructions
+  if (obj.combat_start || obj.combat_end) {
+    return true;
+  }
   return false;
 };
 
