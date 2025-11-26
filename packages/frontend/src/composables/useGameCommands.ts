@@ -72,13 +72,15 @@ export function useGameCommands() {
 
   /**
    * Execute a use item command
+  /**
+   * Execute a use item command
    */
   const executeUseCommand = async (itemName: string): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
     const item = character.inventory?.find(
-      i => i.name.toLowerCase() === itemName.toLowerCase(),
+      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase(),
     );
 
     if (!item) {
@@ -111,7 +113,7 @@ export function useGameCommands() {
     if (!character) return;
 
     const item = character.inventory?.find(
-      i => i.name.toLowerCase() === itemName.toLowerCase(),
+      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase(),
     );
 
     if (!item) {

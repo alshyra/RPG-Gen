@@ -52,7 +52,7 @@
 
         <!-- New Features -->
         <div
-          v-if="levelUpReward.newFeatures.length > 0"
+          v-if="(levelUpReward.newFeatures ?? []).length > 0"
           class="rounded-md bg-slate-800 border border-slate-700 p-4"
         >
           <div class="text-sm text-slate-400 mb-2">

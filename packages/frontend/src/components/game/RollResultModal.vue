@@ -53,7 +53,7 @@
           v-else
           class="text-slate-300"
         >
-          {{ rollData.rolls.join(' + ') }} <span class="text-slate-500">(dé)</span>
+          {{ (rollData.rolls ?? []).join(' + ') }} <span class="text-slate-500">(dé)</span>
         </div>
         <div
           v-if="rollData.bonus !== 0"
@@ -123,7 +123,7 @@ const gameStore = useGameStore();
 const rollData = computed(() => gameStore.rollData);
 
 // Check if first roll (d20 for checks) is 20 or 1
-const firstRoll = computed(() => rollData.value.keptRoll || rollData.value.rolls[0] || 0);
+const firstRoll = computed(() => rollData.value.keptRoll || (rollData.value.rolls ?? [])[0] || 0);
 const isCriticalSuccess = computed(() => firstRoll.value === 20);
 const isCriticalFailure = computed(() => firstRoll.value === 1);
 
@@ -131,7 +131,8 @@ const isDiscardedRoll = (roll: number) => {
   if (!rollData.value.discardedRoll || !rollData.value.advantage || rollData.value.advantage === 'none') return false;
   // For advantage/disadvantage, we have exactly 2 rolls
   // If both rolls are the same value, neither should be marked as discarded
-  if (rollData.value.rolls[0] === rollData.value.rolls[1]) return false;
+  const rolls = rollData.value.rolls ?? [];
+  if (rolls[0] === rolls[1]) return false;
   return roll === rollData.value.discardedRoll;
 };
 

@@ -137,10 +137,13 @@ const killCharacter = (charId: string, deathLocation?: string): void => {
     const char = getAllSavedCharacters().find(s => s.id === charId);
     if (!char) return;
 
-    // Add death metadata
+    // Add death metadata - use data or character field depending on what's available
+    const characterData = char.data ?? char.character;
+    if (!characterData) return;
+
     const deceasedEntry: DeceasedCharacterEntry = {
       id: charId,
-      character: char.data,
+      character: characterData,
       diedAt: new Date().toISOString(),
       location: deathLocation || 'Unknown location',
     };
