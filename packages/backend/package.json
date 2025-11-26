@@ -10,9 +10,8 @@
     "lint": "tsc -p tsconfig.json && eslint .",
     "lint:fix": "eslint . --fix",
     "test": "ava",
-    "generate:dtos": "ts-node ./src/scripts/generate-dtos.ts",
     "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts",
-    "postinstall": "npm run generate:dtos"
+    "postinstall": "npm run generate:openapi"
   },
   "dependencies": {
     "@google/genai": "~1.29.1",
