@@ -46,7 +46,6 @@ const setupSwagger = (app: INestApplication) => {
   SwaggerModule.setup('docs', app, document);
 };
 
-// eslint-disable-next-line max-statements
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({

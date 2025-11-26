@@ -50,7 +50,6 @@ export class CharacterService {
     return this.characterModel.findOne({ userId, characterId }).exec();
   }
 
-  // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
     const updateDoc: any = {};
 

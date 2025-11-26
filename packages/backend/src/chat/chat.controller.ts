@@ -10,7 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import type { CharacterDto } from '@rpg-gen/shared';
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
@@ -22,13 +22,10 @@ import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ChatMessage, ConversationService } from './conversation.service.js';
+import { ChatRequestDto, ChatResponseDto, ChatMessageDto } from './dto/chat-response.dto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
-
-class ChatRequest {
-  message: string;
-}
 
 @ApiTags('chat')
 @Controller('chat')
@@ -148,7 +145,10 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
-  @ApiBody({ type: ChatRequest })
+  @ApiBody({ type: ChatRequestDto })
+  @ApiResponse({ status: 201, description: 'Chat response with narrative and instructions', type: ChatResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  @ApiResponse({ status: 500, description: 'Chat processing failed' })
   async chat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -228,7 +228,9 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
   @Get('/:characterId/history')
   @ApiOperation({ summary: 'Get conversation history for a character' })
-
+  @ApiResponse({ status: 200, description: 'Conversation history', type: [ChatMessageDto] })
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  @ApiResponse({ status: 500, description: 'History retrieval failed' })
   async getHistory(
     @Req() req: Request,
     @Param('characterId') characterId: string,

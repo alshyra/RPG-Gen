@@ -1,5 +1,5 @@
 import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import type { Request } from 'express';
 import Joi from 'joi';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
@@ -9,17 +9,13 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import type { ImageRequest } from '@rpg-gen/shared';
 import { CharacterDocument } from '../schemas/character.schema.js';
+import { CharacterIdBodyDto, AvatarResponseDto, ImageRequestDto } from './dto/image-response.dto.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
-
-class CharacterIdBody {
-  @ApiProperty({ description: 'UUID of the character' })
-  characterId: string;
-}
 
 @ApiTags('image')
 @Controller('image')
@@ -34,7 +30,8 @@ export class ImageController {
 
   @Post()
   @ApiOperation({ summary: 'Generate image from prompt' })
-  @ApiBody({ schema: { type: 'object' } })
+  @ApiBody({ type: ImageRequestDto })
+  @ApiResponse({ status: 400, description: 'Image generation not implemented' })
   async generate(@Body() body: ImageRequest) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
@@ -46,7 +43,9 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-  @ApiBody({ type: CharacterIdBody })
+  @ApiBody({ type: CharacterIdBodyDto })
+  @ApiResponse({ status: 201, description: 'Avatar generated successfully', type: AvatarResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid request or avatar generation failed' })
   async generateAvatar(@Req() req: Request, @Body('characterId') characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 
