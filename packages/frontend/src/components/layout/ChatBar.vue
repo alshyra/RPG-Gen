@@ -3,64 +3,16 @@
     class="bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40 rounded-lg p-3 border border-slate-700"
   >
     <div class="relative flex items-center gap-2">
-      <!-- Command suggestions dropdown -->
-      <div
-        v-if="showSuggestions && suggestionResult.commandSuggestions.length > 0"
-        class="absolute bottom-full left-0 right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-hidden z-10"
-      >
-        <ul class="py-1">
-          <li
-            v-for="(suggestion, index) in suggestionResult.commandSuggestions"
-            :key="suggestion.command"
-            :class="[
-              'px-3 py-2 cursor-pointer transition-colors',
-              index === selectedIndex
-                ? 'bg-purple-600 text-white'
-                : 'hover:bg-slate-700 text-slate-200'
-            ]"
-            @click="selectCommandSuggestion(suggestion)"
-            @mouseenter="selectedIndex = index"
-          >
-            <div class="flex items-center gap-2">
-              <span class="font-mono text-sm font-medium">/{{ suggestion.command }}</span>
-              <span class="text-slate-400 text-sm">{{ suggestion.description }}</span>
-            </div>
-            <div class="text-xs text-slate-500 mt-0.5">
-              {{ suggestion.usage }}
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Argument suggestions dropdown (spells/items) -->
-      <div
-        v-if="showSuggestions && suggestionResult.argumentSuggestions.length > 0"
-        class="absolute bottom-full left-0 right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg overflow-hidden z-10 max-h-48 overflow-y-auto"
-      >
-        <ul class="py-1">
-          <li
-            v-for="(suggestion, index) in suggestionResult.argumentSuggestions"
-            :key="suggestion.name"
-            :class="[
-              'px-3 py-2 cursor-pointer transition-colors',
-              index === selectedIndex
-                ? 'bg-purple-600 text-white'
-                : 'hover:bg-slate-700 text-slate-200'
-            ]"
-            @click="selectArgumentSuggestion(suggestion)"
-            @mouseenter="selectedIndex = index"
-          >
-            <div class="flex items-center gap-2">
-              <span class="text-sm">{{ suggestion.type === 'spell' ? '✨' : '🎒' }}</span>
-              <span class="font-medium text-sm">{{ suggestion.name }}</span>
-              <span
-                v-if="suggestion.description"
-                class="text-slate-400 text-sm"
-              >{{ suggestion.description }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+      <!-- Command and argument suggestions dropdown -->
+      <CommandSuggestions
+        v-if="showSuggestions"
+        :command-suggestions="suggestionResult.commandSuggestions"
+        :argument-suggestions="suggestionResult.argumentSuggestions"
+        :selected-index="selectedIndex"
+        @select-command="selectCommandSuggestion"
+        @select-argument="selectArgumentSuggestion"
+        @update:selected-index="selectedIndex = $event"
+      />
 
       <!-- Message input -->
       <input
@@ -110,6 +62,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
+import CommandSuggestions from './CommandSuggestions.vue';
 import { useGameStore } from '@/stores/gameStore';
 import { useCharacterStore } from '@/stores/characterStore';
 import {
