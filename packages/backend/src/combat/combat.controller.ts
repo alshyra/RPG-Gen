@@ -65,7 +65,7 @@ export class CombatController {
     }
 
     const characterDto = this.characterService.toCharacterDto(character);
-    const state = this.combatService.initializeCombat(characterDto, body);
+    const state = await this.combatService.initializeCombat(characterDto, body, userId);
 
     this.logger.log(`Combat started for character ${characterId} with ${body.combat_start.length} enemies`);
 
@@ -84,7 +84,7 @@ export class CombatController {
         hpMax: e.hpMax,
       })),
       turnOrder: state.turnOrder,
-      narrative: this.combatService.getCombatSummary(characterId),
+      narrative: await this.combatService.getCombatSummary(characterId),
     };
   }
 
@@ -109,13 +109,13 @@ export class CombatController {
       throw new BadRequestException('Character not found');
     }
 
-    if (!this.combatService.isInCombat(characterId)) {
+    if (!(await this.combatService.isInCombat(characterId))) {
       throw new BadRequestException('Character is not in combat');
     }
 
-    const result = this.combatService.processPlayerAttack(characterId, body.target);
+    const result = await this.combatService.processPlayerAttack(characterId, body.target);
     if (!result) {
-      const validTargets = this.combatService.getValidTargets(characterId);
+      const validTargets = await this.combatService.getValidTargets(characterId);
       throw new BadRequestException(
         `Invalid target: ${body.target}. Valid targets: ${validTargets.join(', ')}`,
       );
@@ -135,7 +135,7 @@ export class CombatController {
 
     // If combat ended with victory, add XP
     if (result.victory) {
-      const combatEnd = this.combatService.endCombat(characterId);
+      const combatEnd = await this.combatService.endCombat(characterId);
       if (combatEnd) {
         instructions.push({ xp: combatEnd.xpGained });
         instructions.push({
@@ -156,7 +156,7 @@ export class CombatController {
           enemies_defeated: [],
         },
       });
-      this.combatService.endCombat(characterId);
+      await this.combatService.endCombat(characterId);
     }
 
     this.logger.log(`Attack processed for ${characterId}: hit=${result.playerAttacks[0]?.hit}, victory=${result.victory}, defeat=${result.defeat}`);
@@ -182,7 +182,7 @@ export class CombatController {
       throw new BadRequestException('Character not found');
     }
 
-    const inCombat = this.combatService.isInCombat(characterId);
+    const inCombat = await this.combatService.isInCombat(characterId);
     if (!inCombat) {
       return {
         inCombat: false,
@@ -190,7 +190,7 @@ export class CombatController {
       };
     }
 
-    const state = this.combatService.getCombatState(characterId);
+    const state = await this.combatService.getCombatState(characterId);
     if (!state) {
       return {
         inCombat: false,
@@ -209,8 +209,8 @@ export class CombatController {
         hp: e.hp,
         hpMax: e.hpMax,
       })),
-      validTargets: this.combatService.getValidTargets(characterId),
-      narrative: this.combatService.getCombatSummary(characterId),
+      validTargets: await this.combatService.getValidTargets(characterId),
+      narrative: await this.combatService.getCombatSummary(characterId),
     };
   }
 
@@ -229,14 +229,14 @@ export class CombatController {
       throw new BadRequestException('Character not found');
     }
 
-    if (!this.combatService.isInCombat(characterId)) {
+    if (!(await this.combatService.isInCombat(characterId))) {
       return {
         success: false,
         message: 'Aucun combat en cours.',
       };
     }
 
-    this.combatService.endCombat(characterId);
+    await this.combatService.endCombat(characterId);
     this.logger.log(`Combat forcefully ended for ${characterId}`);
 
     return {

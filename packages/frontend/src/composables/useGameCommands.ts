@@ -1,13 +1,16 @@
-import { useGameStore } from '../stores/gameStore';
-import { useCharacterStore } from '../stores/characterStore';
 import { conversationService } from '../apis/conversationApi';
-import { combatService } from '../services/combatService';
-import { isCombatStartInstruction, isCombatEndInstruction } from '../services/combatTypes';
+import { isCombatEndInstruction, isCombatStartInstruction } from '../services/combatTypes';
+import { useCharacterStore } from '../stores/characterStore';
+import { useCombatStore } from '../stores/combatStore';
+import { useGameStore } from '../stores/gameStore';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
+import { useCombat } from './useCombat';
 
 export function useGameCommands() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
+  const combatStore = useCombatStore();
+  const combat = useCombat();
 
   /**
    * Insert a command into the chat input
@@ -141,54 +144,37 @@ export function useGameCommands() {
   };
 
   /**
-   * Handle attack in combat mode via backend
-   */
-  const handleCombatAttack = async (characterId: string, target: string): Promise<void> => {
-    const attackResponse = await combatService.attack(characterId, target);
-
-    // Display combat narrative
-    gameStore.appendMessage('GM', attackResponse.narrative);
-
-    // Process any instructions (HP changes, XP, etc.)
-    if (attackResponse.instructions) {
-      processInstructions(attackResponse.instructions);
-    }
-
-    // Handle combat end
-    if (attackResponse.combatEnded) {
-      if (attackResponse.victory) {
-        gameStore.appendMessage('System', '🏆 Combat terminé - Victoire!');
-      } else if (attackResponse.defeat) {
-        gameStore.appendMessage('System', '💀 Combat terminé - Défaite...');
-      }
-    }
-  };
-
-  /**
    * Execute an attack command - uses backend combat system when in combat
    */
   const executeAttackCommand = async (target: string): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
+    // Check if we're in combat mode (use store first, then check backend)
+    if (combatStore.inCombat) {
+      await combat.executeAttack(target);
+      return;
+    }
+
+    // Not in store, check backend status
+    const isInCombat = await combat.checkCombatStatus();
+    if (isInCombat) {
+      await combat.executeAttack(target);
+      return;
+    }
+
+    // Not in combat, send to Gemini for narrative handling
     gameStore.appendMessage('Player', `J'attaque ${target}!`);
+    gameStore.appendMessage('System', '...thinking...');
     gameStore.sending = true;
 
     try {
-      // Check if we're in combat mode
-      const statusResponse = await combatService.getStatus(character.characterId);
-
-      if (statusResponse.inCombat) {
-        await handleCombatAttack(character.characterId, target);
-      } else {
-        // Not in combat, send to Gemini for narrative handling
-        gameStore.appendMessage('System', '...thinking...');
-        const response = await conversationService.sendMessage(`I attack ${target}`);
-        gameStore.messages.pop();
-        gameStore.appendMessage('GM', response.text);
-        processInstructions(response.instructions);
-      }
+      const response = await conversationService.sendMessage(`I attack ${target}`);
+      gameStore.messages.pop();
+      gameStore.appendMessage('GM', response.text);
+      processInstructions(response.instructions);
     } catch (err) {
+      gameStore.messages.pop();
       const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
       gameStore.appendMessage('System', `❌ Erreur: ${errorMsg}`);
     } finally {
@@ -198,7 +184,6 @@ export function useGameCommands() {
 
   /**
    * Process game instructions from the response
-   * This mirrors the logic from useGameMessages
    */
   const processInstructions = (instructions: unknown[]): void => {
     if (!Array.isArray(instructions)) return;
@@ -243,22 +228,15 @@ export function useGameCommands() {
           characterStore.useInventoryItem(inventory.name || '');
         }
       } else if (isCombatStartInstruction(item)) {
-        // Combat start - display enemy names (main handling is in useGameMessages)
-        const enemyNames = item.combat_start.map(e => e.name).join(', ');
-        gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
+        // Combat start - delegate to combat composable
+        combat.initializeCombat(item);
       } else if (isCombatEndInstruction(item)) {
-        // Combat end - display results (main handling is in useGameMessages)
-        if (item.combat_end.victory) {
-          gameStore.appendMessage('System', '🏆 Victoire!');
-          if (item.combat_end.enemies_defeated?.length > 0) {
-            gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${item.combat_end.enemies_defeated.join(', ')}`);
-          }
-          if (item.combat_end.xp_gained > 0) {
-            characterStore.updateXp(item.combat_end.xp_gained);
-          }
-        } else {
-          gameStore.appendMessage('System', '💀 Combat terminé.');
-        }
+        // Combat end - delegate to combat composable
+        combat.handleCombatEnd(
+          item.combat_end.victory,
+          item.combat_end.xp_gained,
+          item.combat_end.enemies_defeated,
+        );
       }
     });
   };

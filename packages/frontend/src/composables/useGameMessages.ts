@@ -1,14 +1,12 @@
 import type { GameInstruction, GameResponse } from '@rpg-gen/shared';
 import { conversationService } from '../apis/conversationApi';
-import { combatService } from '../services/combatService';
-import type { CombatStartInstruction } from '../services/combatTypes';
 import {
   isCombatEndInstruction,
   isCombatStartInstruction,
-  type CombatEndInstruction
 } from '../services/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
+import { useCombat } from './useCombat';
 
 export function useGameMessages() {
   const gameStore = useGameStore();
@@ -94,51 +92,6 @@ export function useGameMessages() {
     } else if (instr.inventory.action === 'use') {
       gameStore.appendMessage('System', `⚡ Used item: ${instr.inventory.name}`);
       useCharacterStore().useInventoryItem(instr.inventory.name || '');
-    }
-  };
-
-  const handleCombatStartInstruction = async (instr: CombatStartInstruction): Promise<void> => {
-    const characterStore = useCharacterStore();
-    const character = characterStore.currentCharacter;
-    if (!character) return;
-
-    const enemies = instr.combat_start;
-    const enemyNames = enemies.map(e => e.name).join(', ');
-    gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
-
-    try {
-      const combatState = await combatService.startCombat(character.characterId, instr);
-
-      if (combatState.narrative) {
-        gameStore.appendMessage('System', combatState.narrative);
-      }
-
-      // Display initiative order
-      const initiativeOrder = combatState.turnOrder
-        .map(c => `${c.name} (${c.initiative})`)
-        .join(' → ');
-      gameStore.appendMessage('System', `📋 Ordre d'initiative: ${initiativeOrder}`);
-      gameStore.appendMessage('System', 'Utilisez /attack [nom_ennemi] pour attaquer.');
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
-      gameStore.appendMessage('System', `❌ Erreur de combat: ${errorMsg}`);
-    }
-  };
-
-  const handleCombatEndInstruction = (instr: CombatEndInstruction): void => {
-    const { victory, xp_gained, enemies_defeated } = instr.combat_end;
-
-    if (victory) {
-      gameStore.appendMessage('System', '🏆 Victoire!');
-      if (enemies_defeated.length > 0) {
-        gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${enemies_defeated.join(', ')}`);
-      }
-      if (xp_gained > 0) {
-        gameStore.appendMessage('System', `✨ XP gagnés: ${xp_gained}`);
-        useCharacterStore().updateXp(xp_gained);
-      }
-    } else {
-      gameStore.appendMessage('System', '💀 Combat terminé.');
     }
   };
 

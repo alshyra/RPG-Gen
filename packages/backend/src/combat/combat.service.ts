@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import type { CharacterDto } from '@rpg-gen/shared';
 import { DiceController } from '../dice/dice.controller.js';
 import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
+import { CombatSession, CombatSessionDocument } from '../schemas/combat-session.schema.js';
 import type {
   AttackResult,
   CombatEnemy,
@@ -14,21 +17,16 @@ import type {
 
 /**
  * Service managing combat state and mechanics.
- *
- * NOTE: Combat state is currently stored in-memory, which means:
- * - State is lost on server restart
- * - State is not shared across multiple server instances
- *
- * For production use, consider persisting combat state to the database
- * (e.g., a CombatSession collection) to ensure durability and scalability.
+ * Combat state is persisted to MongoDB for durability across restarts.
  */
 @Injectable()
 export class CombatService {
   private readonly logger = new Logger(CombatService.name);
-
-  // In-memory combat state storage - see class-level comment about production considerations
-  private combatStates = new Map<string, CombatState>();
   private diceController = new DiceController();
+
+  constructor(
+    @InjectModel(CombatSession.name) private combatSessionModel: Model<CombatSessionDocument>,
+  ) {}
 
   /**
    * Get ability modifier for attack calculations
@@ -74,10 +72,11 @@ export class CombatService {
   /**
    * Initialize combat state from combat_start instruction
    */
-  initializeCombat(
+  async initializeCombat(
     character: CharacterDto,
     combatStart: CombatStartInstruction,
-  ): CombatState {
+    userId: string,
+  ): Promise<CombatState> {
     const characterId = character.characterId;
 
     // Build player combat stats
@@ -138,7 +137,13 @@ export class CombatService {
       roundNumber: 1,
     };
 
-    this.combatStates.set(characterId, state);
+    // Persist to database (upsert to handle reconnection scenarios)
+    await this.combatSessionModel.findOneAndUpdate(
+      { characterId },
+      { userId, ...state },
+      { upsert: true, new: true },
+    );
+
     this.logger.log(`Combat initialized for ${characterId} with ${enemies.length} enemies`);
 
     return state;
@@ -147,16 +152,27 @@ export class CombatService {
   /**
    * Check if character is currently in combat
    */
-  isInCombat(characterId: string): boolean {
-    const state = this.combatStates.get(characterId);
-    return state?.inCombat ?? false;
+  async isInCombat(characterId: string): Promise<boolean> {
+    const session = await this.combatSessionModel.findOne({ characterId, inCombat: true });
+    return !!session;
   }
 
   /**
    * Get current combat state
    */
-  getCombatState(characterId: string): CombatState | undefined {
-    return this.combatStates.get(characterId);
+  async getCombatState(characterId: string): Promise<CombatState | null> {
+    const session = await this.combatSessionModel.findOne({ characterId });
+    if (!session) return null;
+
+    return {
+      characterId: session.characterId,
+      inCombat: session.inCombat,
+      enemies: session.enemies,
+      player: session.player,
+      turnOrder: session.turnOrder,
+      currentTurnIndex: session.currentTurnIndex,
+      roundNumber: session.roundNumber,
+    };
   }
 
   /**
@@ -247,8 +263,8 @@ export class CombatService {
   /**
    * Process player attack command
    */
-  processPlayerAttack(characterId: string, targetName: string): TurnResult | null {
-    const state = this.combatStates.get(characterId);
+  async processPlayerAttack(characterId: string, targetName: string): Promise<TurnResult | null> {
+    const state = await this.getCombatState(characterId);
     if (!state || !state.inCombat) {
       return null;
     }
@@ -275,7 +291,7 @@ export class CombatService {
   /**
    * Execute a full combat turn
    */
-  private executeTurn(state: CombatState, targetEnemy: CombatEnemy): TurnResult {
+  private async executeTurn(state: CombatState, targetEnemy: CombatEnemy): Promise<TurnResult> {
     const playerAttacks: AttackResult[] = [];
     const enemyAttacks: AttackResult[] = [];
     const narrativeParts: string[] = [];
@@ -306,6 +322,8 @@ export class CombatService {
     if (aliveEnemies.length === 0) {
       // Victory!
       state.inCombat = false;
+      await this.saveCombatState(state);
+
       const turnResult: TurnResult = {
         turnNumber: state.currentTurnIndex,
         roundNumber: state.roundNumber,
@@ -327,11 +345,15 @@ export class CombatService {
     // Enemy attacks - process each enemy and check for defeat
     const defeatResult = this.processEnemyAttacks(state, aliveEnemies, enemyAttacks, narrativeParts, playerAttacks);
     if (defeatResult) {
+      await this.saveCombatState(state);
       return defeatResult;
     }
 
     // Increment round
     state.roundNumber++;
+
+    // Save updated state to database
+    await this.saveCombatState(state);
 
     const turnResult: TurnResult = {
       turnNumber: state.currentTurnIndex,
@@ -348,6 +370,23 @@ export class CombatService {
     };
 
     return turnResult;
+  }
+
+  /**
+   * Save combat state to database
+   */
+  private async saveCombatState(state: CombatState): Promise<void> {
+    await this.combatSessionModel.findOneAndUpdate(
+      { characterId: state.characterId },
+      {
+        inCombat: state.inCombat,
+        enemies: state.enemies,
+        player: state.player,
+        turnOrder: state.turnOrder,
+        currentTurnIndex: state.currentTurnIndex,
+        roundNumber: state.roundNumber,
+      },
+    );
   }
 
   /**
@@ -422,8 +461,8 @@ export class CombatService {
   /**
    * End combat and generate final result
    */
-  endCombat(characterId: string): { xpGained: number; enemiesDefeated: string[] } | null {
-    const state = this.combatStates.get(characterId);
+  async endCombat(characterId: string): Promise<{ xpGained: number; enemiesDefeated: string[] } | null> {
+    const state = await this.getCombatState(characterId);
     if (!state) {
       return null;
     }
@@ -431,7 +470,8 @@ export class CombatService {
     const defeatedEnemies = state.enemies.filter(e => e.hp <= 0);
     const xpGained = this.calculateXpReward(defeatedEnemies);
 
-    this.combatStates.delete(characterId);
+    // Delete combat session from database
+    await this.combatSessionModel.deleteOne({ characterId });
     this.logger.log(`Combat cleaned up for ${characterId}`);
 
     return {
@@ -443,8 +483,8 @@ export class CombatService {
   /**
    * Get list of valid targets for player
    */
-  getValidTargets(characterId: string): string[] {
-    const state = this.combatStates.get(characterId);
+  async getValidTargets(characterId: string): Promise<string[]> {
+    const state = await this.getCombatState(characterId);
     if (!state || !state.inCombat) {
       return [];
     }
@@ -455,8 +495,8 @@ export class CombatService {
   /**
    * Get combat status summary
    */
-  getCombatSummary(characterId: string): string | null {
-    const state = this.combatStates.get(characterId);
+  async getCombatSummary(characterId: string): Promise<string | null> {
+    const state = await this.getCombatState(characterId);
     if (!state || !state.inCombat) {
       return null;
     }
