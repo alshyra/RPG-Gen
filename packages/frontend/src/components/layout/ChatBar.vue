@@ -83,6 +83,9 @@ import DiceRoll from '../game/DiceRoll.vue';
 import { useGameStore } from '@/stores/gameStore';
 import { getCommandSuggestions, type CommandDefinition } from '@/utils/chatCommands';
 
+/** Delay in ms before hiding suggestions on blur to allow click events to process */
+const SUGGESTION_BLUR_DELAY_MS = 150;
+
 interface Emits {
   (e: 'send'): void;
 }
@@ -132,10 +135,8 @@ const handleKeydown = (event: KeyboardEvent) => {
         break;
       case 'Tab':
       case 'Enter':
-        if (suggestions.value[selectedIndex.value]) {
-          event.preventDefault();
-          selectSuggestion(suggestions.value[selectedIndex.value]);
-        }
+        event.preventDefault();
+        selectSuggestion(suggestions.value[selectedIndex.value]);
         break;
       case 'Escape':
         event.preventDefault();
@@ -149,10 +150,9 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 const handleBlur = () => {
-  // Delay hiding to allow click events to process
   setTimeout(() => {
     showSuggestions.value = false;
-  }, 150);
+  }, SUGGESTION_BLUR_DELAY_MS);
 };
 
 const send = () => emit('send');

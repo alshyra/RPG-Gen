@@ -22,11 +22,12 @@ const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'attack', 'use'];
 
 /**
  * Available commands with their descriptions for autocompletion
+ * (ordered consistently with VALID_COMMANDS)
  */
 export const COMMAND_DEFINITIONS: CommandDefinition[] = [
-  { command: 'attack', description: 'Attaquer une cible', usage: '/attack <cible>' },
   { command: 'cast', description: 'Lancer un sort', usage: '/cast <sort>' },
   { command: 'equip', description: 'Équiper un objet', usage: '/equip <objet>' },
+  { command: 'attack', description: 'Attaquer une cible', usage: '/attack <cible>' },
   { command: 'use', description: 'Utiliser un objet', usage: '/use <objet>' },
 ];
 
