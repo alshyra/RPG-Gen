@@ -1,9 +1,11 @@
-import type { CharacterDto, ItemDto } from '@rpg-gen/shared';
+import { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import { ArmorMeta } from './dto/InventoryItemMeta.js';
+import { ItemResponseDto } from './dto/ItemResponseDto.js';
 
 /**
  * Get Dexterity modifier from ability scores
  */
-export const getDexModifier = (character: CharacterDto): number => {
+export const getDexModifier = (character: CharacterResponseDto): number => {
   const dexScore = character.scores?.Dex ?? 10;
   return Math.floor((dexScore - 10) / 2);
 };
@@ -41,6 +43,8 @@ export const parseArmorAc = (acString: string): { baseAc: number; addDex: boolea
   return { baseAc: 0, addDex: false, maxDex: null };
 };
 
+const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => item.meta?.type === 'armor';
+
 /**
  * Calculate Armor Class for a character based on equipped armor and shield
  *
@@ -51,21 +55,19 @@ export const parseArmorAc = (acString: string): { baseAc: number; addDex: boolea
  * - Heavy Armor: Armor AC (no DEX modifier)
  * - Shield: +2 AC bonus
  */
-export const calculateArmorClass = (character: CharacterDto): number => {
+export const calculateArmorClass = (character: CharacterResponseDto): number => {
   const dexMod = getDexModifier(character);
   const inventory = character.inventory ?? [];
 
   // Find equipped armor and shield
-  const equippedItems = inventory.filter((item: ItemDto) => item.equipped);
+  const equippedItems = inventory.filter(item => item.equipped);
 
-  let equippedArmor: ItemDto | undefined;
-  let equippedShield: ItemDto | undefined;
+  let equippedArmor: ItemResponseDto<ArmorMeta> | undefined;
+  let equippedShield: ItemResponseDto<ArmorMeta> | undefined;
 
   for (const item of equippedItems) {
-    const itemType = item.meta?.type;
-    const itemClass = item.meta?.class;
-
-    if (itemType === 'armor') {
+    if (isItemArmor(item)) {
+      const itemClass = item.meta?.class;
       if (itemClass === 'Shield') {
         equippedShield = item;
       } else if (!equippedArmor) {
@@ -78,7 +80,7 @@ export const calculateArmorClass = (character: CharacterDto): number => {
   let baseAc = 10; // Default unarmored AC
   let dexBonus = dexMod; // Full DEX bonus by default
 
-  if (equippedArmor && equippedArmor.meta?.ac) {
+  if (equippedArmor && equippedArmor.meta?.type == 'armor' && equippedArmor.meta?.ac) {
     const parsed = parseArmorAc(String(equippedArmor.meta.ac));
 
     if (parsed.addDex) {

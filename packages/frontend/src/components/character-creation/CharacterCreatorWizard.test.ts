@@ -21,7 +21,7 @@ vi.mock('@/stores/characterStore', () => ({
   }),
 }));
 
-vi.mock('@/services/characterServiceApi', async () => ({
+vi.mock('@/apis/characterApi', async () => ({
   characterServiceApi: {
     generateAvatar: vi.fn(async (_: string) => 'data:image/png;base64,avatar'),
     getCharacterById: vi.fn(async (_: string) => ({ ...currentCharacter.value, portrait: 'data:image/png;base64,avatar' })),
@@ -32,7 +32,7 @@ vi.mock('@/services/dndRulesService', () => ({
   DnDRulesService: { calculateHpForLevel1: () => 10 },
 }));
 
-vi.mock('@/services/conversationService', async () => ({
+vi.mock('@/apis/conversationApi', async () => ({
   conversationService: {
     startGame: vi.fn(async () => []),
   },
@@ -48,7 +48,15 @@ describe('CharacterCreatorWizard finish flow', () => {
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton',
+          'StepBasicInfo',
+          'StepRaceClass',
+          'StepAbilityScores',
+          'StepSkills',
+          'StepSpells',
+          'StepInventory',
+          'StepAvatar',
+          'UiLoader',
+          'UiButton',
         ],
       },
     });
@@ -66,14 +74,14 @@ describe('CharacterCreatorWizard finish flow', () => {
     route.params.characterId = 'c1';
 
     // Override mocks to return pending promises so we can assert the loader is visible
-    const api = await import('@/services/characterServiceApi');
+    const api = await import('@/apis/characterApi');
     let genResolve: (v?: any) => void = () => {};
     const genPromise = new Promise<string>((resolve) => {
       genResolve = resolve;
     });
     (api.characterServiceApi.generateAvatar as any).mockImplementation(() => genPromise);
 
-    const conv = await import('@/services/conversationService');
+    const conv = await import('@/apis/conversationApi');
     let startResolve: (v?: any) => void = () => {};
     const startPromise = new Promise<any>((resolve) => {
       startResolve = resolve;
@@ -83,7 +91,16 @@ describe('CharacterCreatorWizard finish flow', () => {
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader',
+          'StepBasicInfo',
+          'StepRaceClass',
+          'StepAbilityScores',
+          'StepSkills',
+          'StepSpells',
+          'StepInventory',
+          'StepAvatar',
+          'UiLoader',
+          'UiButton',
+          'FullPageLoader',
         ],
       },
     });

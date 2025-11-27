@@ -8,7 +8,7 @@ const createTestCharacter = (dex: number, inventory: ItemDto[] = []): CharacterD
   world: 'dnd',
   portrait: '',
   isDeceased: false,
-  diedAt: new Date(),
+  diedAt: new Date().toISOString(),
   deathLocation: '',
   state: 'created',
   scores: { Str: 10, Dex: dex, Con: 10, Int: 10, Wis: 10, Cha: 10 },
@@ -30,7 +30,7 @@ test('getDexModifier defaults to 0 when scores are missing', (t) => {
     world: 'dnd',
     portrait: '',
     isDeceased: false,
-    diedAt: new Date(),
+    diedAt: new Date().toISOString(),
     deathLocation: '',
     state: 'created',
   };
@@ -155,7 +155,8 @@ test('calculateArmorClass with armor and shield combined', (t) => {
   };
 
   const char = createTestCharacter(14, [
-    chainMail, shield,
+    chainMail,
+    shield,
   ]);
   t.is(calculateArmorClass(char), 18); // 16 + 2
 });

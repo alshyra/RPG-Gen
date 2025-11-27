@@ -5,7 +5,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [
-    tailwindcss(), vue(),
+    tailwindcss(),
+    vue(),
   ],
   resolve: {
     alias: {

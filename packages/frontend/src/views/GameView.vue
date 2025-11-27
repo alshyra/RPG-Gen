@@ -165,7 +165,7 @@ import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
 import { isCommand } from '../utils/chatCommands';
-import { characterServiceApi } from '../services/characterServiceApi';
+import { characterServiceApi } from '../apis/characterApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 
@@ -208,7 +208,7 @@ onMounted(async () => {
   try {
     await startGame();
   } catch (e) {
-    gameStore.appendMessage('Error', String(e));
+    gameStore.appendMessage('system', `Error: ${String(e)}`);
   }
 });
 

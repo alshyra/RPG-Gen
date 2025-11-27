@@ -70,7 +70,7 @@ import type { CharacterDto } from '@rpg-gen/shared';
 import { onMounted, ref } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { characterServiceApi } from '../services/characterServiceApi';
+import { characterServiceApi } from '../apis/characterApi';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -107,7 +107,7 @@ const deleteCharacter = async (character: Partial<CharacterDto>) => {
 };
 
 const loadCharacters = async () => {
-  const res = await characterServiceApi.getAllSavedCharacters();
+  const res = await characterServiceApi.getAllCharacters();
   characters.value = res;
 };
 

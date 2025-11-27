@@ -38,7 +38,7 @@ describe('UiSelect Component', () => {
     const onUpdate = cy.stub();
     cy.mount(UiSelect, {
       props: {
-        modelValue: 'option1',
+        'modelValue': 'option1',
         'onUpdate:modelValue': onUpdate,
       },
       slots: {
@@ -78,7 +78,7 @@ describe('UiSelect Component', () => {
     const onUpdate = cy.stub();
     cy.mount(UiSelect, {
       props: {
-        modelValue: 'option1',
+        'modelValue': 'option1',
         'onUpdate:modelValue': onUpdate,
       },
       slots: {
@@ -95,7 +95,6 @@ describe('UiSelect Component', () => {
     cy.get('select').select('option1');
 
     cy.wrap(null).then(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(onUpdate).to.have.been.calledThrice;
       expect(onUpdate.firstCall).to.have.been.calledWith('option2');
       expect(onUpdate.secondCall).to.have.been.calledWith('option3');

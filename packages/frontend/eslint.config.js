@@ -1,20 +1,77 @@
 /* global URL */
-import shared from '../../eslint.shared.js';
-import vueParser from 'vue-eslint-parser';
+import js from '@eslint/js';
+import stylistic from '@stylistic/eslint-plugin';
 import pluginVue from 'eslint-plugin-vue';
-import ts from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
+import ts from 'typescript-eslint';
+import vueParser from 'vue-eslint-parser';
 
-export default [
+const tsconfigRootDir = new URL('.', import.meta.url).pathname;
+
+export default defineConfig([
+  { ignores: ['dist/**'] },
+  js.configs.recommended,
+  ...ts.configs.recommended,
+  stylistic.configs.customize({
+    indent: 2,
+    quotes: 'single',
+    semi: true,
+    jsx: false,
+    braceStyle: '1tbs',
+    commaDangle: 'always-multiline',
+    quoteProps: 'consistent-as-needed',
+  }),
+  // Global rules
+  {
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-console': 'off',
+      'arrow-body-style': ['warn', 'as-needed'],
+      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['warn', 15],
+      'prefer-object-spread': 'warn',
+    },
+  },
+  // TypeScript files
+  {
+    files: ['**/*.{ts,tsx}', '**/*.d.ts'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      parser: { ...ts.parser },
+      parserOptions: {
+        tsconfigRootDir,
+        project: ['./tsconfig.eslint.json'],
+      },
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@stylistic/array-bracket-newline': ['error', { minItems: 2 }],
+      '@stylistic/array-element-newline': ['error', { minItems: 2 }],
+    },
+  },
+  // Vue files
   ...pluginVue.configs['flat/recommended'],
-  ...shared,
   {
     files: ['**/*.vue'],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
         parser: '@typescript-eslint/parser',
-        tsconfigRootDir: new URL('.', import.meta.url).pathname,
+        tsconfigRootDir,
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
@@ -31,9 +88,9 @@ export default [
       'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['error', 15],
       'prefer-object-spread': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
+  // CommonJS files
   {
     files: ['**/*.cjs'],
     languageOptions: {
@@ -42,35 +99,13 @@ export default [
       },
     },
   },
+  // Test and Cypress files
   {
-    files: ['cypress.config.ts', 'cypress/**/*.{ts,tsx,js,jsx}'],
-    languageOptions: {
-      parser: { ...ts.parser },
-      parserOptions: {
-        // set the tsconfig root to this package so type-aware rules can find type information
-        tsconfigRootDir: new URL('.', import.meta.url).pathname,
-        // include the main tsconfig and the node tsconfig for tools like ts-node (Cypress)
-        project: ['./tsconfig.eslint.json'],
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
+    files: ['cypress.config.ts', 'cypress/**/*.{ts,tsx,js,jsx}', '**/*.test.ts', '**/*.spec.ts'],
     rules: {
-      // disable the unnecessary-type-assertion rule for Cypress files if desired
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-  {
-    // Ensure TypeScript project is available for all TS files so typed rules can run
-    files: ['**/*.{ts,tsx}', '**/*.d.ts'],
-    languageOptions: {
-      parser: { ...ts.parser },
-      parserOptions: {
-        tsconfigRootDir: new URL('.', import.meta.url).pathname,
-        project: ['./tsconfig.eslint.json'],
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-  },
-];
+]);

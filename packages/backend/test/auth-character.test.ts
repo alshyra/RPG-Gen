@@ -63,7 +63,8 @@ test('Chat message structure', (t) => {
   t.is(typeof message.text, 'string');
   t.is(typeof message.timestamp, 'number');
   t.true([
-    'user', 'assistant',
+    'user',
+    'assistant',
   ].includes(message.role));
 });
 

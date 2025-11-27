@@ -2,13 +2,13 @@ describe('Home Page', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
-    
+
     cy.ensureAuth();
-    
+
     // Create test characters via the repo helper — this uses the DISABLE_AUTH_FOR_E2E bypass
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    cy.prepareE2EDb({ count: 2 }).then((r:any) => {
+    cy.prepareE2EDb({ count: 2 }).then((r: any) => {
       expect(r?.ok).to.equal(true);
     });
 
@@ -44,7 +44,6 @@ describe('Home Page', () => {
   });
 
   it('should display character list when characters exist', () => {
-
     // Spy on characters request and wait for the UI to fetch updated characters
     cy.intercept('GET', '**/api/characters').as('getCharacters');
 

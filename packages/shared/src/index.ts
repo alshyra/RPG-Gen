@@ -1,37 +1,43 @@
-// Public entry for @rpg-gen/shared
-// Re-export all generated DTOs
-export * from './generated';
+export * from './api-types'
 
-// Legacy type aliases to avoid mass code changes during migration
-import type { CharacterDto } from './generated/character.dto';
-import type { ChatMessageDto } from './generated/chatmessage.dto';
-// Some generated DTO groups might not exist yet (game.types, api.types, dnd.types).
-// Provide fallback type aliases (any) so consumers compile and we can migrate incrementally.
-// When generator produces these, we can remove fallback types.
-export type GameInstruction = any;
-export type LevelUpResult = any;
-export type DndLevel = any;
-export type ChatRole = 'user' | 'assistant' | 'system';
-export type DiceRequest = any;
-export type ImageRequest = any;
-export type AvatarRequest = any;
-export type ChatRequest = any;
-export type GameResponse = any;
-export type GameMessage = any;
-export type Spell = any;
-export type InventoryItem = any;
-export type RollInstruction = any;
-export type RollResult = any;
-export type RollModalData = any;
+// Type aliases for backward compatibility
+// These map the new OpenAPI-generated types to familiar names
+export type CharacterDto = import('./api-types').components['schemas']['CharacterResponseDto'];
+export type DeceasedCharacterDto = import('./api-types').components['schemas']['DeceasedCharacterResponseDto'];
+export type ItemDto = import('./api-types').components['schemas']['ItemResponseDto'];
+export type SpellDto = import('./api-types').components['schemas']['SpellResponseDto'];
+export type RaceDto = import('./api-types').components['schemas']['RaceResponseDto'];
+export type AbilityScoresDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];
+export type CharacterClassDto = import('./api-types').components['schemas']['CharacterClassResponseDto'];
+export type SkillDto = import('./api-types').components['schemas']['SkillResponseDto'];
+export type ChatMessage = import('./api-types').components['schemas']['ChatMessageDto'];
+export type ChatResponse = import('./api-types').components['schemas']['ChatResponseDto'];
+export type GameInstruction = import('./api-types').components['schemas']['GameInstructionDto'];
+export type SpellInstruction = import('./api-types').components['schemas']['SpellInstructionDataDto'];
+export type InventoryInstruction = import('./api-types').components['schemas']['InventoryInstructionDataDto'];
+export type MessageMeta = import('./api-types').components['schemas']['MessageMetaDto'];
+export type DiceThrow = import('./api-types').components['schemas']['DiceThrowDto'];
+export type CreateInventoryItemDto = import('./api-types').components['schemas']['CreateInventoryItemDto'];
+export type ImageRequest = import('./api-types').components['schemas']['ImageRequestDto'];
+export type ChatRequest = import('./api-types').components['schemas']['ChatRequestDto'];
+export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
+export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];
 
-// Map old names to DTOs
-export type CharacterEntry = CharacterDto;
+// Legacy alias for backward compatibility
+export type DiceThrowDto = DiceThrow;
 
-export interface SavedCharacterEntry {
-  id: string;
-  data: CharacterDto;
+// RollInstruction with corrected modifier type (OpenAPI can't properly represent string | number)
+export interface RollInstruction {
+  dices: string;
+  modifier?: string | number;
+  description?: string;
+  advantage?: 'advantage' | 'disadvantage' | 'none';
 }
 
+// ChatRole type for convenience
+export type ChatRole = 'user' | 'assistant' | 'system';
+
+// For DeceasedCharacterEntry which includes extra fields
 export interface DeceasedCharacterEntry {
   id: string;
   character: CharacterDto;
@@ -39,7 +45,65 @@ export interface DeceasedCharacterEntry {
   location: string;
 }
 
-export type ChatMessage = ChatMessageDto & { instructions?: GameInstruction[] };
+// DnD level types (not in OpenAPI spec)
+export interface DndLevel {
+  level: number;
+  totalXp: number;
+  proficiencyBonus: number;
+}
 
-// game/api/dnd DTO types are currently provided as fallback aliases above. When the generator
-// creates the actual types we will re-export them from `generated/` and remove the fallbacks.
+export interface LevelUpResult {
+  oldLevel?: number;
+  newLevel: number;
+  hpIncrease?: number;
+  proficiencyIncrease?: number;
+  success?: boolean;
+  hpGain?: number;
+  hasASI?: boolean;
+  newFeatures?: string[];
+  proficiencyBonus?: number;
+  message?: string;
+}
+
+// RollModalData for frontend - includes all fields used in the UI
+export interface RollModalData {
+  dices?: string;
+  modifier?: string | number;
+  description?: string;
+  advantage?: 'advantage' | 'disadvantage' | 'none';
+  show?: boolean;
+  // UI specific fields
+  skillName?: string;
+  rolls?: number[];
+  bonus?: number;
+  total?: number;
+  diceNotation?: string;
+  keptRoll?: number;
+  discardedRoll?: number;
+}
+
+// Legacy types for backward compatibility
+export interface SavedCharacterEntry {
+  id: string;
+  data?: CharacterDto;
+  character?: CharacterDto;
+}
+
+// Roll result type
+export interface RollResult {
+  rolls: number[];
+  mod: number;
+  total: number;
+  advantage?: 'advantage' | 'disadvantage' | 'none';
+  keptRoll?: number;
+  discardedRoll?: number;
+}
+
+// GameResponse from chat API
+export interface GameResponse {
+  text: string;
+  instructions: GameInstruction[];
+  model: string;
+  usage?: Record<string, unknown>;
+  raw?: unknown;
+}

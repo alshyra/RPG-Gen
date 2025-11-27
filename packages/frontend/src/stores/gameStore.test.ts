@@ -2,7 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { expect, it, vi, beforeEach } from 'vitest';
 import { useGameStore } from './gameStore';
 
-vi.mock('@/services/diceService', async () => ({
+vi.mock('@/apis/diceApi', async () => ({
   rollDice: vi.fn().mockResolvedValue({ rolls: [17], mod: 0, total: 17 }),
 }));
 

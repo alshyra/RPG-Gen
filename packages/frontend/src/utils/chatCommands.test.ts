@@ -230,13 +230,9 @@ describe('chatCommands', () => {
   });
 
   describe('getAllSuggestions', () => {
-    const mockSpells = [
-      { name: 'Fireball', level: 3, meta: {} },
-    ];
+    const mockSpells = [{ name: 'Fireball', level: 3, meta: {} }];
 
-    const mockInventory = [
-      { name: 'Health Potion', qty: 1, meta: { consumable: true } },
-    ];
+    const mockInventory = [{ name: 'Health Potion', qty: 1, meta: { consumable: true } }];
 
     it('returns command suggestions for partial command', () => {
       const result = getAllSuggestions('/ca', mockSpells, mockInventory, 5);

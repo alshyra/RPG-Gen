@@ -97,8 +97,8 @@
 
 <script setup lang="ts">
 import FullPageLoader from '@/components/ui/FullPageLoader.vue';
-import { characterServiceApi } from '@/services/characterServiceApi';
-import { conversationService } from '@/services/conversationService';
+import { characterServiceApi } from '@/apis/characterApi';
+import { conversationService } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
@@ -174,13 +174,18 @@ const previousStep = () => {
 // --- helper functions extracted from finishCreation for readability ---
 const saveFinalCharacter = async () => {
   console.log('Finishing character creation for', currentCharacter.value);
-  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value!.classes![0].name!, currentCharacter.value!.scores!.Con!);
-  await updateCharacter(currentCharacter.value!.characterId, {
+  if (!currentCharacter.value
+    || !currentCharacter.value.classes?.[0].name
+    || !currentCharacter.value.scores?.Con
+  ) return;
+  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores.Con);
+  await updateCharacter(currentCharacter.value.characterId, {
     ...currentCharacter.value,
     state: 'created',
     hpMax,
     hp: hpMax,
     skills: currentCharacter.value!.skills,
+    spells: currentCharacter.value!.spells,
     ...(currentCharacter.value!.inventory ? { inventory: currentCharacter.value!.inventory } : {}),
   });
 };
@@ -188,7 +193,6 @@ const saveFinalCharacter = async () => {
 const generateAndApplyAvatar = async () => {
   try {
     const imageUrl = await characterServiceApi.generateAvatar(currentCharacter.value!.characterId);
-    console.log('Avatar generated');
     try {
       const refreshed = await characterServiceApi.getCharacterById(currentCharacter.value!.characterId);
       if (refreshed) currentCharacter.value = refreshed;

@@ -31,6 +31,7 @@ function getAbilityModifier(score: number): number {
  * @returns The skill bonus modifier
  */
 
+// eslint-disable-next-line max-statements
 export const getSkillBonus = (
   character: CharacterDto | null,
   skillNameWithCheck: string,

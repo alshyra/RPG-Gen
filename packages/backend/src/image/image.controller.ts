@@ -1,25 +1,21 @@
-import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { ImageRequest } from '@rpg-gen/shared';
 import type { Request } from 'express';
 import Joi from 'joi';
-import { GeminiImageService } from '../external/image/gemini-image.service.js';
-import { ImageService } from './image.service.js';
-import { CharacterService } from '../character/character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { CharacterService } from '../character/character.service.js';
+import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { ImageRequest } from '@rpg-gen/shared';
-import { CharacterDocument } from '../schemas/character.schema.js';
+import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
+import { ImageService } from './image.service.js';
+import { CharacterDocument } from 'src/character/schema/index.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
-
-class CharacterIdBody {
-  @ApiProperty({ description: 'UUID of the character' })
-  characterId: string;
-}
 
 @ApiTags('image')
 @Controller('image')
@@ -34,7 +30,8 @@ export class ImageController {
 
   @Post()
   @ApiOperation({ summary: 'Generate image from prompt' })
-  @ApiBody({ schema: { type: 'object' } })
+  @ApiBody({ type: ImageRequestDto })
+  @ApiResponse({ status: 400, description: 'Image generation not implemented' })
   async generate(@Body() body: ImageRequest) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
@@ -46,7 +43,9 @@ export class ImageController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generate character avatar from description' })
-  @ApiBody({ type: CharacterIdBody })
+  @ApiBody({ type: CharacterIdBodyDto })
+  @ApiResponse({ status: 201, description: 'Avatar generated successfully', type: AvatarResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid request or avatar generation failed' })
   async generateAvatar(@Req() req: Request, @Body('characterId') characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 

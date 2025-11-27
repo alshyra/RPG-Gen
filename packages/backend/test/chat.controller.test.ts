@@ -40,7 +40,8 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
   const conv: any = {
     append: async () => {},
     getHistory: async () => [
-      { role: 'user', text: 'u1', timestamp: Date.now() }, { role: 'assistant', text: 'a1', timestamp: Date.now() },
+      { role: 'user', text: 'u1', timestamp: Date.now() },
+      { role: 'assistant', text: 'a1', timestamp: Date.now() },
     ],
   };
 

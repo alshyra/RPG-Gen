@@ -1,16 +1,22 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags, ApiResponse, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DiceThrowDto } from './dice.dto.js';
 
 class DiceRequest {
+  @ApiProperty({ description: 'Dice expression (e.g., 1d20+5, 2d6, 1d8-2)' })
   expr: string;
+
+  @ApiPropertyOptional({ description: 'Advantage type for d20 rolls', enum: [
+    'advantage',
+    'disadvantage',
+    'none',
+  ] })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 }
 
 @ApiTags('dice')
 @Controller('dice')
 export class DiceController {
-  // eslint-disable-next-line max-statements
   rollDiceExpr(expr: string, rand: () => number = Math.random, advantage: 'advantage' | 'disadvantage' | 'none' = 'none'): DiceThrowDto {
     expr = expr.replace(/\s+/g, '');
     const m = expr.match(/^([0-9]*)d([0-9]+)([+-][0-9]+)?$/i);
@@ -29,7 +35,8 @@ export class DiceController {
       const total = keptRoll + mod;
       return {
         rolls: [
-          roll1, roll2,
+          roll1,
+          roll2,
         ],
         mod,
         total,
@@ -48,7 +55,8 @@ export class DiceController {
   @Post()
   @ApiOperation({ summary: 'Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20' })
   @ApiBody({ type: DiceRequest })
-  @ApiResponse({ status: 200, description: 'Dice throw result' })
+  @ApiResponse({ status: 200, description: 'Dice throw result', type: DiceThrowDto })
+  @ApiResponse({ status: 400, description: 'Invalid dice expression' })
   roll(@Body('expr') expression: string, @Body('advantage') advantage: 'advantage' | 'disadvantage' | 'none' = 'none'): DiceThrowDto {
     if (!expression || typeof expression !== 'string') {
       throw new BadRequestException('Missing or invalid dice expression');

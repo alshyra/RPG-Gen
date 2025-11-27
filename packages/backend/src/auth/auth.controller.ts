@@ -1,10 +1,11 @@
 import { Controller, Get, Req, Res, UseGuards, Logger } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from './google-auth.guard.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { AuthService } from './auth.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
+import { AuthProfileDto } from './auth.profile.dto.js';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -43,6 +44,7 @@ export class AuthController {
   @Get('profile')
   @ApiOperation({ summary: 'Get current user profile' })
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, description: 'List of characters', type: AuthProfileDto })
   getProfile(@Req() req: Request) {
     const user = req.user as UserDocument;
     return {

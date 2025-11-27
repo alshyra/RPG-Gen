@@ -1,6 +1,6 @@
 import { DiceThrowDto, GameInstruction, GameResponse, RollResult } from '@rpg-gen/shared';
 import { watch } from 'vue';
-import { conversationService } from '../services/conversationService';
+import { conversationService } from '../apis/conversationApi';
 import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
@@ -118,17 +118,18 @@ export const useGameRolls = () => {
   const confirmRoll = async (): Promise<void> => {
     if (!gameStore.pendingInstruction?.roll) return;
     const { rolls, bonus, total, skillName } = gameStore.rollData;
+    if (!rolls || rolls.length === 0) return;
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage(
       'System',
-      buildRollMessage(diceValue, bonus, skillName, total, criticalNote),
+      buildRollMessage(diceValue, bonus ?? 0, skillName ?? '', total ?? 0, criticalNote),
     );
     try {
-      await sendRollResult({ rolls, total, bonus, advantage: false }, skillName, criticalNote);
+      await sendRollResult({ rolls, total: total ?? 0, bonus: bonus ?? 0, advantage: false }, skillName ?? '', criticalNote);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Failed to send roll result: ' + message);
+      gameStore.appendMessage('system', 'Failed to send roll result: ' + message);
       gameStore.showRollModal = false;
     }
   };
@@ -146,7 +147,7 @@ export const useGameRolls = () => {
       await onDiceRolled(payload);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('Error', 'Reroll failed: ' + msg);
+      gameStore.appendMessage('system', 'Reroll failed: ' + msg);
     }
   };
 

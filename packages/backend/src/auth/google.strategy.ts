@@ -16,7 +16,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL:
         process.env.GOOGLE_OAUTH_CALLBACK_URL || 'http://localhost/api/auth/google/callback',
       scope: [
-        'email', 'profile',
+        'email',
+        'profile',
       ],
     });
 

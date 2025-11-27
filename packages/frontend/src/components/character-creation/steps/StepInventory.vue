@@ -33,7 +33,7 @@
             >
               <div class="flex-1">
                 <div class="font-medium">
-                  {{ item.name.replace(/ \(x.*\)$/, '') }}
+                  {{ (item.name ?? '').replace(/ \(x.*\)$/, '') }}
                 </div>
                 <div class="text-xs text-slate-400">
                   {{ item.description }}

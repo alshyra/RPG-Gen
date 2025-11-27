@@ -41,14 +41,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouteLocationAsPathGeneric, RouteLocationAsRelativeGeneric, RouterLink } from 'vue-router';
 import UiLoader from './UiLoader.vue';
 
 const props = defineProps<{
   variant?: 'primary' | 'ghost';
   isLoading?: boolean;
   disabled?: boolean;
-  to?: any;
+  to?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
 }>();
 
 const emit = defineEmits(['click']);

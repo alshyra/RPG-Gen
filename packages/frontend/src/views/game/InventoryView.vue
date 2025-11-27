@@ -22,13 +22,13 @@
     >
       <li
         v-for="item in items"
-        :key="item.name"
+        :key="item.name ?? item._id"
         class="p-2 bg-slate-800/40 rounded border border-slate-700/30 flex items-start gap-3 hover:bg-slate-700/40 transition-colors"
       >
         <div class="flex-1">
           <div class="flex items-center justify-between">
             <div class="font-medium text-sm text-slate-100">
-              {{ item.name }}
+              {{ item.name ?? 'Item' }}
             </div>
             <div class="text-xs text-slate-300">
               x{{ item.qty ?? 1 }}
@@ -48,13 +48,14 @@
           </div>
           <div class="flex gap-2 mt-2">
             <button
+              v-if="item.name"
               class="text-xs px-2 py-1 bg-blue-600/50 hover:bg-blue-600 rounded text-blue-100 transition-colors"
               @click="onUseItem(item.name)"
             >
               Utiliser
             </button>
             <button
-              v-if="!item.equipped"
+              v-if="!item.equipped && item.name"
               class="text-xs px-2 py-1 bg-amber-600/50 hover:bg-amber-600 rounded text-amber-100 transition-colors"
               @click="onEquipItem(item.name)"
             >

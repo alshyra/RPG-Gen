@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { authService } from './authService';
+import { authService } from '../apis/authApi';
 
 describe('authService', () => {
   beforeEach(() => {

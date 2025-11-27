@@ -10,11 +10,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { CharacterDto } from '@rpg-gen/shared';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import { CharacterService } from '../character/character.service.js';
@@ -22,13 +22,10 @@ import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ChatMessage, ConversationService } from './conversation.service.js';
+import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/chat-response.dto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
-
-class ChatRequest {
-  message: string;
-}
 
 @ApiTags('chat')
 @Controller('chat')
@@ -75,7 +72,7 @@ export class ChatController {
     }
   }
 
-  private getAbilityScore(character: CharacterDto, key: string): number {
+  private getAbilityScore(character: CharacterResponseDto, key: string): number {
     let score = character[key];
     if (typeof score === 'number') return score;
     score = character[key.toLowerCase()];
@@ -86,7 +83,7 @@ export class ChatController {
     return typeof score === 'number' ? score : 10;
   }
 
-  private buildCharacterSummary(character: CharacterDto): string {
+  private buildCharacterSummary(character: CharacterResponseDto): string {
     const armorClass = calculateArmorClass(character);
     let summary = `
 Character Information:
@@ -139,7 +136,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
-      meta: { usage: resp.usage || {}, model: resp.modelVersion || '' },
+      meta: { usage: resp.usage ? { ...resp.usage } : undefined, model: resp.modelVersion || '' },
     };
     await this.conv.append(userId, characterId, assistantMsg);
 
@@ -148,7 +145,10 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
-  @ApiBody({ type: ChatRequest })
+  @ApiBody({ type: ChatRequestDto })
+  @ApiResponse({ status: 201, description: 'Chat response with narrative and instructions', type: ChatResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  @ApiResponse({ status: 500, description: 'Chat processing failed' })
   async chat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -182,9 +182,10 @@ CHA ${this.getAbilityScore(character, 'Cha')}
   ): Promise<ChatMessage> {
     this.gemini.initializeChatSession(characterId, this.systemPrompt, []);
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character)
+    const characterDoc = await this.characterService.findByCharacterId(userId, characterId);
+    if (!characterDoc)
       throw new BadRequestException('Character not found for chat initialization');
+    const character = this.characterService.toCharacterDto(characterDoc);
     const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
 
     const initResp = await this.gemini.sendMessage(characterId, initMessage);
@@ -194,7 +195,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
       timestamp: Date.now(),
       meta: {
         model: initResp.modelVersion,
-        usage: initResp.usage || {},
+        usage: initResp.usage ? { ...initResp.usage } : undefined,
       },
     };
 
@@ -228,7 +229,9 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
   @Get('/:characterId/history')
   @ApiOperation({ summary: 'Get conversation history for a character' })
-
+  @ApiResponse({ status: 200, description: 'Conversation history', type: [ChatMessageDto] })
+  @ApiResponse({ status: 400, description: 'Invalid request' })
+  @ApiResponse({ status: 500, description: 'History retrieval failed' })
   async getHistory(
     @Req() req: Request,
     @Param('characterId') characterId: string,

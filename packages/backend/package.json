@@ -10,18 +10,17 @@
     "lint": "tsc -p tsconfig.json && eslint .",
     "lint:fix": "eslint . --fix",
     "test": "ava",
-    "generate:dtos": "ts-node ./src/scripts/generate-dtos.ts",
-    "postinstall": "npm run generate:dtos"
+    "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts"
   },
   "dependencies": {
     "@google/genai": "~1.29.1",
     "@nestjs/common": "^11.1.8",
     "@nestjs/core": "^11.1.8",
     "@nestjs/jwt": "^11.0.1",
-    "@nestjs/schematics": "^11.0.0",
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.8",
+    "@nestjs/schematics": "^11.0.0",
     "@nestjs/swagger": "^11.2.1",
     "@rpg-gen/shared": "*",
     "bcrypt": "^6.0.0",
@@ -32,6 +31,7 @@
     "express": "^5.1.0",
     "joi": "^18.0.1",
     "mongoose": "^8.19.3",
+    "openapi-typescript": "^7.10.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",

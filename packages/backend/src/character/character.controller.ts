@@ -1,25 +1,35 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
+  Delete,
   Get,
+  Logger,
+  NotFoundException,
+  Param,
+  Patch,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Req,
   UseGuards,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-  Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { CharacterService } from './character.service.js';
-import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { CharacterDto } from '@rpg-gen/shared';
+import { CharacterService } from './character.service.js';
+import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import {
+  CharacterResponseDto,
+  CreateCharacterBodyDto,
+  DeceasedCharacterResponseDto,
+  GrantInspirationBodyDto,
+  InspirationResponseDto,
+  KillCharacterBodyDto,
+  MessageResponseDto,
+  RemoveInventoryBodyDto,
+  UpdateCharacterRequestDto,
+} from './dto/index.js';
 
 @ApiTags('characters')
 @Controller('characters')
@@ -32,6 +42,8 @@ export class CharacterController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
+  @ApiBody({ type: CreateCharacterBodyDto })
+  @ApiResponse({ status: 201, description: 'Character created successfully', type: CharacterResponseDto })
   async create(@Req() req: Request, @Body('world') world: string) {
     const user = req.user as UserDocument;
 
@@ -42,6 +54,7 @@ export class CharacterController {
 
   @Get()
   @ApiOperation({ summary: 'Get all characters for the current user' })
+  @ApiResponse({ status: 200, description: 'List of characters', type: [CharacterResponseDto] })
   async findAll(@Req() req: Request) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -52,6 +65,7 @@ export class CharacterController {
 
   @Get('deceased')
   @ApiOperation({ summary: 'Get all deceased characters' })
+  @ApiResponse({ status: 200, description: 'List of deceased characters', type: [DeceasedCharacterResponseDto] })
   async getDeceased(@Req() req: Request) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -66,6 +80,8 @@ export class CharacterController {
 
   @Get(':characterId')
   @ApiOperation({ summary: 'Get a specific character by ID' })
+  @ApiResponse({ status: 200, description: 'Character found', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async findOne(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -78,10 +94,14 @@ export class CharacterController {
 
   @Put(':characterId')
   @ApiOperation({ summary: 'Update a character' })
+  @ApiResponse({ status: 200, description: 'Character updated', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiParam({ name: 'characterId', description: 'ID of the character to update' })
+  @ApiBody({ description: 'Fields to update', type: UpdateCharacterRequestDto })
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() updates: Partial<CharacterDto>,
+    @Body() updates: UpdateCharacterRequestDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -92,6 +112,8 @@ export class CharacterController {
 
   @Delete(':characterId')
   @ApiOperation({ summary: 'Delete a character' })
+  @ApiResponse({ status: 200, description: 'Character deleted', type: MessageResponseDto })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async delete(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -102,10 +124,13 @@ export class CharacterController {
 
   @Post(':characterId/kill')
   @ApiOperation({ summary: 'Mark a character as deceased' })
+  @ApiBody({ type: KillCharacterBodyDto })
+  @ApiResponse({ status: 201, description: 'Character marked as deceased', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async kill(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: { deathLocation?: string },
+    @Body() body: KillCharacterBodyDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -120,6 +145,8 @@ export class CharacterController {
 
   @Post(':characterId/inventory')
   @ApiOperation({ summary: 'Add an item to character\'s inventory' })
+  @ApiResponse({ status: 201, description: 'Item added to inventory', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async addInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -134,11 +161,14 @@ export class CharacterController {
 
   @Patch(':characterId/inventory/:itemId')
   @ApiOperation({ summary: 'Update an item in character\'s inventory' })
+  @ApiResponse({ status: 200, description: 'Inventory item updated', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character or item not found' })
+  @ApiBody({ type: CreateInventoryItemDto })
   async updateInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
     @Param('itemId') itemId: string,
-    @Body() updates: Partial<any>,
+    @Body() updates: Partial<CreateInventoryItemDto>,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -149,29 +179,35 @@ export class CharacterController {
 
   @Delete(':characterId/inventory/:itemId')
   @ApiOperation({ summary: 'Remove an item from character\'s inventory' })
+  @ApiBody({ type: RemoveInventoryBodyDto })
+  @ApiResponse({ status: 200, description: 'Item removed from inventory', type: CharacterResponseDto })
+  @ApiResponse({ status: 404, description: 'Character or item not found' })
   async removeInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
     @Param('itemId') itemId: string,
-    @Body() body: { qty?: number },
+    @Body() body: RemoveInventoryBodyDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body?.qty || 0);
+    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body.qty);
     return this.characterService.toCharacterDto(character);
   }
 
   @Post(':characterId/inspiration/grant')
   @ApiOperation({ summary: 'Grant inspiration point(s) to a character' })
+  @ApiBody({ type: GrantInspirationBodyDto })
+  @ApiResponse({ status: 201, description: 'Inspiration granted', type: InspirationResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid amount' })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async grantInspiration(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: { amount?: number },
+    @Body('amount') amount: number,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    const amount = body.amount || 1;
 
     // Validate amount
     if (typeof amount !== 'number' || amount <= 0 || amount > 5) {
@@ -197,6 +233,9 @@ export class CharacterController {
 
   @Post(':characterId/inspiration/spend')
   @ApiOperation({ summary: 'Spend an inspiration point' })
+  @ApiResponse({ status: 201, description: 'Inspiration spent', type: InspirationResponseDto })
+  @ApiResponse({ status: 400, description: 'No inspiration points available' })
+  @ApiResponse({ status: 404, description: 'Character not found' })
   async spendInspiration(
     @Req() req: Request,
     @Param('characterId') characterId: string,

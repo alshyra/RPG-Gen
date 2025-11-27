@@ -16,7 +16,7 @@ declare global {
        * @example cy.dataCy('submit-button')
        */
       dataCy(value: string): Chainable<JQuery<HTMLElement>>;
-      
+
       /**
        * Ensure the client is authenticated for a test run by contacting the real
        * backend's /api/auth/profile and storing a session token/profile locally.
@@ -24,7 +24,7 @@ declare global {
        * doesn't return a 200 response.
        */
       ensureAuth(): Chainable<void>;
-      
+
       /**
        * Clear authentication tokens from localStorage
        * @example cy.clearAuth()
@@ -42,7 +42,7 @@ declare global {
        * Cleanup the E2E DB (remove characters created for tests)
        */
       cleanupE2EDb(opts?: { url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
-      
+
       // setupApiMocks is removed — tests should call real backend endpoints for E2E.
     }
   }

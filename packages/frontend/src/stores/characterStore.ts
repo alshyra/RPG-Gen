@@ -1,5 +1,5 @@
-import { characterServiceApi } from '@/services/characterServiceApi';
-import { CharacterDto, ItemDto, SpellDto } from '@rpg-gen/shared';
+import { characterServiceApi } from '@/apis/characterApi';
+import { CharacterDto, ItemDto, SpellDto, SpellInstruction, UpdateCharacterRequestDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -26,14 +26,21 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   // inventory/spells helpers (simple implementations)
-  const learnSpell = (spell: SpellDto) => {
+  const learnSpell = (spell: SpellInstruction | SpellDto) => {
     if (!currentCharacter.value) return;
+    // Convert instruction to SpellDto format
+    const spellDto: SpellDto = {
+      name: spell.name,
+      level: spell.level,
+      description: spell.description,
+      meta: {},
+    };
     // immutable update to avoid forced casts
     currentCharacter.value = {
       ...currentCharacter.value,
       spells: [
         ...(currentCharacter.value.spells || []),
-        spell,
+        spellDto,
       ],
     };
   };
@@ -55,9 +62,9 @@ export const useCharacterStore = defineStore('character', () => {
 
         return {
           ...item,
-          qty: item.qty - quantity,
+          qty: (item.qty ?? 1) - quantity,
         };
-      }).filter(i => i.qty > 0);
+      }).filter(i => (i.qty ?? 0) > 0);
 
     try {
       const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
@@ -82,12 +89,12 @@ export const useCharacterStore = defineStore('character', () => {
   const useInventoryItem = async (itemIdentifier: string) => {
     if (!currentCharacter.value) return;
     const inventory = currentCharacter.value?.inventory ?? [];
-    const item = inventory.find(i => (i as any)._id === itemIdentifier || i.definitionId === itemIdentifier || i.name === itemIdentifier);
+    const item = inventory.find(i => i._id === itemIdentifier || i.definitionId === itemIdentifier || i.name === itemIdentifier);
     if (!item) return;
 
     const usable = !!item.meta?.usable || !!item.meta?.consumable;
 
-    if (usable) return removeInventoryItem((item as any)._id || (item.definitionId as string), 1);
+    if (usable) return removeInventoryItem(item._id || (item.definitionId as string), 1);
 
     return undefined;
   };
@@ -115,19 +122,13 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   const createCharacter = async (world: string) => {
-    const newChar = await characterServiceApi.createCharacter({ world });
+    const newChar = await characterServiceApi.createCharacter(world);
     currentCharacter.value = newChar;
     return newChar;
   };
 
-  const updateCharacter = async (characterId: string, character: Partial<CharacterDto>) => {
-    if (!characterId) return;
-    try {
-      await characterServiceApi.saveCharacter(characterId, character);
-    } catch (e) {
-      console.error('Failed to update character', e);
-      throw e;
-    }
+  const updateCharacter = async (characterId: string, character: UpdateCharacterRequestDto) => {
+    await characterServiceApi.saveCharacter(characterId, character);
   };
 
   watch(currentCharacterId, async (id) => {

@@ -64,7 +64,7 @@ test('addInventoryItem with definitionId uses ItemDefinitionService and persists
   t.is(added.definitionId, 'potion-health');
   t.is(added.name, 'Potion de soin');
   t.is(added.description, 'Soigne un peu de PV');
-  t.truthy(added.meta && added.meta.usable === true, 'meta usable true');
+  t.truthy(added.meta && added.meta.type == 'consumable' && added.meta.usable === true, 'meta usable true');
   t.is(added.qty, 1, 'qty defaults to 1');
 });
 

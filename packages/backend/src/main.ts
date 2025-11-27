@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, INestApplication, ConsoleLogger, Logger } from '@nestjs/common';
 import { AppModule } from './app.module.js';
-import { ItemDefinitionService } from './character/item-definition.service.js';
+import { ItemDefinitionService } from './item-definition/item-definition.service.js';
 import weaponsDefinitions from './seed/weapons-definitions.json' with { type: 'json' };
 import itemsDefinitions from './seed/item-definitions.json' with { type: 'json' };
 import armorDefinitions from './seed/armor-definitions.json' with { type: 'json' };
@@ -12,7 +12,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // Validate required environment variables
 const validateEnv = () => {
   const required = [
-    'GOOGLE_API_KEY', 'GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET',
+    'GOOGLE_API_KEY',
+    'GOOGLE_OAUTH_CLIENT_ID',
+    'GOOGLE_OAUTH_CLIENT_SECRET',
   ];
   const missing = required.filter(key => !process.env[key]);
   if (missing.length > 0) {
@@ -27,10 +29,16 @@ const setupCors = (app: INestApplication) => {
     origin: process.env.FRONTEND_URL || 'http://localhost:80',
     credentials: true,
     methods: [
-      'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS',
+      'GET',
+      'POST',
+      'PUT',
+      'DELETE',
+      'PATCH',
+      'OPTIONS',
     ],
     allowedHeaders: [
-      'Content-Type', 'Authorization',
+      'Content-Type',
+      'Authorization',
     ],
   });
 };
@@ -46,7 +54,6 @@ const setupSwagger = (app: INestApplication) => {
   SwaggerModule.setup('docs', app, document);
 };
 
-// eslint-disable-next-line max-statements
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
@@ -67,7 +74,8 @@ const bootstrap = async () => {
     const itemDefService = app.get(ItemDefinitionService);
     await Promise.all([
       ...weaponsDefinitions,
-      ...itemsDefinitions, ...armorDefinitions,
+      ...itemsDefinitions,
+      ...armorDefinitions,
     ].map(def => itemDefService.upsert(def)));
     logger.log('Seeded item definitions at startup');
   } catch (e) {
