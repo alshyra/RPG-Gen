@@ -9,7 +9,7 @@ import createClient from 'openapi-fetch';
 import type { paths } from '@rpg-gen/shared';
 import { authService } from './authApi';
 
-const baseUrl = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+const baseUrl = window.location.origin;
 
 // Create the openapi-fetch client with proper typing
 const client = createClient<paths>({
