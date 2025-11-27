@@ -2,11 +2,8 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterDto, CreateInventoryItemDto, ItemDto, UpdateCharacterRequestDto, components } from '@rpg-gen/shared';
+import type { CharacterDto, CreateInventoryItemDto, ItemDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
 import { api } from './apiClient';
-
-// Type alias for OpenAPI inventory item type
-type OpenApiInventoryItem = components['schemas']['CreateInventoryItemDto'];
 
 // Helper to extract data from openapi-fetch response
 const getData = <T>(response: { data?: T; error?: unknown }): T => {
@@ -17,7 +14,7 @@ const getData = <T>(response: { data?: T; error?: unknown }): T => {
 };
 
 // Convert ItemDto to OpenAPI CreateInventoryItemDto format
-const toOpenApiInventoryItem = (item: Partial<ItemDto>): OpenApiInventoryItem => ({
+const toOpenApiInventoryItem = (item: Partial<ItemDto>): CreateInventoryItemDto => ({
   definitionId: item.definitionId ?? '',
   _id: item._id,
   name: item.name,

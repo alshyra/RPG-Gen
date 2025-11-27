@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import type { CombatEnemy, Combatant, CombatStartInstruction, TurnResult } from '../services/combatTypes';
-import { combatService } from '../services/combatService';
+import { computed, ref } from 'vue';
+import { combatService } from '../apis/combatApi';
 
 export interface CombatStoreEnemy {
   id: string;
@@ -11,6 +10,7 @@ export interface CombatStoreEnemy {
   initiative: number;
 }
 
+// eslint-disable-next-line max-statements
 export const useCombatStore = defineStore('combatStore', () => {
   // Combat state
   const inCombat = ref(false);

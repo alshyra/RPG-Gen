@@ -1,47 +1,107 @@
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync } from 'fs';
 import openapiTS, { astToString } from 'openapi-typescript';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const OPENAPI_URL = process.env.OPENAPI_URL || 'http://localhost:3001/docs-json';
 
-const generateOpenApiTypes = async () => {
-  console.log(`🚀 Fetching OpenAPI spec from ${OPENAPI_URL}...`);
+type OpenApiDocument = { components?: { schemas?: Record<string, unknown> } };
 
+const generateAliasesFile = (document: OpenApiDocument) => {
+  const schemaNames = document.components?.schemas ? Object.keys(document.components.schemas) : [];
+  const aliasLines = schemaNames.sort().map(name => `export type ${name} = import('./api-types').components['schemas']['${name}'];`);
+
+  const indexLines = [
+    '// GENERATED FROM OpenAPI spec - do not edit manually',
+    'export * from \'./api-types\'',
+    '',
+    '// Auto-generated type aliases from OpenAPI components.schemas',
+    ...aliasLines,
+  ];
+
+  return indexLines.join('\n');
+};
+
+const fetchOpenApiSpec = async (url: string) => {
+  console.log(`🚀 Fetching OpenAPI spec from ${url}...`);
+  // Support local file paths (file:// or absolute path)
   try {
-    const response = await fetch(OPENAPI_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (url.startsWith('file://')) {
+      const path = url.replace('file://', '');
+      const data = readFileSync(path, 'utf8');
+      return JSON.parse(data) as OpenApiDocument;
     }
-    const document = await response.json();
-
-    // Define output paths
-    const repoRoot = join(__dirname, '../../../..');
-    const sharedDir = join(repoRoot, 'packages', 'shared', 'src');
-    const specPath = join(sharedDir, 'openapi.json');
-    const typesPath = join(sharedDir, 'api-types.ts');
-
-    // Ensure directories exist
-    if (!existsSync(sharedDir)) {
-      mkdirSync(sharedDir, { recursive: true });
+    if (existsSync(url)) {
+      const data = readFileSync(url, 'utf8');
+      return JSON.parse(data) as OpenApiDocument;
     }
+  } catch {
+    // Not a local file, fall through to fetch
+  }
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const document = await response.json();
+  return document as OpenApiDocument;
+};
 
-    // Write the OpenAPI spec
-    writeFileSync(specPath, JSON.stringify(document, null, 2), 'utf8');
-    console.log(`📄 OpenAPI spec written to ${specPath}`);
+const ensureSharedDir = (sharedDir: string) => {
+  if (!existsSync(sharedDir)) {
+    mkdirSync(sharedDir, { recursive: true });
+  }
+};
 
-    // Generate TypeScript types
-    console.log('🔧 Generating TypeScript types from OpenAPI spec...');
-    const ast = await openapiTS(document);
-    const contents = astToString(ast);
+const writeOpenApiSpecFile = (document: OpenApiDocument, specPath: string) => {
+  writeFileSync(specPath, JSON.stringify(document, null, 2), 'utf8');
+  console.log(`📄 OpenAPI spec written to ${specPath}`);
+};
 
-    // Add header and write types
-    const header = '// GENERATED FROM OpenAPI spec - do not edit manually\n\n';
-    writeFileSync(typesPath, header + contents, 'utf8');
-    console.log(`✅ TypeScript types written to ${typesPath}`);
+const generateAndWriteTypes = async (document: OpenApiDocument, typesPath: string) => {
+  console.log('🔧 Generating TypeScript types from OpenAPI spec...');
+  const ast = await openapiTS(JSON.stringify(document));
+  const contents = astToString(ast);
+  const header = '// GENERATED FROM OpenAPI spec - do not edit manually\n\n';
+  // Write to tmp file, then rename to ensure atomic replace
+  const tmpTypesPath = `${typesPath}.tmp`;
+  writeFileSync(tmpTypesPath, header + contents, 'utf8');
+  renameSync(tmpTypesPath, typesPath);
+  console.log(`✅ TypeScript types written to ${typesPath}`);
+};
+
+const generateAndWriteIndex = (document: OpenApiDocument, sharedDir: string, indexPath: string) => {
+  console.log('🔧 Generating shared index with type aliases...');
+  const indexContent = generateAliasesFile(document);
+  // Write to tmp file, then rename to ensure atomic replace
+  const tmpIndexPath = `${indexPath}.tmp`;
+  writeFileSync(tmpIndexPath, indexContent, 'utf8');
+  renameSync(tmpIndexPath, indexPath);
+  console.log(`✅ Shared index written to ${indexPath}`);
+};
+
+const writeTypesForDocument = async (document: OpenApiDocument) => {
+  // Define output paths
+  const repoRoot = join(__dirname, '../../../..');
+  const sharedDir = join(repoRoot, 'packages', 'shared', 'src');
+  const specPath = join(sharedDir, 'openapi.json');
+  const typesPath = join(sharedDir, 'api-types.ts');
+
+  // Ensure directories exist
+  ensureSharedDir(sharedDir);
+
+  // Write spec, types and index
+  writeOpenApiSpecFile(document, specPath);
+  await generateAndWriteTypes(document, typesPath);
+  generateAndWriteIndex(document, sharedDir, join(sharedDir, 'index.ts'));
+};
+
+const generateOpenApiTypes = async () => {
+  try {
+    const document = await fetchOpenApiSpec(OPENAPI_URL);
+    await writeTypesForDocument(document);
 
     console.log('🎉 Done!');
   } catch (error) {

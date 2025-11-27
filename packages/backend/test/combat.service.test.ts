@@ -1,6 +1,6 @@
 import test from 'ava';
 import type { CharacterDto } from '@rpg-gen/shared';
-import type { CombatStartRequestDto as CombatStartInstruction } from '../src/combat/dto/index.js';
+import type { CombatStartRequestDto } from '../src/combat/dto/index.js';
 
 // Mock the CombatService without MongoDB dependency for unit testing
 // The actual service uses MongoDB - these tests verify core combat logic
@@ -11,7 +11,7 @@ const createMockCharacter = (overrides: Partial<CharacterDto> = {}): CharacterDt
   world: 'test-world',
   portrait: '',
   isDeceased: false,
-  diedAt: new Date(),
+  diedAt: new Date().toISOString(),
   deathLocation: '',
   state: 'created',
   hp: 20,
@@ -22,7 +22,7 @@ const createMockCharacter = (overrides: Partial<CharacterDto> = {}): CharacterDt
   ...overrides,
 });
 
-const createCombatStart = (): CombatStartInstruction => ({
+const createCombatStart = (): CombatStartRequestDto => ({
   combat_start: [{ name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 }],
 });
 
@@ -56,7 +56,7 @@ test('character override works correctly', (t) => {
 });
 
 test('combat start with multiple enemies', (t) => {
-  const combatStart: CombatStartInstruction = {
+  const combatStart: CombatStartRequestDto = {
     combat_start: [
       { name: 'Goblin 1', hp: 7, ac: 13 },
       { name: 'Goblin 2', hp: 7, ac: 13 },
@@ -70,7 +70,7 @@ test('combat start with multiple enemies', (t) => {
 });
 
 test('combat start with optional fields', (t) => {
-  const combatStart: CombatStartInstruction = {
+  const combatStart: CombatStartRequestDto = {
     combat_start: [
       { name: 'Basic Enemy', hp: 10, ac: 12 },
       { name: 'Advanced Enemy', hp: 20, ac: 15, attack_bonus: 5, damage_dice: '2d6', damage_bonus: 3 },

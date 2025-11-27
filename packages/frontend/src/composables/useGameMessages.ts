@@ -3,7 +3,7 @@ import { conversationService } from '../apis/conversationApi';
 import {
   isCombatEndInstruction,
   isCombatStartInstruction,
-} from '../services/combatTypes';
+} from '../apis/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 import { useCombat } from './useCombat';

@@ -1,5 +1,5 @@
 import { conversationService } from '../apis/conversationApi';
-import { isCombatEndInstruction, isCombatStartInstruction } from '../services/combatTypes';
+import { isCombatEndInstruction, isCombatStartInstruction } from '../apis/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
