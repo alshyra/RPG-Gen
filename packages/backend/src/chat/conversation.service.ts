@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as Schema from '../schemas/chat-history.schema.js';
-import { ChatMessageDto } from './dto/chat-response.dto.js';
+import { ChatMessageDto } from './dto/ChatMessageDto.js';
 
 @Injectable()
 export class ConversationService {

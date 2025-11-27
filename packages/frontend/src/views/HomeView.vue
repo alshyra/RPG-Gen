@@ -66,18 +66,18 @@
 </template>
 
 <script setup lang="ts">
-import type { CharacterDto } from '@rpg-gen/shared';
 import { onMounted, ref } from 'vue';
 import WorldSelector from '../components/game/WorldSelector.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../apis/characterApi';
 import { useRouter } from 'vue-router';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 
 const router = useRouter();
-const characters = ref<Partial<CharacterDto>[]>([]);
+const characters = ref<CharacterResponseDto[]>([]);
 const deletingCharacterId = ref<string | null>(null);
 
-const getCharSummary = (character: Partial<CharacterDto>): string => {
+const getCharSummary = (character: Partial<CharacterResponseDto>): string => {
   const classes = character.classes || [];
   return classes
     .map(character => (character?.name ? `${character.name} Niveau ${character.level}` : ''))
@@ -85,7 +85,7 @@ const getCharSummary = (character: Partial<CharacterDto>): string => {
     .join(', ');
 };
 
-const resumeCharacter = (character: Partial<CharacterDto>) => {
+const resumeCharacter = (character: Partial<CharacterResponseDto>) => {
   if (character.state === 'draft') {
     router.push({ name: 'character-step', params: { characterId: character.characterId, step: 1 } });
     return;
@@ -93,7 +93,7 @@ const resumeCharacter = (character: Partial<CharacterDto>) => {
   router.push({ name: 'game', params: { characterId: character.characterId } });
 };
 
-const deleteCharacter = async (character: Partial<CharacterDto>) => {
+const deleteCharacter = async (character: Partial<CharacterResponseDto>) => {
   if (!character.characterId) return;
   if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
     deletingCharacterId.value = character.characterId;

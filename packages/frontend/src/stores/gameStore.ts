@@ -1,12 +1,16 @@
 import { rollDice } from '@/apis/diceApi';
-import type { ChatMessage, DiceThrow, GameInstruction, RollModalData } from '@rpg-gen/shared';
+import { ChatMessageDto, DiceThrowDto, GameInstructionDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-// Display role types used in frontend - includes both API roles and display names
 type DisplayRole = 'user' | 'assistant' | 'system' | 'System' | 'GM' | 'Player' | 'Error';
-
-// Type for internal message storage that uses the base role types
+type RollModalData = {
+  dices: string;
+  modifier: number;
+  description: string;
+  advantage: 'advantage' | 'disadvantage' | 'none';
+  show: boolean;
+};
 type StoredRole = 'user' | 'assistant' | 'system';
 
 // Map display roles to stored roles
@@ -17,8 +21,8 @@ const toStoredRole = (role: DisplayRole): StoredRole => {
 };
 
 export const useGameStore = defineStore('gameStore', () => {
-  const rolls = ref<Array<DiceThrow>>([]);
-  const latestRoll = ref<DiceThrow | null>(null);
+  const rolls = ref<Array<DiceThrowDto>>([]);
+  const latestRoll = ref<DiceThrowDto | null>(null);
   const rollData = ref<RollModalData>({
     dices: '',
     modifier: 0,
@@ -28,8 +32,8 @@ export const useGameStore = defineStore('gameStore', () => {
   });
 
   // Minimal game session/message/pending instruction state used across app
-  const messages = ref<ChatMessage[]>([]);
-  const pendingInstruction = ref<GameInstruction | null>(null);
+  const messages = ref<ChatMessageDto[]>([]);
+  const pendingInstruction = ref<GameInstructionDto | null>(null);
   const playerText = ref('');
   const isInitializing = ref(false);
   const sending = ref(false);
@@ -37,8 +41,8 @@ export const useGameStore = defineStore('gameStore', () => {
 
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
-    const res: DiceThrow = await rollDice(expr, advantage);
-    const payload: DiceThrow = { rolls: res.rolls, mod: res.mod, total: res.total, advantage: res.advantage, keptRoll: res.keptRoll, discardedRoll: res.discardedRoll };
+    const res: DiceThrowDto = await rollDice(expr, advantage);
+    const payload: DiceThrowDto = { rolls: res.rolls, mod: res.mod, total: res.total, advantage: res.advantage, keptRoll: res.keptRoll, discardedRoll: res.discardedRoll };
     rolls.value.push(payload);
     latestRoll.value = payload;
     return payload;

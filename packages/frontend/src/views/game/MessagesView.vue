@@ -41,12 +41,12 @@ import { onMounted, ref, watch } from 'vue';
 import UiMarkdown from '@/components/ui/UiMarkdown.vue';
 import UiSkeleton from '@/components/ui/UiSkeleton.vue';
 import { useGameStore } from '@/stores/gameStore';
-import type { ChatMessage } from '@rpg-gen/shared';
+import { ChatMessageDto } from '@rpg-gen/shared';
 
 const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
-const isLoadingMessage = (message: ChatMessage): boolean =>
+const isLoadingMessage = (message: ChatMessageDto): boolean =>
   message.role === 'system' && message.text === '...thinking...';
 
 // auto-scroll to bottom when messages change

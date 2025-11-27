@@ -1,9 +1,4 @@
-/**
- * Chat command parser utility
- * Parses commands like /cast spell1, /equip sword, /attack target, /use item
- */
-
-import type { ItemDto, SpellDto } from '@rpg-gen/shared';
+import { ItemResponseDto, SpellResponseDto } from '@rpg-gen/shared';
 
 export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
 
@@ -128,8 +123,8 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
 export const getArgumentSuggestions = (
   command: CommandType,
   partialArg: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
+  spells: SpellResponseDto[] = [],
+  inventory: ItemResponseDto[] = [],
   characterLevel: number = 1,
 ): ArgumentSuggestion[] => {
   const partial = partialArg.toLowerCase();
@@ -194,8 +189,8 @@ export const getArgumentSuggestions = (
  */
 export const getAllSuggestions = (
   input: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
+  spells: SpellResponseDto[] = [],
+  inventory: ItemResponseDto[] = [],
   characterLevel: number = 1,
 ): SuggestionResult => {
   const trimmed = input.trim();

@@ -22,7 +22,7 @@ import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ConversationService } from './conversation.service.js';
-import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/chat-response.dto.js';
+import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/index.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
