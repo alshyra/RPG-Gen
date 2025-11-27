@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import test from 'ava';
 import { ChatController } from '../src/chat/chat.controller.js';
 
@@ -21,12 +22,14 @@ test('chat.chat initializes session when missing and replies', async (t) => {
     findByCharacterId: async () => ({ name: 'Hero', classes: [{ name: 'Fighter', level: 1 }], scores: { Con: 12 } }),
   };
 
-  const controller = new ChatController(gemini, conv, characterService);
+  const gamesInstructionProcessor: any = {};
+
+  const controller = new ChatController(gemini, conv, gamesInstructionProcessor, characterService);
 
   const req: any = { user: { _id: { toString: () => 'u1' } } };
 
   const result = await controller.chat(req, 'char1', { message: 'hello' }, 'hello');
-  t.truthy(result.text.includes('assistant'));
+  t.truthy(result.role.includes('assistant'));
   t.is(appended.length, 2, 'should append user and assistant messages');
 });
 
@@ -46,7 +49,8 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
   };
 
   const characterService: any = { findByCharacterId: async () => ({}) };
-  const controller = new ChatController(gemini, conv, characterService);
+  const gamesInstructionProcessor: any = {};
+  const controller = new ChatController(gemini, conv, gamesInstructionProcessor, characterService);
 
   // call private helper via any cast to verify initialization behavior
   await (controller as any).ensureChatSession('u1', 'char2');

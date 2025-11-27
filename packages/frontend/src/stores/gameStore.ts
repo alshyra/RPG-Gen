@@ -50,10 +50,10 @@ export const useGameStore = defineStore('gameStore', () => {
 
   // Basic helpers expected by many composables / components
   // Accepts display roles (GM, Player, System, Error) and maps them to stored roles
-  const appendMessage = (role: DisplayRole, text: string) => messages.value.push({ role: toStoredRole(role), text, timestamp: Date.now() });
+  const appendMessage = (role: DisplayRole, narrative: string) => messages.value.push({ role: toStoredRole(role), narrative, timestamp: Date.now() });
 
-  const updateMessages = (list: Array<{ role: DisplayRole; text: string }>) => {
-    messages.value = list.map(m => ({ role: toStoredRole(m.role), text: m.text, timestamp: Date.now() }));
+  const updateMessages = (list: Array<{ role: DisplayRole; narrative: string }>) => {
+    messages.value = list.map(m => ({ role: toStoredRole(m.role), narrative: m.narrative, timestamp: Date.now() }));
   };
 
   return {

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-class CombatStartEntryDto {
+export class CombatStartEntryDto {
   @ApiProperty({ description: 'Enemy name' })
   name: string;
 

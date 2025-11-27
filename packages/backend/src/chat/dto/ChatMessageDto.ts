@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MessageMetaDto } from './MessageMetaDto.js';
 import { GameInstructionDto } from './GameInstructionDto.js';
 
 /**
@@ -11,19 +10,10 @@ export class ChatMessageDto {
     'assistant',
     'system',
   ] })
-  role: string;
+  role: 'user' | 'assistant' | 'system';
 
-  @ApiProperty({ description: 'Message text content' })
-  text: string;
-
-  @ApiProperty({ description: 'Unix timestamp of the message' })
-  timestamp: number;
-
-  @ApiPropertyOptional({ description: 'Message metadata', type: MessageMetaDto })
-  meta?: MessageMetaDto;
-
-  @ApiPropertyOptional({ description: 'Narrative text (for assistant messages)' })
-  narrative?: string;
+  @ApiProperty({ description: 'Narrative text (for assistant messages)' })
+  narrative: string;
 
   @ApiPropertyOptional({ description: 'Game instructions (for assistant messages)', type: [GameInstructionDto] })
   instructions?: GameInstructionDto[];

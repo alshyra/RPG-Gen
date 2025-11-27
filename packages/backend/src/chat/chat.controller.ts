@@ -14,7 +14,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
+import { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import { CharacterService } from '../character/character.service.js';
@@ -22,7 +22,9 @@ import { cleanNarrativeText, parseGameResponse } from '../external/game-parser.u
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ConversationService } from './conversation.service.js';
-import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/index.js';
+import { GameInstructionProcessor } from './game-instruction.processor.js';
+import { DiceThrowDto } from '../dice/dice.dto.js';
+import { ChatMessageDto, ChatRequestDto } from './dto/index.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
@@ -36,8 +38,9 @@ export class ChatController {
   private systemPrompt: string;
   private scenarioPrompt: string;
   constructor(
-    private readonly gemini: GeminiTextService,
-    private readonly conv: ConversationService,
+    private readonly geminiTexteService: GeminiTextService,
+    private readonly conversationService: ConversationService,
+    private readonly gameInstructionProcessor: GameInstructionProcessor,
     private readonly characterService: CharacterService,
   ) {
     this.loadSystemPrompt().then((systemPrompt) => {
@@ -125,20 +128,21 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     this.logger.log(
       `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`,
     );
-    const userMsg: ChatMessageDto = { role: 'user', text: userText, timestamp: Date.now() };
-    await this.conv.append(userId, characterId, userMsg);
+    const userMsg: ChatMessageDto = {
+      role: 'user',
+      narrative: userText,
+    };
+    await this.conversationService.append(userId, characterId, userMsg);
 
     await this.ensureChatSession(userId, characterId);
-    const resp = await this.gemini.sendMessage(characterId, userText);
+    const resp = await this.geminiTexteService.sendMessage(characterId, userText);
 
     // Save assistant response
     const assistantMsg: ChatMessageDto = {
       role: 'assistant',
-      text: resp.text || '',
-      timestamp: Date.now(),
-      meta: { usage: resp.usage ? { ...resp.usage } : undefined, model: resp.modelVersion || '' },
+      narrative: resp.text || '',
     };
-    await this.conv.append(userId, characterId, assistantMsg);
+    await this.conversationService.append(userId, characterId, assistantMsg);
 
     return assistantMsg;
   }
@@ -146,7 +150,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
   @ApiBody({ type: ChatRequestDto })
-  @ApiResponse({ status: 201, description: 'Chat response with narrative and instructions', type: ChatResponseDto })
+  @ApiResponse({ status: 201, description: 'Chat message (assistant) with narrative and instructions', type: ChatMessageDto })
   @ApiResponse({ status: 400, description: 'Invalid request' })
   @ApiResponse({ status: 500, description: 'Chat processing failed' })
   async chat(
@@ -163,13 +167,36 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
     try {
       const assistantMsg = await this.processUserMessage(userId, characterId, message || '');
-      // return parseGameResponse(assistantMsg.text);
-      return {
-        narrative: cleanNarrativeText(assistantMsg.text),
-        instructions: parseGameResponse(assistantMsg.text).instructions,
+      const parsed = parseGameResponse(assistantMsg.narrative || '').instructions;
+      // Apply instructions server-side (HP/XP/inventory/spell/combat). Roll instructions are left pending.
+      await this.gameInstructionProcessor.processInstructions(userId, characterId, parsed);
+
+      const response: ChatMessageDto = {
+        role: 'assistant',
+        narrative: cleanNarrativeText(assistantMsg.narrative || ''),
+        instructions: parsed,
       };
+      return response;
     } catch (e) {
       throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
+    }
+  }
+
+  @Post(':characterId/roll')
+  @ApiOperation({ summary: 'Roll dice expression for a chat-related instruction' })
+  @ApiResponse({ status: 200, description: 'Dice throw result', type: DiceThrowDto })
+  async roll(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body('expr') expr: string,
+    @Body('advantage') advantage: 'advantage' | 'disadvantage' | 'none' = 'none',
+  ) {
+    if (!expr) throw new BadRequestException('expr required');
+    try {
+      const dice = new (await import('../dice/dice.controller.js')).DiceController();
+      return dice.rollDiceExpr(expr, undefined, advantage);
+    } catch (e) {
+      throw new InternalServerErrorException((e as Error)?.message || 'Roll failed');
     }
   }
 
@@ -177,7 +204,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     userId: string,
     characterId: string,
   ): Promise<ChatMessageDto> {
-    this.gemini.initializeChatSession(characterId, this.systemPrompt, []);
+    this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, []);
 
     const characterDoc = await this.characterService.findByCharacterId(userId, characterId);
     if (!characterDoc)
@@ -185,43 +212,40 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     const character = this.characterService.toCharacterDto(characterDoc);
     const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
 
-    const initResp = await this.gemini.sendMessage(characterId, initMessage);
+    const initResp = await this.geminiTexteService.sendMessage(characterId, initMessage);
     const initMsg: ChatMessageDto = {
       role: 'assistant',
-      text: initResp.text || '',
-      timestamp: Date.now(),
-      meta: {
-        model: initResp.modelVersion,
-        usage: initResp.usage ? { ...initResp.usage } : undefined,
-      },
+      narrative: initResp.text || '',
     };
 
-    await this.conv.append(userId, characterId, initMsg);
+    await this.conversationService.append(userId, characterId, initMsg);
     return initMsg;
   }
 
-  private respondToChat(characterId: string, history: ChatMessageDto[]) {
-    this.gemini.initializeChatSession(
+  private respondToChat(characterId: string, history: any[]) {
+    type MessageLike = { narrative?: string; text?: string };
+    this.geminiTexteService.initializeChatSession(
       characterId,
       this.systemPrompt,
       history.map(m => ({
         role: m.role === 'assistant' ? 'model' : m.role,
-        parts: [{ text: m.text }],
+        parts: [{ text: ((m as MessageLike).narrative || (m as MessageLike).text) || '' }],
       })),
     );
     this.logger.log(`History loaded for character ${characterId}: ${history.length} messages`);
     return history.map(msg =>
-      msg.role === 'assistant' ? { ...msg, ...parseGameResponse(msg.text) } : msg,
+      msg.role === 'assistant' ? { ...msg, ...parseGameResponse(((msg as MessageLike).narrative || (msg as MessageLike).text) || '') } : msg,
     );
   }
 
   private async ensureChatSession(userId: string, characterId: string) {
-    const history = await this.conv.getHistory(userId, characterId);
+    const history = await this.conversationService.getHistory(userId, characterId);
+    type MessageLike = { narrative?: string; text?: string };
     const chatHistory = history.map(m => ({
       role: m.role === 'assistant' ? 'model' : m.role,
-      parts: [{ text: m.text }],
+      parts: [{ text: ((m as MessageLike).narrative || (m as MessageLike).text) || '' }],
     }));
-    this.gemini.initializeChatSession(characterId, this.systemPrompt, chatHistory);
+    this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, chatHistory);
   }
 
   @Get('/:characterId/history')
@@ -238,7 +262,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
     if (!characterId) throw new BadRequestException('characterId required');
     try {
-      const history = await this.conv.getHistory(userId, characterId);
+      const history = await this.conversationService.getHistory(userId, characterId);
       if (history.length === 0) {
         return await this.startChat(userId, characterId);
       }

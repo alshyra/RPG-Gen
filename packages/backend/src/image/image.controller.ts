@@ -8,7 +8,7 @@ import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
 import { ImageService } from './image.service.js';
-import { CharacterDocument } from 'src/character/schema/index.js';
+import { CharacterDocument } from '../character/schema/index.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),

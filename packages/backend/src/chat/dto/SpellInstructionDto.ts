@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 /**
  * Spell instruction data
  */
-export class SpellInstructionDataDto {
+export class SpellInstructionDto {
   @ApiProperty({ description: 'Spell action', enum: [
     'learn',
     'cast',

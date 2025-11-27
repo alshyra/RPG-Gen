@@ -1,31 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { ChatMessage } from './ChatMessage.js';
 
 export type ChatHistoryDocument = ChatHistory & Document;
-
-@Schema({ _id: false })
-class MessageMeta {
-  @Prop({ type: Object, required: false })
-  usage?: Record<string, unknown>;
-
-  @Prop({ type: String, required: false })
-  model?: string;
-}
-
-@Schema({ _id: false })
-export class ChatMessage {
-  @Prop({ required: true, type: String })
-  role: string;
-
-  @Prop({ required: true, type: String })
-  text: string;
-
-  @Prop({ required: true, type: Number })
-  timestamp: number;
-
-  @Prop({ type: MessageMeta, required: false })
-  meta?: MessageMeta;
-}
 
 @Schema({ timestamps: true })
 export class ChatHistory {

@@ -1215,25 +1215,11 @@
             "items": {
               "$ref": "#/components/schemas/GameInstructionDto"
             }
-          },
-          "model": {
-            "type": "string",
-            "description": "AI model used"
-          },
-          "usage": {
-            "type": "object",
-            "description": "Token usage statistics",
-            "additionalProperties": true
-          },
-          "raw": {
-            "type": "object",
-            "description": "Raw response (null by default)"
           }
         },
         "required": [
           "text",
-          "instructions",
-          "model"
+          "instructions"
         ]
       },
       "MessageMetaDto": {

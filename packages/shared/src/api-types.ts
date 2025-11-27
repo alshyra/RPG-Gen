@@ -491,14 +491,6 @@ export interface components {
             text: string;
             /** @description Game instructions extracted from the response */
             instructions: components["schemas"]["GameInstructionDto"][];
-            /** @description AI model used */
-            model: string;
-            /** @description Token usage statistics */
-            usage?: {
-                [key: string]: unknown;
-            };
-            /** @description Raw response (null by default) */
-            raw?: Record<string, never>;
         };
         MessageMetaDto: {
             /** @description AI model version used */

@@ -39,7 +39,7 @@ export const useGameSession = () => {
       (msg).instructions?.forEach((instr: any) =>
         processInstructionInMessage(instr, i === history.length - 1),
       );
-      return { role, text: msg.text };
+      return { role, narrative: msg.narrative };
     });
 
   const getCharIdFromRoute = (): string | undefined => {

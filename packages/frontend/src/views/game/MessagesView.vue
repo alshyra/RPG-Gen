@@ -28,7 +28,7 @@
           </template>
           <UiMarkdown
             v-else
-            :text="m.text"
+            :narrative="m.narrative"
           />
         </div>
       </div>
@@ -47,7 +47,7 @@ const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
 const isLoadingMessage = (message: ChatMessageDto): boolean =>
-  message.role === 'system' && message.text === '...thinking...';
+  message.role === 'system' && message.narrative === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(

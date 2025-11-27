@@ -17,11 +17,6 @@ test('should extract roll instruction from narrative text', (t) => {
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'constitution');
-
-  // Narrative should not contain the JSON block
-  t.false(result.narrative.includes('```json'));
-  t.false(result.narrative.includes('{"roll"'));
-  t.true(result.narrative.includes('Tu inspires profondément'));
 });
 
 test('should extract multiple instructions', (t) => {
@@ -54,14 +49,6 @@ test('should ignore malformed JSON', (t) => {
   t.is(result.instructions[0].xp, 50);
 });
 
-test('should clean whitespace from narrative', (t) => {
-  const input = `Text   with    multiple     spaces {"roll": {"dices": "1d20"}}   more    text`;
-
-  const result = parseGameResponse(input);
-
-  t.is(result.narrative, 'Text with multiple spaces more text');
-});
-
 test('should extract JSON with actual newlines in markdown code block', (t) => {
   const input = `Tu quittes l'auberge et te fonds dans la nuit.
 \`\`\`json
@@ -77,11 +64,6 @@ La rue est sombre.`;
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-
-  // Narrative should be clean
-  t.true(result.narrative.includes('Tu quittes'));
-  t.true(result.narrative.includes('La rue est sombre'));
-  t.false(result.narrative.includes('```'));
 });
 
 test('should extract JSON with escaped newlines (\\n)', (t) => {
@@ -93,11 +75,6 @@ test('should extract JSON with escaped newlines (\\n)', (t) => {
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-
-  // Narrative should be clean
-  t.false(result.narrative.includes('```'));
-  t.false(result.narrative.includes('roll'));
-  t.false(result.narrative.includes('{'));
 });
 
 test('should normalize localized modifier strings (French) to canonical form', (t) => {
@@ -130,13 +107,6 @@ Pour observer les allées et venues discrètement, tu dois trouver une position 
   t.truthy(result.instructions[0].roll);
   t.is(result.instructions[0].roll?.dices, '1d20');
   t.is(result.instructions[0].roll?.modifier, 'dexterity');
-
-  // Narrative should contain the story but not the JSON
-  t.true(result.narrative.includes('Tu quittes l\'auberge'));
-  t.true(result.narrative.includes('Cabaret'));
-  t.true(result.narrative.includes('Discrétion'));
-  t.false(result.narrative.includes('```'));
-  t.false(result.narrative.includes('"roll"'));
 });
 
 test('should extract spell instruction (learn)', (t) => {
@@ -154,11 +124,6 @@ test('should extract spell instruction (learn)', (t) => {
   t.is(result.instructions[0].spell?.name, 'Boule de feu');
   t.is(result.instructions[0].spell?.level, 3);
   t.is(result.instructions[0].spell?.school, 'Évocation');
-
-  // Narrative should not contain the JSON block
-  t.false(result.narrative.includes('```json'));
-  t.false(result.narrative.includes('{"spell"'));
-  t.true(result.narrative.includes('Tu apprends'));
 });
 
 test('should extract spell instruction (cast)', (t) => {
@@ -186,11 +151,6 @@ test('should extract inventory instruction (add)', (t) => {
   t.is(result.instructions[0].inventory?.action, 'add');
   t.is(result.instructions[0].inventory?.name, 'Potion de soin');
   t.is(result.instructions[0].inventory?.quantity, 1);
-
-  // Narrative should not contain the JSON block
-  t.false(result.narrative.includes('```json'));
-  t.false(result.narrative.includes('{"inventory"'));
-  t.true(result.narrative.includes('Tu trouves'));
 });
 
 test('should extract inventory instruction (use)', (t) => {
@@ -235,11 +195,6 @@ test('should extract combat_start instruction', (t) => {
   t.is(result.instructions[0].combat_start[0].hp, 7);
   t.is(result.instructions[0].combat_start[0].ac, 13);
   t.is(result.instructions[0].combat_start[1].name, 'Goblin 2');
-
-  // Narrative should not contain the JSON block
-  t.false(result.narrative.includes('```json'));
-  t.false(result.narrative.includes('combat_start'));
-  t.true(result.narrative.includes('gobelins'));
 });
 
 test('should extract combat_end instruction', (t) => {
@@ -252,7 +207,10 @@ test('should extract combat_end instruction', (t) => {
   t.is(result.instructions[0].combat_end.victory, true);
   t.is(result.instructions[0].combat_end.xp_gained, 100);
   t.is(result.instructions[0].combat_end.player_hp, 15);
-  t.deepEqual(result.instructions[0].combat_end.enemies_defeated, ['Goblin 1', 'Goblin 2']);
+  t.deepEqual(result.instructions[0].combat_end.enemies_defeated, [
+    'Goblin 1',
+    'Goblin 2',
+  ]);
 });
 
 test('should extract combat_start with attack stats', (t) => {

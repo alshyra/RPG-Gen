@@ -2,7 +2,6 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
-import type { CombatStartInstruction } from '../apis/combatTypes';
 
 /**
  * Composable for combat-specific actions and state management

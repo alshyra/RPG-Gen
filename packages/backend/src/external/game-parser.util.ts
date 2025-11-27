@@ -1,4 +1,4 @@
-import { GameInstructionDto, RollInstructionDto } from '@rpg-gen/shared';
+import { GameInstructionDto, RollInstructionDto } from '../chat/dto/index.js';
 
 const extractJsonBlocks = (text: string): string[] => {
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
@@ -119,12 +119,11 @@ export const cleanNarrativeText = (narrative: string): string => {
   return cleaned;
 };
 
-export const parseGameResponse = (text: string) => ({
-  narrative: ,
+export const parseGameResponse = (text: string): { instructions: GameInstructionDto[] } => ({
   instructions: parseGameInstructions(text).map((instr) => {
     if (instr.roll && instr.roll.modifier) {
-      instr.roll.modifier = normalizeModifier(instr.roll.modifier);
+      instr.roll.modifier = normalizeModifier(instr.roll.modifier) as any;
     }
-    return instr;
+    return instr as GameInstructionDto;
   }),
 });

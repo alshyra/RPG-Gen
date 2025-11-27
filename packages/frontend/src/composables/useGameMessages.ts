@@ -14,7 +14,7 @@ export function useGameMessages() {
 
   const handleMessageResponse = (response: GameResponse): void => {
     gameStore.messages.pop();
-    gameStore.appendMessage('GM', response.text);
+    gameStore.appendMessage('GM', response.narrative);
     processInstructions(response.instructions);
   };
 

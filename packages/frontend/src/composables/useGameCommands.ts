@@ -65,7 +65,7 @@ export function useGameCommands() {
     try {
       const response = await conversationService.sendMessage(`I cast the spell ${spell.name}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
+      gameStore.appendMessage('GM', response.narrative);
       processInstructions(response.instructions);
     } catch {
       gameStore.messages.pop();
@@ -100,7 +100,7 @@ export function useGameCommands() {
     try {
       const response = await conversationService.sendMessage(`I use the item ${item.name}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
+      gameStore.appendMessage('GM', response.narrative);
       processInstructions(response.instructions);
     } catch {
       gameStore.messages.pop();
@@ -133,7 +133,7 @@ export function useGameCommands() {
     try {
       const response = await conversationService.sendMessage(`I equip the item ${item.name}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
+      gameStore.appendMessage('GM', response.narrative);
       processInstructions(response.instructions);
     } catch {
       gameStore.messages.pop();
@@ -171,7 +171,7 @@ export function useGameCommands() {
     try {
       const response = await conversationService.sendMessage(`I attack ${target}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.text);
+      gameStore.appendMessage('GM', response.narrative);
       processInstructions(response.instructions);
     } catch (err) {
       gameStore.messages.pop();

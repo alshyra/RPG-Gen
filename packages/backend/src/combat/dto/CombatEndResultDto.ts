@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-class CombatEndDto {
+export class CombatEndDto {
   @ApiProperty({ description: 'Victory state' })
   victory: boolean;
 

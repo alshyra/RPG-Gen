@@ -95,7 +95,7 @@ export const useGameRolls = () => {
   );
 
   const handleRollResponse = async (response: GameResponse): Promise<void> => {
-    gameStore.appendMessage('GM', response.text);
+    gameStore.appendMessage('GM', response.narrative);
     gameStore.pendingInstruction = null;
     gameStore.showRollModal = false;
     response.instructions?.forEach((instr: GameInstructionDto) => {
