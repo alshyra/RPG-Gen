@@ -119,16 +119,12 @@ export const cleanNarrativeText = (narrative: string): string => {
   return cleaned;
 };
 
-export const parseGameResponse = (narrative: string): {
-  narrative: string;
-  instructions: ParsedGameInstruction[];
-} => {
-  const instructions = parseGameInstructions(narrative).map((instr) => {
+export const parseGameResponse = (text: string) => ({
+  narrative: ,
+  instructions: parseGameInstructions(text).map((instr) => {
     if (instr.roll && instr.roll.modifier) {
       instr.roll.modifier = normalizeModifier(instr.roll.modifier);
     }
     return instr;
-  });
-  const cleanedNarrative = cleanNarrativeText(narrative);
-  return { narrative: cleanedNarrative, instructions };
-};
+  }),
+});

@@ -18,7 +18,7 @@ import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import { CharacterService } from '../character/character.service.js';
-import { parseGameResponse } from '../external/game-parser.util.js';
+import { cleanNarrativeText, parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ConversationService } from './conversation.service.js';
@@ -163,13 +163,10 @@ CHA ${this.getAbilityScore(character, 'Cha')}
 
     try {
       const assistantMsg = await this.processUserMessage(userId, characterId, message || '');
-      const { narrative, instructions } = parseGameResponse(assistantMsg.text);
+      // return parseGameResponse(assistantMsg.text);
       return {
-        text: narrative,
-        instructions,
-        model: assistantMsg.meta?.model || 'unknown',
-        usage: assistantMsg.meta?.usage || null,
-        raw: null,
+        narrative: cleanNarrativeText(assistantMsg.text),
+        instructions: parseGameResponse(assistantMsg.text).instructions,
       };
     } catch (e) {
       throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
