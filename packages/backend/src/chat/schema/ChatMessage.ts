@@ -4,7 +4,7 @@ import { GameInstruction } from './GameInstruction.js';
 @Schema({ _id: false })
 export class ChatMessage {
   @Prop({ required: true, type: String })
-  role: string;
+  role: 'user' | 'assistant' | 'system';
 
   @Prop({ required: true, type: String })
   narrative: string;

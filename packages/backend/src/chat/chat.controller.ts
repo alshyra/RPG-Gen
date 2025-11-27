@@ -134,7 +134,9 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     };
     await this.conversationService.append(userId, characterId, userMsg);
 
-    await this.ensureChatSession(userId, characterId);
+    const history = await this.conversationService.getHistory(userId, characterId);
+    // this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, history);
+
     const resp = await this.geminiTexteService.sendMessage(characterId, userText);
 
     // Save assistant response
@@ -238,16 +240,6 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     );
   }
 
-  private async ensureChatSession(userId: string, characterId: string) {
-    const history = await this.conversationService.getHistory(userId, characterId);
-    type MessageLike = { narrative?: string; text?: string };
-    const chatHistory = history.map(m => ({
-      role: m.role === 'assistant' ? 'model' : m.role,
-      parts: [{ text: ((m as MessageLike).narrative || (m as MessageLike).text) || '' }],
-    }));
-    this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, chatHistory);
-  }
-
   @Get('/:characterId/history')
   @ApiOperation({ summary: 'Get conversation history for a character' })
   @ApiResponse({ status: 200, description: 'Conversation history', type: [ChatMessageDto] })
@@ -260,13 +252,13 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    if (!characterId) throw new BadRequestException('characterId required');
     try {
-      const history = await this.conversationService.getHistory(userId, characterId);
-      if (history.length === 0) {
+      const messages = await this.conversationService.getHistory(userId, characterId);
+      this.logger.debug(`Retrieved history for character ${characterId}`, messages);
+      if (!messages?.length) {
         return await this.startChat(userId, characterId);
       }
-      return this.respondToChat(characterId, history);
+      return this.respondToChat(characterId, messages);
     } catch (e) {
       this.logger.error('History retrieval failed', (e as Error)?.stack || e, 'ChatController');
       throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve history');
