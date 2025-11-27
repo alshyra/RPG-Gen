@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { CharacterDto } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
 import { Character, CharacterDocument, Item } from './schema/index.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
@@ -203,20 +202,20 @@ export class CharacterService {
     return {
       characterId: doc.characterId,
       name: doc.name,
-      race: doc.race as CharacterDto['race'],
-      scores: doc.scores as CharacterDto['scores'],
+      race: doc.race,
+      scores: doc.scores,
       hp: doc.hp,
       hpMax: doc.hpMax,
       totalXp: doc.totalXp,
-      classes: doc.classes as CharacterDto['classes'],
-      skills: doc.skills as CharacterDto['skills'],
+      classes: doc.classes,
+      skills: doc.skills,
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender,
       proficiency: doc.proficiency,
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
-      inventory: doc.inventory as CharacterDto['inventory'],
+      inventory: doc.inventory,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,

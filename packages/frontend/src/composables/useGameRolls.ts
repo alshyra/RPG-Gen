@@ -1,4 +1,4 @@
-import { DiceThrowDto, GameInstruction, GameResponse, RollResult } from '@rpg-gen/shared';
+import { DiceThrowDto, GameInstructionDto } from '@rpg-gen/shared';
 import { watch } from 'vue';
 import { conversationService } from '../apis/conversationApi';
 import { getSkillBonus } from '../services/skillService';
@@ -25,7 +25,7 @@ const buildRollMessage = (
 
 type GameStore = ReturnType<typeof useGameStore>;
 
-const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): void => {
+const handleAdditionalRoll = (instr: GameInstructionDto, gameStore: GameStore): void => {
   if (!instr.roll) return;
   gameStore.pendingInstruction = instr;
   let message = `🎲 Roll needed: ${instr.roll.dices}${instr.roll.modifier ? ` - ${instr.roll.modifier}` : ''}`;
@@ -38,7 +38,7 @@ const handleAdditionalRoll = (instr: GameInstruction, gameStore: GameStore): voi
 };
 
 const handleAdditionalXp = (
-  instr: GameInstruction,
+  instr: GameInstructionDto,
   gameStore: GameStore,
   characterStore: ReturnType<typeof useCharacterStore>,
 ): void => {
@@ -48,7 +48,7 @@ const handleAdditionalXp = (
 };
 
 const handleAdditionalHp = (
-  instr: GameInstruction,
+  instr: GameInstructionDto,
   gameStore: GameStore,
   characterStore: ReturnType<typeof useCharacterStore>,
 ): void => {
@@ -98,7 +98,7 @@ export const useGameRolls = () => {
     gameStore.appendMessage('GM', response.text);
     gameStore.pendingInstruction = null;
     gameStore.showRollModal = false;
-    response.instructions?.forEach((instr: GameInstruction) => {
+    response.instructions?.forEach((instr: GameInstructionDto) => {
       if (instr.roll) handleAdditionalRoll(instr, gameStore);
       else if (instr.xp) handleAdditionalXp(instr, gameStore, characterStore);
       else if (instr.hp) handleAdditionalHp(instr, gameStore, characterStore);

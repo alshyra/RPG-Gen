@@ -1,6 +1,5 @@
 import { BadRequestException, Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import type { ImageRequest } from '@rpg-gen/shared';
 import type { Request } from 'express';
 import Joi from 'joi';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -32,7 +31,7 @@ export class ImageController {
   @ApiOperation({ summary: 'Generate image from prompt' })
   @ApiBody({ type: ImageRequestDto })
   @ApiResponse({ status: 400, description: 'Image generation not implemented' })
-  async generate(@Body() body: ImageRequest) {
+  async generate(@Body() body: ImageRequestDto) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
     // Image generation not implemented yet

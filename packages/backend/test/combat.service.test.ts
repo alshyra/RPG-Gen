@@ -1,11 +1,11 @@
 import test from 'ava';
-import type { CharacterDto } from '@rpg-gen/shared';
 import type { CombatStartRequestDto } from '../src/combat/dto/index.js';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 
 // Mock the CombatService without MongoDB dependency for unit testing
 // The actual service uses MongoDB - these tests verify core combat logic
 
-const createMockCharacter = (overrides: Partial<CharacterDto> = {}): CharacterDto => ({
+const createMockCharacter = (overrides: Partial<CharacterResponseDto> = {}): CharacterResponseDto => ({
   characterId: 'test-char-1',
   name: 'Test Hero',
   world: 'test-world',

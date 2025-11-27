@@ -1,11 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { ChatMessage, ChatRole } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
 import * as Schema from '../schemas/chat-history.schema.js';
-
-// Re-export the shared ChatMessage type for convenience
-export type { ChatMessage } from '@rpg-gen/shared';
+import { ChatMessageDto } from './dto/chat-response.dto.js';
 
 @Injectable()
 export class ConversationService {
@@ -16,20 +13,20 @@ export class ConversationService {
     @InjectModel(Schema.ChatHistory.name) private chatHistoryModel: Model<Schema.ChatHistoryDocument>,
   ) {}
 
-  async getHistory(userId: string, characterId: string): Promise<ChatMessage[]> {
+  async getHistory(userId: string, characterId: string): Promise<ChatMessageDto[]> {
     const history = await this.chatHistoryModel.findOne({ userId, characterId }).exec();
 
     if (!history) return [];
 
     return history.messages.map(m => ({
-      role: m.role as ChatRole,
+      role: m.role,
       text: m.text,
       timestamp: m.timestamp,
       meta: m.meta ? { usage: m.meta.usage, model: m.meta.model } : undefined,
     }));
   }
 
-  async append(userId: string, characterId: string, msg: ChatMessage) {
+  async append(userId: string, characterId: string, msg: ChatMessageDto) {
     let history = await this.chatHistoryModel.findOne({ userId, characterId });
 
     // Convert shared message type to schema message type
@@ -62,7 +59,7 @@ export class ConversationService {
     this.logger.log(`💬 Saved message to character ${characterId} (${history.messages.length} messages)`);
   }
 
-  async setHistory(userId: string, characterId: string, list: ChatMessage[]) {
+  async setHistory(userId: string, characterId: string, list: ChatMessageDto[]) {
     // Convert shared messages to schema messages
     const schemaMessages: Schema.ChatMessage[] = list.map(msg => ({
       role: msg.role,

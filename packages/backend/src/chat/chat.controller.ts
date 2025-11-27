@@ -21,7 +21,7 @@ import { CharacterService } from '../character/character.service.js';
 import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import { ChatMessage, ConversationService } from './conversation.service.js';
+import { ConversationService } from './conversation.service.js';
 import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/chat-response.dto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
@@ -125,14 +125,14 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     this.logger.log(
       `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`,
     );
-    const userMsg: ChatMessage = { role: 'user', text: userText, timestamp: Date.now() };
+    const userMsg: ChatMessageDto = { role: 'user', text: userText, timestamp: Date.now() };
     await this.conv.append(userId, characterId, userMsg);
 
     await this.ensureChatSession(userId, characterId);
     const resp = await this.gemini.sendMessage(characterId, userText);
 
     // Save assistant response
-    const assistantMsg: ChatMessage = {
+    const assistantMsg: ChatMessageDto = {
       role: 'assistant',
       text: resp.text || '',
       timestamp: Date.now(),
@@ -179,7 +179,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
   private async startChat(
     userId: string,
     characterId: string,
-  ): Promise<ChatMessage> {
+  ): Promise<ChatMessageDto> {
     this.gemini.initializeChatSession(characterId, this.systemPrompt, []);
 
     const characterDoc = await this.characterService.findByCharacterId(userId, characterId);
@@ -189,7 +189,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
 
     const initResp = await this.gemini.sendMessage(characterId, initMessage);
-    const initMsg: ChatMessage = {
+    const initMsg: ChatMessageDto = {
       role: 'assistant',
       text: initResp.text || '',
       timestamp: Date.now(),
@@ -203,7 +203,7 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     return initMsg;
   }
 
-  private respondToChat(characterId: string, history: ChatMessage[]) {
+  private respondToChat(characterId: string, history: ChatMessageDto[]) {
     this.gemini.initializeChatSession(
       characterId,
       this.systemPrompt,

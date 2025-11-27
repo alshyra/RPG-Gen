@@ -1,9 +1,9 @@
 import test from 'ava';
 import { calculateArmorClass, getDexModifier, parseArmorAc } from '../src/character/armor-class.util.js';
-import type { CharacterDto, ItemDto } from '@rpg-gen/shared';
+import { CharacterResponseDto, ItemResponseDto } from '@rpg-gen/shared';
 
 // Helper to create a minimal character for testing
-const createTestCharacter = (dex: number, inventory: ItemDto[] = []): CharacterDto => ({
+const createTestCharacter = (dex: number, inventory: ItemResponseDto[] = []): CharacterResponseDto => ({
   characterId: 'test-char',
   world: 'dnd',
   portrait: '',
@@ -25,7 +25,7 @@ test('getDexModifier calculates correctly for various DEX scores', (t) => {
 });
 
 test('getDexModifier defaults to 0 when scores are missing', (t) => {
-  const charNoScores: CharacterDto = {
+  const charNoScores: CharacterResponseDto = {
     characterId: 'test',
     world: 'dnd',
     portrait: '',

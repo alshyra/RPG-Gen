@@ -1,4 +1,4 @@
-import type { GameInstruction, RollInstruction } from '@rpg-gen/shared';
+import { GameInstructionDto, RollInstructionDto } from '@rpg-gen/shared';
 
 const extractJsonBlocks = (text: string): string[] => {
   const jsonMatches = Array.from(text.matchAll(/```json(?:\\n|\n|\s)([\s\S]*?)(?:\\n|\n|\s)```/g));
@@ -51,8 +51,8 @@ const isGameInstruction = (obj: Record<string, unknown>): boolean => {
 };
 
 // Extended GameInstruction type that uses the proper RollInstruction with string | number modifier
-type ParsedGameInstruction = Omit<GameInstruction, 'roll'> & {
-  roll?: RollInstruction;
+type ParsedGameInstruction = Omit<GameInstructionDto, 'roll'> & {
+  roll?: RollInstructionDto;
 };
 
 export const parseGameInstructions = (narrative: string): ParsedGameInstruction[] => {
