@@ -31,7 +31,29 @@ Cypress.Commands.add('ensureAuth', () => {
     win.localStorage.setItem('rpg-auth-token', e2eToken);
   });
 
-  // Request real profile — fail if not present so tests don't silently pass with a mock.
+  // Stub the /api/auth/profile and /api/characters endpoints to avoid requiring a real backend
+  cy.intercept('GET', '/api/auth/profile', {
+    statusCode: 200,
+    body: {
+      name: 'Test User',
+      email: 'test@example.com',
+      picture: 'http://localhost/avatar.png',
+    },
+  }).as('getProfile');
+
+  cy.intercept('GET', '/api/characters', {
+    statusCode: 200,
+    body: [{
+      characterId: 'char-1',
+      name: 'Test Character',
+      world: 'dnd',
+      portrait: '',
+      isDeceased: false,
+      state: 'created',
+    }],
+  }).as('getCharacters');
+
+  // Fetch profile and set local storage using the stubbed response
   cy.request({ url: '/api/auth/profile', failOnStatusCode: false }).then((resp) => {
     if (resp?.status === 200 && resp?.body) {
       cy.window().then((win) => {
@@ -40,7 +62,7 @@ Cypress.Commands.add('ensureAuth', () => {
       return;
     }
 
-    throw new Error('ensureAuth failed: /api/auth/profile did not return a profile. Ensure backend is up and DISABLE_AUTH_FOR_E2E=true.');
+    throw new Error('ensureAuth failed: /api/auth/profile did not return a profile. Ensure backend is up or provide a mock.');
   });
 });
 

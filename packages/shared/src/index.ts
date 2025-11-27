@@ -22,7 +22,8 @@ export type ImageRequest = import('./api-types').components['schemas']['ImageReq
 export type ChatRequest = import('./api-types').components['schemas']['ChatRequestDto'];
 export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
 export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];
-
+export type CombatStartRequestDto = import('./api-types').components['schemas']['CombatStartRequestDto'];
+export type AttackRequestDto = import('./api-types').components['schemas']['AttackRequestDto'];
 // Legacy alias for backward compatibility
 export type DiceThrowDto = DiceThrow;
 

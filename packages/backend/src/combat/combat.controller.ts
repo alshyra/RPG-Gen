@@ -9,28 +9,14 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { CombatService } from './combat.service.js';
-import type { CombatStartInstruction, TurnResult } from './combat.types.js';
-
-class AttackRequest {
-  target: string;
-}
-
-class CombatStartRequest {
-  combat_start: {
-    name: string;
-    hp: number;
-    ac: number;
-    attack_bonus?: number;
-    damage_dice?: string;
-    damage_bonus?: number;
-  }[];
-}
+import { TurnResultWithInstructionsDto, CombatEndResponseDto } from './dto/index.js';
+import { CombatStartRequestDto, AttackRequestDto, CombatStateDto } from './dto/index.js';
 
 @ApiTags('combat')
 @Controller('combat')
@@ -46,11 +32,12 @@ export class CombatController {
 
   @Post(':characterId/start')
   @ApiOperation({ summary: 'Initialize combat with enemies' })
-  @ApiBody({ type: CombatStartRequest })
+  @ApiBody({ type: CombatStartRequestDto })
+  @ApiResponse({ status: 201, type: CombatStateDto })
   async startCombat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: CombatStartInstruction,
+    @Body() body: CombatStartRequestDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -70,32 +57,27 @@ export class CombatController {
     this.logger.log(`Combat started for character ${characterId} with ${body.combat_start.length} enemies`);
 
     return {
+      characterId: characterId,
       inCombat: true,
-      roundNumber: state.roundNumber,
-      playerInitiative: state.player.initiative,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      playerAc: state.player.ac,
-      enemies: state.enemies.map(e => ({
-        id: e.id,
-        name: e.name,
-        initiative: e.initiative,
-        hp: e.hp,
-        hpMax: e.hpMax,
-      })),
+      enemies: state.enemies,
+      player: state.player,
       turnOrder: state.turnOrder,
+      currentTurnIndex: state.currentTurnIndex,
+      roundNumber: state.roundNumber,
       narrative: await this.combatService.getCombatSummary(characterId),
     };
   }
 
   @Post(':characterId/attack')
   @ApiOperation({ summary: 'Execute player attack in combat' })
-  @ApiBody({ type: AttackRequest })
+  @ApiResponse({ status: 200, type: TurnResultWithInstructionsDto })
+  @ApiBody({ type: AttackRequestDto })
+  // eslint-disable-next-line max-statements
   async attack(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: AttackRequest,
-  ): Promise<TurnResult & { instructions?: unknown[] }> {
+    @Body() body: AttackRequestDto,
+  ): Promise<TurnResultWithInstructionsDto> {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
@@ -144,6 +126,7 @@ export class CombatController {
             xp_gained: combatEnd.xpGained,
             player_hp: result.playerHp,
             enemies_defeated: combatEnd.enemiesDefeated,
+            narrative: 'Victoire! Tous les ennemis ont été vaincus',
           },
         });
       }
@@ -154,6 +137,7 @@ export class CombatController {
           xp_gained: 0,
           player_hp: 0,
           enemies_defeated: [],
+          narrative: 'Défaite... Vous tombez inconscient.',
         },
       });
       await this.combatService.endCombat(characterId);
@@ -169,6 +153,7 @@ export class CombatController {
 
   @Get(':characterId/status')
   @ApiOperation({ summary: 'Get current combat status' })
+  @ApiResponse({ status: 200, type: CombatStateDto })
   async getStatus(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -199,16 +184,13 @@ export class CombatController {
     }
 
     return {
+      characterId: characterId,
       inCombat: true,
+      enemies: state.enemies.filter(e => e.hp > 0),
+      player: state.player,
+      turnOrder: state.turnOrder,
+      currentTurnIndex: state.currentTurnIndex,
       roundNumber: state.roundNumber,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      enemies: state.enemies.filter(e => e.hp > 0).map(e => ({
-        id: e.id,
-        name: e.name,
-        hp: e.hp,
-        hpMax: e.hpMax,
-      })),
       validTargets: await this.combatService.getValidTargets(characterId),
       narrative: await this.combatService.getCombatSummary(characterId),
     };
@@ -216,10 +198,11 @@ export class CombatController {
 
   @Post(':characterId/end')
   @ApiOperation({ summary: 'Force end current combat (flee)' })
+  @ApiResponse({ status: 200, type: CombatEndResponseDto })
   async endCombat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-  ) {
+  ): Promise<CombatEndResponseDto> {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
@@ -249,6 +232,7 @@ export class CombatController {
           player_hp: character.hp,
           enemies_defeated: [],
           fled: true,
+          narrative: 'Vous avez fui le combat.',
         },
       }],
     };

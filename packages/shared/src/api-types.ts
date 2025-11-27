@@ -275,6 +275,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/combat/{characterId}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Initialize combat with enemies */
+        post: operations["CombatController_startCombat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/attack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute player attack in combat */
+        post: operations["CombatController_attack"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current combat status */
+        get: operations["CombatController_getStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Force end current combat (flee) */
+        post: operations["CombatController_endCombat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/dice": {
         parameters: {
             query?: never;
@@ -796,6 +864,182 @@ export interface components {
             /** @description Updated character */
             character: components["schemas"]["CharacterResponseDto"];
         };
+        CombatStartEntryDto: {
+            /** @description Enemy name */
+            name: string;
+            /** @description Enemy HP */
+            hp: number;
+            /** @description Enemy AC */
+            ac: number;
+            /** @description Attack bonus (optional) */
+            attack_bonus?: number;
+            /** @description Damage dice (optional) */
+            damage_dice?: string;
+            /** @description Damage bonus (optional) */
+            damage_bonus?: number;
+        };
+        CombatStartRequestDto: {
+            /** @description Array of enemies to initialize combat with */
+            combat_start: components["schemas"]["CombatStartEntryDto"][];
+        };
+        CombatEnemyDto: {
+            /** @description Unique enemy ID */
+            id: string;
+            /** @description Enemy name */
+            name: string;
+            /** @description Current hit points */
+            hp: number;
+            /** @description Maximum hit points */
+            hpMax: number;
+            /** @description Armor class */
+            ac: number;
+            /** @description Initiative order value */
+            initiative: number;
+            /** @description Attack bonus for the enemy */
+            attackBonus: number;
+            /** @description Damage dice expression (e.g., 1d8) */
+            damageDice: string;
+            /** @description Damage bonus to add to damage roll */
+            damageBonus: number;
+        };
+        CombatPlayerDto: {
+            /** @description Character ID of the player */
+            characterId: string;
+            /** @description Player name */
+            name: string;
+            /** @description Current hit points */
+            hp: number;
+            /** @description Maximum hit points */
+            hpMax: number;
+            /** @description Armor class */
+            ac: number;
+            /** @description Initiative order value */
+            initiative: number;
+            /** @description Attack bonus for the player */
+            attackBonus: number;
+            /** @description Damage dice expression (e.g., 1d8) */
+            damageDice: string;
+            /** @description Damage bonus to add to damage roll */
+            damageBonus: number;
+        };
+        CombatantDto: {
+            /** @description ID of the combatant (player character or enemy) */
+            id: string;
+            /** @description Combatant name */
+            name: string;
+            /** @description Initiative order value */
+            initiative: number;
+            /** @description Whether combatant is player character */
+            isPlayer: boolean;
+        };
+        CombatStateDto: {
+            /** @description Character ID */
+            characterId: string;
+            /** @description Whether currently in combat */
+            inCombat: boolean;
+            /** @description Active enemies */
+            enemies: components["schemas"]["CombatEnemyDto"][];
+            /** @description Player state */
+            player: components["schemas"]["CombatPlayerDto"];
+            /** @description Turn order for combat */
+            turnOrder: components["schemas"]["CombatantDto"][];
+            /** @description Index of current turn in turnOrder */
+            currentTurnIndex: number;
+            /** @description Current round number */
+            roundNumber: number;
+            /** @description Narrative summary of current combat */
+            narrative?: string;
+            /** @description Valid targets available to player */
+            validTargets?: string[];
+        };
+        AttackRequestDto: {
+            /** @description Target ID to attack */
+            target: string;
+        };
+        AttackResultDto: {
+            /** @description Attacker identifier */
+            attacker: string;
+            /** @description Target identifier */
+            target: string;
+            /** @description Raw attack roll */
+            attackRoll: number;
+            /** @description Attack bonus applied */
+            attackBonus: number;
+            /** @description Total attack value (roll + bonus) */
+            totalAttack: number;
+            /** @description Target's AC */
+            targetAc: number;
+            /** @description Whether the attack hit */
+            hit: boolean;
+            /** @description Whether the attack was a critical hit */
+            critical: boolean;
+            /** @description Whether the attack was a fumble */
+            fumble: boolean;
+            /** @description Individual dice results for the damage roll */
+            damageRoll: number[];
+            /** @description Damage bonus applied */
+            damageBonus: number;
+            /** @description Total damage applied */
+            totalDamage: number;
+            /** @description Target's HP before the attack */
+            targetHpBefore: number;
+            /** @description Target's HP after the attack */
+            targetHpAfter: number;
+            /** @description Whether the target was defeated */
+            targetDefeated: boolean;
+        };
+        TurnResultWithInstructionsDto: {
+            /** @description Turn number */
+            turnNumber: number;
+            /** @description Round number */
+            roundNumber: number;
+            /** @description Attacks performed by player */
+            playerAttacks: components["schemas"]["AttackResultDto"][];
+            /** @description Attacks performed by enemies */
+            enemyAttacks: components["schemas"]["AttackResultDto"][];
+            /** @description Whether combat ended after this turn */
+            combatEnded: boolean;
+            /** @description Whether the player emerged victorious */
+            victory: boolean;
+            /** @description Whether the player was defeated */
+            defeat: boolean;
+            /** @description Remaining enemies after the turn */
+            remainingEnemies: components["schemas"]["CombatEnemyDto"][];
+            /** @description Player's current HP after the turn */
+            playerHp: number;
+            /** @description Player's max HP */
+            playerHpMax: number;
+            /** @description Narrative text summarizing the turn */
+            narrative: string;
+            /** @description Optional set of frontend instructions to apply after the turn */
+            instructions?: Record<string, never>[];
+        };
+        CombatEndDto: {
+            /** @description Victory state */
+            victory: boolean;
+            /** @description XP gained */
+            xp_gained: number;
+            /** @description Player's HP at the end */
+            player_hp: number;
+            /** @description Enemies that were defeated */
+            enemies_defeated: string[];
+            /** @description Flee indicator */
+            fled?: boolean;
+            /** @description Narrative summary */
+            narrative: string;
+        };
+        CombatEndResultDto: {
+            /** @description Combat end information */
+            combat_end: components["schemas"]["CombatEndDto"];
+        };
+        CombatEndResponseDto: {
+            /** @description Whether the operation succeeded */
+            success: boolean;
+            /** @description Human readable message */
+            message: string;
+            /** @description Optional instructions returned after ending combat */
+            instructions?: components["schemas"]["CombatEndResultDto"][];
+        };
         DiceRequest: {
             /** @description Dice expression (e.g., 1d20+5, 2d6, 1d8-2) */
             expr: string;
@@ -1110,7 +1354,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UpdateCharacterRequestDto"];
+                    "application/json": components["schemas"]["CharacterResponseDto"];
                 };
             };
             /** @description Character not found */
@@ -1394,6 +1638,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CombatController_startCombat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CombatStartRequestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_attack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttackRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResultWithInstructionsDto"];
+                };
+            };
+        };
+    };
+    CombatController_getStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_endCombat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatEndResponseDto"];
+                };
             };
         };
     };

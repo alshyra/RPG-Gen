@@ -1,19 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import type { CharacterDto } from '@rpg-gen/shared';
+import type { CharacterResponseDto, InventoryItemMeta, WeaponMeta } from '../character/dto/index.js';
 import { DiceController } from '../dice/dice.controller.js';
 import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
 import { CombatSession, CombatSessionDocument } from '../schemas/combat-session.schema.js';
-import type {
-  AttackResult,
-  CombatEnemy,
-  CombatPlayer,
-  CombatStartInstruction,
-  CombatState,
-  Combatant,
-  TurnResult,
-} from './combat.types.js';
+import { CombatStateDto } from './dto/CombatStateDto.js';
+import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
+import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
+import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
+import { CombatantDto } from './dto/CombatantDto.js';
+import { AttackResultDto } from './dto/AttackResultDto.js';
+import { TurnResultDto } from './dto/TurnResultDto.js';
 
 /**
  * Service managing combat state and mechanics.
@@ -31,7 +29,7 @@ export class CombatService {
   /**
    * Get ability modifier for attack calculations
    */
-  private getStrModifier(character: CharacterDto): number {
+  private getStrModifier(character: CharacterResponseDto): number {
     const strScore = character.scores?.Str ?? 10;
     return Math.floor((strScore - 10) / 2);
   }
@@ -39,7 +37,7 @@ export class CombatService {
   /**
    * Calculate attack bonus based on character stats
    */
-  private calculatePlayerAttackBonus(character: CharacterDto): number {
+  private calculatePlayerAttackBonus(character: CharacterResponseDto): number {
     const strMod = this.getStrModifier(character);
     const proficiency = character.proficiency ?? 2;
     return strMod + proficiency;
@@ -48,20 +46,21 @@ export class CombatService {
   /**
    * Calculate damage bonus (STR modifier by default)
    */
-  private calculatePlayerDamageBonus(character: CharacterDto): number {
+  private calculatePlayerDamageBonus(character: CharacterResponseDto): number {
     return this.getStrModifier(character);
   }
 
   /**
    * Get the player's main weapon damage dice
    */
-  private getPlayerDamageDice(character: CharacterDto): string {
+  private getPlayerDamageDice(character: CharacterResponseDto): string {
     // Check equipped weapons in inventory
     const equipped = character.inventory?.find(
       item => item.equipped && item.meta?.type === 'weapon',
     );
 
-    if (equipped && equipped.meta?.damage) {
+    const isWeaponMeta = (meta?: InventoryItemMeta): meta is WeaponMeta => !!meta && meta.type === 'weapon';
+    if (equipped && isWeaponMeta(equipped.meta) && equipped.meta.damage) {
       return String(equipped.meta.damage);
     }
 
@@ -73,14 +72,14 @@ export class CombatService {
    * Initialize combat state from combat_start instruction
    */
   async initializeCombat(
-    character: CharacterDto,
-    combatStart: CombatStartInstruction,
+    character: CharacterResponseDto,
+    combatStart: CombatStartRequestDto,
     userId: string,
-  ): Promise<CombatState> {
+  ): Promise<CombatStateDto> {
     const characterId = character.characterId;
 
     // Build player combat stats
-    const player: CombatPlayer = {
+    const player: CombatPlayerDto = {
       characterId,
       name: character.name ?? 'Hero',
       hp: character.hp ?? character.hpMax ?? 10,
@@ -98,7 +97,7 @@ export class CombatService {
     player.initiative = playerInitRoll.total + dexMod;
 
     // Build enemy list with initiatives
-    const enemies: CombatEnemy[] = combatStart.combat_start.map((enemy, idx) => {
+    const enemies: CombatEnemyDto[] = combatStart.combat_start.map((enemy, idx) => {
       const initRoll = this.diceController.rollDiceExpr('1d20');
       return {
         id: `enemy-${idx + 1}`,
@@ -114,7 +113,7 @@ export class CombatService {
     });
 
     // Build turn order by initiative
-    const combatants: Combatant[] = [
+    const combatants: CombatantDto[] = [
       { id: characterId, name: player.name, initiative: player.initiative, isPlayer: true },
       ...enemies.map(e => ({
         id: e.id,
@@ -127,7 +126,7 @@ export class CombatService {
     // Sort by initiative (highest first)
     const turnOrder = combatants.sort((a, b) => b.initiative - a.initiative);
 
-    const state: CombatState = {
+    const state: CombatStateDto = {
       characterId,
       inCombat: true,
       enemies,
@@ -160,7 +159,7 @@ export class CombatService {
   /**
    * Get current combat state
    */
-  async getCombatState(characterId: string): Promise<CombatState | null> {
+  async getCombatState(characterId: string): Promise<CombatStateDto | null> {
     const session = await this.combatSessionModel.findOne({ characterId });
     if (!session) return null;
 
@@ -178,11 +177,12 @@ export class CombatService {
   /**
    * Perform a single attack
    */
+  // eslint-disable-next-line max-statements
   private performAttack(
     attacker: { name: string; attackBonus: number; damageDice: string; damageBonus: number },
     target: { name: string; ac: number; hp: number },
     _isPlayerAttack: boolean,
-  ): AttackResult {
+  ): AttackResultDto {
     // Roll attack
     const attackRoll = this.diceController.rollDiceExpr('1d20');
     const dieRoll = attackRoll.rolls[0];
@@ -234,7 +234,7 @@ export class CombatService {
   /**
    * Generate narrative text for an attack result
    */
-  private generateAttackNarrative(result: AttackResult, isPlayerAttack: boolean): string {
+  private generateAttackNarrative(result: AttackResultDto, isPlayerAttack: boolean): string {
     if (result.fumble) {
       return isPlayerAttack
         ? `Vous tentez de frapper ${result.target} mais votre attaque échoue lamentablement (1 naturel).`
@@ -263,7 +263,7 @@ export class CombatService {
   /**
    * Process player attack command
    */
-  async processPlayerAttack(characterId: string, targetName: string): Promise<TurnResult | null> {
+  async processPlayerAttack(characterId: string, targetName: string): Promise<TurnResultDto | null> {
     const state = await this.getCombatState(characterId);
     if (!state || !state.inCombat) {
       return null;
@@ -291,9 +291,10 @@ export class CombatService {
   /**
    * Execute a full combat turn
    */
-  private async executeTurn(state: CombatState, targetEnemy: CombatEnemy): Promise<TurnResult> {
-    const playerAttacks: AttackResult[] = [];
-    const enemyAttacks: AttackResult[] = [];
+  // eslint-disable-next-line max-statements
+  private async executeTurn(state: CombatStateDto, targetEnemy: CombatEnemyDto): Promise<TurnResultDto> {
+    const playerAttacks: AttackResultDto[] = [];
+    const enemyAttacks: AttackResultDto[] = [];
     const narrativeParts: string[] = [];
 
     // Player attack
@@ -324,7 +325,7 @@ export class CombatService {
       state.inCombat = false;
       await this.saveCombatState(state);
 
-      const turnResult: TurnResult = {
+      const turnResult: TurnResultDto = {
         turnNumber: state.currentTurnIndex,
         roundNumber: state.roundNumber,
         playerAttacks,
@@ -355,7 +356,7 @@ export class CombatService {
     // Save updated state to database
     await this.saveCombatState(state);
 
-    const turnResult: TurnResult = {
+    const turnResult: TurnResultDto = {
       turnNumber: state.currentTurnIndex,
       roundNumber: state.roundNumber,
       playerAttacks,
@@ -375,7 +376,7 @@ export class CombatService {
   /**
    * Save combat state to database
    */
-  private async saveCombatState(state: CombatState): Promise<void> {
+  private async saveCombatState(state: CombatStateDto): Promise<void> {
     await this.combatSessionModel.findOneAndUpdate(
       { characterId: state.characterId },
       {
@@ -393,13 +394,13 @@ export class CombatService {
    * Process enemy attacks and return defeat result if player is defeated
    */
   private processEnemyAttacks(
-    state: CombatState,
-    aliveEnemies: CombatEnemy[],
-    enemyAttacks: AttackResult[],
+    state: CombatStateDto,
+    aliveEnemies: CombatEnemyDto[],
+    enemyAttacks: AttackResultDto[],
     narrativeParts: string[],
-    playerAttacks: AttackResult[],
-  ): TurnResult | null {
-    let defeatResult: TurnResult | null = null;
+    playerAttacks: AttackResultDto[],
+  ): TurnResultDto | null {
+    let defeatResult: TurnResultDto | null = null;
 
     aliveEnemies.some((enemy) => {
       const enemyAttack = this.performAttack(
@@ -452,7 +453,7 @@ export class CombatService {
   /**
    * Calculate XP reward for defeated enemies
    */
-  calculateXpReward(enemies: CombatEnemy[]): number {
+  calculateXpReward(enemies: CombatEnemyDto[]): number {
     // Simple XP calculation based on enemy HP totals
     // In a full implementation, this would use CR tables
     return enemies.reduce((total, enemy) => total + enemy.hpMax * 10, 0);

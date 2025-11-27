@@ -1,6 +1,6 @@
 import test from 'ava';
 import type { CharacterDto } from '@rpg-gen/shared';
-import type { CombatStartInstruction } from '../src/combat/combat.types.js';
+import type { CombatStartRequestDto as CombatStartInstruction } from '../src/combat/dto/index.js';
 
 // Mock the CombatService without MongoDB dependency for unit testing
 // The actual service uses MongoDB - these tests verify core combat logic
@@ -23,9 +23,7 @@ const createMockCharacter = (overrides: Partial<CharacterDto> = {}): CharacterDt
 });
 
 const createCombatStart = (): CombatStartInstruction => ({
-  combat_start: [
-    { name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 },
-  ],
+  combat_start: [{ name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 }],
 });
 
 // Test the combat types and basic structure
@@ -122,7 +120,7 @@ test('attack bonus calculation', (t) => {
 test('XP reward calculation based on enemy HP', (t) => {
   // Simple XP calculation: HP * 10
   const enemies = [
-    { hpMax: 7 },  // 70 XP
+    { hpMax: 7 }, // 70 XP
     { hpMax: 15 }, // 150 XP
   ];
 

@@ -1,59 +1,8 @@
 /**
  * Combat service for interacting with the backend combat API
  */
-import type {
-  CombatStartInstruction,
-  TurnResult,
-} from './combatTypes';
-import apiClient from './axiosClient';
-
-export interface CombatStartResponse {
-  inCombat: boolean;
-  roundNumber: number;
-  playerInitiative: number;
-  playerHp: number;
-  playerHpMax: number;
-  playerAc: number;
-  enemies: {
-    id: string;
-    name: string;
-    initiative: number;
-    hp: number;
-    hpMax: number;
-  }[];
-  turnOrder: {
-    id: string;
-    name: string;
-    initiative: number;
-    isPlayer: boolean;
-  }[];
-  narrative: string | null;
-}
-
-export interface AttackResponse extends TurnResult {
-  instructions?: unknown[];
-}
-
-export interface CombatStatusResponse {
-  inCombat: boolean;
-  roundNumber?: number;
-  playerHp?: number;
-  playerHpMax?: number;
-  enemies?: {
-    id: string;
-    name: string;
-    hp: number;
-    hpMax: number;
-  }[];
-  validTargets?: string[];
-  narrative: string | null;
-}
-
-export interface CombatEndResponse {
-  success: boolean;
-  message: string;
-  instructions?: unknown[];
-}
+import { CombatStartRequestDto } from '@rpg-gen/shared';
+import apiClient from '../apis/apiClient';
 
 class CombatService {
   /**
@@ -61,43 +10,44 @@ class CombatService {
    */
   async startCombat(
     characterId: string,
-    combatStart: CombatStartInstruction,
-  ): Promise<CombatStartResponse> {
-    const response = await apiClient.post<CombatStartResponse>(
-      `/combat/${characterId}/start`,
-      combatStart,
-    );
-    return response.data;
+    combatStart: CombatStartRequestDto,
+  ) {
+    await apiClient.POST('/api/combat/{characterId}/start', {
+      params: { path: { characterId } },
+      body: combatStart,
+    });
+    return true;
   }
 
   /**
    * Execute an attack against a target
    */
-  async attack(characterId: string, target: string): Promise<AttackResponse> {
-    const response = await apiClient.post<AttackResponse>(
-      `/combat/${characterId}/attack`,
-      { target },
-    );
-    return response.data;
+  async attack(characterId: string, target: string) {
+    await apiClient.POST('/api/combat/{characterId}/attack', {
+      params: { path: { characterId } },
+      body: { target },
+    });
+    return true;
   }
 
   /**
    * Get current combat status
    */
-  async getStatus(characterId: string): Promise<CombatStatusResponse> {
-    const response = await apiClient.get<CombatStatusResponse>(
-      `/combat/${characterId}/status`,
-    );
+  async getStatus(characterId: string) {
+    const response = await apiClient.GET('/api/combat/{characterId}/status', {
+      params: { path: { characterId } },
+    });
     return response.data;
   }
 
   /**
    * End combat (flee)
    */
-  async endCombat(characterId: string): Promise<CombatEndResponse> {
-    const response = await apiClient.post<CombatEndResponse>(
-      `/combat/${characterId}/end`,
-    );
+  async endCombat(characterId: string) {
+    const response = await apiClient.POST('/api/combat/{characterId}/end', {
+      params: { path: { characterId } },
+      // `/combat/${characterId}/end`,
+    });
     return response.data;
   }
 }
