@@ -1,13 +1,14 @@
-/* global URL */
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import pluginVue from 'eslint-plugin-vue';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 
-const tsconfigRootDir = new URL('.', import.meta.url).pathname;
+const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
   { ignores: ['dist/**'] },
@@ -33,6 +34,7 @@ export default defineConfig([
       'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
       'max-statements': ['warn', 15],
       'prefer-object-spread': 'warn',
+      '@stylistic/newline-per-chained-call': ['error'],
     },
   },
   // TypeScript files
@@ -70,10 +72,12 @@ export default defineConfig([
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: '@typescript-eslint/parser',
-        tsconfigRootDir,
+        // Use the TypeScript parser for script blocks but avoid `project` here
+        // so ESLint won't attempt typed linting that requires the file to be included in a tsconfig.
+        parser: ts.parser,
         ecmaVersion: 'latest',
         sourceType: 'module',
+        extraFileExtensions: ['.vue'],
       },
       globals: {
         ...globals.browser,

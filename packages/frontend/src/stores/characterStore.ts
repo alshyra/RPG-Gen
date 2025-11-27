@@ -1,14 +1,15 @@
 import { characterServiceApi } from '@/apis/characterApi';
-import { CharacterDto, ItemDto, SpellDto, SpellInstruction, UpdateCharacterRequestDto } from '@rpg-gen/shared';
+import { CharacterResponseDto, ItemResponseDto, SpellInstructionDataDto, SpellResponseDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+// eslint-disable-next-line max-statements
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();
   const currentCharacterId = computed(() => typeof route.params.characterId === 'string' ? route.params.characterId : undefined);
 
-  const currentCharacter = ref<CharacterDto>();
+  const currentCharacter = ref<CharacterResponseDto>();
   const showDeathModal = ref(false);
 
   const isDead = computed(() => !!currentCharacter.value && (typeof currentCharacter.value.hp === 'number' ? currentCharacter.value.hp <= 0 : false));
@@ -26,10 +27,10 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   // inventory/spells helpers (simple implementations)
-  const learnSpell = (spell: SpellInstruction | SpellDto) => {
+  const learnSpell = (spell: SpellInstructionDataDto) => {
     if (!currentCharacter.value) return;
     // Convert instruction to SpellDto format
-    const spellDto: SpellDto = {
+    const spellDto: SpellResponseDto = {
       name: spell.name,
       level: spell.level,
       description: spell.description,
@@ -54,7 +55,7 @@ export const useCharacterStore = defineStore('character', () => {
     };
   };
 
-  const removeInventoryItem = async (definitionId: ItemDto['definitionId'], quantity: number = 1) => {
+  const removeInventoryItem = async (definitionId: ItemResponseDto['definitionId'], quantity: number = 1) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;
     currentCharacter.value.inventory = currentCharacter.value.inventory
       ?.map((item) => {
@@ -75,7 +76,7 @@ export const useCharacterStore = defineStore('character', () => {
     }
   };
 
-  const addInventoryItem = async (item: Partial<ItemDto>) => {
+  const addInventoryItem = async (item: Partial<ItemResponseDto>) => {
     if (!currentCharacter.value?.characterId || !item) return;
     try {
       const updated = await characterServiceApi.addInventoryItem(currentCharacter.value.characterId, item);

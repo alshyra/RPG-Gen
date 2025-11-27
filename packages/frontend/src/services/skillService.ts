@@ -1,4 +1,4 @@
-import type { CharacterDto } from '@rpg-gen/shared';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 import { DnDRulesService } from './dndRulesService';
 
 /**
@@ -16,9 +16,7 @@ const abilityMap: Record<string, string> = {
 /**
  * Calculate ability modifier from score
  */
-function getAbilityModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
+const getAbilityModifier = (score: number) => Math.floor((score - 10) / 2);
 
 /**
  * Get the bonus for a specific skill check
@@ -33,7 +31,7 @@ function getAbilityModifier(score: number): number {
 
 // eslint-disable-next-line max-statements
 export const getSkillBonus = (
-  character: CharacterDto | null,
+  character: CharacterResponseDto | null,
   skillNameWithCheck: string,
 ): number => {
   if (!character) return 0;

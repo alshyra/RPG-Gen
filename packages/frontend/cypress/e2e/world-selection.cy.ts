@@ -33,8 +33,10 @@ describe('World Selection', () => {
 
   it('should have start buttons for each world', () => {
     // Each world should have a "Commencer" button
-    cy.get('button').contains('Commencer').should('exist');
-    cy.get('button').filter(':contains("Commencer")').should('have.length.gte', 3);
+    cy.get('button').contains('Commencer')
+      .should('exist');
+    cy.get('button').filter(':contains("Commencer")')
+      .should('have.length.gte', 3);
   });
 
   it('should navigate to character creation when clicking start on a world', () => {

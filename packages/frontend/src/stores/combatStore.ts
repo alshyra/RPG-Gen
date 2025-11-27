@@ -1,22 +1,15 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { combatService } from '../apis/combatApi';
-
-export interface CombatStoreEnemy {
-  id: string;
-  name: string;
-  hp: number;
-  hpMax: number;
-  initiative: number;
-}
+import { CombatantDto, TurnResultWithInstructionsDto } from '@rpg-gen/shared';
 
 // eslint-disable-next-line max-statements
 export const useCombatStore = defineStore('combatStore', () => {
   // Combat state
   const inCombat = ref(false);
   const roundNumber = ref(1);
-  const enemies = ref<CombatStoreEnemy[]>([]);
-  const turnOrder = ref<Combatant[]>([]);
+  const enemies = ref<CombatantDto[]>([]);
+  const turnOrder = ref<CombatantDto[]>([]);
   const playerHp = ref(0);
   const playerHpMax = ref(0);
   const playerInitiative = ref(0);
@@ -36,8 +29,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     playerInitiative: number;
     playerHp: number;
     playerHpMax: number;
-    enemies: CombatStoreEnemy[];
-    turnOrder: Combatant[];
+    enemies: CombatantDto[];
+    turnOrder: CombatantDto[];
   }) => {
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
@@ -56,12 +49,12 @@ export const useCombatStore = defineStore('combatStore', () => {
   /**
    * Update combat state after an attack
    */
-  const updateFromTurnResult = (result: TurnResult) => {
+  const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
     // Update player HP
     playerHp.value = result.playerHp;
 
     // Update enemy HP from remaining enemies
-    result.remainingEnemies.forEach((updatedEnemy: CombatEnemy) => {
+    result.remainingEnemies.forEach((updatedEnemy) => {
       const existingEnemy = enemies.value.find(e => e.id === updatedEnemy.id);
       if (existingEnemy) {
         existingEnemy.hp = updatedEnemy.hp;

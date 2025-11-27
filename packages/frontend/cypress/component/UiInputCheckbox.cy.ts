@@ -89,7 +89,8 @@ describe('UiInputCheckbox Component', () => {
       },
     });
     // the host application should render the value span for the v-model
-    cy.get('body').invoke('html').then(h => cy.log('body html length: ' + (h?.length || 0)));
+    cy.get('body').invoke('html')
+      .then(h => cy.log('body html length: ' + (h?.length || 0)));
     cy.get('[data-testid="ui-checkbox"]').should('exist');
     cy.get('[data-testid="val"]').should('have.text', 'false');
     cy.get('[data-testid="ui-checkbox"]').click();

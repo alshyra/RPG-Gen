@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useCharacterStore } from '@/stores/characterStore';
-import type { GameInstruction } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { useRouter, useRoute } from 'vue-router';
 import { characterServiceApi } from '@/apis/characterApi';
+import { useCharacterStore } from '@/stores/characterStore';
+import { GameInstructionDto } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
 import { conversationService } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
@@ -16,7 +16,7 @@ export const useGameSession = () => {
 
   const { isInitializing } = storeToRefs(gameStore);
 
-  const processInstructionInMessage = (instr: GameInstruction, isLastMessage: boolean): void => {
+  const processInstructionInMessage = (instr: GameInstructionDto, isLastMessage: boolean): void => {
     if (instr.roll) {
       if (isLastMessage) gameStore.pendingInstruction = instr;
       gameStore.appendMessage(

@@ -59,7 +59,8 @@ describe('UiButton', () => {
         default: 'Click me',
       },
     });
-    const buttonClasses = wrapper.find('button').classes().join(' ');
+    const buttonClasses = wrapper.find('button').classes()
+      .join(' ');
     expect(buttonClasses).toContain('opacity-50');
     expect(buttonClasses).toContain('cursor-not-allowed');
   });
@@ -73,7 +74,8 @@ describe('UiButton', () => {
         default: 'Click me',
       },
     });
-    const buttonClasses = wrapper.find('button').classes().join(' ');
+    const buttonClasses = wrapper.find('button').classes()
+      .join(' ');
     expect(buttonClasses).toContain('opacity-50');
     expect(buttonClasses).toContain('cursor-not-allowed');
   });
