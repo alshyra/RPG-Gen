@@ -13,13 +13,16 @@ import { Character, CharacterSchema } from './schema/index.js';
     { name: ItemDefinition.name, schema: ItemDefinitionSchema },
   ])],
   controllers: [
-    CharacterController, ItemDefinitionController,
+    CharacterController,
+    ItemDefinitionController,
   ],
   providers: [
-    CharacterService, ItemDefinitionService,
+    CharacterService,
+    ItemDefinitionService,
   ],
   exports: [
-    CharacterService, ItemDefinitionService,
+    CharacterService,
+    ItemDefinitionService,
   ],
 })
 export class CharacterModule {}

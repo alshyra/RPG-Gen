@@ -155,7 +155,8 @@ test('calculateArmorClass with armor and shield combined', (t) => {
   };
 
   const char = createTestCharacter(14, [
-    chainMail, shield,
+    chainMail,
+    shield,
   ]);
   t.is(calculateArmorClass(char), 18); // 16 + 2
 });

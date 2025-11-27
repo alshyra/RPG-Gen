@@ -3,6 +3,9 @@ import { BaseCharacterResponseDto } from './BaseCharacterResponseDto.js';
 
 export class UpdateCharacterRequestDto extends PartialType(
   OmitType(BaseCharacterResponseDto, [
-    'characterId', 'isDeceased', 'diedAt', 'deathLocation',
+    'characterId',
+    'isDeceased',
+    'diedAt',
+    'deathLocation',
   ] as const),
 ) {}

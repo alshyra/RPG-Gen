@@ -2,8 +2,6 @@ import ts from 'typescript-eslint';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import { defineConfig } from 'eslint/config';
-import globals from 'globals';
-import vueParser from 'vue-eslint-parser';
 
 export default defineConfig([
   { ignores: ['dist/**'] },
@@ -18,21 +16,30 @@ export default defineConfig([
     commaDangle: 'always-multiline',
     quoteProps: 'consistent-as-needed',
   }),
-  // Enforce 'no-explicit-any' as a warning globally to avoid failing CI while still flagging usage
+  // Global rules
   {
     rules: {
-      // Turn off core unused var rule and use @typescript-eslint version
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      'no-console': 'off',
+      'arrow-body-style': ['warn', 'as-needed'],
+      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
+      'max-statements': ['warn', 15],
+      'prefer-object-spread': 'warn',
     },
   },
+  // TypeScript files
   {
-    files: ['**/*.{ts}'],
+    files: ['**/*.{js,ts}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: { ...ts.parser },
+      parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+        project: './tsconfig.json',
+      },
       globals: {
         console: 'readonly',
         process: 'readonly',
@@ -44,34 +51,10 @@ export default defineConfig([
       },
     },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'no-console': 'off',
-      'arrow-body-style': ['warn', 'as-needed'],
-      'no-restricted-syntax': ['warn', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-      'max-statements': ['warn', 15],
-      'prefer-object-spread': 'warn',
-      '@stylistic/array-bracket-newline': ['error', { 'minItems': 2 }],
-      '@stylistic/array-element-newline': ["error", { "minItems": 2 }],
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-    },
-  },
-  // Backend-specific override: set tsconfigRootDir for TypeScript parser resolution
-  {
-    files: ['**/*.{js,ts}'],
-    languageOptions: {
-      parser: { ...ts.parser, tsconfigRootDir: import.meta.dirname },
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        project: './tsconfig.json',
-      },
-    },
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
       '@stylistic/array-bracket-newline': ['error', { minItems: 2 }],
-      // backend can customize stricter rules if necessary
+      '@stylistic/array-element-newline': ['error', { minItems: 2 }],
     },
   },
 ]);

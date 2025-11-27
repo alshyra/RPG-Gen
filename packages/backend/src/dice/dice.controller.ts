@@ -7,7 +7,9 @@ class DiceRequest {
   expr: string;
 
   @ApiPropertyOptional({ description: 'Advantage type for d20 rolls', enum: [
-    'advantage', 'disadvantage', 'none',
+    'advantage',
+    'disadvantage',
+    'none',
   ] })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 }
@@ -33,7 +35,8 @@ export class DiceController {
       const total = keptRoll + mod;
       return {
         rolls: [
-          roll1, roll2,
+          roll1,
+          roll2,
         ],
         mod,
         total,

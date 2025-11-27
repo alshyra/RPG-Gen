@@ -13,7 +13,8 @@ import { ConversationService } from './conversation.service.js';
   ],
   controllers: [ChatController],
   providers: [
-    GeminiTextService, ConversationService,
+    GeminiTextService,
+    ConversationService,
   ],
 })
 export class ChatModule {}

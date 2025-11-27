@@ -55,7 +55,8 @@ export const parseGameInstructions = (narrative: string): ParsedGameInstruction[
   const jsonBlocks = extractJsonBlocks(narrative);
   const inlineJsons = extractInlineJson(narrative);
   const allJsons = [
-    ...jsonBlocks, ...inlineJsons,
+    ...jsonBlocks,
+    ...inlineJsons,
   ];
 
   return allJsons

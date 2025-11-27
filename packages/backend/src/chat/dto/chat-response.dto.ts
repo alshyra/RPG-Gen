@@ -33,7 +33,9 @@ export class RollInstructionDto {
   description?: string;
 
   @ApiPropertyOptional({ description: 'Advantage type', enum: [
-    'advantage', 'disadvantage', 'none',
+    'advantage',
+    'disadvantage',
+    'none',
   ] })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 }
@@ -43,7 +45,9 @@ export class RollInstructionDto {
  */
 export class SpellInstructionDataDto {
   @ApiProperty({ description: 'Spell action', enum: [
-    'learn', 'cast', 'forget',
+    'learn',
+    'cast',
+    'forget',
   ] })
   action: 'learn' | 'cast' | 'forget';
 
@@ -65,7 +69,9 @@ export class SpellInstructionDataDto {
  */
 export class InventoryInstructionDataDto {
   @ApiProperty({ description: 'Inventory action', enum: [
-    'add', 'remove', 'use',
+    'add',
+    'remove',
+    'use',
   ] })
   action: 'add' | 'remove' | 'use';
 
@@ -84,7 +90,11 @@ export class InventoryInstructionDataDto {
  */
 export class GameInstructionDto {
   @ApiPropertyOptional({ description: 'Instruction type', enum: [
-    'roll', 'xp', 'hp', 'spell', 'inventory',
+    'roll',
+    'xp',
+    'hp',
+    'spell',
+    'inventory',
   ] })
   type?: string;
 
@@ -129,7 +139,9 @@ export class ChatResponseDto {
  */
 export class ChatMessageDto {
   @ApiProperty({ description: 'Message role', enum: [
-    'user', 'assistant', 'system',
+    'user',
+    'assistant',
+    'system',
   ] })
   role: string;
 

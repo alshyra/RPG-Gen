@@ -8,7 +8,8 @@ import { CharacterModule } from '../character/character.module.js';
   imports: [CharacterModule],
   controllers: [ImageController],
   providers: [
-    GeminiImageService, ImageService,
+    GeminiImageService,
+    ImageService,
   ],
   exports: [ImageService],
 })

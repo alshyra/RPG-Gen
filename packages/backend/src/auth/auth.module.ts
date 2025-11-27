@@ -19,10 +19,14 @@ import { User, UserSchema } from '../schemas/user.schema.js';
   ],
   controllers: [AuthController],
   providers: [
-    AuthService, JwtStrategy, GoogleStrategy,
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
   ],
   exports: [
-    AuthService, JwtModule, PassportModule,
+    AuthService,
+    JwtModule,
+    PassportModule,
   ],
 })
 export class AuthModule {}

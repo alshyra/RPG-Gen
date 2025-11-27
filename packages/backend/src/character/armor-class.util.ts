@@ -43,9 +43,7 @@ export const parseArmorAc = (acString: string): { baseAc: number; addDex: boolea
   return { baseAc: 0, addDex: false, maxDex: null };
 };
 
-const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => {
-  return item.meta?.type === 'armor';
-};
+const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => item.meta?.type === 'armor';
 
 /**
  * Calculate Armor Class for a character based on equipped armor and shield

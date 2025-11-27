@@ -3,14 +3,16 @@ import { DiceController } from '../src/dice/dice.controller.js';
 
 test('rollDiceExpr parses and rolls correctly with deterministic RNG', (t) => {
   const seq = [
-    0.1, 0.2,
+    0.1,
+    0.2,
   ];
   let i = 0;
   const rng = () => seq[i++ % seq.length];
   const res = (new DiceController()).rollDiceExpr('2d6+1', rng);
   // rolls: 1 + floor(0.1*6)=1, 1 + floor(0.2*6)=2 => [1,2]
   t.deepEqual(res.rolls, [
-    1, 2,
+    1,
+    2,
   ]);
   t.is(res.mod, 1);
   t.is(res.total, 4);
@@ -30,14 +32,16 @@ test('rollDiceExpr invalid expressions throw', (t) => {
 
 test('rollDiceExpr with advantage keeps best of 2d20', (t) => {
   const seq = [
-    0.3, 0.7,
+    0.3,
+    0.7,
   ]; // rolls 7 and 15
   let i = 0;
   const rng = () => seq[i++ % seq.length];
   const res = (new DiceController()).rollDiceExpr('1d20', rng, 'advantage');
   t.is(res.rolls.length, 2);
   t.deepEqual(res.rolls, [
-    7, 15,
+    7,
+    15,
   ]);
   t.is(res.keptRoll, 15);
   t.is(res.discardedRoll, 7);
@@ -47,14 +51,16 @@ test('rollDiceExpr with advantage keeps best of 2d20', (t) => {
 
 test('rollDiceExpr with disadvantage keeps worst of 2d20', (t) => {
   const seq = [
-    0.3, 0.7,
+    0.3,
+    0.7,
   ]; // rolls 7 and 15
   let i = 0;
   const rng = () => seq[i++ % seq.length];
   const res = (new DiceController()).rollDiceExpr('1d20', rng, 'disadvantage');
   t.is(res.rolls.length, 2);
   t.deepEqual(res.rolls, [
-    7, 15,
+    7,
+    15,
   ]);
   t.is(res.keptRoll, 7);
   t.is(res.discardedRoll, 15);
@@ -64,7 +70,8 @@ test('rollDiceExpr with disadvantage keeps worst of 2d20', (t) => {
 
 test('rollDiceExpr with advantage includes modifier', (t) => {
   const seq = [
-    0.5, 0.8,
+    0.5,
+    0.8,
   ]; // rolls 11 and 17
   let i = 0;
   const rng = () => seq[i++ % seq.length];
@@ -76,7 +83,9 @@ test('rollDiceExpr with advantage includes modifier', (t) => {
 
 test('rollDiceExpr advantage only applies to 1d20', (t) => {
   const seq = [
-    0.1, 0.2, 0.3,
+    0.1,
+    0.2,
+    0.3,
   ];
   let i = 0;
   const rng = () => seq[i++ % seq.length];

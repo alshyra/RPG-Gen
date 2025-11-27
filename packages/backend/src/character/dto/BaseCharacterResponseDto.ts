@@ -65,7 +65,8 @@ export class BaseCharacterResponseDto {
   deathLocation?: string;
 
   @ApiProperty({ description: 'Character state', enum: [
-    'draft', 'created',
+    'draft',
+    'created',
   ] })
   state: CharacterState;
 

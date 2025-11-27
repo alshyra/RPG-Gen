@@ -11,7 +11,9 @@ export class DiceThrowDto {
   total: number;
 
   @ApiPropertyOptional({ description: 'Advantage type used for this roll', enum: [
-    'advantage', 'disadvantage', 'none',
+    'advantage',
+    'disadvantage',
+    'none',
   ] })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 
