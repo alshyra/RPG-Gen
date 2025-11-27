@@ -562,10 +562,7 @@ export interface components {
             inspirationPoints?: number;
             /** @description Whether character is deceased */
             isDeceased: boolean;
-            /**
-             * Format: date-time
-             * @description Date of death (ISO string)
-             */
+            /** @description Date of death (ISO string) */
             diedAt?: string;
             /** @description Location where character died */
             deathLocation?: string;
@@ -626,6 +623,45 @@ export interface components {
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
         };
+        UpdateCharacterRequestDto: {
+            /** @description Character name */
+            name?: string;
+            /** @description Physical description of the character */
+            physicalDescription?: string;
+            /** @description Character race */
+            race?: components["schemas"]["RaceResponseDto"];
+            /** @description Ability scores */
+            scores?: components["schemas"]["AbilityScoresResponseDto"];
+            /** @description Current hit points */
+            hp?: number;
+            /** @description Maximum hit points */
+            hpMax?: number;
+            /** @description Total experience points */
+            totalXp?: number;
+            /** @description Character classes */
+            classes?: components["schemas"]["CharacterClassResponseDto"][];
+            /** @description Character skills */
+            skills?: components["schemas"]["SkillResponseDto"][];
+            /** @description Game world (e.g., dnd, vtm) */
+            world?: string;
+            /** @description Character portrait URL or base64 */
+            portrait?: string;
+            /** @description Character gender */
+            gender?: string;
+            /** @description Proficiency bonus */
+            proficiency?: number;
+            /** @description Inspiration points */
+            inspirationPoints?: number;
+            /**
+             * @description Character state
+             * @enum {string}
+             */
+            state?: "draft" | "created";
+            /** @description Character inventory */
+            inventory?: components["schemas"]["ItemResponseDto"][];
+            /** @description Character spells */
+            spells?: components["schemas"]["SpellResponseDto"][];
+        };
         MessageResponseDto: {
             /** @description Response message */
             message: string;
@@ -633,6 +669,97 @@ export interface components {
         KillCharacterBodyDto: {
             /** @description Location where character died */
             deathLocation?: string;
+        };
+        WeaponMeta: {
+            /**
+             * @description Type discriminator for weapons
+             * @enum {string}
+             */
+            type?: "weapon";
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
+            /** @description Weapon class (e.g., Simple Melee, Martial Ranged) */
+            class?: string;
+            /** @description Damage expression (e.g., 1d6 bludgeoning) */
+            damage?: string;
+            /** @description Weapon properties (e.g., Finesse, Thrown) */
+            properties?: string[];
+        };
+        ArmorMeta: {
+            /**
+             * @description Type discriminator for armor
+             * @enum {string}
+             */
+            type?: "armor";
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
+            /** @description Armor class (Light, Medium, Heavy, Shield) */
+            class?: string;
+            /** @description AC value (e.g., 11 + Dex modifier) */
+            ac?: string;
+            /** @description Strength requirement (e.g., Str 13) */
+            strength?: string;
+            /** @description Stealth effect (e.g., Disadvantage) */
+            stealth?: string;
+        };
+        ConsumableMeta: {
+            /**
+             * @description Type discriminator for consumables
+             * @enum {string}
+             */
+            type?: "consumable";
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
+            /** @description Whether the item can be used directly */
+            usable?: boolean;
+        };
+        PackMeta: {
+            /**
+             * @description Type discriminator for packs
+             * @enum {string}
+             */
+            type?: "pack";
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
+        };
+        ToolMeta: {
+            /**
+             * @description Type discriminator for tools
+             * @enum {string}
+             */
+            type?: "tool";
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
+        };
+        GenericMeta: {
+            /** @description Item type discriminator */
+            type?: string;
+            /** @description Item cost (gold pieces or formatted string) */
+            cost?: Record<string, never>;
+            /** @description Item weight in pounds */
+            weight?: Record<string, never>;
+            /** @description Whether this is a starter item */
+            starter?: boolean;
         };
         CreateInventoryItemDto: {
             /** @description Inventory item id (UUID). If provided, attempt to merge with existing item */
@@ -648,10 +775,10 @@ export interface components {
             /** @description If true this item is equipped */
             equipped?: boolean;
             /** @description Arbitrary item meta */
-            meta?: Record<string, never>;
+            meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
         RemoveInventoryBodyDto: {
-            /** @description Quantity to remove (0 = remove all) */
+            /** @description Quantity to remove (-1 = remove all) */
             qty?: number;
         };
         GrantInspirationBodyDto: {
@@ -973,7 +1100,7 @@ export interface operations {
         /** @description Fields to update */
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CharacterResponseDto"];
+                "application/json": components["schemas"]["UpdateCharacterRequestDto"];
             };
         };
         responses: {
@@ -983,7 +1110,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
+                    "application/json": components["schemas"]["UpdateCharacterRequestDto"];
                 };
             };
             /** @description Character not found */

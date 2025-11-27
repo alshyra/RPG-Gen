@@ -10,11 +10,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import type { CharacterDto } from '@rpg-gen/shared';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import { CharacterService } from '../character/character.service.js';
@@ -22,7 +22,7 @@ import { parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ChatMessage, ConversationService } from './conversation.service.js';
-import { ChatRequestDto, ChatResponseDto, ChatMessageDto } from './dto/chat-response.dto.js';
+import { ChatMessageDto, ChatRequestDto, ChatResponseDto } from './dto/chat-response.dto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
@@ -72,7 +72,7 @@ export class ChatController {
     }
   }
 
-  private getAbilityScore(character: CharacterDto, key: string): number {
+  private getAbilityScore(character: CharacterResponseDto, key: string): number {
     let score = character[key];
     if (typeof score === 'number') return score;
     score = character[key.toLowerCase()];
@@ -83,7 +83,7 @@ export class ChatController {
     return typeof score === 'number' ? score : 10;
   }
 
-  private buildCharacterSummary(character: CharacterDto): string {
+  private buildCharacterSummary(character: CharacterResponseDto): string {
     const armorClass = calculateArmorClass(character);
     let summary = `
 Character Information:

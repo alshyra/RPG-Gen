@@ -1,13 +1,13 @@
-import UiInputCheckbox from "../../src/components/ui/UiInputCheckbox.vue";
-import { h, ref } from "vue";
+import UiInputCheckbox from '../../src/components/ui/UiInputCheckbox.vue';
+import { h, ref } from 'vue';
 
-describe("UiInputCheckbox Component", () => {
-  it("should render a checkbox element", () => {
+describe('UiInputCheckbox Component', () => {
+  it('should render a checkbox element', () => {
     cy.mount(UiInputCheckbox);
-    cy.get('input[type="checkbox"]').should("exist");
+    cy.get('input[type="checkbox"]').should('exist');
   });
 
-  it("should be checked when modelValue prop is true", () => {
+  it('should be checked when modelValue prop is true', () => {
     cy.mount(UiInputCheckbox, {
       props: {
         modelValue: true,
@@ -18,16 +18,16 @@ describe("UiInputCheckbox Component", () => {
     cy.get('input[type="checkbox"]').should('have.prop', 'checked', true);
   });
 
-  it("should not be checked when checked prop is false", () => {
+  it('should not be checked when checked prop is false', () => {
     cy.mount(UiInputCheckbox, {
       props: {
         checked: false,
       },
     });
-    cy.get('input[type="checkbox"]').should("not.be.checked");
+    cy.get('input[type="checkbox"]').should('not.be.checked');
   });
 
-  it("should emit change event when checkbox is toggled", () => {
+  it('should emit change event when checkbox is toggled', () => {
     cy.mount(UiInputCheckbox, {
       props: {
         checked: false,
@@ -37,22 +37,22 @@ describe("UiInputCheckbox Component", () => {
     cy.get('[data-testid="ui-checkbox"]').click();
   });
 
-  it("should be disabled when disabled prop is true", () => {
+  it('should be disabled when disabled prop is true', () => {
     cy.mount(UiInputCheckbox, {
       props: {
         disabled: true,
       },
     });
-    cy.get('input[type="checkbox"]').should("be.disabled");
+    cy.get('input[type="checkbox"]').should('be.disabled');
   });
 
-  it("should not be disabled when disabled prop is false", () => {
+  it('should not be disabled when disabled prop is false', () => {
     cy.mount(UiInputCheckbox, {
       props: {
         disabled: false,
       },
     });
-    cy.get('input[type="checkbox"]').should("not.be.disabled");
+    cy.get('input[type="checkbox"]').should('not.be.disabled');
   });
 
   it('should render different sizes from props', () => {
@@ -81,7 +81,7 @@ describe("UiInputCheckbox Component", () => {
         const checkedState = ref(false);
         return () => h('div', [
           h(UiInputCheckbox as any, {
-            modelValue: checkedState.value,
+            'modelValue': checkedState.value,
             'onUpdate:modelValue': (v: boolean) => { checkedState.value = v; },
           }),
           h('span', { 'data-testid': 'val' }, checkedState.value.toString()),
@@ -89,7 +89,7 @@ describe("UiInputCheckbox Component", () => {
       },
     });
     // the host application should render the value span for the v-model
-    cy.get('body').invoke('html').then((h) => cy.log('body html length: ' + (h?.length || 0)));
+    cy.get('body').invoke('html').then(h => cy.log('body html length: ' + (h?.length || 0)));
     cy.get('[data-testid="ui-checkbox"]').should('exist');
     cy.get('[data-testid="val"]').should('have.text', 'false');
     cy.get('[data-testid="ui-checkbox"]').click();

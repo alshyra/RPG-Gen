@@ -38,7 +38,10 @@ export default defineConfig({
             args.push('--url', opts.url);
           }
           try {
-            const { stdout } = await execFileAsync('node', ['../../scripts/prepare-e2e-db.mjs', ...args], { cwd: config.projectRoot });
+            const { stdout } = await execFileAsync('node', [
+              '../../scripts/prepare-e2e-db.mjs',
+              ...args,
+            ], { cwd: config.projectRoot });
             return { ok: true, output: stdout };
           } catch (err) {
             return { ok: false, error: String(err) };
@@ -51,7 +54,10 @@ export default defineConfig({
             args.push('--url', opts.url);
           }
           try {
-            const { stdout } = await execFileAsync('node', ['../../scripts/prepare-e2e-db.mjs', ...args], { cwd: config.projectRoot });
+            const { stdout } = await execFileAsync('node', [
+              '../../scripts/prepare-e2e-db.mjs',
+              ...args,
+            ], { cwd: config.projectRoot });
             return { ok: true, output: stdout };
           } catch (err) {
             return { ok: false, error: String(err) };
@@ -67,7 +73,10 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
-        plugins: [tailwindcss(), vue()],
+        plugins: [
+          tailwindcss(),
+          vue(),
+        ],
         server: {
           port: 5173,
         },

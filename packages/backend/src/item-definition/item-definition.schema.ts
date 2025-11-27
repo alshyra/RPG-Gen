@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import type { InventoryItemMeta } from '../character/dto/InventoryItemMeta.js';
 
 @Schema({ timestamps: true })
 export class ItemDefinition {
@@ -13,7 +14,7 @@ export class ItemDefinition {
   description: string;
 
   @Prop({ type: Object, default: {} })
-  meta: Record<string, any>;
+  meta: InventoryItemMeta;
 
   @Prop({ default: true })
   isEditable: boolean;

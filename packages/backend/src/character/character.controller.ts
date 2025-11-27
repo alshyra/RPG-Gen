@@ -1,35 +1,35 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
+  Delete,
   Get,
+  Logger,
+  NotFoundException,
+  Param,
+  Patch,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Req,
   UseGuards,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-  Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { CharacterService } from './character.service.js';
-import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
-import {
-  CharacterResponseDto,
-  DeceasedCharacterResponseDto,
-  MessageResponseDto,
-  InspirationResponseDto,
-  CreateCharacterBodyDto,
-  KillCharacterBodyDto,
-  RemoveInventoryBodyDto,
-  GrantInspirationBodyDto,
-} from './dto/character-response.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { CharacterDto } from '@rpg-gen/shared';
+import { CharacterService } from './character.service.js';
+import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import {
+  CharacterResponseDto,
+  CreateCharacterBodyDto,
+  DeceasedCharacterResponseDto,
+  GrantInspirationBodyDto,
+  InspirationResponseDto,
+  KillCharacterBodyDto,
+  MessageResponseDto,
+  RemoveInventoryBodyDto,
+  UpdateCharacterRequestDto,
+} from './dto/index.js';
 
 @ApiTags('characters')
 @Controller('characters')
@@ -97,11 +97,11 @@ export class CharacterController {
   @ApiResponse({ status: 200, description: 'Character updated', type: CharacterResponseDto })
   @ApiResponse({ status: 404, description: 'Character not found' })
   @ApiParam({ name: 'characterId', description: 'ID of the character to update' })
-  @ApiBody({ description: 'Fields to update', type: CharacterResponseDto })
+  @ApiBody({ description: 'Fields to update', type: UpdateCharacterRequestDto })
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() updates: Partial<CharacterDto>,
+    @Body() updates: UpdateCharacterRequestDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -191,7 +191,7 @@ export class CharacterController {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body?.qty || 0);
+    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body.qty);
     return this.characterService.toCharacterDto(character);
   }
 
@@ -204,11 +204,10 @@ export class CharacterController {
   async grantInspiration(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: GrantInspirationBodyDto,
+    @Body('amount') amount: number,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    const amount = body.amount || 1;
 
     // Validate amount
     if (typeof amount !== 'number' || amount <= 0 || amount > 5) {

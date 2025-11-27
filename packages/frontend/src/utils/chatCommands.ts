@@ -36,7 +36,12 @@ export interface SuggestionResult {
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 const COMMAND_WITH_SPACE_REGEX = /^\/(\w+)\s*(.*)$/;
 
-const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'attack', 'use'];
+const VALID_COMMANDS: CommandType[] = [
+  'cast',
+  'equip',
+  'attack',
+  'use',
+];
 
 /**
  * Available commands with their descriptions for autocompletion
@@ -96,7 +101,10 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
     return { command: null, argumentPartial: '' };
   }
 
-  const [, commandType, arg] = match;
+  const [
+    , commandType,
+    arg,
+  ] = match;
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {
@@ -236,9 +244,7 @@ export const getAllSuggestions = (
 /**
  * Check if the input is a valid chat command
  */
-export const isCommand = (input: string): boolean => {
-  return input.startsWith('/');
-};
+export const isCommand = (input: string): boolean => input.startsWith('/');
 
 /**
  * Parse a chat command string into a structured command object
@@ -256,7 +262,10 @@ export const parseCommand = (input: string): ParsedCommand | null => {
     return null;
   }
 
-  const [, commandType, target] = match;
+  const [
+    , commandType,
+    target,
+  ] = match;
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {
@@ -272,27 +281,19 @@ export const parseCommand = (input: string): ParsedCommand | null => {
 /**
  * Generate a command string for using an item
  */
-export const generateUseCommand = (itemName: string): string => {
-  return `/use ${itemName}`;
-};
+export const generateUseCommand = (itemName: string): string => `/use ${itemName}`;
 
 /**
  * Generate a command string for casting a spell
  */
-export const generateCastCommand = (spellName: string): string => {
-  return `/cast ${spellName}`;
-};
+export const generateCastCommand = (spellName: string): string => `/cast ${spellName}`;
 
 /**
  * Generate a command string for equipping an item
  */
-export const generateEquipCommand = (itemName: string): string => {
-  return `/equip ${itemName}`;
-};
+export const generateEquipCommand = (itemName: string): string => `/equip ${itemName}`;
 
 /**
  * Generate a command string for attacking a target
  */
-export const generateAttackCommand = (target: string): string => {
-  return `/attack ${target}`;
-};
+export const generateAttackCommand = (target: string): string => `/attack ${target}`;

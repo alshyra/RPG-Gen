@@ -2,24 +2,23 @@ describe('World Selection', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
-    
-    
+
     // Authenticate via real backend for E2E runs
     cy.ensureAuth();
-    
+
     cy.visit('/home');
   });
 
   it('should display all available worlds', () => {
     cy.contains('Choisir un univers').should('be.visible');
-    
+
     // Check that all three worlds are displayed
     cy.contains('Dungeons & Dragons').should('be.visible');
     cy.contains('High fantasy, parties, and epic quests.').should('be.visible');
-    
+
     cy.contains('Vampire: The Masquerade').should('be.visible');
     cy.contains('Gothic-punk political roleplay among vampires.').should('be.visible');
-    
+
     cy.contains('Cyberpunk').should('be.visible');
     cy.contains('Near-future neon dystopia with tech & megacorps.').should('be.visible');
   });

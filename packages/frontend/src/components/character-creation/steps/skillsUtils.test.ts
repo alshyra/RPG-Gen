@@ -16,19 +16,13 @@ describe('computeUpdatedSkills', () => {
   });
 
   it('selecting an existing but non-proficient skill should mark it proficient', () => {
-    const existing = [
-      { name: 'Stealth', proficient: false },
-    ];
+    const existing = [{ name: 'Stealth', proficient: false }];
     const result = computeUpdatedSkills('Stealth', existing);
-    expect(result).toEqual([
-      { name: 'Stealth', proficient: true },
-    ]);
+    expect(result).toEqual([{ name: 'Stealth', proficient: true }]);
   });
 
   it('selecting a skill that is not present should add it as proficient and leave others untouched', () => {
-    const existing = [
-      { name: 'Athletics', proficient: false },
-    ];
+    const existing = [{ name: 'Athletics', proficient: false }];
     const result = computeUpdatedSkills('Acrobatics', existing);
     expect(result).toEqual([
       { name: 'Athletics', proficient: false },

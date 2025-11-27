@@ -2,7 +2,7 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterDto, CreateInventoryItemDto, ItemDto, components } from '@rpg-gen/shared';
+import type { CharacterDto, CreateInventoryItemDto, ItemDto, UpdateCharacterRequestDto, components } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Type alias for OpenAPI inventory item type
@@ -65,7 +65,7 @@ export const characterApi = {
   /**
    * Update a character
    */
-  saveCharacter: async (characterId: string, updates: CharacterDto): Promise<CharacterDto> => {
+  saveCharacter: async (characterId: string, updates: UpdateCharacterRequestDto) => {
     const response = await api.PUT('/api/characters/{characterId}', {
       params: { path: { characterId } },
       body: updates,

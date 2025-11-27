@@ -1,20 +1,20 @@
-import "./commands";
+import './commands';
 
-Cypress.on("uncaught:exception", (err) => {
+Cypress.on('uncaught:exception', (err) => {
   if (
-    err.message.includes("Network") ||
-    err.message.includes("fetch") ||
-    err.message.includes("Failed to fetch")
+    err.message.includes('Network')
+    || err.message.includes('fetch')
+    || err.message.includes('Failed to fetch')
   ) {
     return false;
   }
   return true;
 });
 
-Cypress.Commands.add("clearAuth", () => {
+Cypress.Commands.add('clearAuth', () => {
   cy.window().then((win) => {
-    win.localStorage.removeItem("rpg-auth-token");
-    win.localStorage.removeItem("rpg-user-data");
+    win.localStorage.removeItem('rpg-auth-token');
+    win.localStorage.removeItem('rpg-user-data');
   });
 });
 
@@ -45,11 +45,6 @@ Cypress.Commands.add('ensureAuth', () => {
 });
 
 // Helper wrappers exposing the node tasks for DB prep/cleanup
-Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string }) => {
-  return cy.task('prepareE2EDb', opts || { count: 2 });
-});
+Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string }) => cy.task('prepareE2EDb', opts || { count: 2 }));
 
-Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => {
-  return cy.task('cleanupE2EDb', opts || {});
-});
-
+Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => cy.task('cleanupE2EDb', opts || {}));

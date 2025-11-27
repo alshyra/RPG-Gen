@@ -317,7 +317,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CharacterResponseDto"
+                "$ref": "#/components/schemas/UpdateCharacterRequestDto"
               }
             }
           }
@@ -328,7 +328,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CharacterResponseDto"
+                  "$ref": "#/components/schemas/UpdateCharacterRequestDto"
                 }
               }
             }
@@ -1367,7 +1367,6 @@
             "description": "Whether character is deceased"
           },
           "diedAt": {
-            "format": "date-time",
             "type": "string",
             "description": "Date of death (ISO string)"
           },
@@ -1526,6 +1525,103 @@
           "state"
         ]
       },
+      "UpdateCharacterRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Character name"
+          },
+          "physicalDescription": {
+            "type": "string",
+            "description": "Physical description of the character"
+          },
+          "race": {
+            "description": "Character race",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceResponseDto"
+              }
+            ]
+          },
+          "scores": {
+            "description": "Ability scores",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AbilityScoresResponseDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "totalXp": {
+            "type": "number",
+            "description": "Total experience points"
+          },
+          "classes": {
+            "description": "Character classes",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterClassResponseDto"
+            }
+          },
+          "skills": {
+            "description": "Character skills",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponseDto"
+            }
+          },
+          "world": {
+            "type": "string",
+            "description": "Game world (e.g., dnd, vtm)"
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Character portrait URL or base64"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character gender"
+          },
+          "proficiency": {
+            "type": "number",
+            "description": "Proficiency bonus"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Inspiration points"
+          },
+          "state": {
+            "type": "string",
+            "description": "Character state",
+            "enum": [
+              "draft",
+              "created"
+            ]
+          },
+          "inventory": {
+            "description": "Character inventory",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemResponseDto"
+            }
+          },
+          "spells": {
+            "description": "Character spells",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          }
+        }
+      },
       "MessageResponseDto": {
         "type": "object",
         "properties": {
@@ -1544,6 +1640,182 @@
           "deathLocation": {
             "type": "string",
             "description": "Location where character died"
+          }
+        }
+      },
+      "WeaponMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type discriminator for weapons",
+            "enum": [
+              "weapon"
+            ]
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
+          },
+          "class": {
+            "type": "string",
+            "description": "Weapon class (e.g., Simple Melee, Martial Ranged)"
+          },
+          "damage": {
+            "type": "string",
+            "description": "Damage expression (e.g., 1d6 bludgeoning)"
+          },
+          "properties": {
+            "description": "Weapon properties (e.g., Finesse, Thrown)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ArmorMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type discriminator for armor",
+            "enum": [
+              "armor"
+            ]
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
+          },
+          "class": {
+            "type": "string",
+            "description": "Armor class (Light, Medium, Heavy, Shield)"
+          },
+          "ac": {
+            "type": "string",
+            "description": "AC value (e.g., 11 + Dex modifier)"
+          },
+          "strength": {
+            "type": "string",
+            "description": "Strength requirement (e.g., Str 13)"
+          },
+          "stealth": {
+            "type": "string",
+            "description": "Stealth effect (e.g., Disadvantage)"
+          }
+        }
+      },
+      "ConsumableMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type discriminator for consumables",
+            "enum": [
+              "consumable"
+            ]
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
+          },
+          "usable": {
+            "type": "boolean",
+            "description": "Whether the item can be used directly"
+          }
+        }
+      },
+      "PackMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type discriminator for packs",
+            "enum": [
+              "pack"
+            ]
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
+          }
+        }
+      },
+      "ToolMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type discriminator for tools",
+            "enum": [
+              "tool"
+            ]
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
+          }
+        }
+      },
+      "GenericMeta": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Item type discriminator"
+          },
+          "cost": {
+            "type": "object",
+            "description": "Item cost (gold pieces or formatted string)"
+          },
+          "weight": {
+            "type": "object",
+            "description": "Item weight in pounds"
+          },
+          "starter": {
+            "type": "boolean",
+            "description": "Whether this is a starter item"
           }
         }
       },
@@ -1575,8 +1847,27 @@
             "description": "If true this item is equipped"
           },
           "meta": {
-            "type": "object",
-            "description": "Arbitrary item meta"
+            "description": "Arbitrary item meta",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/WeaponMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ArmorMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ConsumableMeta"
+              },
+              {
+                "$ref": "#/components/schemas/PackMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ToolMeta"
+              },
+              {
+                "$ref": "#/components/schemas/GenericMeta"
+              }
+            ]
           }
         },
         "required": [
@@ -1588,7 +1879,7 @@
         "properties": {
           "qty": {
             "type": "number",
-            "description": "Quantity to remove (0 = remove all)"
+            "description": "Quantity to remove (-1 = remove all)"
           }
         }
       },

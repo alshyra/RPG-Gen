@@ -1,15 +1,15 @@
-import { Body, Controller, Post, BadRequestException, Logger, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { ImageRequest } from '@rpg-gen/shared';
 import type { Request } from 'express';
 import Joi from 'joi';
-import { GeminiImageService } from '../external/image/gemini-image.service.js';
-import { ImageService } from './image.service.js';
-import { CharacterService } from '../character/character.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { CharacterService } from '../character/character.service.js';
+import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
-import type { ImageRequest } from '@rpg-gen/shared';
-import { CharacterDocument } from '../schemas/character.schema.js';
-import { CharacterIdBodyDto, AvatarResponseDto, ImageRequestDto } from './dto/image-response.dto.js';
+import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
+import { ImageService } from './image.service.js';
+import { CharacterDocument } from 'src/character/schema/index.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),

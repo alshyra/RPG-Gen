@@ -1,5 +1,5 @@
 import { characterServiceApi } from '@/apis/characterApi';
-import { CharacterDto, ItemDto, SpellDto, SpellInstruction } from '@rpg-gen/shared';
+import { CharacterDto, ItemDto, SpellDto, SpellInstruction, UpdateCharacterRequestDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -89,12 +89,12 @@ export const useCharacterStore = defineStore('character', () => {
   const useInventoryItem = async (itemIdentifier: string) => {
     if (!currentCharacter.value) return;
     const inventory = currentCharacter.value?.inventory ?? [];
-    const item = inventory.find(i => (i as any)._id === itemIdentifier || i.definitionId === itemIdentifier || i.name === itemIdentifier);
+    const item = inventory.find(i => i._id === itemIdentifier || i.definitionId === itemIdentifier || i.name === itemIdentifier);
     if (!item) return;
 
     const usable = !!item.meta?.usable || !!item.meta?.consumable;
 
-    if (usable) return removeInventoryItem((item as any)._id || (item.definitionId as string), 1);
+    if (usable) return removeInventoryItem(item._id || (item.definitionId as string), 1);
 
     return undefined;
   };
@@ -127,14 +127,8 @@ export const useCharacterStore = defineStore('character', () => {
     return newChar;
   };
 
-  const updateCharacter = async (characterId: string, character: Partial<CharacterDto>) => {
-    if (!characterId) return;
-    try {
-      await characterServiceApi.saveCharacter(characterId, character);
-    } catch (e) {
-      console.error('Failed to update character', e);
-      throw e;
-    }
+  const updateCharacter = async (characterId: string, character: UpdateCharacterRequestDto) => {
+    await characterServiceApi.saveCharacter(characterId, character);
   };
 
   watch(currentCharacterId, async (id) => {

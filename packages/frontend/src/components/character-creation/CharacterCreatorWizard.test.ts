@@ -48,7 +48,15 @@ describe('CharacterCreatorWizard finish flow', () => {
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton',
+          'StepBasicInfo',
+          'StepRaceClass',
+          'StepAbilityScores',
+          'StepSkills',
+          'StepSpells',
+          'StepInventory',
+          'StepAvatar',
+          'UiLoader',
+          'UiButton',
         ],
       },
     });
@@ -83,7 +91,16 @@ describe('CharacterCreatorWizard finish flow', () => {
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
         stubs: [
-          'StepBasicInfo', 'StepRaceClass', 'StepAbilityScores', 'StepSkills', 'StepSpells', 'StepInventory', 'StepAvatar', 'UiLoader', 'UiButton', 'FullPageLoader',
+          'StepBasicInfo',
+          'StepRaceClass',
+          'StepAbilityScores',
+          'StepSkills',
+          'StepSpells',
+          'StepInventory',
+          'StepAvatar',
+          'UiLoader',
+          'UiButton',
+          'FullPageLoader',
         ],
       },
     });

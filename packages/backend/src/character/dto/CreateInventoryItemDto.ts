@@ -1,6 +1,16 @@
-import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiProperty, getSchemaPath, ApiExtraModels } from '@nestjs/swagger';
 import { IsOptional, IsString, IsBoolean, IsNumber, IsObject, Min, IsNotEmpty } from 'class-validator';
+import {
+  WeaponMeta,
+  ArmorMeta,
+  ConsumableMeta,
+  PackMeta,
+  ToolMeta,
+  GenericMeta,
+  type InventoryItemMeta,
+} from './InventoryItemMeta.js';
 
+@ApiExtraModels(WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta)
 export class CreateInventoryItemDto {
   @ApiPropertyOptional({ description: 'Inventory item id (UUID). If provided, attempt to merge with existing item' })
   @IsOptional()
@@ -33,8 +43,18 @@ export class CreateInventoryItemDto {
   @IsBoolean()
   equipped?: boolean;
 
-  @ApiPropertyOptional({ description: 'Arbitrary item meta' })
+  @ApiPropertyOptional({
+    description: 'Arbitrary item meta',
+    oneOf: [
+      { $ref: getSchemaPath(WeaponMeta) },
+      { $ref: getSchemaPath(ArmorMeta) },
+      { $ref: getSchemaPath(ConsumableMeta) },
+      { $ref: getSchemaPath(PackMeta) },
+      { $ref: getSchemaPath(ToolMeta) },
+      { $ref: getSchemaPath(GenericMeta) },
+    ],
+  })
   @IsOptional()
   @IsObject()
-  meta?: Record<string, any>;
+  meta?: InventoryItemMeta;
 }

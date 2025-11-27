@@ -2,9 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { CharacterDto } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
-import { Character, CharacterDocument, Item } from '../schemas/character.schema.js';
-import { CreateInventoryItemDto } from './dto/create-inventory-item.dto.js';
-import { ItemDefinitionService } from './item-definition.service.js';
+import { Character, CharacterDocument, Item } from './schema/index.js';
+import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
+import { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
 
 @Injectable()
 export class CharacterService {
@@ -50,7 +52,7 @@ export class CharacterService {
     return this.characterModel.findOne({ userId, characterId }).exec();
   }
 
-  async update(userId: string, characterId: string, updates: Partial<CharacterDto>): Promise<CharacterDocument> {
+  async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {
     const updateDoc: any = {};
 
     // Build update document
@@ -66,7 +68,6 @@ export class CharacterService {
     if (updates.gender !== undefined) updateDoc.gender = updates.gender;
     if (updates.proficiency !== undefined) updateDoc.proficiency = updates.proficiency;
     if (updates.inspirationPoints !== undefined) updateDoc.inspirationPoints = updates.inspirationPoints;
-    if (updates.isDeceased !== undefined) updateDoc.isDeceased = updates.isDeceased;
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
@@ -136,7 +137,7 @@ export class CharacterService {
   }
 
   private async addNewItemToCharacter(character: CharacterDocument, item: CreateInventoryItemDto, itemDefinition: any, characterId: string) {
-    const newItem: any = {
+    const newItem: Item = {
       _id: crypto.randomUUID(),
       name: item.name || itemDefinition?.name,
       definitionId: item.definitionId || (itemDefinition?.definitionId),
@@ -156,7 +157,7 @@ export class CharacterService {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
-    const item = (character.inventory || []).find((it: any) => it._id === itemId);
+    const item = (character.inventory || []).find(it => it._id === itemId);
     if (!item) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
 
     if (updates.name !== undefined) item.name = updates.name;
@@ -170,11 +171,11 @@ export class CharacterService {
     return saved;
   }
 
-  async removeInventoryItem(userId: string, characterId: string, itemId: string, qtyToRemove = 0) {
+  async removeInventoryItem(userId: string, characterId: string, itemId: string, qtyToRemove: number) {
     const character = await this.characterModel.findOne({ userId, characterId });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
-    const idx = (character.inventory || []).findIndex((it: any) => it._id === itemId);
+    const idx = (character.inventory || []).findIndex(it => it._id === itemId);
     if (idx === -1) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
 
     if (qtyToRemove > 0) {
@@ -198,7 +199,7 @@ export class CharacterService {
   }
 
   // Convert MongoDB document to frontend CharacterDto format
-  toCharacterDto(doc: CharacterDocument): CharacterDto {
+  toCharacterDto(doc: CharacterDocument): CharacterResponseDto {
     return {
       characterId: doc.characterId,
       name: doc.name,

@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, INestApplication, ConsoleLogger, Logger } from '@nestjs/common';
 import { AppModule } from './app.module.js';
-import { ItemDefinitionService } from './character/item-definition.service.js';
+import { ItemDefinitionService } from './item-definition/item-definition.service.js';
 import weaponsDefinitions from './seed/weapons-definitions.json' with { type: 'json' };
 import itemsDefinitions from './seed/item-definitions.json' with { type: 'json' };
 import armorDefinitions from './seed/armor-definitions.json' with { type: 'json' };

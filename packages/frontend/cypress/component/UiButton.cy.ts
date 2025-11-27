@@ -33,7 +33,7 @@ describe('UiButton Component', () => {
 
   it('should be clickable', () => {
     const onClickSpy = cy.spy().as('onClickSpy');
-    
+
     cy.mount(UiButton, {
       props: {
         onClick: onClickSpy,
