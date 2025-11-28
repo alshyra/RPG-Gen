@@ -103,6 +103,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rolls/{characterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit resolved roll(s) (non-chat) for processing */
+        post: operations["RollsController_submitRoll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters": {
         parameters: {
             query?: never;
@@ -185,6 +202,23 @@ export interface paths {
         put?: never;
         /** Add an item to character's inventory */
         post: operations["CharacterController_addInventory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/characters/{characterId}/inventory/equip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Equip an item by definitionId (weapon only) */
+        post: operations["CharacterController_equipInventory"];
         delete?: never;
         options?: never;
         head?: never;
@@ -309,6 +343,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/combat/{characterId}/resolve-roll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve a client-side roll (damage) and apply its effects */
+        post: operations["CombatController_resolveRoll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/combat/{characterId}/status": {
         parameters: {
             query?: never;
@@ -424,11 +475,12 @@ export interface components {
             /** @description URL de la photo de profil de l'utilisateur */
             picture: string;
         };
-        ChatRequestDto: {
-            /** @description User message to send to the AI */
-            message: string;
-        };
-        RollInstructionDto: {
+        RollInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "roll";
             /** @description Dice expression (e.g., 1d20+5) */
             dices: string;
             /** @description Modifier */
@@ -441,7 +493,30 @@ export interface components {
              */
             advantage?: "advantage" | "disadvantage" | "none";
         };
-        SpellInstructionDataDto: {
+        HpInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "hp";
+            /** @description Amount of HP change */
+            hp: number;
+        };
+        XpInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "xp";
+            /** @description Amount of XP gained */
+            xp: number;
+        };
+        SpellInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "spell";
             /**
              * @description Spell action
              * @enum {string}
@@ -456,7 +531,12 @@ export interface components {
             /** @description Spell description */
             description?: string;
         };
-        InventoryInstructionDataDto: {
+        InventoryInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "inventory";
             /**
              * @description Inventory action
              * @enum {string}
@@ -469,36 +549,51 @@ export interface components {
             /** @description Item description */
             description?: string;
         };
-        GameInstructionDto: {
+        CombatStartEntryDto: {
+            /** @description Enemy name */
+            name: string;
+            /** @description Enemy HP */
+            hp: number;
+            /** @description Enemy AC */
+            ac: number;
+            /** @description Attack bonus (optional) */
+            attack_bonus?: number;
+            /** @description Damage dice (optional) */
+            damage_dice?: string;
+            /** @description Damage bonus (optional) */
+            damage_bonus?: number;
+        };
+        CombatStartInstructionMessageDto: {
             /**
              * @description Instruction type
              * @enum {string}
              */
-            type?: "roll" | "xp" | "hp" | "spell" | "inventory";
-            /** @description Roll instruction data */
-            roll?: components["schemas"]["RollInstructionDto"];
-            /** @description HP change */
-            hp?: number;
+            type: "combat_start";
+            /** @description Combat start entries */
+            combat_start: components["schemas"]["CombatStartEntryDto"][];
+        };
+        CombatEndDto: {
+            /** @description Victory state */
+            victory: boolean;
             /** @description XP gained */
-            xp?: number;
-            /** @description Spell instruction */
-            spell?: components["schemas"]["SpellInstructionDataDto"];
-            /** @description Inventory instruction */
-            inventory?: components["schemas"]["InventoryInstructionDataDto"];
+            xp_gained: number;
+            /** @description Player's HP at the end */
+            player_hp: number;
+            /** @description Enemies that were defeated */
+            enemies_defeated: string[];
+            /** @description Flee indicator */
+            fled?: boolean;
+            /** @description Narrative summary */
+            narrative: string;
         };
-        ChatResponseDto: {
-            /** @description Narrative text from the AI (cleaned) */
-            text: string;
-            /** @description Game instructions extracted from the response */
-            instructions: components["schemas"]["GameInstructionDto"][];
-        };
-        MessageMetaDto: {
-            /** @description AI model version used */
-            model?: string;
-            /** @description Token usage statistics */
-            usage?: {
-                [key: string]: unknown;
-            };
+        CombatEndInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "combat_end";
+            /** @description Combat end result */
+            combat_end: components["schemas"]["CombatEndDto"];
         };
         ChatMessageDto: {
             /**
@@ -506,16 +601,10 @@ export interface components {
              * @enum {string}
              */
             role: "user" | "assistant" | "system";
-            /** @description Message text content */
-            text: string;
-            /** @description Unix timestamp of the message */
-            timestamp: number;
-            /** @description Message metadata */
-            meta?: components["schemas"]["MessageMetaDto"];
             /** @description Narrative text (for assistant messages) */
-            narrative?: string;
+            narrative: string;
             /** @description Game instructions (for assistant messages) */
-            instructions?: components["schemas"]["GameInstructionDto"][];
+            instructions?: (components["schemas"]["RollInstructionMessageDto"] | components["schemas"]["HpInstructionMessageDto"] | components["schemas"]["XpInstructionMessageDto"] | components["schemas"]["SpellInstructionMessageDto"] | components["schemas"]["InventoryInstructionMessageDto"] | components["schemas"]["CombatStartInstructionMessageDto"] | components["schemas"]["CombatEndInstructionMessageDto"])[];
         };
         CreateCharacterBodyDto: {
             /** @description Game world (e.g., dnd, vtm) */
@@ -722,10 +811,6 @@ export interface components {
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
         };
-        MessageResponseDto: {
-            /** @description Response message */
-            message: string;
-        };
         KillCharacterBodyDto: {
             /** @description Location where character died */
             deathLocation?: string;
@@ -837,6 +922,13 @@ export interface components {
             /** @description Arbitrary item meta */
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
+        EquipInventoryDto: {
+            /**
+             * @description Definition id of the item to equip
+             * @example weapon-rapier
+             */
+            definitionId: string;
+        };
         RemoveInventoryBodyDto: {
             /** @description Quantity to remove (-1 = remove all) */
             qty?: number;
@@ -856,20 +948,6 @@ export interface components {
             /** @description Updated character */
             character: components["schemas"]["CharacterResponseDto"];
         };
-        CombatStartEntryDto: {
-            /** @description Enemy name */
-            name: string;
-            /** @description Enemy HP */
-            hp: number;
-            /** @description Enemy AC */
-            ac: number;
-            /** @description Attack bonus (optional) */
-            attack_bonus?: number;
-            /** @description Damage dice (optional) */
-            damage_dice?: string;
-            /** @description Damage bonus (optional) */
-            damage_bonus?: number;
-        };
         CombatStartRequestDto: {
             /** @description Array of enemies to initialize combat with */
             combat_start: components["schemas"]["CombatStartEntryDto"][];
@@ -885,6 +963,10 @@ export interface components {
             hpMax: number;
             /** @description Armor class */
             ac: number;
+            /** @description Optional portrait URL or data URI */
+            portrait?: string;
+            /** @description Optional short description for the enemy */
+            description?: string;
             /** @description Initiative order value */
             initiative: number;
             /** @description Attack bonus for the enemy */
@@ -1005,20 +1087,6 @@ export interface components {
             narrative: string;
             /** @description Optional set of frontend instructions to apply after the turn */
             instructions?: Record<string, never>[];
-        };
-        CombatEndDto: {
-            /** @description Victory state */
-            victory: boolean;
-            /** @description XP gained */
-            xp_gained: number;
-            /** @description Player's HP at the end */
-            player_hp: number;
-            /** @description Enemies that were defeated */
-            enemies_defeated: string[];
-            /** @description Flee indicator */
-            fled?: boolean;
-            /** @description Narrative summary */
-            narrative: string;
         };
         CombatEndResultDto: {
             /** @description Combat end information */
@@ -1165,17 +1233,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChatRequestDto"];
+                "application/json": components["schemas"]["ChatMessageDto"];
             };
         };
         responses: {
-            /** @description Chat response with narrative and instructions */
+            /** @description Chat message (assistant) with narrative and instructions */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatResponseDto"];
+                    "application/json": components["schemas"]["ChatMessageDto"];
                 };
             };
             /** @description Invalid request */
@@ -1227,6 +1295,36 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    RollsController_submitRoll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    instructions?: Record<string, never>[];
+                };
+            };
+        };
+        responses: {
+            /** @description Processed instructions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        pendingRolls?: Record<string, never>[];
+                    };
+                };
             };
         };
     };
@@ -1375,7 +1473,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MessageResponseDto"];
+                    "application/json": Record<string, never>;
                 };
             };
             /** @description Character not found */
@@ -1450,6 +1548,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CharacterController_equipInventory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipInventoryDto"];
+            };
+        };
+        responses: {
+            /** @description Character updated with equipped item */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
         };
     };
@@ -1672,6 +1796,27 @@ export interface operations {
                 "application/json": components["schemas"]["AttackRequestDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResultWithInstructionsDto"];
+                };
+            };
+        };
+    };
+    CombatController_resolveRoll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

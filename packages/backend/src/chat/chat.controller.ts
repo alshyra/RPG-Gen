@@ -13,15 +13,16 @@ import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../auth/user.schema.js';
+import { CharacterService } from '../character/character.service.js';
+import { CharacterResponseDto } from '../character/dto/index.js';
+import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { ConversationService } from './conversation.service.js';
+import { GameInstructionProcessor } from './game-instruction.processor.js';
 import { ChatMessageDto } from './dto/index.js';
-import { CharacterService } from 'src/character/character.service.js';
-import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
-const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
+const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
 
 @ApiTags('chat')
 @Controller('chat')
@@ -34,6 +35,7 @@ export class ChatController {
     private readonly geminiTexteService: GeminiTextService,
     private readonly conversationService: ConversationService,
     private readonly characterService: CharacterService,
+    private readonly instructionProcessor: GameInstructionProcessor,
   ) {
     Promise.all([
       this.loadSystemPrompt(),
@@ -44,7 +46,7 @@ export class ChatController {
         scenarioPrompt,
       ]) => {
         this.systemPrompt = systemPrompt + '\n\n' + scenarioPrompt;
-        this.logger.log('System prompt and scenario loaded successfully');
+        this.logger.log('System prompt and scenario loaded successfully !');
       });
   }
 
@@ -97,12 +99,32 @@ export class ChatController {
     const userId = user._id.toString();
 
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
+    // If history exists and last assistant message contains a combat_start instruction,
+    // attempt to process it server-side so persisted combat session is created.
+    if (previousChatMessages && previousChatMessages.length > 0) {
+      // find most recent assistant message that contains a combat_start
+      const lastAssistant = [...previousChatMessages].reverse().find(m => m.role === 'assistant' && Array.isArray((m as any).instructions) && (m as any).instructions.some((i: any) => i.type === 'combat_start'));
+      if (lastAssistant) {
+        try {
+          const instrs = (lastAssistant as any).instructions.filter((i: any) => i.type === 'combat_start');
+          if (instrs.length) {
+            await this.instructionProcessor.processInstructions(userId, characterId, instrs);
+            this.logger.log(`Processed historical combat_start for ${characterId}`);
+          }
+        } catch (e) {
+          this.logger.warn(`Failed to process historical combat_start for ${characterId}: ${(e as Error)?.message}`);
+        }
+      }
+    }
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
       this.initPrompt(character),
       previousChatMessages,
     );
+    if (!previousChatMessages) {
+      await this.getGMResponse(userId, characterId, 'Tu peux commencer l\'aventure');
+    }
     return this.conversationService.getHistory(userId, characterId);
   }
 
@@ -116,16 +138,24 @@ export class ChatController {
     userText: string,
   ) {
     const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
-    await this.conversationService.append(userId, characterId, {
-      role: 'assistant',
-      narrative: parsed.text || '',
-      instructions: parsed.instructions || [],
-    });
-
-    return {
-      role: 'assistant',
-      narrative: parsed.text || '',
+    const assistantMsg = {
+      role: 'assistant' as const,
+      narrative: parsed.narrative || '',
       instructions: parsed.instructions || [],
     };
+
+    // Save assistant reply to history
+    await this.conversationService.append(userId, characterId, assistantMsg);
+
+    // Process game instructions (apply side-effects) if any
+    if (Array.isArray(parsed.instructions) && parsed.instructions.length > 0) {
+      try {
+        await this.instructionProcessor.processInstructions(userId, characterId, parsed.instructions);
+      } catch (e) {
+        this.logger.warn(`Instruction processing failed for ${characterId}: ${(e as Error)?.message}`);
+      }
+    }
+
+    return assistantMsg;
   }
 }

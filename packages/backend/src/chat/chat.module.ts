@@ -6,6 +6,7 @@ import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { ChatHistory, ChatHistorySchema } from './schema/ChatHistory.js';
 import { GameInstructionProcessor } from './game-instruction.processor.js';
 import { ChatController } from './chat.controller.js';
+import { RollsController } from './rolls.controller.js';
 import { ConversationService } from './conversation.service.js';
 
 @Module({
@@ -14,7 +15,10 @@ import { ConversationService } from './conversation.service.js';
     CharacterModule,
     CombatModule,
   ],
-  controllers: [ChatController],
+  controllers: [
+    ChatController,
+    RollsController,
+  ],
   providers: [
     GeminiTextService,
     ConversationService,

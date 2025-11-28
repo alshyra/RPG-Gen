@@ -53,7 +53,6 @@ import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount } from 'vue';
-import type { SpellDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -70,7 +69,7 @@ const toggleSpell = async (s: { name: string; level: number; description?: strin
   if (!currentCharacter.value) return;
 
   if (selected) {
-    characterStore.learnSpell({ name: s.name, level: s.level, description: s.description ?? '', meta: {} } as SpellDto);
+    characterStore.learnSpell({ type: 'spell', action: 'learn', name: s.name, level: s.level, description: s.description ?? '' });
   } else {
     characterStore.forgetSpell(s.name);
   }

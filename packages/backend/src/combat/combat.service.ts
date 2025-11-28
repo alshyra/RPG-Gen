@@ -60,21 +60,11 @@ export class CombatService {
     const equipped = character.inventory?.find(i => i.equipped && i.definitionId);
     if (equipped && equipped.definitionId) {
       try {
-        // Synchronous call avoided; item definitions are available via service
-        // We retrieve definition and use its damage if present
-        // Note: service returns null if not found
-
-        // (we keep logic simple here)
-        // Using await is not allowed in this sync function; fallback to default
-        // Instead, attempt to synchronously access seeded definitions via the service cache if available
-        // If unavailable, fallback to default '1d4'
-        // For now, return default; the ItemDefinitionService is async and a larger refactor would be required to make this sync.
         return '1d4';
       } catch {
         return '1d4';
       }
     }
-
     return '1d4';
   }
 
@@ -105,6 +95,46 @@ export class CombatService {
     const playerInitRoll = this.diceController.rollDiceExpr('1d20');
     const dexMod = getDexModifier(character);
     player.initiative = playerInitRoll.total + dexMod;
+
+    // If the character has an equipped weapon with meta, try to extract damage dice and finesse property
+    try {
+      const inventory = character.inventory || [];
+      // Prefer an equipped weapon item. Fall back to the first equipped item otherwise.
+      let equipped = inventory.find(i => i?.equipped && (i.meta && i.meta.type === 'weapon'));
+      if (!equipped) {
+        equipped = inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-')) || inventory.find(i => i?.equipped);
+      }
+      if (equipped) {
+        const meta = (equipped.meta || {}) as any;
+        // meta.damage can be like '1d8 piercing' in seed definitions
+        if (meta.damage && typeof meta.damage === 'string') {
+          const parts = meta.damage.trim().split(/\s+/);
+          if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
+            player.damageDice = parts[0];
+          }
+        }
+
+        // Determine which ability to use for attack/damage bonus
+        // Rules implemented:
+        // - If the weapon has the 'Finesse' property -> use DEX
+        // - If the weapon is a ranged weapon (class contains 'Ranged' or has 'Ammunition' property) -> use DEX
+        // - Otherwise -> use STR
+        const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
+        const lowerProps = properties.map(p => (p || '').toLowerCase());
+        const classStr = (meta.class || '').toString().toLowerCase();
+        const hasAmmunition = lowerProps.some(p => p.includes('ammunition'));
+        const hasFinesse = lowerProps.includes('finesse');
+        const isRangedClass = classStr.includes('ranged');
+        const usesDex = hasFinesse || hasAmmunition || isRangedClass;
+        const abilityMod = usesDex ? getDexModifier(character) : this.getStrModifier(character);
+        const proficiency = character.proficiency ?? 2;
+        player.attackBonus = abilityMod + proficiency;
+        player.damageBonus = abilityMod;
+      }
+    } catch (err) {
+      // If anything fails here, keep defaults already set
+      this.logger.warn(`Failed to derive weapon stats from inventory: ${err}`);
+    }
 
     // Build enemy list with initiatives
     const enemies: CombatEnemyDto[] = combatStart.combat_start.map((enemy, idx) => {
@@ -158,35 +188,6 @@ export class CombatService {
     return state;
   }
 
-  /**
-   * Check if character is currently in combat
-   */
-  async isInCombat(characterId: string): Promise<boolean> {
-    const session = await this.combatSessionModel.findOne({ characterId, inCombat: true });
-    return !!session;
-  }
-
-  /**
-   * Get current combat state
-   */
-  async getCombatState(characterId: string): Promise<CombatStateDto | null> {
-    const session = await this.combatSessionModel.findOne({ characterId });
-    if (!session) return null;
-
-    return {
-      characterId: session.characterId,
-      inCombat: session.inCombat,
-      enemies: session.enemies,
-      player: session.player,
-      turnOrder: session.turnOrder,
-      currentTurnIndex: session.currentTurnIndex,
-      roundNumber: session.roundNumber,
-    };
-  }
-
-  /**
-   * Perform a single attack
-   */
   // eslint-disable-next-line max-statements
   private performAttack(
     attacker: { name: string; attackBonus: number; damageDice: string; damageBonus: number },
@@ -307,65 +308,124 @@ export class CombatService {
     const enemyAttacks: AttackResultDto[] = [];
     const narrativeParts: string[] = [];
 
-    // Player attack
-    const playerAttack = this.performAttack(
-      {
-        name: state.player.name,
-        attackBonus: state.player.attackBonus,
-        damageDice: state.player.damageDice,
-        damageBonus: state.player.damageBonus,
-      },
-      {
-        name: targetEnemy.name,
-        ac: targetEnemy.ac,
-        hp: targetEnemy.hp,
-      },
-      true,
+    const turnOrder = state.turnOrder;
+    const totalCombatants = turnOrder.length;
+
+    // Process each combatant in initiative order starting from currentTurnIndex
+    // Build ordered combatant list starting from currentTurnIndex
+    const orderedCombatants = Array.from({ length: totalCombatants }).map((_, offset) =>
+      turnOrder[(state.currentTurnIndex + offset) % totalCombatants],
     );
 
-    // Update enemy HP
-    targetEnemy.hp = playerAttack.targetHpAfter;
-    playerAttacks.push(playerAttack);
-    narrativeParts.push(this.generateAttackNarrative(playerAttack, true));
+    let finalResult: TurnResultDto | null = null;
 
-    // Check if combat ends
-    const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-    if (aliveEnemies.length === 0) {
-      // Victory!
-      state.inCombat = false;
+    // eslint-disable-next-line max-statements
+    orderedCombatants.some((combatant) => {
+      if (!state.inCombat) return true;
+
+      if (combatant.isPlayer) {
+        const currentTarget = state.enemies.find(e => e.name.toLowerCase() === targetEnemy.name.toLowerCase());
+        if (currentTarget && currentTarget.hp > 0) {
+          const playerAttack = this.performAttack(
+            {
+              name: state.player.name,
+              attackBonus: state.player.attackBonus,
+              damageDice: state.player.damageDice,
+              damageBonus: state.player.damageBonus,
+            },
+            {
+              name: currentTarget.name,
+              ac: currentTarget.ac,
+              hp: currentTarget.hp,
+            },
+            true,
+          );
+
+          currentTarget.hp = playerAttack.targetHpAfter;
+          playerAttacks.push(playerAttack);
+          narrativeParts.push(this.generateAttackNarrative(playerAttack, true));
+
+          const aliveEnemies = state.enemies.filter(e => e.hp > 0);
+          if (aliveEnemies.length === 0) {
+            state.inCombat = false;
+            finalResult = {
+              turnNumber: state.currentTurnIndex,
+              roundNumber: state.roundNumber,
+              playerAttacks,
+              enemyAttacks,
+              combatEnded: true,
+              victory: true,
+              defeat: false,
+              remainingEnemies: [],
+              playerHp: state.player.hp,
+              playerHpMax: state.player.hpMax,
+              narrative: narrativeParts.join('\n\n') + '\n\nVictoire! Tous les ennemis ont été vaincus!',
+            };
+            this.logger.log(`Combat ended for ${state.characterId}: Victory`);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      const enemy = state.enemies.find(e => e.id === combatant.id && e.hp > 0);
+      if (enemy) {
+        const enemyAttack = this.performAttack(
+          {
+            name: enemy.name,
+            attackBonus: enemy.attackBonus,
+            damageDice: enemy.damageDice,
+            damageBonus: enemy.damageBonus,
+          },
+          {
+            name: state.player.name,
+            ac: state.player.ac,
+            hp: state.player.hp,
+          },
+          false,
+        );
+
+        state.player.hp = enemyAttack.targetHpAfter;
+        enemyAttacks.push(enemyAttack);
+        narrativeParts.push(this.generateAttackNarrative(enemyAttack, false));
+
+        if (state.player.hp <= 0) {
+          state.inCombat = false;
+          finalResult = {
+            turnNumber: state.currentTurnIndex,
+            roundNumber: state.roundNumber,
+            playerAttacks,
+            enemyAttacks,
+            combatEnded: true,
+            victory: false,
+            defeat: true,
+            remainingEnemies: state.enemies.filter(e => e.hp > 0),
+            playerHp: 0,
+            playerHpMax: state.player.hpMax,
+            narrative: narrativeParts.join('\n\n') + '\n\nDéfaite... Vous tombez inconscient.',
+          };
+          this.logger.log(`Combat ended for ${state.characterId}: Defeat`);
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if (finalResult) {
       await this.saveCombatState(state);
-
-      const turnResult: TurnResultDto = {
-        turnNumber: state.currentTurnIndex,
-        roundNumber: state.roundNumber,
-        playerAttacks,
-        enemyAttacks,
-        combatEnded: true,
-        victory: true,
-        defeat: false,
-        remainingEnemies: [],
-        playerHp: state.player.hp,
-        playerHpMax: state.player.hpMax,
-        narrative: narrativeParts.join('\n\n') + '\n\nVictoire! Tous les ennemis ont été vaincus!',
-      };
-
-      this.logger.log(`Combat ended for ${state.characterId}: Victory`);
-      return turnResult;
+      return finalResult;
     }
 
-    // Enemy attacks - process each enemy and check for defeat
-    const defeatResult = this.processEnemyAttacks(state, aliveEnemies, enemyAttacks, narrativeParts, playerAttacks);
-    if (defeatResult) {
-      await this.saveCombatState(state);
-      return defeatResult;
-    }
-
-    // Increment round
+    // Advance current turn index to next combatant for subsequent turns
+    state.currentTurnIndex = (state.currentTurnIndex + 1) % totalCombatants;
+    // Increment round number after a full pass
     state.roundNumber++;
 
-    // Save updated state to database
+    // Persist updated state
     await this.saveCombatState(state);
 
+    const aliveEnemies = state.enemies.filter(e => e.hp > 0);
     const turnResult: TurnResultDto = {
       turnNumber: state.currentTurnIndex,
       roundNumber: state.roundNumber,
@@ -398,6 +458,34 @@ export class CombatService {
         roundNumber: state.roundNumber,
       },
     );
+  }
+
+  /**
+   * Retrieve the current combat state from the database
+   */
+  async getCombatState(characterId: string): Promise<CombatStateDto | null> {
+    const doc = await this.combatSessionModel.findOne({ characterId }).lean().exec();
+    if (!doc) return null;
+
+    const state: CombatStateDto = {
+      characterId: doc.characterId,
+      inCombat: !!doc.inCombat,
+      enemies: (doc.enemies as CombatEnemyDto[]) ?? [],
+      player: doc.player as CombatPlayerDto,
+      turnOrder: (doc.turnOrder as CombatantDto[]) ?? [],
+      currentTurnIndex: doc.currentTurnIndex ?? 0,
+      roundNumber: doc.roundNumber ?? 1,
+    };
+
+    return state;
+  }
+
+  /**
+   * Quick check whether a character currently has an active combat
+   */
+  async isInCombat(characterId: string): Promise<boolean> {
+    const state = await this.getCombatState(characterId);
+    return !!state && state.inCombat === true;
   }
 
   /**
@@ -488,6 +576,60 @@ export class CombatService {
     return {
       xpGained,
       enemiesDefeated: defeatedEnemies.map(e => e.name),
+    };
+  }
+
+  /**
+   * Apply damage reported by client to a named enemy and persist state.
+   */
+  async applyDamageToEnemy(characterId: string, targetName: string, damage: number) {
+    const state = await this.getCombatState(characterId);
+    if (!state || !state.inCombat) return null;
+
+    const enemy = state.enemies.find(e => e.name.toLowerCase() === targetName.toLowerCase());
+    if (!enemy) return null;
+
+    const before = enemy.hp;
+    enemy.hp = Math.max(0, enemy.hp - Math.max(0, Math.floor(damage)));
+
+    // Persist changes
+    await this.saveCombatState(state);
+
+    // Check for victory
+    const alive = state.enemies.filter(e => e.hp > 0);
+    if (alive.length === 0) {
+      // End combat and compute XP
+      const end = await this.endCombat(characterId);
+      return {
+        turnNumber: state.currentTurnIndex,
+        roundNumber: state.roundNumber,
+        playerAttacks: [],
+        enemyAttacks: [],
+        combatEnded: true,
+        victory: true,
+        defeat: false,
+        remainingEnemies: [],
+        playerHp: state.player.hp,
+        playerHpMax: state.player.hpMax,
+        narrative: `Vous infligez ${before - enemy.hp} dégâts et terrassez ${enemy.name}. Victoire!`,
+        instructions: end ? [{ xp: end.xpGained }] : [],
+      };
+    }
+
+    // Return updated state fragment
+    return {
+      turnNumber: state.currentTurnIndex,
+      roundNumber: state.roundNumber,
+      playerAttacks: [],
+      enemyAttacks: [],
+      combatEnded: false,
+      victory: false,
+      defeat: false,
+      remainingEnemies: state.enemies,
+      playerHp: state.player.hp,
+      playerHpMax: state.player.hpMax,
+      narrative: `Vous infligez ${before - enemy.hp} dégâts à ${enemy.name} (PV restants: ${enemy.hp}).`,
+      instructions: [],
     };
   }
 

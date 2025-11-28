@@ -1,7 +1,6 @@
+import { ChatMessageDto } from 'src/chat/dto/ChatMessageDto.js';
 import type { GameInstructionDto } from '../../chat/dto/GameInstructionDto.js';
 import JSONC from 'jsonc-simple-parser';
-
-type ParsedAIResponse = { role: 'assistant' | 'user' | 'system'; text: string; instructions: GameInstructionDto[]; raw?: string };
 
 const tryParse = (s: string): unknown | null => {
   try {
@@ -38,34 +37,30 @@ const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'obj
 // Minimal normalizer: if object has a `type` string, accept it as-is.
 export const normalizeInstruction = (raw: unknown): GameInstructionDto | null => {
   if (!isObject(raw)) return null;
-  const t = raw['type'];
-  if (typeof t === 'string') {
-    // shallowly return fields present; rely on consumer to validate specifics
+  if (typeof raw['type'] === 'string') {
     return raw as unknown as GameInstructionDto;
   }
-  // legacy shapes: hp/xp simple objects
-  if (typeof raw['hp'] === 'number') return { type: 'hp', hp: raw['hp'] } as GameInstructionDto;
-  if (typeof raw['xp'] === 'number') return { type: 'xp', xp: raw['xp'] } as GameInstructionDto;
   return null;
 };
 
-export const parseInstructions = (text: string): GameInstructionDto[] => {
-  const raws = extractInstructions(text);
-  const out = raws.map(r => normalizeInstruction(r)).filter(Boolean) as GameInstructionDto[];
-  return out;
-};
+export const parseInstructions = (text: string): GameInstructionDto[] =>
+  extractInstructions(text)
+    .map(r => normalizeInstruction(r))
+    .filter(Boolean) as GameInstructionDto[];
 
 export const cleanNarrativeText = (narrative: string): string => {
   const candidates = collectCandidates(narrative);
   let cleaned = narrative;
-  candidates.filter(c => tryParse(c) !== null).forEach(c => cleaned = cleaned.replace(c, ''));
+  candidates
+    .filter(c => tryParse(c) !== null)
+    .forEach(c => cleaned = cleaned.replace(c, ''));
   // remove leftover triple-backtick blocks
   cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
   return cleaned.replace(/\s+/g, ' ').trim();
 };
 
-export const parseAIResponse = (text: string): ParsedAIResponse => {
-  const instructions = parseInstructions(text);
-  const cleaned = cleanNarrativeText(text);
-  return { role: 'assistant', text: cleaned, instructions };
-};
+export const parseAIResponse = (text: string): ChatMessageDto => ({
+  role: 'assistant',
+  narrative: cleanNarrativeText(text),
+  instructions: parseInstructions(text),
+});

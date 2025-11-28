@@ -42,9 +42,7 @@ export class CombatController {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    if (!body.combat_start || !Array.isArray(body.combat_start) || body.combat_start.length === 0) {
-      throw new BadRequestException('combat_start array with at least one enemy is required');
-    }
+    this.logger.debug(body);
 
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, body, userId);
@@ -71,76 +69,107 @@ export class CombatController {
   async attack(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: AttackRequestDto,
+    @Body('target') target: string,
   ): Promise<TurnResultWithInstructionsDto> {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-
-    if (!body.target) {
-      throw new BadRequestException('target is required');
+    // Validate in-combat
+    if (!(await this.combatService.isInCombat(characterId))) {
+      throw new BadRequestException('Character is not in combat');
     }
 
-    // Verify character ownership
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    // Get current state
+    const state = await this.combatService.getCombatState(characterId);
+    if (!state) {
+      throw new BadRequestException('No combat state found');
+    }
+
+    // Find target enemy
+    const targetEnemy = state.enemies.find(e => e.name.toLowerCase() === (target || '').toLowerCase() && e.hp > 0);
+    if (!targetEnemy) {
+      const validTargets = await this.combatService.getValidTargets(characterId);
+      throw new BadRequestException(`Invalid target: ${target}. Valid targets: ${validTargets.join(', ')}`);
+    }
+
+    // Build ordered combatants starting from currentTurnIndex
+    const ordered = state.turnOrder.map((_, idx) => state.turnOrder[(state.currentTurnIndex + idx) % state.turnOrder.length]);
+
+    const instructions: unknown[] = [];
+
+    // Helper to push a roll instruction with optional conditional index
+    const pushRoll = (dices: string, meta: Record<string, unknown>, conditionalOn?: number) => {
+      const instr: any = { type: 'roll', dices };
+      if (meta) instr.meta = meta;
+      if (conditionalOn !== undefined) instr.conditionalOn = conditionalOn;
+      instructions.push(instr);
+      return instructions.length - 1;
+    };
+
+    // Iterate ordered combatants and emit roll instructions only for the player.
+    // Enemies will not have their rolls emitted here; the client should only perform player rolls.
+    for (const combatant of ordered) {
+      if (!combatant.isPlayer) continue;
+
+      // Player attack roll
+      const attackIdx = pushRoll('1d20', {
+        actor: state.player.name,
+        actorId: state.player.characterId,
+        action: 'attack',
+        target: targetEnemy.name,
+        attackBonus: state.player.attackBonus,
+        targetAc: targetEnemy.ac,
+        // Include damage dice/bonus so frontend can present damage roll details
+        damageDice: state.player.damageDice,
+        damageBonus: state.player.damageBonus,
+      });
+
+      // Only one player exists in turn order, so we can stop after emitting the attack roll.
+      // Damage rolls are not emitted here: the client should submit the resolved attack roll
+      // result to `POST /api/combat/{characterId}/resolve-roll` which will apply damage server-side
+      break;
+    }
+
+    // Return a TurnResult-like object with instructions for client to perform rolls in order
+    const response: TurnResultWithInstructionsDto = {
+      turnNumber: state.currentTurnIndex,
+      roundNumber: state.roundNumber,
+      playerAttacks: [],
+      enemyAttacks: [],
+      combatEnded: false,
+      victory: false,
+      defeat: false,
+      remainingEnemies: state.enemies,
+      playerHp: state.player.hp,
+      playerHpMax: state.player.hpMax,
+      narrative: 'Perform the attack roll. If the attack hits, submit damage via POST /api/combat/{characterId}/resolve-roll',
+      instructions,
+    };
+
+    return response;
+  }
+
+  @Post(':characterId/resolve-roll')
+  @ApiOperation({ summary: 'Resolve a client-side roll (damage) and apply its effects' })
+  @ApiResponse({ status: 200, type: TurnResultWithInstructionsDto })
+  async resolveRoll(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: { action: string; target?: string; total?: number },
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+
+    if (!body || body.action !== 'damage' || typeof body.total !== 'number' || !body.target) {
+      throw new BadRequestException('Invalid roll resolution payload');
+    }
 
     if (!(await this.combatService.isInCombat(characterId))) {
       throw new BadRequestException('Character is not in combat');
     }
 
-    const result = await this.combatService.processPlayerAttack(characterId, body.target);
-    if (!result) {
-      const validTargets = await this.combatService.getValidTargets(characterId);
-      throw new BadRequestException(
-        `Invalid target: ${body.target}. Valid targets: ${validTargets.join(', ')}`,
-      );
-    }
-
-    // Generate instructions for frontend processing
-    const instructions: unknown[] = [];
-
-    // Add HP change instruction if player took damage
-    const totalPlayerDamage = result.enemyAttacks.reduce(
-      (sum, attack) => sum + (attack.hit ? attack.totalDamage : 0),
-      0,
-    );
-    if (totalPlayerDamage > 0) {
-      instructions.push({ hp: -totalPlayerDamage });
-    }
-
-    // If combat ended with victory, add XP
-    if (result.victory) {
-      const combatEnd = await this.combatService.endCombat(characterId);
-      if (combatEnd) {
-        instructions.push({ xp: combatEnd.xpGained });
-        instructions.push({
-          combat_end: {
-            victory: true,
-            xp_gained: combatEnd.xpGained,
-            player_hp: result.playerHp,
-            enemies_defeated: combatEnd.enemiesDefeated,
-            narrative: 'Victoire! Tous les ennemis ont été vaincus',
-          },
-        });
-      }
-    } else if (result.defeat) {
-      instructions.push({
-        combat_end: {
-          victory: false,
-          xp_gained: 0,
-          player_hp: 0,
-          enemies_defeated: [],
-          narrative: 'Défaite... Vous tombez inconscient.',
-        },
-      });
-      await this.combatService.endCombat(characterId);
-    }
-
-    this.logger.log(`Attack processed for ${characterId}: hit=${result.playerAttacks[0]?.hit}, victory=${result.victory}, defeat=${result.defeat}`);
-
-    return {
-      ...result,
-      instructions,
-    };
+    const result = await this.combatService.applyDamageToEnemy(characterId, body.target, body.total);
+    if (!result) throw new BadRequestException('Failed to apply damage');
+    return result;
   }
 
   @Get(':characterId/status')
@@ -218,7 +247,7 @@ export class CombatController {
         combat_end: {
           victory: false,
           xp_gained: 0,
-          player_hp: character.hp,
+          player_hp: character.hp!,
           enemies_defeated: [],
           fled: true,
           narrative: 'Vous avez fui le combat.',

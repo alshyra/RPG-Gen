@@ -87,12 +87,44 @@ export class ConversationService {
   }
 
   async append(userId: string, characterId: string, msg: ChatMessageDto) {
+    // Defensive normalization: ensure incoming message has required fields
+    const normalized: ChatMessageDto = ((): ChatMessageDto => {
+      if (!msg || typeof msg !== 'object') {
+        this.logger.warn('Appending malformed message (not an object), coercing to system message');
+        return { role: 'system', narrative: String(msg || ''), instructions: [] };
+      }
+      const role = (msg as any).role;
+      const narrative = (msg as any).narrative;
+      const instructions = (msg as any).instructions ?? [];
+      if (!role || typeof role !== 'string' || ![
+        'user',
+        'assistant',
+        'system',
+      ].includes(role)) {
+        this.logger.warn(`Appending message with invalid or missing role; coercing to 'system' - ${JSON.stringify(msg)}`);
+      }
+      if (!narrative || typeof narrative !== 'string') {
+        this.logger.warn(`Appending message with invalid or missing narrative; coercing to empty string - ${JSON.stringify(msg)}`);
+      }
+      return {
+        role: typeof role === 'string' && [
+          'user',
+          'assistant',
+          'system',
+        ].includes(role)
+          ? (role as any)
+          : 'system',
+        narrative: typeof narrative === 'string' ? narrative : '',
+        instructions: Array.isArray(instructions) ? instructions : [],
+      } as ChatMessageDto;
+    })();
+
     let history = await this.chatHistoryModel.findOne({ userId, characterId });
     if (!history) {
       history = new this.chatHistoryModel({
         userId,
         characterId,
-        messages: [msg],
+        messages: [normalized],
         lastUpdated: new Date(),
       });
       await history.save();
@@ -100,7 +132,7 @@ export class ConversationService {
       return;
     }
 
-    history.messages.push(msg);
+    history.messages.push(normalized);
     if (history.messages.length > this.MAX_MESSAGES) {
       history.messages = history.messages.slice(-this.MAX_MESSAGES);
     }

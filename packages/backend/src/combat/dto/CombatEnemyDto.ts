@@ -16,6 +16,12 @@ export class CombatEnemyDto {
   @ApiProperty({ description: 'Armor class' })
   ac: number;
 
+  @ApiProperty({ description: 'Optional portrait URL or data URI', required: false })
+  portrait?: string;
+
+  @ApiProperty({ description: 'Optional short description for the enemy', required: false })
+  description?: string;
+
   @ApiProperty({ description: 'Initiative order value' })
   initiative: number;
 

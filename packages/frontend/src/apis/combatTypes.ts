@@ -1,9 +1,9 @@
-import { CombatEndResponseDto, CombatStartRequestDto } from '@rpg-gen/shared';
+import { CombatEndInstructionMessageDto, CombatStartInstructionMessageDto } from '@rpg-gen/shared';
 
 /**
  * Type guard for combat start instruction
  */
-export function isCombatStartInstruction(obj: unknown): obj is CombatStartRequestDto {
+export function isCombatStartInstruction(obj: unknown): obj is CombatStartInstructionMessageDto {
   if (typeof obj !== 'object' || obj === null) return false;
   const record = obj as Record<string, unknown>;
   if (!Array.isArray(record.combat_start)) return false;
@@ -20,7 +20,7 @@ export function isCombatStartInstruction(obj: unknown): obj is CombatStartReques
 /**
  * Type guard for combat end instruction
  */
-export function isCombatEndInstruction(obj: unknown): obj is CombatEndResponseDto {
+export function isCombatEndInstruction(obj: unknown): obj is CombatEndInstructionMessageDto {
   if (typeof obj !== 'object' || obj === null) return false;
   const record = obj as Record<string, unknown>;
   if (typeof record.combat_end !== 'object' || record.combat_end === null) return false;

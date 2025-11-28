@@ -1,4 +1,4 @@
-import type { SkillDto } from '@rpg-gen/shared';
+import type { SkillResponseDto } from '@rpg-gen/shared';
 
 /**
  * Update skills array when toggling a skill.
@@ -6,7 +6,7 @@ import type { SkillDto } from '@rpg-gen/shared';
  * - If the skill exists but not proficient, mark it as proficient
  * - Otherwise add it as proficient
  */
-export function computeUpdatedSkills(skill: string, existingSkills: SkillDto[] = []): SkillDto[] {
+export function computeUpdatedSkills(skill: string, existingSkills: SkillResponseDto[] = []): SkillResponseDto[] {
   // If skill is currently proficient, just mark that one as not proficient
   const present = existingSkills.find(s => s.name === skill);
   if (present && present.proficient) {

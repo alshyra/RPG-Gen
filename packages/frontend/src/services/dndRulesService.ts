@@ -3,7 +3,7 @@
  * Handles ability calculations, HP, proficiency, etc.
  */
 
-import { AbilityScoresDto } from '@rpg-gen/shared';
+import { AbilityScoresResponseDto } from '@rpg-gen/shared';
 import { getCurrentLevel } from '../utils/dndLevels';
 
 export const ABILITIES = [
@@ -353,7 +353,7 @@ export class DnDRulesService {
   /**
    * Calculate skill modifier for a given skill and ability scores
    */
-  static calculateSkillModifier(skillName: string, scores: AbilityScoresDto, proficiency: number, isProficient: boolean): number {
+  static calculateSkillModifier(skillName: string, scores: AbilityScoresResponseDto, proficiency: number, isProficient: boolean): number {
     const skill = SKILLS.find(s => s.name === skillName);
     if (!skill) return 0;
 

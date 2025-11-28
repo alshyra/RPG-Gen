@@ -1,5 +1,7 @@
 import { conversationService } from '../apis/conversationApi';
+import { characterServiceApi } from '../apis/characterApi';
 import { isCombatEndInstruction, isCombatStartInstruction } from '../apis/combatTypes';
+import type { RollInstructionMessageDto, SpellInstructionMessageDto } from '@rpg-gen/shared';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
@@ -54,22 +56,22 @@ export function useGameCommands() {
     );
 
     if (!spell) {
-      gameStore.appendMessage('System', `❌ Spell not found: ${spellName}`);
+      gameStore.appendMessage('system', `❌ Spell not found: ${spellName}`);
       return;
     }
 
-    gameStore.appendMessage('Player', `I cast ${spell.name}!`);
-    gameStore.appendMessage('System', '...thinking...');
+    gameStore.appendMessage('user', `I cast ${spell.name}!`);
+    gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
 
     try {
       const response = await conversationService.sendMessage(`I cast the spell ${spell.name}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.narrative);
-      processInstructions(response.instructions);
+      gameStore.appendMessage('assistant', response.narrative);
+      processInstructions(response.instructions ?? []);
     } catch {
       gameStore.messages.pop();
-      gameStore.appendMessage('System', `❌ Failed to cast spell: ${spell.name}`);
+      gameStore.appendMessage('system', `❌ Failed to cast spell: ${spell.name}`);
     } finally {
       gameStore.sending = false;
     }
@@ -85,26 +87,28 @@ export function useGameCommands() {
     if (!character) return;
 
     const item = character.inventory?.find(
-      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase(),
+      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase()
+        || (i.definitionId ?? '').toLowerCase() === itemName.toLowerCase()
+        || (i._id ?? '').toLowerCase() === itemName.toLowerCase(),
     );
 
     if (!item) {
-      gameStore.appendMessage('System', `❌ Item not found: ${itemName}`);
+      gameStore.appendMessage('system', `❌ Item not found: ${itemName}`);
       return;
     }
 
-    gameStore.appendMessage('Player', `I use ${item.name}!`);
-    gameStore.appendMessage('System', '...thinking...');
+    gameStore.appendMessage('user', `I use ${item.name}!`);
+    gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
 
     try {
       const response = await conversationService.sendMessage(`I use the item ${item.name}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.narrative);
-      processInstructions(response.instructions);
+      gameStore.appendMessage('assistant', response.narrative);
+      processInstructions(response.instructions ?? []);
     } catch {
       gameStore.messages.pop();
-      gameStore.appendMessage('System', `❌ Failed to use item: ${item.name}`);
+      gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
     } finally {
       gameStore.sending = false;
     }
@@ -122,22 +126,29 @@ export function useGameCommands() {
     );
 
     if (!item) {
-      gameStore.appendMessage('System', `❌ Item not found: ${itemName}`);
+      gameStore.appendMessage('system', `❌ Item not found: ${itemName}`);
       return;
     }
 
-    gameStore.appendMessage('Player', `I equip ${item.name}!`);
-    gameStore.appendMessage('System', '...thinking...');
-    gameStore.sending = true;
+    // Use the dedicated character API to equip the item by definitionId
+    if (!item.definitionId) {
+      gameStore.appendMessage('system', `❌ Cannot equip ${item.name}: no definitionId available`);
+      return;
+    }
 
+    gameStore.appendMessage('user', `Equip ${item.name} (${item.definitionId})`);
+    gameStore.appendMessage('system', 'Equipping...');
+    gameStore.sending = true;
     try {
-      const response = await conversationService.sendMessage(`I equip the item ${item.name}`);
-      gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.narrative);
-      processInstructions(response.instructions);
-    } catch {
-      gameStore.messages.pop();
-      gameStore.appendMessage('System', `❌ Failed to equip item: ${item.name}`);
+      const updated = await characterServiceApi.equipInventoryItem(character.characterId, item.definitionId);
+      // update local store
+      const store = useCharacterStore();
+      // Pinia store exposes `currentCharacter` unwrapped in components, assign directly
+      (store as any).currentCharacter = updated as any;
+      gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      gameStore.appendMessage('system', `❌ Failed to equip item: ${item.name} (${msg})`);
     } finally {
       gameStore.sending = false;
     }
@@ -164,19 +175,19 @@ export function useGameCommands() {
     }
 
     // Not in combat, send to Gemini for narrative handling
-    gameStore.appendMessage('Player', `J'attaque ${target}!`);
-    gameStore.appendMessage('System', '...thinking...');
+    gameStore.appendMessage('user', `J'attaque ${target}!`);
+    gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
 
     try {
       const response = await conversationService.sendMessage(`I attack ${target}`);
       gameStore.messages.pop();
-      gameStore.appendMessage('GM', response.narrative);
-      processInstructions(response.instructions);
+      gameStore.appendMessage('assistant', response.narrative);
+      processInstructions(response.instructions ?? []);
     } catch (err) {
       gameStore.messages.pop();
       const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
-      gameStore.appendMessage('System', `❌ Erreur: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
     } finally {
       gameStore.sending = false;
     }
@@ -190,41 +201,42 @@ export function useGameCommands() {
 
     instructions.forEach((item: unknown) => {
       const instr = item as Record<string, unknown>;
-      if (instr.roll && typeof instr.roll === 'object') {
-        const roll = instr.roll as { dices?: string; modifier?: number | string };
-        gameStore.pendingInstruction = instr;
-        gameStore.appendMessage('System', `🎲 Roll needed: ${roll.dices}${roll.modifier ? ` + ${roll.modifier}` : ''}`);
-      } else if (typeof instr.xp === 'number') {
-        gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+      const type = instr.type as string | undefined;
+      if (type === 'roll') {
+        const roll = instr as RollInstructionMessageDto;
+        gameStore.pendingInstruction = roll;
+        gameStore.appendMessage('system', `🎲 Roll needed: ${roll.dices}${roll.modifier ? ` + ${roll.modifier}` : ''}`);
+      } else if (type === 'xp' && typeof instr.xp === 'number') {
+        gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
         characterStore.updateXp(instr.xp);
-      } else if (typeof instr.hp === 'number') {
-        const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-        gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+      } else if (type === 'hp' && typeof instr.hp === 'number') {
+        const hpChange = (instr.hp) > 0 ? `+${instr.hp}` : instr.hp;
+        gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
         characterStore.updateHp(instr.hp);
         if (characterStore.isDead) characterStore.showDeathModal = true;
-      } else if (instr.spell && typeof instr.spell === 'object') {
-        const spell = instr.spell as { action?: string; name?: string; level?: number };
+      } else if (type === 'spell' && typeof instr.name === 'string') {
+        const spell = instr as unknown as { action?: string; name?: string; level?: number };
         if (spell.action === 'learn') {
-          gameStore.appendMessage('System', `📖 Learned spell: ${spell.name} (Level ${spell.level})`);
-          characterStore.learnSpell(instr.spell as { name: string; level?: number; meta: Record<string, unknown> });
+          gameStore.appendMessage('system', `📖 Learned spell: ${spell.name} (Level ${spell.level})`);
+          characterStore.learnSpell(instr as SpellInstructionMessageDto);
         } else if (spell.action === 'cast') {
-          gameStore.appendMessage('System', `✨ Cast spell: ${spell.name}`);
+          gameStore.appendMessage('system', `✨ Cast spell: ${spell.name}`);
         } else if (spell.action === 'forget') {
-          gameStore.appendMessage('System', `🚫 Forgot spell: ${spell.name}`);
+          gameStore.appendMessage('system', `🚫 Forgot spell: ${spell.name}`);
           characterStore.forgetSpell(spell.name || '');
         }
-      } else if (instr.inventory && typeof instr.inventory === 'object') {
-        const inventory = instr.inventory as { action?: string; name?: string; quantity?: number };
+      } else if (type === 'inventory' && typeof instr.name === 'string') {
+        const inventory = instr as unknown as { action?: string; name?: string; quantity?: number };
         if (inventory.action === 'add') {
           const qty = inventory.quantity || 1;
-          gameStore.appendMessage('System', `🎒 Added to inventory: ${inventory.name} (x${qty})`);
-          characterStore.addInventoryItem(instr.inventory as { name: string; qty: number });
+          gameStore.appendMessage('system', `🎒 Added to inventory: ${inventory.name} (x${qty})`);
+          characterStore.addInventoryItem({ name: inventory.name, qty });
         } else if (inventory.action === 'remove') {
           const qty = inventory.quantity || 1;
-          gameStore.appendMessage('System', `🗑️ Removed from inventory: ${inventory.name} (x${qty})`);
+          gameStore.appendMessage('system', `🗑️ Removed from inventory: ${inventory.name} (x${qty})`);
           characterStore.removeInventoryItem(inventory.name, qty);
         } else if (inventory.action === 'use') {
-          gameStore.appendMessage('System', `⚡ Used item: ${inventory.name}`);
+          gameStore.appendMessage('system', `⚡ Used item: ${inventory.name}`);
           characterStore.useInventoryItem(inventory.name || '');
         }
       } else if (isCombatStartInstruction(item)) {

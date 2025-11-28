@@ -1,5 +1,6 @@
 import { Chat, Content, GoogleGenAI } from '@google/genai';
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { ChatMessageDto } from 'src/chat/dto/ChatMessageDto.js';
 import { parseAIResponse } from './ai-parser.util.js';
 
 @Injectable()
@@ -20,14 +21,14 @@ export class GeminiTextService {
   initializeChatSession(
     sessionId: string,
     systemInstruction: string,
-    initialHistory: Content[] = [],
+    initialHistory: ChatMessageDto[] = [],
   ) {
     if (this.chatClients.has(sessionId)) return;
 
     this.logger.debug(`Creating new chat client for session ${sessionId}`);
     const chat = this.client.chats.create({
       model: this.model,
-      history: initialHistory,
+      history: initialHistory.map(message => ({ role: 'assistant' == message.role ? 'model' : 'user', content: message.narrative } as Content)),
       config: {
         systemInstruction,
         temperature: 0.7,

@@ -1,5 +1,5 @@
 import { characterServiceApi } from '@/apis/characterApi';
-import { CharacterResponseDto, ItemResponseDto, SpellInstructionDataDto, SpellResponseDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
+import { CharacterResponseDto, ItemResponseDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -27,7 +27,7 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   // inventory/spells helpers (simple implementations)
-  const learnSpell = (spell: SpellInstructionDataDto) => {
+  const learnSpell = (spell: SpellInstructionMessageDto) => {
     if (!currentCharacter.value) return;
     // Convert instruction to SpellDto format
     const spellDto: SpellResponseDto = {

@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../auth/user.schema.js';
 import { CharacterService } from './character.service.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import { EquipInventoryDto } from './dto/EquipInventoryDto.js';
 import {
   CharacterResponseDto,
   CreateCharacterBodyDto,
@@ -109,14 +110,14 @@ export class CharacterController {
 
   @Delete(':characterId')
   @ApiOperation({ summary: 'Delete a character' })
-  @ApiResponse({ status: 200, description: 'Character deleted', type: MessageResponseDto })
+  @ApiResponse({ status: 200, description: 'Character deleted', type: Object })
   @ApiResponse({ status: 404, description: 'Character not found' })
   async delete(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
     await this.characterService.delete(userId, characterId);
-    return { message: 'Character deleted' };
+    return { ok: true };
   }
 
   @Post(':characterId/kill')
@@ -154,6 +155,21 @@ export class CharacterController {
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
     return this.characterService.toCharacterDto(character);
+  }
+
+  @Post(':characterId/inventory/equip')
+  @ApiOperation({ summary: 'Equip an item by definitionId (weapon only)' })
+  @ApiBody({ type: EquipInventoryDto })
+  @ApiResponse({ status: 200, description: 'Character updated with equipped item', type: CharacterResponseDto })
+  async equipInventory(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: { definitionId: string },
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+    const character = await this.characterService.equipInventoryItem(userId, characterId, body.definitionId);
+    return character;
   }
 
   @Patch(':characterId/inventory/:itemId')

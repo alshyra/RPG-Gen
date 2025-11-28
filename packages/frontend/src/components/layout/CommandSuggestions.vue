@@ -50,13 +50,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
 import {
   getAllSuggestions,
-  type CommandDefinition,
   type ArgumentSuggestion,
+  type CommandDefinition,
 } from '@/utils/chatCommands';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
   inputText: string;
@@ -70,6 +71,7 @@ const emit = defineEmits<{
 }>();
 
 const characterStore = useCharacterStore();
+const combatStore = useCombatStore();
 
 const selectedIndex = ref(0);
 
@@ -84,6 +86,8 @@ const suggestionResult = computed(() => getAllSuggestions(
   characterStore.currentCharacter?.spells || [],
   characterStore.currentCharacter?.inventory || [],
   characterLevel.value,
+  // pass current valid targets (enemy names) for /attack suggestions
+  combatStore.validTargets || [],
 ));
 
 const totalSuggestions = computed(() =>
@@ -119,7 +123,11 @@ const getItemClass = (index: number): string[] => [
     : 'hover:bg-slate-700 text-slate-200',
 ];
 
-const getArgumentIcon = (type: 'spell' | 'item'): string => type === 'spell' ? '✨' : '🎒';
+const getArgumentIcon = (type: 'spell' | 'item' | 'target'): string => {
+  if (type === 'spell') return '✨';
+  if (type === 'item') return '🎒';
+  return '⚔️';
+};
 
 // Expose methods for keyboard navigation from parent
 const navigateUp = () => {

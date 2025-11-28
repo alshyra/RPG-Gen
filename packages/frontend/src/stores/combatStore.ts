@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { combatService } from '../apis/combatApi';
-import { CombatantDto, TurnResultWithInstructionsDto } from '@rpg-gen/shared';
+import type { CombatantDto, TurnResultWithInstructionsDto, CombatStateDto, CombatEnemyDto, CombatStartRequestDto } from '@rpg-gen/shared';
 
 // eslint-disable-next-line max-statements
 export const useCombatStore = defineStore('combatStore', () => {
   // Combat state
   const inCombat = ref(false);
   const roundNumber = ref(1);
-  const enemies = ref<CombatantDto[]>([]);
+  const enemies = ref<CombatEnemyDto[]>([]);
   const turnOrder = ref<CombatantDto[]>([]);
   const playerHp = ref(0);
   const playerHpMax = ref(0);
@@ -16,29 +16,23 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentTarget = ref<string | null>(null);
 
   // Computed properties
-  const aliveEnemies = computed(() => enemies.value.filter(e => e.hp > 0));
+  const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
   const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
   const hasValidTarget = computed(() => validTargets.value.length > 0);
 
   /**
    * Initialize combat state from backend response
    */
-  const initializeCombat = (response: {
-    inCombat: boolean;
-    roundNumber: number;
-    playerInitiative: number;
-    playerHp: number;
-    playerHpMax: number;
-    enemies: CombatantDto[];
-    turnOrder: CombatantDto[];
-  }) => {
+  const initializeCombat = (response: CombatStateDto) => {
+    // prefer console.log instead of console.debug to avoid being hidden by console filters
+    console.log('[combatStore] initializeCombat', response);
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
-    playerInitiative.value = response.playerInitiative;
-    playerHp.value = response.playerHp;
-    playerHpMax.value = response.playerHpMax;
-    enemies.value = response.enemies;
-    turnOrder.value = response.turnOrder;
+    playerInitiative.value = response.player.initiative ?? 0;
+    playerHp.value = response.player.hp ?? 0;
+    playerHpMax.value = response.player.hpMax ?? 0;
+    enemies.value = response.enemies ?? [];
+    turnOrder.value = response.turnOrder ?? [];
 
     // Auto-select first enemy as target
     if (response.enemies.length > 0) {
@@ -106,8 +100,10 @@ export const useCombatStore = defineStore('combatStore', () => {
   /**
    * Start combat from a combat_start instruction
    */
-  const startCombat = async (characterId: string, instruction: CombatStartInstruction) => {
+  const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
+    console.log('[combatStore] startCombat request', { characterId, instruction });
     const response = await combatService.startCombat(characterId, instruction);
+    console.log('[combatStore] startCombat response', response);
     initializeCombat(response);
     return response;
   };
@@ -116,20 +112,11 @@ export const useCombatStore = defineStore('combatStore', () => {
    * Fetch current combat status from backend
    */
   const fetchStatus = async (characterId: string) => {
+    console.log('[combatStore] fetchStatus for', characterId);
     const response = await combatService.getStatus(characterId);
+    console.log('[combatStore] fetchStatus response', response);
     if (response.inCombat && response.enemies) {
-      initializeCombat({
-        inCombat: true,
-        roundNumber: response.roundNumber ?? 1,
-        playerInitiative: 0,
-        playerHp: response.playerHp ?? 0,
-        playerHpMax: response.playerHpMax ?? 0,
-        enemies: response.enemies.map((e: { id: string; name: string; hp: number; hpMax: number }) => ({
-          ...e,
-          initiative: 0,
-        })),
-        turnOrder: [],
-      });
+      initializeCombat(response);
     } else {
       clearCombat();
     }

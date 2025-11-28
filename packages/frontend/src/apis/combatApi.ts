@@ -17,6 +17,13 @@ class CombatService {
     characterId: string,
     combatStart: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
+    // Debug: log payload being sent to backend
+    try {
+      console.log('[combatApi] startCombat body', combatStart);
+      console.log('[combatApi] startCombat JSON', JSON.stringify(combatStart));
+    } catch (e) {
+      console.log('[combatApi] startCombat - serialization error', e);
+    }
     const response = await api.POST('/api/combat/{characterId}/start', {
       params: { path: { characterId } },
       body: combatStart,
@@ -28,6 +35,14 @@ class CombatService {
    * Execute an attack against a target
    */
   async attack(characterId: string, target: string): Promise<TurnResultWithInstructionsDto> {
+    // Debug: log attack payload before sending
+    try {
+      console.log('[combatApi] attack payload', { characterId, target });
+      console.log('[combatApi] attack JSON', JSON.stringify({ target }));
+    } catch (e) {
+      console.log('[combatApi] attack serialization error', e);
+    }
+
     const response = await api.POST('/api/combat/{characterId}/attack', {
       params: { path: { characterId } },
       body: { target },
@@ -53,6 +68,17 @@ class CombatService {
       params: { path: { characterId } },
     });
     return getData<CombatEndResponseDto>(response);
+  }
+
+  /**
+   * Submit a resolved damage roll from the client so the server can apply it persistently
+   */
+  async resolveRoll(characterId: string, payload: { action: string; target?: string; total?: number }) {
+    const response = await api.POST('/api/combat/{characterId}/resolve-roll', {
+      params: { path: { characterId } },
+      body: payload,
+    });
+    return getData<any>(response);
   }
 }
 

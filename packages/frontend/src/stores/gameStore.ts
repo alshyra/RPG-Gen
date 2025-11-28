@@ -1,39 +1,56 @@
 import { rollDice } from '@/apis/diceApi';
-import { ChatMessageDto, DiceThrowDto, GameInstructionDto } from '@rpg-gen/shared';
+import {
+  ChatMessageDto,
+  DiceThrowDto,
+  RollInstructionMessageDto,
+  HpInstructionMessageDto,
+  XpInstructionMessageDto,
+  SpellInstructionMessageDto,
+  InventoryInstructionMessageDto,
+  CombatStartInstructionMessageDto,
+  CombatEndInstructionMessageDto,
+} from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-type DisplayRole = 'user' | 'assistant' | 'system' | 'System' | 'GM' | 'Player' | 'Error';
+type DisplayRole = 'user' | 'assistant' | 'system';
 type RollModalData = {
-  dices: string;
-  modifier: number;
-  description: string;
-  advantage: 'advantage' | 'disadvantage' | 'none';
-  show: boolean;
+  diceNotation?: string;
+  rolls?: number[];
+  bonus?: number | null;
+  total?: number | null;
+  skillName?: string;
+  advantage?: 'advantage' | 'disadvantage' | 'none';
+  keptRoll?: number | null;
+  discardedRoll?: number | null;
+  show?: boolean;
 };
 type StoredRole = 'user' | 'assistant' | 'system';
 
 // Map display roles to stored roles
 const toStoredRole = (role: DisplayRole): StoredRole => {
-  if (role === 'GM' || role === 'assistant') return 'assistant';
-  if (role === 'Player' || role === 'user') return 'user';
+  if (role === 'assistant') return 'assistant';
+  if (role === 'user') return 'user';
   return 'system';
 };
 
 export const useGameStore = defineStore('gameStore', () => {
   const rolls = ref<Array<DiceThrowDto>>([]);
   const latestRoll = ref<DiceThrowDto | null>(null);
-  const rollData = ref<RollModalData>({
-    dices: '',
-    modifier: 0,
-    description: '',
-    advantage: 'none',
-    show: false,
-  });
+  const rollData = ref<RollModalData>({});
 
   // Minimal game session/message/pending instruction state used across app
-  const messages = ref<ChatMessageDto[]>([]);
-  const pendingInstruction = ref<GameInstructionDto | null>(null);
+  const messages = ref<Array<ChatMessageDto & { timestamp?: number }>>([]);
+  const pendingInstruction = ref<
+    | RollInstructionMessageDto
+    | HpInstructionMessageDto
+    | XpInstructionMessageDto
+    | SpellInstructionMessageDto
+    | InventoryInstructionMessageDto
+    | CombatStartInstructionMessageDto
+    | CombatEndInstructionMessageDto
+    | null
+  >(null);
   const playerText = ref('');
   const isInitializing = ref(false);
   const sending = ref(false);

@@ -2,6 +2,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
+import type { CombatStartInstructionMessageDto } from '@rpg-gen/shared';
 
 /**
  * Composable for combat-specific actions and state management
@@ -14,29 +15,33 @@ export function useCombat() {
   /**
    * Initialize combat from a combat_start instruction
    */
-  const initializeCombat = async (instruction: CombatStartInstruction): Promise<void> => {
+  const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
+    // show as a normal log so developers see it after reload without changing console filters
+    console.log('[useCombat] initializeCombat instruction', instruction);
     const character = characterStore.currentCharacter;
     if (!character) return;
 
     const enemyNames = instruction.combat_start.map(e => e.name).join(', ');
-    gameStore.appendMessage('System', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
+    gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
-      const combatState = await combatStore.startCombat(character.characterId, instruction);
+      // Ensure we send only the expected request shape to the backend
+      const payload = { combat_start: instruction.combat_start };
+      const combatState = await combatStore.startCombat(character.characterId, payload);
 
       if (combatState.narrative) {
-        gameStore.appendMessage('System', combatState.narrative);
+        gameStore.appendMessage('system', combatState.narrative);
       }
 
       // Display initiative order
       const initiativeOrder = combatState.turnOrder
         .map(c => `${c.name} (${c.initiative})`)
         .join(' → ');
-      gameStore.appendMessage('System', `📋 Ordre d'initiative: ${initiativeOrder}`);
-      gameStore.appendMessage('System', 'Utilisez /attack [nom_ennemi] pour attaquer.');
+      gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
+      gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
-      gameStore.appendMessage('System', `❌ Erreur de combat: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur de combat: ${errorMsg}`);
     }
   };
 
@@ -47,17 +52,19 @@ export function useCombat() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    gameStore.appendMessage('Player', `J'attaque ${target}!`);
+    gameStore.appendMessage('user', `J'attaque ${target}!`);
     gameStore.sending = true;
 
     try {
+      // Debug: log which characterId and target we're sending
+      console.log('[useCombat] executeAttack ->', { characterId: character.characterId, target });
       const attackResponse = await combatService.attack(character.characterId, target);
 
       // Update combat store with results
       combatStore.updateFromTurnResult(attackResponse);
 
       // Display combat narrative
-      gameStore.appendMessage('GM', attackResponse.narrative);
+      gameStore.appendMessage('assistant', attackResponse.narrative);
 
       // Process any instructions (HP changes, XP, etc.)
       if (attackResponse.instructions) {
@@ -67,15 +74,15 @@ export function useCombat() {
       // Handle combat end
       if (attackResponse.combatEnded) {
         if (attackResponse.victory) {
-          gameStore.appendMessage('System', '🏆 Combat terminé - Victoire!');
+          gameStore.appendMessage('system', '🏆 Combat terminé - Victoire!');
         } else if (attackResponse.defeat) {
-          gameStore.appendMessage('System', '💀 Combat terminé - Défaite...');
+          gameStore.appendMessage('system', '💀 Combat terminé - Défaite...');
         }
         combatStore.clearCombat();
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
-      gameStore.appendMessage('System', `❌ Erreur: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
     } finally {
       gameStore.sending = false;
     }
@@ -86,15 +93,35 @@ export function useCombat() {
    */
   const processAttackInstructions = (instructions: unknown[]): void => {
     if (!Array.isArray(instructions)) return;
-
     instructions.forEach((item: unknown) => {
-      const instr = item as Record<string, unknown>;
-      if (typeof instr.xp === 'number') {
-        gameStore.appendMessage('System', `✨ Gained ${instr.xp} XP`);
+      const instr = item as Record<string, any>;
+      const type = instr.type as string | undefined;
+
+      if (type === 'roll') {
+        // Map server roll instruction into the app's RollInstructionMessageDto shape
+        const dices = instr.dices as string | undefined;
+        const meta = instr.meta as Record<string, any> | undefined;
+        const attackBonus = meta?.attackBonus as number | undefined;
+        const target = meta?.target as string | undefined;
+        const targetAc = meta?.targetAc as number | undefined;
+
+        const rollInstr = {
+          type: 'roll',
+          dices: dices || '1d20',
+          modifier: typeof attackBonus === 'number' ? attackBonus : undefined,
+          advantage: 'none',
+          description: target ? `Attack vs ${target} (AC ${targetAc ?? '??'})` : undefined,
+        } as any;
+
+        // Set pending instruction so Dice UI appears
+        gameStore.pendingInstruction = rollInstr;
+        gameStore.appendMessage('system', `🎲 Roll needed: ${rollInstr.dices}${attackBonus ? ` +${attackBonus}` : ''} ${target ? ` vs ${target} (AC ${targetAc})` : ''}`);
+      } else if (typeof instr.xp === 'number') {
+        gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
         characterStore.updateXp(instr.xp);
       } else if (typeof instr.hp === 'number') {
         const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-        gameStore.appendMessage('System', `❤️ HP changed: ${hpChange}`);
+        gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
         characterStore.updateHp(instr.hp);
         if (characterStore.isDead) characterStore.showDeathModal = true;
       }
@@ -106,16 +133,16 @@ export function useCombat() {
    */
   const handleCombatEnd = (victory: boolean, xpGained: number, enemiesDefeated: string[]): void => {
     if (victory) {
-      gameStore.appendMessage('System', '🏆 Victoire!');
+      gameStore.appendMessage('system', '🏆 Victoire!');
       if (enemiesDefeated.length > 0) {
-        gameStore.appendMessage('System', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
+        gameStore.appendMessage('system', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
       }
       if (xpGained > 0) {
-        gameStore.appendMessage('System', `✨ XP gagnés: ${xpGained}`);
+        gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
         characterStore.updateXp(xpGained);
       }
     } else {
-      gameStore.appendMessage('System', '💀 Combat terminé.');
+      gameStore.appendMessage('system', '💀 Combat terminé.');
     }
     combatStore.clearCombat();
   };
@@ -129,11 +156,11 @@ export function useCombat() {
 
     try {
       await combatService.endCombat(character.characterId);
-      gameStore.appendMessage('System', '🏃 Vous avez fui le combat.');
+      gameStore.appendMessage('system', '🏃 Vous avez fui le combat.');
       combatStore.clearCombat();
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to flee';
-      gameStore.appendMessage('System', `❌ Erreur: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
     }
   };
 
@@ -145,7 +172,9 @@ export function useCombat() {
     if (!character) return false;
 
     try {
+      console.log('[useCombat] checking combat status for', character.characterId);
       const status = await combatStore.fetchStatus(character.characterId);
+      console.log('[useCombat] fetched combat status', status);
       return status.inCombat;
     } catch {
       return false;

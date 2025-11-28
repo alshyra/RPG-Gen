@@ -31,11 +31,33 @@ export class ConversationService {
 
     const { data, error } = await apiClient.POST('/api/chat/{characterId}', {
       params: { path: { characterId: this.characterId } },
-      body: { message },
+      body: {
+        role: 'user',
+        instructions: [],
+        narrative: message,
+      },
     });
 
     if (error || !data) {
       throw new Error('Failed to send message');
+    }
+
+    return data;
+  }
+
+  /**
+   * Send a structured chat message object (role, narrative, instructions)
+   */
+  async sendStructuredMessage(message: { role: 'user' | 'assistant' | 'system'; narrative: string; instructions?: any[] }) {
+    if (!this.characterId) throw new Error('Game not started. Call startGame first.');
+
+    const { data, error } = await apiClient.POST('/api/chat/{characterId}', {
+      params: { path: { characterId: this.characterId } },
+      body: message,
+    });
+
+    if (error || !data) {
+      throw new Error('Failed to send structured message');
     }
 
     return data;
