@@ -1,64 +1,6 @@
-import { Candidate, Chat, Content, GenerateContentResponse, GoogleGenAI, Part } from '@google/genai';
-import { Injectable, Logger } from '@nestjs/common';
-
-const extractTextFromParts = (parts?: Part[]): string => parts?.[0]?.text || '';
-
-const extractTextFromArrayContent = (content: Content[]): string => {
-  const first = content[0];
-  const parts = first?.parts;
-  return Array.isArray(parts) ? extractTextFromParts(parts) : '';
-};
-
-const extractTextFromObjectContent = (obj: Content): string => {
-  const parts = obj.parts;
-  return Array.isArray(parts) ? extractTextFromParts(parts) : '';
-};
-
-const extractTextFromContent = (content?: Content): string =>
-  Array.isArray(content)
-    ? extractTextFromArrayContent(content)
-    : content && typeof content === 'object'
-      ? extractTextFromObjectContent(content)
-      : '';
-
-const extractTextFromFirstCandidate = (candidates: Candidate[]): string => {
-  const firstCand = candidates[0];
-  const content = firstCand?.content;
-  return extractTextFromContent(content);
-};
-
-const extractTextFromCandidates = (candidates: Candidate[]): string => {
-  const found = candidates.find((candidate) => {
-    const parts = candidate?.content?.parts;
-    return Array.isArray(parts) && parts[0]?.text;
-  });
-  if (!found) return '';
-
-  return extractTextFromParts(found?.content?.parts);
-};
-
-const parseJsonString = (str: string) => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-};
-
-const extractFromCandidate = (candidates: Candidate[]): string => {
-  const text = extractTextFromFirstCandidate(candidates);
-  return text || extractTextFromCandidates(candidates);
-};
-
-const textFromResponse = (data: GenerateContentResponse) => {
-  if (!data) return '';
-  if (typeof data === 'string') {
-    const parsed = parseJsonString(data);
-    return parsed ? textFromResponse(parsed) : data;
-  }
-  if (data.candidates && Array.isArray(data.candidates) && data.candidates.length)
-    return extractFromCandidate(data.candidates);
-};
+import { Chat, Content, GoogleGenAI } from '@google/genai';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { parseAIResponse } from './ai-parser.util.js';
 
 @Injectable()
 export class GeminiTextService {
@@ -78,7 +20,7 @@ export class GeminiTextService {
   initializeChatSession(
     sessionId: string,
     systemInstruction: string,
-    initialHistory: any[] = [],
+    initialHistory: Content[] = [],
   ) {
     if (this.chatClients.has(sessionId)) return;
 
@@ -94,29 +36,15 @@ export class GeminiTextService {
     this.chatClients.set(sessionId, chat);
   }
 
-  private extractResponseMetadata = (response: GenerateContentResponse) => ({
-    usage: response?.usageMetadata || null,
-    modelVersion: this.model,
-  });
-
-  private async handleChatMessage(chat: Chat, message: string) {
-    this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
-    const response = await chat.sendMessage({ message });
-    const text = textFromResponse(response);
-    const { usage, modelVersion } = this.extractResponseMetadata(response);
-    return { text, raw: response, usage, modelVersion };
-  }
-
   async sendMessage(sessionId: string, message: string) {
     const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
 
-    try {
-      return await this.handleChatMessage(chat, message);
-    } catch (e) {
-      this.logger.warn(`Chat sendMessage failed for ${sessionId}`, (e as Error)?.stack || e);
-      throw e;
-    }
+    this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
+    const { text } = await chat.sendMessage({ message });
+    this.logger.debug(`Received response for session ${sessionId}`, text);
+    if (!text) throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
+    return parseAIResponse(text);
   }
 
   clearChat(sessionId: string) {

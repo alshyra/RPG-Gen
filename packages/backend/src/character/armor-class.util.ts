@@ -1,4 +1,4 @@
-import { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { ArmorMeta } from './dto/InventoryItemMeta.js';
 import { ItemResponseDto } from './dto/ItemResponseDto.js';
 

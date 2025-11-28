@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-/**
- * Inventory instruction data
- */
-export class InventoryInstructionDto {
+export class InventoryInstructionMessageDto {
+  @ApiProperty({ description: 'Instruction type', enum: ['inventory'] })
+  type: 'inventory';
+
   @ApiProperty({ description: 'Inventory action', enum: [
     'add',
     'remove',

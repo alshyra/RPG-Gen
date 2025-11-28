@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-/**
- * Spell instruction data
- */
-export class SpellInstructionDto {
+export class SpellInstructionMessageDto {
+  @ApiProperty({ description: 'Instruction type', enum: ['spell'] })
+  type: 'spell';
+
   @ApiProperty({ description: 'Spell action', enum: [
     'learn',
     'cast',

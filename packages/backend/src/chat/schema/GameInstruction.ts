@@ -1,7 +1,4 @@
 import { Prop, Schema } from '@nestjs/mongoose';
-import { RollInstruction } from './RollInstruction.js';
-import { SpellInstruction } from './SpellInstruction.js';
-import { InventoryInstruction } from './InventoryInstruction.js';
 import { CombatStartEntry } from './CombatStartEntry.js';
 import { CombatEnd } from './CombatEnd.js';
 
@@ -16,23 +13,59 @@ export class GameInstruction {
     'combat_start',
     'combat_end',
   ] })
-  type?: string;
+  type: 'roll' | 'xp' | 'hp' | 'spell' | 'inventory' | 'combat_start' | 'combat_end';
 
-  @Prop({ required: false, type: RollInstruction })
-  roll?: RollInstruction;
+  // Roll instruction fields (flattened to top-level for DTO compatibility)
+  @Prop({ required: false, type: String })
+  dices?: string;
 
+  @Prop({ required: false, type: Object })
+  modifier?: string | number;
+
+  @Prop({ required: false, type: String })
+  description?: string;
+
+  @Prop({ required: false, type: String, enum: [
+    'advantage',
+    'disadvantage',
+    'none',
+  ] })
+  advantage?: 'advantage' | 'disadvantage' | 'none';
+
+  // Numeric instruction fields
   @Prop({ required: false, type: Number })
   hp?: number;
 
   @Prop({ required: false, type: Number })
   xp?: number;
 
-  @Prop({ required: false, type: SpellInstruction })
-  spell?: SpellInstruction;
+  // Spell instruction fields
+  // used both in spell and inventory instructions
+  @Prop({ required: false, type: String, enum: [
+    // spell actions
+    'learn',
+    'cast',
+    'forget',
+    // inventory actions
+    'add',
+    'remove',
+    'use',
+  ] })
+  action?: 'learn' | 'cast' | 'forget' | 'add' | 'remove' | 'use';
 
-  @Prop({ required: false, type: InventoryInstruction })
-  inventory?: InventoryInstruction;
+  @Prop({ required: false, type: String })
+  name?: string;
 
+  @Prop({ required: false, type: Number })
+  level?: number;
+
+  @Prop({ required: false, type: String })
+  school?: string;
+
+  @Prop({ required: false, type: Number })
+  quantity?: number;
+
+  // Combat instructions
   @Prop({ required: false, type: [CombatStartEntry] })
   combat_start?: CombatStartEntry[];
 

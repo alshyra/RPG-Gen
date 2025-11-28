@@ -46,12 +46,7 @@ export class CombatController {
       throw new BadRequestException('combat_start array with at least one enemy is required');
     }
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
-      throw new BadRequestException('Character not found');
-    }
-
-    const characterDto = this.characterService.toCharacterDto(character);
+    const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, body, userId);
 
     this.logger.log(`Combat started for character ${characterId} with ${body.combat_start.length} enemies`);
@@ -87,9 +82,6 @@ export class CombatController {
 
     // Verify character ownership
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
-      throw new BadRequestException('Character not found');
-    }
 
     if (!(await this.combatService.isInCombat(characterId))) {
       throw new BadRequestException('Character is not in combat');
@@ -163,9 +155,6 @@ export class CombatController {
 
     // Verify character ownership
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
-      throw new BadRequestException('Character not found');
-    }
 
     const inCombat = await this.combatService.isInCombat(characterId);
     if (!inCombat) {

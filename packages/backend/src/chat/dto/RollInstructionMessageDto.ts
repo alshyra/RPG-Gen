@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-/**
- * Roll instruction data
- */
-export class RollInstructionDto {
+export class RollInstructionMessageDto {
+  @ApiProperty({ description: 'Instruction type', enum: ['roll'] })
+  type: 'roll';
+
   @ApiProperty({ description: 'Dice expression (e.g., 1d20+5)' })
   dices: string;
 

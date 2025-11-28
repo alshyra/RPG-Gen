@@ -1,40 +1,24 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { CombatStartEntryDto, CombatEndDto } from '../../combat/dto/index.js';
-import { InventoryInstructionDto } from './InventoryInstructionDto.js';
-import { RollInstructionDto } from './RollInstructionDto.js';
-import { SpellInstructionDto } from './SpellInstructionDto.js';
+export * from './RollInstructionMessageDto.js';
+export * from './HpInstructionMessageDto.js';
+export * from './XpInstructionMessageDto.js';
+export * from './SpellInstructionMessageDto.js';
+export * from './InventoryInstructionMessageDto.js';
+export * from './CombatStartInstructionMessageDto.js';
+export * from './CombatEndInstructionMessageDto.js';
 
-/**
- * Game instruction from the AI
- */
-export class GameInstructionDto {
-  @ApiPropertyOptional({ description: 'Instruction type', enum: [
-    'roll',
-    'xp',
-    'hp',
-    'spell',
-    'inventory',
-  ] })
-  type?: string;
+import type { RollInstructionMessageDto } from './RollInstructionMessageDto.js';
+import type { HpInstructionMessageDto } from './HpInstructionMessageDto.js';
+import type { XpInstructionMessageDto } from './XpInstructionMessageDto.js';
+import type { SpellInstructionMessageDto } from './SpellInstructionMessageDto.js';
+import type { InventoryInstructionMessageDto } from './InventoryInstructionMessageDto.js';
+import type { CombatStartInstructionMessageDto } from './CombatStartInstructionMessageDto.js';
+import type { CombatEndInstructionMessageDto } from './CombatEndInstructionMessageDto.js';
 
-  @ApiPropertyOptional({ description: 'Roll instruction data', type: RollInstructionDto })
-  roll?: RollInstructionDto;
-
-  @ApiPropertyOptional({ description: 'HP change' })
-  hp?: number;
-
-  @ApiPropertyOptional({ description: 'XP gained' })
-  xp?: number;
-
-  @ApiPropertyOptional({ description: 'Spell instruction', type: SpellInstructionDto })
-  spell?: SpellInstructionDto;
-
-  @ApiPropertyOptional({ description: 'Inventory instruction', type: InventoryInstructionDto })
-  inventory?: InventoryInstructionDto;
-
-  @ApiPropertyOptional({ description: 'Combat start entries', type: [CombatStartEntryDto] })
-  combat_start?: CombatStartEntryDto[];
-
-  @ApiPropertyOptional({ description: 'Combat end result', type: CombatEndDto })
-  combat_end?: CombatEndDto;
-}
+export type GameInstructionDto
+  = | RollInstructionMessageDto
+    | HpInstructionMessageDto
+    | XpInstructionMessageDto
+    | SpellInstructionMessageDto
+    | InventoryInstructionMessageDto
+    | CombatStartInstructionMessageDto
+    | CombatEndInstructionMessageDto;

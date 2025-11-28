@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -14,17 +13,12 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { calculateArmorClass } from '../character/armor-class.util.js';
-import { CharacterService } from '../character/character.service.js';
-import { cleanNarrativeText, parseGameResponse } from '../external/game-parser.util.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { ConversationService } from './conversation.service.js';
-import { GameInstructionProcessor } from './game-instruction.processor.js';
-import { DiceThrowDto } from '../dice/dice.dto.js';
-import { ChatMessageDto, ChatRequestDto } from './dto/index.js';
+import { ChatMessageDto } from './dto/index.js';
+import { CharacterService } from 'src/character/character.service.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
@@ -36,208 +30,58 @@ const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'cha
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
   private systemPrompt: string;
-  private scenarioPrompt: string;
   constructor(
     private readonly geminiTexteService: GeminiTextService,
     private readonly conversationService: ConversationService,
-    private readonly gameInstructionProcessor: GameInstructionProcessor,
     private readonly characterService: CharacterService,
   ) {
-    this.loadSystemPrompt().then((systemPrompt) => {
-      this.systemPrompt = systemPrompt;
-      this.logger.log(
-        `System prompt loaded (${systemPrompt.length} chars)`,
-      );
-    });
-    this.loadScenarii().then((scenarioPrompt) => {
-      this.scenarioPrompt = scenarioPrompt;
-      this.logger.log(
-        `Scenario prompt loaded (${scenarioPrompt.length} chars)`,
-      );
-    });
+    Promise.all([
+      this.loadSystemPrompt(),
+      this.loadScenarii(),
+    ])
+      .then(([
+        systemPrompt,
+        scenarioPrompt,
+      ]) => {
+        this.systemPrompt = systemPrompt + '\n\n' + scenarioPrompt;
+        this.logger.log('System prompt and scenario loaded successfully');
+      });
   }
 
   private async loadSystemPrompt(): Promise<string> {
-    try {
-      this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
-      return await readFile(TEMPLATE_PATH, 'utf8');
-    } catch {
-      return '';
-    }
+    this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
+    return await readFile(TEMPLATE_PATH, 'utf8');
   }
 
   private async loadScenarii(): Promise<string> {
-    try {
-      this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
-      return await readFile(SCENARIO_PATH, 'utf8');
-    } catch {
-      return '';
-    }
-  }
-
-  private getAbilityScore(character: CharacterResponseDto, key: string): number {
-    let score = character[key];
-    if (typeof score === 'number') return score;
-    score = character[key.toLowerCase()];
-    if (typeof score === 'number') return score;
-    score = character.scores?.[key];
-    if (typeof score === 'number') return score;
-    score = character.scores?.[key.toLowerCase()];
-    return typeof score === 'number' ? score : 10;
-  }
-
-  private buildCharacterSummary(character: CharacterResponseDto): string {
-    const armorClass = calculateArmorClass(character);
-    let summary = `
-Character Information:
-- Name: ${character.name || 'Unknown'}
-- Race: ${typeof character.race === 'object' ? character.race?.name : character.race || 'Unknown'}
-- Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
-- Gender: ${character.gender || 'Unknown'}
-- HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
-- AC: ${armorClass}
-- XP: ${character.totalXp || 0}
-- Level: 1
-- Stats:
-STR ${this.getAbilityScore(character, 'Str')},
-DEX ${this.getAbilityScore(character, 'Dex')},
-CON ${this.getAbilityScore(character, 'Con')},
-INT ${this.getAbilityScore(character, 'Int')},
-WIS ${this.getAbilityScore(character, 'Wis')},
-CHA ${this.getAbilityScore(character, 'Cha')}
-`;
-
-    // Add spells if character has any
-    if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
-    }
-
-    // Add inventory if character has any
-    if (character.inventory && character.inventory.length > 0) {
-      summary += `- Inventory: ${character.inventory.map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`).join(', ')}\n`;
-    }
-
-    return summary;
-  }
-
-  private async processUserMessage(
-    userId: string,
-    characterId: string,
-    userText: string,
-  ) {
-    this.logger.log(
-      `Processing message for character ${characterId}: "${userText.substring(0, 50)}..."`,
-    );
-    const userMsg: ChatMessageDto = {
-      role: 'user',
-      narrative: userText,
-    };
-    await this.conversationService.append(userId, characterId, userMsg);
-
-    const history = await this.conversationService.getHistory(userId, characterId);
-    // this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, history);
-
-    const resp = await this.geminiTexteService.sendMessage(characterId, userText);
-
-    // Save assistant response
-    const assistantMsg: ChatMessageDto = {
-      role: 'assistant',
-      narrative: resp.text || '',
-    };
-    await this.conversationService.append(userId, characterId, assistantMsg);
-
-    return assistantMsg;
+    this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
+    return await readFile(SCENARIO_PATH, 'utf8');
   }
 
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
-  @ApiBody({ type: ChatRequestDto })
+  @ApiBody({ type: ChatMessageDto })
   @ApiResponse({ status: 201, description: 'Chat message (assistant) with narrative and instructions', type: ChatMessageDto })
   @ApiResponse({ status: 400, description: 'Invalid request' })
   @ApiResponse({ status: 500, description: 'Chat processing failed' })
   async chat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
-    @Body() body: unknown,
-    @Body('message') message: string,
+    @Body() chatMessageDto: ChatMessageDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-    this.logger.log(`Received chat request for characterId ${characterId} with message: ${message}...`);
-    if (!message) throw new BadRequestException('message required');
-    if (!characterId) throw new BadRequestException('characterId required');
+    this.logger.log(`Received chat request for characterId ${characterId} with message: ${chatMessageDto}...`);
 
-    try {
-      const assistantMsg = await this.processUserMessage(userId, characterId, message || '');
-      const parsed = parseGameResponse(assistantMsg.narrative || '').instructions;
-      // Apply instructions server-side (HP/XP/inventory/spell/combat). Roll instructions are left pending.
-      await this.gameInstructionProcessor.processInstructions(userId, characterId, parsed);
-
-      const response: ChatMessageDto = {
-        role: 'assistant',
-        narrative: cleanNarrativeText(assistantMsg.narrative || ''),
-        instructions: parsed,
-      };
-      return response;
-    } catch (e) {
-      throw new InternalServerErrorException((e as Error)?.message || 'Chat failed');
-    }
-  }
-
-  @Post(':characterId/roll')
-  @ApiOperation({ summary: 'Roll dice expression for a chat-related instruction' })
-  @ApiResponse({ status: 200, description: 'Dice throw result', type: DiceThrowDto })
-  async roll(
-    @Req() req: Request,
-    @Param('characterId') characterId: string,
-    @Body('expr') expr: string,
-    @Body('advantage') advantage: 'advantage' | 'disadvantage' | 'none' = 'none',
-  ) {
-    if (!expr) throw new BadRequestException('expr required');
-    try {
-      const dice = new (await import('../dice/dice.controller.js')).DiceController();
-      return dice.rollDiceExpr(expr, undefined, advantage);
-    } catch (e) {
-      throw new InternalServerErrorException((e as Error)?.message || 'Roll failed');
-    }
-  }
-
-  private async startChat(
-    userId: string,
-    characterId: string,
-  ): Promise<ChatMessageDto> {
-    this.geminiTexteService.initializeChatSession(characterId, this.systemPrompt, []);
-
-    const characterDoc = await this.characterService.findByCharacterId(userId, characterId);
-    if (!characterDoc)
-      throw new BadRequestException('Character not found for chat initialization');
-    const character = this.characterService.toCharacterDto(characterDoc);
-    const initMessage = `${this.systemPrompt}\n\n${this.scenarioPrompt}\n\n${this.buildCharacterSummary(character)}`;
-
-    const initResp = await this.geminiTexteService.sendMessage(characterId, initMessage);
-    const initMsg: ChatMessageDto = {
-      role: 'assistant',
-      narrative: initResp.text || '',
-    };
-
-    await this.conversationService.append(userId, characterId, initMsg);
-    return initMsg;
-  }
-
-  private respondToChat(characterId: string, history: any[]) {
-    type MessageLike = { narrative?: string; text?: string };
+    const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
+    const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
-      this.systemPrompt,
-      history.map(m => ({
-        role: m.role === 'assistant' ? 'model' : m.role,
-        parts: [{ text: ((m as MessageLike).narrative || (m as MessageLike).text) || '' }],
-      })),
+      `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`,
+      previousChatMessages,
     );
-    this.logger.log(`History loaded for character ${characterId}: ${history.length} messages`);
-    return history.map(msg =>
-      msg.role === 'assistant' ? { ...msg, ...parseGameResponse(((msg as MessageLike).narrative || (msg as MessageLike).text) || '') } : msg,
-    );
+    await this.conversationService.append(userId, characterId, chatMessageDto);
+    return this.getGMResponse(userId, characterId, chatMessageDto.narrative);
   }
 
   @Get('/:characterId/history')
@@ -252,16 +96,32 @@ CHA ${this.getAbilityScore(character, 'Cha')}
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
-    try {
-      const messages = await this.conversationService.getHistory(userId, characterId);
-      this.logger.debug(`Retrieved history for character ${characterId}`, messages);
-      if (!messages?.length) {
-        return await this.startChat(userId, characterId);
-      }
-      return this.respondToChat(characterId, messages);
-    } catch (e) {
-      this.logger.error('History retrieval failed', (e as Error)?.stack || e, 'ChatController');
-      throw new InternalServerErrorException((e as Error)?.message || 'Failed to retrieve history');
-    }
+    const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    this.geminiTexteService.initializeChatSession(
+      characterId,
+      `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`,
+      previousChatMessages,
+    );
+    return this.conversationService.getHistory(userId, characterId);
+  }
+
+  private async getGMResponse(
+    userId: string,
+    characterId: string,
+    userText: string,
+  ) {
+    const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
+    await this.conversationService.append(userId, characterId, {
+      role: 'assistant',
+      narrative: parsed.text || '',
+      instructions: parsed.instructions || [],
+    });
+
+    return {
+      role: 'assistant',
+      narrative: parsed.text || '',
+      instructions: parsed.instructions || [],
+    };
   }
 }

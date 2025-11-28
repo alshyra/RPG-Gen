@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Character, CharacterDocument, Item } from './schema/index.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
-import { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
 
 @Injectable()
@@ -47,8 +47,12 @@ export class CharacterService {
     return this.characterModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
-  async findByCharacterId(userId: string, characterId: string): Promise<CharacterDocument | null> {
-    return this.characterModel.findOne({ userId, characterId }).exec();
+  async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
+    const doc = await this.characterModel.findOne({ userId, characterId }).exec();
+    if (!doc) {
+      throw new NotFoundException(`Character ${characterId} not found`);
+    }
+    return this.toCharacterDto(doc);
   }
 
   async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {

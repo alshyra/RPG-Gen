@@ -8,7 +8,7 @@ import { GeminiImageService } from '../external/image/gemini-image.service.js';
 import { UserDocument } from '../schemas/user.schema.js';
 import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
 import { ImageService } from './image.service.js';
-import { CharacterDocument } from '../character/schema/index.js';
+import type { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
@@ -53,13 +53,10 @@ export class ImageController {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
-
-    if (!character) throw new BadRequestException('Character not found');
-
     return await this.handleGenerateAvatar(userId, character);
   }
 
-  private async handleGenerateAvatar(userId: string, character: CharacterDocument) {
+  private async handleGenerateAvatar(userId: string, character: CharacterResponseDto) {
     try {
       // Generate avatar image
       const prompt = this.buildAvatarPrompt(character);
@@ -90,7 +87,7 @@ export class ImageController {
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 
-  private buildAvatarPrompt(character: CharacterDocument): string {
+  private buildAvatarPrompt(character: CharacterResponseDto): string {
     const characterContext: string[] = [];
     if (character.name) characterContext.push(`Name: ${character.name}`);
     if (character.gender) characterContext.push(`Gender: ${character.gender}`);

@@ -1,9 +1,24 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { GameInstructionDto } from './GameInstructionDto.js';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import {
+  RollInstructionMessageDto,
+  HpInstructionMessageDto,
+  XpInstructionMessageDto,
+  SpellInstructionMessageDto,
+  InventoryInstructionMessageDto,
+  CombatStartInstructionMessageDto,
+  CombatEndInstructionMessageDto,
+  GameInstructionDto,
+} from './GameInstructionDto.js';
 
-/**
- * Chat message in history
- */
+@ApiExtraModels(
+  RollInstructionMessageDto,
+  HpInstructionMessageDto,
+  XpInstructionMessageDto,
+  SpellInstructionMessageDto,
+  InventoryInstructionMessageDto,
+  CombatStartInstructionMessageDto,
+  CombatEndInstructionMessageDto,
+)
 export class ChatMessageDto {
   @ApiProperty({ description: 'Message role', enum: [
     'user',
@@ -15,6 +30,20 @@ export class ChatMessageDto {
   @ApiProperty({ description: 'Narrative text (for assistant messages)' })
   narrative: string;
 
-  @ApiPropertyOptional({ description: 'Game instructions (for assistant messages)', type: [GameInstructionDto] })
+  @ApiPropertyOptional({
+    description: 'Game instructions (for assistant messages)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(RollInstructionMessageDto) },
+        { $ref: getSchemaPath(HpInstructionMessageDto) },
+        { $ref: getSchemaPath(XpInstructionMessageDto) },
+        { $ref: getSchemaPath(SpellInstructionMessageDto) },
+        { $ref: getSchemaPath(InventoryInstructionMessageDto) },
+        { $ref: getSchemaPath(CombatStartInstructionMessageDto) },
+        { $ref: getSchemaPath(CombatEndInstructionMessageDto) },
+      ],
+    },
+  })
   instructions?: GameInstructionDto[];
 }
