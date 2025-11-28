@@ -35,12 +35,21 @@ type GameStore = ReturnType<typeof useGameStore>;
 
 const handleAdditionalRoll = (instr: RollInstructionMessageDto, gameStore: GameStore): void => {
   gameStore.pendingInstruction = instr;
-  let message = `🎲 Roll needed: ${instr.dices}${instr.modifier ? ` - ${JSON.stringify(instr.modifier)}` : ''}`;
-  if (instr.advantage === 'advantage') {
-    message += ' (with ADVANTAGE ↑)';
-  } else if (instr.advantage === 'disadvantage') {
-    message += ' (with DISADVANTAGE ↓)';
+  const meta: Record<string, any> | undefined = (instr as any).meta;
+  const action = meta?.action as string | undefined;
+  const targetName = meta?.target as string | undefined;
+  const targetAc = typeof meta?.targetAc === 'number' ? meta.targetAc : undefined;
+  const modifierLabel = typeof instr.modifier === 'number' ? ` +${instr.modifier}` : typeof instr.modifier === 'string' ? ` (${instr.modifier})` : '';
+  const advLabel = instr.advantage === 'advantage' ? ' (ADVANTAGE ↑)' : instr.advantage === 'disadvantage' ? ' (DISADVANTAGE ↓)' : '';
+
+  let message = `🎲 Roll needed: ${instr.dices}${modifierLabel}${advLabel}`;
+  if (action === 'attack') {
+    message = `⚔️ Attack roll${targetName ? ` vs ${targetName}` : ''}${typeof targetAc === 'number' ? ` (AC ${targetAc})` : ''}: ${instr.dices}${modifierLabel}${advLabel}`;
+    if (meta?.damageDice) message += ` — if hit: damage ${meta.damageDice}${meta.damageBonus ? ` +${meta.damageBonus}` : ''}`;
+  } else if (action === 'damage') {
+    message = `💥 Damage roll for ${targetName ?? 'target'}: ${instr.dices}${modifierLabel}`;
   }
+
   gameStore.appendMessage('system', message);
 };
 
