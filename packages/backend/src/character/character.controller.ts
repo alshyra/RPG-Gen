@@ -16,7 +16,7 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { CharacterService } from './character.service.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import {
@@ -26,7 +26,6 @@ import {
   GrantInspirationBodyDto,
   InspirationResponseDto,
   KillCharacterBodyDto,
-  MessageResponseDto,
   RemoveInventoryBodyDto,
   UpdateCharacterRequestDto,
 } from './dto/index.js';

@@ -5,7 +5,7 @@ import type { CharacterResponseDto } from '../character/dto/index.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import { DiceController } from '../dice/dice.controller.js';
 import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
-import { CombatSession, CombatSessionDocument } from '../schemas/combat-session.schema.js';
+import { CombatSession, CombatSessionDocument } from './combat-session.schema.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
 import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';

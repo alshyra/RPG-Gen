@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
 import { ImageService } from './image.service.js';
 import type { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';

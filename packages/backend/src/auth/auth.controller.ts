@@ -4,7 +4,7 @@ import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from './google-auth.guard.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { AuthService } from './auth.service.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from './user.schema.js';
 import { AuthProfileDto } from './auth.profile.dto.js';
 
 @ApiTags('auth')

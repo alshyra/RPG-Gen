@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CombatController } from './combat.controller.js';
 import { CombatService } from './combat.service.js';
 import { CharacterModule } from '../character/character.module.js';
-import { CombatSession, CombatSessionSchema } from '../schemas/combat-session.schema.js';
+import { CombatSession, CombatSessionSchema } from './combat-session.schema.js';
 
 @Module({
   imports: [

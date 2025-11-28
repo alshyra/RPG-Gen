@@ -55,9 +55,9 @@ export class CharacterService {
     return this.toCharacterDto(doc);
   }
 
+  // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {
     const updateDoc: any = {};
-
     // Build update document
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
@@ -74,7 +74,7 @@ export class CharacterService {
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
-
+    updateDoc.
     const character = await this.characterModel.findOneAndUpdate(
       { userId, characterId },
       { $set: updateDoc },

@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { CombatService } from './combat.service.js';
 import { TurnResultWithInstructionsDto, CombatEndResponseDto } from './dto/index.js';
 import { CombatStartRequestDto, AttackRequestDto, CombatStateDto } from './dto/index.js';

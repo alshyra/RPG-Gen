@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   Logger,
   Param,
   Post,
@@ -15,10 +14,11 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { ConversationService } from './conversation.service.js';
 import { ChatMessageDto } from './dto/index.js';
 import { CharacterService } from 'src/character/character.service.js';
+import { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'chat.scenario.txt');
@@ -77,7 +77,7 @@ export class ChatController {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
-      `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`,
+      this.initPrompt(character),
       previousChatMessages,
     );
     await this.conversationService.append(userId, characterId, chatMessageDto);
@@ -100,10 +100,14 @@ export class ChatController {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
-      `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`,
+      this.initPrompt(character),
       previousChatMessages,
     );
     return this.conversationService.getHistory(userId, characterId);
+  }
+
+  private initPrompt(character: CharacterResponseDto) {
+    return `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`;
   }
 
   private async getGMResponse(

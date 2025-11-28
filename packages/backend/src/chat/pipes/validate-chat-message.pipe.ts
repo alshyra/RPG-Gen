@@ -17,10 +17,9 @@ export class ValidateChatMessagePipe implements PipeTransform {
     if (!isRole(value.role)) throw new BadRequestException('Invalid role');
     if (typeof value.narrative !== 'string') throw new BadRequestException('narrative must be a string');
 
-    if (value.instructions !== undefined) {
-      if (!Array.isArray(value.instructions)) throw new BadRequestException('instructions must be an array');
-      if (value.instructions.some(instr => !isInstruction(instr))) throw new BadRequestException('invalid instruction shape');
-    }
+    if (value.instructions && !Array.isArray(value.instructions)) throw new BadRequestException('instructions must be an array');
+    if (value.instructions && !value.instructions.every(isInstruction)) throw new BadRequestException('invalid instruction shape');
+
     value.narrative = value.narrative.trim();
     return value;
   }
