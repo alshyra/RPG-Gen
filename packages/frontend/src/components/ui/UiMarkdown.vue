@@ -11,7 +11,7 @@ import { marked } from 'marked';
 import { computed } from 'vue';
 
 const props = defineProps({
-  text: {
+  narrative: {
     type: String,
     required: true,
   },
@@ -30,7 +30,7 @@ marked.setOptions({
   walkTokens: null,
 });
 
-const renderedMarkdown = computed(() => marked(props.text));
+const renderedMarkdown = computed(() => marked(props.narrative));
 </script>
 
 <style scoped>

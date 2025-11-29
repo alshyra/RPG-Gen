@@ -35,7 +35,7 @@
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
-import type { SkillDto } from '@rpg-gen/shared';
+import type { SkillResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
@@ -65,7 +65,7 @@ const setSkillProficiency = async (skill: string, isProficient: boolean) => {
 
   // If skill exists, update its proficient flag; otherwise add it when setting true
   const present = existingSkills.find(s => s.name === skill);
-  let updated: SkillDto[];
+  let updated: SkillResponseDto[];
   if (present) {
     updated = existingSkills.map(s => (s.name === skill ? { ...s, proficient: isProficient } : s));
   } else if (isProficient) {

@@ -1,9 +1,4 @@
-/**
- * Chat command parser utility
- * Parses commands like /cast spell1, /equip sword, /attack target, /use item
- */
-
-import type { ItemDto, SpellDto } from '@rpg-gen/shared';
+import { ItemResponseDto, SpellResponseDto } from '@rpg-gen/shared';
 
 export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
 
@@ -21,7 +16,7 @@ export interface CommandDefinition {
 export interface ArgumentSuggestion {
   name: string;
   description?: string;
-  type: 'spell' | 'item';
+  type: 'spell' | 'item' | 'target';
 }
 
 export type SuggestionType = 'command' | 'argument';
@@ -128,9 +123,10 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
 export const getArgumentSuggestions = (
   command: CommandType,
   partialArg: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
+  spells: SpellResponseDto[] = [],
+  inventory: ItemResponseDto[] = [],
   characterLevel: number = 1,
+  validTargets: string[] = [],
 ): ArgumentSuggestion[] => {
   const partial = partialArg.toLowerCase();
 
@@ -177,8 +173,10 @@ export const getArgumentSuggestions = (
         }));
 
     case 'attack':
-      // For attack, we don't have a list of targets, so no suggestions
-      return [];
+      // For attack, suggest valid targets (enemy names) if provided
+      return validTargets
+        .filter(name => name.toLowerCase().includes(partial))
+        .map(name => ({ name, type: 'target' as const }));
 
     default:
       return [];
@@ -194,9 +192,10 @@ export const getArgumentSuggestions = (
  */
 export const getAllSuggestions = (
   input: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
+  spells: SpellResponseDto[] = [],
+  inventory: ItemResponseDto[] = [],
   characterLevel: number = 1,
+  validTargets: string[] = [],
 ): SuggestionResult => {
   const trimmed = input.trim();
 
@@ -225,7 +224,14 @@ export const getAllSuggestions = (
   const { command, argumentPartial } = parseActiveCommand(input);
 
   if (command) {
-    const argumentSuggestions = getArgumentSuggestions(command, argumentPartial, spells, inventory, characterLevel);
+    const argumentSuggestions = getArgumentSuggestions(
+      command,
+      argumentPartial,
+      spells,
+      inventory,
+      characterLevel,
+      validTargets,
+    );
     return {
       type: 'argument',
       commandSuggestions: [],

@@ -16,9 +16,10 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { CharacterService } from './character.service.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import { EquipInventoryDto } from './dto/EquipInventoryDto.js';
 import {
   CharacterResponseDto,
   CreateCharacterBodyDto,
@@ -26,7 +27,6 @@ import {
   GrantInspirationBodyDto,
   InspirationResponseDto,
   KillCharacterBodyDto,
-  MessageResponseDto,
   RemoveInventoryBodyDto,
   UpdateCharacterRequestDto,
 } from './dto/index.js';
@@ -87,9 +87,7 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) throw new NotFoundException('Character not found');
-
-    return this.characterService.toCharacterDto(character);
+    return character;
   }
 
   @Put(':characterId')
@@ -112,14 +110,14 @@ export class CharacterController {
 
   @Delete(':characterId')
   @ApiOperation({ summary: 'Delete a character' })
-  @ApiResponse({ status: 200, description: 'Character deleted', type: MessageResponseDto })
+  @ApiResponse({ status: 200, description: 'Character deleted', type: Object })
   @ApiResponse({ status: 404, description: 'Character not found' })
   async delete(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
 
     await this.characterService.delete(userId, characterId);
-    return { message: 'Character deleted' };
+    return { ok: true };
   }
 
   @Post(':characterId/kill')
@@ -157,6 +155,21 @@ export class CharacterController {
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
     return this.characterService.toCharacterDto(character);
+  }
+
+  @Post(':characterId/inventory/equip')
+  @ApiOperation({ summary: 'Equip an item by definitionId (weapon only)' })
+  @ApiBody({ type: EquipInventoryDto })
+  @ApiResponse({ status: 200, description: 'Character updated with equipped item', type: CharacterResponseDto })
+  async equipInventory(
+    @Req() req: Request,
+    @Param('characterId') characterId: string,
+    @Body() body: { definitionId: string },
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id.toString();
+    const character = await this.characterService.equipInventoryItem(userId, characterId, body.definitionId);
+    return character;
   }
 
   @Patch(':characterId/inventory/:itemId')
@@ -215,8 +228,6 @@ export class CharacterController {
     }
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) throw new NotFoundException('Character not found');
-
     // Cap inspiration points at 5 (D&D 5e rule)
     const currentPoints = character.inspirationPoints || 0;
     const newPoints = Math.min(currentPoints + amount, 5);
@@ -244,8 +255,6 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) throw new NotFoundException('Character not found');
-
     const currentPoints = character.inspirationPoints || 0;
     if (currentPoints <= 0) {
       throw new BadRequestException('No inspiration points available');

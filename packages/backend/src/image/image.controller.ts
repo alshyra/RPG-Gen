@@ -1,15 +1,14 @@
 import { BadRequestException, Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import type { ImageRequest } from '@rpg-gen/shared';
 import type { Request } from 'express';
 import Joi from 'joi';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
-import { UserDocument } from '../schemas/user.schema.js';
+import { UserDocument } from '../auth/user.schema.js';
 import { AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto } from './dto/image-response.dto.js';
 import { ImageService } from './image.service.js';
-import { CharacterDocument } from 'src/character/schema/index.js';
+import type { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 
 const schema = Joi.object({
   token: Joi.string().allow('').optional(),
@@ -32,7 +31,7 @@ export class ImageController {
   @ApiOperation({ summary: 'Generate image from prompt' })
   @ApiBody({ type: ImageRequestDto })
   @ApiResponse({ status: 400, description: 'Image generation not implemented' })
-  async generate(@Body() body: ImageRequest) {
+  async generate(@Body() body: ImageRequestDto) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
     // Image generation not implemented yet
@@ -54,13 +53,10 @@ export class ImageController {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
-
-    if (!character) throw new BadRequestException('Character not found');
-
     return await this.handleGenerateAvatar(userId, character);
   }
 
-  private async handleGenerateAvatar(userId: string, character: CharacterDocument) {
+  private async handleGenerateAvatar(userId: string, character: CharacterResponseDto) {
     try {
       // Generate avatar image
       const prompt = this.buildAvatarPrompt(character);
@@ -91,7 +87,7 @@ export class ImageController {
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 
-  private buildAvatarPrompt(character: CharacterDocument): string {
+  private buildAvatarPrompt(character: CharacterResponseDto): string {
     const characterContext: string[] = [];
     if (character.name) characterContext.push(`Name: ${character.name}`);
     if (character.gender) characterContext.push(`Gender: ${character.gender}`);

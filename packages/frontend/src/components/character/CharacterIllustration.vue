@@ -23,7 +23,8 @@ const normalize = (v: any, fallback: string) => {
   if (typeof v === 'object') {
     // prefer id, then name
     if (v.id) return String(v.id).toLowerCase();
-    if (v.name) return String(v.name).toLowerCase().replace(/\s+/g, '-');
+    if (v.name) return String(v.name).toLowerCase()
+      .replace(/\s+/g, '-');
     return fallback;
   }
   return String(v).toLowerCase();

@@ -34,7 +34,8 @@ describe('Authentication Flow', () => {
     cy.contains('Se connecter avec Google').should('be.visible');
 
     // Check for Google OAuth button
-    cy.get('button').contains('Se connecter avec Google').should('be.visible');
+    cy.get('button').contains('Se connecter avec Google')
+      .should('be.visible');
   });
 
   it('should protect home route (world selector)', () => {
@@ -101,7 +102,9 @@ describe('Authentication Flow', () => {
       cy.visit('/home');
 
       // Click on user profile avatar to open menu
-      cy.get('button').find('img[alt="Test User"]').parent().click();
+      cy.get('button').find('img[alt="Test User"]')
+        .parent()
+        .click();
 
       // Look for logout button
       cy.contains('Se déconnecter').should('be.visible');

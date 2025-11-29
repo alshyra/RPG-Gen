@@ -130,7 +130,7 @@
 
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
-import type { LevelUpResult } from '@rpg-gen/shared';
+import type { LevelUpResult } from '../../services/dndLevelUpService';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';

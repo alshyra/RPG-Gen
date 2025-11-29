@@ -140,7 +140,8 @@ const currentStep = computed({
   },
 });
 
-const chosenSkills = computed(() => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0);
+const chosenSkills = computed(() => (currentCharacter.value?.skills || [])
+  .filter(skill => !!skill.proficient).length || 0);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {

@@ -1,0 +1,3 @@
+Ceci est une instruction pour faciliter la gestion des scénarios dans le backend.
+
+Le joueur arrive dans une arene face à 2 gobelins, le combat commence immédiatement.

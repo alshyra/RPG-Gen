@@ -112,7 +112,13 @@
         <router-view />
       </main>
 
-      <!-- Chat Bar (aligned with messages in grid) -->
+      <div
+        v-if="inCombat"
+        class="lg:col-start-4 lg:col-span-9"
+      >
+        <CombatPanel />
+      </div>
+
       <div class="lg:col-start-4 lg:col-span-9">
         <ChatBar
           @send="handleSendMessage"
@@ -154,20 +160,24 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { characterServiceApi } from '../apis/characterApi';
 import AbilityScores from '../components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '../components/character/CharacterPortrait.vue';
+import CombatPanel from '../components/game/CombatPanel.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
 import UiButton from '../components/ui/UiButton.vue';
+import { useCombat } from '../composables/useCombat';
 import { useGameCommands } from '../composables/useGameCommands';
 import { useGameMessages } from '../composables/useGameMessages';
 import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
-import { isCommand } from '../utils/chatCommands';
-import { characterServiceApi } from '../apis/characterApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
+import { isCommand } from '../utils/chatCommands';
+import { storeToRefs } from 'pinia';
+import { useCombatStore } from '@/stores/combatStore';
 
 // State
 const router = useRouter();
@@ -182,7 +192,9 @@ const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { confirmRoll } = useGameRolls();
 const { handleInput } = useGameCommands();
-
+const combat = useCombat();
+const combatStore= useCombatStore();
+const {inCombat} = storeToRefs(combatStore);
 /**
  * Handle sending a message - either as a command or regular message
  */
@@ -207,6 +219,14 @@ const toggleSidebar = () => {
 onMounted(async () => {
   try {
     await startGame();
+    // After session started, check backend combat status and initialize the combat store
+    try {
+      const wasInCombat = await combat.checkCombatStatus();
+      // Use console.log so messages appear even when DevTools filters out debug/verbose level
+      console.log('[GameView] combat status at startup', { wasInCombat });
+    } catch (err) {
+      console.warn('Failed to load combat status at startup', err);
+    }
   } catch (e) {
     gameStore.appendMessage('system', `Error: ${String(e)}`);
   }

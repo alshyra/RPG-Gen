@@ -62,6 +62,7 @@ describe('UiCard Component', () => {
       },
     });
 
-    cy.get('button').should('contain', 'Click me').and('be.visible');
+    cy.get('button').should('contain', 'Click me')
+      .and('be.visible');
   });
 });

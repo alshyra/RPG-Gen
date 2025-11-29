@@ -42,7 +42,9 @@ describe('Navigation', () => {
     cy.visit('/home');
     cy.wait('@getCharacters');
     // Resume the first character
-    cy.get('button').contains('Reprendre').first().click();
+    cy.get('button').contains('Reprendre')
+      .first()
+      .click();
 
     // If the character is in draft state the resume button leads to character-step;
     // if so, navigate to /game/:characterId explicitly; otherwise we should already be in /game/:id.
@@ -61,7 +63,8 @@ describe('Navigation', () => {
     cy.url().should('match', /\/game\/[A-Za-z0-9-]+.*$/);
 
     // Click the RPG Gemini title to go home
-    cy.get('h1').contains('RPG Gemini').click();
+    cy.get('h1').contains('RPG Gemini')
+      .click();
     cy.url().should('include', '/home');
   });
 

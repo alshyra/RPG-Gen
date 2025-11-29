@@ -3,7 +3,15 @@
  * Handles HP gain, ASI, features, and spell slots
  */
 
-import type { LevelUpResult } from '@rpg-gen/shared';
+export interface LevelUpResult {
+  success: boolean;
+  newLevel: number;
+  hpGain: number;
+  hasASI: boolean;
+  newFeatures: string[];
+  proficiencyBonus: number;
+  message: string;
+}
 
 interface ClassLevelUpRules {
   hpDie: number;

@@ -1,4 +1,4 @@
-import { CharacterDto } from '@rpg-gen/shared';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ref } from 'vue';
 import useAbilityScores from './useAbilityScores';
@@ -14,7 +14,7 @@ describe('useAbilityScores', () => {
     const abilities = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterDto;
+    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
     const { pointsUsed } = useAbilityScores();
     // 15 -> 9, 14 -> 7, 13 -> 5, 12 -> 4, 10 -> 2, 8 -> 0 => sum 27
     expect(pointsUsed.value).toBe(27);
@@ -24,7 +24,7 @@ describe('useAbilityScores', () => {
     const abilities = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterDto;
+    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
     const { formatMod } = useAbilityScores();
 
     expect(formatMod(18)).toBe('+4');
@@ -36,7 +36,7 @@ describe('useAbilityScores', () => {
     const abilities = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterDto;
+    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
 
     const { pointsUsed, applyPointBuyChange } = useAbilityScores();
 
@@ -53,7 +53,7 @@ describe('useAbilityScores', () => {
     const abilities = ref({ Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterDto;
+    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
     const { applyPointBuyChange } = useAbilityScores();
 
     // current cost = 9 + 9 + 7 = 25; upgrading Cha to 15 costs 9 -> 34 > 27

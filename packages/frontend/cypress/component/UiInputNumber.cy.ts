@@ -149,7 +149,8 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').should('not.be.disabled').click();
+      cy.contains('+').should('not.be.disabled')
+        .click();
       cy.wrap(null).then(() => {
         expect(onUpdate).to.have.been.calledWith(11);
       });
@@ -166,7 +167,8 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('-').should('not.be.disabled').click();
+      cy.contains('-').should('not.be.disabled')
+        .click();
       cy.wrap(null).then(() => {
         expect(onUpdate).to.have.been.calledWith(9);
       });

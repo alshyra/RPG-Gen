@@ -5,7 +5,7 @@
       :is-loading="isLoading || gameStore.sending"
       @click="onClick"
     >
-      {{ props.pendingInstruction?.roll ? 'Roll 🎲' : 'Envoyer' }}
+      {{ props.pendingInstruction?.type === 'roll' ? 'Roll 🎲' : 'Envoyer' }}
     </UiButton>
   </div>
 </template>
@@ -13,14 +13,14 @@
 <script setup lang="ts">
 import { useGameStore } from '@/stores/gameStore';
 import UiButton from '../ui/UiButton.vue';
-import { type GameInstruction } from '@rpg-gen/shared';
 import { ref } from 'vue';
+import type { RollInstructionMessageDto } from '@rpg-gen/shared';
 
 const emit = defineEmits<{
   (e: 'send'): void;
 }>();
 
-const props = defineProps<{ pendingInstruction?: GameInstruction | null; expr: string }>();
+const props = defineProps<{ pendingInstruction?: RollInstructionMessageDto | null; expr: string }>();
 
 const gameStore = useGameStore();
 const isLoading = ref(false);
@@ -31,9 +31,9 @@ const onClick = async () => {
   if (isLoading.value) return;
   isLoading.value = true;
   try {
-    if (props.pendingInstruction?.roll) {
+    if (props.pendingInstruction?.type === 'roll') {
       // Get advantage/disadvantage from the game instruction
-      const advantage = props.pendingInstruction.roll.advantage || 'none';
+      const advantage = props.pendingInstruction.advantage || 'none';
       await gameStore.doRoll(props.expr, advantage);
     } else {
       await send();

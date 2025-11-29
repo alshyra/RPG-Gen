@@ -22,7 +22,8 @@ describe('Home Page', () => {
 
   it('should display the world selector', () => {
     // The WorldSelector component should be present
-    cy.get('h1').contains('RPG Gemini').should('exist');
+    cy.get('h1').contains('RPG Gemini')
+      .should('exist');
   });
 
   it('should display message when no characters exist (or show characters if present)', () => {
@@ -63,16 +64,21 @@ describe('Home Page', () => {
       } else {
         cy.contains('Mes personnages').should('be.visible');
         // Ensure UI includes action buttons if characters exist
-        cy.get('button').filter(':contains("Reprendre")').should('have.length.gte', 1);
+        cy.get('button').filter(':contains("Reprendre")')
+          .should('have.length.gte', 1);
       }
     });
 
     // Should have resume and delete buttons for each character
-    cy.get('button').contains('Reprendre').should('exist');
-    cy.get('button').contains('Supprimer').should('exist');
+    cy.get('button').contains('Reprendre')
+      .should('exist');
+    cy.get('button').contains('Supprimer')
+      .should('exist');
     // At least one action button should be available for existing characters
-    cy.get('button').filter(':contains("Reprendre")').should('have.length.gte', 1);
-    cy.get('button').filter(':contains("Supprimer")').should('have.length.gte', 1);
+    cy.get('button').filter(':contains("Reprendre")')
+      .should('have.length.gte', 1);
+    cy.get('button').filter(':contains("Supprimer")')
+      .should('have.length.gte', 1);
 
     // Clean up: ensure we didn't leave extra test characters behind - optional but helpful.
     // We'll leave characters in CI for debugging; if you prefer cleanup, we could delete them here.

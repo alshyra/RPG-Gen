@@ -86,18 +86,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChatRequestDto"
+                "$ref": "#/components/schemas/ChatMessageDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Chat response with narrative and instructions",
+            "description": "Chat message (assistant) with narrative and instructions",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChatResponseDto"
+                  "$ref": "#/components/schemas/ChatMessageDto"
                 }
               }
             }
@@ -162,6 +162,68 @@
         "summary": "Get conversation history for a character",
         "tags": [
           "chat"
+        ]
+      }
+    },
+    "/api/rolls/{characterId}": {
+      "post": {
+        "operationId": "RollsController_submitRoll",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instructions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Processed instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pendingRolls": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit resolved roll(s) (non-chat) for processing",
+        "tags": [
+          "rolls"
         ]
       }
     },
@@ -328,7 +390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateCharacterRequestDto"
+                  "$ref": "#/components/schemas/CharacterResponseDto"
                 }
               }
             }
@@ -365,7 +427,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MessageResponseDto"
+                  "type": "object"
                 }
               }
             }
@@ -478,6 +540,52 @@
           }
         ],
         "summary": "Add an item to character's inventory",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/{characterId}/inventory/equip": {
+      "post": {
+        "operationId": "CharacterController_equipInventory",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipInventoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Character updated with equipped item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Equip an item by definitionId (weapon only)",
         "tags": [
           "characters"
         ]
@@ -726,6 +834,206 @@
         ]
       }
     },
+    "/api/combat/{characterId}/start": {
+      "post": {
+        "operationId": "CombatController_startCombat",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CombatStartRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CombatStateDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initialize combat with enemies",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
+    "/api/combat/{characterId}/attack": {
+      "post": {
+        "operationId": "CombatController_attack",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttackRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Execute player attack in combat",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
+    "/api/combat/{characterId}/resolve-roll": {
+      "post": {
+        "operationId": "CombatController_resolveRoll",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve a client-side roll (damage) and apply its effects",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
+    "/api/combat/{characterId}/status": {
+      "get": {
+        "operationId": "CombatController_getStatus",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CombatStateDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current combat status",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
+    "/api/combat/{characterId}/end": {
+      "post": {
+        "operationId": "CombatController_endCombat",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CombatEndResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Force end current combat (flee)",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
     "/api/dice": {
       "post": {
         "operationId": "DiceController_roll",
@@ -885,21 +1193,16 @@
           "picture"
         ]
       },
-      "ChatRequestDto": {
+      "RollInstructionMessageDto": {
         "type": "object",
         "properties": {
-          "message": {
+          "type": {
             "type": "string",
-            "description": "User message to send to the AI"
-          }
-        },
-        "required": [
-          "message"
-        ]
-      },
-      "RollInstructionDto": {
-        "type": "object",
-        "properties": {
+            "description": "Instruction type",
+            "enum": [
+              "roll"
+            ]
+          },
           "dices": {
             "type": "string",
             "description": "Dice expression (e.g., 1d20+5)"
@@ -923,12 +1226,60 @@
           }
         },
         "required": [
+          "type",
           "dices"
         ]
       },
-      "SpellInstructionDataDto": {
+      "HpInstructionMessageDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "hp"
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Amount of HP change"
+          }
+        },
+        "required": [
+          "type",
+          "hp"
+        ]
+      },
+      "XpInstructionMessageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "xp"
+            ]
+          },
+          "xp": {
+            "type": "number",
+            "description": "Amount of XP gained"
+          }
+        },
+        "required": [
+          "type",
+          "xp"
+        ]
+      },
+      "SpellInstructionMessageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "spell"
+            ]
+          },
           "action": {
             "type": "string",
             "description": "Spell action",
@@ -956,13 +1307,21 @@
           }
         },
         "required": [
+          "type",
           "action",
           "name"
         ]
       },
-      "InventoryInstructionDataDto": {
+      "InventoryInstructionMessageDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "inventory"
+            ]
+          },
           "action": {
             "type": "string",
             "description": "Inventory action",
@@ -986,105 +1345,130 @@
           }
         },
         "required": [
+          "type",
           "action",
           "name"
         ]
       },
-      "GameInstructionDto": {
+      "CombatStartEntryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Enemy name"
+          },
+          "hp": {
+            "type": "number",
+            "description": "Enemy HP"
+          },
+          "ac": {
+            "type": "number",
+            "description": "Enemy AC"
+          },
+          "attack_bonus": {
+            "type": "number",
+            "description": "Attack bonus (optional)"
+          },
+          "damage_dice": {
+            "type": "string",
+            "description": "Damage dice (optional)"
+          },
+          "damage_bonus": {
+            "type": "number",
+            "description": "Damage bonus (optional)"
+          }
+        },
+        "required": [
+          "name",
+          "hp",
+          "ac"
+        ]
+      },
+      "CombatStartInstructionMessageDto": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
             "description": "Instruction type",
             "enum": [
-              "roll",
-              "xp",
-              "hp",
-              "spell",
-              "inventory"
+              "combat_start"
             ]
           },
-          "roll": {
-            "description": "Roll instruction data",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RollInstructionDto"
-              }
-            ]
-          },
-          "hp": {
-            "type": "number",
-            "description": "HP change"
-          },
-          "xp": {
-            "type": "number",
-            "description": "XP gained"
-          },
-          "spell": {
-            "description": "Spell instruction",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SpellInstructionDataDto"
-              }
-            ]
-          },
-          "inventory": {
-            "description": "Inventory instruction",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/InventoryInstructionDataDto"
-              }
-            ]
-          }
-        }
-      },
-      "ChatResponseDto": {
-        "type": "object",
-        "properties": {
-          "text": {
-            "type": "string",
-            "description": "Narrative text from the AI (cleaned)"
-          },
-          "instructions": {
-            "description": "Game instructions extracted from the response",
+          "combat_start": {
+            "description": "Combat start entries",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GameInstructionDto"
+              "$ref": "#/components/schemas/CombatStartEntryDto"
             }
-          },
-          "model": {
-            "type": "string",
-            "description": "AI model used"
-          },
-          "usage": {
-            "type": "object",
-            "description": "Token usage statistics",
-            "additionalProperties": true
-          },
-          "raw": {
-            "type": "object",
-            "description": "Raw response (null by default)"
           }
         },
         "required": [
-          "text",
-          "instructions",
-          "model"
+          "type",
+          "combat_start"
         ]
       },
-      "MessageMetaDto": {
+      "CombatEndDto": {
         "type": "object",
         "properties": {
-          "model": {
-            "type": "string",
-            "description": "AI model version used"
+          "victory": {
+            "type": "boolean",
+            "description": "Victory state"
           },
-          "usage": {
-            "type": "object",
-            "description": "Token usage statistics",
-            "additionalProperties": true
+          "xp_gained": {
+            "type": "number",
+            "description": "XP gained"
+          },
+          "player_hp": {
+            "type": "number",
+            "description": "Player's HP at the end"
+          },
+          "enemies_defeated": {
+            "description": "Enemies that were defeated",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fled": {
+            "type": "boolean",
+            "description": "Flee indicator"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative summary"
           }
-        }
+        },
+        "required": [
+          "victory",
+          "xp_gained",
+          "player_hp",
+          "enemies_defeated",
+          "narrative"
+        ]
+      },
+      "CombatEndInstructionMessageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "combat_end"
+            ]
+          },
+          "combat_end": {
+            "description": "Combat end result",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "combat_end"
+        ]
       },
       "ChatMessageDto": {
         "type": "object",
@@ -1098,38 +1482,43 @@
               "system"
             ]
           },
-          "text": {
-            "type": "string",
-            "description": "Message text content"
-          },
-          "timestamp": {
-            "type": "number",
-            "description": "Unix timestamp of the message"
-          },
-          "meta": {
-            "description": "Message metadata",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MessageMetaDto"
-              }
-            ]
-          },
           "narrative": {
             "type": "string",
             "description": "Narrative text (for assistant messages)"
           },
           "instructions": {
-            "description": "Game instructions (for assistant messages)",
             "type": "array",
+            "description": "Game instructions (for assistant messages)",
             "items": {
-              "$ref": "#/components/schemas/GameInstructionDto"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RollInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/HpInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/XpInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SpellInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/InventoryInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CombatStartInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CombatEndInstructionMessageDto"
+                }
+              ]
             }
           }
         },
         "required": [
           "role",
-          "text",
-          "timestamp"
+          "narrative"
         ]
       },
       "CreateCharacterBodyDto": {
@@ -1622,18 +2011,6 @@
           }
         }
       },
-      "MessageResponseDto": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "description": "Response message"
-          }
-        },
-        "required": [
-          "message"
-        ]
-      },
       "KillCharacterBodyDto": {
         "type": "object",
         "properties": {
@@ -1874,6 +2251,19 @@
           "definitionId"
         ]
       },
+      "EquipInventoryDto": {
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string",
+            "description": "Definition id of the item to equip",
+            "example": "weapon-rapier"
+          }
+        },
+        "required": [
+          "definitionId"
+        ]
+      },
       "RemoveInventoryBodyDto": {
         "type": "object",
         "properties": {
@@ -1917,6 +2307,438 @@
           "ok",
           "inspirationPoints",
           "character"
+        ]
+      },
+      "CombatStartRequestDto": {
+        "type": "object",
+        "properties": {
+          "combat_start": {
+            "description": "Array of enemies to initialize combat with",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatStartEntryDto"
+            }
+          }
+        },
+        "required": [
+          "combat_start"
+        ]
+      },
+      "CombatEnemyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique enemy ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Enemy name"
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "ac": {
+            "type": "number",
+            "description": "Armor class"
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Optional portrait URL or data URI"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional short description for the enemy"
+          },
+          "initiative": {
+            "type": "number",
+            "description": "Initiative order value"
+          },
+          "attackBonus": {
+            "type": "number",
+            "description": "Attack bonus for the enemy"
+          },
+          "damageDice": {
+            "type": "string",
+            "description": "Damage dice expression (e.g., 1d8)"
+          },
+          "damageBonus": {
+            "type": "number",
+            "description": "Damage bonus to add to damage roll"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "hp",
+          "hpMax",
+          "ac",
+          "initiative",
+          "attackBonus",
+          "damageDice",
+          "damageBonus"
+        ]
+      },
+      "CombatPlayerDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "Character ID of the player"
+          },
+          "name": {
+            "type": "string",
+            "description": "Player name"
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "ac": {
+            "type": "number",
+            "description": "Armor class"
+          },
+          "initiative": {
+            "type": "number",
+            "description": "Initiative order value"
+          },
+          "attackBonus": {
+            "type": "number",
+            "description": "Attack bonus for the player"
+          },
+          "damageDice": {
+            "type": "string",
+            "description": "Damage dice expression (e.g., 1d8)"
+          },
+          "damageBonus": {
+            "type": "number",
+            "description": "Damage bonus to add to damage roll"
+          }
+        },
+        "required": [
+          "characterId",
+          "name",
+          "hp",
+          "hpMax",
+          "ac",
+          "initiative",
+          "attackBonus",
+          "damageDice",
+          "damageBonus"
+        ]
+      },
+      "CombatantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the combatant (player character or enemy)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Combatant name"
+          },
+          "initiative": {
+            "type": "number",
+            "description": "Initiative order value"
+          },
+          "isPlayer": {
+            "type": "boolean",
+            "description": "Whether combatant is player character"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "initiative",
+          "isPlayer"
+        ]
+      },
+      "CombatStateDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "Character ID"
+          },
+          "inCombat": {
+            "type": "boolean",
+            "description": "Whether currently in combat"
+          },
+          "enemies": {
+            "description": "Active enemies",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatEnemyDto"
+            }
+          },
+          "player": {
+            "description": "Player state",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatPlayerDto"
+              }
+            ]
+          },
+          "turnOrder": {
+            "description": "Turn order for combat",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatantDto"
+            }
+          },
+          "currentTurnIndex": {
+            "type": "number",
+            "description": "Index of current turn in turnOrder"
+          },
+          "roundNumber": {
+            "type": "number",
+            "description": "Current round number"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative summary of current combat"
+          },
+          "validTargets": {
+            "description": "Valid targets available to player",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "characterId",
+          "inCombat",
+          "enemies",
+          "player",
+          "turnOrder",
+          "currentTurnIndex",
+          "roundNumber"
+        ]
+      },
+      "AttackRequestDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target ID to attack"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      },
+      "AttackResultDto": {
+        "type": "object",
+        "properties": {
+          "attacker": {
+            "type": "string",
+            "description": "Attacker identifier"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target identifier"
+          },
+          "attackRoll": {
+            "type": "number",
+            "description": "Raw attack roll"
+          },
+          "attackBonus": {
+            "type": "number",
+            "description": "Attack bonus applied"
+          },
+          "totalAttack": {
+            "type": "number",
+            "description": "Total attack value (roll + bonus)"
+          },
+          "targetAc": {
+            "type": "number",
+            "description": "Target's AC"
+          },
+          "hit": {
+            "type": "boolean",
+            "description": "Whether the attack hit"
+          },
+          "critical": {
+            "type": "boolean",
+            "description": "Whether the attack was a critical hit"
+          },
+          "fumble": {
+            "type": "boolean",
+            "description": "Whether the attack was a fumble"
+          },
+          "damageRoll": {
+            "description": "Individual dice results for the damage roll",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "damageBonus": {
+            "type": "number",
+            "description": "Damage bonus applied"
+          },
+          "totalDamage": {
+            "type": "number",
+            "description": "Total damage applied"
+          },
+          "targetHpBefore": {
+            "type": "number",
+            "description": "Target's HP before the attack"
+          },
+          "targetHpAfter": {
+            "type": "number",
+            "description": "Target's HP after the attack"
+          },
+          "targetDefeated": {
+            "type": "boolean",
+            "description": "Whether the target was defeated"
+          }
+        },
+        "required": [
+          "attacker",
+          "target",
+          "attackRoll",
+          "attackBonus",
+          "totalAttack",
+          "targetAc",
+          "hit",
+          "critical",
+          "fumble",
+          "damageRoll",
+          "damageBonus",
+          "totalDamage",
+          "targetHpBefore",
+          "targetHpAfter",
+          "targetDefeated"
+        ]
+      },
+      "TurnResultWithInstructionsDto": {
+        "type": "object",
+        "properties": {
+          "turnNumber": {
+            "type": "number",
+            "description": "Turn number"
+          },
+          "roundNumber": {
+            "type": "number",
+            "description": "Round number"
+          },
+          "playerAttacks": {
+            "description": "Attacks performed by player",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttackResultDto"
+            }
+          },
+          "enemyAttacks": {
+            "description": "Attacks performed by enemies",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttackResultDto"
+            }
+          },
+          "combatEnded": {
+            "type": "boolean",
+            "description": "Whether combat ended after this turn"
+          },
+          "victory": {
+            "type": "boolean",
+            "description": "Whether the player emerged victorious"
+          },
+          "defeat": {
+            "type": "boolean",
+            "description": "Whether the player was defeated"
+          },
+          "remainingEnemies": {
+            "description": "Remaining enemies after the turn",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatEnemyDto"
+            }
+          },
+          "playerHp": {
+            "type": "number",
+            "description": "Player's current HP after the turn"
+          },
+          "playerHpMax": {
+            "type": "number",
+            "description": "Player's max HP"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative text summarizing the turn"
+          },
+          "instructions": {
+            "type": "array",
+            "description": "Optional set of frontend instructions to apply after the turn",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "turnNumber",
+          "roundNumber",
+          "playerAttacks",
+          "enemyAttacks",
+          "combatEnded",
+          "victory",
+          "defeat",
+          "remainingEnemies",
+          "playerHp",
+          "playerHpMax",
+          "narrative"
+        ]
+      },
+      "CombatEndResultDto": {
+        "type": "object",
+        "properties": {
+          "combat_end": {
+            "description": "Combat end information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "combat_end"
+        ]
+      },
+      "CombatEndResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human readable message"
+          },
+          "instructions": {
+            "description": "Optional instructions returned after ending combat",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatEndResultDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "message"
         ]
       },
       "DiceRequest": {

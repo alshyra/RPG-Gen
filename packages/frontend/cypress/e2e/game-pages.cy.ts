@@ -15,7 +15,9 @@ describe('Game detail pages', () => {
     // Wait for characters to load and resume the first one
     cy.wait('@getCharacters');
     // Click the first resume button
-    cy.get('button').contains('Reprendre').first().click();
+    cy.get('button').contains('Reprendre')
+      .first()
+      .click();
 
     // Some test accounts may be in draft state and resume leads to character-step. Ensure we are on the game view
     cy.url().then((u) => {
@@ -50,7 +52,9 @@ describe('Game detail pages', () => {
     cy.intercept('GET', '**/api/characters').as('getCharacters');
     cy.visit('/home');
     cy.wait('@getCharacters');
-    cy.get('button').contains('Reprendre').first().click();
+    cy.get('button').contains('Reprendre')
+      .first()
+      .click();
     // ensure we are on the game view (if resume navigates to character-step, visit game explicitely)
     cy.url().then((u) => {
       const url = u.toString();

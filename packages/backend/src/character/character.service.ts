@@ -1,11 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { CharacterDto } from '@rpg-gen/shared';
 import { Model } from 'mongoose';
 import { Character, CharacterDocument, Item } from './schema/index.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
-import { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
 
 @Injectable()
@@ -48,13 +48,17 @@ export class CharacterService {
     return this.characterModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
-  async findByCharacterId(userId: string, characterId: string): Promise<CharacterDocument | null> {
-    return this.characterModel.findOne({ userId, characterId }).exec();
+  async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
+    const doc = await this.characterModel.findOne({ userId, characterId }).exec();
+    if (!doc) {
+      throw new NotFoundException(`Character ${characterId} not found`);
+    }
+    return this.toCharacterDto(doc);
   }
 
+  // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {
     const updateDoc: any = {};
-
     // Build update document
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
@@ -71,7 +75,7 @@ export class CharacterService {
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
-
+    // updateDoc.
     const character = await this.characterModel.findOneAndUpdate(
       { userId, characterId },
       { $set: updateDoc },
@@ -123,6 +127,68 @@ export class CharacterService {
     if (foundItem) return this.mergeIntoExistingItem(character, foundItem, createItem);
     const itemDefinition = await this.itemDefinitionService.findByDefinitionId(createItem.definitionId);
     return this.addNewItemToCharacter(character, createItem, itemDefinition, characterId);
+  }
+
+  /**
+   * Equip an inventory item identified by its definitionId.
+   * If the item is not present, it will be added from the item definition.
+   * Only items whose definition meta.type === 'weapon' are allowed to be equipped by this helper.
+   */
+  // eslint-disable-next-line max-statements
+  async equipInventoryItem(userId: string, characterId: string, definitionId: string) {
+    const character = await this.characterModel.findOne({ userId, characterId });
+    if (!character) throw new NotFoundException(`Character ${characterId} not found`);
+    if (!definitionId) throw new BadRequestException('definitionId is required');
+
+    // Resolve definition and ensure it's a weapon
+    const def = await this.itemDefinitionService.findByDefinitionId(definitionId).catch(() => null);
+    if (!def) throw new NotFoundException(`Item definition ${definitionId} not found`);
+    const meta = def.meta || {};
+    if ((meta.type || '').toString().toLowerCase() !== 'weapon') {
+      throw new BadRequestException('Only weapon items can be equipped via this endpoint');
+    }
+
+    // Find existing inventory item with this definitionId
+    let item = (character.inventory || []).find(i => i.definitionId === definitionId);
+
+    // If not found, create one from the definition and add it
+    if (!item) {
+      const newItem: Item = {
+        _id: crypto.randomUUID(),
+        name: def.name || definitionId,
+        definitionId: def.definitionId,
+        qty: 1,
+        description: def.description || '',
+        equipped: false,
+        meta: def.meta || {},
+      } as any;
+      character.inventory = character.inventory || [];
+      character.inventory.push(newItem);
+      item = newItem as any;
+    }
+
+    // Ensure only the targeted weapon is equipped (no for loop)
+    character.inventory = (character.inventory || []).map((it) => {
+      try {
+        const type = (it?.meta?.type || '').toString().toLowerCase();
+        if (type === 'weapon') {
+          return { ...it, equipped: it.definitionId === definitionId };
+        }
+        return it;
+      } catch {
+        return it;
+      }
+    });
+
+    // Rebind `item` to the updated inventory entry so subsequent mutation targets the array item
+    item = (character.inventory || []).find(i => i.definitionId === definitionId) || item;
+
+    // Equip target item
+    item!.equipped = true;
+
+    const saved = await character.save();
+    this.logger.log(`Equipped ${definitionId} for ${characterId}`);
+    return this.toCharacterDto(saved);
   }
 
   private async mergeIntoExistingItem(character: CharacterDocument, foundItem: Item, item: CreateInventoryItemDto) {
@@ -203,20 +269,20 @@ export class CharacterService {
     return {
       characterId: doc.characterId,
       name: doc.name,
-      race: doc.race as CharacterDto['race'],
-      scores: doc.scores as CharacterDto['scores'],
+      race: doc.race,
+      scores: doc.scores,
       hp: doc.hp,
       hpMax: doc.hpMax,
       totalXp: doc.totalXp,
-      classes: doc.classes as CharacterDto['classes'],
-      skills: doc.skills as CharacterDto['skills'],
+      classes: doc.classes,
+      skills: doc.skills,
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender,
       proficiency: doc.proficiency,
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
-      inventory: doc.inventory as CharacterDto['inventory'],
+      inventory: doc.inventory,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,
