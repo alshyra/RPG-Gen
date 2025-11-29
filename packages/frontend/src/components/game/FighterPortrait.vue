@@ -1,5 +1,8 @@
 <template>
-  <div class="fighter-card relative bg-slate-800/40 rounded overflow-hidden flex items-stretch">
+  <div
+    class="fighter-card relative bg-slate-800/40 rounded overflow-hidden flex items-stretch"
+    :data-cy="props.isPlayer ? 'player-portrait' : ('enemy-portrait-' + (props.enemy?.id || props.enemy?.name))"
+  >
     <div class="relative w-full h-full">
       <img
         :src="resolvedPortrait"
@@ -24,6 +27,7 @@
           <button
             v-if="showAttackButton"
             class="px-2 py-0.5 text-[11px] rounded bg-amber-400 hover:bg-amber-300 text-amber-900"
+            data-cy="attack-button"
             @click.prevent="doAttack"
           >
             Attaquer
@@ -38,7 +42,11 @@
       </div>
 
       <div class="absolute inset-y-2 right-1 flex items-center pointer-events-none">
-        <div class="relative w-3 h-full bg-slate-700 rounded overflow-hidden">
+        <div
+          class="relative w-3 h-full bg-slate-700 rounded overflow-hidden"
+          data-cy="hp-bar"
+          :data-hp="String(enemyDisplayHp)"
+        >
           <div
             class="absolute left-0 right-0 bottom-0 bg-linear-to-t from-red-600 to-red-400"
             :style="{ height: hpPct }"

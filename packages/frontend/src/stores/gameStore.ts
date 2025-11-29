@@ -23,6 +23,10 @@ type RollModalData = {
   advantage?: 'advantage' | 'disadvantage' | 'none';
   keptRoll?: number | null;
   discardedRoll?: number | null;
+  // meta coming from pending instruction (attack/damage)
+  action?: string;
+  target?: string;
+  targetAc?: number | null;
   show?: boolean;
 };
 type StoredRole = 'user' | 'assistant' | 'system';

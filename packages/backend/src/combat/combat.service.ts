@@ -616,21 +616,45 @@ export class CombatService {
       };
     }
 
-    // Return updated state fragment
-    return {
+    // After applying player damage, process enemy attacks for the rest of the turn
+    const playerAttacks: AttackResultDto[] = [];
+    const enemyAttacks: AttackResultDto[] = [];
+    const narrativeParts: string[] = [];
+
+    narrativeParts.push(`Vous infligez ${before - enemy.hp} dégâts à ${enemy.name} (PV restants: ${enemy.hp}).`);
+
+    // Process enemies' attacks
+    const enemyProcessingResult = this.processEnemyAttacks(state, alive, enemyAttacks, narrativeParts, playerAttacks);
+    if (enemyProcessingResult) {
+      // Player defeated during enemy processing or combat ended — persist updates and return
+      await this.saveCombatState(state);
+      return enemyProcessingResult;
+    }
+
+    // Advance current turn index to next combatant and increment round
+    const totalCombatants = state.turnOrder.length;
+    state.currentTurnIndex = (state.currentTurnIndex + 1) % totalCombatants;
+    state.roundNumber++;
+
+    // Persist updated state
+    await this.saveCombatState(state);
+
+    // Build response
+    const turnResult: TurnResultDto = {
       turnNumber: state.currentTurnIndex,
       roundNumber: state.roundNumber,
-      playerAttacks: [],
-      enemyAttacks: [],
+      playerAttacks,
+      enemyAttacks,
       combatEnded: false,
       victory: false,
       defeat: false,
       remainingEnemies: state.enemies,
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
-      narrative: `Vous infligez ${before - enemy.hp} dégâts à ${enemy.name} (PV restants: ${enemy.hp}).`,
-      instructions: [],
+      narrative: narrativeParts.join('\n\n'),
     };
+
+    return turnResult;
   }
 
   /**

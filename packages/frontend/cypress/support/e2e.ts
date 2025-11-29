@@ -41,18 +41,6 @@ Cypress.Commands.add('ensureAuth', () => {
     },
   }).as('getProfile');
 
-  cy.intercept('GET', '/api/characters', {
-    statusCode: 200,
-    body: [{
-      characterId: 'char-1',
-      name: 'Test Character',
-      world: 'dnd',
-      portrait: '',
-      isDeceased: false,
-      state: 'created',
-    }],
-  }).as('getCharacters');
-
   // Fetch profile and set local storage using the stubbed response
   cy.request({ url: '/api/auth/profile', failOnStatusCode: false }).then((resp) => {
     if (resp?.status === 200 && resp?.body) {
@@ -67,6 +55,6 @@ Cypress.Commands.add('ensureAuth', () => {
 });
 
 // Helper wrappers exposing the node tasks for DB prep/cleanup
-Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string }) => cy.task('prepareE2EDb', opts || { count: 2 }));
+Cypress.Commands.add('prepareE2EDb', (opts?: { count?: number; url?: string; ready?: boolean; withChat?: boolean }) => cy.task('prepareE2EDb', opts || { count: 2 }));
 
 Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => cy.task('cleanupE2EDb', opts || {}));

@@ -9,3 +9,4 @@ export * from './CombatStartRequestDto.js';
 export * from './CombatEndResultDto.js';
 export * from './CombatEndResponseDto.js';
 export * from './AttackRequestDto.js';
+export * from './DiceThrowDto.js';

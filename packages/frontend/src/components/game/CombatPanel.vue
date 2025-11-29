@@ -1,10 +1,10 @@
 <template>
-  <div class="card p-1 mb-2 max-h-44 overflow-y-auto">
+  <div class="card p-1 mb-2 max-h-44 overflow-y-auto" data-cy="combat-panel">
     <div class="flex items-center justify-between mb-2">
       <div class="font-semibold">
         ⚔️ Combat
       </div>
-      <div class="text-sm text-slate-400">
+      <div class="text-sm text-slate-400" data-cy="combat-round">
         Round {{ roundNumber }}
       </div>
     </div>
@@ -13,10 +13,11 @@
     <div class="-mx-1 px-1">
       <div class="flex flex-nowrap sm:flex-wrap gap-1 overflow-x-auto sm:overflow-visible overflow-y-hidden">
         <div
-          v-for="(p, idx) in localOrder"
+          v-for="(p, idx) in participants"
           :key="p.id || idx"
           class="shrink-0 p-1"
           :style="{ width: '120px', height: '120px' }"
+          :data-cy="p.isPlayer ? 'player-portrait' : ('enemy-' + (p.enemyOrdinal ?? idx))"
         >
           <FighterPortrait
             :enemy="p.isPlayer ? null : (p as unknown as any)"
@@ -32,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { computed } from 'vue';
 import { useCombat } from '@/composables/useCombat';
 import FighterPortrait from './FighterPortrait.vue';
 import { useCharacterStore } from '@/stores/characterStore';
@@ -47,6 +48,7 @@ type Participant = {
   hp?: number;
   hpMax?: number | string;
   portrait?: string;
+  enemyOrdinal?: number;
 };
 
 const combat = useCombat();
@@ -57,8 +59,8 @@ const enemies = combat.enemies;
 const roundNumber = combat.roundNumber;
 
 // Build participants array: player + enemies, ordered by initiative desc
-const participants = computed(() => {
-  const list: Participant[] = [];
+  const participants = computed(() => {
+    const list: Participant[] = [];
   const player = characterStore.currentCharacter;
   if (player) {
     list.push({
@@ -74,28 +76,21 @@ const participants = computed(() => {
 
   const maybeRef = enemies as unknown as { value?: CombatEnemyDto[] };
   const enemyList: CombatEnemyDto[] = Array.isArray(maybeRef?.value) ? maybeRef.value! : Array.isArray(enemies) ? (enemies as unknown as CombatEnemyDto[]) : [];
-  enemyList.forEach(e => list.push({ ...e, isPlayer: false }));
+  // Attach a stable enemyOrdinal (index among enemies) so tests can target them deterministically
+  enemyList.forEach((e, i) => list.push({ ...e, isPlayer: false, enemyOrdinal: i } as Participant & { enemyOrdinal: number }));
 
   // sort by initiative desc (higher initiative acts first)
   list.sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0));
   return list;
 });
 
-// Local rotatable order to visually represent turn progression
-const localOrder = ref<Participant[]>([]);
-
-watch(participants, (next) => {
-  localOrder.value = next.slice();
-}, { immediate: true });
-
-const onActorActed = (actor: string) => {
-  // rotate only when the player acted
-  if (actor !== 'player') return;
-  if (localOrder.value.length === 0) return;
-  const first = localOrder.value[0];
-  if (first && first.isPlayer) {
-    const shifted = localOrder.value.shift();
-    if (shifted) localOrder.value.push(shifted);
+const onActorActed = async (_actor: string) => {
+  // Do not rotate client-side; refresh authoritative combat state from backend.
+  if (!characterStore.currentCharacter) return;
+  try {
+    await combatStore.fetchStatus(characterStore.currentCharacter.characterId);
+  } catch (e) {
+    console.error('Failed to refresh combat status after action', e);
   }
 };
 </script>

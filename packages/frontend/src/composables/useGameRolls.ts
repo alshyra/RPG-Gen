@@ -89,6 +89,8 @@ export const useGameRolls = () => {
         : typeof instr.modifier === 'number'
           ? instr.modifier
           : 0;
+    // include meta info (target, action, targetAc) so UI can display hit/miss
+    const meta: Record<string, any> | undefined = (instr as any).meta;
     gameStore.rollData = {
       skillName,
       rolls: rollResult.rolls,
@@ -98,6 +100,9 @@ export const useGameRolls = () => {
       advantage: rollResult.advantage,
       keptRoll: rollResult.keptRoll,
       discardedRoll: rollResult.discardedRoll,
+      action: meta?.action as string | undefined,
+      target: meta?.target as string | undefined,
+      targetAc: typeof meta?.targetAc === 'number' ? meta.targetAc : null,
     };
     gameStore.showRollModal = true;
   };
@@ -123,7 +128,10 @@ export const useGameRolls = () => {
       description: `Result: ${JSON.stringify(rollResult)}${criticalNote}`,
     };
 
-    // Route roll results to the new rolls API so they are not persisted via /chat
+    // If this roll originates from a pending instruction that includes a game action
+    // (for example attack/damage), route it to the combat endpoint so combat remains
+    // server-authoritative and we don't use the generic /api/rolls path during fights.
+    const pending = gameStore.pendingInstruction as any;
     const characterId = useCharacterStore().currentCharacter?.characterId;
     if (!characterId) {
       gameStore.appendMessage('system', 'No character selected; cannot submit roll.');
@@ -131,6 +139,33 @@ export const useGameRolls = () => {
     }
 
     try {
+      if (pending && pending.meta && typeof pending.meta.action === 'string') {
+        // Map roll result into an action payload for combat resolve
+        const action = pending.meta.action as string;
+        const target = pending.meta.target as string | undefined;
+        const die = Array.isArray(rollResult.rolls) && rollResult.rolls.length > 0 ? rollResult.rolls[0] : undefined;
+
+        if (action === 'attack' || action === 'damage') {
+          // For combat actions, call the combat resolve endpoint
+          const payload: any = { action, target, total: rollResult.total };
+          if (typeof die === 'number') payload.die = die;
+          const resp = await combatService.resolveRoll(characterId, payload);
+
+          // Process returned instructions (if any)
+          if (resp && Array.isArray(resp.instructions)) {
+            resp.instructions.forEach((p: any) => {
+              if (p.type === 'roll') handleAdditionalRoll(p, gameStore);
+              else if (p.type === 'xp') handleAdditionalXp(p, gameStore, characterStore);
+              else if (p.type === 'hp') handleAdditionalHp(p, gameStore, characterStore);
+            });
+          } else {
+            gameStore.appendMessage('system', 'Roll submitted to combat');
+          }
+          return;
+        }
+      }
+
+      // Fallback: route non-combat rolls to the generic rolls API
       const resp = await rollsService.submitRoll(characterId, { instructions: [instr] });
       // The backend returns any pendingRolls that need client action
       if (resp && Array.isArray(resp.pendingRolls)) {
@@ -151,54 +186,84 @@ export const useGameRolls = () => {
 
   const confirmRoll = async (): Promise<void> => {
     if (!gameStore.pendingInstruction || gameStore.pendingInstruction.type !== 'roll') return;
-    const { rolls, bonus, total, skillName } = gameStore.rollData;
-    if (!rolls || rolls.length === 0) return;
-    const diceValue = rolls[0];
-    const criticalNote = getCriticalNote(diceValue);
-    gameStore.appendMessage(
-      'system',
-      buildRollMessage(diceValue, bonus ?? 0, skillName ?? '', total ?? 0, criticalNote),
-    );
+    if (gameStore.sending) return;
+    gameStore.sending = true;
     try {
-      // If this roll comes from an attack instruction, handle locally: evaluate hit vs AC and
-      // if hit, trigger the damage roll instruction immediately.
+      const { rolls, bonus, total, skillName } = gameStore.rollData;
+      if (!rolls || rolls.length === 0) return;
+      const diceValue = rolls[0];
+      const criticalNote = getCriticalNote(diceValue);
+      gameStore.appendMessage(
+        'system',
+        buildRollMessage(diceValue, bonus ?? 0, skillName ?? '', total ?? 0, criticalNote),
+      );
+
+      // If this roll comes from an attack instruction, send the resolved attack total to the server
+      // and let the backend determine hit/miss and next instructions. Server is authoritative for combat.
       const pending = gameStore.pendingInstruction as any;
       if (pending && pending.meta && pending.meta.action === 'attack') {
         const meta = pending.meta as Record<string, any>;
         const attackTotal = total ?? 0;
-        const targetAc = typeof meta.targetAc === 'number' ? meta.targetAc : undefined;
         const targetName = meta.target as string | undefined;
 
-        const hit = typeof targetAc === 'number' ? attackTotal >= targetAc : false;
-        gameStore.appendMessage('system', hit ? `✅ Attaque réussie contre ${targetName} (${attackTotal} ≥ ${targetAc})` : `❌ Attaque ratée contre ${targetName} (${attackTotal} < ${targetAc})`);
-
-        // If hit, prepare and trigger damage roll
-        if (hit) {
-          const damageDice = meta.damageDice || '1d4';
-          const damageBonus = typeof meta.damageBonus === 'number' ? meta.damageBonus : 0;
-          const damageInstr = {
-            type: 'roll',
-            dices: damageDice,
-            modifier: damageBonus,
-            advantage: 'none',
-            description: `Damage to ${targetName}`,
-            meta: {
-              action: 'damage',
-              target: targetName,
-              damageBonus,
-            },
-          } as any;
-
-          // Set pending instruction for damage and trigger a server-side deterministic roll
-          gameStore.pendingInstruction = damageInstr;
-          // Automatically request a roll for the damage dice (this will update latestRoll and open modal)
-          await gameStore.doRoll(damageDice, 'none');
+        const characterId = useCharacterStore().currentCharacter?.characterId;
+        if (!characterId) {
+          gameStore.appendMessage('system', 'No character selected; cannot resolve attack.');
           return;
         }
 
-        // If miss, clear pending instruction and do not forward to conversation
-        gameStore.pendingInstruction = null;
-        gameStore.showRollModal = false;
+        try {
+          const dieRoll = Array.isArray(rolls) && rolls.length > 0 ? rolls[0] : undefined;
+          const resp = await combatService.resolveRoll(characterId, { action: 'attack', target: targetName, total: attackTotal, die: dieRoll } as any);
+
+          // If backend returned a turn result, update combat store
+          try {
+            const combatStore = useCombatStore();
+            if (resp && (resp.remainingEnemies || resp.playerHp || resp.roundNumber)) {
+              combatStore.updateFromTurnResult(resp);
+            }
+          } catch (e) {
+            // ignore store update errors
+          }
+
+          // Process returned instructions (if any)
+          if (resp && Array.isArray(resp.instructions)) {
+            resp.instructions.forEach((instr: any) => {
+              if (instr.type === 'roll') {
+                // set pending instruction to let dice UI show
+                gameStore.pendingInstruction = {
+                  type: 'roll',
+                  dices: instr.dices,
+                  modifier: instr.modifier,
+                  advantage: instr.advantage || 'none',
+                  meta: instr.meta,
+                  description: instr.description,
+                } as any;
+                // notify user
+                gameStore.appendMessage('system', `🎲 ${instr.description ?? 'Additional roll required'}: ${instr.dices}`);
+              } else if (typeof instr.xp === 'number') {
+                handleAdditionalXp(instr, gameStore, characterStore);
+              } else if (typeof instr.hp === 'number') {
+                handleAdditionalHp(instr, gameStore, characterStore);
+              }
+            });
+          }
+
+          // Append any narrative from server
+          if (resp && resp.narrative) {
+            gameStore.appendMessage('assistant', resp.narrative);
+          }
+
+          // Hide roll modal if server resolved everything synchronously
+          if (!resp || !Array.isArray(resp.instructions) || resp.instructions.length === 0) {
+            gameStore.pendingInstruction = null;
+            gameStore.showRollModal = false;
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          gameStore.appendMessage('system', `Failed to resolve attack on server: ${msg}`);
+        }
+
         return;
       }
 
@@ -261,10 +326,16 @@ export const useGameRolls = () => {
 
       // Non-attack roll: send result to conversation service for processing
       await sendRollResult({ rolls, total: total ?? 0, bonus: bonus ?? 0, advantage: false }, skillName ?? '', criticalNote);
+      // close modal after sending non-combat roll
+      gameStore.pendingInstruction = null;
+      gameStore.showRollModal = false;
+      return;
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       gameStore.appendMessage('system', 'Failed to send roll result: ' + message);
       gameStore.showRollModal = false;
+    } finally {
+      gameStore.sending = false;
     }
   };
 

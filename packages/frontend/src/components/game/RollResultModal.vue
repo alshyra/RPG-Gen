@@ -12,6 +12,14 @@
         {{ rollData.diceNotation }}
       </div>
       <div
+        v-if="rollData.target !== undefined && rollData.targetAc !== undefined && rollData.targetAc !== null"
+        class="mt-2"
+      >
+        <div class="text-sm font-semibold">
+          Target: {{ rollData.target ?? 'Unknown' }} — AC: {{ rollData.targetAc }}
+        </div>
+      </div>
+      <div
         v-if="rollData.skillName"
         class="text-xs text-slate-500 mt-1"
       >
@@ -62,10 +70,16 @@
           + {{ rollData.bonus ?? 0 }} <span class="text-slate-500">(bonus)</span>
         </div>
         <div class="border-t border-slate-600 pt-2 mt-2">
-          <div
-            :class="['text-xl font-bold', isCriticalSuccess ? 'text-green-400' : isCriticalFailure ? 'text-red-400' : 'text-green-400']"
-          >
+          <div :class="['text-xl font-bold', isCriticalSuccess ? 'text-green-400' : isCriticalFailure ? 'text-red-400' : 'text-green-400']">
             Total: {{ rollData.total ?? 0 }}
+          </div>
+          <div
+            v-if="hasTarget"
+            class="mt-1"
+          >
+            <span :class="hasHit ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'">
+              {{ hasHit ? 'HIT' : 'MISS' }}
+            </span>
           </div>
           <div
             v-if="isCriticalSuccess"
@@ -86,10 +100,12 @@
     <!-- Action Buttons -->
     <div class="flex gap-3">
       <button
-        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
+        :disabled="gameStore.sending"
         @click="confirm"
       >
-        Send Result
+        <span v-if="gameStore.sending">Sending...</span>
+        <span v-else>Send Result</span>
       </button>
       <button
         class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded-lg transition"
@@ -135,6 +151,14 @@ const isDiscardedRoll = (roll: number) => {
   if (rolls[0] === rolls[1]) return false;
   return roll === rollData.value.discardedRoll;
 };
+
+const hasTarget = computed(() => typeof (rollData.value?.targetAc) === 'number' && rollData.value?.targetAc !== null);
+const hasHit = computed(() => {
+  if (!hasTarget.value) return false;
+  const total = (rollData.value?.total ?? 0);
+  const ac = (rollData.value?.targetAc ?? 0);
+  return total >= ac;
+});
 
 const confirm = () => emit('confirm');
 const reroll = () => emit('reroll');
