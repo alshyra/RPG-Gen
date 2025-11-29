@@ -158,10 +158,16 @@ Status of implementation (backend changes applied)
 
 - **Implemented**: `ActionRecord` Mongoose schema and indexes added in `packages/backend/src/combat/action-record.schema.ts`.
 - **Implemented**: `ActionRecordService` in `packages/backend/src/combat/action-record.service.ts` to provide atomic acquire/setApplied/setFailed semantics.
+- **Implemented**: New `generateToken()` method in `ActionRecordService` to create action tokens for player turns.
 - **Implemented**: New idempotent endpoints:
   - `POST /api/combat/:characterId/attack/:actionToken` (uses `AttackRequestDto`) — implemented in `packages/backend/src/combat/combat.controller.ts`.
   - `POST /api/combat/:characterId/resolve-roll/:actionToken` (uses dice resolution payload) — implemented in `packages/backend/src/combat/combat.controller.ts`.
 - **Index / TTL**: unique index on `actionToken` and TTL index on `expiresAt` added to schema.
+- **Implemented**: `CombatStateDto` extended with `phase`, `actionToken`, and `expectedDto` fields.
+- **Implemented**: Combat start and status endpoints now generate and return `actionToken` for player actions.
+- **Implemented**: Frontend `combatService` updated with `attackWithToken()` and `resolveRollWithToken()` methods.
+- **Implemented**: Frontend `combatStore` now tracks `actionToken`, `phase`, and `expectedDto`.
+- **Implemented**: `useCombat` composable uses action tokens when executing attacks.
 
 Dead code removed / deprecated
 
@@ -170,8 +176,8 @@ Dead code removed / deprecated
 Notes / next steps
 
 - Add more unit/integration tests simulating concurrent submissions (recommended using an in-memory MongoDB or test container).
-- Surface `actionToken` in prompt payloads returned by the server (frontend integration) so clients can follow the multi-step flow.
 - Consider adding optional `Idempotency-Key` header handling in controllers and persisting it on `ActionRecord`.
+- Regenerate shared DTOs after running the backend to ensure frontend has latest types.
 
 Mapping DTOs (rapide)
 

@@ -1,6 +1,6 @@
 import test from 'ava';
 import { calculateArmorClass, getDexModifier, parseArmorAc } from '../src/character/armor-class.util.js';
-import { CharacterResponseDto, ItemResponseDto } from '@rpg-gen/shared';
+import type { CharacterResponseDto, ItemResponseDto } from '@rpg-gen/shared';
 
 // Helper to create a minimal character for testing
 const createTestCharacter = (dex: number, inventory: ItemResponseDto[] = []): CharacterResponseDto => ({

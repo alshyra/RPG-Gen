@@ -46,7 +46,7 @@ export function useCombat() {
   };
 
   /**
-   * Execute an attack against a target
+   * Execute an attack against a target using actionToken for idempotency
    */
   const executeAttack = async (target: string): Promise<void> => {
     const character = characterStore.currentCharacter;
@@ -56,9 +56,19 @@ export function useCombat() {
     gameStore.sending = true;
 
     try {
-      // Debug: log which characterId and target we're sending
-      console.log('[useCombat] executeAttack ->', { characterId: character.characterId, target });
-      const attackResponse = await combatService.attack(character.characterId, target);
+      // Use the stored action token for idempotent attack
+      const token = combatStore.actionToken;
+      console.log('[useCombat] executeAttack ->', { characterId: character.characterId, target, actionToken: token });
+
+      let attackResponse;
+      if (token) {
+        // Use tokenized endpoint for idempotency
+        attackResponse = await combatService.attackWithToken(character.characterId, token, target);
+      } else {
+        // Fallback to legacy endpoint if no token available (should not happen in normal flow)
+        console.warn('[useCombat] No action token available, falling back to legacy attack endpoint');
+        attackResponse = await combatService.attack(character.characterId, target);
+      }
 
       // Update combat store with results
       combatStore.updateFromTurnResult(attackResponse);
@@ -66,7 +76,7 @@ export function useCombat() {
       // Display combat narrative
       gameStore.appendMessage('assistant', attackResponse.narrative);
 
-      // Process any instructions (HP changes, XP, etc.)
+      // Process any instructions (HP changes, XP, roll requests, etc.)
       if (attackResponse.instructions) {
         processAttackInstructions(attackResponse.instructions);
       }
@@ -79,6 +89,9 @@ export function useCombat() {
           gameStore.appendMessage('system', '💀 Combat terminé - Défaite...');
         }
         combatStore.clearCombat();
+      } else {
+        // Fetch fresh status to get new action token for next turn
+        await combatStore.fetchStatus(character.characterId);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
@@ -94,24 +107,27 @@ export function useCombat() {
   const processAttackInstructions = (instructions: unknown[]): void => {
     if (!Array.isArray(instructions)) return;
     instructions.forEach((item: unknown) => {
-      const instr = item as Record<string, any>;
+      const instr = item as Record<string, unknown>;
       const type = instr.type as string | undefined;
 
       if (type === 'roll') {
         // Map server roll instruction into the app's RollInstructionMessageDto shape
         const dices = instr.dices as string | undefined;
-        const meta = instr.meta as Record<string, any> | undefined;
+        const meta = instr.meta as Record<string, unknown> | undefined;
         const attackBonus = meta?.attackBonus as number | undefined;
         const target = meta?.target as string | undefined;
         const targetAc = meta?.targetAc as number | undefined;
 
+        // Create a roll instruction with proper types (modifier is mistyped in generated types)
         const rollInstr = {
-          type: 'roll',
+          type: 'roll' as const,
           dices: dices || '1d20',
-          modifier: typeof attackBonus === 'number' ? attackBonus : undefined,
-          advantage: 'none',
+          advantage: 'none' as const,
           description: target ? `Attack vs ${target} (AC ${targetAc ?? '??'})` : undefined,
-        } as any;
+        };
+
+        // Update phase to indicate we're awaiting a damage roll
+        combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
 
         // Set pending instruction so Dice UI appears
         gameStore.pendingInstruction = rollInstr;
@@ -189,6 +205,8 @@ export function useCombat() {
     validTargets: combatStore.validTargets,
     currentTarget: combatStore.currentTarget,
     roundNumber: combatStore.roundNumber,
+    actionToken: combatStore.actionToken,
+    phase: combatStore.phase,
 
     // Actions
     initializeCombat,

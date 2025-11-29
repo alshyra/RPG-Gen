@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { combatService } from '../apis/combatApi';
-import type { CombatantDto, TurnResultWithInstructionsDto, CombatStateDto, CombatEnemyDto, CombatStartRequestDto } from '@rpg-gen/shared';
+import { combatService, type ExtendedCombatStateDto } from '../apis/combatApi';
+import type { CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto } from '@rpg-gen/shared';
+
+export type CombatPhase = 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
 
 // eslint-disable-next-line max-statements
 export const useCombatStore = defineStore('combatStore', () => {
@@ -15,6 +17,11 @@ export const useCombatStore = defineStore('combatStore', () => {
   const playerInitiative = ref(0);
   const currentTarget = ref<string | null>(null);
 
+  // Action token state for idempotent operations
+  const actionToken = ref<string | null>(null);
+  const phase = ref<CombatPhase>('PLAYER_TURN');
+  const expectedDto = ref<string>('AttackRequestDto');
+
   // Computed properties
   const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
   const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
@@ -23,7 +30,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   /**
    * Initialize combat state from backend response
    */
-  const initializeCombat = (response: CombatStateDto) => {
+  const initializeCombat = (response: ExtendedCombatStateDto) => {
     // prefer console.log instead of console.debug to avoid being hidden by console filters
     console.log('[combatStore] initializeCombat', response);
     inCombat.value = response.inCombat;
@@ -33,6 +40,11 @@ export const useCombatStore = defineStore('combatStore', () => {
     playerHpMax.value = response.player.hpMax ?? 0;
     enemies.value = response.enemies ?? [];
     turnOrder.value = response.turnOrder ?? [];
+
+    // Store action token and phase if provided
+    actionToken.value = response.actionToken ?? null;
+    phase.value = (response.phase ?? 'PLAYER_TURN') as CombatPhase;
+    expectedDto.value = response.expectedDto ?? 'AttackRequestDto';
 
     // Auto-select first enemy as target
     if (response.enemies.length > 0) {
@@ -61,6 +73,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     // Check if combat ended
     if (result.combatEnded) {
       inCombat.value = false;
+      phase.value = 'COMBAT_ENDED';
+      actionToken.value = null;
     }
 
     // Update target if current target is dead
@@ -95,6 +109,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     playerHpMax.value = 0;
     playerInitiative.value = 0;
     currentTarget.value = null;
+    actionToken.value = null;
+    phase.value = 'PLAYER_TURN';
+    expectedDto.value = 'AttackRequestDto';
   };
 
   /**
@@ -109,7 +126,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   };
 
   /**
-   * Fetch current combat status from backend
+   * Fetch current combat status from backend (includes new actionToken)
    */
   const fetchStatus = async (characterId: string) => {
     console.log('[combatStore] fetchStatus for', characterId);
@@ -123,6 +140,15 @@ export const useCombatStore = defineStore('combatStore', () => {
     return response;
   };
 
+  /**
+   * Update action token after receiving a new one from the server
+   */
+  const setActionToken = (token: string | null, newPhase?: CombatPhase, newExpectedDto?: string) => {
+    actionToken.value = token;
+    if (newPhase) phase.value = newPhase;
+    if (newExpectedDto) expectedDto.value = newExpectedDto;
+  };
+
   return {
     // State
     inCombat,
@@ -133,6 +159,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     playerHpMax,
     playerInitiative,
     currentTarget,
+    actionToken,
+    phase,
+    expectedDto,
 
     // Computed
     aliveEnemies,
@@ -146,5 +175,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     clearCombat,
     startCombat,
     fetchStatus,
+    setActionToken,
   };
 });

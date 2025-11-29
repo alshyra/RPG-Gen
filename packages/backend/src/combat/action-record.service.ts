@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { randomUUID } from 'crypto';
 import { ActionRecord, ActionRecordDocument, ActionStatus } from './action-record.schema.js';
 
 @Injectable()
@@ -10,6 +11,33 @@ export class ActionRecordService {
   constructor(
     @InjectModel(ActionRecord.name) private readonly actionModel: Model<ActionRecordDocument>,
   ) {}
+
+  /**
+   * Generate a new action token for a combat turn.
+   * The token is persisted with PENDING status and includes metadata about expected DTO.
+   */
+  async generateToken(metadata: {
+    requesterId: string;
+    combatId: string;
+    expectedDto: string;
+    ttlMinutes?: number;
+  }): Promise<string> {
+    const actionToken = `t-${randomUUID()}`;
+    const ttlMinutes = metadata.ttlMinutes ?? 30;
+    const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
+
+    await this.actionModel.create({
+      actionToken,
+      requesterId: metadata.requesterId,
+      combatId: metadata.combatId,
+      expectedDto: metadata.expectedDto,
+      status: ActionStatus.PENDING,
+      expiresAt,
+    });
+
+    this.logger.debug(`Generated action token ${actionToken} for combat ${metadata.combatId}`);
+    return actionToken;
+  }
 
   async getByToken(actionToken: string) {
     return this.actionModel.findOne({ actionToken }).lean().exec();

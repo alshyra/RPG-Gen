@@ -80,6 +80,13 @@ export class CombatController {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, body, userId);
 
+    // Generate an action token for the first player action
+    const actionToken = await this.actionRecordService.generateToken({
+      requesterId: userId,
+      combatId: characterId,
+      expectedDto: 'AttackRequestDto',
+    });
+
     this.logger.log(`Combat started for character ${characterId} with ${body.combat_start.length} enemies`);
 
     return {
@@ -91,6 +98,9 @@ export class CombatController {
       currentTurnIndex: state.currentTurnIndex,
       roundNumber: state.roundNumber,
       narrative: await this.combatService.getCombatSummary(characterId),
+      phase: 'PLAYER_TURN' as const,
+      actionToken,
+      expectedDto: 'AttackRequestDto',
     };
   }
 
@@ -326,6 +336,7 @@ export class CombatController {
     const inCombat = await this.combatService.isInCombat(characterId);
     if (!inCombat) {
       return {
+        characterId,
         inCombat: false,
         narrative: 'Aucun combat en cours.',
       };
@@ -334,10 +345,18 @@ export class CombatController {
     const state = await this.combatService.getCombatState(characterId);
     if (!state) {
       return {
+        characterId,
         inCombat: false,
         narrative: 'Aucun combat en cours.',
       };
     }
+
+    // Generate a fresh action token for the player's next action
+    const actionToken = await this.actionRecordService.generateToken({
+      requesterId: userId,
+      combatId: characterId,
+      expectedDto: 'AttackRequestDto',
+    });
 
     return {
       characterId: characterId,
@@ -349,6 +368,9 @@ export class CombatController {
       roundNumber: state.roundNumber,
       validTargets: await this.combatService.getValidTargets(characterId),
       narrative: await this.combatService.getCombatSummary(characterId),
+      phase: 'PLAYER_TURN' as const,
+      actionToken,
+      expectedDto: 'AttackRequestDto',
     };
   }
 

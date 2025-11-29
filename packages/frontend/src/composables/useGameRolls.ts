@@ -287,7 +287,7 @@ export const useGameRolls = () => {
               if (resp) {
                 try {
                   combatStore.updateFromTurnResult(resp);
-                } catch (e) {
+                } catch {
                   // best-effort local update if shape differs
                 }
               }
@@ -295,10 +295,10 @@ export const useGameRolls = () => {
               gameStore.appendMessage('system', `💥 Dégâts infligés à ${targetName}: ${damageTotal}`);
               try {
                 if (resp && Array.isArray(resp.remainingEnemies)) {
-                  const updated = resp.remainingEnemies.find((r: any) => r.name === targetName || r.id === (resp.targetId ?? undefined));
+                  const updated = resp.remainingEnemies.find((r) => r.name === targetName);
                   if (updated) {
-                    const hpNow = typeof updated.hp === 'number' ? updated.hp : updated.currentHp ?? undefined;
-                    const hpMax = updated.hpMax ?? updated.maxHp ?? undefined;
+                    const hpNow = typeof updated.hp === 'number' ? updated.hp : undefined;
+                    const hpMax = updated.hpMax ?? undefined;
                     if (typeof hpNow === 'number') {
                       gameStore.appendMessage('system', `🩸 ${targetName} a ${hpNow}${hpMax ? `/${hpMax}` : ''} PV restants`);
                       if (hpNow <= 0) {
@@ -307,7 +307,7 @@ export const useGameRolls = () => {
                     }
                   }
                 }
-              } catch (e) {
+              } catch {
                 // ignore best-effort
               }
             }
