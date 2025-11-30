@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { combatService, type ExtendedCombatStateDto } from '../apis/combatApi';
-import type { CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto } from '@rpg-gen/shared';
+import type { CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto, AttackResultDto } from '@rpg-gen/shared';
 
 export type CombatPhase = 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
 
@@ -21,6 +21,15 @@ export const useCombatStore = defineStore('combatStore', () => {
   const actionToken = ref<string | null>(null);
   const phase = ref<CombatPhase>('PLAYER_TURN');
   const expectedDto = ref<string>('AttackRequestDto');
+
+  // Attack result modal state
+  const showAttackResultModal = ref(false);
+  const currentAttackResult = ref<AttackResultDto | null>(null);
+  const isCurrentAttackPlayerAttack = ref(true);
+
+  // Queue for displaying attack results one by one (for enemy animations)
+  const attackResultQueue = ref<Array<{ result: AttackResultDto; isPlayerAttack: boolean }>>([]);
+  const isAnimatingAttacks = ref(false);
 
   // Computed properties
   const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
@@ -149,6 +158,58 @@ export const useCombatStore = defineStore('combatStore', () => {
     if (newExpectedDto) expectedDto.value = newExpectedDto;
   };
 
+  /**
+   * Queue attack results from a turn for sequential display
+   */
+  const queueAttackResults = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
+    // Add player attacks first
+    playerAttacks.forEach((result) => {
+      attackResultQueue.value.push({ result, isPlayerAttack: true });
+    });
+    // Then enemy attacks
+    enemyAttacks.forEach((result) => {
+      attackResultQueue.value.push({ result, isPlayerAttack: false });
+    });
+  };
+
+  /**
+   * Show the next attack result from the queue
+   */
+  const showNextAttackResult = (): boolean => {
+    if (attackResultQueue.value.length === 0) {
+      isAnimatingAttacks.value = false;
+      return false;
+    }
+
+    const next = attackResultQueue.value.shift();
+    if (next) {
+      currentAttackResult.value = next.result;
+      isCurrentAttackPlayerAttack.value = next.isPlayerAttack;
+      showAttackResultModal.value = true;
+    }
+    return true;
+  };
+
+  /**
+   * Close the current attack result modal and show the next one
+   */
+  const closeAttackResultModal = () => {
+    showAttackResultModal.value = false;
+    // Show next result after a short delay for visual clarity
+    setTimeout(() => {
+      showNextAttackResult();
+    }, 300);
+  };
+
+  /**
+   * Start the attack animation sequence
+   */
+  const startAttackAnimation = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
+    queueAttackResults(playerAttacks, enemyAttacks);
+    isAnimatingAttacks.value = true;
+    showNextAttackResult();
+  };
+
   return {
     // State
     inCombat,
@@ -163,6 +224,13 @@ export const useCombatStore = defineStore('combatStore', () => {
     phase,
     expectedDto,
 
+    // Attack result modal state
+    showAttackResultModal,
+    currentAttackResult,
+    isCurrentAttackPlayerAttack,
+    attackResultQueue,
+    isAnimatingAttacks,
+
     // Computed
     aliveEnemies,
     validTargets,
@@ -176,5 +244,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     startCombat,
     fetchStatus,
     setActionToken,
+    queueAttackResults,
+    showNextAttackResult,
+    closeAttackResultModal,
+    startAttackAnimation,
   };
 });

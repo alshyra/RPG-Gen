@@ -27,7 +27,7 @@
       <div class="flex gap-2 flex-shrink-0">
         <DiceRoll
           :pending-instruction="gameStore.pendingInstruction?.type === 'roll' ? gameStore.pendingInstruction : null"
-          expr="1d20"
+          :expr="pendingDiceExpr"
           @send="send"
         />
       </div>
@@ -81,6 +81,15 @@ const playerText = computed({
 });
 
 const isRolling = computed(() => gameStore.pendingInstruction?.type === 'roll');
+
+// Get the dice expression from pending instruction, or default to 1d20
+const pendingDiceExpr = computed(() => {
+  const p = gameStore.pendingInstruction;
+  if (p && p.type === 'roll' && p.dices) {
+    return p.dices;
+  }
+  return '1d20';
+});
 
 const pendingRollText = computed(() => {
   const p = gameStore.pendingInstruction;

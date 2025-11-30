@@ -73,7 +73,14 @@ export function useCombat() {
       // Update combat store with results
       combatStore.updateFromTurnResult(attackResponse);
 
-      // Display combat narrative
+      // Start the attack animation sequence to show results in modals
+      const playerAttacks = attackResponse.playerAttacks || [];
+      const enemyAttacks = attackResponse.enemyAttacks || [];
+      if (playerAttacks.length > 0 || enemyAttacks.length > 0) {
+        combatStore.startAttackAnimation(playerAttacks, enemyAttacks);
+      }
+
+      // Display combat narrative (after animations complete)
       gameStore.appendMessage('assistant', attackResponse.narrative);
 
       // Process any instructions (HP changes, XP, roll requests, etc.)
