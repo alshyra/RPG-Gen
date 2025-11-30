@@ -9,14 +9,26 @@
       </div>
     </div>
 
-    <div v-if="!hasItems" class="text-xs text-slate-400">Aucun objet pour le moment.</div>
+    <div
+      v-if="!hasItems"
+      class="text-xs text-slate-400"
+    >
+      Aucun objet pour le moment.
+    </div>
 
-    <div v-else class="space-y-4 overflow-auto">
+    <div
+      v-else
+      class="space-y-4 overflow-auto"
+    >
       <template v-for="groupKey in ['Weapons','Armor','Consumables','Other']">
         <div v-if="groupedItems[groupKey] && groupedItems[groupKey].length > 0">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-xs font-semibold text-slate-200">{{ groupLabel(groupKey) }}</h4>
-            <div class="text-xs text-slate-400">{{ groupedItems[groupKey].length }} item(s)</div>
+            <h4 class="text-xs font-semibold text-slate-200">
+              {{ groupLabel(groupKey) }}
+            </h4>
+            <div class="text-xs text-slate-400">
+              {{ groupedItems[groupKey].length }} item(s)
+            </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -25,23 +37,40 @@
               :key="item._id || item.name"
               role="button"
               tabindex="0"
+              class="relative p-3 bg-slate-800/40 rounded border border-slate-700/30 flex flex-col justify-between gap-2 hover:bg-slate-700/40 transition-colors cursor-pointer h-28"
               @click="onCardClick(item)"
               @keydown.enter="onCardClick(item)"
-              class="relative p-3 bg-slate-800/40 rounded border border-slate-700/30 flex flex-col justify-between gap-2 hover:bg-slate-700/40 transition-colors cursor-pointer h-28"
             >
               <div class="flex items-start gap-3">
                 <div class="w-10 h-10 flex items-center justify-center bg-slate-700 rounded shrink-0">
-                  <i :class="getIconClass(item)" aria-hidden="true"></i>
+                  <i
+                    :class="getIconClass(item)"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div class="flex-1 overflow-hidden">
-                  <div class="font-medium text-sm text-slate-100 truncate">{{ item.name ?? 'Objet' }}</div>
-                  <div class="text-xs text-slate-400 line-clamp-3" style="max-height:3.6rem;">{{ item.description || '' }}</div>
+                  <div class="font-medium text-sm text-slate-100 truncate">
+                    {{ item.name ?? 'Objet' }}
+                  </div>
+                  <div
+                    class="text-xs text-slate-400 line-clamp-3"
+                    style="max-height:3.6rem;"
+                  >
+                    {{ item.description || '' }}
+                  </div>
                 </div>
-                <div class="text-xs text-slate-300 ml-2">x{{ item.qty ?? 1 }}</div>
+                <div class="text-xs text-slate-300 ml-2">
+                  x{{ item.qty ?? 1 }}
+                </div>
               </div>
 
               <div class="flex justify-end">
-                <div v-if="item.equipped" class="text-amber-300 text-xs">Équipé</div>
+                <div
+                  v-if="item.equipped"
+                  class="text-amber-300 text-xs"
+                >
+                  Équipé
+                </div>
               </div>
             </div>
           </div>
@@ -77,7 +106,7 @@ const groupedItems = computed(() => {
     else groups.Other.push(it);
   });
   // Sort each group with equipped items first
-  Object.keys(groups).forEach(k => {
+  Object.keys(groups).forEach((k) => {
     groups[k].sort((a: any, b: any) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0));
   });
   return groups;

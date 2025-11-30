@@ -1,4 +1,5 @@
 <template>
+  <Accordion />
   <!-- Combat wrapper manages its own fixed positioning, header, bump and collapsed state -->
   <transition
     name="combat-panel"
@@ -12,10 +13,6 @@
         data-cy="combat-panel"
         class="bg-slate-900/95 border border-slate-700 shadow-lg relative w-full overflow-hidden rounded-t-lg rounded-b-none p-4"
       >
-        <!-- Bump (visual) -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-6 bg-slate-900 border border-slate-700 rounded-t-full z-10 pointer-events-none" />
-
-        <!-- Header -->
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2 text-slate-200 font-semibold">
             <svg
@@ -38,7 +35,6 @@
           </div>
         </div>
 
-        <!-- Chevron/close button sitting above the bump -->
         <button
           class="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 border border-slate-700 shadow-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
           :aria-expanded="ui.isCombatOpen"
@@ -59,8 +55,6 @@
             />
           </svg>
         </button>
-
-        <!-- Main panel content (existing card) -->
         <div
           class="card p-1 mb-2 max-h-44 overflow-y-auto mt-3"
           data-cy="combat-panel"
@@ -89,15 +83,12 @@
   </transition>
 
   <!-- Collapsed handle (still visible when combat present) -->
-  <transition name="combat-panel">
+  <transition name="combat-handle">
     <div
       v-if="inCombat && !ui.isCombatOpen"
-      class="inset-x-4 max-w-5xl mx-auto z-60 pointer-events-auto"
+      class="transition-all duration-700 inset-x-4 max-w-5xl mx-auto z-60 pointer-events-auto"
     >
-      <div class="bg-slate-900/95 border border-slate-700 shadow-lg relative w-full overflow-hidden rounded-t-lg h-10 flex items-center px-4">
-        <!-- Bump -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-6 bg-slate-900 border border-slate-700 rounded-t-full z-10 pointer-events-none" />
-
+      <div class="bg-slate-900/95 border border-slate-700 shadow-lg relative w-full rounded-t-lg h-10 flex items-center px-4">
         <div class="flex items-center gap-3 w-full">
           <div class="flex items-center gap-2 text-slate-200 font-semibold">
             <svg
@@ -146,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, nextTick, watch, onMounted, onBeforeUnmount } from 'vue';
 import FighterPortrait from './FighterPortrait.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
@@ -199,6 +190,29 @@ const participants = computed(() => {
   return list;
 });
 
+// Measure expanded panel height and animate max-height (Accordion-like behavior)
+const containerEl = ref<HTMLElement | null>(null);
+const height = ref<number>(0);
+
+const updateHeight = () => {
+  if (containerEl.value) height.value = containerEl.value.scrollHeight;
+};
+
+onMounted(() => {
+  nextTick().then(updateHeight);
+  window.addEventListener('resize', updateHeight);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateHeight);
+});
+
+// Recompute height when participants or open state change
+watch([() => participants.value.length, () => ui.isCombatOpen], async () => {
+  await nextTick();
+  updateHeight();
+});
+
 const onActorActed = async (_actor: string) => {
   // Do not rotate client-side; refresh authoritative combat state from backend.
   if (!characterStore.currentCharacter) return;
@@ -213,17 +227,38 @@ const onActorActed = async (_actor: string) => {
 <style scoped>
 .combat-panel-enter-from,
 .combat-panel-leave-to {
-  transform: translateY(40px) scale(.985);
+  max-height: 0;
+  opacity: 0;
+}
+.combat-panel-enter-from {
+  max-height: 0;
   opacity: 0;
 }
 .combat-panel-enter-to,
 .combat-panel-leave-from {
-  transform: translateY(0) scale(1);
   opacity: 1;
 }
 .combat-panel-enter-active,
 .combat-panel-leave-active {
-  transform-origin: bottom center;
-  transition: transform 320ms cubic-bezier(.16,.84,.24,1), opacity 320ms cubic-bezier(.16,.84,.24,1);
+  transition: max-height 320ms cubic-bezier(.16,.84,.24,1), opacity 220ms ease;
+  will-change: max-height, opacity;
+}
+
+/* Collapsed handle: shrink/grow opposite to the main panel */
+.combat-handle-enter-from,
+.combat-handle-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+.combat-handle-enter-to,
+.combat-handle-leave-from {
+  max-height: 64px; /* enough to show the 40px handle comfortably */
+  opacity: 1;
+}
+.combat-handle-enter-active,
+.combat-handle-leave-active {
+  transition: max-height 280ms cubic-bezier(.16,.84,.24,1), opacity 160ms ease;
+  will-change: max-height, opacity;
 }
 </style>
