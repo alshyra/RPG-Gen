@@ -157,27 +157,7 @@
     />
 
     <!-- Combat result modal for attack animations -->
-    <CombatResultModal
-      v-if="combatStore.currentAttackResult"
-      :is-open="combatStore.showAttackResultModal"
-      :is-player-attack="combatStore.isCurrentAttackPlayerAttack"
-      :attacker-name="combatStore.currentAttackResult.attacker"
-      :target-name="combatStore.currentAttackResult.target"
-      :attack-roll="combatStore.currentAttackResult.attackRoll"
-      :attack-bonus="combatStore.currentAttackResult.attackBonus"
-      :total-attack="combatStore.currentAttackResult.totalAttack"
-      :target-ac="combatStore.currentAttackResult.targetAc"
-      :hit="combatStore.currentAttackResult.hit"
-      :is-critical="combatStore.currentAttackResult.critical"
-      :is-fumble="combatStore.currentAttackResult.fumble"
-      :damage-roll="combatStore.currentAttackResult.damageRoll || []"
-      :damage-bonus="combatStore.currentAttackResult.damageBonus"
-      :total-damage="combatStore.currentAttackResult.totalDamage"
-      :target-hp-before="combatStore.currentAttackResult.targetHpBefore"
-      :target-hp-after="combatStore.currentAttackResult.targetHpAfter"
-      :target-defeated="combatStore.currentAttackResult.targetDefeated"
-      @close="combatStore.closeAttackResultModal"
-    />
+    <CombatResultModal v-if="combatStore.currentAttackResult" />
   </div>
 </template>
 <script setup lang="ts">

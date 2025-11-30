@@ -152,31 +152,30 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
+import { useCombatStore } from '../../stores/combatStore';
 
-defineProps<{
-  isOpen: boolean;
-  isPlayerAttack: boolean;
-  attackerName: string;
-  targetName: string;
-  attackRoll: number;
-  attackBonus: number;
-  totalAttack: number;
-  targetAc: number;
-  hit: boolean;
-  isCritical: boolean;
-  isFumble: boolean;
-  damageRoll: number[];
-  damageBonus: number;
-  totalDamage: number;
-  targetHpBefore: number;
-  targetHpAfter: number;
-  targetDefeated: boolean;
-}>();
+const combatStore = useCombatStore();
 
-const emit = defineEmits<{
-  (e: 'close'): void;
-}>();
+// Computed properties from store
+const isOpen = computed(() => combatStore.showAttackResultModal);
+const isPlayerAttack = computed(() => combatStore.isCurrentAttackPlayerAttack);
+const attackerName = computed(() => combatStore.currentAttackResult?.attacker ?? '');
+const targetName = computed(() => combatStore.currentAttackResult?.target ?? '');
+const attackRoll = computed(() => combatStore.currentAttackResult?.attackRoll ?? 0);
+const attackBonus = computed(() => combatStore.currentAttackResult?.attackBonus ?? 0);
+const totalAttack = computed(() => combatStore.currentAttackResult?.totalAttack ?? 0);
+const targetAc = computed(() => combatStore.currentAttackResult?.targetAc ?? 0);
+const hit = computed(() => combatStore.currentAttackResult?.hit ?? false);
+const isCritical = computed(() => combatStore.currentAttackResult?.critical ?? false);
+const isFumble = computed(() => combatStore.currentAttackResult?.fumble ?? false);
+const damageRoll = computed(() => combatStore.currentAttackResult?.damageRoll ?? []);
+const damageBonus = computed(() => combatStore.currentAttackResult?.damageBonus ?? 0);
+const totalDamage = computed(() => combatStore.currentAttackResult?.totalDamage ?? 0);
+const targetHpBefore = computed(() => combatStore.currentAttackResult?.targetHpBefore ?? 0);
+const targetHpAfter = computed(() => combatStore.currentAttackResult?.targetHpAfter ?? 0);
+const targetDefeated = computed(() => combatStore.currentAttackResult?.targetDefeated ?? false);
 
-const close = () => emit('close');
+const close = () => combatStore.closeAttackResultModal();
 </script>
