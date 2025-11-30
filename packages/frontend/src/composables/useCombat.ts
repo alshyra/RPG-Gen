@@ -3,6 +3,7 @@ import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
 import type { CombatStartInstructionMessageDto } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
 
 /**
  * Composable for combat-specific actions and state management
@@ -11,6 +12,7 @@ export function useCombat() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
+  const { currentCharacter } = storeToRefs(characterStore);
 
   /**
    * Initialize combat from a combat_start instruction
@@ -18,8 +20,7 @@ export function useCombat() {
   const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
     // show as a normal log so developers see it after reload without changing console filters
     console.log('[useCombat] initializeCombat instruction', instruction);
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    if (!currentCharacter.value) return;
 
     const enemyNames = instruction.combat_start.map(e => e.name).join(', ');
     gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
@@ -27,7 +28,7 @@ export function useCombat() {
     try {
       // Ensure we send only the expected request shape to the backend
       const payload = { combat_start: instruction.combat_start };
-      const combatState = await combatStore.startCombat(character.characterId, payload);
+      const combatState = await combatStore.startCombat(currentCharacter.value.characterId, payload);
 
       if (combatState.narrative) {
         gameStore.appendMessage('system', combatState.narrative);
@@ -49,25 +50,23 @@ export function useCombat() {
    * Execute an attack against a target using actionToken for idempotency
    */
   const executeAttack = async (target: string): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
-
+    if (!currentCharacter.value) return;
     gameStore.appendMessage('user', `J'attaque ${target}!`);
     gameStore.sending = true;
 
     try {
       // Use the stored action token for idempotent attack
       const token = combatStore.actionToken;
-      console.log('[useCombat] executeAttack ->', { characterId: character.characterId, target, actionToken: token });
+      console.log('[useCombat] executeAttack ->', { characterId: currentCharacter.value.characterId, target, actionToken: token });
 
       let attackResponse;
       if (token) {
         // Use tokenized endpoint for idempotency
-        attackResponse = await combatService.attackWithToken(character.characterId, token, target);
+        attackResponse = await combatService.attackWithToken(currentCharacter.value.characterId, token, target);
       } else {
         // Fallback to legacy endpoint if no token available (should not happen in normal flow)
         console.warn('[useCombat] No action token available, falling back to legacy attack endpoint');
-        attackResponse = await combatService.attack(character.characterId, target);
+        attackResponse = await combatService.attack(currentCharacter.value.characterId, target);
       }
 
       // Update combat store with results
@@ -81,6 +80,8 @@ export function useCombat() {
       }
 
       // Display combat narrative (after animations complete)
+      currentCharacter.value.hp = attackResponse.playerHp;
+      // Display combat narrative
       gameStore.appendMessage('assistant', attackResponse.narrative);
 
       // Process any instructions (HP changes, XP, roll requests, etc.)
@@ -98,7 +99,7 @@ export function useCombat() {
         combatStore.clearCombat();
       } else {
         // Fetch fresh status to get new action token for next turn
-        await combatStore.fetchStatus(character.characterId);
+        await combatStore.fetchStatus(currentCharacter.value.characterId);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to attack';

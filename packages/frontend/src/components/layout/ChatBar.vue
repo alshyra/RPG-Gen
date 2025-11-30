@@ -1,6 +1,9 @@
 <template>
   <div
-    class="bg-linear-to-t from-slate-950 via-slate-900/80 to-slate-900/40 rounded-lg p-3 border border-slate-700"
+    :class="[
+      'bg-linear-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
+      connectedTop ? 'rounded-b-lg' : 'rounded-lg'
+    ]"
   >
     <div class="relative flex items-center gap-2">
       <!-- Command and argument suggestions dropdown -->
@@ -24,7 +27,7 @@
       >
 
       <!-- Dice Roll / Send button -->
-      <div class="flex gap-2 flex-shrink-0">
+      <div class="flex gap-2 shrink-0">
         <DiceRoll
           :pending-instruction="gameStore.pendingInstruction?.type === 'roll' ? gameStore.pendingInstruction : null"
           :expr="pendingDiceExpr"
@@ -56,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+const { connectedTop = false } = defineProps<{ connectedTop?: boolean }>();
 import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';

@@ -12,8 +12,6 @@ export const useCombatStore = defineStore('combatStore', () => {
   const roundNumber = ref(1);
   const enemies = ref<CombatEnemyDto[]>([]);
   const turnOrder = ref<CombatantDto[]>([]);
-  const playerHp = ref(0);
-  const playerHpMax = ref(0);
   const playerInitiative = ref(0);
   const currentTarget = ref<string | null>(null);
 
@@ -45,8 +43,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
     playerInitiative.value = response.player.initiative ?? 0;
-    playerHp.value = response.player.hp ?? 0;
-    playerHpMax.value = response.player.hpMax ?? 0;
     enemies.value = response.enemies ?? [];
     turnOrder.value = response.turnOrder ?? [];
 
@@ -65,9 +61,6 @@ export const useCombatStore = defineStore('combatStore', () => {
    * Update combat state after an attack
    */
   const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
-    // Update player HP
-    playerHp.value = result.playerHp;
-
     // Update enemy HP from remaining enemies
     result.remainingEnemies.forEach((updatedEnemy) => {
       const existingEnemy = enemies.value.find(e => e.id === updatedEnemy.id);
@@ -114,8 +107,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     roundNumber.value = 1;
     enemies.value = [];
     turnOrder.value = [];
-    playerHp.value = 0;
-    playerHpMax.value = 0;
     playerInitiative.value = 0;
     currentTarget.value = null;
     actionToken.value = null;
@@ -216,8 +207,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     roundNumber,
     enemies,
     turnOrder,
-    playerHp,
-    playerHpMax,
     playerInitiative,
     currentTarget,
     actionToken,

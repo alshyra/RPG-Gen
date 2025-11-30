@@ -113,7 +113,7 @@ export class CombatController {
     @Req() req: Request,
     @Param('characterId') characterId: string,
     @Param('actionToken') actionToken: string,
-    @Body() body: AttackRequestDto,
+    @Body('target') target: string,
   ): Promise<TurnResultWithInstructionsDto> {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -127,7 +127,6 @@ export class CombatController {
       return (acquired.record).resultPayload as TurnResultWithInstructionsDto;
     }
 
-    const target = body.target;
     const state = await this.combatService.getCombatState(characterId);
     if (!state) {
       await this.actionRecordService.setFailed(actionToken, { error: 'No combat state found' });
