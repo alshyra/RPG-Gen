@@ -16,6 +16,7 @@ test('chat.chat initializes session when missing and replies', async (t) => {
   const conv: any = {
     append: async (_u: string, _c: string, msg: any) => { appended.push(msg); },
     getHistory: async () => [],
+    buildCharacterSummary: () => 'Test character summary',
   };
 
   const characterService: any = {
@@ -24,7 +25,7 @@ test('chat.chat initializes session when missing and replies', async (t) => {
 
   const gamesInstructionProcessor: any = {};
 
-  const controller = new ChatController(gemini, conv, gamesInstructionProcessor, characterService);
+  const controller = new ChatController(gemini, conv, characterService, gamesInstructionProcessor);
 
   const req: any = { user: { _id: { toString: () => 'u1' } } };
 
@@ -46,11 +47,12 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
       { role: 'user', text: 'u1', timestamp: Date.now() },
       { role: 'assistant', text: 'a1', timestamp: Date.now() },
     ],
+    buildCharacterSummary: () => 'Test character summary',
   };
 
   const characterService: any = { findByCharacterId: async () => ({}) };
   const gamesInstructionProcessor: any = {};
-  const controller = new ChatController(gemini, conv, gamesInstructionProcessor, characterService);
+  const controller = new ChatController(gemini, conv, characterService, gamesInstructionProcessor);
 
   // call public method to verify initialization behavior
   const req: any = { user: { _id: { toString: () => 'u1' } } };
@@ -58,5 +60,6 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
   t.truthy(Array.isArray(capturedHistory));
   t.is(capturedHistory.length, 2);
   t.is(capturedHistory[0].role, 'user');
-  t.is(capturedHistory[1].role, 'model');
+  // The mock receives the raw history from conversationService - transformation to 'model' happens inside real GeminiTextService
+  t.is(capturedHistory[1].role, 'assistant');
 });

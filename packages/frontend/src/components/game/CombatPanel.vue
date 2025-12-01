@@ -1,10 +1,16 @@
 <template>
-  <div class="card p-1 mb-2 max-h-44 overflow-y-auto" data-cy="combat-panel">
+  <div
+    class="card p-1 mb-2 max-h-44 overflow-y-auto"
+    data-cy="combat-panel"
+  >
     <div class="flex items-center justify-between mb-2">
       <div class="font-semibold">
         ⚔️ Combat
       </div>
-      <div class="text-sm text-slate-400" data-cy="combat-round">
+      <div
+        class="text-sm text-slate-400"
+        data-cy="combat-round"
+      >
         Round {{ roundNumber }}
       </div>
     </div>
@@ -59,8 +65,8 @@ const enemies = combat.enemies;
 const roundNumber = combat.roundNumber;
 
 // Build participants array: player + enemies, ordered by initiative desc
-  const participants = computed(() => {
-    const list: Participant[] = [];
+const participants = computed(() => {
+  const list: Participant[] = [];
   const player = characterStore.currentCharacter;
   if (player) {
     list.push({

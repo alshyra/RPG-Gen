@@ -51,6 +51,10 @@ import UiXpBar from '../ui/UiXpBar.vue';
 import CharacterIllustration from './CharacterIllustration.vue';
 import { storeToRefs } from 'pinia';
 
+interface InventoryItem {
+  meta?: { class?: string; type?: string; ac?: string | number };
+}
+
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
@@ -71,55 +75,65 @@ const xpPercent = computed(() => {
   return progress.percentage;
 });
 
+const parseShieldBonus = (item: InventoryItem): number => {
+  if (!item.meta?.ac) return 0;
+  const m = String(item.meta.ac).match(/([+-]?\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+};
+
+const isShield = (item: InventoryItem): boolean =>
+  item.meta?.class === 'Shield'
+  || (item.meta?.type === 'armor' && (item.meta?.class || '').toLowerCase() === 'shield');
+
+const calculateDexBonus = (acRaw: string, dexMod: number): number => {
+  const usesDex = /dex/i.test(acRaw);
+  if (!usesDex) return 0;
+  const capMatch = acRaw.match(/max\s*[:(\s]*?(\d+)/i);
+  if (capMatch) {
+    const cap = parseInt(capMatch[1], 10);
+    return Math.min(dexMod, isNaN(cap) ? dexMod : cap);
+  }
+  return dexMod;
+};
+
 const inspirationPoints = computed(() => currentCharacter.value?.inspirationPoints || 0);
+
+const getCharValue = () => currentCharacter.value as {
+  ac?: number;
+  armorClass?: number;
+  scores?: Record<string, number>;
+  inventory?: InventoryItem[];
+};
+
+const computeArmorAc = (armor: InventoryItem, dexMod: number, shieldBonus: number): number | null => {
+  if (!armor.meta?.ac) return null;
+  const acRaw = String(armor.meta.ac);
+  const baseMatch = acRaw.match(/(\d+)/);
+  const base = baseMatch ? parseInt(baseMatch[1], 10) : null;
+  if (base !== null) return base + calculateDexBonus(acRaw, dexMod) + shieldBonus;
+  return null;
+};
+
 const ac = computed(() => {
   if (!currentCharacter.value) return '-';
 
-  // If backend already provides AC, use it
-  const explicitAc = (currentCharacter.value as any).ac ?? (currentCharacter.value as any).armorClass;
+  const charValue = getCharValue();
+  const explicitAc = charValue.ac ?? charValue.armorClass;
   if (explicitAc !== undefined && explicitAc !== null) return explicitAc;
 
-  // Compute from inventory and DEX modifier
   const inv = currentCharacter.value.inventory ?? [];
-  // Shield bonus: look for shield item with meta.ac like '+2'
-  const shield = inv.find((i: any) => i.meta?.class === 'Shield' || (i.meta?.type === 'armor' && (i.meta?.class || '').toLowerCase() === 'shield')) as any;
-  let shieldBonus = 0;
-  if (shield && shield.meta?.ac) {
-    const s = String(shield.meta.ac);
-    const m = s.match(/([+-]?\d+)/);
-    if (m) shieldBonus = parseInt(m[1], 10);
-  }
+  const shield = inv.find(isShield);
+  const shieldBonus = shield ? parseShieldBonus(shield) : 0;
+  const armor = inv.find((i: InventoryItem) => i.meta?.type === 'armor' && !isShield(i));
 
-  // Armor item (non-shield)
-  const armor = inv.find((i: any) => i.meta?.type === 'armor' && !(i.meta?.class === 'Shield')) as any;
-
-  const dexScore = (currentCharacter.value as any).scores?.Dex ?? (currentCharacter.value as any).scores?.dex ?? 10;
+  const dexScore = charValue.scores?.Dex ?? charValue.scores?.dex ?? 10;
   const dexMod = DnDRulesService.getAbilityModifier(Number(dexScore || 10));
 
-  if (armor && armor.meta?.ac) {
-    // Examples: '11 + Dex', '12 + Dex', 14, '+2'
-    const acRaw = String(armor.meta.ac);
-    const baseMatch = acRaw.match(/(\d+)/);
-    const base = baseMatch ? parseInt(baseMatch[1], 10) : null;
-    const usesDex = /dex/i.test(acRaw) || /Dex/.test(acRaw);
-    if (base !== null) {
-      // Respect optional Dex cap in armor description (e.g. 'max 2')
-      let dexToAdd = 0;
-      if (usesDex) {
-        const capMatch = acRaw.match(/max\s*[:\(\s]*?(\d+)/i);
-        if (capMatch) {
-          const cap = parseInt(capMatch[1], 10);
-          dexToAdd = Math.min(dexMod, isNaN(cap) ? dexMod : cap);
-        } else {
-          dexToAdd = dexMod;
-        }
-      }
-
-      return base + dexToAdd + shieldBonus;
-    }
+  if (armor) {
+    const armorAc = computeArmorAc(armor, dexMod, shieldBonus);
+    if (armorAc !== null) return armorAc;
   }
 
-  // Default: 10 + DEX modifier + shield
   return 10 + dexMod + shieldBonus;
 });
 </script>

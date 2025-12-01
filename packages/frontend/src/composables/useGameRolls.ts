@@ -295,7 +295,7 @@ export const useGameRolls = () => {
               gameStore.appendMessage('system', `💥 Dégâts infligés à ${targetName}: ${damageTotal}`);
               try {
                 if (resp && Array.isArray(resp.remainingEnemies)) {
-                  const updated = resp.remainingEnemies.find((r) => r.name === targetName);
+                  const updated = resp.remainingEnemies.find(r => r.name === targetName);
                   if (updated) {
                     const hpNow = typeof updated.hp === 'number' ? updated.hp : undefined;
                     const hpMax = updated.hpMax ?? undefined;

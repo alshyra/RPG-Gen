@@ -33,7 +33,15 @@ export class CombatStateDto {
   @ApiPropertyOptional({ description: 'Valid targets available to player', type: [String] })
   validTargets?: string[];
 
-  @ApiPropertyOptional({ description: 'Current combat phase', enum: ['PLAYER_TURN', 'AWAITING_DAMAGE_ROLL', 'ENEMY_TURN', 'COMBAT_ENDED'] })
+  @ApiPropertyOptional({
+    description: 'Current combat phase',
+    enum: [
+      'PLAYER_TURN',
+      'AWAITING_DAMAGE_ROLL',
+      'ENEMY_TURN',
+      'COMBAT_ENDED',
+    ],
+  })
   phase?: CombatPhase;
 
   @ApiPropertyOptional({ description: 'Action token for idempotent action submission' })

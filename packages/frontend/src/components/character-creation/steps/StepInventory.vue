@@ -115,36 +115,36 @@
       </div>
     </div>
 
-      <!-- Armor choice (pick one) -->
-      <div class="mb-2">
-        <div class="font-medium text-sm">
-          Choisissez votre armure
-        </div>
-        <div class="text-xs text-slate-400 mb-2">
-          Sélectionnez une armure de départ parmi les options proposées.
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div
-            v-for="armor in availableArmors"
-            :key="armor.definitionId"
-            class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
+    <!-- Armor choice (pick one) -->
+    <div class="mb-2">
+      <div class="font-medium text-sm">
+        Choisissez votre armure
+      </div>
+      <div class="text-xs text-slate-400 mb-2">
+        Sélectionnez une armure de départ parmi les options proposées.
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div
+          v-for="armor in availableArmors"
+          :key="armor.definitionId"
+          class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
+        >
+          <UiInputCheckbox
+            :model-value="armorIsSelected(armor)"
+            @update:model-value="() => toggleArmor(armor)"
           >
-            <UiInputCheckbox
-              :model-value="armorIsSelected(armor)"
-              @update:model-value="() => toggleArmor(armor)"
-            >
-              <div class="flex-1">
-                <div class="font-medium">
-                  {{ armor.name }}
-                </div>
-                <div class="text-xs text-slate-400">
-                  {{ armor.description }}
-                </div>
+            <div class="flex-1">
+              <div class="font-medium">
+                {{ armor.name }}
               </div>
-            </UiInputCheckbox>
-          </div>
+              <div class="text-xs text-slate-400">
+                {{ armor.description }}
+              </div>
+            </div>
+          </UiInputCheckbox>
         </div>
       </div>
+    </div>
   </div>
 </template>
 

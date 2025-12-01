@@ -16,7 +16,9 @@
     </section>
 
     <div class="max-w-2xl w-full mx-auto mt-8 text-center">
-      <p class="text-slate-300 mb-3">Créer un nouveau personnage — uniquement pour D&D.</p>
+      <p class="text-slate-300 mb-3">
+        Créer un nouveau personnage — uniquement pour D&D.
+      </p>
       <UiButton
         variant="primary"
         :is-loading="creating"
