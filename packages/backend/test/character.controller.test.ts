@@ -9,7 +9,13 @@ class FakeCharacterService {
     return {
       characterId,
       name: 'Test',
-      inventory: [{ _id: 'item-1', name: item.name || 'item', qty: item.qty || 1 }],
+      inventory: [
+        {
+          _id: 'item-1',
+          name: item.name || 'item',
+          qty: item.qty || 1,
+        },
+      ],
     } as any;
   }
 
@@ -17,7 +23,13 @@ class FakeCharacterService {
     return {
       characterId,
       name: 'Test',
-      inventory: [{ _id: itemId, name: updates.name || 'item', qty: updates.qty || 1 }],
+      inventory: [
+        {
+          _id: itemId,
+          name: updates.name || 'item',
+          qty: updates.qty || 1,
+        },
+      ],
     } as any;
   }
 
@@ -36,7 +48,11 @@ class FakeCharacterService {
 
 test('addInventory creates item and returns character shape', async (t) => {
   try {
-    const res = await new FakeCharacterService().addInventoryItem('user1', 'character-1', { name: 'Test Sword', qty: 1 });
+    const res = await new FakeCharacterService()
+      .addInventoryItem('user1', 'character-1', {
+        name: 'Test Sword',
+        qty: 1,
+      });
     t.truthy(res);
     t.true(Array.isArray(res.inventory));
     t.is(res.inventory[0].name, 'Test Sword');
@@ -47,7 +63,11 @@ test('addInventory creates item and returns character shape', async (t) => {
 
 test('updateInventory updates item and returns character shape', async (t) => {
   try {
-    const res = await new FakeCharacterService().updateInventoryItem('user1', 'character-1', 'item-1', { name: 'Better Sword', qty: 2 });
+    const res = await new FakeCharacterService()
+      .updateInventoryItem('user1', 'character-1', 'item-1', {
+        name: 'Better Sword',
+        qty: 2,
+      });
     t.truthy(res);
     t.is(res.inventory[0]._id, 'item-1');
     t.is(res.inventory[0].qty, 2);
@@ -58,7 +78,8 @@ test('updateInventory updates item and returns character shape', async (t) => {
 
 test('removeInventory removes item and returns character shape', async (t) => {
   try {
-    const res = await new FakeCharacterService().removeInventoryItem('user1', 'character-1');
+    const res = await new FakeCharacterService()
+      .removeInventoryItem('user1', 'character-1');
     t.truthy(res);
     t.true(Array.isArray(res.inventory));
     t.is(res.inventory.length, 0);

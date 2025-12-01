@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class SpellResponseDto {
   @ApiProperty({ description: 'Spell name' })
@@ -10,6 +12,9 @@ export class SpellResponseDto {
   @ApiPropertyOptional({ description: 'Spell description' })
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Spell metadata', additionalProperties: true })
+  @ApiPropertyOptional({
+    description: 'Spell metadata',
+    additionalProperties: true,
+  })
   meta?: Record<string, unknown>;
 }

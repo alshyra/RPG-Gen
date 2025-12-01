@@ -8,6 +8,9 @@ export class InspirationResponseDto {
   @ApiProperty({ description: 'Updated inspiration points count' })
   inspirationPoints: number;
 
-  @ApiProperty({ description: 'Updated character', type: CharacterResponseDto })
+  @ApiProperty({
+    description: 'Updated character',
+    type: CharacterResponseDto,
+  })
   character: CharacterResponseDto;
 }

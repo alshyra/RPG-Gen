@@ -1,4 +1,6 @@
-import { Injectable, PipeTransform, BadRequestException } from '@nestjs/common';
+import {
+  Injectable, PipeTransform, BadRequestException,
+} from '@nestjs/common';
 import type { ChatMessageDto } from '../dto/ChatMessageDto.js';
 
 const isRole = (r: string): r is 'user' | 'assistant' | 'system' => r === 'user' || r === 'assistant' || r === 'system';

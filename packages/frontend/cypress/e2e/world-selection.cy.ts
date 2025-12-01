@@ -10,32 +10,45 @@ describe('World Selection', () => {
   });
 
   it('should display all available worlds', () => {
-    cy.contains('Choisir un univers').should('be.visible');
+    cy.contains('Choisir un univers')
+      .should('be.visible');
 
     // Check that all three worlds are displayed
-    cy.contains('Dungeons & Dragons').should('be.visible');
-    cy.contains('High fantasy, parties, and epic quests.').should('be.visible');
+    cy.contains('Dungeons & Dragons')
+      .should('be.visible');
+    cy.contains('High fantasy, parties, and epic quests.')
+      .should('be.visible');
 
-    cy.contains('Vampire: The Masquerade').should('be.visible');
-    cy.contains('Gothic-punk political roleplay among vampires.').should('be.visible');
+    cy.contains('Vampire: The Masquerade')
+      .should('be.visible');
+    cy.contains('Gothic-punk political roleplay among vampires.')
+      .should('be.visible');
 
-    cy.contains('Cyberpunk').should('be.visible');
-    cy.contains('Near-future neon dystopia with tech & megacorps.').should('be.visible');
+    cy.contains('Cyberpunk')
+      .should('be.visible');
+    cy.contains('Near-future neon dystopia with tech & megacorps.')
+      .should('be.visible');
   });
 
   it('should display world logos', () => {
     // Check that world logos/initials are displayed
-    cy.get('.logo').should('have.length.gte', 3);
-    cy.contains('.logo', 'D').should('be.visible');
-    cy.contains('.logo', 'V').should('be.visible');
-    cy.contains('.logo', 'C').should('be.visible');
+    cy.get('.logo')
+      .should('have.length.gte', 3);
+    cy.contains('.logo', 'D')
+      .should('be.visible');
+    cy.contains('.logo', 'V')
+      .should('be.visible');
+    cy.contains('.logo', 'C')
+      .should('be.visible');
   });
 
   it('should have start buttons for each world', () => {
     // Each world should have a "Commencer" button
-    cy.get('button').contains('Commencer')
+    cy.get('button')
+      .contains('Commencer')
       .should('exist');
-    cy.get('button').filter(':contains("Commencer")')
+    cy.get('button')
+      .filter(':contains("Commencer")')
       .should('have.length.gte', 3);
   });
 
@@ -48,7 +61,8 @@ describe('World Selection', () => {
       .click();
 
     // Should navigate to character creation page (with generated characterId)
-    cy.url().should('match', /\/character\/[^/]+\/step\/1/);
+    cy.url()
+      .should('match', /\/character\/[^/]+\/step\/1/);
   });
 
   it('should store selected world in sessionStorage', () => {
@@ -60,7 +74,8 @@ describe('World Selection', () => {
       .click();
 
     // After creation, check that characterId exists in the URL
-    cy.url().should('match', /\/character\/[^/]+\/step\/1/);
+    cy.url()
+      .should('match', /\/character\/[^/]+\/step\/1/);
   });
 
   it('should highlight world on hover', () => {

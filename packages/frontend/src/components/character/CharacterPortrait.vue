@@ -45,14 +45,20 @@
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
 import { computed } from 'vue';
-import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
+import {
+  getCurrentLevel, getXpProgress,
+} from '../../utils/dndLevels';
 import { DnDRulesService } from '@/services/dndRulesService';
 import UiXpBar from '../ui/UiXpBar.vue';
 import CharacterIllustration from './CharacterIllustration.vue';
 import { storeToRefs } from 'pinia';
 
 interface InventoryItem {
-  meta?: { class?: string; type?: string; ac?: string | number };
+  meta?: {
+    class?: string;
+    type?: string;
+    ac?: string | number;
+  };
 }
 
 const characterStore = useCharacterStore();
@@ -77,7 +83,8 @@ const xpPercent = computed(() => {
 
 const parseShieldBonus = (item: InventoryItem): number => {
   if (!item.meta?.ac) return 0;
-  const m = String(item.meta.ac).match(/([+-]?\d+)/);
+  const m = String(item.meta.ac)
+    .match(/([+-]?\d+)/);
   return m ? parseInt(m[1], 10) : 0;
 };
 

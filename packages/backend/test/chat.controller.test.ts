@@ -7,7 +7,11 @@ test('chat.chat initializes session when missing and replies', async (t) => {
     initializeChatSession: (_sessionId: string, _system: string, _history: any[]) => { initialized = true; },
     sendMessage: async (_sessionId: string, _msg: string) => {
       if (!initialized) throw new Error('Chat session missing. Call getOrCreateChat first.');
-      return { text: 'assistant reply', usage: {}, modelVersion: 'm1' };
+      return {
+        text: 'assistant reply',
+        usage: {},
+        modelVersion: 'm1',
+      };
     },
   };
 
@@ -19,7 +23,16 @@ test('chat.chat initializes session when missing and replies', async (t) => {
   };
 
   const characterService: any = {
-    findByCharacterId: async () => ({ name: 'Hero', classes: [{ name: 'Fighter', level: 1 }], scores: { Con: 12 } }),
+    findByCharacterId: async () => ({
+      name: 'Hero',
+      classes: [
+        {
+          name: 'Fighter',
+          level: 1,
+        },
+      ],
+      scores: { Con: 12 },
+    }),
   };
 
   const gamesInstructionProcessor: any = {};
@@ -37,14 +50,26 @@ test('ensureChatSession uses existing history when initializing', async (t) => {
   let capturedHistory: any = null;
   const gemini: any = {
     initializeChatSession: (_sessionId: string, _system: string, history: any[]) => { capturedHistory = history; },
-    sendMessage: async (_sessionId: string, _msg: string) => ({ text: 'ok', usage: {}, modelVersion: 'v' }),
+    sendMessage: async (_sessionId: string, _msg: string) => ({
+      text: 'ok',
+      usage: {},
+      modelVersion: 'v',
+    }),
   };
 
   const conv: any = {
     append: async () => {},
     getHistory: async () => [
-      { role: 'user', text: 'u1', timestamp: Date.now() },
-      { role: 'assistant', text: 'a1', timestamp: Date.now() },
+      {
+        role: 'user',
+        text: 'u1',
+        timestamp: Date.now(),
+      },
+      {
+        role: 'assistant',
+        text: 'a1',
+        timestamp: Date.now(),
+      },
     ],
     buildCharacterSummary: () => 'Test character summary',
   };

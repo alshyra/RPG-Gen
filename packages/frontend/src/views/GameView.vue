@@ -74,8 +74,12 @@
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  computed, onMounted,
+} from 'vue';
+import {
+  useRoute, useRouter,
+} from 'vue-router';
 import { characterServiceApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/CombatPanel.vue';
 import CombatResultModal from '../components/game/CombatResultModal.vue';

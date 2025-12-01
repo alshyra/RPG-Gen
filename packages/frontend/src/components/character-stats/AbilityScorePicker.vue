@@ -42,12 +42,21 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import UiInputNumber from '../ui/UiInputNumber.vue';
 
-const props = defineProps<{ mode?: 'edit' | 'levelup' | 'point-buy'; levelUpBudget?: number; proficiency?: number; initialScores?: Record<string, number> }>();
-const { mode = 'point-buy', proficiency = 1 } = props;
+const props = defineProps<{
+  mode?: 'edit' | 'levelup' | 'point-buy';
+  levelUpBudget?: number;
+  proficiency?: number;
+  initialScores?: Record<string, number>;
+}>();
+const {
+  mode = 'point-buy', proficiency = 1,
+} = props;
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const { formatMod, applyPointBuyChange } = useAbilityScores();
+const {
+  formatMod, applyPointBuyChange,
+} = useAbilityScores();
 
 const onUpdateAbilityValue = async (ability: typeof ABILITIES[number], val: number) => {
   const value = (val ?? (currentCharacter?.value?.scores?.[ability] ?? 8));

@@ -50,7 +50,8 @@ export async function validateImage(imageData: string | Buffer): Promise<boolean
       buffer = imageData;
     }
 
-    const metadata = await sharp(buffer).metadata();
+    const metadata = await sharp(buffer)
+      .metadata();
     return !!(metadata.width && metadata.height);
   } catch {
     return false;

@@ -1,4 +1,6 @@
-import { ItemResponseDto, SpellResponseDto } from '@rpg-gen/shared';
+import {
+  ItemResponseDto, SpellResponseDto,
+} from '@rpg-gen/shared';
 
 export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
 
@@ -43,10 +45,26 @@ const VALID_COMMANDS: CommandType[] = [
  * (ordered consistently with VALID_COMMANDS)
  */
 export const COMMAND_DEFINITIONS: CommandDefinition[] = [
-  { command: 'cast', description: 'Lancer un sort', usage: '/cast <sort>' },
-  { command: 'equip', description: 'Équiper un objet', usage: '/equip <objet>' },
-  { command: 'attack', description: 'Attaquer une cible', usage: '/attack <cible>' },
-  { command: 'use', description: 'Utiliser un objet', usage: '/use <objet>' },
+  {
+    command: 'cast',
+    description: 'Lancer un sort',
+    usage: '/cast <sort>',
+  },
+  {
+    command: 'equip',
+    description: 'Équiper un objet',
+    usage: '/equip <objet>',
+  },
+  {
+    command: 'attack',
+    description: 'Attaquer une cible',
+    usage: '/attack <cible>',
+  },
+  {
+    command: 'use',
+    description: 'Utiliser un objet',
+    usage: '/use <objet>',
+  },
 ];
 
 /**
@@ -55,7 +73,8 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
  * @returns Array of matching command definitions
  */
 export const getCommandSuggestions = (input: string): CommandDefinition[] => {
-  const trimmed = input.trim().toLowerCase();
+  const trimmed = input.trim()
+    .toLowerCase();
 
   // Only provide suggestions if input starts with /
   if (!trimmed.startsWith('/')) {
@@ -82,16 +101,26 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
 /**
  * Parse the current command from input to determine what type of argument is expected
  */
-export const parseActiveCommand = (input: string): { command: CommandType | null; argumentPartial: string } => {
-  const trimmed = input.trim().toLowerCase();
+export const parseActiveCommand = (input: string): {
+  command: CommandType | null;
+  argumentPartial: string;
+} => {
+  const trimmed = input.trim()
+    .toLowerCase();
 
   if (!trimmed.startsWith('/')) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   const match = trimmed.match(COMMAND_WITH_SPACE_REGEX);
   if (!match) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   const [
@@ -101,7 +130,10 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   return {
@@ -134,7 +166,8 @@ export const getArgumentSuggestions = (
       return spells
         .filter((spell) => {
           const spellLevel = spell.level || 0;
-          const matchesName = spell.name.toLowerCase().includes(partial);
+          const matchesName = spell.name.toLowerCase()
+            .includes(partial);
           const matchesLevel = spellLevel <= characterLevel;
           return matchesName && matchesLevel;
         })
@@ -149,7 +182,8 @@ export const getArgumentSuggestions = (
       return inventory
         .filter((item) => {
           const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
-          const matchesName = (item.name ?? '').toLowerCase().includes(partial);
+          const matchesName = (item.name ?? '').toLowerCase()
+            .includes(partial);
           return isUsable && matchesName;
         })
         .filter(item => item.name !== undefined)
@@ -162,7 +196,8 @@ export const getArgumentSuggestions = (
     case 'equip':
       // Show all items for /equip command
       return inventory
-        .filter(item => (item.name ?? '').toLowerCase().includes(partial))
+        .filter(item => (item.name ?? '').toLowerCase()
+          .includes(partial))
         .filter(item => item.name !== undefined)
         .map(item => ({
           name: item.name!,
@@ -173,8 +208,12 @@ export const getArgumentSuggestions = (
     case 'attack':
       // For attack, suggest valid targets (enemy names) if provided
       return validTargets
-        .filter(name => name.toLowerCase().includes(partial))
-        .map(name => ({ name, type: 'target' as const }));
+        .filter(name => name.toLowerCase()
+          .includes(partial))
+        .map(name => ({
+          name,
+          type: 'target' as const,
+        }));
 
     default:
       return [];
@@ -219,7 +258,9 @@ export const getAllSuggestions = (
   }
 
   // Command with space - check for argument suggestions
-  const { command, argumentPartial } = parseActiveCommand(input);
+  const {
+    command, argumentPartial,
+  } = parseActiveCommand(input);
 
   if (command) {
     const argumentSuggestions = getArgumentSuggestions(

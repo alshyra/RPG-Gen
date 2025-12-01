@@ -8,7 +8,8 @@ test('rollDiceExpr parses and rolls correctly with deterministic RNG', (t) => {
   ];
   let i = 0;
   const rng = () => seq[i++ % seq.length];
-  const res = (new DiceController()).rollDiceExpr('2d6+1', rng);
+  const res = (new DiceController())
+    .rollDiceExpr('2d6+1', rng);
   // rolls: 1 + floor(0.1*6)=1, 1 + floor(0.2*6)=2 => [1,2]
   t.deepEqual(res.rolls, [
     1,
@@ -20,13 +21,15 @@ test('rollDiceExpr parses and rolls correctly with deterministic RNG', (t) => {
 
 test('rollDiceExpr single die default count', (t) => {
   const rng = () => 0.49; // 1 + floor(0.49*20)=1 + 9 = 10 for d20
-  const res = (new DiceController()).rollDiceExpr('d20', rng);
+  const res = (new DiceController())
+    .rollDiceExpr('d20', rng);
   t.is(res.rolls.length, 1);
   t.is(res.rolls[0], 1 + Math.floor(0.49 * 20));
 });
 
 test('rollDiceExpr invalid expressions throw', (t) => {
-  const err = t.throws(() => (new DiceController()).rollDiceExpr('abc'));
+  const err = t.throws(() => (new DiceController())
+    .rollDiceExpr('abc'));
   t.truthy(err);
 });
 
@@ -37,7 +40,8 @@ test('rollDiceExpr with advantage keeps best of 2d20', (t) => {
   ]; // rolls 7 and 15
   let i = 0;
   const rng = () => seq[i++ % seq.length];
-  const res = (new DiceController()).rollDiceExpr('1d20', rng, 'advantage');
+  const res = (new DiceController())
+    .rollDiceExpr('1d20', rng, 'advantage');
   t.is(res.rolls.length, 2);
   t.deepEqual(res.rolls, [
     7,
@@ -56,7 +60,8 @@ test('rollDiceExpr with disadvantage keeps worst of 2d20', (t) => {
   ]; // rolls 7 and 15
   let i = 0;
   const rng = () => seq[i++ % seq.length];
-  const res = (new DiceController()).rollDiceExpr('1d20', rng, 'disadvantage');
+  const res = (new DiceController())
+    .rollDiceExpr('1d20', rng, 'disadvantage');
   t.is(res.rolls.length, 2);
   t.deepEqual(res.rolls, [
     7,
@@ -75,7 +80,8 @@ test('rollDiceExpr with advantage includes modifier', (t) => {
   ]; // rolls 11 and 17
   let i = 0;
   const rng = () => seq[i++ % seq.length];
-  const res = (new DiceController()).rollDiceExpr('1d20+5', rng, 'advantage');
+  const res = (new DiceController())
+    .rollDiceExpr('1d20+5', rng, 'advantage');
   t.is(res.keptRoll, 17);
   t.is(res.mod, 5);
   t.is(res.total, 22); // 17 + 5
@@ -89,7 +95,8 @@ test('rollDiceExpr advantage only applies to 1d20', (t) => {
   ];
   let i = 0;
   const rng = () => seq[i++ % seq.length];
-  const res = (new DiceController()).rollDiceExpr('2d6', rng, 'advantage');
+  const res = (new DiceController())
+    .rollDiceExpr('2d6', rng, 'advantage');
   // Should roll normally, not with advantage
   t.is(res.rolls.length, 2);
   t.is(res.advantage, 'none');
@@ -106,6 +113,9 @@ test('roll endpoint accepts expr property in body', (t) => {
 
 test('roll endpoint rejects non-expr payloads (dices not allowed)', (t) => {
   const controller = new DiceController();
-  const err = t.throws(() => controller.roll({ dices: '1d20', advantage: 'advantage' } as any));
+  const err = t.throws(() => controller.roll({
+    dices: '1d20',
+    advantage: 'advantage',
+  } as any));
   t.truthy(err);
 });

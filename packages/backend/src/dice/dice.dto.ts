@@ -1,7 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class DiceThrowDto {
-  @ApiProperty({ description: 'Individual dice roll results', type: [Number] })
+  @ApiProperty({
+    description: 'Individual dice roll results',
+    type: [Number],
+  })
   rolls: number[];
 
   @ApiProperty({ description: 'Modifier applied to the total' })

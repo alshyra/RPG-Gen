@@ -23,8 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
-const props = defineProps<{ hp?: string | number; animate?: boolean }>();
+import {
+  ref, watch, onMounted, computed,
+} from 'vue';
+const props = defineProps<{
+  hp?: string | number;
+  animate?: boolean;
+}>();
 
 const beating = ref(false);
 let timer: ReturnType<typeof setTimeout> | null = null;

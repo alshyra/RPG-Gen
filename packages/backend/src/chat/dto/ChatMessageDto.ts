@@ -1,4 +1,6 @@
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath,
+} from '@nestjs/swagger';
 import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,

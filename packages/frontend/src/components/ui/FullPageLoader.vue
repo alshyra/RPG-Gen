@@ -16,7 +16,10 @@
 import UiLoader from './UiLoader.vue';
 import { defineProps } from 'vue';
 
-const props = defineProps<{ title?: string; subtitle?: string }>();
+const props = defineProps<{
+  title?: string;
+  subtitle?: string;
+}>();
 const title = props.title ?? 'Patientez…';
 const subtitle = props.subtitle ?? '';
 </script>

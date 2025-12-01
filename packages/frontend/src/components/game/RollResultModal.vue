@@ -128,9 +128,7 @@ interface Emits {
   close: [];
 }
 
-defineProps<{
-  isOpen: boolean;
-}>();
+defineProps<{ isOpen: boolean }>();
 
 const emit = defineEmits<Emits>();
 

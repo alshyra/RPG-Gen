@@ -16,7 +16,11 @@
 
 <script setup lang="ts">
 import CharacterHealth from './CharacterHealth.vue';
-defineProps<{ name?: string; info?: string; hp?: string | number }>();
+defineProps<{
+  name?: string;
+  info?: string;
+  hp?: string | number;
+}>();
 </script>
 
 <style scoped></style>

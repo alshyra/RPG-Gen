@@ -1,4 +1,6 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import {
+  Prop, Schema,
+} from '@nestjs/mongoose';
 
 @Schema({ _id: false })
 export class InventoryInstruction {
@@ -13,12 +15,21 @@ export class InventoryInstruction {
   })
   action: 'add' | 'remove' | 'use';
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   name: string;
 
-  @Prop({ required: false, type: Number })
+  @Prop({
+    required: false,
+    type: Number,
+  })
   quantity?: number;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   description?: string;
 }

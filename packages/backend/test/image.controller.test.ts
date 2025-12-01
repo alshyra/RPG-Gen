@@ -21,7 +21,12 @@ class FakeCharacterService {
       name: 'Test',
       gender: 'male',
       race: { name: 'Human' },
-      classes: [{ name: 'Rogue', level: 1 }],
+      classes: [
+        {
+          name: 'Rogue',
+          level: 1,
+        },
+      ],
       physicalDescription: 'Short guy with a dagger',
     } as any;
   }

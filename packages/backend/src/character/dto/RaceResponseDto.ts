@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class RaceResponseDto {
   @ApiPropertyOptional({ description: 'Race ID' })
@@ -7,6 +9,9 @@ export class RaceResponseDto {
   @ApiPropertyOptional({ description: 'Race name' })
   name?: string;
 
-  @ApiProperty({ description: 'Ability score modifiers', additionalProperties: { type: 'number' } })
+  @ApiProperty({
+    description: 'Ability score modifiers',
+    additionalProperties: { type: 'number' },
+  })
   mods: Record<string, number>;
 }

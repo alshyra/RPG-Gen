@@ -12,9 +12,9 @@ export class ConversationService {
     if (!character) throw new Error('No character provided to startGame.');
     this.characterId = character.characterId;
 
-    const { data, error } = await apiClient.GET('/api/chat/{characterId}/history', {
-      params: { path: { characterId: this.characterId } },
-    });
+    const {
+      data, error,
+    } = await apiClient.GET('/api/chat/{characterId}/history', { params: { path: { characterId: this.characterId } } });
 
     if (error) {
       throw new Error('Failed to load conversation history');
@@ -29,7 +29,9 @@ export class ConversationService {
   async sendMessage(message: string) {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 
-    const { data, error } = await apiClient.POST('/api/chat/{characterId}', {
+    const {
+      data, error,
+    } = await apiClient.POST('/api/chat/{characterId}', {
       params: { path: { characterId: this.characterId } },
       body: {
         role: 'user',
@@ -48,10 +50,16 @@ export class ConversationService {
   /**
    * Send a structured chat message object (role, narrative, instructions)
    */
-  async sendStructuredMessage(message: { role: 'user' | 'assistant' | 'system'; narrative: string; instructions?: any[] }) {
+  async sendStructuredMessage(message: {
+    role: 'user' | 'assistant' | 'system';
+    narrative: string;
+    instructions?: any[];
+  }) {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 
-    const { data, error } = await apiClient.POST('/api/chat/{characterId}', {
+    const {
+      data, error,
+    } = await apiClient.POST('/api/chat/{characterId}', {
       params: { path: { characterId: this.characterId } },
       body: message,
     });

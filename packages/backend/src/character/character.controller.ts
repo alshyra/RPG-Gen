@@ -5,7 +5,6 @@ import {
   Delete,
   Get,
   Logger,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -13,7 +12,9 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { UserDocument } from '../auth/user.schema.js';
@@ -43,7 +44,11 @@ export class CharacterController {
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
   @ApiBody({ type: CreateCharacterBodyDto })
-  @ApiResponse({ status: 201, description: 'Character created successfully', type: CharacterResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Character created successfully',
+    type: CharacterResponseDto,
+  })
   async create(@Req() req: Request, @Body('world') world: string) {
     const user = req.user as UserDocument;
 
@@ -54,7 +59,11 @@ export class CharacterController {
 
   @Get()
   @ApiOperation({ summary: 'Get all characters for the current user' })
-  @ApiResponse({ status: 200, description: 'List of characters', type: [CharacterResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of characters',
+    type: [CharacterResponseDto],
+  })
   async findAll(@Req() req: Request) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -65,7 +74,11 @@ export class CharacterController {
 
   @Get('deceased')
   @ApiOperation({ summary: 'Get all deceased characters' })
-  @ApiResponse({ status: 200, description: 'List of deceased characters', type: [DeceasedCharacterResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of deceased characters',
+    type: [DeceasedCharacterResponseDto],
+  })
   async getDeceased(@Req() req: Request) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -80,8 +93,15 @@ export class CharacterController {
 
   @Get(':characterId')
   @ApiOperation({ summary: 'Get a specific character by ID' })
-  @ApiResponse({ status: 200, description: 'Character found', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Character found',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async findOne(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -92,10 +112,23 @@ export class CharacterController {
 
   @Put(':characterId')
   @ApiOperation({ summary: 'Update a character' })
-  @ApiResponse({ status: 200, description: 'Character updated', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character not found' })
-  @ApiParam({ name: 'characterId', description: 'ID of the character to update' })
-  @ApiBody({ description: 'Fields to update', type: UpdateCharacterRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Character updated',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
+  @ApiParam({
+    name: 'characterId',
+    description: 'ID of the character to update',
+  })
+  @ApiBody({
+    description: 'Fields to update',
+    type: UpdateCharacterRequestDto,
+  })
   async update(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -110,8 +143,15 @@ export class CharacterController {
 
   @Delete(':characterId')
   @ApiOperation({ summary: 'Delete a character' })
-  @ApiResponse({ status: 200, description: 'Character deleted', type: Object })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Character deleted',
+    type: Object,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async delete(@Req() req: Request, @Param('characterId') characterId: string) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
@@ -123,8 +163,15 @@ export class CharacterController {
   @Post(':characterId/kill')
   @ApiOperation({ summary: 'Mark a character as deceased' })
   @ApiBody({ type: KillCharacterBodyDto })
-  @ApiResponse({ status: 201, description: 'Character marked as deceased', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 201,
+    description: 'Character marked as deceased',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async kill(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -143,8 +190,15 @@ export class CharacterController {
 
   @Post(':characterId/inventory')
   @ApiOperation({ summary: 'Add an item to character\'s inventory' })
-  @ApiResponse({ status: 201, description: 'Item added to inventory', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 201,
+    description: 'Item added to inventory',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async addInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -160,7 +214,11 @@ export class CharacterController {
   @Post(':characterId/inventory/equip')
   @ApiOperation({ summary: 'Equip an item by definitionId (weapon only)' })
   @ApiBody({ type: EquipInventoryDto })
-  @ApiResponse({ status: 200, description: 'Character updated with equipped item', type: CharacterResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Character updated with equipped item',
+    type: CharacterResponseDto,
+  })
   async equipInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -174,8 +232,15 @@ export class CharacterController {
 
   @Patch(':characterId/inventory/:itemId')
   @ApiOperation({ summary: 'Update an item in character\'s inventory' })
-  @ApiResponse({ status: 200, description: 'Inventory item updated', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character or item not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Inventory item updated',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character or item not found',
+  })
   @ApiBody({ type: CreateInventoryItemDto })
   async updateInventory(
     @Req() req: Request,
@@ -193,8 +258,15 @@ export class CharacterController {
   @Delete(':characterId/inventory/:itemId')
   @ApiOperation({ summary: 'Remove an item from character\'s inventory' })
   @ApiBody({ type: RemoveInventoryBodyDto })
-  @ApiResponse({ status: 200, description: 'Item removed from inventory', type: CharacterResponseDto })
-  @ApiResponse({ status: 404, description: 'Character or item not found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Item removed from inventory',
+    type: CharacterResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character or item not found',
+  })
   async removeInventory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -211,9 +283,19 @@ export class CharacterController {
   @Post(':characterId/inspiration/grant')
   @ApiOperation({ summary: 'Grant inspiration point(s) to a character' })
   @ApiBody({ type: GrantInspirationBodyDto })
-  @ApiResponse({ status: 201, description: 'Inspiration granted', type: InspirationResponseDto })
-  @ApiResponse({ status: 400, description: 'Invalid amount' })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 201,
+    description: 'Inspiration granted',
+    type: InspirationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid amount',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async grantInspiration(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -231,9 +313,7 @@ export class CharacterController {
     // Cap inspiration points at 5 (D&D 5e rule)
     const currentPoints = character.inspirationPoints || 0;
     const newPoints = Math.min(currentPoints + amount, 5);
-    const updated = await this.characterService.update(userId, characterId, {
-      inspirationPoints: newPoints,
-    });
+    const updated = await this.characterService.update(userId, characterId, { inspirationPoints: newPoints });
 
     return {
       ok: true,
@@ -244,9 +324,19 @@ export class CharacterController {
 
   @Post(':characterId/inspiration/spend')
   @ApiOperation({ summary: 'Spend an inspiration point' })
-  @ApiResponse({ status: 201, description: 'Inspiration spent', type: InspirationResponseDto })
-  @ApiResponse({ status: 400, description: 'No inspiration points available' })
-  @ApiResponse({ status: 404, description: 'Character not found' })
+  @ApiResponse({
+    status: 201,
+    description: 'Inspiration spent',
+    type: InspirationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'No inspiration points available',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Character not found',
+  })
   async spendInspiration(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -260,9 +350,7 @@ export class CharacterController {
       throw new BadRequestException('No inspiration points available');
     }
 
-    const updated = await this.characterService.update(userId, characterId, {
-      inspirationPoints: currentPoints - 1,
-    });
+    const updated = await this.characterService.update(userId, characterId, { inspirationPoints: currentPoints - 1 });
 
     return {
       ok: true,

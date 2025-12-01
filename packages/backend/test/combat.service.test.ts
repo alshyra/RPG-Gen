@@ -11,19 +11,36 @@ const createMockCharacter = (overrides: Partial<CharacterResponseDto> = {}): Cha
   world: 'test-world',
   portrait: '',
   isDeceased: false,
-  diedAt: new Date().toISOString(),
+  diedAt: new Date()
+    .toISOString(),
   deathLocation: '',
   state: 'created',
   hp: 20,
   hpMax: 20,
-  scores: { Str: 16, Dex: 14, Con: 14, Int: 10, Wis: 12, Cha: 8 },
+  scores: {
+    Str: 16,
+    Dex: 14,
+    Con: 14,
+    Int: 10,
+    Wis: 12,
+    Cha: 8,
+  },
   proficiency: 2,
   inventory: [],
   ...overrides,
 });
 
 const createCombatStart = (): CombatStartRequestDto => ({
-  combat_start: [{ name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 }],
+  combat_start: [
+    {
+      name: 'Goblin',
+      hp: 7,
+      ac: 13,
+      attack_bonus: 4,
+      damage_dice: '1d6',
+      damage_bonus: 2,
+    },
+  ],
 });
 
 // Test the combat types and basic structure
@@ -48,7 +65,11 @@ test('mock character has required fields', (t) => {
 });
 
 test('character override works correctly', (t) => {
-  const character = createMockCharacter({ hp: 100, hpMax: 100, name: 'Custom Hero' });
+  const character = createMockCharacter({
+    hp: 100,
+    hpMax: 100,
+    name: 'Custom Hero',
+  });
 
   t.is(character.hp, 100);
   t.is(character.hpMax, 100);
@@ -58,9 +79,21 @@ test('character override works correctly', (t) => {
 test('combat start with multiple enemies', (t) => {
   const combatStart: CombatStartRequestDto = {
     combat_start: [
-      { name: 'Goblin 1', hp: 7, ac: 13 },
-      { name: 'Goblin 2', hp: 7, ac: 13 },
-      { name: 'Goblin Boss', hp: 21, ac: 15 },
+      {
+        name: 'Goblin 1',
+        hp: 7,
+        ac: 13,
+      },
+      {
+        name: 'Goblin 2',
+        hp: 7,
+        ac: 13,
+      },
+      {
+        name: 'Goblin Boss',
+        hp: 21,
+        ac: 15,
+      },
     ],
   };
 
@@ -72,8 +105,19 @@ test('combat start with multiple enemies', (t) => {
 test('combat start with optional fields', (t) => {
   const combatStart: CombatStartRequestDto = {
     combat_start: [
-      { name: 'Basic Enemy', hp: 10, ac: 12 },
-      { name: 'Advanced Enemy', hp: 20, ac: 15, attack_bonus: 5, damage_dice: '2d6', damage_bonus: 3 },
+      {
+        name: 'Basic Enemy',
+        hp: 10,
+        ac: 12,
+      },
+      {
+        name: 'Advanced Enemy',
+        hp: 20,
+        ac: 15,
+        attack_bonus: 5,
+        damage_dice: '2d6',
+        damage_bonus: 3,
+      },
     ],
   };
 
@@ -89,17 +133,44 @@ test('combat start with optional fields', (t) => {
 
 test('STR modifier calculation', (t) => {
   // STR 16 = (16-10)/2 = +3
-  const character = createMockCharacter({ scores: { Str: 16, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 } });
+  const character = createMockCharacter({
+    scores: {
+      Str: 16,
+      Dex: 10,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
+  });
   const strMod = Math.floor(((character.scores?.Str ?? 10) - 10) / 2);
   t.is(strMod, 3);
 
   // STR 8 = (8-10)/2 = -1
-  const weakCharacter = createMockCharacter({ scores: { Str: 8, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 } });
+  const weakCharacter = createMockCharacter({
+    scores: {
+      Str: 8,
+      Dex: 10,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
+  });
   const weakStrMod = Math.floor(((weakCharacter.scores?.Str ?? 10) - 10) / 2);
   t.is(weakStrMod, -1);
 
   // STR 10 = (10-10)/2 = 0
-  const avgCharacter = createMockCharacter({ scores: { Str: 10, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 } });
+  const avgCharacter = createMockCharacter({
+    scores: {
+      Str: 10,
+      Dex: 10,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
+  });
   const avgStrMod = Math.floor(((avgCharacter.scores?.Str ?? 10) - 10) / 2);
   t.is(avgStrMod, 0);
 });
@@ -107,7 +178,14 @@ test('STR modifier calculation', (t) => {
 test('attack bonus calculation', (t) => {
   // STR 16 (+3) + proficiency 2 = +5
   const character = createMockCharacter({
-    scores: { Str: 16, Dex: 10, Con: 10, Int: 10, Wis: 10, Cha: 10 },
+    scores: {
+      Str: 16,
+      Dex: 10,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
     proficiency: 2,
   });
 
@@ -131,7 +209,14 @@ test('XP reward calculation based on enemy HP', (t) => {
 test('unarmored AC calculation with DEX', (t) => {
   // DEX 14 = +2 modifier, unarmored = 10 + 2 = 12
   const character = createMockCharacter({
-    scores: { Str: 10, Dex: 14, Con: 10, Int: 10, Wis: 10, Cha: 10 },
+    scores: {
+      Str: 10,
+      Dex: 14,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
     inventory: [],
   });
 
@@ -144,7 +229,14 @@ test('unarmored AC calculation with DEX', (t) => {
 test('initiative modifier from DEX', (t) => {
   // DEX 14 = +2 modifier for initiative
   const character = createMockCharacter({
-    scores: { Str: 10, Dex: 14, Con: 10, Int: 10, Wis: 10, Cha: 10 },
+    scores: {
+      Str: 10,
+      Dex: 14,
+      Con: 10,
+      Int: 10,
+      Wis: 10,
+      Cha: 10,
+    },
   });
 
   const dexMod = Math.floor(((character.scores?.Dex ?? 10) - 10) / 2);

@@ -10,7 +10,9 @@ import {
 } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { useCombat } from './useCombat';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  useRoute, useRouter,
+} from 'vue-router';
 import { conversationService } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
@@ -18,11 +20,15 @@ export const useGameSession = () => {
   const router = useRouter();
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
+  const {
+    currentCharacter, showDeathModal,
+  } = storeToRefs(characterStore);
 
   const { isInitializing } = storeToRefs(gameStore);
 
-  const { checkCombatStatus, initializeCombat } = useCombat();
+  const {
+    checkCombatStatus, initializeCombat,
+  } = useCombat();
 
   const handleCombatStartInstruction = async (instr: CombatStartInstructionMessageDto) => {
     console.log('[useGameSession] detected combat_start in history — fetching status', instr);
@@ -72,7 +78,10 @@ export const useGameSession = () => {
           ? [(msg).instructions]
           : [];
     instrs.forEach((instr: any) => processInstructionInMessage(instr, i === history.length - 1));
-    return { role, narrative: msg.narrative };
+    return {
+      role,
+      narrative: msg.narrative,
+    };
   });
 
   const getCharIdFromRoute = (): string | undefined => {

@@ -20,14 +20,22 @@ export const getDexModifier = (character: CharacterResponseDto): number => {
 
 const parseShieldAc = (trimmed: string): ParsedAc | null => {
   if (trimmed.startsWith('+')) {
-    return { baseAc: parseInt(trimmed, 10), addDex: false, maxDex: null };
+    return {
+      baseAc: parseInt(trimmed, 10),
+      addDex: false,
+      maxDex: null,
+    };
   }
   return null;
 };
 
 const parseHeavyArmorAc = (trimmed: string): ParsedAc | null => {
   if (/^\d+$/.test(trimmed)) {
-    return { baseAc: parseInt(trimmed, 10), addDex: false, maxDex: null };
+    return {
+      baseAc: parseInt(trimmed, 10),
+      addDex: false,
+      maxDex: null,
+    };
   }
   return null;
 };
@@ -35,7 +43,11 @@ const parseHeavyArmorAc = (trimmed: string): ParsedAc | null => {
 const parseLightArmorAc = (trimmed: string): ParsedAc | null => {
   const match = trimmed.match(/^(\d+)\s*\+\s*Dex modifier$/i);
   if (match) {
-    return { baseAc: parseInt(match[1], 10), addDex: true, maxDex: null };
+    return {
+      baseAc: parseInt(match[1], 10),
+      addDex: true,
+      maxDex: null,
+    };
   }
   return null;
 };
@@ -43,7 +55,11 @@ const parseLightArmorAc = (trimmed: string): ParsedAc | null => {
 const parseMediumArmorAc = (trimmed: string): ParsedAc | null => {
   const match = trimmed.match(/^(\d+)\s*\+\s*Dex modifier\s*\(max\s*(\d+)\)$/i);
   if (match) {
-    return { baseAc: parseInt(match[1], 10), addDex: true, maxDex: parseInt(match[2], 10) };
+    return {
+      baseAc: parseInt(match[1], 10),
+      addDex: true,
+      maxDex: parseInt(match[2], 10),
+    };
   }
   return null;
 };
@@ -54,7 +70,11 @@ export const parseArmorAc = (acString: string): ParsedAc => {
     ?? parseHeavyArmorAc(trimmed)
     ?? parseLightArmorAc(trimmed)
     ?? parseMediumArmorAc(trimmed)
-    ?? { baseAc: 0, addDex: false, maxDex: null };
+    ?? {
+      baseAc: 0,
+      addDex: false,
+      maxDex: null,
+    };
 };
 
 const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => item.meta?.type === 'armor';
@@ -63,19 +83,34 @@ const findEquippedGear = (inventory: ItemResponseDto[]): EquippedGear => {
   const equippedItems = inventory.filter(item => item.equipped && isItemArmor(item)) as ItemResponseDto<ArmorMeta>[];
   const shield = equippedItems.find(item => item.meta?.class === 'Shield');
   const armor = equippedItems.find(item => item.meta?.class !== 'Shield');
-  return { armor, shield };
+  return {
+    armor,
+    shield,
+  };
 };
 
-const computeArmorBonus = (armor: ItemResponseDto<ArmorMeta> | undefined, dexMod: number): { baseAc: number; dexBonus: number } => {
+const computeArmorBonus = (armor: ItemResponseDto<ArmorMeta> | undefined, dexMod: number): {
+  baseAc: number;
+  dexBonus: number;
+} => {
   if (!armor?.meta?.ac) {
-    return { baseAc: 10, dexBonus: dexMod };
+    return {
+      baseAc: 10,
+      dexBonus: dexMod,
+    };
   }
   const parsed = parseArmorAc(String(armor.meta.ac));
   if (!parsed.addDex) {
-    return { baseAc: parsed.baseAc, dexBonus: 0 };
+    return {
+      baseAc: parsed.baseAc,
+      dexBonus: 0,
+    };
   }
   const dexBonus = parsed.maxDex !== null ? Math.min(dexMod, parsed.maxDex) : dexMod;
-  return { baseAc: parsed.baseAc, dexBonus };
+  return {
+    baseAc: parsed.baseAc,
+    dexBonus,
+  };
 };
 
 const computeShieldBonus = (shield: ItemResponseDto<ArmorMeta> | undefined): number => {
@@ -85,7 +120,11 @@ const computeShieldBonus = (shield: ItemResponseDto<ArmorMeta> | undefined): num
 
 export const calculateArmorClass = (character: CharacterResponseDto): number => {
   const dexMod = getDexModifier(character);
-  const { armor, shield } = findEquippedGear(character.inventory ?? []);
-  const { baseAc, dexBonus } = computeArmorBonus(armor, dexMod);
+  const {
+    armor, shield,
+  } = findEquippedGear(character.inventory ?? []);
+  const {
+    baseAc, dexBonus,
+  } = computeArmorBonus(armor, dexMod);
   return baseAc + dexBonus + computeShieldBonus(shield);
 };

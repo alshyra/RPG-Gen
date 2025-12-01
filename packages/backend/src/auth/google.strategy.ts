@@ -1,9 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable, Logger,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
+import {
+  Strategy, VerifyCallback, Profile,
+} from 'passport-google-oauth20';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from './user.schema.js';
+import {
+  User, UserDocument,
+} from './user.schema.js';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -44,7 +50,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   private async findOrCreateUser(profile: Profile): Promise<UserDocument> {
-    const { id, name, emails, photos } = profile;
+    const {
+      id, name, emails, photos,
+    } = profile;
     let user = await this.userModel.findOne({ googleId: id });
 
     if (!user) {
@@ -58,7 +66,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         picture: photos?.[0]?.value,
         lastLogin: new Date(),
       });
-      this.logger.log('User created:', { id: user._id, email: user.email });
+      this.logger.log('User created:', {
+        id: user._id,
+        email: user.email,
+      });
     } else {
       this.logger.log('User already exists, updating last login');
       user.lastLogin = new Date();

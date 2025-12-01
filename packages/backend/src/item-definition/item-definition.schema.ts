@@ -1,10 +1,15 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import {
+  Prop, Schema, SchemaFactory,
+} from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import type { InventoryItemMeta } from '../character/dto/InventoryItemMeta.js';
 
 @Schema({ timestamps: true })
 export class ItemDefinition {
-  @Prop({ required: true, unique: true })
+  @Prop({
+    required: true,
+    unique: true,
+  })
   definitionId: string;
 
   @Prop({ required: true })
@@ -13,7 +18,10 @@ export class ItemDefinition {
   @Prop({ default: '' })
   description: string;
 
-  @Prop({ type: Object, default: {} })
+  @Prop({
+    type: Object,
+    default: {},
+  })
   meta: InventoryItemMeta;
 
   @Prop({ default: true })

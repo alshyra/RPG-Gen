@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class CombatStartEntryDto {
   @ApiProperty({ description: 'Enemy name' })
@@ -21,6 +23,9 @@ export class CombatStartEntryDto {
 }
 
 export class CombatStartRequestDto {
-  @ApiProperty({ description: 'Array of enemies to initialize combat with', type: [CombatStartEntryDto] })
+  @ApiProperty({
+    description: 'Array of enemies to initialize combat with',
+    type: [CombatStartEntryDto],
+  })
   combat_start: CombatStartEntryDto[];
 }

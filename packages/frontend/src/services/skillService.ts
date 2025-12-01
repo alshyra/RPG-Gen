@@ -37,7 +37,8 @@ export const getSkillBonus = (
   if (!character) return 0;
 
   // Remove " Check" suffix
-  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '').trim();
+  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '')
+    .trim();
 
   // Check for format "Ability (Skill)" e.g. "Strength (Athletics)" — allow unicode and spaces
   const abilitySkillMatch = nameWithoutCheck.match(/^(.+?)\s*\((.+?)\)$/u);
@@ -47,7 +48,8 @@ export const getSkillBonus = (
     const skillName = abilitySkillMatch[2].trim();
 
     // Prefer to resolve the skill using the DnD mapping (handles canonical skill->ability mapping)
-    const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === skillName.toLowerCase());
+    const rulesSkill = DnDRulesService.getAllSkills()
+      .find(s => s.name.toLowerCase() === skillName.toLowerCase());
     if (rulesSkill && character.scores) {
       // compute from the ability tied to the skill
       const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
@@ -98,7 +100,8 @@ export const getSkillBonus = (
       if (typeof skill.modifier === 'number') return skill.modifier;
 
       // Compute using rules mapping
-      const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === nameWithoutCheck.toLowerCase());
+      const rulesSkill = DnDRulesService.getAllSkills()
+        .find(s => s.name.toLowerCase() === nameWithoutCheck.toLowerCase());
       if (rulesSkill && character.scores) {
         const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
         let modifier = getAbilityModifier(abilityScore);

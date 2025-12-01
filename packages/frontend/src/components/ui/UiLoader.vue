@@ -19,7 +19,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = defineProps<{ size?: 'xs' | 'sm' | 'md' | 'lg'; inline?: boolean; colorClass?: string; padding?: boolean }>();
+const props = defineProps<{
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  inline?: boolean;
+  colorClass?: string;
+  padding?: boolean;
+}>();
 
 const size = props.size ?? 'md';
 const inline = props.inline ?? false;

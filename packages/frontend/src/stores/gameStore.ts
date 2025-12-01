@@ -63,7 +63,14 @@ export const useGameStore = defineStore('gameStore', () => {
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
     const res: DiceThrowDto = await rollDice(expr, advantage);
-    const payload: DiceThrowDto = { rolls: res.rolls, mod: res.mod, total: res.total, advantage: res.advantage, keptRoll: res.keptRoll, discardedRoll: res.discardedRoll };
+    const payload: DiceThrowDto = {
+      rolls: res.rolls,
+      mod: res.mod,
+      total: res.total,
+      advantage: res.advantage,
+      keptRoll: res.keptRoll,
+      discardedRoll: res.discardedRoll,
+    };
     rolls.value.push(payload);
     latestRoll.value = payload;
     return payload;
@@ -71,10 +78,21 @@ export const useGameStore = defineStore('gameStore', () => {
 
   // Basic helpers expected by many composables / components
   // Accepts display roles (GM, Player, System, Error) and maps them to stored roles
-  const appendMessage = (role: DisplayRole, narrative: string) => messages.value.push({ role: toStoredRole(role), narrative, timestamp: Date.now() });
+  const appendMessage = (role: DisplayRole, narrative: string) => messages.value.push({
+    role: toStoredRole(role),
+    narrative,
+    timestamp: Date.now(),
+  });
 
-  const updateMessages = (list: { role: DisplayRole; narrative: string }[]) => {
-    messages.value = list.map(m => ({ role: toStoredRole(m.role), narrative: m.narrative, timestamp: Date.now() }));
+  const updateMessages = (list: {
+    role: DisplayRole;
+    narrative: string;
+  }[]) => {
+    messages.value = list.map(m => ({
+      role: toStoredRole(m.role),
+      narrative: m.narrative,
+      timestamp: Date.now(),
+    }));
   };
 
   return {

@@ -1,6 +1,10 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync } from 'fs';
+import {
+  existsSync, mkdirSync, writeFileSync, readFileSync, renameSync,
+} from 'fs';
 import openapiTS, { astToString } from 'openapi-typescript';
-import { dirname, join } from 'path';
+import {
+  dirname, join,
+} from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +16,8 @@ interface OpenApiDocument { components?: { schemas?: Record<string, unknown> } }
 
 const generateAliasesFile = (document: OpenApiDocument) => {
   const schemaNames = document.components?.schemas ? Object.keys(document.components.schemas) : [];
-  const aliasLines = schemaNames.sort().map(name => `export type ${name} = import('./api-types').components['schemas']['${name}'];`);
+  const aliasLines = schemaNames.sort()
+    .map(name => `export type ${name} = import('./api-types').components['schemas']['${name}'];`);
 
   const indexLines = [
     '// GENERATED FROM OpenAPI spec - do not edit manually',

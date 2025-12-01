@@ -54,9 +54,7 @@ import { getCurrentLevel } from '../../utils/dndLevels';
 import { storeToRefs } from 'pinia';
 import { useCharacterStore } from '@/stores/characterStore';
 
-interface Props {
-  isOpen: boolean;
-}
+interface Props { isOpen: boolean }
 
 interface Emits {
   confirm: [];
@@ -71,17 +69,19 @@ const { currentCharacter } = storeToRefs(characterStore);
 const characterName = computed(() => currentCharacter.value?.name || 'Unknown');
 const characterClass = computed(() => {
   const classes = currentCharacter.value?.classes || [];
-  return classes.map((c: any) => `${c.name} ${c.level}`).join(', ') || '';
+  return classes.map((c: any) => `${c.name} ${c.level}`)
+    .join(', ') || '';
 });
 const characterXp = computed(() => currentCharacter.value?.totalXp || 0);
 const characterLevel = computed(() => getCurrentLevel(currentCharacter.value?.totalXp || 0).level);
-const diedDate = computed(() => new Date().toLocaleDateString('fr-FR', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-}));
+const diedDate = computed(() => new Date()
+  .toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }));
 
 const close = () => emit('close');
 const confirmDeath = () => emit('confirm');

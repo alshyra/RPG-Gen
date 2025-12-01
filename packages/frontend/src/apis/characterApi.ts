@@ -2,11 +2,16 @@
  * Character Service using OpenAPI-fetch client
  * Type-safe API calls for character management
  */
-import type { CharacterResponseDto, CreateInventoryItemDto, ItemResponseDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
+import type {
+  CharacterResponseDto, CreateInventoryItemDto, ItemResponseDto, UpdateCharacterRequestDto,
+} from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Helper to extract data from openapi-fetch response
-const getData = <T>(response: { data?: T; error?: unknown }): T => {
+const getData = <T>(response: {
+  data?: T;
+  error?: unknown;
+}): T => {
   if (response.error) {
     throw response.error;
   }
@@ -30,9 +35,7 @@ export const characterApi = {
    */
   createCharacter: async (world: string) => {
     // Use fetch directly since the endpoint body type is not properly typed in OpenAPI
-    const response = await api.POST('/api/characters', {
-      body: { world },
-    });
+    const response = await api.POST('/api/characters', { body: { world } });
     if (response.error) throw new Error('Failed to create character');
     return response.data;
   },
@@ -50,9 +53,7 @@ export const characterApi = {
    */
   getCharacterById: async (characterId: string): Promise<CharacterResponseDto | null> => {
     try {
-      const response = await api.GET('/api/characters/{characterId}', {
-        params: { path: { characterId } },
-      });
+      const response = await api.GET('/api/characters/{characterId}', { params: { path: { characterId } } });
       return getData<CharacterResponseDto>(response);
     } catch {
       return null;
@@ -74,9 +75,7 @@ export const characterApi = {
    * Delete a character
    */
   deleteCharacter: async (characterId: string): Promise<void> => {
-    await api.DELETE('/api/characters/{characterId}', {
-      params: { path: { characterId } },
-    });
+    await api.DELETE('/api/characters/{characterId}', { params: { path: { characterId } } });
   },
 
   /**
@@ -125,7 +124,12 @@ export const characterApi = {
    */
   updateInventoryItem: async (characterId: string, itemId: string, updates: CreateInventoryItemDto): Promise<CharacterResponseDto> => {
     const response = await api.PATCH('/api/characters/{characterId}/inventory/{itemId}', {
-      params: { path: { characterId, itemId } },
+      params: {
+        path: {
+          characterId,
+          itemId,
+        },
+      },
       body: updates,
     });
     return getData<CharacterResponseDto>(response);
@@ -136,7 +140,12 @@ export const characterApi = {
    */
   removeInventoryItem: async (characterId: string, itemId: string, qty?: number): Promise<CharacterResponseDto> => {
     const response = await api.DELETE('/api/characters/{characterId}/inventory/{itemId}', {
-      params: { path: { characterId, itemId } },
+      params: {
+        path: {
+          characterId,
+          itemId,
+        },
+      },
       body: { qty },
     });
     return getData<CharacterResponseDto>(response);
@@ -158,9 +167,7 @@ export const characterApi = {
    * Spend an inspiration point
    */
   spendInspiration: async (characterId: string): Promise<CharacterResponseDto> => {
-    const response = await api.POST('/api/characters/{characterId}/inspiration/spend', {
-      params: { path: { characterId } },
-    });
+    const response = await api.POST('/api/characters/{characterId}/inspiration/spend', { params: { path: { characterId } } });
     const result = getData<{ character: CharacterResponseDto }>(response);
     return result.character;
   },
@@ -169,9 +176,7 @@ export const characterApi = {
    * Generate character avatar
    */
   generateAvatar: async (characterId: string): Promise<string> => {
-    const response = await api.POST('/api/image/generate-avatar', {
-      body: { characterId },
-    });
+    const response = await api.POST('/api/image/generate-avatar', { body: { characterId } });
     const result = getData<{ imageUrl: string }>(response);
     return result.imageUrl;
   },

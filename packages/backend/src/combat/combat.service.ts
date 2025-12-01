@@ -1,11 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable, Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import type { CharacterResponseDto } from '../character/dto/index.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import { DiceController } from '../dice/dice.controller.js';
-import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
-import { CombatSession, CombatSessionDocument } from './combat-session.schema.js';
+import {
+  calculateArmorClass, getDexModifier,
+} from '../character/armor-class.util.js';
+import {
+  CombatSession, CombatSessionDocument,
+} from './combat-session.schema.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
 import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
@@ -115,7 +121,8 @@ export class CombatService {
   private weaponUsesDex(meta: WeaponMeta): boolean {
     const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
     const lowerProps = properties.map(p => (p || '').toLowerCase());
-    const classStr = (meta.class || '').toString().toLowerCase();
+    const classStr = (meta.class || '').toString()
+      .toLowerCase();
     const hasAmmunition = lowerProps.some(p => p.includes('ammunition'));
     const hasFinesse = lowerProps.includes('finesse');
     const isRangedClass = classStr.includes('ranged');
@@ -127,7 +134,8 @@ export class CombatService {
    */
   private extractDamageDice(meta: WeaponMeta): string | undefined {
     if (meta.damage && typeof meta.damage === 'string') {
-      const parts = meta.damage.trim().split(/\s+/);
+      const parts = meta.damage.trim()
+        .split(/\s+/);
       if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
         return parts[0];
       }
@@ -179,8 +187,18 @@ export class CombatService {
    */
   private buildTurnOrder(characterId: string, player: CombatPlayerDto, enemies: CombatEnemyDto[]): CombatantDto[] {
     const combatants: CombatantDto[] = [
-      { id: characterId, name: player.name, initiative: player.initiative, isPlayer: true },
-      ...enemies.map(e => ({ id: e.id, name: e.name, initiative: e.initiative, isPlayer: false })),
+      {
+        id: characterId,
+        name: player.name,
+        initiative: player.initiative,
+        isPlayer: true,
+      },
+      ...enemies.map(e => ({
+        id: e.id,
+        name: e.name,
+        initiative: e.initiative,
+        isPlayer: false,
+      })),
     ];
     return combatants.sort((a, b) => b.initiative - a.initiative);
   }
@@ -222,8 +240,14 @@ export class CombatService {
 
     await this.combatSessionModel.findOneAndUpdate(
       { characterId },
-      { userId, ...state },
-      { upsert: true, new: true },
+      {
+        userId,
+        ...state,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
     );
 
     this.logger.log(`Combat initialized for ${characterId} with ${enemies.length} enemies`);
@@ -232,8 +256,17 @@ export class CombatService {
 
   // eslint-disable-next-line max-statements
   private performAttack(
-    attacker: { name: string; attackBonus: number; damageDice: string; damageBonus: number },
-    target: { name: string; ac: number; hp: number },
+    attacker: {
+      name: string;
+      attackBonus: number;
+      damageDice: string;
+      damageBonus: number;
+    },
+    target: {
+      name: string;
+      ac: number;
+      hp: number;
+    },
     _isPlayerAttack: boolean,
   ): AttackResultDto {
     // Roll attack
@@ -330,7 +363,8 @@ export class CombatService {
     if (!targetEnemy) {
       // If no exact match, try partial match
       const partialMatch = state.enemies.find(
-        e => e.name.toLowerCase().includes(targetName.toLowerCase()) && e.hp > 0,
+        e => e.name.toLowerCase()
+          .includes(targetName.toLowerCase()) && e.hp > 0,
       );
       if (!partialMatch) {
         return null;
@@ -355,7 +389,8 @@ export class CombatService {
 
     // Process each combatant in initiative order starting from currentTurnIndex
     // Build ordered combatant list starting from currentTurnIndex
-    const orderedCombatants = Array.from({ length: totalCombatants }).map((_, offset) => turnOrder[(state.currentTurnIndex + offset) % totalCombatants]);
+    const orderedCombatants = Array.from({ length: totalCombatants })
+      .map((_, offset) => turnOrder[(state.currentTurnIndex + offset) % totalCombatants]);
 
     let finalResult: TurnResultDto | null = null;
 
@@ -504,7 +539,8 @@ export class CombatService {
    * Retrieve the current combat state from the database
    */
   async getCombatState(characterId: string): Promise<CombatStateDto | null> {
-    const doc = await this.combatSessionModel.findOne({ characterId }).lean()
+    const doc = await this.combatSessionModel.findOne({ characterId })
+      .lean()
       .exec();
     if (!doc) return null;
 
@@ -601,7 +637,10 @@ export class CombatService {
   /**
    * End combat and generate final result
    */
-  async endCombat(characterId: string): Promise<{ xpGained: number; enemiesDefeated: string[] } | null> {
+  async endCombat(characterId: string): Promise<{
+    xpGained: number;
+    enemiesDefeated: string[];
+  } | null> {
     const state = await this.getCombatState(characterId);
     if (!state) {
       return null;
@@ -668,12 +707,18 @@ export class CombatService {
   /**
    * Find enemy and apply damage, returning damage dealt
    */
-  private applyDamageToTargetEnemy(state: CombatStateDto, targetName: string, damage: number): { enemy: CombatEnemyDto; damageDealt: number } | null {
+  private applyDamageToTargetEnemy(state: CombatStateDto, targetName: string, damage: number): {
+    enemy: CombatEnemyDto;
+    damageDealt: number;
+  } | null {
     const enemy = state.enemies.find(e => e.name.toLowerCase() === targetName.toLowerCase());
     if (!enemy) return null;
     const before = enemy.hp;
     enemy.hp = Math.max(0, enemy.hp - Math.max(0, Math.floor(damage)));
-    return { enemy, damageDealt: before - enemy.hp };
+    return {
+      enemy,
+      damageDealt: before - enemy.hp,
+    };
   }
 
   /**
@@ -729,7 +774,8 @@ export class CombatService {
       return [];
     }
 
-    return state.enemies.filter(e => e.hp > 0).map(e => e.name);
+    return state.enemies.filter(e => e.hp > 0)
+      .map(e => e.name);
   }
 
   /**
@@ -742,7 +788,8 @@ export class CombatService {
     }
 
     const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-    const enemyList = aliveEnemies.map(e => `${e.name} (PV: ${e.hp}/${e.hpMax})`).join(', ');
+    const enemyList = aliveEnemies.map(e => `${e.name} (PV: ${e.hp}/${e.hpMax})`)
+      .join(', ');
 
     return `Combat en cours - Round ${state.roundNumber}\n`
       + `Vos PV: ${state.player.hp}/${state.player.hpMax}\n`

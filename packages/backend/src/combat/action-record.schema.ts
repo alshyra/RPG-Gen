@@ -1,5 +1,9 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import {
+  Prop, Schema, SchemaFactory,
+} from '@nestjs/mongoose';
+import {
+  Document, Schema as MongooseSchema,
+} from 'mongoose';
 
 export type ActionRecordDocument = ActionRecord & Document;
 
@@ -12,22 +16,44 @@ export enum ActionStatus {
 
 @Schema({ timestamps: true })
 export class ActionRecord {
-  @Prop({ required: true, type: String, unique: true })
+  @Prop({
+    required: true,
+    type: String,
+    unique: true,
+  })
   actionToken: string;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   idempotencyKey?: string;
 
-  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  @Prop({
+    required: true,
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'User',
+  })
   requesterId: MongooseSchema.Types.ObjectId;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   combatId: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   expectedDto: string;
 
-  @Prop({ required: true, type: String, enum: Object.values(ActionStatus), default: ActionStatus.PENDING })
+  @Prop({
+    required: true,
+    type: String,
+    enum: Object.values(ActionStatus),
+    default: ActionStatus.PENDING,
+  })
   status: ActionStatus;
 
   @Prop({ type: MongooseSchema.Types.Mixed })

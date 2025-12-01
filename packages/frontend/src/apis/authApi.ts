@@ -62,7 +62,8 @@ const decodeToken = (token: string): { exp?: number } | null => {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
     // Convert base64url to base64 and add padding if needed
-    let payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    let payload = parts[1].replace(/-/g, '+')
+      .replace(/_/g, '/');
     // Add padding to make the length a multiple of 4
     const paddingNeeded = (4 - (payload.length % 4)) % 4;
     payload += '='.repeat(paddingNeeded);
@@ -107,11 +108,7 @@ const logout = (): void => {
 // Fetch user profile from backend
 const fetchUserProfile = async (token: string): Promise<AuthProfileDto | null> => {
   try {
-    const response = await api.GET('/api/auth/profile', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.GET('/api/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
     if (response.error) return null;
     const userData = response.data;
     setUser(userData);

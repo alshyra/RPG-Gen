@@ -152,7 +152,9 @@
 import { useCharacterStore } from '@/stores/characterStore';
 import { ItemResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
-import { onBeforeUnmount, ref } from 'vue';
+import {
+  onBeforeUnmount, ref,
+} from 'vue';
 import UiInputCheckbox from '../../ui/UiInputCheckbox.vue';
 import UiInputNumber from '../../ui/UiInputNumber.vue';
 
@@ -160,12 +162,48 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const basePack: ItemResponseDto[] = [
-  { definitionId: 'pack-backpack', name: 'Sac à dos', description: 'Contient divers petits outils et rations', qty: 1, meta: {} },
-  { definitionId: 'generic-torch', name: 'Torche', description: 'Éclairage temporaire', qty: 3, meta: { usable: true } },
-  { definitionId: 'food-rations', name: 'Rations', description: 'Portion pour un repas', qty: 5, meta: { usable: true } },
-  { definitionId: 'tent-1-2', name: 'Tente', description: 'Abri pour 1-2 personnes', qty: 1, meta: {} },
-  { definitionId: 'rope-15m', name: 'Corde (15m)', description: 'Utilitaire polyvalent', qty: 1, meta: {} },
-  { definitionId: 'potion-health', name: 'Potion de soin', description: 'Soigne un peu de PV', qty: 3, meta: { usable: true } },
+  {
+    definitionId: 'pack-backpack',
+    name: 'Sac à dos',
+    description: 'Contient divers petits outils et rations',
+    qty: 1,
+    meta: {},
+  },
+  {
+    definitionId: 'generic-torch',
+    name: 'Torche',
+    description: 'Éclairage temporaire',
+    qty: 3,
+    meta: { usable: true },
+  },
+  {
+    definitionId: 'food-rations',
+    name: 'Rations',
+    description: 'Portion pour un repas',
+    qty: 5,
+    meta: { usable: true },
+  },
+  {
+    definitionId: 'tent-1-2',
+    name: 'Tente',
+    description: 'Abri pour 1-2 personnes',
+    qty: 1,
+    meta: {},
+  },
+  {
+    definitionId: 'rope-15m',
+    name: 'Corde (15m)',
+    description: 'Utilitaire polyvalent',
+    qty: 1,
+    meta: {},
+  },
+  {
+    definitionId: 'potion-health',
+    name: 'Potion de soin',
+    description: 'Soigne un peu de PV',
+    qty: 3,
+    meta: { usable: true },
+  },
 ];
 
 // Weapon choices — separate main weapons from secondary items (shield/bow)
@@ -189,9 +227,51 @@ const availableMainWeapons: ItemResponseDto[] = [
       starter: true,
     },
   },
-  { definitionId: 'weapon-quarterstaff', name: 'Quarterstaff', description: 'Bâton polyvalent, parfois à deux mains.', qty: 1, meta: { type: 'weapon', class: 'Simple Melee', cost: '2 sp', damage: '1d6 bludgeoning', weight: '4 lb', properties: ['Versatile 1d8'], starter: true } },
-  { definitionId: 'weapon-longsword', name: 'Longsword', description: 'Épée équilibrée; peut être utilisée à deux mains.', qty: 1, meta: { type: 'weapon', class: 'Martial Melee', cost: '15 gp', damage: '1d8 slashing', weight: '3 lb', properties: ['Versatile 1d10'], starter: true } },
-  { definitionId: 'weapon-rapier', name: 'Rapier', description: 'Lame fine et précise; excellente pour l\'escrime.', qty: 1, meta: { type: 'weapon', class: 'Martial Melee', cost: '25 gp', damage: '1d8 piercing', weight: '2 lb', properties: ['Finesse'], starter: true } },
+  {
+    definitionId: 'weapon-quarterstaff',
+    name: 'Quarterstaff',
+    description: 'Bâton polyvalent, parfois à deux mains.',
+    qty: 1,
+    meta: {
+      type: 'weapon',
+      class: 'Simple Melee',
+      cost: '2 sp',
+      damage: '1d6 bludgeoning',
+      weight: '4 lb',
+      properties: ['Versatile 1d8'],
+      starter: true,
+    },
+  },
+  {
+    definitionId: 'weapon-longsword',
+    name: 'Longsword',
+    description: 'Épée équilibrée; peut être utilisée à deux mains.',
+    qty: 1,
+    meta: {
+      type: 'weapon',
+      class: 'Martial Melee',
+      cost: '15 gp',
+      damage: '1d8 slashing',
+      weight: '3 lb',
+      properties: ['Versatile 1d10'],
+      starter: true,
+    },
+  },
+  {
+    definitionId: 'weapon-rapier',
+    name: 'Rapier',
+    description: 'Lame fine et précise; excellente pour l\'escrime.',
+    qty: 1,
+    meta: {
+      type: 'weapon',
+      class: 'Martial Melee',
+      cost: '25 gp',
+      damage: '1d8 piercing',
+      weight: '2 lb',
+      properties: ['Finesse'],
+      starter: true,
+    },
+  },
 ];
 const chosenMainWeapon = ref(availableMainWeapons[0]);
 const availableMainWeaponsDefinitionIds = availableMainWeapons.map(w => w.definitionId);
@@ -215,13 +295,56 @@ const availableSecondaryItems: ItemResponseDto[] = [
       starter: true,
     },
   },
-  { definitionId: 'armor-shield', name: 'Shield', description: 'Bouclier, porté à la main; confère un bonus à la CA.', qty: 1, meta: { type: 'armor', class: 'Shield', cost: '10 gp', ac: '+2', strength: '—', stealth: '—', weight: '6 lb', starter: true } },
+  {
+    definitionId: 'armor-shield',
+    name: 'Shield',
+    description: 'Bouclier, porté à la main; confère un bonus à la CA.',
+    qty: 1,
+    meta: {
+      type: 'armor',
+      class: 'Shield',
+      cost: '10 gp',
+      ac: '+2',
+      strength: '—',
+      stealth: '—',
+      weight: '6 lb',
+      starter: true,
+    },
+  },
 ];
 
 // Armor choice (pick one among a few armor options)
 const availableArmors: ItemResponseDto[] = [
-  { definitionId: 'armor-leather', name: 'Leather', description: 'Armure en cuir, légère et pratique. AC 11 + Dex modifier.', qty: 1, meta: { type: 'armor', class: 'Light Armor', cost: '10 gp', ac: '11 + Dex modifier', stealth: '—', weight: '10 lb', starter: true } },
-  { definitionId: 'armor-hide', name: 'Hide', description: 'Armure en peaux assemblées; protection moyenne. AC 12 + Dex (max 2).', qty: 1, meta: { type: 'armor', class: 'Medium Armor', cost: '10 gp', ac: '12 + Dex modifier (max 2)', stealth: '—', weight: '12 lb', starter: true } },
+  {
+    definitionId: 'armor-leather',
+    name: 'Leather',
+    description: 'Armure en cuir, légère et pratique. AC 11 + Dex modifier.',
+    qty: 1,
+    meta: {
+      type: 'armor',
+      class: 'Light Armor',
+      cost: '10 gp',
+      ac: '11 + Dex modifier',
+      stealth: '—',
+      weight: '10 lb',
+      starter: true,
+    },
+  },
+  {
+    definitionId: 'armor-hide',
+    name: 'Hide',
+    description: 'Armure en peaux assemblées; protection moyenne. AC 12 + Dex (max 2).',
+    qty: 1,
+    meta: {
+      type: 'armor',
+      class: 'Medium Armor',
+      cost: '10 gp',
+      ac: '12 + Dex modifier (max 2)',
+      stealth: '—',
+      weight: '12 lb',
+      starter: true,
+    },
+  },
 ];
 const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
 const chosenArmor = ref<ItemResponseDto | null>(availableArmors[0]);

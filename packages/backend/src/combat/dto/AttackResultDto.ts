@@ -28,7 +28,10 @@ export class AttackResultDto {
   @ApiProperty({ description: 'Whether the attack was a fumble' })
   fumble: boolean;
 
-  @ApiProperty({ description: 'Individual dice results for the damage roll', type: [Number] })
+  @ApiProperty({
+    description: 'Individual dice results for the damage roll',
+    type: [Number],
+  })
   damageRoll: number[];
 
   @ApiProperty({ description: 'Damage bonus applied' })

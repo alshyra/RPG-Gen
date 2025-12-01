@@ -9,10 +9,16 @@ export class TurnResultDto {
   @ApiProperty({ description: 'Round number' })
   roundNumber: number;
 
-  @ApiProperty({ description: 'Attacks performed by player', type: [AttackResultDto] })
+  @ApiProperty({
+    description: 'Attacks performed by player',
+    type: [AttackResultDto],
+  })
   playerAttacks: AttackResultDto[];
 
-  @ApiProperty({ description: 'Attacks performed by enemies', type: [AttackResultDto] })
+  @ApiProperty({
+    description: 'Attacks performed by enemies',
+    type: [AttackResultDto],
+  })
   enemyAttacks: AttackResultDto[];
 
   @ApiProperty({ description: 'Whether combat ended after this turn' })
@@ -24,7 +30,10 @@ export class TurnResultDto {
   @ApiProperty({ description: 'Whether the player was defeated' })
   defeat: boolean;
 
-  @ApiProperty({ description: 'Remaining enemies after the turn', type: [CombatEnemyDto] })
+  @ApiProperty({
+    description: 'Remaining enemies after the turn',
+    type: [CombatEnemyDto],
+  })
   remainingEnemies: CombatEnemyDto[];
 
   @ApiProperty({ description: 'Player\'s current HP after the turn' })

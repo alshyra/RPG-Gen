@@ -1,8 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable, Logger, NotFoundException,
+} from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Character, CharacterDocument, Item } from './schema/index.js';
+import {
+  Character, CharacterDocument, Item,
+} from './schema/index.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
@@ -11,7 +15,14 @@ import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
 @Injectable()
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
-  private readonly DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 };
+  private readonly DEFAULT_BASE_SCORES = {
+    Str: 15,
+    Dex: 14,
+    Con: 13,
+    Int: 12,
+    Wis: 10,
+    Cha: 8,
+  };
 
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
@@ -41,16 +52,21 @@ export class CharacterService {
   }
 
   async findByUserId(userId: string, includeDeceased = false): Promise<CharacterDocument[]> {
-    const filter: any = { userId };
+    const filter = { userId };
     if (!includeDeceased) {
       filter.isDeceased = false;
     }
-    return this.characterModel.find(filter).sort({ createdAt: -1 })
+    return this.characterModel.find(filter)
+      .sort({ createdAt: -1 })
       .exec();
   }
 
   async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
-    const doc = await this.characterModel.findOne({ userId, characterId }).exec();
+    const doc = await this.characterModel.findOne({
+      userId,
+      characterId,
+    })
+      .exec();
     if (!doc) {
       throw new NotFoundException(`Character ${characterId} not found`);
     }
@@ -78,9 +94,15 @@ export class CharacterService {
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
     // updateDoc.
     const character = await this.characterModel.findOneAndUpdate(
-      { userId, characterId },
+      {
+        userId,
+        characterId,
+      },
       { $set: updateDoc },
-      { new: true, runValidators: true },
+      {
+        new: true,
+        runValidators: true,
+      },
     );
 
     if (!character) {
@@ -92,7 +114,10 @@ export class CharacterService {
   }
 
   async delete(userId: string, characterId: string): Promise<void> {
-    const result = await this.characterModel.deleteOne({ userId, characterId });
+    const result = await this.characterModel.deleteOne({
+      userId,
+      characterId,
+    });
     if (result.deletedCount === 0) {
       throw new NotFoundException(`Character ${characterId} not found`);
     }
@@ -104,7 +129,10 @@ export class CharacterService {
     characterId: string,
     deathLocation?: string,
   ): Promise<CharacterDocument> {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const character = await this.characterModel.findOne({
+      userId,
+      characterId,
+    });
     if (!character) {
       throw new NotFoundException(`Character ${characterId} not found`);
     }
@@ -119,7 +147,10 @@ export class CharacterService {
   }
 
   async addInventoryItem(userId: string, characterId: string, createItem: CreateInventoryItemDto) {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const character = await this.characterModel.findOne({
+      userId,
+      characterId,
+    });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
     if (!createItem.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
 
@@ -136,15 +167,20 @@ export class CharacterService {
    */
   // eslint-disable-next-line max-statements
   async equipInventoryItem(userId: string, characterId: string, definitionId: string) {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const character = await this.characterModel.findOne({
+      userId,
+      characterId,
+    });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
     if (!definitionId) throw new BadRequestException('definitionId is required');
 
     // Resolve definition and ensure it's a weapon
-    const def = await this.itemDefinitionService.findByDefinitionId(definitionId).catch(() => null);
+    const def = await this.itemDefinitionService.findByDefinitionId(definitionId)
+      .catch(() => null);
     if (!def) throw new NotFoundException(`Item definition ${definitionId} not found`);
     const meta = def.meta || {};
-    if ((meta.type || '').toString().toLowerCase() !== 'weapon') {
+    if ((meta.type || '').toString()
+      .toLowerCase() !== 'weapon') {
       throw new BadRequestException('Only weapon items can be equipped via this endpoint');
     }
 
@@ -170,9 +206,13 @@ export class CharacterService {
     // Ensure only the targeted weapon is equipped (no for loop)
     character.inventory = (character.inventory || []).map((it) => {
       try {
-        const type = (it?.meta?.type || '').toString().toLowerCase();
+        const type = (it?.meta?.type || '').toString()
+          .toLowerCase();
         if (type === 'weapon') {
-          return { ...it, equipped: it.definitionId === definitionId };
+          return {
+            ...it,
+            equipped: it.definitionId === definitionId,
+          };
         }
         return it;
       } catch {
@@ -210,7 +250,10 @@ export class CharacterService {
       qty: item.qty || 1,
       description: item.description ?? itemDefinition?.description,
       equipped: item.equipped || false,
-      meta: { ...(itemDefinition?.meta || {}), ...(item.meta || {}) },
+      meta: {
+        ...(itemDefinition?.meta || {}),
+        ...(item.meta || {}),
+      },
     };
     character.inventory = character.inventory || [];
     character.inventory.push(newItem);
@@ -220,7 +263,10 @@ export class CharacterService {
   }
 
   async updateInventoryItem(userId: string, characterId: string, itemId: string, updates: Partial<any>) {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const character = await this.characterModel.findOne({
+      userId,
+      characterId,
+    });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
     const item = (character.inventory || []).find(it => it._id === itemId);
@@ -238,7 +284,10 @@ export class CharacterService {
   }
 
   async removeInventoryItem(userId: string, characterId: string, itemId: string, qtyToRemove: number) {
-    const character = await this.characterModel.findOne({ userId, characterId });
+    const character = await this.characterModel.findOne({
+      userId,
+      characterId,
+    });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
     const idx = (character.inventory || []).findIndex(it => it._id === itemId);
@@ -261,7 +310,11 @@ export class CharacterService {
   }
 
   async getDeceasedCharacters(userId: string): Promise<CharacterDocument[]> {
-    return this.characterModel.find({ userId, isDeceased: true }).sort({ diedAt: -1 })
+    return this.characterModel.find({
+      userId,
+      isDeceased: true,
+    })
+      .sort({ diedAt: -1 })
       .exec();
   }
 

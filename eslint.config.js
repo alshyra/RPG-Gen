@@ -14,11 +14,15 @@ const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 const stylisticRules = {
   '@stylistic/array-bracket-newline': ['error', { multiline: true }],
   '@stylistic/array-element-newline': ['error', 'consistent'],
-  '@stylistic/object-curly-newline': ['error', { multiline: true, consistent: true }],
-  '@stylistic/object-property-newline': ['error', { allowAllPropertiesOnSameLine: true }],
+  '@stylistic/object-curly-newline': ['error', {
+    ObjectExpression: { multiline: true, minProperties: 2, consistent: true },
+    ObjectPattern: { multiline: true, minProperties: 2, consistent: true },
+    ImportDeclaration: { multiline: true, minProperties: 4, consistent: true },
+  }],
+  '@stylistic/object-property-newline': ['error', { allowAllPropertiesOnSameLine: false }],
   '@stylistic/function-paren-newline': ['error', 'multiline-arguments'],
   '@stylistic/function-call-argument-newline': ['error', 'consistent'],
-  '@stylistic/newline-per-chained-call': ['error', { ignoreChainWithDepth: 2 }],
+  '@stylistic/newline-per-chained-call': ['error', { ignoreChainWithDepth: 1 }],
   '@stylistic/implicit-arrow-linebreak': ['error', 'beside'],
 };
 

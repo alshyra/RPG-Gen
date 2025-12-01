@@ -1,11 +1,19 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import {
+  Prop, Schema,
+} from '@nestjs/mongoose';
 
 @Schema({ _id: false })
 export class Race {
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   id: string;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   name: string;
 
   @Prop({ type: Object })

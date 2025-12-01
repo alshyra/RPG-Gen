@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 import { RaceResponseDto } from './RaceResponseDto.js';
 import { AbilityScoresResponseDto } from './AbilityScoresResponseDto.js';
 import { CharacterClassResponseDto } from './CharacterClassResponseDto.js';
@@ -18,10 +20,16 @@ export class BaseCharacterResponseDto {
   @ApiPropertyOptional({ description: 'Physical description of the character' })
   physicalDescription?: string;
 
-  @ApiPropertyOptional({ description: 'Character race', type: RaceResponseDto })
+  @ApiPropertyOptional({
+    description: 'Character race',
+    type: RaceResponseDto,
+  })
   race?: RaceResponseDto;
 
-  @ApiPropertyOptional({ description: 'Ability scores', type: AbilityScoresResponseDto })
+  @ApiPropertyOptional({
+    description: 'Ability scores',
+    type: AbilityScoresResponseDto,
+  })
   scores?: AbilityScoresResponseDto;
 
   @ApiPropertyOptional({ description: 'Current hit points' })
@@ -33,10 +41,16 @@ export class BaseCharacterResponseDto {
   @ApiPropertyOptional({ description: 'Total experience points' })
   totalXp?: number;
 
-  @ApiPropertyOptional({ description: 'Character classes', type: [CharacterClassResponseDto] })
+  @ApiPropertyOptional({
+    description: 'Character classes',
+    type: [CharacterClassResponseDto],
+  })
   classes?: CharacterClassResponseDto[];
 
-  @ApiPropertyOptional({ description: 'Character skills', type: [SkillResponseDto] })
+  @ApiPropertyOptional({
+    description: 'Character skills',
+    type: [SkillResponseDto],
+  })
   skills?: SkillResponseDto[];
 
   @ApiProperty({ description: 'Game world (e.g., dnd, vtm)' })
@@ -73,9 +87,15 @@ export class BaseCharacterResponseDto {
   })
   state: CharacterState;
 
-  @ApiPropertyOptional({ description: 'Character inventory', type: [ItemResponseDto] })
+  @ApiPropertyOptional({
+    description: 'Character inventory',
+    type: [ItemResponseDto],
+  })
   inventory?: ItemResponseDto[];
 
-  @ApiPropertyOptional({ description: 'Character spells', type: [SpellResponseDto] })
+  @ApiPropertyOptional({
+    description: 'Character spells',
+    type: [SpellResponseDto],
+  })
   spells?: SpellResponseDto[];
 }

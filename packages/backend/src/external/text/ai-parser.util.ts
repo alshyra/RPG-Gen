@@ -43,11 +43,17 @@ export const normalizeInstruction = (raw: unknown): GameInstructionDto | null =>
   }
   // Backward compatibility: {"combat_start": [...]} without type field
   if (Array.isArray(raw['combat_start'])) {
-    return { type: 'combat_start', combat_start: raw['combat_start'] } as unknown as GameInstructionDto;
+    return {
+      type: 'combat_start',
+      combat_start: raw['combat_start'],
+    } as unknown as GameInstructionDto;
   }
   // Backward compatibility: {"combat_end": {...}} without type field
   if (isObject(raw['combat_end'])) {
-    return { type: 'combat_end', combat_end: raw['combat_end'] } as unknown as GameInstructionDto;
+    return {
+      type: 'combat_end',
+      combat_end: raw['combat_end'],
+    } as unknown as GameInstructionDto;
   }
   return null;
 };
@@ -64,7 +70,8 @@ export const cleanNarrativeText = (narrative: string): string => {
     .forEach(c => cleaned = cleaned.replace(c, ''));
   // remove leftover triple-backtick blocks
   cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
-  return cleaned.replace(/\s+/g, ' ').trim();
+  return cleaned.replace(/\s+/g, ' ')
+    .trim();
 };
 
 export const parseAIResponse = (text: string): ChatMessageDto => ({

@@ -1,24 +1,46 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import {
+  Prop, Schema,
+} from '@nestjs/mongoose';
 import type { InventoryItemMeta } from '../dto/InventoryItemMeta.js';
 
 @Schema({ _id: false })
 export class Item {
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   _id: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   name: string;
 
-  @Prop({ required: true, default: 1, type: Number })
+  @Prop({
+    required: true,
+    default: 1,
+    type: Number,
+  })
   qty: number;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   description: string;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   definitionId: string;
 
-  @Prop({ required: false, default: false, type: Boolean })
+  @Prop({
+    required: false,
+    default: false,
+    type: Boolean,
+  })
   equipped: boolean;
 
   @Prop({ type: Object })

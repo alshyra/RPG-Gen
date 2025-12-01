@@ -1,10 +1,24 @@
-import { ABILITIES, DEFAULT_BASE_SCORES } from '@/services/dndRulesService';
+import {
+  ABILITIES, DEFAULT_BASE_SCORES,
+} from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { CharacterResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
-export const COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9, 16: 12, 17: 15, 18: 19 } as const;
+export const COST = {
+  8: 0,
+  9: 1,
+  10: 2,
+  11: 3,
+  12: 4,
+  13: 5,
+  14: 7,
+  15: 9,
+  16: 12,
+  17: 15,
+  18: 19,
+} as const;
 
 const useAbilityScores = () => {
   const characterStore = useCharacterStore();
@@ -48,7 +62,10 @@ const useAbilityScores = () => {
 
     currentCharacter.value = {
       ...currentCharacter.value,
-      scores: { ...characterScores.value, [ability]: newValue },
+      scores: {
+        ...characterScores.value,
+        [ability]: newValue,
+      },
     };
     return { allowed: true };
   };

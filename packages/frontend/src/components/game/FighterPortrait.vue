@@ -67,11 +67,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import {
+  computed, onMounted, ref,
+} from 'vue';
 import { useCombat } from '@/composables/useCombat';
 import type { CombatEnemyDto } from '@rpg-gen/shared';
 import { useCharacterStore } from '@/stores/characterStore';
-import { pickBestPortrait, getFallbackPortrait } from '@/composables/usePortraits';
+import {
+  pickBestPortrait, getFallbackPortrait,
+} from '@/composables/usePortraits';
 
 const props = defineProps<{
   enemy: CombatEnemyDto | null;

@@ -61,7 +61,9 @@
 <script setup lang="ts">
 const { connectedTop = false } = defineProps<{ connectedTop?: boolean }>();
 import { useGameStore } from '@/stores/gameStore';
-import { computed, ref } from 'vue';
+import {
+  computed, ref,
+} from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
 import CommandSuggestions from './CommandSuggestions.vue';
 

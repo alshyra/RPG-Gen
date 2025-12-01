@@ -1,5 +1,9 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags, ApiResponse, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  BadRequestException, Body, Controller, Post,
+} from '@nestjs/common';
+import {
+  ApiBody, ApiOperation, ApiTags, ApiResponse, ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 import { DiceThrowDto } from './dice.dto.js';
 
 type AdvantageType = 'advantage' | 'disadvantage' | 'none';
@@ -29,7 +33,11 @@ const parseDiceExpression = (expr: string): ParsedDice => {
   const sides = parseInt(m[2], 10);
   const mod = m[3] ? parseInt(m[3], 10) : 0;
   if (n < 1 || sides < 1) throw new Error('Invalid dice numbers');
-  return { n, sides, mod };
+  return {
+    n,
+    sides,
+    mod,
+  };
 };
 
 const rollWithAdvantage = (
@@ -42,20 +50,34 @@ const rollWithAdvantage = (
   const roll2 = 1 + Math.floor(rand() * sides);
   const keptRoll = advantage === 'advantage' ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
   const discardedRoll = advantage === 'advantage' ? Math.min(roll1, roll2) : Math.max(roll1, roll2);
-  return { rolls: [roll1, roll2], mod, total: keptRoll + mod, advantage, keptRoll, discardedRoll };
+  return {
+    rolls: [roll1, roll2],
+    mod,
+    total: keptRoll + mod,
+    advantage,
+    keptRoll,
+    discardedRoll,
+  };
 };
 
 const rollNormal = (n: number, sides: number, mod: number, rand: () => number): DiceThrowDto => {
   const rolls = Array.from({ length: n }, () => 1 + Math.floor(rand() * sides));
   const total = rolls.reduce((s, v) => s + v, 0) + mod;
-  return { rolls, mod, total, advantage: 'none' };
+  return {
+    rolls,
+    mod,
+    total,
+    advantage: 'none',
+  };
 };
 
 @ApiTags('dice')
 @Controller('dice')
 export class DiceController {
   rollDiceExpr(expr: string, rand: () => number = Math.random, advantage: AdvantageType = 'none'): DiceThrowDto {
-    const { n, sides, mod } = parseDiceExpression(expr);
+    const {
+      n, sides, mod,
+    } = parseDiceExpression(expr);
     if (advantage !== 'none' && n === 1 && sides === 20) {
       return rollWithAdvantage(sides, mod, advantage, rand);
     }
@@ -65,8 +87,15 @@ export class DiceController {
   @Post()
   @ApiOperation({ summary: 'Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20' })
   @ApiBody({ type: DiceRequest })
-  @ApiResponse({ status: 200, description: 'Dice throw result', type: DiceThrowDto })
-  @ApiResponse({ status: 400, description: 'Invalid dice expression' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dice throw result',
+    type: DiceThrowDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid dice expression',
+  })
   roll(@Body('expr') expression: string, @Body('advantage') advantage: AdvantageType = 'none'): DiceThrowDto {
     if (!expression || typeof expression !== 'string') {
       throw new BadRequestException('Missing or invalid dice expression');

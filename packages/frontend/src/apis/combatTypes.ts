@@ -1,4 +1,6 @@
-import { CombatEndInstructionMessageDto, CombatStartInstructionMessageDto } from '@rpg-gen/shared';
+import {
+  CombatEndInstructionMessageDto, CombatStartInstructionMessageDto,
+} from '@rpg-gen/shared';
 
 /**
  * Type guard for combat start instruction

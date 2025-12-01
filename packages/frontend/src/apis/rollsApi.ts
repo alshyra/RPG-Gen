@@ -1,6 +1,9 @@
 import { api } from './apiClient';
 
-const getData = <T>(response: { data?: T; error?: unknown }): T => {
+const getData = <T>(response: {
+  data?: T;
+  error?: unknown;
+}): T => {
   if (response.error) throw response.error;
   return response.data as T;
 };

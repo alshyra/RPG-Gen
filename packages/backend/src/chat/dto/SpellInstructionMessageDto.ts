@@ -1,7 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class SpellInstructionMessageDto {
-  @ApiProperty({ description: 'Instruction type', enum: ['spell'] })
+  @ApiProperty({
+    description: 'Instruction type',
+    enum: ['spell'],
+  })
   type: 'spell';
 
   @ApiProperty({

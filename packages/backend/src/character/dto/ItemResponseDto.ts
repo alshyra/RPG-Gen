@@ -20,6 +20,9 @@ export class ItemResponseDto<MetaType = InventoryItemMeta> {
   @ApiPropertyOptional({ description: 'Is equipped' })
   equipped?: boolean;
 
-  @ApiPropertyOptional({ description: 'Item metadata', additionalProperties: true })
+  @ApiPropertyOptional({
+    description: 'Item metadata',
+    additionalProperties: true,
+  })
   meta?: MetaType;
 }

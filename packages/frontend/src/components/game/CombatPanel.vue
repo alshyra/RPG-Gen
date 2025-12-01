@@ -136,7 +136,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, watch, onMounted, onBeforeUnmount } from 'vue';
+import {
+  computed, ref, nextTick, watch, onMounted, onBeforeUnmount,
+} from 'vue';
 import FighterPortrait from './FighterPortrait.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
@@ -159,7 +161,9 @@ const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
 const ui = useUiStore();
 
-const { inCombat, roundNumber } = storeToRefs(combatStore);
+const {
+  inCombat, roundNumber,
+} = storeToRefs(combatStore);
 
 const enemies = combatStore.enemies;
 
@@ -182,7 +186,11 @@ const participants = computed(() => {
   const maybeRef = enemies as unknown as { value?: CombatEnemyDto[] };
   const enemyList: CombatEnemyDto[] = Array.isArray(maybeRef?.value) ? maybeRef.value : Array.isArray(enemies) ? (enemies as unknown as CombatEnemyDto[]) : [];
   // Attach a stable enemyOrdinal (index among enemies) so tests can target them deterministically
-  enemyList.forEach((e, i) => list.push({ ...e, isPlayer: false, enemyOrdinal: i } as Participant & { enemyOrdinal: number }));
+  enemyList.forEach((e, i) => list.push({
+    ...e,
+    isPlayer: false,
+    enemyOrdinal: i,
+  } as Participant & { enemyOrdinal: number }));
 
   // sort by initiative desc (higher initiative acts first)
   list.sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0));
@@ -198,7 +206,8 @@ const updateHeight = () => {
 };
 
 onMounted(() => {
-  nextTick().then(updateHeight);
+  nextTick()
+    .then(updateHeight);
   window.addEventListener('resize', updateHeight);
 });
 

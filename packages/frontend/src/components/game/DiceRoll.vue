@@ -18,7 +18,10 @@ import type { RollInstructionMessageDto } from '@rpg-gen/shared';
 
 const emit = defineEmits<(e: 'send') => void>();
 
-const props = defineProps<{ pendingInstruction?: RollInstructionMessageDto | null; expr: string }>();
+const props = defineProps<{
+  pendingInstruction?: RollInstructionMessageDto | null;
+  expr: string;
+}>();
 
 const gameStore = useGameStore();
 const isLoading = ref(false);

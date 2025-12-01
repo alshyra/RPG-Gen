@@ -46,7 +46,13 @@ const createDndCharacter = async () => {
     const newChar = await characterServiceApi.createCharacter('dnd');
     if (newChar && newChar.characterId) {
       // Navigate to character creation step 1 for the new character
-      router.push({ name: 'character-step', params: { characterId: newChar.characterId, step: 1 } });
+      router.push({
+        name: 'character-step',
+        params: {
+          characterId: newChar.characterId,
+          step: 1,
+        },
+      });
     }
   } catch (e) {
     console.error('Failed to create DnD character', e);

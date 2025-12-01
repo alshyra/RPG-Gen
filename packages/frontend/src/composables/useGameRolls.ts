@@ -269,7 +269,11 @@ export const useGameRolls = () => {
     total: number,
     die: number | undefined,
   ): Promise<void> => {
-    const payload: CombatResolvePayload = { action, target, total };
+    const payload: CombatResolvePayload = {
+      action,
+      target,
+      total,
+    };
     if (typeof die === 'number') payload.die = die;
     const resp = await combatService.resolveRoll(characterId, payload);
     if (resp?.instructions && Array.isArray(resp.instructions)) {
@@ -279,7 +283,12 @@ export const useGameRolls = () => {
     }
   };
 
-  const submitNonCombatRoll = async (characterId: string, instr: { type: string; dices: string; modifier: number; description: string }): Promise<void> => {
+  const submitNonCombatRoll = async (characterId: string, instr: {
+    type: string;
+    dices: string;
+    modifier: number;
+    description: string;
+  }): Promise<void> => {
     const resp = await rollsService.submitRoll(characterId, { instructions: [instr] });
     if (resp?.pendingRolls && Array.isArray(resp.pendingRolls)) {
       processResponseInstructions(resp.pendingRolls, gameStore, characterStore);
@@ -289,7 +298,11 @@ export const useGameRolls = () => {
   };
 
   const sendRollResult = async (
-    rollResult: { rolls: number[]; total: number; bonus: number },
+    rollResult: {
+      rolls: number[];
+      total: number;
+      bonus: number;
+    },
     skillName: string,
     criticalNote: string,
   ): Promise<void> => {
@@ -308,7 +321,12 @@ export const useGameRolls = () => {
         const die = extractDieFromRolls(rollResult.rolls);
         await submitCombatRoll(characterId, action, pending?.meta?.target, rollResult.total, die);
       } else {
-        const instr = { type: 'roll', dices: skillName || 'roll', modifier: rollResult.bonus, description: `Result: ${JSON.stringify(rollResult)}${criticalNote}` };
+        const instr = {
+          type: 'roll',
+          dices: skillName || 'roll',
+          modifier: rollResult.bonus,
+          description: `Result: ${JSON.stringify(rollResult)}${criticalNote}`,
+        };
         await submitNonCombatRoll(characterId, instr);
       }
     } catch (e) {
@@ -320,17 +338,27 @@ export const useGameRolls = () => {
   // confirmRoll - refactored into smaller helpers
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const displayRollMessage = (): { diceValue: number; criticalNote: string } | null => {
-    const { rolls, bonus, total, skillName } = gameStore.rollData;
+  const displayRollMessage = (): {
+    diceValue: number;
+    criticalNote: string;
+  } | null => {
+    const {
+      rolls, bonus, total, skillName,
+    } = gameStore.rollData;
     if (!rolls?.length) return null;
     const diceValue = rolls[0];
     const criticalNote = getCriticalNote(diceValue);
     gameStore.appendMessage('system', buildRollMessage(diceValue, bonus ?? 0, skillName ?? '', total ?? 0, criticalNote));
-    return { diceValue, criticalNote };
+    return {
+      diceValue,
+      criticalNote,
+    };
   };
 
   const handleConfirmAttack = async (pending: RollInstructionWithMeta): Promise<void> => {
-    const { rolls, total } = gameStore.rollData;
+    const {
+      rolls, total,
+    } = gameStore.rollData;
     const meta = pending.meta;
     const characterId = useCharacterStore().currentCharacter?.characterId;
     if (!characterId) {
@@ -338,7 +366,11 @@ export const useGameRolls = () => {
       return;
     }
 
-    const payload: CombatResolvePayload = { action: 'attack', target: meta?.target, total: total ?? 0 };
+    const payload: CombatResolvePayload = {
+      action: 'attack',
+      target: meta?.target,
+      total: total ?? 0,
+    };
     const die = extractDieFromRolls(rolls);
     if (typeof die === 'number') payload.die = die;
 
@@ -362,13 +394,23 @@ export const useGameRolls = () => {
     const characterId = useCharacterStore().currentCharacter?.characterId;
     if (!characterId) return;
 
-    const resp = await combatService.resolveRoll(characterId, { action: 'damage', target: targetName, total: damageTotal });
+    const resp = await combatService.resolveRoll(characterId, {
+      action: 'damage',
+      target: targetName,
+      total: damageTotal,
+    });
     if (resp && targetName) await handleDamageRollResponse(resp, targetName, damageTotal, gameStore);
   };
 
   const handleConfirmNonCombat = async (criticalNote: string): Promise<void> => {
-    const { rolls, bonus, total, skillName } = gameStore.rollData;
-    await sendRollResult({ rolls: rolls ?? [], total: total ?? 0, bonus: bonus ?? 0 }, skillName ?? '', criticalNote);
+    const {
+      rolls, bonus, total, skillName,
+    } = gameStore.rollData;
+    await sendRollResult({
+      rolls: rolls ?? [],
+      total: total ?? 0,
+      bonus: bonus ?? 0,
+    }, skillName ?? '', criticalNote);
   };
 
   const handleConfirmRollAction = async (pending: RollInstructionWithMeta, criticalNote: string): Promise<void> => {
@@ -419,5 +461,9 @@ export const useGameRolls = () => {
     }
   };
 
-  return { onDiceRolled, confirmRoll, rerollDice };
+  return {
+    onDiceRolled,
+    confirmRoll,
+    rerollDice,
+  };
 };

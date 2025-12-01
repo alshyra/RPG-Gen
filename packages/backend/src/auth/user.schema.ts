@@ -1,14 +1,23 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import {
+  Prop, Schema, SchemaFactory,
+} from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({
+    required: true,
+    unique: true,
+    type: String,
+  })
   googleId: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   email: string;
 
   @Prop({ type: String })
@@ -23,7 +32,10 @@ export class User {
   @Prop({ type: String })
   picture: string;
 
-  @Prop({ default: Date.now, type: Date })
+  @Prop({
+    default: Date.now,
+    type: Date,
+  })
   lastLogin: Date;
 }
 

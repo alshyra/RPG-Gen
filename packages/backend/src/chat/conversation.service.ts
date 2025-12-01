@@ -1,15 +1,13 @@
+import { Content } from '@google/genai';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { AbilityScoresResponseDto } from 'src/character/dto/AbilityScoresResponseDto.js';
+import { calculateArmorClass } from '../character/armor-class.util.js';
+import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import type { ChatMessageDto } from './dto/ChatMessageDto.js';
 import type { GameInstructionDto } from './dto/GameInstructionDto.js';
 import { ChatHistory, ChatHistoryDocument } from './schema/index.js';
-import type { ChatMessage } from './schema/ChatMessage.js';
-import type { GameInstruction } from './schema/GameInstruction.js';
-import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
-import { calculateArmorClass } from '../character/armor-class.util.js';
-import { AbilityScoresResponseDto } from 'src/character/dto/AbilityScoresResponseDto.js';
-import { Content } from '@google/genai';
 
 @Injectable()
 export class ConversationService {
@@ -21,7 +19,11 @@ export class ConversationService {
   ) {}
 
   async getHistory(userId: string, characterId: string): Promise<ChatMessageDto[] | undefined> {
-    const history = await this.chatHistoryModel.findOne({ userId, characterId }).exec();
+    const history = await this.chatHistoryModel.findOne({
+      userId,
+      characterId,
+    })
+      .exec();
     if (!history) return undefined;
     const availablesTypes = [
       'roll',
@@ -53,7 +55,8 @@ export class ConversationService {
     Character Information:
     - Name: ${character.name || 'Unknown'}
     - Race: ${typeof character.race === 'object' ? character.race?.name : character.race || 'Unknown'}
-    - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
+    - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`)
+      .join(', ') || 'None'}
     - Gender: ${character.gender || 'Unknown'}
     - HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
     - AC: ${armorClass}
@@ -69,11 +72,13 @@ export class ConversationService {
     `;
 
     if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`).join(', ')}\n`;
+      summary += `- Spells Known: ${character.spells.map(s => `${s.name} (Lvl ${s.level})`)
+        .join(', ')}\n`;
     }
 
     if (character.inventory && character.inventory.length > 0) {
-      summary += `- Inventory: ${character.inventory.map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`).join(', ')}\n`;
+      summary += `- Inventory: ${character.inventory.map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`)
+        .join(', ')}\n`;
     }
 
     return summary;
@@ -91,11 +96,15 @@ export class ConversationService {
     const normalized: ChatMessageDto = ((): ChatMessageDto => {
       if (!msg || typeof msg !== 'object') {
         this.logger.warn('Appending malformed message (not an object), coercing to system message');
-        return { role: 'system', narrative: String(msg || ''), instructions: [] };
+        return {
+          role: 'system',
+          narrative: String(msg || ''),
+          instructions: [],
+        };
       }
-      const role = (msg as any).role;
-      const narrative = (msg as any).narrative;
-      const instructions = (msg as any).instructions ?? [];
+      const role = msg.role;
+      const narrative = msg.narrative;
+      const instructions = msg.instructions ?? [];
       if (!role || typeof role !== 'string' || ![
         'user',
         'assistant',
@@ -112,14 +121,17 @@ export class ConversationService {
           'assistant',
           'system',
         ].includes(role)
-          ? (role as any)
+          ? role
           : 'system',
         narrative: typeof narrative === 'string' ? narrative : '',
         instructions: Array.isArray(instructions) ? instructions : [],
       } as ChatMessageDto;
     })();
 
-    let history = await this.chatHistoryModel.findOne({ userId, characterId });
+    let history = await this.chatHistoryModel.findOne({
+      userId,
+      characterId,
+    });
     if (!history) {
       history = new this.chatHistoryModel({
         userId,

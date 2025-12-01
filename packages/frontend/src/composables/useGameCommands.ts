@@ -32,8 +32,14 @@ const processHpInstruction = (hp: number, gameStore: GameStore, characterStore: 
 };
 
 const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
-  const spell = instr as { action?: string; name?: string; level?: number };
-  const { action, name, level } = spell;
+  const spell = instr as {
+    action?: string;
+    name?: string;
+    level?: number;
+  };
+  const {
+    action, name, level,
+  } = spell;
   if (action === 'learn') {
     gameStore.appendMessage('system', `📖 Learned spell: ${name} (Level ${level})`);
     characterStore.learnSpell(instr as SpellInstructionMessageDto);
@@ -46,11 +52,20 @@ const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, c
 };
 
 const processInventoryInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
-  const inventory = instr as { action?: string; name?: string; quantity?: number };
-  const { action, name, quantity = 1 } = inventory;
+  const inventory = instr as {
+    action?: string;
+    name?: string;
+    quantity?: number;
+  };
+  const {
+    action, name, quantity = 1,
+  } = inventory;
   if (action === 'add') {
     gameStore.appendMessage('system', `🎒 Added to inventory: ${name} (x${quantity})`);
-    characterStore.addInventoryItem({ name: name ?? '', qty: quantity });
+    characterStore.addInventoryItem({
+      name: name ?? '',
+      qty: quantity,
+    });
   } else if (action === 'remove') {
     gameStore.appendMessage('system', `🗑️ Removed from inventory: ${name} (x${quantity})`);
     characterStore.removeInventoryItem(name ?? '', quantity);
@@ -65,7 +80,11 @@ const findSpell = (character: CharacterResponseDto, spellName: string) => charac
 
 const matchesName = (value: string | undefined, search: string): boolean => (value ?? '').toLowerCase() === search.toLowerCase();
 
-const findItem = (character: CharacterResponseDto, itemName: string) => character.inventory?.find((i: { name?: string; definitionId?: string; _id?: string }) => matchesName(i.name, itemName) || matchesName(i.definitionId, itemName) || matchesName(i._id, itemName));
+const findItem = (character: CharacterResponseDto, itemName: string) => character.inventory?.find((i: {
+  name?: string;
+  definitionId?: string;
+  _id?: string;
+}) => matchesName(i.name, itemName) || matchesName(i.definitionId, itemName) || matchesName(i._id, itemName));
 
 const sendToGemini = async (
   message: string,
@@ -259,7 +278,9 @@ export function useGameCommands() {
       } else if (isCombatStartInstruction(item)) {
         combat.initializeCombat(item);
       } else if (isCombatEndInstruction(item)) {
-        const { victory, xp_gained, enemies_defeated } = item.combat_end;
+        const {
+          victory, xp_gained, enemies_defeated,
+        } = item.combat_end;
         combat.handleCombatEnd(victory, xp_gained, enemies_defeated);
       }
     });

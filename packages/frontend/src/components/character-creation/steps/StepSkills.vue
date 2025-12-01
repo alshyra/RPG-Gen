@@ -54,9 +54,7 @@ const saveCurrent = async () => {
 
   if (!currentCharacter.value.characterId) return;
 
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
-    skills: currentCharacter.value.skills,
-  });
+  await characterStore.updateCharacter(currentCharacter.value.characterId, { skills: currentCharacter.value.skills });
 };
 
 const setSkillProficiency = async (skill: string, isProficient: boolean) => {
@@ -67,11 +65,20 @@ const setSkillProficiency = async (skill: string, isProficient: boolean) => {
   const present = existingSkills.find(s => s.name === skill);
   let updated: SkillResponseDto[];
   if (present) {
-    updated = existingSkills.map(s => (s.name === skill ? { ...s, proficient: isProficient } : s));
+    updated = existingSkills.map(s => (s.name === skill
+      ? {
+          ...s,
+          proficient: isProficient,
+        }
+      : s));
   } else if (isProficient) {
     updated = [
       ...existingSkills,
-      { name: skill, proficient: true, modifier: 0 },
+      {
+        name: skill,
+        proficient: true,
+        modifier: 0,
+      },
     ];
   } else {
     // not present and setting to false — no-op

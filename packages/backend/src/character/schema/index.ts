@@ -14,5 +14,11 @@ export type CharacterDocument = Character & Document;
 export const CharacterSchema = SchemaFactory.createForClass(Character);
 
 // Index for efficient querying
-CharacterSchema.index({ userId: 1, characterId: 1 });
-CharacterSchema.index({ userId: 1, isDeceased: 1 });
+CharacterSchema.index({
+  userId: 1,
+  characterId: 1,
+});
+CharacterSchema.index({
+  userId: 1,
+  isDeceased: 1,
+});

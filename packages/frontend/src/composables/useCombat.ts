@@ -2,7 +2,9 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
-import type { CombatStartInstructionMessageDto, TurnResultWithInstructionsDto } from '@rpg-gen/shared';
+import type {
+  CombatStartInstructionMessageDto, TurnResultWithInstructionsDto,
+} from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 
 type GameStore = ReturnType<typeof useGameStore>;
@@ -14,12 +16,18 @@ interface InstructionItem {
   dices?: string;
   xp?: number;
   hp?: number;
-  meta?: { attackBonus?: number; target?: string; targetAc?: number };
+  meta?: {
+    attackBonus?: number;
+    target?: string;
+    targetAc?: number;
+  };
 }
 
 // ----- Instruction Processors -----
 const processRollInstruction = (instr: InstructionItem, gameStore: GameStore, combatStore: CombatStore): void => {
-  const { dices = '1d20', meta } = instr;
+  const {
+    dices = '1d20', meta,
+  } = instr;
   const rollInstr = {
     type: 'roll' as const,
     dices,
@@ -98,9 +106,16 @@ export function useCombat() {
   const combatStore = useCombatStore();
   const { currentCharacter } = storeToRefs(characterStore);
 
-  const displayCombatStartSuccess = (combatState: { narrative?: string; turnOrder: { name: string; initiative: number }[] }): void => {
+  const displayCombatStartSuccess = (combatState: {
+    narrative?: string;
+    turnOrder: {
+      name: string;
+      initiative: number;
+    }[];
+  }): void => {
     if (combatState.narrative) gameStore.appendMessage('system', combatState.narrative);
-    const initiativeOrder = combatState.turnOrder.map(c => `${c.name} (${c.initiative})`).join(' → ');
+    const initiativeOrder = combatState.turnOrder.map(c => `${c.name} (${c.initiative})`)
+      .join(' → ');
     gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
     gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
   };
@@ -112,7 +127,8 @@ export function useCombat() {
     console.log('[useCombat] initializeCombat instruction', instruction);
     if (!currentCharacter.value) return;
 
-    const enemyNames = instruction.combat_start.map(e => e.name).join(', ');
+    const enemyNames = instruction.combat_start.map(e => e.name)
+      .join(', ');
     gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
@@ -154,7 +170,11 @@ export function useCombat() {
 
     try {
       const characterId = currentCharacter.value.characterId;
-      console.log('[useCombat] executeAttack ->', { characterId, target, actionToken: combatStore.actionToken });
+      console.log('[useCombat] executeAttack ->', {
+        characterId,
+        target,
+        actionToken: combatStore.actionToken,
+      });
       const attackResponse = await performAttack(characterId, target, combatStore.actionToken);
       await handleAttackSuccess(attackResponse, characterId);
     } catch (err) {

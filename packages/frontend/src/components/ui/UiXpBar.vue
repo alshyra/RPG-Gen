@@ -18,5 +18,8 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ percentage: number; label?: string }>();
+defineProps<{
+  percentage: number;
+  label?: string;
+}>();
 </script>

@@ -1,7 +1,11 @@
 import { characterServiceApi } from '@/apis/characterApi';
-import { CharacterResponseDto, ItemResponseDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto } from '@rpg-gen/shared';
+import {
+  CharacterResponseDto, ItemResponseDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto,
+} from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import {
+  computed, ref, watch,
+} from 'vue';
 import { useRoute } from 'vue-router';
 
 // eslint-disable-next-line max-statements
@@ -65,7 +69,8 @@ export const useCharacterStore = defineStore('character', () => {
           ...item,
           qty: (item.qty ?? 1) - quantity,
         };
-      }).filter(i => (i.qty ?? 0) > 0);
+      })
+      .filter(i => (i.qty ?? 0) > 0);
 
     try {
       const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);

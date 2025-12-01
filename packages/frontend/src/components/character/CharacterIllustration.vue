@@ -10,8 +10,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-const props = defineProps<{ clazz?: string; raceId?: string; gender?: string; src?: string }>();
+import {
+  ref, computed, watch,
+} from 'vue';
+const props = defineProps<{
+  clazz?: string;
+  raceId?: string;
+  gender?: string;
+  src?: string;
+}>();
 
 const errored = ref(false);
 const attemptIndex = ref(0);
@@ -25,12 +32,15 @@ const normalize = (v: any, fallback: string) => {
   if (typeof v === 'string') return v.toLowerCase();
   if (typeof v === 'object') {
     // prefer id, then name
-    if (v.id) return String(v.id).toLowerCase();
-    if (v.name) return String(v.name).toLowerCase()
+    if (v.id) return String(v.id)
+      .toLowerCase();
+    if (v.name) return String(v.name)
+      .toLowerCase()
       .replace(/\s+/g, '-');
     return fallback;
   }
-  return String(v).toLowerCase();
+  return String(v)
+    .toLowerCase();
 };
 
 const buildName = () => {

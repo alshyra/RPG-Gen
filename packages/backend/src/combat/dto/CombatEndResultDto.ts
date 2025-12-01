@@ -1,4 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 export class CombatEndDto {
   @ApiProperty({ description: 'Victory state' })
@@ -21,6 +23,9 @@ export class CombatEndDto {
 }
 
 export class CombatEndResultDto {
-  @ApiProperty({ description: 'Combat end information', type: CombatEndDto })
+  @ApiProperty({
+    description: 'Combat end information',
+    type: CombatEndDto,
+  })
   combat_end: CombatEndDto;
 }

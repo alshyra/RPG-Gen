@@ -4,16 +4,14 @@ describe('UiInputNumber Component', () => {
   describe('Basic Rendering', () => {
     it('should render with default value of 0', () => {
       cy.mount(UiInputNumber);
-      cy.contains('0').should('be.visible');
+      cy.contains('0')
+        .should('be.visible');
     });
 
     it('should display the modelValue', () => {
-      cy.mount(UiInputNumber, {
-        props: {
-          modelValue: 10,
-        },
-      });
-      cy.contains('10').should('be.visible');
+      cy.mount(UiInputNumber, { props: { modelValue: 10 } });
+      cy.contains('10')
+        .should('be.visible');
     });
   });
 
@@ -27,10 +25,12 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(6);
-      });
+      cy.contains('+')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(6);
+        });
     });
 
     it('should decrement value when - button is clicked', () => {
@@ -42,10 +42,12 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('-').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(4);
-      });
+      cy.contains('-')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(4);
+        });
     });
   });
 
@@ -58,7 +60,8 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('-').should('be.disabled');
+      cy.contains('-')
+        .should('be.disabled');
     });
 
     it('should respect max constraint', () => {
@@ -69,7 +72,8 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').should('be.disabled');
+      cy.contains('+')
+        .should('be.disabled');
     });
 
     it('should not go below min when decrementing', () => {
@@ -82,10 +86,12 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('-').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(8);
-      });
+      cy.contains('-')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(8);
+        });
     });
 
     it('should not go above max when incrementing', () => {
@@ -98,10 +104,12 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(15);
-      });
+      cy.contains('+')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(15);
+        });
     });
   });
 
@@ -116,10 +124,12 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(15);
-      });
+      cy.contains('+')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(15);
+        });
     });
   });
 
@@ -132,8 +142,10 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').should('be.disabled');
-      cy.contains('-').should('be.disabled');
+      cy.contains('+')
+        .should('be.disabled');
+      cy.contains('-')
+        .should('be.disabled');
     });
   });
 
@@ -149,11 +161,13 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('+').should('not.be.disabled')
+      cy.contains('+')
+        .should('not.be.disabled')
         .click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(11);
-      });
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(11);
+        });
     });
 
     it('should allow decrements within range', () => {
@@ -167,26 +181,27 @@ describe('UiInputNumber Component', () => {
         },
       });
 
-      cy.contains('-').should('not.be.disabled')
+      cy.contains('-')
+        .should('not.be.disabled')
         .click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(9);
-      });
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(9);
+        });
     });
 
     it('should handle undefined modelValue gracefully', () => {
       const onUpdate = cy.stub();
-      cy.mount(UiInputNumber, {
-        props: {
-          'onUpdate:modelValue': onUpdate,
-        },
-      });
+      cy.mount(UiInputNumber, { props: { 'onUpdate:modelValue': onUpdate } });
 
-      cy.contains('0').should('be.visible');
-      cy.contains('+').click();
-      cy.wrap(null).then(() => {
-        expect(onUpdate).to.have.been.calledWith(1);
-      });
+      cy.contains('0')
+        .should('be.visible');
+      cy.contains('+')
+        .click();
+      cy.wrap(null)
+        .then(() => {
+          expect(onUpdate).to.have.been.calledWith(1);
+        });
     });
   });
 });

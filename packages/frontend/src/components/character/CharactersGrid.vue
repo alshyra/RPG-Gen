@@ -99,7 +99,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import {
+  ref, onMounted,
+} from 'vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import { characterServiceApi } from '@/apis/characterApi';
 import { useRouter } from 'vue-router';
@@ -126,10 +128,19 @@ const loadCharacters = async () => {
 
 const onResume = (character: CharacterResponseDto) => {
   if (character.state === 'draft') {
-    router.push({ name: 'character-step', params: { characterId: character.characterId, step: 1 } });
+    router.push({
+      name: 'character-step',
+      params: {
+        characterId: character.characterId,
+        step: 1,
+      },
+    });
     return;
   }
-  router.push({ name: 'game', params: { characterId: character.characterId } });
+  router.push({
+    name: 'game',
+    params: { characterId: character.characterId },
+  });
 };
 
 const onDelete = async (character: CharacterResponseDto) => {

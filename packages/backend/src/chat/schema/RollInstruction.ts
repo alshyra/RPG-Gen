@@ -1,14 +1,25 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import {
+  Prop, Schema,
+} from '@nestjs/mongoose';
 
 @Schema({ _id: false })
 export class RollInstruction {
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+  })
   dices: string;
 
-  @Prop({ required: false, type: Object })
+  @Prop({
+    required: false,
+    type: Object,
+  })
   modifier?: string | number;
 
-  @Prop({ required: false, type: String })
+  @Prop({
+    required: false,
+    type: String,
+  })
   description?: string;
 
   @Prop({

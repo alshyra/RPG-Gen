@@ -1,5 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
+import {
+  IsArray, IsBoolean, IsOptional, IsString,
+} from 'class-validator';
 
 export class BaseMeta {
   @ApiPropertyOptional({ description: 'Item type discriminator' })
@@ -22,7 +26,10 @@ export class BaseMeta {
 }
 
 export class WeaponMeta extends BaseMeta {
-  @ApiProperty({ enum: ['weapon'], description: 'Type discriminator for weapons' })
+  @ApiProperty({
+    enum: ['weapon'],
+    description: 'Type discriminator for weapons',
+  })
   @IsString()
   override type = 'weapon' as const;
 
@@ -36,7 +43,10 @@ export class WeaponMeta extends BaseMeta {
   @IsString()
   damage?: string;
 
-  @ApiPropertyOptional({ description: 'Weapon properties (e.g., Finesse, Thrown)', type: [String] })
+  @ApiPropertyOptional({
+    description: 'Weapon properties (e.g., Finesse, Thrown)',
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -44,7 +54,10 @@ export class WeaponMeta extends BaseMeta {
 }
 
 export class ArmorMeta extends BaseMeta {
-  @ApiProperty({ enum: ['armor'], description: 'Type discriminator for armor' })
+  @ApiProperty({
+    enum: ['armor'],
+    description: 'Type discriminator for armor',
+  })
   @IsString()
   override type = 'armor' as const;
 
@@ -70,7 +83,10 @@ export class ArmorMeta extends BaseMeta {
 }
 
 export class ConsumableMeta extends BaseMeta {
-  @ApiProperty({ enum: ['consumable'], description: 'Type discriminator for consumables' })
+  @ApiProperty({
+    enum: ['consumable'],
+    description: 'Type discriminator for consumables',
+  })
   @IsString()
   override type = 'consumable' as const;
 
@@ -81,13 +97,19 @@ export class ConsumableMeta extends BaseMeta {
 }
 
 export class PackMeta extends BaseMeta {
-  @ApiProperty({ enum: ['pack'], description: 'Type discriminator for packs' })
+  @ApiProperty({
+    enum: ['pack'],
+    description: 'Type discriminator for packs',
+  })
   @IsString()
   override type = 'pack' as const;
 }
 
 export class ToolMeta extends BaseMeta {
-  @ApiProperty({ enum: ['tool'], description: 'Type discriminator for tools' })
+  @ApiProperty({
+    enum: ['tool'],
+    description: 'Type discriminator for tools',
+  })
   @IsString()
   override type = 'tool' as const;
 }

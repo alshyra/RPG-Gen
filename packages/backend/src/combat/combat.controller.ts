@@ -11,7 +11,9 @@ import {
   UseGuards,
   GoneException,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
@@ -19,10 +21,16 @@ import { UserDocument } from '../auth/user.schema.js';
 import { CombatService } from './combat.service.js';
 
 import { ActionRecordService } from './action-record.service.js';
-import { ActionRecord, ActionStatus } from './action-record.schema.js';
-import { TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto } from './dto/index.js';
+import {
+  ActionRecord, ActionStatus,
+} from './action-record.schema.js';
+import {
+  TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto,
+} from './dto/index.js';
 import { DiceController } from '../dice/dice.controller.js';
-import { CombatStartRequestDto, AttackRequestDto, CombatStateDto, CombatEnemyDto } from './dto/index.js';
+import {
+  CombatStartRequestDto, AttackRequestDto, CombatStateDto, CombatEnemyDto,
+} from './dto/index.js';
 
 @ApiTags('combat')
 @Controller('combat')
@@ -55,18 +63,27 @@ export class CombatController {
         throw new ConflictException('Action token already consumed by another requester');
       }
       if (record && record.status === ActionStatus.APPLIED) {
-        return { alreadyApplied: true, record } as const;
+        return {
+          alreadyApplied: true,
+          record,
+        } as const;
       }
       throw new BadRequestException('Unable to acquire action token');
     }
 
-    return { alreadyApplied: false, record: acquire.record as ActionRecord } as const;
+    return {
+      alreadyApplied: false,
+      record: acquire.record as ActionRecord,
+    } as const;
   }
 
   @Post(':characterId/start')
   @ApiOperation({ summary: 'Initialize combat with enemies' })
   @ApiBody({ type: CombatStartRequestDto })
-  @ApiResponse({ status: 201, type: CombatStateDto })
+  @ApiResponse({
+    status: 201,
+    type: CombatStateDto,
+  })
   async startCombat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -106,7 +123,10 @@ export class CombatController {
 
   @Post(':characterId/attack/:actionToken')
   @ApiOperation({ summary: 'Execute player attack in combat' })
-  @ApiResponse({ status: 200, type: TurnResultWithInstructionsDto })
+  @ApiResponse({
+    status: 200,
+    type: TurnResultWithInstructionsDto,
+  })
   @ApiBody({ type: AttackRequestDto })
   // eslint-disable-next-line max-statements
   async attack(
@@ -191,7 +211,15 @@ export class CombatController {
     };
 
     // Persist partial attack info and mark the record to expect DiceThrowDto next
-    const partial = { attackRoll: die, attackBonus: state.player.attackBonus, totalAttack, targetAc: targetEnemy.ac, hit: true, critical, fumble };
+    const partial = {
+      attackRoll: die,
+      attackBonus: state.player.attackBonus,
+      totalAttack,
+      targetAc: targetEnemy.ac,
+      hit: true,
+      critical,
+      fumble,
+    };
     await this.actionRecordService.setPendingWithExpected(actionToken, 'DiceThrowDto', partial, { requesterId: userId });
 
     return response;
@@ -200,7 +228,10 @@ export class CombatController {
   /* eslint-disable max-statements */
   @Post(':characterId/resolve-roll/:actionToken')
   @ApiOperation({ summary: 'Resolve a client-side roll (damage) and apply its effects' })
-  @ApiResponse({ status: 200, type: TurnResultWithInstructionsDto })
+  @ApiResponse({
+    status: 200,
+    type: TurnResultWithInstructionsDto,
+  })
   @ApiBody({ type: DiceThrowDto })
   async resolveRoll(
     @Req() req: Request,
@@ -229,7 +260,11 @@ export class CombatController {
     if (existing.expectedDto !== 'DiceThrowDto') throw new BadRequestException('This action token is not awaiting a dice throw');
 
     // Now acquire (lock) atomically before processing
-    const acquired = await this.actionRecordService.tryAcquire(actionToken, { requesterId: userId, combatId: characterId, expectedDto: 'DiceThrowDto' });
+    const acquired = await this.actionRecordService.tryAcquire(actionToken, {
+      requesterId: userId,
+      combatId: characterId,
+      expectedDto: 'DiceThrowDto',
+    });
     if (!acquired.acquired) {
       // Another worker may be processing; if applied return result, else conflict
       const rec = acquired.record as ActionRecord | null;
@@ -261,7 +296,12 @@ export class CombatController {
   }
   /* eslint-enable max-statements */
 
-  private async handleAttackResolution(characterId: string, body: { action: string; target?: string; total?: number; die?: number }) {
+  private async handleAttackResolution(characterId: string, body: {
+    action: string;
+    target?: string;
+    total?: number;
+    die?: number;
+  }) {
     if (typeof body.total !== 'number' || !body.target) {
       throw new BadRequestException('Invalid attack resolution payload');
     }
@@ -315,7 +355,12 @@ export class CombatController {
     };
   }
 
-  private async handleDamageResolution(characterId: string, body: { action: string; target?: string; total?: number; die?: number }) {
+  private async handleDamageResolution(characterId: string, body: {
+    action: string;
+    target?: string;
+    total?: number;
+    die?: number;
+  }) {
     if (typeof body.total !== 'number' || !body.target) {
       throw new BadRequestException('Invalid damage resolution payload');
     }
@@ -326,7 +371,10 @@ export class CombatController {
 
   @Get(':characterId/status')
   @ApiOperation({ summary: 'Get current combat status' })
-  @ApiResponse({ status: 200, type: CombatStateDto })
+  @ApiResponse({
+    status: 200,
+    type: CombatStateDto,
+  })
   async getStatus(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -379,7 +427,10 @@ export class CombatController {
 
   @Post(':characterId/end')
   @ApiOperation({ summary: 'Force end current combat (flee)' })
-  @ApiResponse({ status: 200, type: CombatEndResponseDto })
+  @ApiResponse({
+    status: 200,
+    type: CombatEndResponseDto,
+  })
   async endCombat(
     @Req() req: Request,
     @Param('characterId') characterId: string,

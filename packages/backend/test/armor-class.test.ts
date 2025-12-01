@@ -1,6 +1,10 @@
 import test from 'ava';
-import { calculateArmorClass, getDexModifier, parseArmorAc } from '../src/character/armor-class.util.js';
-import type { CharacterResponseDto, ItemResponseDto } from '@rpg-gen/shared';
+import {
+  calculateArmorClass, getDexModifier, parseArmorAc,
+} from '../src/character/armor-class.util.js';
+import type {
+  CharacterResponseDto, ItemResponseDto,
+} from '@rpg-gen/shared';
 
 // Helper to create a minimal character for testing
 const createTestCharacter = (dex: number, inventory: ItemResponseDto[] = []): CharacterResponseDto => ({
@@ -8,10 +12,18 @@ const createTestCharacter = (dex: number, inventory: ItemResponseDto[] = []): Ch
   world: 'dnd',
   portrait: '',
   isDeceased: false,
-  diedAt: new Date().toISOString(),
+  diedAt: new Date()
+    .toISOString(),
   deathLocation: '',
   state: 'created',
-  scores: { Str: 10, Dex: dex, Con: 10, Int: 10, Wis: 10, Cha: 10 },
+  scores: {
+    Str: 10,
+    Dex: dex,
+    Con: 10,
+    Int: 10,
+    Wis: 10,
+    Cha: 10,
+  },
   inventory,
 });
 
@@ -30,7 +42,8 @@ test('getDexModifier defaults to 0 when scores are missing', (t) => {
     world: 'dnd',
     portrait: '',
     isDeceased: false,
-    diedAt: new Date().toISOString(),
+    diedAt: new Date()
+      .toISOString(),
     deathLocation: '',
     state: 'created',
   };
@@ -39,29 +52,61 @@ test('getDexModifier defaults to 0 when scores are missing', (t) => {
 
 test('parseArmorAc parses light armor correctly', (t) => {
   const result = parseArmorAc('11 + Dex modifier');
-  t.deepEqual(result, { baseAc: 11, addDex: true, maxDex: null });
+  t.deepEqual(result, {
+    baseAc: 11,
+    addDex: true,
+    maxDex: null,
+  });
 
   const result2 = parseArmorAc('12 + Dex modifier');
-  t.deepEqual(result2, { baseAc: 12, addDex: true, maxDex: null });
+  t.deepEqual(result2, {
+    baseAc: 12,
+    addDex: true,
+    maxDex: null,
+  });
 });
 
 test('parseArmorAc parses medium armor correctly', (t) => {
   const result = parseArmorAc('12 + Dex modifier (max 2)');
-  t.deepEqual(result, { baseAc: 12, addDex: true, maxDex: 2 });
+  t.deepEqual(result, {
+    baseAc: 12,
+    addDex: true,
+    maxDex: 2,
+  });
 
   const result2 = parseArmorAc('14 + Dex modifier (max 2)');
-  t.deepEqual(result2, { baseAc: 14, addDex: true, maxDex: 2 });
+  t.deepEqual(result2, {
+    baseAc: 14,
+    addDex: true,
+    maxDex: 2,
+  });
 });
 
 test('parseArmorAc parses heavy armor correctly', (t) => {
-  t.deepEqual(parseArmorAc('14'), { baseAc: 14, addDex: false, maxDex: null });
-  t.deepEqual(parseArmorAc('16'), { baseAc: 16, addDex: false, maxDex: null });
-  t.deepEqual(parseArmorAc('18'), { baseAc: 18, addDex: false, maxDex: null });
+  t.deepEqual(parseArmorAc('14'), {
+    baseAc: 14,
+    addDex: false,
+    maxDex: null,
+  });
+  t.deepEqual(parseArmorAc('16'), {
+    baseAc: 16,
+    addDex: false,
+    maxDex: null,
+  });
+  t.deepEqual(parseArmorAc('18'), {
+    baseAc: 18,
+    addDex: false,
+    maxDex: null,
+  });
 });
 
 test('parseArmorAc parses shield correctly', (t) => {
   const result = parseArmorAc('+2');
-  t.deepEqual(result, { baseAc: 2, addDex: false, maxDex: null });
+  t.deepEqual(result, {
+    baseAc: 2,
+    addDex: false,
+    maxDex: null,
+  });
 });
 
 test('calculateArmorClass returns 10 + DEX for unarmored character', (t) => {
@@ -80,7 +125,11 @@ test('calculateArmorClass with light armor adds full DEX', (t) => {
     name: 'Leather',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Light Armor', ac: '11 + Dex modifier' },
+    meta: {
+      type: 'armor',
+      class: 'Light Armor',
+      ac: '11 + Dex modifier',
+    },
   };
   const char14Dex = createTestCharacter(14, [leather]);
   t.is(calculateArmorClass(char14Dex), 13); // 11 + 2
@@ -89,7 +138,11 @@ test('calculateArmorClass with light armor adds full DEX', (t) => {
     name: 'Studded Leather',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Light Armor', ac: '12 + Dex modifier' },
+    meta: {
+      type: 'armor',
+      class: 'Light Armor',
+      ac: '12 + Dex modifier',
+    },
   };
   const char18Dex = createTestCharacter(18, [studdedLeather]);
   t.is(calculateArmorClass(char18Dex), 16); // 12 + 4
@@ -100,7 +153,11 @@ test('calculateArmorClass with medium armor caps DEX at max 2', (t) => {
     name: 'Chain Shirt',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Medium Armor', ac: '13 + Dex modifier (max 2)' },
+    meta: {
+      type: 'armor',
+      class: 'Medium Armor',
+      ac: '13 + Dex modifier (max 2)',
+    },
   };
 
   // High DEX character should be capped
@@ -117,7 +174,11 @@ test('calculateArmorClass with heavy armor ignores DEX', (t) => {
     name: 'Chain Mail',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Heavy Armor', ac: '16' },
+    meta: {
+      type: 'armor',
+      class: 'Heavy Armor',
+      ac: '16',
+    },
   };
 
   const char18Dex = createTestCharacter(18, [chainMail]);
@@ -132,7 +193,11 @@ test('calculateArmorClass with shield adds +2', (t) => {
     name: 'Shield',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Shield', ac: '+2' },
+    meta: {
+      type: 'armor',
+      class: 'Shield',
+      ac: '+2',
+    },
   };
 
   // Just shield (unarmored + shield)
@@ -145,13 +210,21 @@ test('calculateArmorClass with armor and shield combined', (t) => {
     name: 'Chain Mail',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Heavy Armor', ac: '16' },
+    meta: {
+      type: 'armor',
+      class: 'Heavy Armor',
+      ac: '16',
+    },
   };
   const shield = {
     name: 'Shield',
     qty: 1,
     equipped: true,
-    meta: { type: 'armor', class: 'Shield', ac: '+2' },
+    meta: {
+      type: 'armor',
+      class: 'Shield',
+      ac: '+2',
+    },
   };
 
   const char = createTestCharacter(14, [
@@ -166,7 +239,11 @@ test('calculateArmorClass ignores unequipped armor', (t) => {
     name: 'Plate',
     qty: 1,
     equipped: false, // Not equipped!
-    meta: { type: 'armor', class: 'Heavy Armor', ac: '18' },
+    meta: {
+      type: 'armor',
+      class: 'Heavy Armor',
+      ac: '18',
+    },
   };
 
   const char = createTestCharacter(14, [plate]);
@@ -178,7 +255,10 @@ test('calculateArmorClass ignores non-armor items', (t) => {
     name: 'Longsword',
     qty: 1,
     equipped: true,
-    meta: { type: 'weapon', damage: '1d8' },
+    meta: {
+      type: 'weapon',
+      damage: '1d8',
+    },
   };
 
   const char = createTestCharacter(14, [sword]);

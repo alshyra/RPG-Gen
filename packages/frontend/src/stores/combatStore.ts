@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
-import { combatService, type ExtendedCombatStateDto } from '../apis/combatApi';
-import type { CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto, AttackResultDto } from '@rpg-gen/shared';
+import {
+  computed, ref,
+} from 'vue';
+import {
+  combatService, type ExtendedCombatStateDto,
+} from '../apis/combatApi';
+import type {
+  CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto, AttackResultDto,
+} from '@rpg-gen/shared';
 
 export type CombatPhase = 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
 
@@ -26,7 +32,10 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isCurrentAttackPlayerAttack = ref(true);
 
   // Queue for displaying attack results one by one (for enemy animations)
-  const attackResultQueue = ref<{ result: AttackResultDto; isPlayerAttack: boolean }[]>([]);
+  const attackResultQueue = ref<{
+    result: AttackResultDto;
+    isPlayerAttack: boolean;
+  }[]>([]);
   const isAnimatingAttacks = ref(false);
 
   // Computed properties
@@ -118,7 +127,10 @@ export const useCombatStore = defineStore('combatStore', () => {
    * Start combat from a combat_start instruction
    */
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
-    console.log('[combatStore] startCombat request', { characterId, instruction });
+    console.log('[combatStore] startCombat request', {
+      characterId,
+      instruction,
+    });
     const response = await combatService.startCombat(characterId, instruction);
     console.log('[combatStore] startCombat response', response);
     initializeCombat(response);
@@ -155,11 +167,17 @@ export const useCombatStore = defineStore('combatStore', () => {
   const queueAttackResults = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
     // Add player attacks first
     playerAttacks.forEach((result) => {
-      attackResultQueue.value.push({ result, isPlayerAttack: true });
+      attackResultQueue.value.push({
+        result,
+        isPlayerAttack: true,
+      });
     });
     // Then enemy attacks
     enemyAttacks.forEach((result) => {
-      attackResultQueue.value.push({ result, isPlayerAttack: false });
+      attackResultQueue.value.push({
+        result,
+        isPlayerAttack: false,
+      });
     });
   };
 

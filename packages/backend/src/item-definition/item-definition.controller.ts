@@ -1,4 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller, Get, Param,
+} from '@nestjs/common';
 import { ItemDefinitionService } from './item-definition.service.js';
 
 @Controller('items')

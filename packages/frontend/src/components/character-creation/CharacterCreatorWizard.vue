@@ -102,8 +102,12 @@ import { conversationService } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  computed, ref,
+} from 'vue';
+import {
+  useRoute, useRouter,
+} from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
 import UiLoader from '../ui/UiLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -143,7 +147,13 @@ const currentStep = computed({
   },
   set: (value: number) => {
     const charId = (route.params.characterId as string) || currentCharacter.value?.characterId;
-    router.push({ name: 'character-step', params: { characterId: charId, step: value + 1 } });
+    router.push({
+      name: 'character-step',
+      params: {
+        characterId: charId,
+        step: value + 1,
+      },
+    });
   },
 });
 
@@ -224,7 +234,10 @@ const initConversationForCharacter = async () => {
 };
 
 const navigateToGame = async () => {
-  await router.push({ name: 'game', params: { characterId: currentCharacter.value!.characterId } });
+  await router.push({
+    name: 'game',
+    params: { characterId: currentCharacter.value!.characterId },
+  });
 };
 
 const finishCreation = async () => {

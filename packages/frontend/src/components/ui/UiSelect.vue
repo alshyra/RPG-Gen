@@ -9,9 +9,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  modelValue: string;
-}>();
+defineProps<{ modelValue: string }>();
 
 defineEmits<(e: 'update:modelValue', value: string) => void>();
 </script>

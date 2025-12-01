@@ -10,11 +10,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{
-  variant?: 'text' | 'avatar' | 'card';
-}>(), {
-  variant: 'text',
-});
+const props = withDefaults(defineProps<{ variant?: 'text' | 'avatar' | 'card' }>(), { variant: 'text' });
 
 const sizeClasses = computed(() => {
   switch (props.variant) {

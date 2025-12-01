@@ -6,7 +6,9 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtStrategy } from './jwt.strategy.js';
 import { GoogleStrategy } from './google.strategy.js';
-import { User, UserSchema } from './user.schema.js';
+import {
+  User, UserSchema,
+} from './user.schema.js';
 
 @Module({
   imports: [
@@ -15,7 +17,12 @@ import { User, UserSchema } from './user.schema.js';
       secret: process.env.JWT_SECRET || 'default-secret-change-in-production',
       signOptions: { expiresIn: '7d' },
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [

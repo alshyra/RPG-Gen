@@ -57,7 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import {
+  reactive, ref,
+} from 'vue';
 import UiButton from '../ui/UiButton.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useRouter } from 'vue-router';
@@ -78,8 +80,29 @@ const goToCharacterCreation = async (world: string) => {
 };
 
 const worlds = reactive([
-  { id: 'dnd', enabled: true, logo: 'D', bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500', name: 'Dungeons & Dragons', desc: 'High fantasy, parties, and epic quests.' },
-  { id: 'vtm', enabled: false, logo: 'V', bgClass: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500', name: 'Vampire: The Masquerade', desc: 'Gothic-punk political roleplay among vampires.' },
-  { id: 'cyberpunk', enabled: false, logo: 'C', bgClass: 'bg-gradient-to-tr from-cyan-400 to-indigo-500', name: 'Cyberpunk', desc: 'Near-future neon dystopia with tech & megacorps.' },
+  {
+    id: 'dnd',
+    enabled: true,
+    logo: 'D',
+    bgClass: 'bg-gradient-to-tr from-amber-500 to-rose-500',
+    name: 'Dungeons & Dragons',
+    desc: 'High fantasy, parties, and epic quests.',
+  },
+  {
+    id: 'vtm',
+    enabled: false,
+    logo: 'V',
+    bgClass: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500',
+    name: 'Vampire: The Masquerade',
+    desc: 'Gothic-punk political roleplay among vampires.',
+  },
+  {
+    id: 'cyberpunk',
+    enabled: false,
+    logo: 'C',
+    bgClass: 'bg-gradient-to-tr from-cyan-400 to-indigo-500',
+    name: 'Cyberpunk',
+    desc: 'Near-future neon dystopia with tech & megacorps.',
+  },
 ]);
 </script>

@@ -57,11 +57,11 @@ import {
   type ArgumentSuggestion,
   type CommandDefinition,
 } from '@/utils/chatCommands';
-import { computed, ref, watch } from 'vue';
+import {
+  computed, ref, watch,
+} from 'vue';
 
-interface Props {
-  inputText: string;
-}
+interface Props { inputText: string }
 
 const props = defineProps<Props>();
 
@@ -141,7 +141,9 @@ const navigateDown = () => {
 };
 
 const selectCurrent = () => {
-  const { commandSuggestions, argumentSuggestions } = suggestionResult.value;
+  const {
+    commandSuggestions, argumentSuggestions,
+  } = suggestionResult.value;
   if (commandSuggestions.length > 0) {
     selectCommand(commandSuggestions[selectedIndex.value]);
   } else if (argumentSuggestions.length > 0) {

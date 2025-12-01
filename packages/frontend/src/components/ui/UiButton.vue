@@ -41,7 +41,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouteLocationAsPathGeneric, RouteLocationAsRelativeGeneric, RouterLink } from 'vue-router';
+import {
+  RouteLocationAsPathGeneric, RouteLocationAsRelativeGeneric, RouterLink,
+} from 'vue-router';
 import UiLoader from './UiLoader.vue';
 
 const props = defineProps<{

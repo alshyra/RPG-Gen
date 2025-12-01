@@ -8,7 +8,9 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
@@ -63,9 +65,19 @@ export class ChatController {
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
   @ApiBody({ type: ChatMessageDto })
-  @ApiResponse({ status: 201, description: 'Chat message (assistant) with narrative and instructions', type: ChatMessageDto })
-  @ApiResponse({ status: 400, description: 'Invalid request' })
-  @ApiResponse({ status: 500, description: 'Chat processing failed' })
+  @ApiResponse({
+    status: 201,
+    description: 'Chat message (assistant) with narrative and instructions',
+    type: ChatMessageDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Chat processing failed',
+  })
   async chat(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -88,9 +100,19 @@ export class ChatController {
 
   @Get('/:characterId/history')
   @ApiOperation({ summary: 'Get conversation history for a character' })
-  @ApiResponse({ status: 200, description: 'Conversation history', type: [ChatMessageDto] })
-  @ApiResponse({ status: 400, description: 'Invalid request' })
-  @ApiResponse({ status: 500, description: 'History retrieval failed' })
+  @ApiResponse({
+    status: 200,
+    description: 'Conversation history',
+    type: [ChatMessageDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'History retrieval failed',
+  })
   async getHistory(
     @Req() req: Request,
     @Param('characterId') characterId: string,
@@ -115,7 +137,8 @@ export class ChatController {
     type MessageWithInstructions = ChatMessageDto & { instructions?: { type: string }[] };
     const hasCombatStart = (m: MessageWithInstructions) => m.role === 'assistant' && m.instructions?.some(i => i.type === 'combat_start');
 
-    const lastAssistant = [...messages].reverse().find(hasCombatStart) as MessageWithInstructions | undefined;
+    const lastAssistant = [...messages].reverse()
+      .find(hasCombatStart) as MessageWithInstructions | undefined;
     if (!lastAssistant?.instructions) return;
 
     const combatInstrs = lastAssistant.instructions.filter(i => i.type === 'combat_start');

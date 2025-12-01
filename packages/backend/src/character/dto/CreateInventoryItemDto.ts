@@ -1,5 +1,9 @@
-import { ApiPropertyOptional, ApiProperty, getSchemaPath, ApiExtraModels } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean, IsNumber, IsObject, Min, IsNotEmpty } from 'class-validator';
+import {
+  ApiPropertyOptional, ApiProperty, getSchemaPath, ApiExtraModels,
+} from '@nestjs/swagger';
+import {
+  IsOptional, IsString, IsBoolean, IsNumber, IsObject, Min, IsNotEmpty,
+} from 'class-validator';
 import {
   WeaponMeta,
   ArmorMeta,

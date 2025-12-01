@@ -91,7 +91,9 @@ import { computed } from 'vue';
 import 'rpg-awesome/css/rpg-awesome.css';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useGameCommands } from '@/composables/useGameCommands';
-import { generateUseCommand, generateEquipCommand } from '@/utils/chatCommands';
+import {
+  generateUseCommand, generateEquipCommand,
+} from '@/utils/chatCommands';
 import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();
@@ -103,7 +105,12 @@ const hasItems = computed(() => items.value.length > 0);
 const itemsCount = computed(() => items.value.length || 0);
 
 const groupedItems = computed(() => {
-  const groups: Record<string, any[]> = { Weapons: [], Armor: [], Consumables: [], Other: [] };
+  const groups: Record<string, any[]> = {
+    Weapons: [],
+    Armor: [],
+    Consumables: [],
+    Other: [],
+  };
   (items.value || []).forEach((it) => {
     if (it.meta?.type === 'weapon') groups.Weapons.push(it);
     else if (it.meta?.type === 'armor' || it.meta?.class === 'Shield') groups.Armor.push(it);
@@ -111,9 +118,10 @@ const groupedItems = computed(() => {
     else groups.Other.push(it);
   });
   // Sort each group with equipped items first
-  Object.keys(groups).forEach((k) => {
-    groups[k].sort((a: any, b: any) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0));
-  });
+  Object.keys(groups)
+    .forEach((k) => {
+      groups[k].sort((a: any, b: any) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0));
+    });
   return groups;
 });
 

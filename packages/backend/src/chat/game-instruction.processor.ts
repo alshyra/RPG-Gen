@@ -1,4 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable, Logger,
+} from '@nestjs/common';
 import { CharacterService } from '../character/character.service.js';
 import { CombatService } from '../combat/combat.service.js';
 import type { GameInstructionDto } from './dto/index.js';
