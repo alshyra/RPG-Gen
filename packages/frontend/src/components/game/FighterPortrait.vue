@@ -78,9 +78,7 @@ const props = defineProps<{
   isPlayer?: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: 'acted', actor: string): void;
-}>();
+const emit = defineEmits<(e: 'acted', actor: string) => void>();
 
 const characterStore = useCharacterStore();
 const combat = useCombat();

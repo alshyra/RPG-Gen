@@ -4,15 +4,19 @@ import { CombatEnd } from './CombatEnd.js';
 
 @Schema({ _id: false })
 export class GameInstruction {
-  @Prop({ required: false, type: String, enum: [
-    'roll',
-    'xp',
-    'hp',
-    'spell',
-    'inventory',
-    'combat_start',
-    'combat_end',
-  ] })
+  @Prop({
+    required: false,
+    type: String,
+    enum: [
+      'roll',
+      'xp',
+      'hp',
+      'spell',
+      'inventory',
+      'combat_start',
+      'combat_end',
+    ],
+  })
   type: 'roll' | 'xp' | 'hp' | 'spell' | 'inventory' | 'combat_start' | 'combat_end';
 
   // Roll instruction fields (flattened to top-level for DTO compatibility)
@@ -25,11 +29,15 @@ export class GameInstruction {
   @Prop({ required: false, type: String })
   description?: string;
 
-  @Prop({ required: false, type: String, enum: [
-    'advantage',
-    'disadvantage',
-    'none',
-  ] })
+  @Prop({
+    required: false,
+    type: String,
+    enum: [
+      'advantage',
+      'disadvantage',
+      'none',
+    ],
+  })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 
   // Numeric instruction fields
@@ -41,16 +49,20 @@ export class GameInstruction {
 
   // Spell instruction fields
   // used both in spell and inventory instructions
-  @Prop({ required: false, type: String, enum: [
+  @Prop({
+    required: false,
+    type: String,
+    enum: [
     // spell actions
-    'learn',
-    'cast',
-    'forget',
-    // inventory actions
-    'add',
-    'remove',
-    'use',
-  ] })
+      'learn',
+      'cast',
+      'forget',
+      // inventory actions
+      'add',
+      'remove',
+      'use',
+    ],
+  })
   action?: 'learn' | 'cast' | 'forget' | 'add' | 'remove' | 'use';
 
   @Prop({ required: false, type: String })

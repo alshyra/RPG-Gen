@@ -31,16 +31,18 @@ const allowedRaces = computed(() => ALLOWED_RACES);
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const additionalSelectedClass = (allowedRace: RaceResponseDto) =>
-  currentCharacter.value?.race?.id === allowedRace.id
-    ? 'border-indigo-500 bg-indigo-600/20'
-    : 'border-slate-700';
+const additionalSelectedClass = (allowedRace: RaceResponseDto) => currentCharacter.value?.race?.id === allowedRace.id
+  ? 'border-indigo-500 bg-indigo-600/20'
+  : 'border-slate-700';
 
 const summaryMods = (mods: RaceResponseDto['mods']) => {
   try {
     return Object
       .entries(mods)
-      .map(([attributeName, statAdjustment]) => `${attributeName}${(statAdjustment) >= 0 ? '+' + (statAdjustment) : statAdjustment}`)
+      .map(([
+        attributeName,
+        statAdjustment,
+      ]) => `${attributeName}${(statAdjustment) >= 0 ? '+' + (statAdjustment) : statAdjustment}`)
       .join(' ');
   } catch { return ''; }
 };

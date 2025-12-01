@@ -20,8 +20,13 @@
       v-else
       class="space-y-4 overflow-auto"
     >
-      <template v-for="groupKey in ['Weapons','Armor','Consumables','Other']">
-        <div v-if="groupedItems[groupKey] && groupedItems[groupKey].length > 0">
+      <template
+        v-for="groupKey in ['Weapons','Armor','Consumables','Other']"
+        :key="groupKey"
+      >
+        <div
+          v-if="groupedItems[groupKey] && groupedItems[groupKey].length > 0"
+        >
           <div class="flex items-center justify-between mb-2">
             <h4 class="text-xs font-semibold text-slate-200">
               {{ groupLabel(groupKey) }}
@@ -99,7 +104,7 @@ const itemsCount = computed(() => items.value.length || 0);
 
 const groupedItems = computed(() => {
   const groups: Record<string, any[]> = { Weapons: [], Armor: [], Consumables: [], Other: [] };
-  (items.value || []).forEach((it: any) => {
+  (items.value || []).forEach((it) => {
     if (it.meta?.type === 'weapon') groups.Weapons.push(it);
     else if (it.meta?.type === 'armor' || it.meta?.class === 'Shield') groups.Armor.push(it);
     else if (it.meta?.usable || it.meta?.consumable) groups.Consumables.push(it);

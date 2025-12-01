@@ -4,11 +4,14 @@ export class InventoryInstructionMessageDto {
   @ApiProperty({ description: 'Instruction type', enum: ['inventory'] })
   type: 'inventory';
 
-  @ApiProperty({ description: 'Inventory action', enum: [
-    'add',
-    'remove',
-    'use',
-  ] })
+  @ApiProperty({
+    description: 'Inventory action',
+    enum: [
+      'add',
+      'remove',
+      'use',
+    ],
+  })
   action: 'add' | 'remove' | 'use';
 
   @ApiProperty({ description: 'Item name' })

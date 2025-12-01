@@ -11,10 +11,14 @@ export class RollInstruction {
   @Prop({ required: false, type: String })
   description?: string;
 
-  @Prop({ required: false, type: String, enum: [
-    'advantage',
-    'disadvantage',
-    'none',
-  ] })
+  @Prop({
+    required: false,
+    type: String,
+    enum: [
+      'advantage',
+      'disadvantage',
+      'none',
+    ],
+  })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 }

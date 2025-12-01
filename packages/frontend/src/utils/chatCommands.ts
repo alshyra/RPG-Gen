@@ -76,9 +76,7 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
   }
 
   // Filter commands that start with the partial input
-  return COMMAND_DEFINITIONS.filter(def =>
-    def.command.startsWith(partial),
-  );
+  return COMMAND_DEFINITIONS.filter(def => def.command.startsWith(partial));
 };
 
 /**
@@ -125,7 +123,7 @@ export const getArgumentSuggestions = (
   partialArg: string,
   spells: SpellResponseDto[] = [],
   inventory: ItemResponseDto[] = [],
-  characterLevel: number = 1,
+  characterLevel = 1,
   validTargets: string[] = [],
 ): ArgumentSuggestion[] => {
   const partial = partialArg.toLowerCase();
@@ -194,7 +192,7 @@ export const getAllSuggestions = (
   input: string,
   spells: SpellResponseDto[] = [],
   inventory: ItemResponseDto[] = [],
-  characterLevel: number = 1,
+  characterLevel = 1,
   validTargets: string[] = [],
 ): SuggestionResult => {
   const trimmed = input.trim();

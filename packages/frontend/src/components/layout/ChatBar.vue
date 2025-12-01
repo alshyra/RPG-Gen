@@ -68,9 +68,7 @@ import CommandSuggestions from './CommandSuggestions.vue';
 /** Delay in ms before hiding suggestions on blur to allow click events to process */
 const SUGGESTION_BLUR_DELAY_MS = 150;
 
-interface Emits {
-  (e: 'send'): void;
-}
+type Emits = (e: 'send') => void;
 
 const emit = defineEmits<Emits>();
 const gameStore = useGameStore();

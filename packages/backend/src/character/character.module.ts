@@ -8,10 +8,12 @@ import { CharacterService } from './character.service.js';
 import { Character, CharacterSchema } from './schema/index.js';
 
 @Module({
-  imports: [MongooseModule.forFeature([
-    { name: Character.name, schema: CharacterSchema },
-    { name: ItemDefinition.name, schema: ItemDefinitionSchema },
-  ])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Character.name, schema: CharacterSchema },
+      { name: ItemDefinition.name, schema: ItemDefinitionSchema },
+    ]),
+  ],
   controllers: [
     CharacterController,
     ItemDefinitionController,

@@ -1,18 +1,99 @@
 import { conversationService } from '../apis/conversationApi';
 import { characterServiceApi } from '../apis/characterApi';
 import { isCombatEndInstruction, isCombatStartInstruction } from '../apis/combatTypes';
-import type { RollInstructionMessageDto, SpellInstructionMessageDto } from '@rpg-gen/shared';
+import type { RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto } from '@rpg-gen/shared';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 import { useCombat } from './useCombat';
 
+type GameStore = ReturnType<typeof useGameStore>;
+type CharacterStore = ReturnType<typeof useCharacterStore>;
+type InstructionItem = Record<string, unknown>;
+
+// ----- Instruction Processors -----
+const processRollInstruction = (instr: RollInstructionMessageDto, gameStore: GameStore): void => {
+  gameStore.pendingInstruction = instr;
+  const mod = instr.modifier ? ` + ${instr.modifier}` : '';
+  gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${mod}`);
+};
+
+const processXpInstruction = (xp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
+  gameStore.appendMessage('system', `✨ Gained ${xp} XP`);
+  characterStore.updateXp(xp);
+};
+
+const processHpInstruction = (hp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
+  const hpChange = hp > 0 ? `+${hp}` : hp;
+  gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
+  characterStore.updateHp(hp);
+  if (characterStore.isDead) characterStore.showDeathModal = true;
+};
+
+const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+  const spell = instr as { action?: string; name?: string; level?: number };
+  const { action, name, level } = spell;
+  if (action === 'learn') {
+    gameStore.appendMessage('system', `📖 Learned spell: ${name} (Level ${level})`);
+    characterStore.learnSpell(instr as SpellInstructionMessageDto);
+  } else if (action === 'cast') {
+    gameStore.appendMessage('system', `✨ Cast spell: ${name}`);
+  } else if (action === 'forget') {
+    gameStore.appendMessage('system', `🚫 Forgot spell: ${name}`);
+    characterStore.forgetSpell(name ?? '');
+  }
+};
+
+const processInventoryInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+  const inventory = instr as { action?: string; name?: string; quantity?: number };
+  const { action, name, quantity = 1 } = inventory;
+  if (action === 'add') {
+    gameStore.appendMessage('system', `🎒 Added to inventory: ${name} (x${quantity})`);
+    characterStore.addInventoryItem({ name: name ?? '', qty: quantity });
+  } else if (action === 'remove') {
+    gameStore.appendMessage('system', `🗑️ Removed from inventory: ${name} (x${quantity})`);
+    characterStore.removeInventoryItem(name ?? '', quantity);
+  } else if (action === 'use') {
+    gameStore.appendMessage('system', `⚡ Used item: ${name}`);
+    characterStore.useInventoryItem(name ?? '');
+  }
+};
+
+// ----- Command Helpers -----
+const findSpell = (character: CharacterResponseDto, spellName: string) => character.spells?.find((s: { name: string }) => s.name.toLowerCase() === spellName.toLowerCase());
+
+const matchesName = (value: string | undefined, search: string): boolean => (value ?? '').toLowerCase() === search.toLowerCase();
+
+const findItem = (character: CharacterResponseDto, itemName: string) => character.inventory?.find((i: { name?: string; definitionId?: string; _id?: string }) => matchesName(i.name, itemName) || matchesName(i.definitionId, itemName) || matchesName(i._id, itemName));
+
+const sendToGemini = async (
+  message: string,
+  gameStore: GameStore,
+  processInstructions: (instrs: unknown[]) => void,
+): Promise<void> => {
+  const response = await conversationService.sendMessage(message);
+  gameStore.messages.pop();
+  gameStore.appendMessage('assistant', response.narrative);
+  processInstructions(response.instructions ?? []);
+};
+
 export function useGameCommands() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const combat = useCombat();
+
+  const executeWithLoading = async (action: () => Promise<void>, errorPrefix: string): Promise<void> => {
+    gameStore.sending = true;
+    try {
+      await action();
+    } catch (e) {
+      gameStore.appendMessage('system', `❌ ${errorPrefix} (${e instanceof Error ? e.message : String(e)})`);
+    } finally {
+      gameStore.sending = false;
+    }
+  };
 
   /**
    * Insert a command into the chat input
@@ -51,10 +132,7 @@ export function useGameCommands() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    const spell = character.spells?.find(
-      s => s.name.toLowerCase() === spellName.toLowerCase(),
-    );
-
+    const spell = findSpell(character, spellName);
     if (!spell) {
       gameStore.appendMessage('system', `❌ Spell not found: ${spellName}`);
       return;
@@ -65,10 +143,7 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      const response = await conversationService.sendMessage(`I cast the spell ${spell.name}`);
-      gameStore.messages.pop();
-      gameStore.appendMessage('assistant', response.narrative);
-      processInstructions(response.instructions ?? []);
+      await sendToGemini(`I cast the spell ${spell.name}`, gameStore, processInstructions);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to cast spell: ${spell.name}`);
@@ -79,19 +154,12 @@ export function useGameCommands() {
 
   /**
    * Execute a use item command
-  /**
-   * Execute a use item command
    */
   const executeUseCommand = async (itemName: string): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    const item = character.inventory?.find(
-      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase()
-        || (i.definitionId ?? '').toLowerCase() === itemName.toLowerCase()
-        || (i._id ?? '').toLowerCase() === itemName.toLowerCase(),
-    );
-
+    const item = findItem(character, itemName);
     if (!item) {
       gameStore.appendMessage('system', `❌ Item not found: ${itemName}`);
       return;
@@ -102,10 +170,7 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      const response = await conversationService.sendMessage(`I use the item ${item.name}`);
-      gameStore.messages.pop();
-      gameStore.appendMessage('assistant', response.narrative);
-      processInstructions(response.instructions ?? []);
+      await sendToGemini(`I use the item ${item.name}`, gameStore, processInstructions);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
@@ -117,41 +182,31 @@ export function useGameCommands() {
   /**
    * Execute an equip item command
    */
+  const findEquippableItem = (character: CharacterResponseDto, itemName: string) => {
+    const item = character.inventory?.find(i => (i.name ?? '').toLowerCase() === itemName.toLowerCase());
+    if (!item) return { error: `❌ Item not found: ${itemName}` };
+    if (!item.definitionId) return { error: `❌ Cannot equip ${item.name}: no definitionId available` };
+    return { item };
+  };
+
   const executeEquipCommand = async (itemName: string): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    const item = character.inventory?.find(
-      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase(),
-    );
-
-    if (!item) {
-      gameStore.appendMessage('system', `❌ Item not found: ${itemName}`);
+    const result = findEquippableItem(character, itemName);
+    if (result.error) {
+      gameStore.appendMessage('system', result.error);
       return;
     }
-
-    // Use the dedicated character API to equip the item by definitionId
-    if (!item.definitionId) {
-      gameStore.appendMessage('system', `❌ Cannot equip ${item.name}: no definitionId available`);
-      return;
-    }
-
+    const item = result.item!;
     gameStore.appendMessage('user', `Equip ${item.name} (${item.definitionId})`);
     gameStore.appendMessage('system', 'Equipping...');
-    gameStore.sending = true;
-    try {
-      const updated = await characterServiceApi.equipInventoryItem(character.characterId, item.definitionId);
-      // update local store
-      const store = useCharacterStore();
-      // Pinia store exposes `currentCharacter` unwrapped in components, assign directly
-      (store as any).currentCharacter = updated as any;
+
+    await executeWithLoading(async () => {
+      const updated = await characterServiceApi.equipInventoryItem(character.characterId, item.definitionId!);
+      characterStore.currentCharacter = updated;
       gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('system', `❌ Failed to equip item: ${item.name} (${msg})`);
-    } finally {
-      gameStore.sending = false;
-    }
+    }, `Failed to equip item: ${item.name}`);
   };
 
   /**
@@ -161,33 +216,21 @@ export function useGameCommands() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    // Check if we're in combat mode (use store first, then check backend)
-    if (combatStore.inCombat) {
-      await combat.executeAttack(target);
-      return;
-    }
-
-    // Not in store, check backend status
-    const isInCombat = await combat.checkCombatStatus();
+    const isInCombat = combatStore.inCombat || await combat.checkCombatStatus();
     if (isInCombat) {
       await combat.executeAttack(target);
       return;
     }
 
-    // Not in combat, send to Gemini for narrative handling
     gameStore.appendMessage('user', `J'attaque ${target}!`);
     gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
 
     try {
-      const response = await conversationService.sendMessage(`I attack ${target}`);
-      gameStore.messages.pop();
-      gameStore.appendMessage('assistant', response.narrative);
-      processInstructions(response.instructions ?? []);
+      await sendToGemini(`I attack ${target}`, gameStore, processInstructions);
     } catch (err) {
       gameStore.messages.pop();
-      const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
-      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
     } finally {
       gameStore.sending = false;
     }
@@ -200,55 +243,24 @@ export function useGameCommands() {
     if (!Array.isArray(instructions)) return;
 
     instructions.forEach((item: unknown) => {
-      const instr = item as Record<string, unknown>;
+      const instr = item as InstructionItem;
       const type = instr.type as string | undefined;
+
       if (type === 'roll') {
-        const roll = instr as RollInstructionMessageDto;
-        gameStore.pendingInstruction = roll;
-        gameStore.appendMessage('system', `🎲 Roll needed: ${roll.dices}${roll.modifier ? ` + ${roll.modifier}` : ''}`);
+        processRollInstruction(instr as RollInstructionMessageDto, gameStore);
       } else if (type === 'xp' && typeof instr.xp === 'number') {
-        gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
-        characterStore.updateXp(instr.xp);
+        processXpInstruction(instr.xp, gameStore, characterStore);
       } else if (type === 'hp' && typeof instr.hp === 'number') {
-        const hpChange = (instr.hp) > 0 ? `+${instr.hp}` : instr.hp;
-        gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
-        characterStore.updateHp(instr.hp);
-        if (characterStore.isDead) characterStore.showDeathModal = true;
+        processHpInstruction(instr.hp, gameStore, characterStore);
       } else if (type === 'spell' && typeof instr.name === 'string') {
-        const spell = instr as unknown as { action?: string; name?: string; level?: number };
-        if (spell.action === 'learn') {
-          gameStore.appendMessage('system', `📖 Learned spell: ${spell.name} (Level ${spell.level})`);
-          characterStore.learnSpell(instr as SpellInstructionMessageDto);
-        } else if (spell.action === 'cast') {
-          gameStore.appendMessage('system', `✨ Cast spell: ${spell.name}`);
-        } else if (spell.action === 'forget') {
-          gameStore.appendMessage('system', `🚫 Forgot spell: ${spell.name}`);
-          characterStore.forgetSpell(spell.name || '');
-        }
+        processSpellInstruction(instr, gameStore, characterStore);
       } else if (type === 'inventory' && typeof instr.name === 'string') {
-        const inventory = instr as unknown as { action?: string; name?: string; quantity?: number };
-        if (inventory.action === 'add') {
-          const qty = inventory.quantity || 1;
-          gameStore.appendMessage('system', `🎒 Added to inventory: ${inventory.name} (x${qty})`);
-          characterStore.addInventoryItem({ name: inventory.name, qty });
-        } else if (inventory.action === 'remove') {
-          const qty = inventory.quantity || 1;
-          gameStore.appendMessage('system', `🗑️ Removed from inventory: ${inventory.name} (x${qty})`);
-          characterStore.removeInventoryItem(inventory.name, qty);
-        } else if (inventory.action === 'use') {
-          gameStore.appendMessage('system', `⚡ Used item: ${inventory.name}`);
-          characterStore.useInventoryItem(inventory.name || '');
-        }
+        processInventoryInstruction(instr, gameStore, characterStore);
       } else if (isCombatStartInstruction(item)) {
-        // Combat start - delegate to combat composable
         combat.initializeCombat(item);
       } else if (isCombatEndInstruction(item)) {
-        // Combat end - delegate to combat composable
-        combat.handleCombatEnd(
-          item.combat_end.victory,
-          item.combat_end.xp_gained,
-          item.combat_end.enemies_defeated,
-        );
+        const { victory, xp_gained, enemies_defeated } = item.combat_end;
+        combat.handleCombatEnd(victory, xp_gained, enemies_defeated);
       }
     });
   };

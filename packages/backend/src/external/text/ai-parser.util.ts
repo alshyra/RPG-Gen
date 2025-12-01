@@ -52,10 +52,9 @@ export const normalizeInstruction = (raw: unknown): GameInstructionDto | null =>
   return null;
 };
 
-export const parseInstructions = (text: string): GameInstructionDto[] =>
-  extractInstructions(text)
-    .map(r => normalizeInstruction(r))
-    .filter(Boolean) as GameInstructionDto[];
+export const parseInstructions = (text: string): GameInstructionDto[] => extractInstructions(text)
+  .map(r => normalizeInstruction(r))
+  .filter(Boolean) as GameInstructionDto[];
 
 export const cleanNarrativeText = (narrative: string): string => {
   const candidates = collectCandidates(narrative);

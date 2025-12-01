@@ -10,11 +10,14 @@ export class DiceThrowDto {
   @ApiProperty({ description: 'Total result (sum of rolls + modifier)' })
   total: number;
 
-  @ApiPropertyOptional({ description: 'Advantage type used for this roll', enum: [
-    'advantage',
-    'disadvantage',
-    'none',
-  ] })
+  @ApiPropertyOptional({
+    description: 'Advantage type used for this roll',
+    enum: [
+      'advantage',
+      'disadvantage',
+      'none',
+    ],
+  })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 
   @ApiPropertyOptional({ description: 'The roll that was kept (when using advantage/disadvantage)' })

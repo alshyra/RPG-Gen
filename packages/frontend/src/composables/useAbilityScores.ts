@@ -33,7 +33,7 @@ const useAbilityScores = () => {
     if (initialScores) {
       // Level-up mode: budget is the number of direct +1 increases available above initial scores
       const currentIncrease = (current - (initialScores?.[ability] ?? 8)) || 0;
-      const currentUsed = (Object.keys(initialScores) as Array<keyof typeof initialScores>)
+      const currentUsed = (Object.keys(initialScores) as (keyof typeof initialScores)[])
         .map(k => Math.max(0, (characterScores.value[k as keyof CharacterResponseDto['scores']] ?? 8) - ((initialScores as any)[k] ?? 8)))
         .reduce((s, v) => s + v, 0);
       const newIncrease = Math.max(0, newValue - (initialScores?.[ability] ?? 8));

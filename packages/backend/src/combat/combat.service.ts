@@ -13,6 +13,19 @@ import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
 import { CombatantDto } from './dto/CombatantDto.js';
 import { AttackResultDto } from './dto/AttackResultDto.js';
 import { TurnResultDto } from './dto/TurnResultDto.js';
+import { TurnResultWithInstructionsDto } from './dto/TurnResultWithInstructionsDto.js';
+
+interface WeaponMeta {
+  damage?: string;
+  class?: string;
+  properties?: string[];
+}
+
+interface EquippedItem {
+  equipped?: boolean;
+  definitionId?: string;
+  meta?: WeaponMeta;
+}
 
 /**
  * Service managing combat state and mechanics.
@@ -69,18 +82,11 @@ export class CombatService {
   }
 
   /**
-   * Initialize combat state from combat_start instruction
+   * Build base player combat stats
    */
-  async initializeCombat(
-    character: CharacterResponseDto,
-    combatStart: CombatStartRequestDto,
-    userId: string,
-  ): Promise<CombatStateDto> {
-    const characterId = character.characterId;
-
-    // Build player combat stats
-    const player: CombatPlayerDto = {
-      characterId,
+  private buildBasePlayerStats(character: CharacterResponseDto): CombatPlayerDto {
+    return {
+      characterId: character.characterId,
       name: character.name ?? 'Hero',
       hp: character.hp ?? character.hpMax ?? 10,
       hpMax: character.hpMax ?? 10,
@@ -90,54 +96,69 @@ export class CombatService {
       damageDice: this.getPlayerDamageDice(character),
       damageBonus: this.calculatePlayerDamageBonus(character),
     };
+  }
 
-    // Roll player initiative
-    const playerInitRoll = this.diceController.rollDiceExpr('1d20');
-    const dexMod = getDexModifier(character);
-    player.initiative = playerInitRoll.total + dexMod;
-
-    // If the character has an equipped weapon with meta, try to extract damage dice and finesse property
-    try {
-      const inventory = character.inventory || [];
-      // Prefer an equipped weapon item. Fall back to the first equipped item otherwise.
-      let equipped = inventory.find(i => i?.equipped && (i.meta && i.meta.type === 'weapon'));
-      if (!equipped) {
-        equipped = inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-')) || inventory.find(i => i?.equipped);
-      }
-      if (equipped) {
-        const meta = (equipped.meta || {}) as any;
-        // meta.damage can be like '1d8 piercing' in seed definitions
-        if (meta.damage && typeof meta.damage === 'string') {
-          const parts = meta.damage.trim().split(/\s+/);
-          if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
-            player.damageDice = parts[0];
-          }
-        }
-
-        // Determine which ability to use for attack/damage bonus
-        // Rules implemented:
-        // - If the weapon has the 'Finesse' property -> use DEX
-        // - If the weapon is a ranged weapon (class contains 'Ranged' or has 'Ammunition' property) -> use DEX
-        // - Otherwise -> use STR
-        const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
-        const lowerProps = properties.map(p => (p || '').toLowerCase());
-        const classStr = (meta.class || '').toString().toLowerCase();
-        const hasAmmunition = lowerProps.some(p => p.includes('ammunition'));
-        const hasFinesse = lowerProps.includes('finesse');
-        const isRangedClass = classStr.includes('ranged');
-        const usesDex = hasFinesse || hasAmmunition || isRangedClass;
-        const abilityMod = usesDex ? getDexModifier(character) : this.getStrModifier(character);
-        const proficiency = character.proficiency ?? 2;
-        player.attackBonus = abilityMod + proficiency;
-        player.damageBonus = abilityMod;
-      }
-    } catch (err) {
-      // If anything fails here, keep defaults already set
-      this.logger.warn(`Failed to derive weapon stats from inventory: ${err}`);
+  /**
+   * Find equipped weapon from inventory
+   */
+  private findEquippedWeapon(inventory: EquippedItem[]): EquippedItem | undefined {
+    let equipped = inventory.find(i => i?.equipped && i.meta && (i.meta as { type?: string }).type === 'weapon');
+    if (!equipped) {
+      equipped = inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-'));
     }
+    return equipped || inventory.find(i => i?.equipped);
+  }
 
-    // Build enemy list with initiatives
-    const enemies: CombatEnemyDto[] = combatStart.combat_start.map((enemy, idx) => {
+  /**
+   * Check if weapon uses DEX for attack/damage
+   */
+  private weaponUsesDex(meta: WeaponMeta): boolean {
+    const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
+    const lowerProps = properties.map(p => (p || '').toLowerCase());
+    const classStr = (meta.class || '').toString().toLowerCase();
+    const hasAmmunition = lowerProps.some(p => p.includes('ammunition'));
+    const hasFinesse = lowerProps.includes('finesse');
+    const isRangedClass = classStr.includes('ranged');
+    return hasFinesse || hasAmmunition || isRangedClass;
+  }
+
+  /**
+   * Extract damage dice from weapon meta
+   */
+  private extractDamageDice(meta: WeaponMeta): string | undefined {
+    if (meta.damage && typeof meta.damage === 'string') {
+      const parts = meta.damage.trim().split(/\s+/);
+      if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
+        return parts[0];
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Update player stats based on equipped weapon
+   */
+  private updatePlayerWeaponStats(player: CombatPlayerDto, character: CharacterResponseDto): void {
+    const inventory = (character.inventory || []) as EquippedItem[];
+    const equipped = this.findEquippedWeapon(inventory);
+    if (!equipped) return;
+
+    const meta: WeaponMeta = equipped.meta || {};
+    const damageDice = this.extractDamageDice(meta);
+    if (damageDice) player.damageDice = damageDice;
+
+    const usesDex = this.weaponUsesDex(meta);
+    const abilityMod = usesDex ? getDexModifier(character) : this.getStrModifier(character);
+    const proficiency = character.proficiency ?? 2;
+    player.attackBonus = abilityMod + proficiency;
+    player.damageBonus = abilityMod;
+  }
+
+  /**
+   * Build enemy list with rolled initiatives
+   */
+  private buildEnemies(combatStart: CombatStartRequestDto): CombatEnemyDto[] {
+    return combatStart.combat_start.map((enemy, idx) => {
       const initRoll = this.diceController.rollDiceExpr('1d20');
       return {
         id: `enemy-${idx + 1}`,
@@ -151,20 +172,43 @@ export class CombatService {
         damageBonus: enemy.damage_bonus ?? 1,
       };
     });
+  }
 
-    // Build turn order by initiative
+  /**
+   * Build sorted turn order from player and enemies
+   */
+  private buildTurnOrder(characterId: string, player: CombatPlayerDto, enemies: CombatEnemyDto[]): CombatantDto[] {
     const combatants: CombatantDto[] = [
       { id: characterId, name: player.name, initiative: player.initiative, isPlayer: true },
-      ...enemies.map(e => ({
-        id: e.id,
-        name: e.name,
-        initiative: e.initiative,
-        isPlayer: false,
-      })),
+      ...enemies.map(e => ({ id: e.id, name: e.name, initiative: e.initiative, isPlayer: false })),
     ];
+    return combatants.sort((a, b) => b.initiative - a.initiative);
+  }
 
-    // Sort by initiative (highest first)
-    const turnOrder = combatants.sort((a, b) => b.initiative - a.initiative);
+  /**
+   * Initialize combat state from combat_start instruction
+   */
+  async initializeCombat(
+    character: CharacterResponseDto,
+    combatStart: CombatStartRequestDto,
+    userId: string,
+  ): Promise<CombatStateDto> {
+    const characterId = character.characterId;
+    const player = this.buildBasePlayerStats(character);
+
+    // Roll player initiative
+    const playerInitRoll = this.diceController.rollDiceExpr('1d20');
+    player.initiative = playerInitRoll.total + getDexModifier(character);
+
+    // Update player stats based on equipped weapon
+    try {
+      this.updatePlayerWeaponStats(player, character);
+    } catch (err) {
+      this.logger.warn(`Failed to derive weapon stats from inventory: ${err}`);
+    }
+
+    const enemies = this.buildEnemies(combatStart);
+    const turnOrder = this.buildTurnOrder(characterId, player, enemies);
 
     const state: CombatStateDto = {
       characterId,
@@ -176,7 +220,6 @@ export class CombatService {
       roundNumber: 1,
     };
 
-    // Persist to database (upsert to handle reconnection scenarios)
     await this.combatSessionModel.findOneAndUpdate(
       { characterId },
       { userId, ...state },
@@ -184,7 +227,6 @@ export class CombatService {
     );
 
     this.logger.log(`Combat initialized for ${characterId} with ${enemies.length} enemies`);
-
     return state;
   }
 
@@ -313,9 +355,7 @@ export class CombatService {
 
     // Process each combatant in initiative order starting from currentTurnIndex
     // Build ordered combatant list starting from currentTurnIndex
-    const orderedCombatants = Array.from({ length: totalCombatants }).map((_, offset) =>
-      turnOrder[(state.currentTurnIndex + offset) % totalCombatants],
-    );
+    const orderedCombatants = Array.from({ length: totalCombatants }).map((_, offset) => turnOrder[(state.currentTurnIndex + offset) % totalCombatants]);
 
     let finalResult: TurnResultDto | null = null;
 
@@ -464,7 +504,8 @@ export class CombatService {
    * Retrieve the current combat state from the database
    */
   async getCombatState(characterId: string): Promise<CombatStateDto | null> {
-    const doc = await this.combatSessionModel.findOne({ characterId }).lean().exec();
+    const doc = await this.combatSessionModel.findOne({ characterId }).lean()
+      .exec();
     if (!doc) return null;
 
     const state: CombatStateDto = {
@@ -580,67 +621,36 @@ export class CombatService {
   }
 
   /**
-   * Apply damage reported by client to a named enemy and persist state.
+   * Build victory result when all enemies are defeated
    */
-  async applyDamageToEnemy(characterId: string, targetName: string, damage: number) {
-    const state = await this.getCombatState(characterId);
-    if (!state || !state.inCombat) return null;
+  private async buildVictoryResult(state: CombatStateDto, characterId: string, enemy: CombatEnemyDto, damageDealt: number): Promise<TurnResultWithInstructionsDto> {
+    const end = await this.endCombat(characterId);
+    return {
+      turnNumber: state.currentTurnIndex,
+      roundNumber: state.roundNumber,
+      playerAttacks: [],
+      enemyAttacks: [],
+      combatEnded: true,
+      victory: true,
+      defeat: false,
+      remainingEnemies: [],
+      playerHp: state.player.hp,
+      playerHpMax: state.player.hpMax,
+      narrative: `Vous infligez ${damageDealt} dégâts et terrassez ${enemy.name}. Victoire!`,
+      instructions: end ? [{ xp: end.xpGained }] : [],
+    };
+  }
 
-    const enemy = state.enemies.find(e => e.name.toLowerCase() === targetName.toLowerCase());
-    if (!enemy) return null;
-
-    const before = enemy.hp;
-    enemy.hp = Math.max(0, enemy.hp - Math.max(0, Math.floor(damage)));
-
-    // Persist changes
-    await this.saveCombatState(state);
-
-    // Check for victory
-    const alive = state.enemies.filter(e => e.hp > 0);
-    if (alive.length === 0) {
-      // End combat and compute XP
-      const end = await this.endCombat(characterId);
-      return {
-        turnNumber: state.currentTurnIndex,
-        roundNumber: state.roundNumber,
-        playerAttacks: [],
-        enemyAttacks: [],
-        combatEnded: true,
-        victory: true,
-        defeat: false,
-        remainingEnemies: [],
-        playerHp: state.player.hp,
-        playerHpMax: state.player.hpMax,
-        narrative: `Vous infligez ${before - enemy.hp} dégâts et terrassez ${enemy.name}. Victoire!`,
-        instructions: end ? [{ xp: end.xpGained }] : [],
-      };
-    }
-
-    // After applying player damage, process enemy attacks for the rest of the turn
-    const playerAttacks: AttackResultDto[] = [];
-    const enemyAttacks: AttackResultDto[] = [];
-    const narrativeParts: string[] = [];
-
-    narrativeParts.push(`Vous infligez ${before - enemy.hp} dégâts à ${enemy.name} (PV restants: ${enemy.hp}).`);
-
-    // Process enemies' attacks
-    const enemyProcessingResult = this.processEnemyAttacks(state, alive, enemyAttacks, narrativeParts, playerAttacks);
-    if (enemyProcessingResult) {
-      // Player defeated during enemy processing or combat ended — persist updates and return
-      await this.saveCombatState(state);
-      return enemyProcessingResult;
-    }
-
-    // Advance current turn index to next combatant and increment round
-    const totalCombatants = state.turnOrder.length;
-    state.currentTurnIndex = (state.currentTurnIndex + 1) % totalCombatants;
-    state.roundNumber++;
-
-    // Persist updated state
-    await this.saveCombatState(state);
-
-    // Build response
-    const turnResult: TurnResultDto = {
+  /**
+   * Build turn result after processing damage and enemy attacks
+   */
+  private buildDamageTurnResult(
+    state: CombatStateDto,
+    playerAttacks: AttackResultDto[],
+    enemyAttacks: AttackResultDto[],
+    narrativeParts: string[],
+  ): TurnResultDto {
+    return {
       turnNumber: state.currentTurnIndex,
       roundNumber: state.roundNumber,
       playerAttacks,
@@ -653,8 +663,61 @@ export class CombatService {
       playerHpMax: state.player.hpMax,
       narrative: narrativeParts.join('\n\n'),
     };
+  }
 
-    return turnResult;
+  /**
+   * Find enemy and apply damage, returning damage dealt
+   */
+  private applyDamageToTargetEnemy(state: CombatStateDto, targetName: string, damage: number): { enemy: CombatEnemyDto; damageDealt: number } | null {
+    const enemy = state.enemies.find(e => e.name.toLowerCase() === targetName.toLowerCase());
+    if (!enemy) return null;
+    const before = enemy.hp;
+    enemy.hp = Math.max(0, enemy.hp - Math.max(0, Math.floor(damage)));
+    return { enemy, damageDealt: before - enemy.hp };
+  }
+
+  /**
+   * Process enemy attacks and advance turn if needed
+   */
+  private async processDamageEnemyPhase(
+    state: CombatStateDto,
+    alive: CombatEnemyDto[],
+    narrativeParts: string[],
+  ): Promise<TurnResultDto | null> {
+    const playerAttacks: AttackResultDto[] = [];
+    const enemyAttacks: AttackResultDto[] = [];
+
+    const enemyResult = this.processEnemyAttacks(state, alive, enemyAttacks, narrativeParts, playerAttacks);
+    if (enemyResult) {
+      await this.saveCombatState(state);
+      return enemyResult;
+    }
+
+    state.currentTurnIndex = (state.currentTurnIndex + 1) % state.turnOrder.length;
+    state.roundNumber++;
+    await this.saveCombatState(state);
+
+    return this.buildDamageTurnResult(state, playerAttacks, enemyAttacks, narrativeParts);
+  }
+
+  /**
+   * Apply damage reported by client to a named enemy and persist state.
+   */
+  async applyDamageToEnemy(characterId: string, targetName: string, damage: number): Promise<TurnResultWithInstructionsDto | TurnResultDto | null> {
+    const state = await this.getCombatState(characterId);
+    if (!state?.inCombat) return null;
+
+    const result = this.applyDamageToTargetEnemy(state, targetName, damage);
+    if (!result) return null;
+    await this.saveCombatState(state);
+
+    const alive = state.enemies.filter(e => e.hp > 0);
+    if (alive.length === 0) {
+      return this.buildVictoryResult(state, characterId, result.enemy, result.damageDealt);
+    }
+
+    const narrativeParts = [`Vous infligez ${result.damageDealt} dégâts à ${result.enemy.name} (PV restants: ${result.enemy.hp}).`];
+    return this.processDamageEnemyPhase(state, alive, narrativeParts);
   }
 
   /**

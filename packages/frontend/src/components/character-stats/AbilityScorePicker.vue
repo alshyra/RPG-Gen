@@ -51,7 +51,7 @@ const { formatMod, applyPointBuyChange } = useAbilityScores();
 
 const onUpdateAbilityValue = async (ability: typeof ABILITIES[number], val: number) => {
   const value = (val ?? (currentCharacter?.value?.scores?.[ability] ?? 8));
-  const result = applyPointBuyChange(ability as typeof ABILITIES[number], value);
+  const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
   await characterStore.updateCharacter(currentCharacter.value.characterId, { scores: currentCharacter.value.scores });
 };

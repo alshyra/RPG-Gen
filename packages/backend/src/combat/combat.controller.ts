@@ -161,17 +161,19 @@ export class CombatController {
     }
 
     // Hit: instruct client to roll damage. Persist partial attack info and set expectedDto to DiceThrowDto
-    const instructions: Array<Record<string, unknown>> = [{
-      type: 'roll',
-      dices: state.player.damageDice || '1d4',
-      modifier: state.player.damageBonus || 0,
-      meta: {
-        action: 'damage',
-        target: targetEnemy.name,
-        damageBonus: state.player.damageBonus || 0,
-      },
-      description: `Damage to ${targetEnemy.name}`,
-    } as Record<string, unknown>];
+    const instructions: Record<string, unknown>[] = [
+      {
+        type: 'roll',
+        dices: state.player.damageDice || '1d4',
+        modifier: state.player.damageBonus || 0,
+        meta: {
+          action: 'damage',
+          target: targetEnemy.name,
+          damageBonus: state.player.damageBonus || 0,
+        },
+        description: `Damage to ${targetEnemy.name}`,
+      } as Record<string, unknown>,
+    ];
 
     const response: TurnResultWithInstructionsDto = {
       turnNumber: state.currentTurnIndex,
@@ -297,17 +299,19 @@ export class CombatController {
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: `Attaque touchée contre ${targetEnemy.name} (${attackTotal} ≥ ${targetEnemy.ac})${critText}. Lancez les dégâts.`,
-      instructions: [{
-        type: 'roll',
-        dices: state.player.damageDice || '1d4',
-        modifier: state.player.damageBonus || 0,
-        meta: {
-          action: 'damage',
-          target: targetEnemy.name,
-          damageBonus: state.player.damageBonus || 0,
+      instructions: [
+        {
+          type: 'roll',
+          dices: state.player.damageDice || '1d4',
+          modifier: state.player.damageBonus || 0,
+          meta: {
+            action: 'damage',
+            target: targetEnemy.name,
+            damageBonus: state.player.damageBonus || 0,
+          },
+          description: `Damage to ${targetEnemy.name}`,
         },
-        description: `Damage to ${targetEnemy.name}`,
-      }],
+      ],
     };
   }
 
@@ -401,16 +405,18 @@ export class CombatController {
     return {
       success: true,
       message: 'Vous avez fui le combat.',
-      instructions: [{
-        combat_end: {
-          victory: false,
-          xp_gained: 0,
-          player_hp: character.hp!,
-          enemies_defeated: [],
-          fled: true,
-          narrative: 'Vous avez fui le combat.',
+      instructions: [
+        {
+          combat_end: {
+            victory: false,
+            xp_gained: 0,
+            player_hp: character.hp!,
+            enemies_defeated: [],
+            fled: true,
+            narrative: 'Vous avez fui le combat.',
+          },
         },
-      }],
+      ],
     };
   }
 }

@@ -2,8 +2,92 @@ import { useGameStore } from '../stores/gameStore';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
-import type { CombatStartInstructionMessageDto } from '@rpg-gen/shared';
+import type { CombatStartInstructionMessageDto, TurnResultWithInstructionsDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
+
+type GameStore = ReturnType<typeof useGameStore>;
+type CharacterStore = ReturnType<typeof useCharacterStore>;
+type CombatStore = ReturnType<typeof useCombatStore>;
+
+interface InstructionItem {
+  type?: string;
+  dices?: string;
+  xp?: number;
+  hp?: number;
+  meta?: { attackBonus?: number; target?: string; targetAc?: number };
+}
+
+// ----- Instruction Processors -----
+const processRollInstruction = (instr: InstructionItem, gameStore: GameStore, combatStore: CombatStore): void => {
+  const { dices = '1d20', meta } = instr;
+  const rollInstr = {
+    type: 'roll' as const,
+    dices,
+    advantage: 'none' as const,
+    description: meta?.target ? `Attack vs ${meta.target} (AC ${meta.targetAc ?? '??'})` : undefined,
+  };
+
+  combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
+  gameStore.pendingInstruction = rollInstr;
+  const bonus = meta?.attackBonus ? ` +${meta.attackBonus}` : '';
+  const target = meta?.target ? ` vs ${meta.target} (AC ${meta.targetAc})` : '';
+  gameStore.appendMessage('system', `🎲 Roll needed: ${dices}${bonus}${target}`);
+};
+
+const processXpInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+  if (typeof instr.xp !== 'number') return;
+  gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
+  characterStore.updateXp(instr.xp);
+};
+
+const processHpInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+  if (typeof instr.hp !== 'number') return;
+  const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
+  gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
+  characterStore.updateHp(instr.hp);
+  if (characterStore.isDead) characterStore.showDeathModal = true;
+};
+
+const processAttackInstructions = (
+  instructions: unknown[],
+  gameStore: GameStore,
+  characterStore: CharacterStore,
+  combatStore: CombatStore,
+): void => {
+  if (!Array.isArray(instructions)) return;
+  instructions.forEach((item: unknown) => {
+    const instr = item as InstructionItem;
+    if (instr.type === 'roll') processRollInstruction(instr, gameStore, combatStore);
+    else if (typeof instr.xp === 'number') processXpInstruction(instr, gameStore, characterStore);
+    else if (typeof instr.hp === 'number') processHpInstruction(instr, gameStore, characterStore);
+  });
+};
+
+// ----- Attack Helpers -----
+const performAttack = async (characterId: string, target: string, token: string | null): Promise<TurnResultWithInstructionsDto> => {
+  if (token) {
+    return combatService.attackWithToken(characterId, token, target);
+  }
+  console.warn('[useCombat] No action token available, falling back to legacy attack endpoint');
+  return combatService.attack(characterId, target);
+};
+
+const handleAttackAnimations = (attackResponse: TurnResultWithInstructionsDto, combatStore: CombatStore): void => {
+  const playerAttacks = attackResponse.playerAttacks ?? [];
+  const enemyAttacks = attackResponse.enemyAttacks ?? [];
+  if (playerAttacks.length > 0 || enemyAttacks.length > 0) {
+    combatStore.startAttackAnimation(playerAttacks, enemyAttacks);
+  }
+};
+
+const handleCombatEndFromResponse = (attackResponse: TurnResultWithInstructionsDto, gameStore: GameStore, combatStore: CombatStore): void => {
+  if (attackResponse.victory) {
+    gameStore.appendMessage('system', '🏆 Combat terminé - Victoire!');
+  } else if (attackResponse.defeat) {
+    gameStore.appendMessage('system', '💀 Combat terminé - Défaite...');
+  }
+  combatStore.clearCombat();
+};
 
 /**
  * Composable for combat-specific actions and state management
@@ -14,11 +98,17 @@ export function useCombat() {
   const combatStore = useCombatStore();
   const { currentCharacter } = storeToRefs(characterStore);
 
+  const displayCombatStartSuccess = (combatState: { narrative?: string; turnOrder: { name: string; initiative: number }[] }): void => {
+    if (combatState.narrative) gameStore.appendMessage('system', combatState.narrative);
+    const initiativeOrder = combatState.turnOrder.map(c => `${c.name} (${c.initiative})`).join(' → ');
+    gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
+    gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
+  };
+
   /**
    * Initialize combat from a combat_start instruction
    */
   const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
-    // show as a normal log so developers see it after reload without changing console filters
     console.log('[useCombat] initializeCombat instruction', instruction);
     if (!currentCharacter.value) return;
 
@@ -26,23 +116,31 @@ export function useCombat() {
     gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
-      // Ensure we send only the expected request shape to the backend
       const payload = { combat_start: instruction.combat_start };
       const combatState = await combatStore.startCombat(currentCharacter.value.characterId, payload);
-
-      if (combatState.narrative) {
-        gameStore.appendMessage('system', combatState.narrative);
-      }
-
-      // Display initiative order
-      const initiativeOrder = combatState.turnOrder
-        .map(c => `${c.name} (${c.initiative})`)
-        .join(' → ');
-      gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
-      gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
+      displayCombatStartSuccess(combatState);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
       gameStore.appendMessage('system', `❌ Erreur de combat: ${errorMsg}`);
+    }
+  };
+
+  const handleAttackSuccess = async (
+    attackResponse: TurnResultWithInstructionsDto,
+    characterId: string,
+  ): Promise<void> => {
+    combatStore.updateFromTurnResult(attackResponse);
+    handleAttackAnimations(attackResponse, combatStore);
+    if (currentCharacter.value) currentCharacter.value.hp = attackResponse.playerHp;
+    gameStore.appendMessage('assistant', attackResponse.narrative);
+
+    if (attackResponse.instructions) {
+      processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
+    }
+    if (attackResponse.combatEnded) {
+      handleCombatEndFromResponse(attackResponse, gameStore, combatStore);
+    } else {
+      await combatStore.fetchStatus(characterId);
     }
   };
 
@@ -55,101 +153,15 @@ export function useCombat() {
     gameStore.sending = true;
 
     try {
-      // Use the stored action token for idempotent attack
-      const token = combatStore.actionToken;
-      console.log('[useCombat] executeAttack ->', { characterId: currentCharacter.value.characterId, target, actionToken: token });
-
-      let attackResponse;
-      if (token) {
-        // Use tokenized endpoint for idempotency
-        attackResponse = await combatService.attackWithToken(currentCharacter.value.characterId, token, target);
-      } else {
-        // Fallback to legacy endpoint if no token available (should not happen in normal flow)
-        console.warn('[useCombat] No action token available, falling back to legacy attack endpoint');
-        attackResponse = await combatService.attack(currentCharacter.value.characterId, target);
-      }
-
-      // Update combat store with results
-      combatStore.updateFromTurnResult(attackResponse);
-
-      // Start the attack animation sequence to show results in modals
-      const playerAttacks = attackResponse.playerAttacks || [];
-      const enemyAttacks = attackResponse.enemyAttacks || [];
-      if (playerAttacks.length > 0 || enemyAttacks.length > 0) {
-        combatStore.startAttackAnimation(playerAttacks, enemyAttacks);
-      }
-
-      // Display combat narrative (after animations complete)
-      currentCharacter.value.hp = attackResponse.playerHp;
-      // Display combat narrative
-      gameStore.appendMessage('assistant', attackResponse.narrative);
-
-      // Process any instructions (HP changes, XP, roll requests, etc.)
-      if (attackResponse.instructions) {
-        processAttackInstructions(attackResponse.instructions);
-      }
-
-      // Handle combat end
-      if (attackResponse.combatEnded) {
-        if (attackResponse.victory) {
-          gameStore.appendMessage('system', '🏆 Combat terminé - Victoire!');
-        } else if (attackResponse.defeat) {
-          gameStore.appendMessage('system', '💀 Combat terminé - Défaite...');
-        }
-        combatStore.clearCombat();
-      } else {
-        // Fetch fresh status to get new action token for next turn
-        await combatStore.fetchStatus(currentCharacter.value.characterId);
-      }
+      const characterId = currentCharacter.value.characterId;
+      console.log('[useCombat] executeAttack ->', { characterId, target, actionToken: combatStore.actionToken });
+      const attackResponse = await performAttack(characterId, target, combatStore.actionToken);
+      await handleAttackSuccess(attackResponse, characterId);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to attack';
-      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
+      gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
     } finally {
       gameStore.sending = false;
     }
-  };
-
-  /**
-   * Process instructions from attack response
-   */
-  const processAttackInstructions = (instructions: unknown[]): void => {
-    if (!Array.isArray(instructions)) return;
-    instructions.forEach((item: unknown) => {
-      const instr = item as Record<string, unknown>;
-      const type = instr.type as string | undefined;
-
-      if (type === 'roll') {
-        // Map server roll instruction into the app's RollInstructionMessageDto shape
-        const dices = instr.dices as string | undefined;
-        const meta = instr.meta as Record<string, unknown> | undefined;
-        const attackBonus = meta?.attackBonus as number | undefined;
-        const target = meta?.target as string | undefined;
-        const targetAc = meta?.targetAc as number | undefined;
-
-        // Create a roll instruction with proper types (modifier is mistyped in generated types)
-        const rollInstr = {
-          type: 'roll' as const,
-          dices: dices || '1d20',
-          advantage: 'none' as const,
-          description: target ? `Attack vs ${target} (AC ${targetAc ?? '??'})` : undefined,
-        };
-
-        // Update phase to indicate we're awaiting a damage roll
-        combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
-
-        // Set pending instruction so Dice UI appears
-        gameStore.pendingInstruction = rollInstr;
-        gameStore.appendMessage('system', `🎲 Roll needed: ${rollInstr.dices}${attackBonus ? ` +${attackBonus}` : ''} ${target ? ` vs ${target} (AC ${targetAc})` : ''}`);
-      } else if (typeof instr.xp === 'number') {
-        gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
-        characterStore.updateXp(instr.xp);
-      } else if (typeof instr.hp === 'number') {
-        const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-        gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
-        characterStore.updateHp(instr.hp);
-        if (characterStore.isDead) characterStore.showDeathModal = true;
-      }
-    });
   };
 
   /**

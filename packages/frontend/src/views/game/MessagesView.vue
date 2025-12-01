@@ -46,8 +46,7 @@ import { ChatMessageDto } from '@rpg-gen/shared';
 const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
-const isLoadingMessage = (message: ChatMessageDto): boolean =>
-  message.role === 'system' && message.narrative === '...thinking...';
+const isLoadingMessage = (message: ChatMessageDto): boolean => message.role === 'system' && message.narrative === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(

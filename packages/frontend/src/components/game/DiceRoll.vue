@@ -16,9 +16,7 @@ import UiButton from '../ui/UiButton.vue';
 import { ref } from 'vue';
 import type { RollInstructionMessageDto } from '@rpg-gen/shared';
 
-const emit = defineEmits<{
-  (e: 'send'): void;
-}>();
+const emit = defineEmits<(e: 'send') => void>();
 
 const props = defineProps<{ pendingInstruction?: RollInstructionMessageDto | null; expr: string }>();
 

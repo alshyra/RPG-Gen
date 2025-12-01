@@ -42,12 +42,10 @@ import RacePicker from '../RacePicker.vue';
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const genderOptions = computed(() =>
-  GENDERS.map(g => ({
-    value: g,
-    label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
-  })),
-);
+const genderOptions = computed(() => GENDERS.map(g => ({
+  value: g,
+  label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
+})));
 
 const onUpdateName = useDebounceFn(async (name: string) => {
   if (!currentCharacter.value) return;

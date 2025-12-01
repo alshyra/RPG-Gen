@@ -13,10 +13,13 @@ export class RollInstructionMessageDto {
   @ApiPropertyOptional({ description: 'Roll description' })
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Advantage type', enum: [
-    'advantage',
-    'disadvantage',
-    'none',
-  ] })
+  @ApiPropertyOptional({
+    description: 'Advantage type',
+    enum: [
+      'advantage',
+      'disadvantage',
+      'none',
+    ],
+  })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 }

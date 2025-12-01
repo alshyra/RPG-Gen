@@ -1,5 +1,5 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
-export * from './api-types'
+export * from './api-types';
 
 // Auto-generated type aliases from OpenAPI components.schemas
 export type AbilityScoresResponseDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];

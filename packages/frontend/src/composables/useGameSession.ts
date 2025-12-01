@@ -63,18 +63,17 @@ export const useGameSession = () => {
     }
   };
 
-  const processHistoryMessages = (history: any[]): any[] =>
-    history.map((msg, i) => {
-      const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
-      // Be defensive: normalize instructions to array (some historical entries may store a single object)
-      const instrs = Array.isArray((msg).instructions)
-        ? (msg).instructions
-        : (msg).instructions
-            ? [(msg).instructions]
-            : [];
-      instrs.forEach((instr: any) => processInstructionInMessage(instr, i === history.length - 1));
-      return { role, narrative: msg.narrative };
-    });
+  const processHistoryMessages = (history: any[]): any[] => history.map((msg, i) => {
+    const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
+    // Be defensive: normalize instructions to array (some historical entries may store a single object)
+    const instrs = Array.isArray((msg).instructions)
+      ? (msg).instructions
+      : (msg).instructions
+          ? [(msg).instructions]
+          : [];
+    instrs.forEach((instr: any) => processInstructionInMessage(instr, i === history.length - 1));
+    return { role, narrative: msg.narrative };
+  });
 
   const getCharIdFromRoute = (): string | undefined => {
     const route = useRoute();

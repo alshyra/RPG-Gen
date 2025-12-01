@@ -20,11 +20,14 @@ import {
   CombatEndInstructionMessageDto,
 )
 export class ChatMessageDto {
-  @ApiProperty({ description: 'Message role', enum: [
-    'user',
-    'assistant',
-    'system',
-  ] })
+  @ApiProperty({
+    description: 'Message role',
+    enum: [
+      'user',
+      'assistant',
+      'system',
+    ],
+  })
   role: 'user' | 'assistant' | 'system';
 
   @ApiProperty({ description: 'Narrative text (for assistant messages)' })

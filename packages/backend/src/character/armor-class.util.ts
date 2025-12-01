@@ -2,108 +2,90 @@ import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { ArmorMeta } from './dto/InventoryItemMeta.js';
 import { ItemResponseDto } from './dto/ItemResponseDto.js';
 
-/**
- * Get Dexterity modifier from ability scores
- */
+interface ParsedAc {
+  baseAc: number;
+  addDex: boolean;
+  maxDex: number | null;
+}
+
+interface EquippedGear {
+  armor?: ItemResponseDto<ArmorMeta>;
+  shield?: ItemResponseDto<ArmorMeta>;
+}
+
 export const getDexModifier = (character: CharacterResponseDto): number => {
   const dexScore = character.scores?.Dex ?? 10;
   return Math.floor((dexScore - 10) / 2);
 };
 
-/**
- * Parse the AC string from armor definition meta
- * @returns { baseAc: number, addDex: boolean, maxDex: number | null }
- */
-export const parseArmorAc = (acString: string): { baseAc: number; addDex: boolean; maxDex: number | null } => {
-  const trimmed = acString.trim();
-
-  // Shield case: "+2"
+const parseShieldAc = (trimmed: string): ParsedAc | null => {
   if (trimmed.startsWith('+')) {
     return { baseAc: parseInt(trimmed, 10), addDex: false, maxDex: null };
   }
+  return null;
+};
 
-  // Heavy armor case: just a number like "14", "16", "17", "18"
+const parseHeavyArmorAc = (trimmed: string): ParsedAc | null => {
   if (/^\d+$/.test(trimmed)) {
     return { baseAc: parseInt(trimmed, 10), addDex: false, maxDex: null };
   }
+  return null;
+};
 
-  // Light armor case: "11 + Dex modifier" or "12 + Dex modifier"
-  const lightArmorMatch = trimmed.match(/^(\d+)\s*\+\s*Dex modifier$/i);
-  if (lightArmorMatch) {
-    return { baseAc: parseInt(lightArmorMatch[1], 10), addDex: true, maxDex: null };
+const parseLightArmorAc = (trimmed: string): ParsedAc | null => {
+  const match = trimmed.match(/^(\d+)\s*\+\s*Dex modifier$/i);
+  if (match) {
+    return { baseAc: parseInt(match[1], 10), addDex: true, maxDex: null };
   }
+  return null;
+};
 
-  // Medium armor case: "12 + Dex modifier (max 2)" or similar
-  const mediumArmorMatch = trimmed.match(/^(\d+)\s*\+\s*Dex modifier\s*\(max\s*(\d+)\)$/i);
-  if (mediumArmorMatch) {
-    return { baseAc: parseInt(mediumArmorMatch[1], 10), addDex: true, maxDex: parseInt(mediumArmorMatch[2], 10) };
+const parseMediumArmorAc = (trimmed: string): ParsedAc | null => {
+  const match = trimmed.match(/^(\d+)\s*\+\s*Dex modifier\s*\(max\s*(\d+)\)$/i);
+  if (match) {
+    return { baseAc: parseInt(match[1], 10), addDex: true, maxDex: parseInt(match[2], 10) };
   }
+  return null;
+};
 
-  // Default: couldn't parse, return 0 base with no dex
-  return { baseAc: 0, addDex: false, maxDex: null };
+export const parseArmorAc = (acString: string): ParsedAc => {
+  const trimmed = acString.trim();
+  return parseShieldAc(trimmed)
+    ?? parseHeavyArmorAc(trimmed)
+    ?? parseLightArmorAc(trimmed)
+    ?? parseMediumArmorAc(trimmed)
+    ?? { baseAc: 0, addDex: false, maxDex: null };
 };
 
 const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => item.meta?.type === 'armor';
 
-/**
- * Calculate Armor Class for a character based on equipped armor and shield
- *
- * D&D 5e AC Rules:
- * - Unarmored: 10 + DEX modifier
- * - Light Armor: Armor AC + full DEX modifier
- * - Medium Armor: Armor AC + DEX modifier (max 2)
- * - Heavy Armor: Armor AC (no DEX modifier)
- * - Shield: +2 AC bonus
- */
+const findEquippedGear = (inventory: ItemResponseDto[]): EquippedGear => {
+  const equippedItems = inventory.filter(item => item.equipped && isItemArmor(item)) as ItemResponseDto<ArmorMeta>[];
+  const shield = equippedItems.find(item => item.meta?.class === 'Shield');
+  const armor = equippedItems.find(item => item.meta?.class !== 'Shield');
+  return { armor, shield };
+};
+
+const computeArmorBonus = (armor: ItemResponseDto<ArmorMeta> | undefined, dexMod: number): { baseAc: number; dexBonus: number } => {
+  if (!armor?.meta?.ac) {
+    return { baseAc: 10, dexBonus: dexMod };
+  }
+  const parsed = parseArmorAc(String(armor.meta.ac));
+  if (!parsed.addDex) {
+    return { baseAc: parsed.baseAc, dexBonus: 0 };
+  }
+  const dexBonus = parsed.maxDex !== null ? Math.min(dexMod, parsed.maxDex) : dexMod;
+  return { baseAc: parsed.baseAc, dexBonus };
+};
+
+const computeShieldBonus = (shield: ItemResponseDto<ArmorMeta> | undefined): number => {
+  if (!shield?.meta?.ac) return 0;
+  return parseArmorAc(String(shield.meta.ac)).baseAc;
+};
+
 export const calculateArmorClass = (character: CharacterResponseDto): number => {
   const dexMod = getDexModifier(character);
-  const inventory = character.inventory ?? [];
-
-  // Find equipped armor and shield
-  const equippedItems = inventory.filter(item => item.equipped);
-
-  let equippedArmor: ItemResponseDto<ArmorMeta> | undefined;
-  let equippedShield: ItemResponseDto<ArmorMeta> | undefined;
-
-  for (const item of equippedItems) {
-    if (isItemArmor(item)) {
-      const itemClass = item.meta?.class;
-      if (itemClass === 'Shield') {
-        equippedShield = item;
-      } else if (!equippedArmor) {
-        // Take first non-shield armor
-        equippedArmor = item;
-      }
-    }
-  }
-
-  let baseAc = 10; // Default unarmored AC
-  let dexBonus = dexMod; // Full DEX bonus by default
-
-  if (equippedArmor && equippedArmor.meta?.type == 'armor' && equippedArmor.meta?.ac) {
-    const parsed = parseArmorAc(String(equippedArmor.meta.ac));
-
-    if (parsed.addDex) {
-      // Light or Medium armor
-      baseAc = parsed.baseAc;
-      if (parsed.maxDex !== null) {
-        // Medium armor caps DEX bonus
-        dexBonus = Math.min(dexMod, parsed.maxDex);
-      }
-    } else {
-      // Heavy armor or invalid: use base AC, no DEX bonus
-      baseAc = parsed.baseAc;
-      dexBonus = 0;
-    }
-  }
-
-  let totalAc = baseAc + dexBonus;
-
-  // Add shield bonus
-  if (equippedShield && equippedShield.meta?.ac) {
-    const shieldParsed = parseArmorAc(String(equippedShield.meta.ac));
-    totalAc += shieldParsed.baseAc; // Shield AC is typically "+2"
-  }
-
-  return totalAc;
+  const { armor, shield } = findEquippedGear(character.inventory ?? []);
+  const { baseAc, dexBonus } = computeArmorBonus(armor, dexMod);
+  return baseAc + dexBonus + computeShieldBonus(shield);
 };

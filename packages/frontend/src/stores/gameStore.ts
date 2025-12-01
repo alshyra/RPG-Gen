@@ -14,7 +14,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 type DisplayRole = 'user' | 'assistant' | 'system';
-type RollModalData = {
+interface RollModalData {
   diceNotation?: string;
   rolls?: number[];
   bonus?: number | null;
@@ -28,7 +28,7 @@ type RollModalData = {
   target?: string;
   targetAc?: number | null;
   show?: boolean;
-};
+}
 type StoredRole = 'user' | 'assistant' | 'system';
 
 // Map display roles to stored roles
@@ -39,12 +39,12 @@ const toStoredRole = (role: DisplayRole): StoredRole => {
 };
 
 export const useGameStore = defineStore('gameStore', () => {
-  const rolls = ref<Array<DiceThrowDto>>([]);
+  const rolls = ref<DiceThrowDto[]>([]);
   const latestRoll = ref<DiceThrowDto | null>(null);
   const rollData = ref<RollModalData>({});
 
   // Minimal game session/message/pending instruction state used across app
-  const messages = ref<Array<ChatMessageDto & { timestamp?: number }>>([]);
+  const messages = ref<(ChatMessageDto & { timestamp?: number })[]>([]);
   const pendingInstruction = ref<
     | RollInstructionMessageDto
     | HpInstructionMessageDto
@@ -73,7 +73,7 @@ export const useGameStore = defineStore('gameStore', () => {
   // Accepts display roles (GM, Player, System, Error) and maps them to stored roles
   const appendMessage = (role: DisplayRole, narrative: string) => messages.value.push({ role: toStoredRole(role), narrative, timestamp: Date.now() });
 
-  const updateMessages = (list: Array<{ role: DisplayRole; narrative: string }>) => {
+  const updateMessages = (list: { role: DisplayRole; narrative: string }[]) => {
     messages.value = list.map(m => ({ role: toStoredRole(m.role), narrative: m.narrative, timestamp: Date.now() }));
   };
 

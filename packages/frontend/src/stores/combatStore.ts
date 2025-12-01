@@ -26,7 +26,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isCurrentAttackPlayerAttack = ref(true);
 
   // Queue for displaying attack results one by one (for enemy animations)
-  const attackResultQueue = ref<Array<{ result: AttackResultDto; isPlayerAttack: boolean }>>([]);
+  const attackResultQueue = ref<{ result: AttackResultDto; isPlayerAttack: boolean }[]>([]);
   const isAnimatingAttacks = ref(false);
 
   // Computed properties

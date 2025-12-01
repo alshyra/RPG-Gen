@@ -16,22 +16,16 @@ export const ABILITIES = [
 ] as const;
 export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 } as const;
 
-interface RaceModifiers {
-  [key: string]: number;
-}
+type RaceModifiers = Record<string, number>;
 
-interface HitDieMap {
-  [className: string]: number;
-}
+type HitDieMap = Record<string, number>;
 
 interface Skill {
   name: string;
   ability: typeof ABILITIES[number];
 }
 
-interface ClassProficiencies {
-  [className: string]: string[]; // skill names
-}
+type ClassProficiencies = Record<string, string[]>;
 
 // D&D 5e Skills mapped to abilities
 const SKILLS: Skill[] = [
@@ -210,7 +204,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
 };
 
 // How many skills can be chosen per class
-const CLASS_SKILL_CHOICES: { [className: string]: number } = {
+const CLASS_SKILL_CHOICES: Record<string, number> = {
   Barbarian: 2,
   Bard: 3,
   Cleric: 2,
@@ -278,7 +272,7 @@ export class DnDRulesService {
   /**
    * Get proficiency bonus for a given level or total XP
    */
-  static getProficiencyBonus(levelOrXp: number, isXp: boolean = false): number {
+  static getProficiencyBonus(levelOrXp: number, isXp = false): number {
     const xp = isXp ? levelOrXp : undefined;
     if (xp !== undefined) {
       const level = getCurrentLevel(xp);

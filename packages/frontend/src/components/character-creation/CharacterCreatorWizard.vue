@@ -119,7 +119,14 @@ const route = useRoute();
 const isLoading = ref(false);
 const loadingTitle = ref('');
 const loadingSubtitle = ref('');
-const steps = ['Informations', 'Classe et Capacités', 'Compétences', 'Sorts', 'Inventaire', 'Avatar'];
+const steps = [
+  'Informations',
+  'Classe et Capacités',
+  'Compétences',
+  'Sorts',
+  'Inventaire',
+  'Avatar',
+];
 
 const characterStore = useCharacterStore();
 const { updateCharacter } = characterStore;
@@ -185,9 +192,9 @@ const saveFinalCharacter = async () => {
     state: 'created',
     hpMax,
     hp: hpMax,
-    skills: currentCharacter.value!.skills,
-    spells: currentCharacter.value!.spells,
-    ...(currentCharacter.value!.inventory ? { inventory: currentCharacter.value!.inventory } : {}),
+    skills: currentCharacter.value.skills,
+    spells: currentCharacter.value.spells,
+    ...(currentCharacter.value.inventory ? { inventory: currentCharacter.value.inventory } : {}),
   });
 };
 

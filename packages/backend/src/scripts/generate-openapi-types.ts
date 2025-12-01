@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 
 const OPENAPI_URL = process.env.OPENAPI_URL || 'http://localhost:3001/docs-json';
 
-type OpenApiDocument = { components?: { schemas?: Record<string, unknown> } };
+interface OpenApiDocument { components?: { schemas?: Record<string, unknown> } }
 
 const generateAliasesFile = (document: OpenApiDocument) => {
   const schemaNames = document.components?.schemas ? Object.keys(document.components.schemas) : [];

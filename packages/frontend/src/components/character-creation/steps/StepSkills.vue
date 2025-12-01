@@ -69,7 +69,10 @@ const setSkillProficiency = async (skill: string, isProficient: boolean) => {
   if (present) {
     updated = existingSkills.map(s => (s.name === skill ? { ...s, proficient: isProficient } : s));
   } else if (isProficient) {
-    updated = [...existingSkills, { name: skill, proficient: true, modifier: 0 }];
+    updated = [
+      ...existingSkills,
+      { name: skill, proficient: true, modifier: 0 },
+    ];
   } else {
     // not present and setting to false — no-op
     updated = existingSkills;

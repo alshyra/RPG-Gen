@@ -170,7 +170,25 @@ const basePack: ItemResponseDto[] = [
 
 // Weapon choices — separate main weapons from secondary items (shield/bow)
 const availableMainWeapons: ItemResponseDto[] = [
-  { definitionId: 'weapon-dagger', name: 'Dague', description: 'Lame légère, facile à jeter.', qty: 1, meta: { type: 'weapon', class: 'Simple Melee', cost: '2 gp', damage: '1d4 piercing', weight: '1 lb', properties: ['Finesse', 'Light', 'Thrown 20/60'], starter: true } },
+  {
+    definitionId: 'weapon-dagger',
+    name: 'Dague',
+    description: 'Lame légère, facile à jeter.',
+    qty: 1,
+    meta: {
+      type: 'weapon',
+      class: 'Simple Melee',
+      cost: '2 gp',
+      damage: '1d4 piercing',
+      weight: '1 lb',
+      properties: [
+        'Finesse',
+        'Light',
+        'Thrown 20/60',
+      ],
+      starter: true,
+    },
+  },
   { definitionId: 'weapon-quarterstaff', name: 'Quarterstaff', description: 'Bâton polyvalent, parfois à deux mains.', qty: 1, meta: { type: 'weapon', class: 'Simple Melee', cost: '2 sp', damage: '1d6 bludgeoning', weight: '4 lb', properties: ['Versatile 1d8'], starter: true } },
   { definitionId: 'weapon-longsword', name: 'Longsword', description: 'Épée équilibrée; peut être utilisée à deux mains.', qty: 1, meta: { type: 'weapon', class: 'Martial Melee', cost: '15 gp', damage: '1d8 slashing', weight: '3 lb', properties: ['Versatile 1d10'], starter: true } },
   { definitionId: 'weapon-rapier', name: 'Rapier', description: 'Lame fine et précise; excellente pour l\'escrime.', qty: 1, meta: { type: 'weapon', class: 'Martial Melee', cost: '25 gp', damage: '1d8 piercing', weight: '2 lb', properties: ['Finesse'], starter: true } },
@@ -179,7 +197,24 @@ const chosenMainWeapon = ref(availableMainWeapons[0]);
 const availableMainWeaponsDefinitionIds = availableMainWeapons.map(w => w.definitionId);
 
 const availableSecondaryItems: ItemResponseDto[] = [
-  { definitionId: 'weapon-shortbow', name: 'Shortbow', description: 'Arc court et léger.', qty: 1, meta: { type: 'weapon', class: 'Simple Ranged', cost: '25 gp', damage: '1d6 piercing', weight: '2 lb', properties: ['Ammunition 80/320', 'Two-handed'], starter: true } },
+  {
+    definitionId: 'weapon-shortbow',
+    name: 'Shortbow',
+    description: 'Arc court et léger.',
+    qty: 1,
+    meta: {
+      type: 'weapon',
+      class: 'Simple Ranged',
+      cost: '25 gp',
+      damage: '1d6 piercing',
+      weight: '2 lb',
+      properties: [
+        'Ammunition 80/320',
+        'Two-handed',
+      ],
+      starter: true,
+    },
+  },
   { definitionId: 'armor-shield', name: 'Shield', description: 'Bouclier, porté à la main; confère un bonus à la CA.', qty: 1, meta: { type: 'armor', class: 'Shield', cost: '10 gp', ac: '+2', strength: '—', stealth: '—', weight: '6 lb', starter: true } },
 ];
 
@@ -193,13 +228,11 @@ const chosenArmor = ref<ItemResponseDto | null>(availableArmors[0]);
 
 const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map(i => i.definitionId);
 const chosenSecondaryItem = ref<ItemResponseDto>(availableSecondaryItems[0]);
-const weaponIsSelected = (weapon: ItemResponseDto) =>
-  (currentCharacter.value?.inventory || [])
-    .some(i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name);
+const weaponIsSelected = (weapon: ItemResponseDto) => (currentCharacter.value?.inventory || [])
+  .some(i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name);
 
-const armorIsSelected = (armor: ItemResponseDto) =>
-  (currentCharacter.value?.inventory || [])
-    .some(i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name);
+const armorIsSelected = (armor: ItemResponseDto) => (currentCharacter.value?.inventory || [])
+  .some(i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name);
 
 const toggleArmor = (armor: ItemResponseDto) => {
   if (!currentCharacter.value) return;

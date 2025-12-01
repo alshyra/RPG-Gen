@@ -45,7 +45,8 @@ export class CharacterService {
     if (!includeDeceased) {
       filter.isDeceased = false;
     }
-    return this.characterModel.find(filter).sort({ createdAt: -1 }).exec();
+    return this.characterModel.find(filter).sort({ createdAt: -1 })
+      .exec();
   }
 
   async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
@@ -122,8 +123,7 @@ export class CharacterService {
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
     if (!createItem.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
 
-    const foundItem = (character.inventory || []).find(item =>
-      item.definitionId && item.definitionId === createItem.definitionId);
+    const foundItem = (character.inventory || []).find(item => item.definitionId && item.definitionId === createItem.definitionId);
     if (foundItem) return this.mergeIntoExistingItem(character, foundItem, createItem);
     const itemDefinition = await this.itemDefinitionService.findByDefinitionId(createItem.definitionId);
     return this.addNewItemToCharacter(character, createItem, itemDefinition, characterId);
@@ -261,7 +261,8 @@ export class CharacterService {
   }
 
   async getDeceasedCharacters(userId: string): Promise<CharacterDocument[]> {
-    return this.characterModel.find({ userId, isDeceased: true }).sort({ diedAt: -1 }).exec();
+    return this.characterModel.find({ userId, isDeceased: true }).sort({ diedAt: -1 })
+      .exec();
   }
 
   // Convert MongoDB document to frontend CharacterDto format

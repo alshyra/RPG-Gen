@@ -75,15 +75,13 @@ const characterClass = computed(() => {
 });
 const characterXp = computed(() => currentCharacter.value?.totalXp || 0);
 const characterLevel = computed(() => getCurrentLevel(currentCharacter.value?.totalXp || 0).level);
-const diedDate = computed(() =>
-  new Date().toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }),
-);
+const diedDate = computed(() => new Date().toLocaleDateString('fr-FR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+}));
 
 const close = () => emit('close');
 const confirmDeath = () => emit('confirm');

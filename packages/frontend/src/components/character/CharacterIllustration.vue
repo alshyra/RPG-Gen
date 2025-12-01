@@ -15,7 +15,10 @@ const props = defineProps<{ clazz?: string; raceId?: string; gender?: string; sr
 
 const errored = ref(false);
 const attemptIndex = ref(0);
-const exts = ['png', 'svg'];
+const exts = [
+  'png',
+  'svg',
+];
 
 const normalize = (v: any, fallback: string) => {
   if (v == null) return fallback;
@@ -59,7 +62,11 @@ function onError() {
 }
 
 // If props change (new class/race/gender), reset attempts so we try fresh images
-watch(() => [props.clazz, props.raceId, props.gender], () => {
+watch(() => [
+  props.clazz,
+  props.raceId,
+  props.gender,
+], () => {
   attemptIndex.value = 0;
   errored.value = false;
 });

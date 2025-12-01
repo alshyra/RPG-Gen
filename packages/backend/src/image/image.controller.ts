@@ -11,7 +11,8 @@ import { ImageService } from './image.service.js';
 import type { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
 
 const schema = Joi.object({
-  token: Joi.string().allow('').optional(),
+  token: Joi.string().allow('')
+    .optional(),
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });

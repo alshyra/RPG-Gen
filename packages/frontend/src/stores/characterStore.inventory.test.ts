@@ -45,10 +45,17 @@ describe('characterStore inventory persistence', () => {
 
   it('uses inventory item only if it is usable (consumable)', async () => {
     const store = useCharacterStore();
-    store.currentCharacter = { characterId: 'c1', name: 'Hero', world: 'dnd', portrait: '', isDeceased: false, inventory: [
-      { _id: 'i1', name: 'Potion', qty: 2, meta: { usable: true } },
-      { _id: 'i2', name: 'Tent', qty: 1, meta: {} },
-    ] } as any;
+    store.currentCharacter = {
+      characterId: 'c1',
+      name: 'Hero',
+      world: 'dnd',
+      portrait: '',
+      isDeceased: false,
+      inventory: [
+        { _id: 'i1', name: 'Potion', qty: 2, meta: { usable: true } },
+        { _id: 'i2', name: 'Tent', qty: 1, meta: {} },
+      ],
+    } as any;
 
     const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue({ ...store.currentCharacter, inventory: [{ _id: 'i2', name: 'Tent', qty: 1, meta: {} }] } as any);
 

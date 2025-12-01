@@ -40,7 +40,8 @@ export class ActionRecordService {
   }
 
   async getByToken(actionToken: string) {
-    return this.actionModel.findOne({ actionToken }).lean().exec();
+    return this.actionModel.findOne({ actionToken }).lean()
+      .exec();
   }
 
   /**
@@ -71,13 +72,18 @@ export class ActionRecordService {
 
     // Try to atomically set PROCESSING if not already APPLIED
     const acquired = await this.actionModel.findOneAndUpdate(
-      { actionToken, status: { $ne: ActionStatus.APPLIED }, $or: [
-        { status: ActionStatus.PENDING },
-        { status: ActionStatus.FAILED },
-      ] },
+      {
+        actionToken,
+        status: { $ne: ActionStatus.APPLIED },
+        $or: [
+          { status: ActionStatus.PENDING },
+          { status: ActionStatus.FAILED },
+        ],
+      },
       { $set: { status: ActionStatus.PROCESSING, updatedAt: new Date() } },
       { new: true },
-    ).lean().exec();
+    ).lean()
+      .exec();
 
     if (!acquired) {
       // Check if it's already APPLIED
@@ -98,11 +104,13 @@ export class ActionRecordService {
     if (opts?.idempotencyKey) update.idempotencyKey = opts.idempotencyKey;
     if (opts?.requesterId) update.requesterId = opts.requesterId;
 
-    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true }).lean().exec();
+    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true }).lean()
+      .exec();
   }
 
   async setFailed(actionToken: string, errorPayload: unknown) {
-    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: { status: ActionStatus.FAILED, resultPayload: errorPayload, updatedAt: new Date() } }, { new: true }).lean().exec();
+    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: { status: ActionStatus.FAILED, resultPayload: errorPayload, updatedAt: new Date() } }, { new: true }).lean()
+      .exec();
   }
 
   /**
@@ -119,6 +127,7 @@ export class ActionRecordService {
     if (partialPayload !== undefined) update.resultPayload = partialPayload;
     if (opts?.requesterId) update.requesterId = opts.requesterId;
 
-    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true }).lean().exec();
+    return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true }).lean()
+      .exec();
   }
 }

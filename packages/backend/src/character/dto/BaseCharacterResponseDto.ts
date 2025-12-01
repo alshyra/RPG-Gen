@@ -64,10 +64,13 @@ export class BaseCharacterResponseDto {
   @ApiPropertyOptional({ description: 'Location where character died' })
   deathLocation?: string;
 
-  @ApiProperty({ description: 'Character state', enum: [
-    'draft',
-    'created',
-  ] })
+  @ApiProperty({
+    description: 'Character state',
+    enum: [
+      'draft',
+      'created',
+    ],
+  })
   state: CharacterState;
 
   @ApiPropertyOptional({ description: 'Character inventory', type: [ItemResponseDto] })

@@ -92,9 +92,7 @@ export const getSkillBonus = (
 
   // Try to find the skill in character's skills array (legacy format)
   if (character.skills && Array.isArray(character.skills)) {
-    const skill = character.skills.find(s =>
-      (s.name ?? '').toLowerCase() === nameWithoutCheck.toLowerCase(),
-    );
+    const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === nameWithoutCheck.toLowerCase());
     if (skill) {
       // If an explicit modifier is present, use it. Otherwise compute based on ability + proficiency.
       if (typeof skill.modifier === 'number') return skill.modifier;

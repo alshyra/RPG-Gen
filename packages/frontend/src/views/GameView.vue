@@ -12,65 +12,7 @@
       class="grid lg:grid-cols-12 gap-2 flex-1 min-h-0 overflow-hidden"
       style="grid-template-rows: 1fr auto;"
     >
-      <!-- Left: character info panel - floating on mobile -->
-      <aside
-        :class="[
-          'lg:col-span-3 lg:row-span-2 flex flex-col gap-2 min-h-0 overflow-hidden',
-          'fixed lg:relative top-0 bottom-24 lg:inset-y-0 left-0 w-80 lg:w-auto z-50',
-          'bg-slate-900 lg:bg-transparent',
-          'transition-transform duration-300 ease-in-out',
-          ui.isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        ]"
-      >
-        <div class="p-2 lg:p-0 h-full flex flex-col gap-2 overflow-hidden">
-          <CharacterPortrait class="shrink-0" />
-          <div class="card flex-1 overflow-auto min-h-0">
-            <AbilityScores
-              :character="characterStore.currentCharacter"
-              class="mt-3"
-            />
-            <div class="border-t border-slate-600 mt-3" />
-            <nav class="p-3 space-y-2">
-              <UiButton
-                variant="ghost"
-                :to="{ name: 'game' , params: { characterId: characterId }}"
-                class="w-full text-left px-3 py-2"
-              >
-                Messages
-              </UiButton>
-              <UiButton
-                variant="ghost"
-                :to="{ name: 'game-inventory', params: { characterId: characterId }}"
-                class="w-full text-left px-3 py-2"
-              >
-                Inventaire
-              </UiButton>
-              <UiButton
-                variant="ghost"
-                :to="{ name: 'game-skills', params: { characterId: characterId }}"
-                class="w-full text-left px-3 py-2"
-              >
-                Compétences
-              </UiButton>
-              <UiButton
-                variant="ghost"
-                :to="{ name: 'game-spells', params: { characterId: characterId }}"
-                class="w-full text-left px-3 py-2"
-              >
-                Sorts
-              </UiButton>
-              <UiButton
-                variant="ghost"
-                :to="{ name: 'game-quest', params: { characterId: characterId }}"
-                class="w-full text-left px-3 py-2"
-              >
-                Journal
-              </UiButton>
-            </nav>
-          </div>
-        </div>
-      </aside>
-
+      <CharacterInfoPanel />
       <!-- Center: messages (or detail views via child routes) -->
       <main class="lg:col-span-9 flex flex-col min-h-0 overflow-auto">
         <router-view />
@@ -129,17 +71,17 @@
   </div>
 </template>
 <script setup lang="ts">
+import { useCombatStore } from '@/stores/combatStore';
+import { useUiStore } from '@/stores/uiStore';
+import { storeToRefs } from 'pinia';
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { characterServiceApi } from '../apis/characterApi';
-import AbilityScores from '../components/character-stats/AbilityScores.vue';
-import CharacterPortrait from '../components/character/CharacterPortrait.vue';
 import CombatPanel from '../components/game/CombatPanel.vue';
 import CombatResultModal from '../components/game/CombatResultModal.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
-import UiButton from '../components/ui/UiButton.vue';
 import { useCombat } from '../composables/useCombat';
 import { useGameCommands } from '../composables/useGameCommands';
 import { useGameMessages } from '../composables/useGameMessages';
@@ -148,9 +90,7 @@ import { useGameSession } from '../composables/useGameSession';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 import { isCommand } from '../utils/chatCommands';
-import { storeToRefs } from 'pinia';
-import { useCombatStore } from '@/stores/combatStore';
-import { useUiStore } from '@/stores/uiStore';
+import CharacterInfoPanel from './game/CharacterInfoPanel.vue';
 
 // State
 const router = useRouter();

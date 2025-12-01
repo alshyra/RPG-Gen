@@ -55,7 +55,7 @@ export const useCharacterStore = defineStore('character', () => {
     };
   };
 
-  const removeInventoryItem = async (definitionId: ItemResponseDto['definitionId'], quantity: number = 1) => {
+  const removeInventoryItem = async (definitionId: ItemResponseDto['definitionId'], quantity = 1) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;
     currentCharacter.value.inventory = currentCharacter.value.inventory
       ?.map((item) => {

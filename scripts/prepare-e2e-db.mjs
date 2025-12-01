@@ -51,7 +51,11 @@ async function request(path, options = {}) {
   });
   const text = await res.text();
   let json;
-  try { json = JSON.parse(text); } catch(e) { json = text; }
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    json = text;
+  }
   return { status: res.status, body: json, raw: text };
 }
 
@@ -98,7 +102,7 @@ async function main() {
     try {
       log('Creating character', i, '...');
       const create = await request('/api/characters', { method: 'POST', body: { world: 'dnd' } });
-      if (![200,201].includes(create.status)) {
+      if (![200, 201].includes(create.status)) {
         log('Failed to create character ', create.status, create.body || create.raw);
         continue;
       }
@@ -110,7 +114,7 @@ async function main() {
       }
 
       // update with a clear name so UI shows it
-      const name = `e2e-${new Date().toISOString().replace(/[:.]/g,'')}-${i}`;
+      const name = `e2e-${new Date().toISOString().replace(/[:.]/g, '')}-${i}`;
       const updateBody = { name };
 
       // If --ready provided, set typical D&D starter stats and HP, equip a starter weapon
@@ -142,7 +146,7 @@ async function main() {
               meta: { type: 'weapon' },
             },
           });
-          if (![200,201].includes(invResp.status)) {
+          if (![200, 201].includes(invResp.status)) {
             log('Failed to add inventory for', characterId, invResp.status, invResp.body || invResp.raw);
           } else {
             // Ensure equipped via equip endpoint (some controllers expect definitionId equip)
@@ -169,7 +173,7 @@ async function main() {
             ],
           };
           const chatResp = await request(`/api/chat/${characterId}`, { method: 'POST', body: assistantMsg });
-          if (![200,201].includes(chatResp.status)) {
+          if (![200, 201].includes(chatResp.status)) {
             log('Failed to post assistant chat for', characterId, chatResp.status, chatResp.body || chatResp.raw);
           } else {
             log('Posted assistant combat_start for', characterId);
@@ -187,4 +191,7 @@ async function main() {
   console.table(created);
 }
 
-main().catch(e => { console.error('Unexpected error', e); process.exit(2); });
+main().catch((e) => {
+  console.error('Unexpected error', e);
+  process.exit(2);
+});

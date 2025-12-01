@@ -1,4 +1,3 @@
-/* eslint-disable max-statements */
 describe('Character Creation', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
@@ -113,7 +112,7 @@ describe('Character Creation', () => {
     // Character is persisted server-side as a draft — fetch via the API
     cy.url().should('match', /\/character\/([^/]+)\/step\/1/)
       .then((u) => {
-        const match = (u as string).match(/\/character\/([^/]+)\/step\/1/);
+        const match = (u).match(/\/character\/([^/]+)\/step\/1/);
         expect(match).to.be.not.null;
         const id = (match as RegExpMatchArray)[1];
         cy.request({ method: 'GET', url: `/api/characters/${id}`, failOnStatusCode: false }).then((resp) => {
@@ -153,7 +152,7 @@ describe('Character Creation', () => {
     // The draft should be persisted server-side (avoid fixed wait)
     cy.url().should('match', /\/character\/([^/]+)\/step\/1/)
       .then((u) => {
-        const match = (u as string).match(/\/character\/([^/]+)\/step\/1/);
+        const match = (u).match(/\/character\/([^/]+)\/step\/1/);
         expect(match).to.not.be.null;
         const id = (match as RegExpMatchArray)[1];
         cy.request({ method: 'GET', url: `/api/characters/${id}`, failOnStatusCode: false }).then((resp) => {
@@ -256,7 +255,7 @@ describe('Character Creation', () => {
     // Verify scores are still persisted server-side after reload
     cy.url().should('match', /\/character\/([^/]+)\/step\//)
       .then((u) => {
-        const match = (u as string).match(/\/character\/([^/]+)\/step\//);
+        const match = (u).match(/\/character\/([^/]+)\/step\//);
         expect(match).to.not.be.null;
         const id = (match as RegExpMatchArray)[1];
         cy.request({ method: 'GET', url: `/api/characters/${id}`, failOnStatusCode: false }).then((resp) => {

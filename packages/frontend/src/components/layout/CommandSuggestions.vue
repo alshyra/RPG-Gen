@@ -90,10 +90,8 @@ const suggestionResult = computed(() => getAllSuggestions(
   combatStore.validTargets || [],
 ));
 
-const totalSuggestions = computed(() =>
-  suggestionResult.value.commandSuggestions.length
-  + suggestionResult.value.argumentSuggestions.length,
-);
+const totalSuggestions = computed(() => suggestionResult.value.commandSuggestions.length
+  + suggestionResult.value.argumentSuggestions.length);
 
 // Reset selection when suggestions change
 watch(totalSuggestions, (newTotal) => {

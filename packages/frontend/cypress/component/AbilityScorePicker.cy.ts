@@ -7,10 +7,14 @@ describe('AbilityScorePicker', () => {
   it('renders abilities and shows remaining points (point-buy)', () => {
     const pinia = createPinia();
     const router = createRouter({ history: createMemoryHistory(), routes: [] });
-    cy.mount(AbilityScorePicker, { global: { plugins: [
-      pinia,
-      router,
-    ] } });
+    cy.mount(AbilityScorePicker, {
+      global: {
+        plugins: [
+          pinia,
+          router,
+        ],
+      },
+    });
     cy.then(() => {
       const store = useCharacterStore();
       store.currentCharacter = {
@@ -48,10 +52,12 @@ describe('AbilityScorePicker', () => {
       props: {
         modelValue: undefined,
       },
-      global: { plugins: [
-        pinia2,
-        router2,
-      ] },
+      global: {
+        plugins: [
+          pinia2,
+          router2,
+        ],
+      },
     });
     cy.then(() => {
       const store = useCharacterStore();
@@ -109,10 +115,12 @@ describe('AbilityScorePicker', () => {
         initialScores,
         levelUpBudget: 2,
       },
-      global: { plugins: [
-        pinia3,
-        router3,
-      ] },
+      global: {
+        plugins: [
+          pinia3,
+          router3,
+        ],
+      },
     });
     cy.then(() => {
       const store = useCharacterStore();
@@ -179,10 +187,12 @@ describe('AbilityScorePicker', () => {
         modelValue: scores,
         mode: 'edit',
       },
-      global: { plugins: [
-        pinia4,
-        router4,
-      ] },
+      global: {
+        plugins: [
+          pinia4,
+          router4,
+        ],
+      },
     });
     cy.then(() => {
       const store = useCharacterStore();
@@ -223,10 +233,12 @@ describe('AbilityScorePicker', () => {
         modelValue: undefined,
         proficiency: 3,
       },
-      global: { plugins: [
-        pinia5,
-        router5,
-      ] },
+      global: {
+        plugins: [
+          pinia5,
+          router5,
+        ],
+      },
     });
     cy.then(() => {
       const store = useCharacterStore();

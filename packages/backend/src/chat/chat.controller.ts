@@ -97,35 +97,48 @@ export class ChatController {
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();
-
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
-    // If history exists and last assistant message contains a combat_start instruction,
-    // attempt to process it server-side so persisted combat session is created.
-    if (previousChatMessages && previousChatMessages.length > 0) {
-      // find most recent assistant message that contains a combat_start
-      const lastAssistant = [...previousChatMessages].reverse().find(m => m.role === 'assistant' && Array.isArray((m as any).instructions) && (m as any).instructions.some((i: any) => i.type === 'combat_start'));
-      if (lastAssistant) {
-        try {
-          const instrs = (lastAssistant as any).instructions.filter((i: any) => i.type === 'combat_start');
-          if (instrs.length) {
-            await this.instructionProcessor.processInstructions(userId, characterId, instrs);
-            this.logger.log(`Processed historical combat_start for ${characterId}`);
-          }
-        } catch (e) {
-          this.logger.warn(`Failed to process historical combat_start for ${characterId}: ${(e as Error)?.message}`);
-        }
-      }
+
+    await this.processHistoricalCombat(previousChatMessages, userId, characterId);
+    await this.initSessionAndStartIfNeeded(userId, characterId, previousChatMessages);
+
+    return this.conversationService.getHistory(userId, characterId);
+  }
+
+  private async processHistoricalCombat(
+    messages: ChatMessageDto[] | undefined,
+    userId: string,
+    characterId: string,
+  ): Promise<void> {
+    if (!messages?.length) return;
+
+    type MessageWithInstructions = ChatMessageDto & { instructions?: { type: string }[] };
+    const hasCombatStart = (m: MessageWithInstructions) => m.role === 'assistant' && m.instructions?.some(i => i.type === 'combat_start');
+
+    const lastAssistant = [...messages].reverse().find(hasCombatStart) as MessageWithInstructions | undefined;
+    if (!lastAssistant?.instructions) return;
+
+    const combatInstrs = lastAssistant.instructions.filter(i => i.type === 'combat_start');
+    if (!combatInstrs.length) return;
+
+    try {
+      await this.instructionProcessor.processInstructions(userId, characterId, combatInstrs);
+      this.logger.log(`Processed historical combat_start for ${characterId}`);
+    } catch (e) {
+      this.logger.warn(`Failed to process historical combat_start for ${characterId}: ${(e as Error)?.message}`);
     }
+  }
+
+  private async initSessionAndStartIfNeeded(
+    userId: string,
+    characterId: string,
+    previousChatMessages: ChatMessageDto[] | undefined,
+  ): Promise<void> {
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    this.geminiTexteService.initializeChatSession(
-      characterId,
-      this.initPrompt(character),
-      previousChatMessages,
-    );
+    this.geminiTexteService.initializeChatSession(characterId, this.initPrompt(character), previousChatMessages ?? []);
     if (!previousChatMessages) {
       await this.getGMResponse(userId, characterId, 'Tu peux commencer l\'aventure');
     }
-    return this.conversationService.getHistory(userId, characterId);
   }
 
   private initPrompt(character: CharacterResponseDto) {

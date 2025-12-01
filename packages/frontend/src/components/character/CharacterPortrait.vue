@@ -81,8 +81,7 @@ const parseShieldBonus = (item: InventoryItem): number => {
   return m ? parseInt(m[1], 10) : 0;
 };
 
-const isShield = (item: InventoryItem): boolean =>
-  item.meta?.class === 'Shield'
+const isShield = (item: InventoryItem): boolean => item.meta?.class === 'Shield'
   || (item.meta?.type === 'armor' && (item.meta?.class || '').toLowerCase() === 'shield');
 
 const calculateDexBonus = (acRaw: string, dexMod: number): number => {

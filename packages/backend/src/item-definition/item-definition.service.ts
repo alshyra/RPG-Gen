@@ -10,7 +10,8 @@ export class ItemDefinitionService {
   constructor(@InjectModel(ItemDefinition.name) private model: Model<ItemDefinitionDocument>) {}
 
   async findAll(): Promise<ItemDefinition[]> {
-    return this.model.find().sort({ name: 1 }).exec();
+    return this.model.find().sort({ name: 1 })
+      .exec();
   }
 
   async findByDefinitionId(id: string): Promise<ItemDefinition | null> {

@@ -4,11 +4,14 @@ export class SpellInstructionMessageDto {
   @ApiProperty({ description: 'Instruction type', enum: ['spell'] })
   type: 'spell';
 
-  @ApiProperty({ description: 'Spell action', enum: [
-    'learn',
-    'cast',
-    'forget',
-  ] })
+  @ApiProperty({
+    description: 'Spell action',
+    enum: [
+      'learn',
+      'cast',
+      'forget',
+    ],
+  })
   action: 'learn' | 'cast' | 'forget';
 
   @ApiProperty({ description: 'Spell name' })

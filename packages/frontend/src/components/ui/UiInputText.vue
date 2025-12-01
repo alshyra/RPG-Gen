@@ -17,7 +17,5 @@ defineProps<{
   disabled?: boolean;
 }>();
 
-defineEmits<{
-  (e: 'update:modelValue', value: string): void;
-}>();
+defineEmits<(e: 'update:modelValue', value: string) => void>();
 </script>
