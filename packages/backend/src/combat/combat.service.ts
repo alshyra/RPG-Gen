@@ -20,6 +20,7 @@ import { CombatantDto } from './dto/CombatantDto.js';
 import { AttackResultDto } from './dto/AttackResultDto.js';
 import { TurnResultDto } from './dto/TurnResultDto.js';
 import { TurnResultWithInstructionsDto } from './dto/TurnResultWithInstructionsDto.js';
+import type { XpInstructionMessageDto } from '../chat/dto/index.js';
 
 interface WeaponMeta {
   damage?: string;
@@ -676,7 +677,14 @@ export class CombatService {
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: `Vous infligez ${damageDealt} dégâts et terrassez ${enemy.name}. Victoire!`,
-      instructions: end ? [{ xp: end.xpGained }] : [],
+      instructions: end
+        ? [
+            {
+              type: 'xp',
+              xp: end.xpGained,
+            } as XpInstructionMessageDto,
+          ]
+        : [],
     };
   }
 

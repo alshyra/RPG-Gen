@@ -1,16 +1,15 @@
 import {
+  BadRequestException,
   Injectable, Logger, NotFoundException,
 } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  Character, CharacterDocument, Item,
-} from './schema/index.js';
-import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
+import { ItemDefinition } from 'src/item-definition/item-definition.schema.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
+import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
+import { Character, CharacterDocument, Item } from './schema/index.js';
 
 @Injectable()
 export class CharacterService {
@@ -77,7 +76,7 @@ export class CharacterService {
 
   // eslint-disable-next-line max-statements
   async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {
-    const updateDoc: any = {};
+    const updateDoc: { [key in keyof UpdateCharacterRequestDto]?: UpdateCharacterRequestDto[key] } = {};
     // Build update document
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
@@ -94,7 +93,7 @@ export class CharacterService {
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
-    // updateDoc.
+
     const character = await this.characterModel.findOneAndUpdate(
       {
         userId,
@@ -159,6 +158,7 @@ export class CharacterService {
     const foundItem = (character.inventory || []).find(item => item.definitionId && item.definitionId === createItem.definitionId);
     if (foundItem) return this.mergeIntoExistingItem(character, foundItem, createItem);
     const itemDefinition = await this.itemDefinitionService.findByDefinitionId(createItem.definitionId);
+    if (!itemDefinition) throw new NotFoundException(`Item definition ${createItem.definitionId} not found`);
     return this.addNewItemToCharacter(character, createItem, itemDefinition, characterId);
   }
 
@@ -199,10 +199,10 @@ export class CharacterService {
         description: def.description || '',
         equipped: false,
         meta: def.meta || {},
-      } as any;
+      };
       character.inventory = character.inventory || [];
       character.inventory.push(newItem);
-      item = newItem as any;
+      item = newItem;
     }
 
     // Ensure only the targeted weapon is equipped (no for loop)
@@ -226,7 +226,7 @@ export class CharacterService {
     item = (character.inventory || []).find(i => i.definitionId === definitionId) || item;
 
     // Equip target item
-    item!.equipped = true;
+    item.equipped = true;
 
     const saved = await character.save();
     this.logger.log(`Equipped ${definitionId} for ${characterId}`);
@@ -244,7 +244,12 @@ export class CharacterService {
     return saved;
   }
 
-  private async addNewItemToCharacter(character: CharacterDocument, item: CreateInventoryItemDto, itemDefinition: any, characterId: string) {
+  private async addNewItemToCharacter(
+    character: CharacterDocument,
+    item: CreateInventoryItemDto,
+    itemDefinition: ItemDefinition,
+    characterId: string,
+  ) {
     const newItem: Item = {
       _id: crypto.randomUUID(),
       name: item.name || itemDefinition?.name,
@@ -264,7 +269,7 @@ export class CharacterService {
     return saved;
   }
 
-  async updateInventoryItem(userId: string, characterId: string, itemId: string, updates: Partial<any>) {
+  async updateInventoryItem(userId: string, characterId: string, itemId: string, updates: CreateInventoryItemDto) {
     const character = await this.characterModel.findOne({
       userId,
       characterId,

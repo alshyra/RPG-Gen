@@ -125,13 +125,13 @@ export class ActionRecordService {
     idempotencyKey?: string;
     requesterId?: string;
   }) {
-    const update: any = {
+    const update = {
       status: ActionStatus.APPLIED,
       resultPayload,
       updatedAt: new Date(),
+      ...(opts?.idempotencyKey ? { idempotencyKey: opts.idempotencyKey } : {}),
+      ...(opts?.requesterId ? { requesterId: opts.requesterId } : {}),
     };
-    if (opts?.idempotencyKey) update.idempotencyKey = opts.idempotencyKey;
-    if (opts?.requesterId) update.requesterId = opts.requesterId;
 
     return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true })
       .lean()
@@ -156,13 +156,13 @@ export class ActionRecordService {
    * and the next step will submit the final payload (e.g. attack -> resolve-roll).
    */
   async setPendingWithExpected(actionToken: string, expectedDto: string, partialPayload?: unknown, opts?: { requesterId?: string }) {
-    const update: any = {
+    const update = {
       status: ActionStatus.PENDING,
       expectedDto,
       updatedAt: new Date(),
+      ...(opts?.requesterId ? { requesterId: opts.requesterId } : {}),
+      ...(partialPayload !== undefined ? { resultPayload: partialPayload } : {}),
     };
-    if (partialPayload !== undefined) update.resultPayload = partialPayload;
-    if (opts?.requesterId) update.requesterId = opts.requesterId;
 
     return this.actionModel.findOneAndUpdate({ actionToken }, { $set: update }, { new: true })
       .lean()

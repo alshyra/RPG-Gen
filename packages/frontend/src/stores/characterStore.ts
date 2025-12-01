@@ -68,8 +68,7 @@ const createSpellManager = (charRef: Ref<CharacterResponseDto | undefined>) => (
   },
 });
 
-// --- Store definition ---
-
+// eslint-disable-next-line max-statements
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();
   const currentCharacterId = computed(() => (typeof route.params.characterId === 'string' ? route.params.characterId : undefined));

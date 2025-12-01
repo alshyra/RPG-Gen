@@ -246,7 +246,7 @@ export class CharacterController {
     @Req() req: Request,
     @Param('characterId') characterId: string,
     @Param('itemId') itemId: string,
-    @Body() updates: Partial<CreateInventoryItemDto>,
+    @Body() updates: CreateInventoryItemDto,
   ) {
     const user = req.user as UserDocument;
     const userId = user._id.toString();

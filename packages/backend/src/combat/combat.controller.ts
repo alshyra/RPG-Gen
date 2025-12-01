@@ -27,6 +27,7 @@ import {
 import {
   TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto,
 } from './dto/index.js';
+import type { RollInstructionMessageDto } from '../chat/dto/index.js';
 import { DiceController } from '../dice/dice.controller.js';
 import {
   CombatStartRequestDto, AttackRequestDto, CombatStateDto, CombatEnemyDto,
@@ -181,7 +182,7 @@ export class CombatController {
     }
 
     // Hit: instruct client to roll damage. Persist partial attack info and set expectedDto to DiceThrowDto
-    const instructions: Record<string, unknown>[] = [
+    const instructions: RollInstructionMessageDto[] = [
       {
         type: 'roll',
         dices: state.player.damageDice || '1d4',
@@ -192,7 +193,7 @@ export class CombatController {
           damageBonus: state.player.damageBonus || 0,
         },
         description: `Damage to ${targetEnemy.name}`,
-      } as Record<string, unknown>,
+      },
     ];
 
     const response: TurnResultWithInstructionsDto = {
