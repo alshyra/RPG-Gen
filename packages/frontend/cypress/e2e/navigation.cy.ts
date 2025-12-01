@@ -60,7 +60,7 @@ describe('Navigation', () => {
         const url = u.toString();
         const m = url.match(/\/character\/([^/]+)\/step\//);
         if (m) {
-          const id = m[1];
+          const [, id] = m;
           cy.intercept('GET', `**/api/characters/${id}`)
             .as('getCharacter');
           cy.visit(`/game/${id}`);

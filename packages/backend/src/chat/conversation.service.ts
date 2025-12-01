@@ -102,8 +102,8 @@ export class ConversationService {
           instructions: [],
         };
       }
-      const role = msg.role;
-      const narrative = msg.narrative;
+      const { role } = msg;
+      const { narrative } = msg;
       const instructions = msg.instructions ?? [];
       if (!role || typeof role !== 'string' || ![
         'user',

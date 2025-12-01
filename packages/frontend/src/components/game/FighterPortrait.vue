@@ -106,7 +106,7 @@ onMounted(async () => {
     resolvedPortrait.value = characterStore.currentCharacter?.portrait || `/images/enemies/hero.png`;
     return;
   }
-  const enemy = props.enemy;
+  const { enemy } = props;
   if (!enemy) {
     resolvedPortrait.value = `/images/enemies/enemy.png`;
     return;

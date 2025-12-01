@@ -65,7 +65,7 @@ test('addInventoryItem with definitionId uses ItemDefinitionService and persists
 
   t.true(Array.isArray(updated.inventory), 'inventory is an array');
   t.is(updated.inventory.length, 1, 'one item added');
-  const added = updated.inventory[0];
+  const [added] = updated.inventory;
   t.is(added.definitionId, 'potion-health');
   t.is(added.name, 'Potion de soin');
   t.is(added.description, 'Soigne un peu de PV');

@@ -3,36 +3,27 @@ import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { combatService } from '../apis/combatApi';
 import type {
-  CombatStartInstructionMessageDto, TurnResultWithInstructionsDto,
+  CombatStartInstructionMessageDto, TurnResultWithInstructionsDto, RollInstructionMessageDto,
+  HpInstructionMessageDto, XpInstructionMessageDto, GameInstructionDto,
 } from '@rpg-gen/shared';
+import { isRollInstruction, isHpInstruction, isXpInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
 type CombatStore = ReturnType<typeof useCombatStore>;
 
-interface InstructionItem {
-  type?: string;
-  dices?: string;
-  xp?: number;
-  hp?: number;
-  meta?: {
-    attackBonus?: number;
-    target?: string;
-    targetAc?: number;
-  };
-}
-
 // ----- Instruction Processors -----
-const processRollInstruction = (instr: InstructionItem, gameStore: GameStore, combatStore: CombatStore): void => {
+function processRollInstruction(instr: RollInstructionMessageDto, gameStore: GameStore, combatStore: CombatStore): void {
   const {
-    dices = '1d20', meta,
+    dices, meta,
   } = instr;
-  const rollInstr = {
-    type: 'roll' as const,
+  const rollInstr: RollInstructionMessageDto = {
+    type: 'roll',
     dices,
-    advantage: 'none' as const,
+    advantage: 'none',
     description: meta?.target ? `Attack vs ${meta.target} (AC ${meta.targetAc ?? '??'})` : undefined,
+    meta,
   };
 
   combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
@@ -40,45 +31,51 @@ const processRollInstruction = (instr: InstructionItem, gameStore: GameStore, co
   const bonus = meta?.attackBonus ? ` +${meta.attackBonus}` : '';
   const target = meta?.target ? ` vs ${meta.target} (AC ${meta.targetAc})` : '';
   gameStore.appendMessage('system', `🎲 Roll needed: ${dices}${bonus}${target}`);
-};
+}
 
-const processXpInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
-  if (typeof instr.xp !== 'number') return;
+function processXpInstruction(instr: XpInstructionMessageDto, gameStore: GameStore, characterStore: CharacterStore): void {
   gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
   characterStore.updateXp(instr.xp);
-};
+}
 
-const processHpInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
-  if (typeof instr.hp !== 'number') return;
+function processHpInstruction(instr: HpInstructionMessageDto, gameStore: GameStore, characterStore: CharacterStore): void {
   const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
   gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
   characterStore.updateHp(instr.hp);
   if (characterStore.isDead) characterStore.showDeathModal = true;
-};
+}
 
-const processAttackInstructions = (
-  instructions: unknown[],
+function processSingleCombatInstruction(
+  instr: GameInstructionDto,
   gameStore: GameStore,
   characterStore: CharacterStore,
   combatStore: CombatStore,
-): void => {
-  if (!Array.isArray(instructions)) return;
-  instructions.forEach((item: unknown) => {
-    const instr = item as InstructionItem;
-    if (instr.type === 'roll') processRollInstruction(instr, gameStore, combatStore);
-    else if (typeof instr.xp === 'number') processXpInstruction(instr, gameStore, characterStore);
-    else if (typeof instr.hp === 'number') processHpInstruction(instr, gameStore, characterStore);
-  });
-};
+): void {
+  if (isRollInstruction(instr)) {
+    processRollInstruction(instr, gameStore, combatStore);
+  } else if (isXpInstruction(instr)) {
+    processXpInstruction(instr, gameStore, characterStore);
+  } else if (isHpInstruction(instr)) {
+    processHpInstruction(instr, gameStore, characterStore);
+  }
+}
+
+function processAttackInstructions(
+  instructions: GameInstructionDto[],
+  gameStore: GameStore,
+  characterStore: CharacterStore,
+  combatStore: CombatStore,
+): void {
+  instructions.forEach(instr => processSingleCombatInstruction(instr, gameStore, characterStore, combatStore));
+}
 
 // ----- Attack Helpers -----
-const performAttack = async (characterId: string, target: string, token: string | null): Promise<TurnResultWithInstructionsDto> => {
-  if (token) {
-    return combatService.attackWithToken(characterId, token, target);
+async function performAttack(characterId: string, target: string, token: string | null): Promise<TurnResultWithInstructionsDto> {
+  if (!token) {
+    throw new Error('Action token is required for attack');
   }
-  console.warn('[useCombat] No action token available, falling back to legacy attack endpoint');
-  return combatService.attack(characterId, target);
-};
+  return combatService.attackWithToken(characterId, token, target);
+}
 
 const handleAttackAnimations = (attackResponse: TurnResultWithInstructionsDto, combatStore: CombatStore): void => {
   const playerAttacks = attackResponse.playerAttacks ?? [];
@@ -169,7 +166,7 @@ export function useCombat() {
     gameStore.sending = true;
 
     try {
-      const characterId = currentCharacter.value.characterId;
+      const { characterId } = currentCharacter.value;
       console.log('[useCombat] executeAttack ->', {
         characterId,
         target,

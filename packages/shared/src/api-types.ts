@@ -326,7 +326,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/combat/{characterId}/attack': {
+  '/api/combat/{characterId}/attack/{actionToken}': {
     parameters: {
       query?: never;
       header?: never;
@@ -343,7 +343,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/api/combat/{characterId}/resolve-roll': {
+  '/api/combat/{characterId}/resolve-roll/{actionToken}': {
     parameters: {
       query?: never;
       header?: never;
@@ -475,6 +475,20 @@ export interface components {
       /** @description URL de la photo de profil de l'utilisateur */
       picture: string;
     };
+    RollMetaDto: {
+      /** @description Attack bonus to apply */
+      attackBonus?: number;
+      /** @description Target name */
+      target?: string;
+      /** @description Target armor class */
+      targetAc?: number;
+      /** @description Damage dice expression */
+      damageDice?: string;
+      /** @description Damage bonus to apply */
+      damageBonus?: number;
+      /** @description Action type (e.g., attack, damage) */
+      action?: string;
+    };
     RollInstructionMessageDto: {
       /**
              * @description Instruction type
@@ -483,8 +497,8 @@ export interface components {
       type: 'roll';
       /** @description Dice expression (e.g., 1d20+5) */
       dices: string;
-      /** @description Modifier */
-      modifier?: Record<string, never>;
+      /** @description Modifier to apply to the roll */
+      modifier?: string | number;
       /** @description Roll description */
       description?: string;
       /**
@@ -492,6 +506,8 @@ export interface components {
              * @enum {string}
              */
       advantage?: 'advantage' | 'disadvantage' | 'none';
+      /** @description Optional metadata for combat rolls */
+      meta?: components['schemas']['RollMetaDto'];
     };
     HpInstructionMessageDto: {
       /**
@@ -1019,6 +1035,15 @@ export interface components {
       narrative?: string;
       /** @description Valid targets available to player */
       validTargets?: string[];
+      /**
+             * @description Current combat phase
+             * @enum {string}
+             */
+      phase?: 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
+      /** @description Action token for idempotent action submission */
+      actionToken?: string;
+      /** @description Expected DTO type for the next action (e.g., AttackRequestDto, DiceThrowDto) */
+      expectedDto?: string;
     };
     AttackRequestDto: {
       /** @description Target ID to attack */
@@ -1080,7 +1105,24 @@ export interface components {
       /** @description Narrative text summarizing the turn */
       narrative: string;
       /** @description Optional set of frontend instructions to apply after the turn */
-      instructions?: Record<string, never>[];
+      instructions?: (components['schemas']['RollInstructionMessageDto'] | components['schemas']['HpInstructionMessageDto'] | components['schemas']['XpInstructionMessageDto'] | components['schemas']['SpellInstructionMessageDto'] | components['schemas']['InventoryInstructionMessageDto'] | components['schemas']['CombatStartInstructionMessageDto'] | components['schemas']['CombatEndInstructionMessageDto'])[];
+    };
+    DiceThrowDto: {
+      /** @description Individual dice roll results */
+      rolls: number[];
+      /** @description Modifier applied to the total */
+      mod: number;
+      /** @description Total result (sum of rolls + modifier) */
+      total: number;
+      /**
+             * @description Advantage type used for this roll
+             * @enum {string}
+             */
+      advantage?: 'advantage' | 'disadvantage' | 'none';
+      /** @description The roll that was kept (when using advantage/disadvantage) */
+      keptRoll?: number;
+      /** @description The roll that was discarded (when using advantage/disadvantage) */
+      discardedRoll?: number;
     };
     CombatEndResultDto: {
       /** @description Combat end information */
@@ -1102,23 +1144,6 @@ export interface components {
              * @enum {string}
              */
       advantage?: 'advantage' | 'disadvantage' | 'none';
-    };
-    DiceThrowDto: {
-      /** @description Individual dice roll results */
-      rolls: number[];
-      /** @description Modifier applied to the total */
-      mod: number;
-      /** @description Total result (sum of rolls + modifier) */
-      total: number;
-      /**
-             * @description Advantage type used for this roll
-             * @enum {string}
-             */
-      advantage?: 'advantage' | 'disadvantage' | 'none';
-      /** @description The roll that was kept (when using advantage/disadvantage) */
-      keptRoll?: number;
-      /** @description The roll that was discarded (when using advantage/disadvantage) */
-      discardedRoll?: number;
     };
     ImageRequestDto: {
       /** @description API token (optional) */
@@ -1706,6 +1731,7 @@ export interface operations {
       header?: never;
       path: {
         characterId: string;
+        actionToken: string;
       };
       cookie?: never;
     };
@@ -1729,10 +1755,15 @@ export interface operations {
       header?: never;
       path: {
         characterId: string;
+        actionToken: string;
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DiceThrowDto'];
+      };
+    };
     responses: {
       200: {
         headers: Record<string, unknown>;

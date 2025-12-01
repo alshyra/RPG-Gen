@@ -192,7 +192,7 @@ export const GENDERS = [
   'male',
   'female',
 ] as const;
-export const DEFAULT_RACE = ALLOWED_RACES[0];
+export const [DEFAULT_RACE] = ALLOWED_RACES;
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
@@ -531,9 +531,24 @@ export class DnDRulesService {
     baseScores: Record<string, number>,
     className: string,
     raceModifiers: RaceModifiers,
-    raceInfo: any,
+    raceInfo: { id?: string;
+      name?: string;
+      mods: Record<string, number>; },
     selectedSkills?: string[],
-  ): any {
+  ): {
+    name: string;
+    scores: Record<string, number>;
+    hp: number;
+    hpMax: number;
+    classes: { name: string;
+      level: number; }[];
+    race: typeof raceInfo;
+    totalXp: number;
+    proficiency: number;
+    skills: { name: string;
+      proficient: boolean;
+      modifier: number; }[];
+  } {
     // Apply racial bonuses
     const finalScores = this.applyRacialModifiers(baseScores, raceModifiers);
 

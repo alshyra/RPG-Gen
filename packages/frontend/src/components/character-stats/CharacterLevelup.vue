@@ -131,6 +131,7 @@
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
 import type { LevelUpResult } from '../../services/dndLevelUpService';
+import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   computed, ref,
 } from 'vue';
@@ -140,7 +141,7 @@ import { conversationService } from '../../apis/conversationApi';
 
 interface Props {
   world?: string;
-  initialCharacter?: any;
+  initialCharacter?: CharacterResponseDto;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -155,7 +156,7 @@ const router = useRouter();
 const isPending = ref(false);
 
 // Character data
-const character = computed(() => props.initialCharacter || {});
+const character = computed<Partial<CharacterResponseDto>>(() => props.initialCharacter || {});
 const currentLevel = computed(() => character.value.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));
 
@@ -176,7 +177,7 @@ const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(ne
 
 // Handlers
 
-const buildLevelUpMessage = (updatedCharacter: any): string => `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({
+const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): string => `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({
   name: updatedCharacter.name,
   level: nextLevel.value,
   class: className.value,
@@ -189,7 +190,7 @@ const buildLevelUpMessage = (updatedCharacter: any): string => `Player leveled u
 
 const executeLevelUp = async (): Promise<void> => {
   // Update character with new level and HP
-  const updatedCharacter = {
+  const updatedCharacter: Partial<CharacterResponseDto> = {
     ...character.value,
     classes: [
       {

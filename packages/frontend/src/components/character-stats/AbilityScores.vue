@@ -28,6 +28,9 @@
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
+import type { AbilityScoresResponseDto } from '@rpg-gen/shared';
+
+type AbilityKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -60,13 +63,14 @@ const abilities = {
 };
 
 const getAbilityScore = (key: string): number => {
-  if (!currentCharacter.value) return 10;
+  if (!currentCharacter.value?.scores) return 10;
 
-  // Try capitalized format (Str, Dex, etc.)
-  const capitalized = key.charAt(0)
-    .toUpperCase() + key.slice(1);
+  // Convert to capitalized format (Str, Dex, etc.)
+  const capitalized = (key.charAt(0)
+    .toUpperCase() + key.slice(1)) as AbilityKey;
+  const scores: AbilityScoresResponseDto = currentCharacter.value.scores;
 
-  return (currentCharacter.value.scores as any)[capitalized] as number;
+  return scores[capitalized] ?? 10;
 };
 
 const getModifier = (score: number): number => Math.floor((score - 10) / 2);

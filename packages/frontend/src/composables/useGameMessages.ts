@@ -31,7 +31,7 @@ export function useGameMessages() {
     processInstructions(instrs);
   };
 
-  const handleMessageError = (e: Error | unknown): void => {
+  const handleMessageError = (e: unknown): void => {
     gameStore.messages.pop();
     const message = e instanceof Error ? e.message : 'Failed to send message';
     gameStore.appendMessage('system', message);

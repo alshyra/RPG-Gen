@@ -69,7 +69,7 @@ const { currentCharacter } = storeToRefs(characterStore);
 const characterName = computed(() => currentCharacter.value?.name || 'Unknown');
 const characterClass = computed(() => {
   const classes = currentCharacter.value?.classes || [];
-  return classes.map((c: any) => `${c.name} ${c.level}`)
+  return classes.map(c => `${c.name} ${c.level}`)
     .join(', ') || '';
 });
 const characterXp = computed(() => currentCharacter.value?.totalXp || 0);

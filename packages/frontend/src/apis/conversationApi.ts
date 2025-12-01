@@ -1,4 +1,4 @@
-import { CharacterResponseDto } from '@rpg-gen/shared';
+import { CharacterResponseDto, type GameInstructionDto } from '@rpg-gen/shared';
 import apiClient from './apiClient';
 
 export class ConversationService {
@@ -53,7 +53,7 @@ export class ConversationService {
   async sendStructuredMessage(message: {
     role: 'user' | 'assistant' | 'system';
     narrative: string;
-    instructions?: any[];
+    instructions?: GameInstructionDto[];
   }) {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 

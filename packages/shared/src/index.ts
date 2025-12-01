@@ -1,6 +1,9 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
 export * from './api-types';
 
+// Type guards and utility types
+export * from './type-guards';
+
 // Auto-generated type aliases from OpenAPI components.schemas
 export type AbilityScoresResponseDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];
 export type ArmorMeta = import('./api-types').components['schemas']['ArmorMeta'];
@@ -42,6 +45,7 @@ export type PackMeta = import('./api-types').components['schemas']['PackMeta'];
 export type RaceResponseDto = import('./api-types').components['schemas']['RaceResponseDto'];
 export type RemoveInventoryBodyDto = import('./api-types').components['schemas']['RemoveInventoryBodyDto'];
 export type RollInstructionMessageDto = import('./api-types').components['schemas']['RollInstructionMessageDto'];
+export type RollMetaDto = import('./api-types').components['schemas']['RollMetaDto'];
 export type SkillResponseDto = import('./api-types').components['schemas']['SkillResponseDto'];
 export type SpellInstructionMessageDto = import('./api-types').components['schemas']['SpellInstructionMessageDto'];
 export type SpellResponseDto = import('./api-types').components['schemas']['SpellResponseDto'];

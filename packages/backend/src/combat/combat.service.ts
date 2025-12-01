@@ -211,7 +211,7 @@ export class CombatService {
     combatStart: CombatStartRequestDto,
     userId: string,
   ): Promise<CombatStateDto> {
-    const characterId = character.characterId;
+    const { characterId } = character;
     const player = this.buildBasePlayerStats(character);
 
     // Roll player initiative
@@ -271,7 +271,7 @@ export class CombatService {
   ): AttackResultDto {
     // Roll attack
     const attackRoll = this.diceController.rollDiceExpr('1d20');
-    const dieRoll = attackRoll.rolls[0];
+    const [dieRoll] = attackRoll.rolls;
     const totalAttack = dieRoll + attacker.attackBonus;
 
     const critical = dieRoll === 20;
@@ -384,7 +384,7 @@ export class CombatService {
     const enemyAttacks: AttackResultDto[] = [];
     const narrativeParts: string[] = [];
 
-    const turnOrder = state.turnOrder;
+    const { turnOrder } = state;
     const totalCombatants = turnOrder.length;
 
     // Process each combatant in initiative order starting from currentTurnIndex

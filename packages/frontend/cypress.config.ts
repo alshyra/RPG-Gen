@@ -48,14 +48,23 @@ export default defineConfig({
               '../../scripts/prepare-e2e-db.mjs',
               ...args,
             ], { cwd: config.projectRoot });
-            return { ok: true, output: stdout };
+            return {
+              ok: true,
+              output: stdout,
+            };
           } catch (err) {
-            return { ok: false, error: String(err) };
+            return {
+              ok: false,
+              error: String(err),
+            };
           }
         },
         async startCombatFor(opts) {
           const characterId = opts?.characterId;
-          if (!characterId) return { ok: false, error: 'missing characterId' };
+          if (!characterId) return {
+            ok: false,
+            error: 'missing characterId',
+          };
           const base = process.env.CYPRESS_BASE_URL || 'http://localhost:80';
           const url = `${base}/api/combat/${characterId}/start`;
           try {
@@ -68,7 +77,10 @@ export default defineConfig({
             ]);
             return { ok: true };
           } catch (err) {
-            return { ok: false, error: String(err) };
+            return {
+              ok: false,
+              error: String(err),
+            };
           }
         },
 
@@ -82,9 +94,15 @@ export default defineConfig({
               '../../scripts/prepare-e2e-db.mjs',
               ...args,
             ], { cwd: config.projectRoot });
-            return { ok: true, output: stdout };
+            return {
+              ok: true,
+              output: stdout,
+            };
           } catch (err) {
-            return { ok: false, error: String(err) };
+            return {
+              ok: false,
+              error: String(err),
+            };
           }
         },
       });

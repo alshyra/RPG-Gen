@@ -15,7 +15,7 @@ declare global {
        * Custom command to select an element by data-cy attribute.
        * @example cy.dataCy('submit-button')
        */
-      dataCy(value: string): Chainable<JQuery<HTMLElement>>;
+      dataCy(value: string): Chainable<JQuery>;
 
       /**
        * Ensure the client is authenticated for a test run by contacting the real

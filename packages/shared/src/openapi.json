@@ -880,12 +880,20 @@
         ]
       }
     },
-    "/api/combat/{characterId}/attack": {
+    "/api/combat/{characterId}/attack/{actionToken}": {
       "post": {
         "operationId": "CombatController_attack",
         "parameters": [
           {
             "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actionToken",
             "required": true,
             "in": "path",
             "schema": {
@@ -926,7 +934,7 @@
         ]
       }
     },
-    "/api/combat/{characterId}/resolve-roll": {
+    "/api/combat/{characterId}/resolve-roll/{actionToken}": {
       "post": {
         "operationId": "CombatController_resolveRoll",
         "parameters": [
@@ -937,8 +945,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "actionToken",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiceThrowDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -1193,6 +1219,35 @@
           "picture"
         ]
       },
+      "RollMetaDto": {
+        "type": "object",
+        "properties": {
+          "attackBonus": {
+            "type": "number",
+            "description": "Attack bonus to apply"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target name"
+          },
+          "targetAc": {
+            "type": "number",
+            "description": "Target armor class"
+          },
+          "damageDice": {
+            "type": "string",
+            "description": "Damage dice expression"
+          },
+          "damageBonus": {
+            "type": "number",
+            "description": "Damage bonus to apply"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action type (e.g., attack, damage)"
+          }
+        }
+      },
       "RollInstructionMessageDto": {
         "type": "object",
         "properties": {
@@ -1208,8 +1263,15 @@
             "description": "Dice expression (e.g., 1d20+5)"
           },
           "modifier": {
-            "type": "object",
-            "description": "Modifier"
+            "description": "Modifier to apply to the roll",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
           },
           "description": {
             "type": "string",
@@ -1222,6 +1284,14 @@
               "advantage",
               "disadvantage",
               "none"
+            ]
+          },
+          "meta": {
+            "description": "Optional metadata for combat rolls",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RollMetaDto"
+              }
             ]
           }
         },
@@ -2514,6 +2584,24 @@
             "items": {
               "type": "string"
             }
+          },
+          "phase": {
+            "type": "string",
+            "description": "Current combat phase",
+            "enum": [
+              "PLAYER_TURN",
+              "AWAITING_DAMAGE_ROLL",
+              "ENEMY_TURN",
+              "COMBAT_ENDED"
+            ]
+          },
+          "actionToken": {
+            "type": "string",
+            "description": "Action token for idempotent action submission"
+          },
+          "expectedDto": {
+            "type": "string",
+            "description": "Expected DTO type for the next action (e.g., AttackRequestDto, DiceThrowDto)"
           }
         },
         "required": [
@@ -2683,7 +2771,29 @@
             "type": "array",
             "description": "Optional set of frontend instructions to apply after the turn",
             "items": {
-              "type": "object"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RollInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/HpInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/XpInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SpellInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/InventoryInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CombatStartInstructionMessageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CombatEndInstructionMessageDto"
+                }
+              ]
             }
           }
         },
@@ -2699,6 +2809,48 @@
           "playerHp",
           "playerHpMax",
           "narrative"
+        ]
+      },
+      "DiceThrowDto": {
+        "type": "object",
+        "properties": {
+          "rolls": {
+            "description": "Individual dice roll results",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "mod": {
+            "type": "number",
+            "description": "Modifier applied to the total"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total result (sum of rolls + modifier)"
+          },
+          "advantage": {
+            "type": "string",
+            "description": "Advantage type used for this roll",
+            "enum": [
+              "advantage",
+              "disadvantage",
+              "none"
+            ]
+          },
+          "keptRoll": {
+            "type": "number",
+            "description": "The roll that was kept (when using advantage/disadvantage)"
+          },
+          "discardedRoll": {
+            "type": "number",
+            "description": "The roll that was discarded (when using advantage/disadvantage)"
+          }
+        },
+        "required": [
+          "rolls",
+          "mod",
+          "total"
         ]
       },
       "CombatEndResultDto": {
@@ -2760,48 +2912,6 @@
         },
         "required": [
           "expr"
-        ]
-      },
-      "DiceThrowDto": {
-        "type": "object",
-        "properties": {
-          "rolls": {
-            "description": "Individual dice roll results",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "mod": {
-            "type": "number",
-            "description": "Modifier applied to the total"
-          },
-          "total": {
-            "type": "number",
-            "description": "Total result (sum of rolls + modifier)"
-          },
-          "advantage": {
-            "type": "string",
-            "description": "Advantage type used for this roll",
-            "enum": [
-              "advantage",
-              "disadvantage",
-              "none"
-            ]
-          },
-          "keptRoll": {
-            "type": "number",
-            "description": "The roll that was kept (when using advantage/disadvantage)"
-          },
-          "discardedRoll": {
-            "type": "number",
-            "description": "The roll that was discarded (when using advantage/disadvantage)"
-          }
-        },
-        "required": [
-          "rolls",
-          "mod",
-          "total"
         ]
       },
       "ImageRequestDto": {

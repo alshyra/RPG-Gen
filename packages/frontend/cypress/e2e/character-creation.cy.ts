@@ -162,7 +162,7 @@ describe('Character Creation', () => {
       .then((u) => {
         const match = (u).match(/\/character\/([^/]+)\/step\/1/);
         expect(match).to.be.not.null;
-        const id = (match as RegExpMatchArray)[1];
+        const [, id] = match as RegExpMatchArray;
         cy.request({
           method: 'GET',
           url: `/api/characters/${id}`,
@@ -217,7 +217,7 @@ describe('Character Creation', () => {
       .then((u) => {
         const match = (u).match(/\/character\/([^/]+)\/step\/1/);
         expect(match).to.not.be.null;
-        const id = (match as RegExpMatchArray)[1];
+        const [, id] = match as RegExpMatchArray;
         cy.request({
           method: 'GET',
           url: `/api/characters/${id}`,
@@ -362,7 +362,7 @@ describe('Character Creation', () => {
       .then((u) => {
         const match = (u).match(/\/character\/([^/]+)\/step\//);
         expect(match).to.not.be.null;
-        const id = (match as RegExpMatchArray)[1];
+        const [, id] = match as RegExpMatchArray;
         cy.request({
           method: 'GET',
           url: `/api/characters/${id}`,

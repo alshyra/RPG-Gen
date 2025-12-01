@@ -2,7 +2,7 @@ import { ChatMessageDto } from 'src/chat/dto/ChatMessageDto.js';
 import type { GameInstructionDto } from '../../chat/dto/GameInstructionDto.js';
 import JSONC from 'jsonc-simple-parser';
 
-const tryParse = (s: string): unknown | null => {
+const tryParse = (s: string): unknown => {
   try {
     // allow JSONC tolerant syntax
     return JSONC.parse(s);

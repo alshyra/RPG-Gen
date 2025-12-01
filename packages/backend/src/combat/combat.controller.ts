@@ -163,7 +163,7 @@ export class CombatController {
     // Server-side attack roll (phase 2.b): resolve the d20 attack roll here
     const dice = new DiceController();
     const attackRoll = dice.rollDiceExpr('1d20');
-    const die = attackRoll.rolls[0];
+    const [die] = attackRoll.rolls;
     const totalAttack = die + (state.player.attackBonus || 0);
     const critical = die === 20;
     const fumble = die === 1;

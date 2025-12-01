@@ -27,7 +27,8 @@ const exts = [
   'svg',
 ];
 
-const normalize = (v: any, fallback: string) => {
+const normalize = (v: string | { id?: string;
+  name?: string; } | null | undefined, fallback: string): string => {
   if (v == null) return fallback;
   if (typeof v === 'string') return v.toLowerCase();
   if (typeof v === 'object') {
@@ -51,7 +52,7 @@ const buildName = () => {
 };
 
 // Use base URL so paths work whether app is served at root or subpath
-const baseUrl = ((import.meta as any).env && (import.meta as any).env.BASE_URL) ? (import.meta as any).env.BASE_URL : '/';
+const baseUrl: string = import.meta.env?.BASE_URL ?? '/';
 
 const imgSrc = computed(() => {
   if (props.src) {

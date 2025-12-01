@@ -28,7 +28,7 @@ describe('Game detail pages', () => {
         const url = u.toString();
         const m = url.match(/\/character\/([^/]+)\/step\//);
         if (m) {
-          const id = m[1];
+          const [_, id] = m;
           // ensure we fetch the character when visiting the game route
           cy.intercept('GET', `**/api/characters/${id}`)
             .as('getCharacter');
@@ -72,7 +72,7 @@ describe('Game detail pages', () => {
         const url = u.toString();
         const m = url.match(/\/character\/([^/]+)\/step\//);
         if (m) {
-          const id = m[1];
+          const [_, id] = m;
           cy.intercept('GET', `**/api/characters/${id}`)
             .as('getCharacter');
           cy.visit(`/game/${id}`);

@@ -20,7 +20,8 @@ if (shouldMockLocalStorage) {
       delete storage[key];
     },
     clear: () => {
-      Object.keys(storage).forEach(k => delete storage[k]);
+      Object.keys(storage)
+        .forEach(k => delete storage[k]);
     },
     key: (index: number) => Object.keys(storage)[index] ?? null,
     get length() {

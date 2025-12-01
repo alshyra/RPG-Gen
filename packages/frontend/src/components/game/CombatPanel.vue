@@ -165,7 +165,7 @@ const {
   inCombat, roundNumber,
 } = storeToRefs(combatStore);
 
-const enemies = combatStore.enemies;
+const { enemies } = combatStore;
 
 // Build participants array: player + enemies, ordered by initiative desc
 const participants = computed(() => {

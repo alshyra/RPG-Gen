@@ -19,7 +19,8 @@
     "test:e2e": "npm -w rpg-gemini-frontend run test:e2e",
     "test:e2e:open": "npm -w rpg-gemini-frontend run test:e2e:open",
     "generate:openapi": "npm --workspace rpg-gemini-backend run generate:openapi",
-    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint ."
+    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint .",
+    "lint:fix": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint . --fix"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

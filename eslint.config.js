@@ -29,14 +29,18 @@ const stylisticRules = {
 // Shared rules for both frontend and backend
 const sharedRules = {
   'no-unused-vars': 'off',
-  '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+  'prefer-destructuring': 'off',
+  '@typescript-eslint/prefer-destructuring': 'error',
+  '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', ignoreRestSiblings: true, destructuredArrayIgnorePattern: '^_' }],
   '@typescript-eslint/no-explicit-any': 'warn',
   '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+  '@typescript-eslint/no-unnecessary-type-arguments': 'error',
+  '@typescript-eslint/no-redundant-type-constituents': 'error',
   '@typescript-eslint/explicit-module-boundary-types': 'off',
   'no-console': 'off',
   'arrow-body-style': ['error', 'as-needed'],
   'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-  'max-statements': ['error', 15],
+  'max-statements': ['error', 15, { ignoreTopLevelFunctions: true }],
   'prefer-object-spread': 'error',
   ...stylisticRules,
 };
@@ -120,7 +124,13 @@ export default defineConfig([
       globals: { ...globals.node },
     },
     rules: {
+      ...sharedRules,
       '@typescript-eslint/no-require-imports': 'off',
+      // Disable type-aware rules that require parserOptions.project
+      '@typescript-eslint/prefer-destructuring': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-type-arguments': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
     },
   },
   // Tests & Cypress relaxations

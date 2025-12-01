@@ -74,9 +74,9 @@ const buttonClass = computed(() => {
   return classes.join(' ');
 });
 
-const handleNavigate = (navigate: (e?: any) => any, e: any) => {
+const handleNavigate = (navigate: ((e?: MouseEvent) => void) | undefined, e: MouseEvent) => {
   if (isDisabled.value) {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    e.preventDefault();
     return;
   }
   if (navigate) {
@@ -84,9 +84,9 @@ const handleNavigate = (navigate: (e?: any) => any, e: any) => {
   }
 };
 
-const onClick = (e: any) => {
+const onClick = (e: MouseEvent) => {
   if (isDisabled.value) {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    e.preventDefault();
     return;
   }
   emit('click', e);

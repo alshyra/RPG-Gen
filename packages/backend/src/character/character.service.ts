@@ -52,7 +52,9 @@ export class CharacterService {
   }
 
   async findByUserId(userId: string, includeDeceased = false): Promise<CharacterDocument[]> {
-    const filter = { userId };
+    const filter: { userId: string;
+
+      isDeceased?: boolean; } = { userId };
     if (!includeDeceased) {
       filter.isDeceased = false;
     }

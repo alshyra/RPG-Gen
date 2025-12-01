@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { characterServiceApi } from '@/apis/characterApi';
 import { useCharacterStore } from '@/stores/characterStore';
 import {
@@ -7,6 +5,11 @@ import {
   HpInstructionMessageDto,
   XpInstructionMessageDto,
   CombatStartInstructionMessageDto,
+  type GameInstructionDto,
+  isRollInstruction,
+  isHpInstruction,
+  isXpInstruction,
+  isCombatStartInstruction,
 } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { useCombat } from './useCombat';
@@ -15,6 +18,32 @@ import {
 } from 'vue-router';
 import { conversationService } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
+
+type DisplayRole = 'user' | 'assistant' | 'system';
+
+interface HistoryMessage {
+  role: 'user' | 'assistant' | 'system';
+  narrative: string;
+  instructions?: GameInstructionDto | GameInstructionDto[];
+}
+
+interface ProcessedMessage {
+  role: DisplayRole;
+  narrative: string;
+}
+
+// Type for instructions that processInstructionInMessage can handle
+type ProcessableInstruction
+  = | RollInstructionMessageDto
+    | HpInstructionMessageDto
+    | XpInstructionMessageDto
+    | CombatStartInstructionMessageDto;
+
+// Type guard to check if an instruction is processable
+const isProcessableInstruction = (instr: GameInstructionDto): instr is ProcessableInstruction => isRollInstruction(instr)
+  || isHpInstruction(instr)
+  || isXpInstruction(instr)
+  || isCombatStartInstruction(instr);
 
 export const useGameSession = () => {
   const router = useRouter();
@@ -34,7 +63,6 @@ export const useGameSession = () => {
     console.log('[useGameSession] detected combat_start in history — fetching status', instr);
     try {
       const inCombat = await checkCombatStatus();
-      // If backend reports no active combat, initialize it using the provided instruction
       if (!inCombat) await initializeCombat(instr);
     } catch (e) {
       console.error('[useGameSession] failed to fetch combat status after combat_start', e);
@@ -42,44 +70,48 @@ export const useGameSession = () => {
   };
 
   const processInstructionInMessage = async (
-    instr: RollInstructionMessageDto | HpInstructionMessageDto | XpInstructionMessageDto | CombatStartInstructionMessageDto,
+    instr: ProcessableInstruction,
     isLastMessage: boolean,
   ): Promise<void> => {
-    // handle combat start specially
-    // be defensive about the type union so we accept other instruction shapes too
-    const asAny = instr as unknown as Record<string, unknown>;
-    if (asAny.type === 'combat_start') {
-      // only trigger a status fetch if this is the most recent assistant message
-      if (isLastMessage) await handleCombatStartInstruction(instr as unknown as CombatStartInstructionMessageDto);
+    if (isCombatStartInstruction(instr)) {
+      if (isLastMessage) await handleCombatStartInstruction(instr);
       return;
     }
-    if (instr.type === 'roll') {
+    if (isRollInstruction(instr)) {
       if (isLastMessage) gameStore.pendingInstruction = instr;
       gameStore.appendMessage(
         'system',
         `🎲 Roll needed: ${instr.dices}${instr.modifier ? ` + ${JSON.stringify(instr.modifier)}` : ''}`,
       );
-    } else if (instr.type === 'xp') {
+    } else if (isXpInstruction(instr)) {
       gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
       characterStore.updateXp(instr.xp);
-    } else if (instr.type === 'hp') {
+    } else if (isHpInstruction(instr)) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
       characterStore.updateHp(instr.hp);
     }
   };
 
-  const processHistoryMessages = (history: any[]): any[] => history.map((msg, i) => {
-    const role = msg.role === 'assistant' ? 'GM' : msg.role === 'user' ? 'Player' : msg.role;
-    // Be defensive: normalize instructions to array (some historical entries may store a single object)
-    const instrs = Array.isArray((msg).instructions)
-      ? (msg).instructions
-      : (msg).instructions
-          ? [(msg).instructions]
-          : [];
-    instrs.forEach((instr: any) => processInstructionInMessage(instr, i === history.length - 1));
+  const mapRoleToDisplay = (role: 'user' | 'assistant' | 'system'): DisplayRole => {
+    if (role === 'assistant') return 'assistant';
+    if (role === 'user') return 'user';
+    return 'system';
+  };
+
+  const processHistoryMessages = (history: HistoryMessage[]): ProcessedMessage[] => history.map((msg, i) => {
+    const instrs: GameInstructionDto[] = Array.isArray(msg.instructions)
+      ? msg.instructions
+      : msg.instructions
+        ? [msg.instructions]
+        : [];
+
+    // Filter to only processable instructions (skip spell instructions etc.)
+    instrs.filter(isProcessableInstruction)
+      .forEach(instr => processInstructionInMessage(instr, i === history.length - 1));
+
     return {
-      role,
+      role: mapRoleToDisplay(msg.role),
       narrative: msg.narrative,
     };
   });
@@ -124,7 +156,7 @@ export const useGameSession = () => {
       if (char.isDeceased) showDeathModal.value = true;
       const messages = await conversationService.startGame(char);
       if (messages?.length) {
-        const processed = await processHistoryMessages(messages);
+        const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);
       }
     } catch (e: unknown) {

@@ -95,17 +95,29 @@ import {
   generateUseCommand, generateEquipCommand,
 } from '@/utils/chatCommands';
 import { storeToRefs } from 'pinia';
+import type { ItemResponseDto } from '@rpg-gen/shared';
+
+// Extended item type with known meta fields
+interface InventoryItem extends ItemResponseDto {
+  meta?: {
+    type?: string;
+    class?: string;
+    usable?: boolean;
+    consumable?: boolean;
+    [key: string]: unknown;
+  };
+}
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 const { insertCommand } = useGameCommands();
 
-const items = computed(() => (currentCharacter.value?.inventory || []));
+const items = computed<InventoryItem[]>(() => (currentCharacter.value?.inventory || []) as InventoryItem[]);
 const hasItems = computed(() => items.value.length > 0);
 const itemsCount = computed(() => items.value.length || 0);
 
 const groupedItems = computed(() => {
-  const groups: Record<string, any[]> = {
+  const groups: Record<string, InventoryItem[]> = {
     Weapons: [],
     Armor: [],
     Consumables: [],
@@ -120,7 +132,7 @@ const groupedItems = computed(() => {
   // Sort each group with equipped items first
   Object.keys(groups)
     .forEach((k) => {
-      groups[k].sort((a: any, b: any) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0));
+      groups[k].sort((a, b) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0));
     });
   return groups;
 });
@@ -142,8 +154,8 @@ const onEquipItem = (itemName: string) => {
   insertCommand(generateEquipCommand(itemName));
 };
 
-const onCardClick = (item: any) => {
-  const name = item.name;
+const onCardClick = (item: InventoryItem) => {
+  const { name } = item;
   if (!name) return;
 
   // Consumables / usable items => use
@@ -162,7 +174,7 @@ const onCardClick = (item: any) => {
   window.alert('Aucune action associée à cet objet.');
 };
 
-const getIconClass = (item: any): string => {
+const getIconClass = (item: InventoryItem): string => {
   if (!item || !item.meta) return 'ra ra-backpack text-slate-300 text-lg';
 
   if (item.meta.type === 'weapon') return 'ra ra-sword text-amber-300 text-lg';

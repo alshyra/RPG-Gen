@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CombatEndDto } from '../../combat/dto/index.js';
+import { CombatEndDto } from '../../combat/dto/CombatEndResultDto.js';
 
 export class CombatEndInstructionMessageDto {
   @ApiProperty({

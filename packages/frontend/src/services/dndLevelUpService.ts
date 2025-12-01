@@ -596,7 +596,7 @@ export const dndLevelUpService = {
     const rules = classRules[className];
     if (!rules) return 1 + conModifier; // fallback
 
-    const hpDie = rules.hpDie;
+    const { hpDie } = rules;
     // Average HP die result (rounded down) + CON modifier
     const averageRoll = Math.floor(hpDie / 2) + 1;
     const hpGain = Math.max(1, averageRoll + conModifier);

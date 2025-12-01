@@ -1,14 +1,8 @@
 import { rollDice } from '@/apis/diceApi';
-import {
+import type {
   ChatMessageDto,
   DiceThrowDto,
-  RollInstructionMessageDto,
-  HpInstructionMessageDto,
-  XpInstructionMessageDto,
-  SpellInstructionMessageDto,
-  InventoryInstructionMessageDto,
-  CombatStartInstructionMessageDto,
-  CombatEndInstructionMessageDto,
+  GameInstructionDto,
 } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
@@ -32,11 +26,11 @@ interface RollModalData {
 type StoredRole = 'user' | 'assistant' | 'system';
 
 // Map display roles to stored roles
-const toStoredRole = (role: DisplayRole): StoredRole => {
+function toStoredRole(role: DisplayRole): StoredRole {
   if (role === 'assistant') return 'assistant';
   if (role === 'user') return 'user';
   return 'system';
-};
+}
 
 export const useGameStore = defineStore('gameStore', () => {
   const rolls = ref<DiceThrowDto[]>([]);
@@ -45,16 +39,7 @@ export const useGameStore = defineStore('gameStore', () => {
 
   // Minimal game session/message/pending instruction state used across app
   const messages = ref<(ChatMessageDto & { timestamp?: number })[]>([]);
-  const pendingInstruction = ref<
-    | RollInstructionMessageDto
-    | HpInstructionMessageDto
-    | XpInstructionMessageDto
-    | SpellInstructionMessageDto
-    | InventoryInstructionMessageDto
-    | CombatStartInstructionMessageDto
-    | CombatEndInstructionMessageDto
-    | null
-  >(null);
+  const pendingInstruction = ref<GameInstructionDto | null>(null);
   const playerText = ref('');
   const isInitializing = ref(false);
   const sending = ref(false);
