@@ -146,6 +146,18 @@ class Combatant {
     type: Boolean,
   })
   isPlayer: boolean;
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  originId?: string;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  activationIndex?: number;
 }
 
 @Schema({ timestamps: true })
@@ -204,6 +216,48 @@ export class CombatSession {
     default: 1,
   })
   roundNumber: number;
+
+  // D&D 5e Action Economy
+  @Prop({
+    required: false,
+    type: Number,
+    default: 1,
+  })
+  actionRemaining: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+    default: 1,
+  })
+  actionMax: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+    default: 1,
+  })
+  bonusActionRemaining: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+    default: 1,
+  })
+  bonusActionMax: number;
+
+  @Prop({
+    required: false,
+    type: String,
+    enum: [
+      'PLAYER_TURN',
+      'AWAITING_DAMAGE_ROLL',
+      'ENEMY_TURN',
+      'COMBAT_ENDED',
+    ],
+    default: 'PLAYER_TURN',
+  })
+  phase: string;
 }
 
 export const CombatSessionSchema = SchemaFactory.createForClass(CombatSession);

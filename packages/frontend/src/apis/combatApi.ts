@@ -81,6 +81,17 @@ class CombatService {
     });
     return getData<TurnResultWithInstructionsDto>(response);
   }
+
+  /**
+   * End the current player activation and advance to next turn.
+   * This triggers enemy actions automatically until the next player activation.
+   */
+  async endActivation(characterId: string): Promise<TurnResultWithInstructionsDto> {
+    const response = await api.POST('/api/combat/{characterId}/end-activation', {
+      params: { path: { characterId } },
+    });
+    return getData<TurnResultWithInstructionsDto>(response);
+  }
 }
 
 export const combatService = new CombatService();

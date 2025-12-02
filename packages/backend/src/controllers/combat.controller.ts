@@ -110,6 +110,21 @@ export class CombatController {
     return this.combatOrchestrator.getStatus(userId, characterId);
   }
 
+  @Post(':characterId/end-activation')
+  @ApiOperation({ summary: 'End current player activation and advance turn (triggers enemy actions)' })
+  @ApiResponse({
+    status: 200,
+    type: TurnResultWithInstructionsDto,
+    description: 'Returns result of enemy actions and new player turn state',
+  })
+  async endActivation(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+  ): Promise<TurnResultWithInstructionsDto> {
+    const userId = req.user._id.toString();
+    return this.combatOrchestrator.endPlayerActivation(userId, characterId);
+  }
+
   @Post(':characterId/end')
   @ApiOperation({ summary: 'Force end current combat (flee)' })
   @ApiResponse({

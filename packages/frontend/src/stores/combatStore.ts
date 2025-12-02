@@ -32,10 +32,27 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
   const isAnimatingAttacks = ref(false);
+  const currentTurnIndex = ref(0);
+
+  // D&D 5e Action Economy
+  const actionRemaining = ref(1);
+  const actionMax = ref(1);
+  const bonusActionRemaining = ref(1);
+  const bonusActionMax = ref(1);
 
   const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
   const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
   const hasValidTarget = computed(() => validTargets.value.length > 0);
+  const canAct = computed(() => (actionRemaining.value ?? 0) > 0);
+  const canBonusAct = computed(() => (bonusActionRemaining.value ?? 0) > 0);
+
+  // Get current combatant from turn order
+  const currentCombatant = computed(() => {
+    if (turnOrder.value.length === 0) return null;
+    return turnOrder.value[currentTurnIndex.value] ?? null;
+  });
+
+  const isPlayerTurn = computed(() => currentCombatant.value?.isPlayer ?? false);
 
   const initializeCombat = (response: CombatStateDto): void => {
     console.log('[combatStore] initializeCombat', response);
@@ -44,9 +61,17 @@ export const useCombatStore = defineStore('combatStore', () => {
     playerInitiative.value = response.player.initiative ?? 0;
     enemies.value = response.enemies ?? [];
     turnOrder.value = response.turnOrder ?? [];
+    currentTurnIndex.value = response.currentTurnIndex ?? 0;
     actionToken.value = response.actionToken ?? null;
     phase.value = response.phase ?? 'PLAYER_TURN';
     expectedDto.value = response.expectedDto ?? 'AttackRequestDto';
+
+    // Action economy
+    actionRemaining.value = response.actionRemaining ?? 1;
+    actionMax.value = response.actionMax ?? 1;
+    bonusActionRemaining.value = response.bonusActionRemaining ?? 1;
+    bonusActionMax.value = response.bonusActionMax ?? 1;
+
     if (response.enemies.length > 0) {
       [currentTarget.value] = response.enemies;
     }
@@ -67,6 +92,14 @@ export const useCombatStore = defineStore('combatStore', () => {
   const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
     enemies.value = updateEnemiesFromResult(enemies, result.remainingEnemies);
     roundNumber.value = result.roundNumber;
+
+    // Update action economy from result
+    if (result.actionRemaining !== undefined) actionRemaining.value = result.actionRemaining;
+    if (result.actionMax !== undefined) actionMax.value = result.actionMax;
+    if (result.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.bonusActionRemaining;
+    if (result.bonusActionMax !== undefined) bonusActionMax.value = result.bonusActionMax;
+    if (result.phase) phase.value = result.phase;
+
     if (result.combatEnded) {
       inCombat.value = false;
       phase.value = 'COMBAT_ENDED';
@@ -90,6 +123,11 @@ export const useCombatStore = defineStore('combatStore', () => {
     isCurrentAttackPlayerAttack.value = true;
     attackResultQueue.value = [];
     isAnimatingAttacks.value = false;
+    currentTurnIndex.value = 0;
+    actionRemaining.value = 1;
+    actionMax.value = 1;
+    bonusActionRemaining.value = 1;
+    bonusActionMax.value = 1;
   };
 
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
@@ -154,6 +192,29 @@ export const useCombatStore = defineStore('combatStore', () => {
     showNextAttackResult();
   };
 
+  /**
+   * End the current player activation and advance turn.
+   * This triggers enemy actions until the next player activation.
+   */
+  const endActivation = async (characterId: string) => {
+    console.log('[combatStore] endActivation for', characterId);
+    const response = await combatService.endActivation(characterId);
+    console.log('[combatStore] endActivation response', response);
+
+    // Update state from response
+    updateFromTurnResult(response);
+
+    // Show enemy attack animations if any
+    if (response.enemyAttacks && response.enemyAttacks.length > 0) {
+      startAttackAnimation([], response.enemyAttacks);
+    }
+
+    // Refresh full status to get new action token
+    await fetchStatus(characterId);
+
+    return response;
+  };
+
   return {
     inCombat,
     enemies,
@@ -164,14 +225,26 @@ export const useCombatStore = defineStore('combatStore', () => {
     expectedDto,
     playerInitiative,
     turnOrder,
+    currentTurnIndex,
     showAttackResultModal,
     currentAttackResult,
     isCurrentAttackPlayerAttack,
     attackResultQueue,
     isAnimatingAttacks,
+    // Action economy
+    actionRemaining,
+    actionMax,
+    bonusActionRemaining,
+    bonusActionMax,
+    // Computed
     aliveEnemies,
     validTargets,
     hasValidTarget,
+    canAct,
+    canBonusAct,
+    currentCombatant,
+    isPlayerTurn,
+    // Actions
     initializeCombat,
     updateFromTurnResult,
     clearCombat,
@@ -180,5 +253,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     setActionToken,
     startAttackAnimation,
     closeAttackResultModal,
+    endActivation,
   };
 });

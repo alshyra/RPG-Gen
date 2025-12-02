@@ -29,8 +29,50 @@
             </svg>
             <span>Combat</span>
           </div>
-          <div class="ml-auto text-sm text-slate-400">
+          <div
+            class="ml-2 text-sm text-slate-400"
+            data-cy="combat-round"
+          >
             Round {{ roundNumber }}
+          </div>
+          <!-- Action Economy Display -->
+          <div class="ml-auto flex items-center gap-3 text-sm">
+            <div
+              class="flex items-center gap-1"
+              data-cy="action-counter"
+              :class="combatStore.actionRemaining > 0 ? 'text-green-400' : 'text-slate-500'"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" />
+              </svg>
+              <span>{{ combatStore.actionRemaining }}</span>
+            </div>
+            <div
+              class="flex items-center gap-1"
+              data-cy="bonus-action-counter"
+              :class="combatStore.bonusActionRemaining > 0 ? 'text-amber-400' : 'text-slate-500'"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z" />
+              </svg>
+              <span>{{ combatStore.bonusActionRemaining }}</span>
+            </div>
+            <!-- Combat Phase -->
+            <div
+              class="px-2 py-0.5 rounded text-xs font-medium"
+              data-cy="combat-phase"
+              :class="phaseClass"
+            >
+              {{ phaseLabel }}
+            </div>
           </div>
         </div>
 
@@ -76,6 +118,20 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- End Turn Button -->
+        <div class="flex justify-end mt-2">
+          <button
+            data-cy="end-turn-button"
+            class="px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+            :class="endTurnButtonClass"
+            :disabled="!canEndTurn || isEndingTurn"
+            @click="onEndTurn"
+          >
+            <span v-if="isEndingTurn">En cours...</span>
+            <span v-else>Fin de tour</span>
+          </button>
         </div>
       </div>
     </div>
@@ -162,10 +218,43 @@ const characterStore = useCharacterStore();
 const ui = useUiStore();
 
 const {
-  inCombat, roundNumber,
+  inCombat, roundNumber, phase,
 } = storeToRefs(combatStore);
 
 const { enemies } = combatStore;
+
+const isEndingTurn = ref(false);
+
+// Phase display
+const phaseLabel = computed(() => {
+  switch (phase.value) {
+    case 'PLAYER_TURN': return 'Your Turn';
+    case 'AWAITING_DAMAGE_ROLL': return 'Roll Damage';
+    case 'ENEMY_TURN': return 'Enemy Turn';
+    case 'COMBAT_ENDED': return 'Combat Over';
+    default: return 'Your Turn';
+  }
+});
+
+const phaseClass = computed(() => {
+  switch (phase.value) {
+    case 'PLAYER_TURN': return 'bg-green-600 text-white';
+    case 'AWAITING_DAMAGE_ROLL': return 'bg-amber-600 text-white';
+    case 'ENEMY_TURN': return 'bg-red-600 text-white';
+    case 'COMBAT_ENDED': return 'bg-slate-600 text-white';
+    default: return 'bg-green-600 text-white';
+  }
+});
+
+// Can end turn only during player turn
+const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
+
+const endTurnButtonClass = computed(() => {
+  if (!canEndTurn.value) {
+    return 'bg-slate-600 text-slate-400 cursor-not-allowed';
+  }
+  return 'bg-purple-600 hover:bg-purple-700 text-white';
+});
 
 // Build participants array: player + enemies, ordered by initiative desc
 const participants = computed(() => {
@@ -231,6 +320,19 @@ const onActorActed = async (_actor: string) => {
     await combatStore.fetchStatus(characterStore.currentCharacter.characterId);
   } catch (e) {
     console.error('Failed to refresh combat status after action', e);
+  }
+};
+
+const onEndTurn = async () => {
+  if (!characterStore.currentCharacter || isEndingTurn.value) return;
+
+  try {
+    isEndingTurn.value = true;
+    await combatStore.endActivation(characterStore.currentCharacter.characterId);
+  } catch (e) {
+    console.error('Failed to end turn', e);
+  } finally {
+    isEndingTurn.value = false;
   }
 };
 </script>

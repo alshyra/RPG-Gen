@@ -52,7 +52,8 @@ export class CombatOrchestrator {
     userId: string,
     characterId: string,
     combatStartRequest: CombatStartRequestDto,
-  ): Promise<CombatStateDto & { actionToken: string; expectedDto: string }> {
+  ): Promise<CombatStateDto & { actionToken: string;
+    expectedDto: string; }> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
 
@@ -232,7 +233,7 @@ export class CombatOrchestrator {
         throw new BadRequestException('No pending successful attack associated with this token');
       }
 
-      const result = await this.combatService.applyDamageToEnemy(characterId, diceThrowDto.target!, diceThrowDto.total!);
+      const result = await this.combatService.applyDamageToEnemy(characterId, diceThrowDto.target, diceThrowDto.total);
       if (!result) throw new BadRequestException('Failed to apply damage');
 
       await this.actionRecordService.setApplied(actionToken, result, { requesterId: userId });
@@ -249,7 +250,11 @@ export class CombatOrchestrator {
   async getStatus(
     userId: string,
     characterId: string,
-  ): Promise<(CombatStateDto & { actionToken?: string; expectedDto?: string; validTargets?: string[] }) | { characterId: string; inCombat: false; narrative: string }> {
+  ): Promise<(CombatStateDto & { actionToken?: string;
+    expectedDto?: string;
+    validTargets?: string[]; }) | { characterId: string;
+      inCombat: false;
+      narrative: string; }> {
     await this.characterService.findByCharacterId(userId, characterId);
 
     const inCombat = await this.combatService.isInCombat(characterId);
@@ -331,10 +336,14 @@ export class CombatOrchestrator {
   async processCombatVictory(
     userId: string,
     characterId: string,
-  ): Promise<{ xpGained: number; enemiesDefeated: string[] }> {
+  ): Promise<{ xpGained: number;
+    enemiesDefeated: string[]; }> {
     const result = await this.combatService.endCombat(characterId);
     if (!result) {
-      return { xpGained: 0, enemiesDefeated: [] };
+      return {
+        xpGained: 0,
+        enemiesDefeated: [],
+      };
     }
 
     // Distribute XP to character
@@ -355,7 +364,8 @@ export class CombatOrchestrator {
     userId: string,
     combatId: string,
     expectedDto: string,
-  ): Promise<{ alreadyApplied: boolean; record: ActionRecord }> {
+  ): Promise<{ alreadyApplied: boolean;
+    record: ActionRecord; }> {
     const exists = await this.actionRecordService.getByToken(actionToken);
     if (!exists) throw new GoneException('Action token not found or expired');
 
@@ -384,5 +394,30 @@ export class CombatOrchestrator {
       alreadyApplied: false,
       record: acquire.record as ActionRecord,
     };
+  }
+
+  /**
+   * End the current player activation and advance turns.
+   * Resolves enemy activations automatically until next player turn.
+   */
+  async endPlayerActivation(
+    userId: string,
+    characterId: string,
+  ): Promise<TurnResultWithInstructionsDto> {
+    // Validate character ownership
+    await this.characterService.findByCharacterId(userId, characterId);
+
+    if (!(await this.combatService.isInCombat(characterId))) {
+      throw new BadRequestException('Character is not in combat');
+    }
+
+    const result = await this.combatService.endPlayerActivation(characterId);
+    if (!result) {
+      throw new BadRequestException('Failed to end player activation');
+    }
+
+    this.logger.log(`Player activation ended for ${characterId}. New round: ${result.roundNumber}`);
+
+    return result;
   }
 }

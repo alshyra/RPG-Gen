@@ -1,5 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsBoolean } from 'class-validator';
+import {
+  ApiProperty, ApiPropertyOptional,
+} from '@nestjs/swagger';
+import {
+  IsString, IsNumber, IsBoolean, IsOptional,
+} from 'class-validator';
 
 export class CombatantDto {
   @ApiProperty({ description: 'ID of the combatant (player character or enemy)' })
@@ -17,4 +21,14 @@ export class CombatantDto {
   @ApiProperty({ description: 'Whether combatant is player character' })
   @IsBoolean()
   isPlayer: boolean;
+
+  @ApiPropertyOptional({ description: 'Original ID for duplicated player entries (all share same originId)' })
+  @IsOptional()
+  @IsString()
+  originId?: string;
+
+  @ApiPropertyOptional({ description: 'Activation index for player duplicates (0-based)' })
+  @IsOptional()
+  @IsNumber()
+  activationIndex?: number;
 }

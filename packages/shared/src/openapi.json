@@ -165,55 +165,6 @@
         ]
       }
     },
-    "/api/rolls/{characterId}": {
-      "post": {
-        "operationId": "RollsController_submitRoll",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitRollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RollInstructionMessageDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Submit resolved roll(s) (non-chat) for processing",
-        "tags": [
-          "rolls"
-        ]
-      }
-    },
     "/api/characters": {
       "post": {
         "operationId": "CharacterController_create",
@@ -1018,6 +969,42 @@
         ]
       }
     },
+    "/api/combat/{characterId}/end-activation": {
+      "post": {
+        "operationId": "CombatController_endActivation",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns result of enemy actions and new player turn state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End current player activation and advance turn (triggers enemy actions)",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
     "/api/combat/{characterId}/end": {
       "post": {
         "operationId": "CombatController_endCombat",
@@ -1165,6 +1152,55 @@
         },
         "tags": [
           "Health"
+        ]
+      }
+    },
+    "/api/rolls/{characterId}": {
+      "post": {
+        "operationId": "RollsController_submitRoll",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitRollDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RollInstructionMessageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit resolved roll(s) (non-chat) for processing",
+        "tags": [
+          "rolls"
         ]
       }
     }
@@ -1580,21 +1616,6 @@
         "required": [
           "role",
           "narrative"
-        ]
-      },
-      "SubmitRollDto": {
-        "type": "object",
-        "properties": {
-          "instructions": {
-            "description": "Resolved instructions array",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RollInstructionMessageDto"
-            }
-          }
-        },
-        "required": [
-          "instructions"
         ]
       },
       "CreateCharacterBodyDto": {
@@ -2572,6 +2593,14 @@
           "isPlayer": {
             "type": "boolean",
             "description": "Whether combatant is player character"
+          },
+          "originId": {
+            "type": "string",
+            "description": "Original ID for duplicated player entries (all share same originId)"
+          },
+          "activationIndex": {
+            "type": "number",
+            "description": "Activation index for player duplicates (0-based)"
           }
         },
         "required": [
@@ -2650,6 +2679,22 @@
           "expectedDto": {
             "type": "string",
             "description": "Expected DTO type for the next action (e.g., AttackRequestDto, DiceThrowDto)"
+          },
+          "actionRemaining": {
+            "type": "number",
+            "description": "Remaining standard actions for current activation"
+          },
+          "actionMax": {
+            "type": "number",
+            "description": "Maximum standard actions per activation"
+          },
+          "bonusActionRemaining": {
+            "type": "number",
+            "description": "Remaining bonus actions for current activation"
+          },
+          "bonusActionMax": {
+            "type": "number",
+            "description": "Maximum bonus actions per activation"
           }
         },
         "required": [
@@ -2843,6 +2888,32 @@
                 }
               ]
             }
+          },
+          "actionRemaining": {
+            "type": "number",
+            "description": "Remaining standard actions for current activation"
+          },
+          "actionMax": {
+            "type": "number",
+            "description": "Maximum standard actions per activation"
+          },
+          "bonusActionRemaining": {
+            "type": "number",
+            "description": "Remaining bonus actions for current activation"
+          },
+          "bonusActionMax": {
+            "type": "number",
+            "description": "Maximum bonus actions per activation"
+          },
+          "phase": {
+            "type": "string",
+            "description": "Current combat phase",
+            "enum": [
+              "PLAYER_TURN",
+              "AWAITING_DAMAGE_ROLL",
+              "ENEMY_TURN",
+              "COMBAT_ENDED"
+            ]
           }
         },
         "required": [
@@ -3004,6 +3075,21 @@
         },
         "required": [
           "imageUrl"
+        ]
+      },
+      "SubmitRollDto": {
+        "type": "object",
+        "properties": {
+          "instructions": {
+            "description": "Resolved instructions array",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RollInstructionMessageDto"
+            }
+          }
+        },
+        "required": [
+          "instructions"
         ]
       }
     }

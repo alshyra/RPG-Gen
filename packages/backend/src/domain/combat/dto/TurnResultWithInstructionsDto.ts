@@ -10,7 +10,10 @@ import {
   CombatStartInstructionMessageDto,
   CombatEndInstructionMessageDto,
 } from '../../chat/dto/index.js';
-import { IsOptional, IsArray } from 'class-validator';
+import {
+  IsOptional, IsArray, IsNumber, IsString,
+} from 'class-validator';
+import type { CombatPhase } from './CombatStateDto.js';
 
 export class TurnResultWithInstructionsDto extends TurnResultDto {
   @ApiPropertyOptional({
@@ -31,6 +34,40 @@ export class TurnResultWithInstructionsDto extends TurnResultDto {
   @IsOptional()
   @IsArray()
   instructions?: GameInstructionDto[];
+
+  // D&D 5e Action Economy
+  @ApiPropertyOptional({ description: 'Remaining standard actions for current activation' })
+  @IsOptional()
+  @IsNumber()
+  actionRemaining?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum standard actions per activation' })
+  @IsOptional()
+  @IsNumber()
+  actionMax?: number;
+
+  @ApiPropertyOptional({ description: 'Remaining bonus actions for current activation' })
+  @IsOptional()
+  @IsNumber()
+  bonusActionRemaining?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum bonus actions per activation' })
+  @IsOptional()
+  @IsNumber()
+  bonusActionMax?: number;
+
+  @ApiPropertyOptional({
+    description: 'Current combat phase',
+    enum: [
+      'PLAYER_TURN',
+      'AWAITING_DAMAGE_ROLL',
+      'ENEMY_TURN',
+      'COMBAT_ENDED',
+    ],
+  })
+  @IsOptional()
+  @IsString()
+  phase?: CombatPhase;
 }
 
 // Re-export instruction DTOs for OpenAPI schema generation

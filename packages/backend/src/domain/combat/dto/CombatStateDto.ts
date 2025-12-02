@@ -89,4 +89,25 @@ export class CombatStateDto {
   @IsOptional()
   @IsString()
   expectedDto?: string;
+
+  // D&D 5e Action Economy
+  @ApiPropertyOptional({ description: 'Remaining standard actions for current activation' })
+  @IsOptional()
+  @IsNumber()
+  actionRemaining?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum standard actions per activation' })
+  @IsOptional()
+  @IsNumber()
+  actionMax?: number;
+
+  @ApiPropertyOptional({ description: 'Remaining bonus actions for current activation' })
+  @IsOptional()
+  @IsNumber()
+  bonusActionRemaining?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum bonus actions per activation' })
+  @IsOptional()
+  @IsNumber()
+  bonusActionMax?: number;
 }
