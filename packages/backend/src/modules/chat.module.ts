@@ -27,5 +27,6 @@ import {
     ConversationService,
     ChatOrchestrator,
   ],
+  exports: [ChatOrchestrator],
 })
 export class ChatModule {}
