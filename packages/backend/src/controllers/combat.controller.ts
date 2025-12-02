@@ -12,12 +12,16 @@ import {
   ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
-import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 import {
-  TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto,
-  CombatStartRequestDto, AttackRequestDto, CombatStateDto,
+  AttackRequestDto,
+  CombatEndResponseDto,
+  CombatStartRequestDto,
+  CombatStateDto,
+  DiceThrowDto,
+  TurnResultWithInstructionsDto,
 } from '../domain/combat/dto/index.js';
 import type { RPGRequest } from '../global.types.js';
+import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 
 /**
  * CombatController - Thin controller that delegates to CombatOrchestrator.
@@ -68,10 +72,10 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('actionToken') actionToken: string,
-    @Body('target') target: string,
+    @Body('targetId') targetId: string,
   ): Promise<TurnResultWithInstructionsDto> {
     const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(userId, characterId, actionToken, target);
+    return this.combatOrchestrator.processAttack(userId, characterId, actionToken, targetId);
   }
 
   @Post(':characterId/resolve-roll/:actionToken')
@@ -85,14 +89,11 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('actionToken') actionToken: string,
-    @Body() body: DiceThrowDto,
+    @Body() diceThrowDto: DiceThrowDto,
   ) {
     const userId = req.user._id.toString();
-    return this.combatOrchestrator.resolveRoll(userId, characterId, actionToken, {
-      action: body.action,
-      target: body.target,
-      total: body.total,
-    });
+    this.logger.debug(`Received resolveRoll request for character ${characterId} with actionToken ${actionToken} and payload ${JSON.stringify(diceThrowDto)}`);
+    return this.combatOrchestrator.resolveRoll(userId, characterId, actionToken, diceThrowDto);
   }
 
   @Get(':characterId/status')

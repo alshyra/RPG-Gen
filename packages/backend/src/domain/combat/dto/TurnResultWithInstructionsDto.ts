@@ -10,6 +10,7 @@ import {
   CombatStartInstructionMessageDto,
   CombatEndInstructionMessageDto,
 } from '../../chat/dto/index.js';
+import { IsOptional, IsArray } from 'class-validator';
 
 export class TurnResultWithInstructionsDto extends TurnResultDto {
   @ApiPropertyOptional({
@@ -27,6 +28,8 @@ export class TurnResultWithInstructionsDto extends TurnResultDto {
       ],
     },
   })
+  @IsOptional()
+  @IsArray()
   instructions?: GameInstructionDto[];
 }
 

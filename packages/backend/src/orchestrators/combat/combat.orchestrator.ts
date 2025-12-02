@@ -19,6 +19,7 @@ import type {
   CombatStateDto,
   TurnResultWithInstructionsDto,
   CombatEndResponseDto,
+  DiceThrowDto,
 } from '../../domain/combat/dto/index.js';
 import type { RollInstructionMessageDto } from '../../domain/chat/dto/index.js';
 
@@ -180,10 +181,11 @@ export class CombatOrchestrator {
     userId: string,
     characterId: string,
     actionToken: string,
-    body: { action: string; target?: string; total?: number },
+    diceThrowDto: DiceThrowDto,
   ): Promise<TurnResultWithInstructionsDto> {
-    if (!body || !body.action) {
-      throw new BadRequestException('Invalid roll resolution payload');
+    this.logger.debug(`Resolving roll for character ${characterId} with token ${actionToken} and payload ${JSON.stringify(diceThrowDto)}`);
+    if (!diceThrowDto || !diceThrowDto.action) {
+      throw new BadRequestException('Invalid roll resolution payload', `${JSON.stringify(diceThrowDto)}`);
     }
 
     if (!(await this.combatService.isInCombat(characterId))) {
@@ -221,7 +223,7 @@ export class CombatOrchestrator {
     }
 
     try {
-      if (body.action !== 'damage') {
+      if (diceThrowDto.action !== 'damage') {
         throw new BadRequestException('resolve-roll expects action = "damage" in this flow');
       }
 
@@ -230,7 +232,7 @@ export class CombatOrchestrator {
         throw new BadRequestException('No pending successful attack associated with this token');
       }
 
-      const result = await this.combatService.applyDamageToEnemy(characterId, body.target!, body.total!);
+      const result = await this.combatService.applyDamageToEnemy(characterId, diceThrowDto.target!, diceThrowDto.total!);
       if (!result) throw new BadRequestException('Failed to apply damage');
 
       await this.actionRecordService.setApplied(actionToken, result, { requesterId: userId });

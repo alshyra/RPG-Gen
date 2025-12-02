@@ -234,10 +234,16 @@ export function useGameRolls() {
       gameStore.appendMessage('system', 'No action token available for combat roll');
       return;
     }
-    const payload: DiceThrowDto = {
+    const pending = gameStore.pendingInstruction;
+    const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
+    const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
+    const payload: DiceThrowDto & { action?: string;
+      target?: string; } = {
       rolls,
       mod: 0,
       total,
+      action,
+      target,
     };
     const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
     if (resp?.instructions && resp.instructions.length > 0) {
@@ -323,10 +329,16 @@ export function useGameRolls() {
       gameStore.appendMessage('system', 'No character or action token; cannot resolve attack.');
       return;
     }
-    const payload: DiceThrowDto = {
+    const pending = gameStore.pendingInstruction;
+    const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
+    const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
+    const payload: DiceThrowDto & { action?: string;
+      target?: string; } = {
       rolls: rolls ?? [],
       mod: 0,
       total: total ?? 0,
+      action,
+      target,
     };
     const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
     if (resp) await handleAttackRollResponse(resp);
@@ -347,10 +359,13 @@ export function useGameRolls() {
     const characterId = characterStore.currentCharacter?.characterId;
     const { actionToken } = combatStore;
     if (!characterId || !actionToken) return;
-    const payload: DiceThrowDto = {
+    const payload: DiceThrowDto & { action?: string;
+      target?: string; } = {
       rolls: rolls ?? [],
       mod: 0,
       total: damageTotal,
+      action: 'damage',
+      target: targetName,
     };
     const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
     if (resp && targetName) {

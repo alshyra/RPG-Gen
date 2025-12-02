@@ -786,7 +786,7 @@ export class CombatService {
     }
 
     return state.enemies.filter(e => e.hp > 0)
-      .map(e => e.name);
+      .map(e => e.id);
   }
 
   /**
