@@ -56,7 +56,10 @@ watch(
   () => {
     if (messagesPane.value) {
       setTimeout(() => {
-        messagesPane.value!.scrollTop = messagesPane.value!.scrollHeight;
+        // Re-check ref inside setTimeout since it may have become null during navigation
+        if (messagesPane.value) {
+          messagesPane.value.scrollTop = messagesPane.value.scrollHeight;
+        }
       }, 50);
     }
   },

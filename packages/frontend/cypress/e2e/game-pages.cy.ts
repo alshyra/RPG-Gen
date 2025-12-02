@@ -16,9 +16,8 @@ describe('Game detail pages', () => {
     cy.visit('/home');
     // Wait for characters to load and resume the first one
     cy.wait('@getCharacters');
-    // Click the first resume button
-    cy.get('button')
-      .contains('Reprendre')
+    // Click on the character card (role="button" with aria-label containing "Reprendre")
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .first()
       .click();
 
@@ -62,8 +61,8 @@ describe('Game detail pages', () => {
       .as('getCharacters');
     cy.visit('/home');
     cy.wait('@getCharacters');
-    cy.get('button')
-      .contains('Reprendre')
+    // Click on the character card (role="button" with aria-label containing "Reprendre")
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .first()
       .click();
     // ensure we are on the game view (if resume navigates to character-step, visit game explicitely)

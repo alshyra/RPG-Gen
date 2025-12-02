@@ -1,6 +1,6 @@
 import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { ArmorMeta } from './dto/InventoryItemMeta.js';
-import { ItemResponseDto } from './dto/ItemResponseDto.js';
+import { InventoryItemDto } from './dto/InventoryItemDto.js';
 
 interface ParsedAc {
   baseAc: number;
@@ -9,8 +9,8 @@ interface ParsedAc {
 }
 
 interface EquippedGear {
-  armor?: ItemResponseDto<ArmorMeta>;
-  shield?: ItemResponseDto<ArmorMeta>;
+  armor?: InventoryItemDto<ArmorMeta>;
+  shield?: InventoryItemDto<ArmorMeta>;
 }
 
 export const getDexModifier = (character: CharacterResponseDto): number => {
@@ -77,10 +77,10 @@ export const parseArmorAc = (acString: string): ParsedAc => {
     };
 };
 
-const isItemArmor = (item: ItemResponseDto): item is ItemResponseDto<ArmorMeta> => item.meta?.type === 'armor';
+const isItemArmor = (item: InventoryItemDto): item is InventoryItemDto<ArmorMeta> => item.meta?.type === 'armor';
 
-const findEquippedGear = (inventory: ItemResponseDto[]): EquippedGear => {
-  const equippedItems = inventory.filter(item => item.equipped && isItemArmor(item)) as ItemResponseDto<ArmorMeta>[];
+const findEquippedGear = (inventory: InventoryItemDto[]): EquippedGear => {
+  const equippedItems = inventory.filter(item => item.equipped && isItemArmor(item)) as InventoryItemDto<ArmorMeta>[];
   const shield = equippedItems.find(item => item.meta?.class === 'Shield');
   const armor = equippedItems.find(item => item.meta?.class !== 'Shield');
   return {
@@ -89,7 +89,7 @@ const findEquippedGear = (inventory: ItemResponseDto[]): EquippedGear => {
   };
 };
 
-const computeArmorBonus = (armor: ItemResponseDto<ArmorMeta> | undefined, dexMod: number): {
+const computeArmorBonus = (armor: InventoryItemDto<ArmorMeta> | undefined, dexMod: number): {
   baseAc: number;
   dexBonus: number;
 } => {
@@ -113,7 +113,7 @@ const computeArmorBonus = (armor: ItemResponseDto<ArmorMeta> | undefined, dexMod
   };
 };
 
-const computeShieldBonus = (shield: ItemResponseDto<ArmorMeta> | undefined): number => {
+const computeShieldBonus = (shield: InventoryItemDto<ArmorMeta> | undefined): number => {
   if (!shield?.meta?.ac) return 0;
   return parseArmorAc(String(shield.meta.ac)).baseAc;
 };

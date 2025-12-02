@@ -98,13 +98,29 @@ export const useCombatStore = defineStore('combatStore', () => {
     if (result.actionMax !== undefined) actionMax.value = result.actionMax;
     if (result.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.bonusActionRemaining;
     if (result.bonusActionMax !== undefined) bonusActionMax.value = result.bonusActionMax;
-    if (result.phase) phase.value = result.phase;
+    if (result.phase) {
+      phase.value = result.phase;
+      // If phase returned to PLAYER_TURN, reset expectedDto to accept new attacks
+      if (result.phase === 'PLAYER_TURN') {
+        expectedDto.value = 'AttackRequestDto';
+      }
+    }
 
     if (result.combatEnded) {
       inCombat.value = false;
       phase.value = 'COMBAT_ENDED';
       actionToken.value = null;
     }
+    currentTarget.value = selectNextAliveTarget(enemies);
+  };
+
+  /**
+   * Update only enemies and round number without touching phase/expectedDto.
+   * Used when attack hits and a roll instruction is pending.
+   */
+  const updateEnemiesOnly = (remainingEnemies: CombatEnemyDto[], newRoundNumber: number) => {
+    enemies.value = updateEnemiesFromResult(enemies, remainingEnemies);
+    roundNumber.value = newRoundNumber;
     currentTarget.value = selectNextAliveTarget(enemies);
   };
 
@@ -154,6 +170,10 @@ export const useCombatStore = defineStore('combatStore', () => {
     actionToken.value = token;
     if (newPhase) phase.value = newPhase;
     if (newExpectedDto) expectedDto.value = newExpectedDto;
+  };
+
+  const setCurrentTarget = (target: CombatEnemyDto | null) => {
+    currentTarget.value = target;
   };
 
   const queueAttackResults = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
@@ -247,7 +267,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     // Actions
     initializeCombat,
     updateFromTurnResult,
+    updateEnemiesOnly,
     clearCombat,
+    setCurrentTarget,
     startCombat,
     fetchStatus,
     setActionToken,

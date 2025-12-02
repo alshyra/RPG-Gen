@@ -5,7 +5,7 @@ import { RaceResponseDto } from './RaceResponseDto.js';
 import { AbilityScoresResponseDto } from './AbilityScoresResponseDto.js';
 import { CharacterClassResponseDto } from './CharacterClassResponseDto.js';
 import { SkillResponseDto } from './SkillResponseDto.js';
-import { ItemResponseDto } from './ItemResponseDto.js';
+import { InventoryItemDto } from './InventoryItemDto.js';
 import { SpellResponseDto } from './SpellResponseDto.js';
 
 export type CharacterState = 'draft' | 'created';
@@ -89,9 +89,9 @@ export class BaseCharacterResponseDto {
 
   @ApiPropertyOptional({
     description: 'Character inventory',
-    type: [ItemResponseDto],
+    type: [InventoryItemDto],
   })
-  inventory?: ItemResponseDto[];
+  inventory?: InventoryItemDto[];
 
   @ApiPropertyOptional({
     description: 'Character spells',

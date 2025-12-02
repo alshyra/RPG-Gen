@@ -22,7 +22,6 @@ describe('Home Page', () => {
   });
 
   it('should display the world selector', () => {
-    // The WorldSelector component should be present
     cy.get('h1')
       .contains('RPG Gemini')
       .should('exist');
@@ -69,32 +68,27 @@ describe('Home Page', () => {
     cy.get('body')
       .then(($body) => {
         const text = $body.text();
-        if (text.includes('Aucun personnage créé')) {
-          cy.contains('Aucun personnage créé')
+        if (text.includes('Aucun personnage trouvé')) {
+          cy.contains(/Aucun personnage trouvé/)
             .should('be.visible');
         } else {
           cy.contains('Mes personnages')
             .should('be.visible');
-          // Ensure UI includes action buttons if characters exist
-          cy.get('button')
-            .filter(':contains("Reprendre")')
+          // Ensure UI includes character cards with aria-label containing "Reprendre"
+          cy.get('[role="button"][aria-label*="Reprendre"]')
             .should('have.length.gte', 1);
         }
       });
 
-    // Should have resume and delete buttons for each character
-    cy.get('button')
-      .contains('Reprendre')
+    // Should have clickable character cards and delete buttons
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .should('exist');
-    cy.get('button')
-      .contains('Supprimer')
+    cy.get('button[aria-label*="Supprimer"]')
       .should('exist');
-    // At least one action button should be available for existing characters
-    cy.get('button')
-      .filter(':contains("Reprendre")')
+    // At least one character card should be available for existing characters
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .should('have.length.gte', 1);
-    cy.get('button')
-      .filter(':contains("Supprimer")')
+    cy.get('button[aria-label*="Supprimer"]')
       .should('have.length.gte', 1);
 
     // Clean up: ensure we didn't leave extra test characters behind - optional but helpful.
@@ -102,10 +96,8 @@ describe('Home Page', () => {
   });
 
   it('should navigate to character creation when world is selected', () => {
-    // This test would need to interact with WorldSelector
-    // For now, we just verify the page structure is correct
-    // Use data-cy selector to choose a world and assert we navigate to the character creation flow
-    cy.dataCy('world-start-dnd')
+    // Click it to navigate to character creation
+    cy.contains('button', 'Créer un personnage')
       .click();
     // Should navigate to the character creation route (with generated characterId)
     cy.url()

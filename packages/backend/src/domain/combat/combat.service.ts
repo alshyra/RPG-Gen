@@ -3,36 +3,28 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import type { CharacterResponseDto } from '../character/dto/index.js';
-import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
-import { DiceService } from '../dice/dice.service.js';
-import {
-  calculateArmorClass, getDexModifier,
-} from '../character/armor-class.util.js';
 import {
   CombatSession, CombatSessionDocument,
 } from '../../infra/mongo/combat-session.schema.js';
-import { CombatStateDto } from './dto/CombatStateDto.js';
+import {
+  calculateArmorClass, getDexModifier,
+} from '../character/armor-class.util.js';
+import type {
+  CharacterResponseDto,
+  InventoryItemDto, WeaponMeta,
+} from '../character/dto/index.js';
+import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
+import type { XpInstructionMessageDto } from '../chat/dto/index.js';
+import { DiceService } from '../dice/dice.service.js';
+import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
+import { AttackResultDto } from './dto/AttackResultDto.js';
+import { CombatantDto } from './dto/CombatantDto.js';
+import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
 import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
-import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
-import { CombatantDto } from './dto/CombatantDto.js';
-import { AttackResultDto } from './dto/AttackResultDto.js';
+import { CombatStateDto } from './dto/CombatStateDto.js';
 import { TurnResultDto } from './dto/TurnResultDto.js';
 import { TurnResultWithInstructionsDto } from './dto/TurnResultWithInstructionsDto.js';
-import type { XpInstructionMessageDto } from '../chat/dto/index.js';
-
-interface WeaponMeta {
-  damage?: string;
-  class?: string;
-  properties?: string[];
-}
-
-interface EquippedItem {
-  equipped?: boolean;
-  definitionId?: string;
-  meta?: WeaponMeta;
-}
 
 /**
  * Service managing combat state and mechanics.
@@ -108,12 +100,11 @@ export class CombatService {
   /**
    * Find equipped weapon from inventory
    */
-  private findEquippedWeapon(inventory: EquippedItem[]): EquippedItem | undefined {
-    let equipped = inventory.find(i => i?.equipped && i.meta && (i.meta as { type?: string }).type === 'weapon');
-    if (!equipped) {
-      equipped = inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-'));
-    }
-    return equipped || inventory.find(i => i?.equipped);
+  private findEquippedWeapon(inventory: InventoryItemDto[]) {
+    const equipped = inventory.find(i => i?.equipped && i.meta && (i.meta as { type?: string }).type === 'weapon');
+    if (equipped) return equipped;
+
+    return inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-'));
   }
 
   /**
@@ -148,11 +139,11 @@ export class CombatService {
    * Update player stats based on equipped weapon
    */
   private updatePlayerWeaponStats(player: CombatPlayerDto, character: CharacterResponseDto): void {
-    const inventory = (character.inventory || []) as EquippedItem[];
-    const equipped = this.findEquippedWeapon(inventory);
+    if (!character.inventory) return;
+    const equipped = this.findEquippedWeapon(character.inventory);
     if (!equipped) return;
-
-    const meta: WeaponMeta = equipped.meta || {};
+    const { meta } = equipped;
+    if (!isWeaponMeta(meta)) return;
     const damageDice = this.extractDamageDice(meta);
     if (damageDice) player.damageDice = damageDice;
 
@@ -285,6 +276,7 @@ export class CombatService {
       enemies,
       player,
       turnOrder,
+      // start at the first combatant (index 0) by default; may be adjusted below
       currentTurnIndex: 0,
       roundNumber: 1,
       phase: 'PLAYER_TURN',
@@ -293,6 +285,46 @@ export class CombatService {
       bonusActionRemaining: bonusActionMax,
       bonusActionMax,
     };
+
+    if (state.turnOrder.length > 0 && !state.turnOrder[0].isPlayer) {
+      const enemyAttacks: AttackResultDto[] = [];
+      const narrativeParts: string[] = [];
+
+      // Walk turn order from index 0 until a player activation is found
+      for (let idx = 0; idx < state.turnOrder.length; idx++) {
+        const combatant = state.turnOrder[idx];
+        if (combatant.isPlayer) {
+          // Set current index to this player activation and reset action economy
+          state.currentTurnIndex = idx;
+          this.resetActionEconomy(state);
+          state.phase = 'PLAYER_TURN';
+          break;
+        }
+
+        // Enemy activation: find enemy and process single attack
+        const enemy = state.enemies.find(e => e.id === combatant.id && e.hp > 0);
+        if (enemy) {
+          state.phase = 'ENEMY_TURN';
+          const defeatResult = this.processSingleEnemyActivation(state, enemy, enemyAttacks, narrativeParts);
+          if (defeatResult) {
+            // Player defeated during initial enemy activations
+            await this.combatSessionModel.findOneAndUpdate(
+              { characterId },
+              {
+                userId,
+                ...state,
+              },
+              {
+                upsert: true,
+                new: true,
+              },
+            );
+            this.logger.log(`Combat initialized (and ended) for ${characterId} after initial enemy activations`);
+            return state;
+          }
+        }
+      }
+    }
 
     await this.combatSessionModel.findOneAndUpdate(
       { characterId },

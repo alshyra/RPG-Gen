@@ -23,8 +23,8 @@ describe('Combat flow', () => {
       .as('getCharacters');
     cy.visit('/home');
     cy.wait('@getCharacters');
-    cy.get('button')
-      .contains('Reprendre')
+    // Click on the character card (role="button" with aria-label containing "Reprendre")
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .first()
       .click();
 
@@ -56,7 +56,7 @@ describe('Combat flow', () => {
           .should('be.gte', 1);
 
         // Intercept the attack request so we can wait for the backend to process it
-        cy.intercept('POST', '**/api/combat/*/attack')
+        cy.intercept('POST', '**/api/combat/*/attack/*')
           .as('attackReq');
 
         // Find the first enemy tile by deterministic selector and click its attack button

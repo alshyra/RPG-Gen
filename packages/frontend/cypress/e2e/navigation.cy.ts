@@ -47,9 +47,8 @@ describe('Navigation', () => {
       .as('getCharacters');
     cy.visit('/home');
     cy.wait('@getCharacters');
-    // Resume the first character
-    cy.get('button')
-      .contains('Reprendre')
+    // Resume the first character by clicking on the card
+    cy.get('[role="button"][aria-label*="Reprendre"]')
       .first()
       .click();
 

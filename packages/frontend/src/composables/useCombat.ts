@@ -143,17 +143,41 @@ export function useCombat() {
     attackResponse: TurnResultWithInstructionsDto,
     characterId: string,
   ): Promise<void> => {
-    combatStore.updateFromTurnResult(attackResponse);
+    // Check for roll instructions BEFORE updating state
+    const hasRoll = Array.isArray(attackResponse.instructions) && attackResponse.instructions.some(instr => isRollInstruction(instr as any));
+    console.log('[useCombat] handleAttackSuccess hasRoll:', hasRoll, 'instructions:', attackResponse.instructions);
+
+    // If we have a roll instruction, process it FIRST before updateFromTurnResult
+    // This sets expectedDto to 'DiceThrowDto' before the phase is potentially reset
+    if (hasRoll && attackResponse.instructions) {
+      processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
+      console.log('[useCombat] After processAttackInstructions: phase=', combatStore.phase, 'expectedDto=', combatStore.expectedDto);
+    }
+
+    // Now update combat state - on hit with roll, don't update phase (it would reset expectedDto)
+    if (!hasRoll) {
+      combatStore.updateFromTurnResult(attackResponse);
+    } else {
+      // Manually update only what's needed without resetting phase/expectedDto
+      // updateFromTurnResult sets phase=PLAYER_TURN which resets expectedDto
+      // We already set expectedDto='DiceThrowDto' in processRollInstruction above
+      combatStore.updateEnemiesOnly(attackResponse.remainingEnemies, attackResponse.roundNumber);
+    }
+
     handleAttackAnimations(attackResponse, combatStore);
     if (currentCharacter.value) currentCharacter.value.hp = attackResponse.playerHp;
     gameStore.appendMessage('assistant', attackResponse.narrative);
 
-    if (attackResponse.instructions) {
+    // Process non-roll instructions (XP, HP, etc.)
+    if (!hasRoll && attackResponse.instructions) {
       processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
     }
+
     if (attackResponse.combatEnded) {
       handleCombatEndFromResponse(attackResponse, gameStore, combatStore);
-    } else {
+    } else if (!hasRoll) {
+      // If server sent a roll instruction, avoid immediately refreshing status
+      // which regenerates a new action token and would close the roll modal.
       await combatStore.fetchStatus(characterId);
     }
   };
@@ -163,8 +187,11 @@ export function useCombat() {
    */
   const executeAttack = async (target: CombatEnemyDto): Promise<void> => {
     if (!currentCharacter.value) return;
-    gameStore.appendMessage('user', `J'attaque ${target}!`);
+    gameStore.appendMessage('user', `J'attaque ${target.name}!`);
     gameStore.sending = true;
+
+    // Store the target so sendRollResult can use it later
+    combatStore.setCurrentTarget(target);
 
     try {
       const { characterId } = currentCharacter.value;

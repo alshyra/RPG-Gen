@@ -62,21 +62,17 @@ describe('API Integration', () => {
         }));
       });
 
-    // Visit the protected route — even if the backend is down the UI should render a usable world selector.
+    // Visit the protected route — even if the backend is down the UI should render a usable home page.
     cy.visit('/home');
 
     // We don't rely on observing any outgoing GET — different UI flows may or may not
     // trigger a call right away. Instead just allow the UI to render and assert the
-    // presence of the world selector elements.
+    // presence of the main UI elements.
 
     // Basic UI should still work
     cy.contains('RPG Gemini')
       .should('be.visible');
-    cy.contains('Choisir un univers')
-      .should('be.visible');
-
-    // World selector should be functional
-    cy.contains('Dungeons & Dragons')
+    cy.contains('button', 'Créer un personnage')
       .should('be.visible');
   });
 });

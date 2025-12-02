@@ -9,10 +9,7 @@ describe('Character Creation', () => {
     cy.contains('RPG Gemini')
       .should('be.visible');
 
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -114,10 +111,7 @@ describe('Character Creation', () => {
   });
 
   it('should save character draft to the server (draft persisted)', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -176,10 +170,7 @@ describe('Character Creation', () => {
   });
 
   it('should restore draft on page refresh', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -243,10 +234,7 @@ describe('Character Creation', () => {
   });
 
   it('should go back to previous step', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -270,10 +258,7 @@ describe('Character Creation', () => {
   });
 
   it('should validate step completion before allowing next', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -294,10 +279,7 @@ describe('Character Creation', () => {
   });
 
   it('should persist ability scores (character.scores) on page refresh', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()
@@ -377,10 +359,7 @@ describe('Character Creation', () => {
   });
 
   it('should auto-generate and save avatar when finishing character creation', () => {
-    cy.contains('Dungeons & Dragons')
-      .closest('.tpl')
-      .find('button')
-      .contains('Commencer')
+    cy.contains('button', 'Créer un personnage')
       .click();
 
     cy.url()

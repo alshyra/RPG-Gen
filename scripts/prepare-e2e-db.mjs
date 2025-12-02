@@ -157,29 +157,23 @@ async function main() {
         }
       }
 
-      // Optionally append a chat assistant message with combat_start instruction so the UI can initialize combat from history
+      // Optionally start combat directly via the combat API
       if (opts.withChat) {
         try {
-          const assistantMsg = {
-            role: 'assistant',
-            narrative: 'Un groupe de gobelins vous attaque soudainement !',
-            instructions: [
-              {
-                type: 'combat_start',
-                combat_start: [
-                  { name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 },
-                ],
-              },
+          // Start combat directly via the combat API
+          const combatStartBody = {
+            combat_start: [
+              { name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 },
             ],
           };
-          const chatResp = await request(`/api/chat/${characterId}`, { method: 'POST', body: assistantMsg });
-          if (![200, 201].includes(chatResp.status)) {
-            log('Failed to post assistant chat for', characterId, chatResp.status, chatResp.body || chatResp.raw);
+          const combatResp = await request(`/api/combat/${characterId}/start`, { method: 'POST', body: combatStartBody });
+          if (![200, 201].includes(combatResp.status)) {
+            log('Failed to start combat for', characterId, combatResp.status, combatResp.body || combatResp.raw);
           } else {
-            log('Posted assistant combat_start for', characterId);
+            log('Started combat for', characterId);
           }
         } catch (e) {
-          log('Failed to post chat message for', characterId, e?.message || e);
+          log('Failed to start combat for', characterId, e?.message || e);
         }
       }
     } catch (e) {

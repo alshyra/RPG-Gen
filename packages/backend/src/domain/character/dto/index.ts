@@ -2,7 +2,7 @@ export * from './RaceResponseDto.js';
 export * from './AbilityScoresResponseDto.js';
 export * from './CharacterClassResponseDto.js';
 export * from './SkillResponseDto.js';
-export * from './ItemResponseDto.js';
+export * from './InventoryItemDto.js';
 export * from './SpellResponseDto.js';
 export * from './BaseCharacterResponseDto.js';
 export * from './CharacterResponseDto.js';

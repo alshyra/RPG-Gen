@@ -100,6 +100,33 @@
           class="card p-1 mb-2 max-h-44 mt-3"
           data-cy="combat-panel"
         >
+          <!-- Turn order display (compact) -->
+          <div class="mb-2">
+            <div
+              data-cy="turn-order"
+              class="flex gap-2 items-center text-xs overflow-auto"
+            >
+              <template
+                v-for="(t, i) in turnOrder"
+                :key="t.id"
+              >
+                <div
+                  :data-cy="t.isPlayer ? 'turn-order-player' : ('turn-order-' + i)"
+                  :class="['px-2 py-1 rounded', currentTurnIndex === i ? 'ring-2 ring-amber-400' : 'bg-slate-800']"
+                >
+                  <span v-text="t.name" />
+                  <div
+                    v-if="currentTurnIndex === i"
+                    data-cy="current-activation"
+                    class="sr-only"
+                  >
+                    current
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
           <!-- Participant tiles -->
           <div class="-mx-1 px-1">
             <div class="flex flex-nowrap sm:flex-wrap gap-1 overflow-x-auto sm:overflow-visible overflow-y-hidden">
@@ -136,6 +163,35 @@
       </div>
     </div>
   </transition>
+
+  <!-- Roll modal (server requested roll) - delegated to autonomous component -->
+  <RollDamageModal />
+
+  <!-- Attack result modal - teleported to body to avoid pointer-events:none inheritance -->
+  <Teleport to="body">
+    <div
+      v-if="showAttackResultModal"
+      class="fixed inset-0 z-70 flex items-center justify-center"
+    >
+      <div
+        data-cy="attack-result-modal"
+        class="bg-slate-900 border border-slate-700 p-4 rounded shadow-lg w-96"
+      >
+        <div class="text-lg font-semibold mb-2">
+          Attack Result
+        </div>
+        <pre class="text-sm text-slate-200 mb-3">{{ currentAttackResult }}</pre>
+        <div class="flex justify-end">
+          <button
+            class="px-3 py-1 rounded bg-emerald-600"
+            @click="closeAttackResult"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 
   <!-- Collapsed handle (still visible when combat present) -->
   <transition name="combat-handle">
@@ -195,7 +251,9 @@
 import {
   computed, ref, nextTick, watch, onMounted, onBeforeUnmount,
 } from 'vue';
+import { combatService } from '@/apis/combatApi';
 import FighterPortrait from './FighterPortrait.vue';
+import RollDamageModal from './RollDamageModal.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -220,6 +278,27 @@ const ui = useUiStore();
 const {
   inCombat, roundNumber, phase,
 } = storeToRefs(combatStore);
+
+// Expose turn order and index from the store for the template
+const {
+  turnOrder,
+  currentTurnIndex: storeCurrentTurnIndex,
+  expectedDto,
+  showAttackResultModal,
+  currentAttackResult,
+} = storeToRefs(combatStore);
+
+const currentTurnIndex = computed(() => storeCurrentTurnIndex.value ?? 0);
+
+// Show a simple roll modal when the server expects a roll or when phase requests it
+const showRollModal = computed(() => {
+  console.log('[CombatPanel] showRollModal check:', {
+    expectedDto: expectedDto.value,
+    phase: phase.value,
+    result: (expectedDto.value && expectedDto.value !== 'AttackRequestDto') || phase.value === 'AWAITING_DAMAGE_ROLL',
+  });
+  return (expectedDto.value && expectedDto.value !== 'AttackRequestDto') || phase.value === 'AWAITING_DAMAGE_ROLL';
+});
 
 const { enemies } = combatStore;
 
@@ -314,6 +393,13 @@ watch([
 });
 
 const onActorActed = async (_actor: string) => {
+  // Do not refresh status if we're waiting for a damage roll
+  // (this would reset the expectedDto and close the roll modal)
+  if (combatStore.phase === 'AWAITING_DAMAGE_ROLL' || combatStore.expectedDto === 'DiceThrowDto') {
+    console.log('[CombatPanel] onActorActed skipped - awaiting damage roll');
+    return;
+  }
+
   // Do not rotate client-side; refresh authoritative combat state from backend.
   if (!characterStore.currentCharacter) return;
   try {
@@ -333,6 +419,49 @@ const onEndTurn = async () => {
     console.error('Failed to end turn', e);
   } finally {
     isEndingTurn.value = false;
+  }
+};
+
+const closeAttackResult = () => {
+  combatStore.closeAttackResultModal();
+};
+
+const closeRollModal = async () => {
+  // refresh status to clear expectedDto if server moved on
+  if (!characterStore.currentCharacter) return;
+  await combatStore.fetchStatus(characterStore.currentCharacter.characterId);
+};
+
+const sendRollResult = async () => {
+  if (!characterStore.currentCharacter) return;
+  try {
+    const charId = characterStore.currentCharacter.characterId;
+    const token = combatStore.actionToken;
+    if (!token) {
+      console.error('No action token available to resolve roll');
+      return;
+    }
+
+    // Send a dummy DiceThrowDto using the current target and a small roll
+    const payload = {
+      rolls: [3],
+      mod: 0,
+      total: 3,
+      action: 'damage',
+      target: combatStore.currentTarget?.name ?? '',
+    };
+
+    const result = await combatService.resolveRollWithToken(charId, token, payload as any);
+
+    // Update combat store with the result (preserves phase info before fetchStatus)
+    if (result) {
+      combatStore.updateFromTurnResult(result);
+    }
+
+    // Now fetch fresh status to get a new action token
+    await combatStore.fetchStatus(charId);
+  } catch (e) {
+    console.error('Failed to send roll result', e);
   }
 };
 </script>
