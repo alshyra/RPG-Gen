@@ -1,0 +1,229 @@
+<template>
+  <!-- Combat wrapper manages its own fixed positioning, header, bump and collapsed state -->
+  <transition
+    name="combat-panel"
+    appear
+  >
+    <div
+      v-if="inCombat && ui.isCombatOpen"
+      class="inset-x-4 max-w-5xl mx-auto z-60 pointer-events-auto"
+    >
+      <div
+        data-cy="combat-panel"
+        class="bg-slate-900/95 border border-slate-700 shadow-lg relative w-full rounded-t-lg rounded-b-none p-4"
+      >
+        <CombatHeader />
+
+        <div
+          class="card p-1 mb-2 max-h-44 mt-3"
+          data-cy="combat-panel"
+        >
+          <TurnOrder />
+          <ParticipantsGrid />
+        </div>
+
+        <!-- End Turn Button -->
+        <div class="flex justify-end mt-2">
+          <UiButton
+            data-cy="end-turn-button"
+            :class="endTurnButtonClass"
+            :disabled="!canEndTurn || isEndingTurn"
+            @click="onEndTurn"
+          >
+            <span v-if="isEndingTurn">En cours...</span>
+            <span v-else>Fin de tour</span>
+          </UiButton>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- Roll modal (server requested roll) - delegated to autonomous component -->
+  <RollDamageModal />
+
+  <!-- Attack result modal - teleported to body to avoid pointer-events:none inheritance -->
+  <Teleport to="body">
+    <div
+      v-if="showAttackResultModal"
+      class="fixed inset-0 z-70 flex items-center justify-center"
+    >
+      <div
+        data-cy="attack-result-modal"
+        class="bg-slate-900 border border-slate-700 p-4 rounded shadow-lg w-96"
+      >
+        <div class="text-lg font-semibold mb-2">
+          Attack Result
+        </div>
+        <pre class="text-sm text-slate-200 mb-3">{{ currentAttackResult }}</pre>
+        <div class="flex justify-end">
+          <UiButton
+            class="px-3 py-1 rounded bg-emerald-600"
+            @click="combatStore.closeAttackResultModal"
+          >
+            OK
+          </UiButton>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <!-- Collapsed handle (still visible when combat present) -->
+  <transition name="combat-handle">
+    <div
+      v-if="inCombat && !ui.isCombatOpen"
+      class="transition-all duration-700 inset-x-4 max-w-5xl mx-auto z-60 pointer-events-auto"
+    >
+      <div class="bg-slate-900/95 border border-slate-700 shadow-lg relative w-full rounded-t-lg h-10 flex items-center px-4">
+        <div class="flex items-center gap-3 w-full">
+          <div class="flex items-center gap-2 text-slate-200 font-semibold">
+            <span>Combat</span>
+          </div>
+          <div class="ml-auto text-sm text-slate-400">
+            Round {{ roundNumber }}
+          </div>
+        </div>
+
+        <button
+          class="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 border border-slate-700 shadow-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
+          :aria-expanded="ui.isCombatOpen"
+          aria-label="Afficher le panneau de combat"
+          @click="ui.toggleCombat()"
+        >
+          <ChevronUp
+            :class="['w-4 h-4 text-slate-200 transform-gpu transition-transform duration-250', ui.isCombatOpen ? 'rotate-180' : 'rotate-0']"
+          />
+        </button>
+      </div>
+    </div>
+  </transition>
+</template>
+
+<script setup lang="ts">
+import { ChevronUp } from 'lucide-vue-next';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
+import RollDamageModal from '../RollDamageModal.vue';
+import CombatHeader from './CombatHeader.vue';
+import ParticipantsGrid from './ParticipantsGrid.vue';
+import TurnOrder from './TurnOrder.vue';
+
+import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
+import { useUiStore } from '@/stores/uiStore';
+import { storeToRefs } from 'pinia';
+import UiButton from '@/components/ui/UiButton.vue';
+
+const combatStore = useCombatStore();
+const characterStore = useCharacterStore();
+const ui = useUiStore();
+
+const {
+  inCombat, roundNumber, phase,
+} = storeToRefs(combatStore);
+
+// Expose turn order and index from the store for the template
+const {
+  showAttackResultModal,
+  currentAttackResult,
+} = storeToRefs(combatStore);
+
+const isEndingTurn = ref(false);
+
+// Can end turn only during player turn
+const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
+
+const endTurnButtonClass = computed(() => {
+  if (!canEndTurn.value) {
+    return 'bg-slate-600 text-slate-400 cursor-not-allowed';
+  }
+  return 'bg-purple-600 hover:bg-purple-700 text-white';
+});
+
+// participants are computed inside `ParticipantsGrid` now
+
+// Measure expanded panel height and animate max-height (Accordion-like behavior)
+const containerEl = ref<HTMLElement | null>(null);
+const height = ref<number>(0);
+
+const updateHeight = () => {
+  if (containerEl.value) height.value = containerEl.value.scrollHeight;
+};
+
+onMounted(() => {
+  nextTick()
+    .then(updateHeight);
+  window.addEventListener('resize', updateHeight);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateHeight);
+});
+
+// Recompute height when open state changes
+watch(
+  () => ui.isCombatOpen,
+  async () => {
+    await nextTick();
+    updateHeight();
+  },
+);
+
+const onEndTurn = async () => {
+  if (!characterStore.currentCharacter || isEndingTurn.value) return;
+
+  try {
+    isEndingTurn.value = true;
+    await combatStore.endActivation(characterStore.currentCharacter.characterId);
+  } catch (e) {
+    console.error('Failed to end turn', e);
+  } finally {
+    isEndingTurn.value = false;
+  }
+};
+
+</script>
+
+<style scoped>
+.combat-panel-enter-from,
+.combat-panel-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.combat-panel-enter-from {
+  max-height: 0;
+  opacity: 0;
+}
+.combat-panel-enter-to,
+.combat-panel-leave-from {
+  opacity: 1;
+}
+.combat-panel-enter-active,
+.combat-panel-leave-active {
+  transition: max-height 320ms cubic-bezier(.16,.84,.24,1), opacity 220ms ease;
+  will-change: max-height, opacity;
+}
+
+/* Collapsed handle: shrink/grow opposite to the main panel */
+.combat-handle-enter-from,
+.combat-handle-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+.combat-handle-enter-to,
+.combat-handle-leave-from {
+  max-height: 64px; /* enough to show the 40px handle comfortably */
+  opacity: 1;
+}
+.combat-handle-enter-active,
+.combat-handle-leave-active {
+  transition: max-height 280ms cubic-bezier(.16,.84,.24,1), opacity 160ms ease;
+  will-change: max-height, opacity;
+}
+</style>

@@ -72,11 +72,12 @@
 </template>
 
 <script setup lang="ts">
-import { Teleport, computed, ref } from 'vue';
-import { useGameStore } from '@/stores/gameStore';
-import { useCombatStore } from '@/stores/combatStore';
 import { combatService } from '@/apis/combatApi';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
+import { useGameStore } from '@/stores/gameStore';
+import { DiceThrowDto } from '@rpg-gen/shared';
+import { Teleport, computed, ref } from 'vue';
 
 const gameStore = useGameStore();
 const combatStore = useCombatStore();
@@ -84,22 +85,31 @@ const characterStore = useCharacterStore();
 
 const isOpen = computed(() => (combatStore.expectedDto && combatStore.expectedDto !== 'AttackRequestDto') || combatStore.phase === 'AWAITING_DAMAGE_ROLL');
 
-const pending = computed(() => gameStore.pendingInstruction as any);
+const pending = computed(() => gameStore.pendingInstruction);
 
-const description = computed(() => pending.value?.description ?? (pending.value?.meta?.target ? `Attack vs ${pending.value.meta.target}` : 'Server requested a damage roll'));
+const description = computed(() => {
+  if (pending.value?.type === 'roll' && pending.value.description) {
+    return pending.value.description;
+  }
+  if (pending.value?.type === 'roll' && pending.value?.meta?.target) {
+    return `Attack vs ${pending.value.meta.target}`;
+  }
+  return 'Server requested a damage roll';
+});
 
-const rollResult = ref<any | null>(null);
+const rollResult = ref<DiceThrowDto | null>(null);
 const isRolling = ref(false);
 
 const hasRolled = computed(() => !!rollResult.value);
 
 const attackRollDisplay = computed(() => {
   if (rollResult.value && Array.isArray(rollResult.value.rolls) && rollResult.value.rolls.length > 0) return String(rollResult.value.rolls[0]);
-  const v = pending.value?.meta?.attackRoll;
-  return (v === undefined || v === null) ? '-' : String(v);
+  if (!pending.value || pending.value.type !== 'roll') return '-';
+  const attackRoll = pending.value?.meta?.attackRoll;
+  return (attackRoll === undefined || attackRoll === null) ? '-' : String(attackRoll);
 });
 
-const attackBonusDisplay = computed(() => pending.value?.meta?.attackBonus ?? 0);
+const attackBonusDisplay = computed(() => pending.value?.type === 'roll' ? pending.value?.meta?.attackBonus : 0);
 const totalAttackDisplay = computed(() => {
   const totalFromRoll = rollResult.value?.total;
   if (totalFromRoll !== undefined && totalFromRoll !== null) return String(totalFromRoll + (pending.value?.meta?.attackBonus ?? 0));
@@ -143,6 +153,26 @@ const doRollAction = async () => {
   }
 };
 
+const buildRollPayload = (r: DiceThrowDto) => ({
+  rolls: r.rolls,
+  mod: r.mod ?? 0,
+  total: r.total,
+  action: 'damage',
+  target: combatStore.currentTarget?.name ?? pending.value?.meta?.target ?? '',
+});
+
+const sendRollResult = async (charId: string, token: string, payload: DiceThrowDto) => {
+  try {
+    const result = await combatService.resolveRollWithToken(charId, token, payload);
+    if (result) {
+      combatStore.updateFromTurnResult(result);
+    }
+    await combatStore.fetchStatus(charId);
+  } catch (e) {
+    console.error('Failed to send roll result', e);
+  }
+};
+
 const onSend = async () => {
   if (!characterStore.currentCharacter) return;
   const charId = characterStore.currentCharacter.characterId;
@@ -156,24 +186,8 @@ const onSend = async () => {
     return;
   }
 
-  try {
-    const payload = {
-      rolls: rollResult.value.rolls,
-      mod: rollResult.value.mod ?? 0,
-      total: rollResult.value.total,
-      action: 'damage',
-      target: combatStore.currentTarget?.name ?? pending.value?.meta?.target ?? '',
-    } as any;
-
-    const result = await combatService.resolveRollWithToken(charId, token, payload);
-    if (result) {
-      combatStore.updateFromTurnResult(result);
-    }
-
-    await combatStore.fetchStatus(charId);
-  } catch (e) {
-    console.error('Failed to send roll result', e);
-  }
+  const payload = buildRollPayload(rollResult.value);
+  await sendRollResult(charId, token, payload);
 };
 </script>
 

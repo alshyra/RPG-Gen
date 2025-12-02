@@ -81,7 +81,7 @@ import {
   useRoute, useRouter,
 } from 'vue-router';
 import { characterServiceApi } from '../apis/characterApi';
-import CombatPanel from '../components/game/CombatPanel.vue';
+import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import CombatResultModal from '../components/game/CombatResultModal.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';

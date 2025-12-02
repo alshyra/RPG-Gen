@@ -1,7 +1,7 @@
 <template>
   <div
     class="fighter-card relative bg-slate-800/40 rounded overflow-hidden flex items-stretch"
-    :data-cy="props.isPlayer ? 'player-portrait' : ('enemy-portrait-' + (props.enemy?.id || props.enemy?.name))"
+    :data-cy="isPlayer ? 'player-portrait' : ('enemy-portrait-' + enemy?.id)"
   >
     <div class="relative w-full h-full">
       <img
@@ -76,22 +76,25 @@ import { useCharacterStore } from '@/stores/characterStore';
 import {
   pickBestPortrait, getFallbackPortrait,
 } from '@/composables/usePortraits';
+import { useCombatStore } from '@/stores/combatStore';
+import { storeToRefs } from 'pinia';
 
-const props = defineProps<{
+const {
+  enemy, isPlayer,
+} = defineProps<{
   enemy: CombatEnemyDto | null;
   isPlayer?: boolean;
 }>();
-
-const emit = defineEmits<(e: 'acted', actor: string) => void>();
-
+const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 const combat = useCombat();
 
-const title = computed(() => (props.isPlayer ? (characterStore.currentCharacter?.name ?? 'You') : (props.enemy?.name ?? 'Enemy')));
-const descriptionText = computed(() => props.enemy?.description ?? '');
+const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (enemy?.name ?? 'Enemy')));
+const descriptionText = computed(() => enemy?.description ?? '');
 
-const enemyDisplayHp = computed(() => props.isPlayer ? (characterStore.currentCharacter?.hp ?? 0) : (props.enemy?.hp ?? 0));
-const enemyDisplayMax = computed(() => props.isPlayer ? (characterStore.currentCharacter?.hpMax ?? '-') : (props.enemy?.hpMax ?? '-'));
+const enemyDisplayHp = computed(() => isPlayer ? (currentCharacter.value?.hp ?? 0) : (enemy?.hp ?? 0));
+const enemyDisplayMax = computed(() => isPlayer ? (currentCharacter.value?.hpMax ?? '-') : (enemy?.hpMax ?? '-'));
 const hpPct = computed(() => {
   const hp = Number(enemyDisplayHp.value || 0);
   const max = typeof enemyDisplayMax.value === 'number' ? Number(enemyDisplayMax.value) : undefined;
@@ -102,11 +105,10 @@ const hpPct = computed(() => {
 const resolvedPortrait = ref<string>(`/images/enemies/enemy.png`);
 
 onMounted(async () => {
-  if (props.isPlayer) {
-    resolvedPortrait.value = characterStore.currentCharacter?.portrait || `/images/enemies/hero.png`;
+  if (isPlayer) {
+    resolvedPortrait.value = currentCharacter.value?.portrait || `/images/enemies/hero.png`;
     return;
   }
-  const { enemy } = props;
   if (!enemy) {
     resolvedPortrait.value = `/images/enemies/enemy.png`;
     return;
@@ -119,17 +121,13 @@ onMounted(async () => {
   resolvedPortrait.value = byManifest || getFallbackPortrait(enemy.name || enemy.id || 'enemy');
 });
 
-const showAttackButton = computed(() => !props.isPlayer && (props.enemy?.hp ?? 0) > 0);
-const altLabel = computed(() => props.isPlayer ? 'Vous' : 'Mort');
+const showAttackButton = computed(() => !isPlayer && (enemy?.hp ?? 0) > 0);
+const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
 
 const doAttack = async () => {
-  if (!props.enemy) return;
-  try {
-    await combat.executeAttack(props.enemy);
-    emit('acted', 'player');
-  } catch (e) {
-    console.error('attack failed', e);
-  }
+  if (!enemy || !currentCharacter.value?.characterId) return;
+  await combat.executeAttack(enemy);
+  await combatStore.fetchStatus(currentCharacter.value.characterId);
 };
 </script>
 

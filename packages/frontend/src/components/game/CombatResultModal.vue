@@ -1,15 +1,15 @@
 <template>
   <UiModal
-    :is-open="isOpen"
+    :is-open="showAttackResultModal"
     @close="close"
   >
     <!-- Header -->
     <div class="text-center mb-6">
       <h2 class="text-2xl font-bold text-amber-400 mb-2">
-        ⚔️ {{ isPlayerAttack ? 'Votre Attaque' : 'Attaque Ennemie' }}
+        ⚔️ {{ isCurrentAttackPlayerAttack ? 'Votre Attaque' : 'Attaque Ennemie' }}
       </h2>
       <div class="text-sm text-slate-400">
-        {{ attackerName }} → {{ targetName }}
+        {{ currentAttackResult?.attacker ?? '' }} → {{ currentAttackResult?.target ?? '' }}
       </div>
     </div>
 
@@ -23,43 +23,43 @@
           <div
             :class="[
               'w-14 h-14 rounded-lg flex items-center justify-center text-xl font-bold border-2',
-              isCritical ? 'bg-green-600 text-white border-green-400' :
-              isFumble ? 'bg-red-600 text-white border-red-400' :
+              (currentAttackResult?.critical ?? false) ? 'bg-green-600 text-white border-green-400' :
+              (currentAttackResult?.fumble ?? false) ? 'bg-red-600 text-white border-red-400' :
               'bg-slate-600 text-amber-300 border-amber-400'
             ]"
           >
-            {{ attackRoll }}
+            {{ currentAttackResult?.attackRoll ?? 0 }}
           </div>
           <span class="text-slate-400">+</span>
           <div class="text-lg text-slate-300">
-            {{ attackBonus }}
+            {{ currentAttackResult?.attackBonus ?? 0 }}
           </div>
           <span class="text-slate-400">=</span>
           <div class="text-2xl font-bold text-amber-300">
-            {{ totalAttack }}
+            {{ currentAttackResult?.totalAttack ?? 0 }}
           </div>
         </div>
         <div class="text-sm text-slate-500 mt-2">
-          vs CA {{ targetAc }}
+          vs CA {{ currentAttackResult?.targetAc ?? 0 }}
         </div>
       </div>
 
       <!-- Hit/Miss result -->
       <div class="text-center">
         <div
-          v-if="isCritical"
+          v-if="currentAttackResult?.critical ?? false"
           class="text-green-400 text-lg font-bold"
         >
           ✨ COUP CRITIQUE! ✨
         </div>
         <div
-          v-else-if="isFumble"
+          v-else-if="currentAttackResult?.fumble ?? false"
           class="text-red-400 text-lg font-bold"
         >
           💀 ÉCHEC CRITIQUE! 💀
         </div>
         <div
-          v-else-if="hit"
+          v-else-if="currentAttackResult?.hit ?? false"
           class="text-green-400 text-lg font-bold"
         >
           ✓ TOUCHÉ!
@@ -75,7 +75,7 @@
 
     <!-- Damage Display (only if hit) -->
     <div
-      v-if="hit && damageRoll.length > 0"
+      v-if="(currentAttackResult?.hit ?? false) && (currentAttackResult?.damageRoll ?? []).length > 0"
       class="bg-slate-700/50 rounded-lg p-4 mb-4"
     >
       <div class="text-center">
@@ -84,29 +84,29 @@
         </div>
         <div class="flex justify-center items-center gap-2 mb-2">
           <div
-            v-for="(roll, idx) in damageRoll"
+            v-for="(roll, idx) in (currentAttackResult?.damageRoll ?? [])"
             :key="idx"
             class="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold bg-red-600/50 text-red-200 border border-red-500"
           >
             {{ roll }}
           </div>
           <span
-            v-if="damageBonus !== 0"
+            v-if="(currentAttackResult?.damageBonus ?? 0) !== 0"
             class="text-slate-400"
           >+</span>
           <div
-            v-if="damageBonus !== 0"
+            v-if="(currentAttackResult?.damageBonus ?? 0) !== 0"
             class="text-lg text-slate-300"
           >
-            {{ damageBonus }}
+            {{ currentAttackResult?.damageBonus ?? 0 }}
           </div>
           <span class="text-slate-400">=</span>
           <div class="text-2xl font-bold text-red-400">
-            {{ totalDamage }}
+            {{ currentAttackResult?.totalDamage ?? 0 }}
           </div>
         </div>
         <div
-          v-if="isCritical"
+          v-if="currentAttackResult?.critical ?? false"
           class="text-xs text-green-400"
         >
           (Dégâts doublés par le critique!)
@@ -116,26 +116,26 @@
 
     <!-- HP Changes -->
     <div
-      v-if="hit"
+      v-if="currentAttackResult?.hit ?? false"
       class="bg-slate-700/50 rounded-lg p-4 mb-4"
     >
       <div class="flex justify-between items-center">
         <div class="text-sm text-slate-400">
-          PV de {{ targetName }}
+          PV de {{ currentAttackResult?.target ?? '' }}
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-slate-300">{{ targetHpBefore }}</span>
+          <span class="text-slate-300">{{ currentAttackResult?.targetHpBefore ?? 0 }}</span>
           <span class="text-red-400">→</span>
-          <span :class="targetHpAfter <= 0 ? 'text-red-500 font-bold' : 'text-slate-300'">
-            {{ targetHpAfter }}
+          <span :class="(currentAttackResult?.targetHpAfter ?? 0) <= 0 ? 'text-red-500 font-bold' : 'text-slate-300'">
+            {{ currentAttackResult?.targetHpAfter ?? 0 }}
           </span>
         </div>
       </div>
       <div
-        v-if="targetDefeated"
+        v-if="currentAttackResult?.targetDefeated ?? false"
         class="text-center mt-3 text-amber-400 font-bold"
       >
-        🏆 {{ targetName }} est vaincu!
+        🏆 {{ currentAttackResult?.target ?? '' }} est vaincu!
       </div>
     </div>
 
@@ -152,30 +152,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import UiModal from '../ui/UiModal.vue';
 import { useCombatStore } from '../../stores/combatStore';
+import { storeToRefs } from 'pinia';
 
 const combatStore = useCombatStore();
-
-// Computed properties from store
-const isOpen = computed(() => combatStore.showAttackResultModal);
-const isPlayerAttack = computed(() => combatStore.isCurrentAttackPlayerAttack);
-const attackerName = computed(() => combatStore.currentAttackResult?.attacker ?? '');
-const targetName = computed(() => combatStore.currentAttackResult?.target ?? '');
-const attackRoll = computed(() => combatStore.currentAttackResult?.attackRoll ?? 0);
-const attackBonus = computed(() => combatStore.currentAttackResult?.attackBonus ?? 0);
-const totalAttack = computed(() => combatStore.currentAttackResult?.totalAttack ?? 0);
-const targetAc = computed(() => combatStore.currentAttackResult?.targetAc ?? 0);
-const hit = computed(() => combatStore.currentAttackResult?.hit ?? false);
-const isCritical = computed(() => combatStore.currentAttackResult?.critical ?? false);
-const isFumble = computed(() => combatStore.currentAttackResult?.fumble ?? false);
-const damageRoll = computed(() => combatStore.currentAttackResult?.damageRoll ?? []);
-const damageBonus = computed(() => combatStore.currentAttackResult?.damageBonus ?? 0);
-const totalDamage = computed(() => combatStore.currentAttackResult?.totalDamage ?? 0);
-const targetHpBefore = computed(() => combatStore.currentAttackResult?.targetHpBefore ?? 0);
-const targetHpAfter = computed(() => combatStore.currentAttackResult?.targetHpAfter ?? 0);
-const targetDefeated = computed(() => combatStore.currentAttackResult?.targetDefeated ?? false);
+const {
+  showAttackResultModal,
+  isCurrentAttackPlayerAttack,
+  currentAttackResult,
+} = storeToRefs(combatStore);
 
 const close = () => combatStore.closeAttackResultModal();
 </script>
