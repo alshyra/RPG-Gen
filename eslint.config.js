@@ -40,7 +40,7 @@ const sharedRules = {
   'no-console': 'off',
   'arrow-body-style': ['error', 'as-needed'],
   'no-restricted-syntax': ['error', 'ForStatement', 'ForInStatement', 'ForOfStatement'],
-  'max-statements': ['error', 15, { ignoreTopLevelFunctions: true }],
+  'max-statements': ['error', 15, { ignoreTopLevelFunctions: true, ignoreHigherOrderFunctions: true }],
   'prefer-object-spread': 'error',
   ...stylisticRules,
 };

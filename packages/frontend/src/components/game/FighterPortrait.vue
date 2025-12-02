@@ -125,8 +125,7 @@ const altLabel = computed(() => props.isPlayer ? 'Vous' : 'Mort');
 const doAttack = async () => {
   if (!props.enemy) return;
   try {
-    const target = props.enemy.name || props.enemy.id;
-    await combat.executeAttack(target);
+    await combat.executeAttack(props.enemy.id);
     emit('acted', 'player');
   } catch (e) {
     console.error('attack failed', e);

@@ -54,11 +54,12 @@ test('parses inventory add instruction', (t) => {
 });
 
 test('parses roll request instruction', (t) => {
-  const input = 'Prepare to roll.\n\n```json\n{"type":"roll","dices":"1d20","modifier":"wisdom (Perception)","advantage":"none"}\n```\n';
+  const input = 'Prepare to roll.\n\n```json\n{"type":"roll","dices":"1d20","modifierLabel":"wisdom (Perception)","advantage":"none"}\n```\n';
   const parsed = parseAIResponse(input);
   const inst = (parsed.instructions || []).find(i => (i as any).type === 'roll');
   t.truthy(inst);
   t.is((inst as any).dices, '1d20');
+  t.is((inst as any).modifierLabel, 'wisdom (Perception)');
 });
 
 test('parses hp and xp instructions', (t) => {

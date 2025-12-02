@@ -79,9 +79,12 @@ export const useGameSession = () => {
     }
     if (isRollInstruction(instr)) {
       if (isLastMessage) gameStore.pendingInstruction = instr;
+      const label = instr.modifierLabel ?? '';
+      const value = instr.modifierValue ?? 0;
+      const modDisplay = label ? ` (${label})` : (value ? ` + ${value}` : '');
       gameStore.appendMessage(
         'system',
-        `🎲 Roll needed: ${instr.dices}${instr.modifier ? ` + ${JSON.stringify(instr.modifier)}` : ''}`,
+        `🎲 Roll needed: ${instr.dices}${modDisplay}`,
       );
     } else if (isXpInstruction(instr)) {
       gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);

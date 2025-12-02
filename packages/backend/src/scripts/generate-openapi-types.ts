@@ -22,6 +22,7 @@ const generateAliasesFile = (document: OpenApiDocument) => {
   const indexLines = [
     '// GENERATED FROM OpenAPI spec - do not edit manually',
     'export * from \'./api-types\'',
+    'export * from \'./type-guards\'',
     '',
     '// Auto-generated type aliases from OpenAPI components.schemas',
     ...aliasLines,

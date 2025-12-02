@@ -4,7 +4,7 @@ import {
 import {
   Injectable, InternalServerErrorException, Logger,
 } from '@nestjs/common';
-import { ChatMessageDto } from 'src/chat/dto/ChatMessageDto.js';
+import { ChatMessageDto } from '../../chat/dto/ChatMessageDto.js';
 import { parseAIResponse } from './ai-parser.util.js';
 
 @Injectable()

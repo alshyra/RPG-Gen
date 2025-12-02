@@ -183,33 +183,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "instructions": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/SubmitRollDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Processed instructions",
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "pendingRolls": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RollInstructionMessageDto"
                   }
                 }
               }
@@ -826,7 +813,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDefinitionDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1262,16 +1256,13 @@
             "type": "string",
             "description": "Dice expression (e.g., 1d20+5)"
           },
-          "modifier": {
-            "description": "Modifier to apply to the roll",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+          "modifierLabel": {
+            "type": "string",
+            "description": "Semantic modifier label (e.g., \"wisdom (Perception)\")"
+          },
+          "modifierValue": {
+            "type": "number",
+            "description": "Numeric modifier to apply to the roll (e.g., +3)"
           },
           "description": {
             "type": "string",
@@ -1589,6 +1580,21 @@
         "required": [
           "role",
           "narrative"
+        ]
+      },
+      "SubmitRollDto": {
+        "type": "object",
+        "properties": {
+          "instructions": {
+            "description": "Resolved instructions array",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RollInstructionMessageDto"
+            }
+          }
+        },
+        "required": [
+          "instructions"
         ]
       },
       "CreateCharacterBodyDto": {
@@ -2379,6 +2385,48 @@
           "character"
         ]
       },
+      "ItemDefinitionDto": {
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string",
+            "description": "Unique identifier for the item definition",
+            "example": "sword_of_flames_001"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the item",
+            "example": "Sword of Flames"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the item",
+            "example": "A magical sword that burns with eternal flames",
+            "default": ""
+          },
+          "meta": {
+            "type": "object",
+            "description": "Metadata containing item properties and stats",
+            "example": {
+              "damage": 10,
+              "durability": 100,
+              "rarity": "rare"
+            }
+          },
+          "isEditable": {
+            "type": "boolean",
+            "description": "Whether this item definition can be modified",
+            "default": true
+          }
+        },
+        "required": [
+          "definitionId",
+          "name",
+          "description",
+          "meta",
+          "isEditable"
+        ]
+      },
       "CombatStartRequestDto": {
         "type": "object",
         "properties": {
@@ -2617,13 +2665,13 @@
       "AttackRequestDto": {
         "type": "object",
         "properties": {
-          "target": {
+          "targetId": {
             "type": "string",
             "description": "Target ID to attack"
           }
         },
         "required": [
-          "target"
+          "targetId"
         ]
       },
       "AttackResultDto": {

@@ -8,7 +8,7 @@ import {
 } from './schema/ChatHistory.js';
 import { GameInstructionProcessor } from './game-instruction.processor.js';
 import { ChatController } from './chat.controller.js';
-import { RollsController } from './rolls.controller.js';
+import { RollsController } from '../rolls/rolls.controller.js';
 import { ConversationService } from './conversation.service.js';
 
 @Module({

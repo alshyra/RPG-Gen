@@ -98,8 +98,10 @@ const pendingDiceExpr = computed(() => {
 const pendingRollText = computed(() => {
   const p = gameStore.pendingInstruction;
   if (!p || p.type !== 'roll') return '';
-  const modifier = typeof p.modifier === 'string' || typeof p.modifier === 'number' ? p.modifier : (p.modifier ? JSON.stringify(p.modifier) : '');
-  return `🎲 ${p.dices}${modifier ? ` +${modifier}` : ''}`;
+  const label = p.modifierLabel ?? '';
+  const value = p.modifierValue ?? 0;
+  const modDisplay = label ? ` (${label})` : (value ? ` +${value}` : '');
+  return `🎲 ${p.dices}${modDisplay}`;
 });
 
 const handleCommandSelect = (command: string) => {

@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ItemDefinition } from 'src/item-definition/item-definition.schema.js';
+import { ItemDefinition } from '../item-definition/item-definition.schema.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';

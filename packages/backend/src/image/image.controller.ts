@@ -4,17 +4,16 @@ import {
 import {
   ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
 import Joi from 'joi';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
+import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import { GeminiImageService } from '../external/image/gemini-image.service.js';
-import { UserDocument } from '../auth/user.schema.js';
 import {
   AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto,
 } from './dto/image-response.dto.js';
 import { ImageService } from './image.service.js';
-import type { CharacterResponseDto } from 'src/character/dto/CharacterResponseDto.js';
+import type { RPGRequest } from '../global.types.js';
 
 const schema = Joi.object({
   token: Joi.string()
@@ -65,12 +64,12 @@ export class ImageController {
     status: 400,
     description: 'Invalid request or avatar generation failed',
   })
-  async generateAvatar(@Req() req: Request, @Body('characterId') characterId: string) {
+  async generateAvatar(@Req() req: RPGRequest, @Body('characterId') characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 
     if (!characterId || typeof characterId !== 'string') throw new BadRequestException('characterId is required');
 
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
     const character = await this.characterService.findByCharacterId(userId, characterId);
     return await this.handleGenerateAvatar(userId, character);

@@ -1,4 +1,4 @@
-import { ChatMessageDto } from 'src/chat/dto/ChatMessageDto.js';
+import { ChatMessageDto } from '../../chat/dto/ChatMessageDto.js';
 import type { GameInstructionDto } from '../../chat/dto/GameInstructionDto.js';
 import JSONC from 'jsonc-simple-parser';
 

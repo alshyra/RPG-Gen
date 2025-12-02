@@ -31,6 +31,7 @@
     "eslint": "^9.39.1",
     "express": "^5.1.0",
     "joi": "^18.0.1",
+    "jsonc-simple-parser": "^3.0.0",
     "mongoose": "^8.19.3",
     "openapi-typescript": "^7.10.1",
     "passport": "^0.7.0",

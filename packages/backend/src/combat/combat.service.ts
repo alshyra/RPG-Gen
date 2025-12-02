@@ -768,8 +768,11 @@ export class CombatService {
     if (alive.length === 0) {
       return this.buildVictoryResult(state, characterId, result.enemy, result.damageDealt);
     }
+    let narrativeParts = [`Vous infligez ${result.damageDealt} dégâts à ${result.enemy.name} (PV restants: ${result.enemy.hp}).`];
 
-    const narrativeParts = [`Vous infligez ${result.damageDealt} dégâts à ${result.enemy.name} (PV restants: ${result.enemy.hp}).`];
+    if (result.damageDealt == 0) {
+      narrativeParts = [`Vous ratez votre attaque contre ${result.enemy.name} et n'infligez aucun dégât.`];
+    }
     return this.processDamageEnemyPhase(state, alive, narrativeParts);
   }
 

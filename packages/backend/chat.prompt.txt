@@ -82,11 +82,12 @@ Lorsque le combat se termine (victoire ou défaite), vous recevrez une instructi
 Tous les objets JSON doivent être à la **fin de votre message**, **séparés** de la narration par au moins une ligne, et en **anglais** :
 
   * **Demander un jet de dés (Output MJ) :**
-    - IMPORTANT: all values in the JSON payload MUST be canonical English identifiers. The `modifier` field must be a canonical skill or ability name in English — prefer skill names such as "Perception", "Athletics", "Stealth". If you include both ability and skill, use the English format `"ability (Skill)"` (e.g. "wisdom (Perception)"). Do NOT output localized names such as "Sagesse".
+    - IMPORTANT: all values in the JSON payload MUST be canonical English identifiers. The `modifierLabel` field must be a canonical skill or ability name in English — prefer skill names such as "Perception", "Athletics", "Stealth". If you include both ability and skill, use the English format `"ability (Skill)"` (e.g. "wisdom (Perception)"). Do NOT output localized names such as "Sagesse".
+    - The `modifierValue` field (numeric bonus) will be computed by the backend from the character sheet; do NOT include it in AI-generated instructions.
     ```json
-    {"roll": {"dices": "1d20", "modifier": "wisdom (Perception)", "advantage": "none"}}
-    {"roll": {"dices": "1d20", "modifier": "strength (Athletics)", "advantage": "advantage"}}
-    {"roll": {"dices": "1d20", "modifier": "constitution (Saving Throw)", "advantage": "disadvantage"}}
+    {"roll": {"dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none"}}
+    {"roll": {"dices": "1d20", "modifierLabel": "strength (Athletics)", "advantage": "advantage"}}
+    {"roll": {"dices": "1d20", "modifierLabel": "constitution (Saving Throw)", "advantage": "disadvantage"}}
     ```
   * **Reconnaître les résultats du jet (Input Système reçu) :**
     ```json

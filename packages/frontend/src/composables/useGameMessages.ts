@@ -57,7 +57,10 @@ export function useGameMessages() {
   const handleRollInstruction = (instr: RollInstructionMessageDto): void => {
     if (instr.type !== 'roll') return;
     gameStore.pendingInstruction = instr;
-    gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${instr.modifier ? ` + ${JSON.stringify(instr.modifier)}` : ''}`);
+    const label = instr.modifierLabel ?? '';
+    const value = instr.modifierValue ?? 0;
+    const modDisplay = label ? ` (${label})` : (value ? ` + ${value}` : '');
+    gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${modDisplay}`);
   };
 
   const handleXpInstruction = (instr: XpInstructionMessageDto): void => {

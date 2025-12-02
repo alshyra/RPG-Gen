@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { type InventoryItemMeta } from 'src/character/dto/InventoryItemMeta.js';
+import { type InventoryItemMeta } from '../character/dto/InventoryItemMeta.js';
 
 export class ItemDefinitionDto {
   @ApiProperty({

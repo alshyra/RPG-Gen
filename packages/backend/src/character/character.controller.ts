@@ -15,9 +15,8 @@ import {
 import {
   ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { UserDocument } from '../auth/user.schema.js';
+import type { RPGRequest } from '../global.types.js';
 import { CharacterService } from './character.service.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { EquipInventoryDto } from './dto/EquipInventoryDto.js';
@@ -49,8 +48,8 @@ export class CharacterController {
     description: 'Character created successfully',
     type: CharacterResponseDto,
   })
-  async create(@Req() req: Request, @Body('world') world: string) {
-    const user = req.user as UserDocument;
+  async create(@Req() req: RPGRequest, @Body('world') world: string) {
+    const { user } = req;
 
     const userId = user._id.toString();
     const character = await this.characterService.create(userId, world);
@@ -64,8 +63,8 @@ export class CharacterController {
     description: 'List of characters',
     type: [CharacterResponseDto],
   })
-  async findAll(@Req() req: Request) {
-    const user = req.user as UserDocument;
+  async findAll(@Req() req: RPGRequest) {
+    const { user } = req;
     const userId = user._id.toString();
 
     const characters = await this.characterService.findByUserId(userId);
@@ -79,8 +78,8 @@ export class CharacterController {
     description: 'List of deceased characters',
     type: [DeceasedCharacterResponseDto],
   })
-  async getDeceased(@Req() req: Request) {
-    const user = req.user as UserDocument;
+  async getDeceased(@Req() req: RPGRequest) {
+    const { user } = req;
     const userId = user._id.toString();
 
     const characters = await this.characterService.getDeceasedCharacters(userId);
@@ -102,8 +101,8 @@ export class CharacterController {
     status: 404,
     description: 'Character not found',
   })
-  async findOne(@Req() req: Request, @Param('characterId') characterId: string) {
-    const user = req.user as UserDocument;
+  async findOne(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
@@ -130,11 +129,11 @@ export class CharacterController {
     type: UpdateCharacterRequestDto,
   })
   async update(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() updates: UpdateCharacterRequestDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.update(userId, characterId, updates);
@@ -152,8 +151,8 @@ export class CharacterController {
     status: 404,
     description: 'Character not found',
   })
-  async delete(@Req() req: Request, @Param('characterId') characterId: string) {
-    const user = req.user as UserDocument;
+  async delete(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+    const { user } = req;
     const userId = user._id.toString();
 
     await this.characterService.delete(userId, characterId);
@@ -173,11 +172,11 @@ export class CharacterController {
     description: 'Character not found',
   })
   async kill(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() body: KillCharacterBodyDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.markAsDeceased(
@@ -200,11 +199,11 @@ export class CharacterController {
     description: 'Character not found',
   })
   async addInventory(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() item: CreateInventoryItemDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
@@ -220,11 +219,11 @@ export class CharacterController {
     type: CharacterResponseDto,
   })
   async equipInventory(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() body: { definitionId: string },
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
     const character = await this.characterService.equipInventoryItem(userId, characterId, body.definitionId);
     return character;
@@ -243,12 +242,12 @@ export class CharacterController {
   })
   @ApiBody({ type: CreateInventoryItemDto })
   async updateInventory(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('itemId') itemId: string,
     @Body() updates: CreateInventoryItemDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.updateInventoryItem(userId, characterId, itemId, updates);
@@ -268,12 +267,12 @@ export class CharacterController {
     description: 'Character or item not found',
   })
   async removeInventory(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('itemId') itemId: string,
     @Body() body: RemoveInventoryBodyDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body.qty);
@@ -297,11 +296,11 @@ export class CharacterController {
     description: 'Character not found',
   })
   async grantInspiration(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body('amount') amount: number,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     // Validate amount
@@ -338,10 +337,10 @@ export class CharacterController {
     description: 'Character not found',
   })
   async spendInspiration(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);

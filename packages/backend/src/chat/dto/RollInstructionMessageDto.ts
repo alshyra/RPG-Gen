@@ -1,30 +1,11 @@
 import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
+import { RollMetaDto } from './RolllMetaDto.js';
 
 /**
  * Metadata for roll instructions, typically used for combat attack/damage rolls
  */
-export class RollMetaDto {
-  @ApiPropertyOptional({ description: 'Attack bonus to apply' })
-  attackBonus?: number;
-
-  @ApiPropertyOptional({ description: 'Target name' })
-  target?: string;
-
-  @ApiPropertyOptional({ description: 'Target armor class' })
-  targetAc?: number;
-
-  @ApiPropertyOptional({ description: 'Damage dice expression' })
-  damageDice?: string;
-
-  @ApiPropertyOptional({ description: 'Damage bonus to apply' })
-  damageBonus?: number;
-
-  @ApiPropertyOptional({ description: 'Action type (e.g., attack, damage)' })
-  action?: string;
-}
-
 export class RollInstructionMessageDto {
   @ApiProperty({
     description: 'Instruction type',
@@ -36,13 +17,14 @@ export class RollInstructionMessageDto {
   dices: string;
 
   @ApiPropertyOptional({
-    description: 'Modifier to apply to the roll',
-    oneOf: [
-      { type: 'string' },
-      { type: 'number' },
-    ],
+    description: 'Semantic modifier label (e.g., "wisdom (Perception)")',
   })
-  modifier?: string | number;
+  modifierLabel?: string;
+
+  @ApiPropertyOptional({
+    description: 'Numeric modifier to apply to the roll (e.g., +3)',
+  })
+  modifierValue?: number;
 
   @ApiPropertyOptional({ description: 'Roll description' })
   description?: string;

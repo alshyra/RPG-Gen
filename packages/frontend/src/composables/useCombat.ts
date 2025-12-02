@@ -5,6 +5,7 @@ import { combatService } from '../apis/combatApi';
 import type {
   CombatStartInstructionMessageDto, TurnResultWithInstructionsDto, RollInstructionMessageDto,
   HpInstructionMessageDto, XpInstructionMessageDto, GameInstructionDto,
+  CombatEnemyDto,
 } from '@rpg-gen/shared';
 import { isRollInstruction, isHpInstruction, isXpInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
@@ -70,7 +71,7 @@ function processAttackInstructions(
 }
 
 // ----- Attack Helpers -----
-async function performAttack(characterId: string, target: string, token: string | null): Promise<TurnResultWithInstructionsDto> {
+async function performAttack(characterId: string, target: CombatEnemyDto, token: string | null): Promise<TurnResultWithInstructionsDto> {
   if (!token) {
     throw new Error('Action token is required for attack');
   }
@@ -160,7 +161,7 @@ export function useCombat() {
   /**
    * Execute an attack against a target using actionToken for idempotency
    */
-  const executeAttack = async (target: string): Promise<void> => {
+  const executeAttack = async (target: CombatEnemyDto): Promise<void> => {
     if (!currentCharacter.value) return;
     gameStore.appendMessage('user', `J'attaque ${target}!`);
     gameStore.sending = true;
@@ -169,7 +170,7 @@ export function useCombat() {
       const { characterId } = currentCharacter.value;
       console.log('[useCombat] executeAttack ->', {
         characterId,
-        target,
+        targetName: target.name,
         actionToken: combatStore.actionToken,
       });
       const attackResponse = await performAttack(characterId, target, combatStore.actionToken);
@@ -235,22 +236,11 @@ export function useCombat() {
   };
 
   return {
-    // State (from store)
-    inCombat: combatStore.inCombat,
-    enemies: combatStore.enemies,
-    aliveEnemies: combatStore.aliveEnemies,
-    validTargets: combatStore.validTargets,
-    currentTarget: combatStore.currentTarget,
-    roundNumber: combatStore.roundNumber,
-    actionToken: combatStore.actionToken,
-    phase: combatStore.phase,
-
     // Actions
     initializeCombat,
     executeAttack,
     handleCombatEnd,
     fleeCombat,
     checkCombatStatus,
-    setTarget: combatStore.setTarget,
   };
 }

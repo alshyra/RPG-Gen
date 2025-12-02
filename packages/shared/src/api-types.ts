@@ -497,8 +497,10 @@ export interface components {
       type: 'roll';
       /** @description Dice expression (e.g., 1d20+5) */
       dices: string;
-      /** @description Modifier to apply to the roll */
-      modifier?: string | number;
+      /** @description Semantic modifier label (e.g., "wisdom (Perception)") */
+      modifierLabel?: string;
+      /** @description Numeric modifier to apply to the roll (e.g., +3) */
+      modifierValue?: number;
       /** @description Roll description */
       description?: string;
       /**
@@ -621,6 +623,10 @@ export interface components {
       narrative: string;
       /** @description Game instructions (for assistant messages) */
       instructions?: (components['schemas']['RollInstructionMessageDto'] | components['schemas']['HpInstructionMessageDto'] | components['schemas']['XpInstructionMessageDto'] | components['schemas']['SpellInstructionMessageDto'] | components['schemas']['InventoryInstructionMessageDto'] | components['schemas']['CombatStartInstructionMessageDto'] | components['schemas']['CombatEndInstructionMessageDto'])[];
+    };
+    SubmitRollDto: {
+      /** @description Resolved instructions array */
+      instructions: components['schemas']['RollInstructionMessageDto'][];
     };
     CreateCharacterBodyDto: {
       /** @description Game world (e.g., dnd, vtm) */
@@ -958,6 +964,38 @@ export interface components {
       /** @description Updated character */
       character: components['schemas']['CharacterResponseDto'];
     };
+    ItemDefinitionDto: {
+      /**
+             * @description Unique identifier for the item definition
+             * @example sword_of_flames_001
+             */
+      definitionId: string;
+      /**
+             * @description Display name of the item
+             * @example Sword of Flames
+             */
+      name: string;
+      /**
+             * @description Detailed description of the item
+             * @default
+             * @example A magical sword that burns with eternal flames
+             */
+      description: string;
+      /**
+             * @description Metadata containing item properties and stats
+             * @example {
+             *       "damage": 10,
+             *       "durability": 100,
+             *       "rarity": "rare"
+             *     }
+             */
+      meta: Record<string, never>;
+      /**
+             * @description Whether this item definition can be modified
+             * @default true
+             */
+      isEditable: boolean;
+    };
     CombatStartRequestDto: {
       /** @description Array of enemies to initialize combat with */
       combat_start: components['schemas']['CombatStartEntryDto'][];
@@ -1047,7 +1085,7 @@ export interface components {
     };
     AttackRequestDto: {
       /** @description Target ID to attack */
-      target: string;
+      targetId: string;
     };
     AttackResultDto: {
       /** @description Attacker identifier */
@@ -1308,19 +1346,14 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': {
-          instructions?: Record<string, never>[];
-        };
+        'application/json': components['schemas']['SubmitRollDto'];
       };
     };
     responses: {
-      /** @description Processed instructions */
       200: {
         headers: Record<string, unknown>;
         content: {
-          'application/json': {
-            pendingRolls?: Record<string, never>[];
-          };
+          'application/json': components['schemas']['RollInstructionMessageDto'][];
         };
       };
     };
@@ -1698,7 +1731,9 @@ export interface operations {
     responses: {
       200: {
         headers: Record<string, unknown>;
-        content?: never;
+        content: {
+          'application/json': components['schemas']['ItemDefinitionDto'];
+        };
       };
     };
   };

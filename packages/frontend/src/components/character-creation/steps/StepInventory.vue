@@ -405,6 +405,7 @@ const toggleSecondaryItem = (item: ItemResponseDto) => {
 onBeforeUnmount(async () => {
   try {
     if (!currentCharacter.value?.characterId) return;
+    chosenMainWeapon.value.equipped = true;
     await characterStore.updateCharacter(currentCharacter.value.characterId, {
       inventory: [
         chosenMainWeapon.value,

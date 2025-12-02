@@ -30,9 +30,15 @@ export class GameInstruction {
 
   @Prop({
     required: false,
-    type: Object,
+    type: String,
   })
-  modifier?: string | number;
+  modifierLabel?: string;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  modifierValue?: number;
 
   @Prop({
     required: false,

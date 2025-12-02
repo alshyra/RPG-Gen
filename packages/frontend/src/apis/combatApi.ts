@@ -3,6 +3,7 @@
  */
 import type {
   CombatStartRequestDto, CombatStateDto, TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto,
+  CombatEnemyDto,
 } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
@@ -32,7 +33,7 @@ class CombatService {
   /**
    * Execute an attack against a target using an action token for idempotency
    */
-  async attackWithToken(characterId: string, actionToken: string, target: string): Promise<TurnResultWithInstructionsDto> {
+  async attackWithToken(characterId: string, actionToken: string, target: CombatEnemyDto): Promise<TurnResultWithInstructionsDto> {
     const response = await api.POST('/api/combat/{characterId}/attack/{actionToken}', {
       params: {
         path: {
@@ -40,7 +41,7 @@ class CombatService {
           actionToken,
         },
       },
-      body: { target },
+      body: { targetId: target.id },
     });
     return getData<TurnResultWithInstructionsDto>(response);
   }

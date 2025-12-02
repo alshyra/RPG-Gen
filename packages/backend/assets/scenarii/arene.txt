@@ -2,4 +2,5 @@ Ceci est une instruction pour faciliter la gestion des scénarios dans le backen
 
 Le joueur arrive dans une arene face à 2 gobelins, le combat commence immédiatement.
 
-stats: { "name": "Goblin", "hp": 7, "ac": 15, "attack_bonus": 2, "damage_dice": "1d4", "damage_bonus": 2 },
+stats: 
+{ "name": "Goblin-1", "hp": 7, "ac": 10, "attack_bonus": 0, "damage_dice": "1d4", "damage_bonus": 0 },

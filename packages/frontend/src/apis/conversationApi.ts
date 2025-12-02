@@ -26,7 +26,7 @@ export class ConversationService {
   /**
    * Send a message to the game backend
    */
-  async sendMessage(message: string) {
+  async sendMessage(narrative: string, instructions: GameInstructionDto[] = []) {
     if (!this.characterId) throw new Error('Game not started. Call startGame first.');
 
     const {
@@ -35,8 +35,8 @@ export class ConversationService {
       params: { path: { characterId: this.characterId } },
       body: {
         role: 'user',
-        instructions: [],
-        narrative: message,
+        instructions,
+        narrative,
       },
     });
 

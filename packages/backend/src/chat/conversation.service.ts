@@ -2,7 +2,7 @@ import { Content } from '@google/genai';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AbilityScoresResponseDto } from 'src/character/dto/AbilityScoresResponseDto.js';
+import { AbilityScoresResponseDto } from '../character/dto/AbilityScoresResponseDto.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import type { ChatMessageDto } from './dto/ChatMessageDto.js';

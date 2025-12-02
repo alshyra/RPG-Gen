@@ -14,7 +14,6 @@ import {
 import {
   ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { CharacterService } from '../character/character.service.js';
 import { UserDocument } from '../auth/user.schema.js';
@@ -32,6 +31,7 @@ import { DiceController } from '../dice/dice.controller.js';
 import {
   CombatStartRequestDto, AttackRequestDto, CombatStateDto, CombatEnemyDto,
 } from './dto/index.js';
+import type { RPGRequest } from '../global.types.js';
 
 @ApiTags('combat')
 @Controller('combat')
@@ -86,11 +86,11 @@ export class CombatController {
     type: CombatStateDto,
   })
   async startCombat(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() body: CombatStartRequestDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     this.logger.debug(body);
@@ -131,12 +131,12 @@ export class CombatController {
   @ApiBody({ type: AttackRequestDto })
   // eslint-disable-next-line max-statements
   async attack(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('actionToken') actionToken: string,
     @Body('target') target: string,
   ): Promise<TurnResultWithInstructionsDto> {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     if (!(await this.combatService.isInCombat(characterId))) {
@@ -154,7 +154,7 @@ export class CombatController {
       throw new BadRequestException('No combat state found');
     }
 
-    const targetEnemy = state.enemies.find(e => e.name.toLowerCase() === (target || '').toLowerCase() && e.hp > 0);
+    const targetEnemy = state.enemies.find(e => e.id.toLowerCase() === (target || '').toLowerCase() && e.hp > 0);
     if (!targetEnemy) {
       const validTargets = await this.combatService.getValidTargets(characterId);
       await this.actionRecordService.setFailed(actionToken, { error: 'Invalid target' });
@@ -168,7 +168,7 @@ export class CombatController {
     const totalAttack = die + (state.player.attackBonus || 0);
     const critical = die === 20;
     const fumble = die === 1;
-    const hit = critical || (typeof targetEnemy.ac === 'number' ? (totalAttack >= targetEnemy.ac && !fumble) : false);
+    const hit = critical || (totalAttack >= targetEnemy.ac && !fumble);
 
     if (!hit) {
       // Miss: apply miss effects and advance turn (no damage). This is a final result for the sequence.
@@ -186,7 +186,7 @@ export class CombatController {
       {
         type: 'roll',
         dices: state.player.damageDice || '1d4',
-        modifier: state.player.damageBonus || 0,
+        modifierValue: state.player.damageBonus || 0,
         meta: {
           action: 'damage',
           target: targetEnemy.name,
@@ -235,12 +235,12 @@ export class CombatController {
   })
   @ApiBody({ type: DiceThrowDto })
   async resolveRoll(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Param('actionToken') actionToken: string,
     @Body() body: DiceThrowDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     if (!body || !body.action) {
@@ -344,7 +344,7 @@ export class CombatController {
         {
           type: 'roll',
           dices: state.player.damageDice || '1d4',
-          modifier: state.player.damageBonus || 0,
+          modifierValue: state.player.damageBonus || 0,
           meta: {
             action: 'damage',
             target: targetEnemy.name,
@@ -377,10 +377,10 @@ export class CombatController {
     type: CombatStateDto,
   })
   async getStatus(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     await this.characterService.findByCharacterId(userId, characterId);
@@ -433,10 +433,10 @@ export class CombatController {
     type: CombatEndResponseDto,
   })
   async endCombat(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ): Promise<CombatEndResponseDto> {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);

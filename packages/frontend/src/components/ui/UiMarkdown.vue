@@ -30,7 +30,7 @@ marked.setOptions({
   walkTokens: null,
 });
 
-const renderedMarkdown = computed(() => marked(props.narrative));
+const renderedMarkdown = computed(() => props.narrative ? marked(props.narrative) : '');
 </script>
 
 <style scoped>

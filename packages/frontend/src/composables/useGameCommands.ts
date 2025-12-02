@@ -1,7 +1,11 @@
 import { conversationService } from '../apis/conversationApi';
 import { characterServiceApi } from '../apis/characterApi';
 import { isCombatEndInstruction, isCombatStartInstruction } from '../apis/combatTypes';
-import type { RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto } from '@rpg-gen/shared';
+import type {
+  RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto, GameInstructionDto,
+  InventoryInstructionMessageDto,
+  CombatEnemyDto,
+} from '@rpg-gen/shared';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
@@ -15,7 +19,9 @@ type InstructionItem = Record<string, unknown>;
 // ----- Instruction Processors -----
 const processRollInstruction = (instr: RollInstructionMessageDto, gameStore: GameStore): void => {
   gameStore.pendingInstruction = instr;
-  const mod = instr.modifier ? ` + ${instr.modifier}` : '';
+  const label = instr.modifierLabel ?? '';
+  const value = instr.modifierValue ?? 0;
+  const mod = label ? ` (${label})` : (value ? ` + ${value}` : '');
   gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${mod}`);
 };
 
@@ -86,22 +92,22 @@ const findItem = (character: CharacterResponseDto, itemName: string) => characte
   _id?: string;
 }) => matchesName(i.name, itemName) || matchesName(i.definitionId, itemName) || matchesName(i._id, itemName));
 
-const sendToGemini = async (
-  message: string,
-  gameStore: GameStore,
-  processInstructions: (instrs: unknown[]) => void,
-): Promise<void> => {
-  const response = await conversationService.sendMessage(message);
-  gameStore.messages.pop();
-  gameStore.appendMessage('assistant', response.narrative);
-  processInstructions(response.instructions ?? []);
-};
-
+// eslint-disable-next-line max-statements
 export function useGameCommands() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const combat = useCombat();
+
+  const sendToGemini = async (
+    message: string,
+    instructions: GameInstructionDto[] = [],
+  ): Promise<void> => {
+    const response = await conversationService.sendMessage(message, instructions);
+    gameStore.messages.pop();
+    gameStore.appendMessage('assistant', response.narrative);
+    processInstructions(response.instructions ?? []);
+  };
 
   const executeWithLoading = async (action: () => Promise<void>, errorPrefix: string): Promise<void> => {
     gameStore.sending = true;
@@ -139,7 +145,9 @@ export function useGameCommands() {
         await executeEquipCommand(command.target);
         break;
       case 'attack':
-        await executeAttackCommand(command.target);
+        const target = combatStore.aliveEnemies.find(e => e.id.toLocaleLowerCase() === command.target.toLowerCase());
+        if (!target) throw new Error(`Enemy not found: ${command.target} maybe name is used instead of id`);
+        await executeAttackCommand(target);
         break;
     }
   };
@@ -162,7 +170,13 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      await sendToGemini(`I cast the spell ${spell.name}`, gameStore, processInstructions);
+      await sendToGemini(`I cast the spell ${spell.name}`, [{
+        type: 'spell',
+        action: 'cast',
+        name: spell.name,
+        description: spell.description,
+        level: spell.level,
+      } as SpellInstructionMessageDto]);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to cast spell: ${spell.name}`);
@@ -189,7 +203,11 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      await sendToGemini(`I use the item ${item.name}`, gameStore, processInstructions);
+      await sendToGemini(`I use the item ${item.name}`, [{
+        type: 'inventory',
+        action: 'use',
+        name: item._id,
+      } as InventoryInstructionMessageDto]);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
@@ -231,7 +249,7 @@ export function useGameCommands() {
   /**
    * Execute an attack command - uses backend combat system when in combat
    */
-  const executeAttackCommand = async (target: string): Promise<void> => {
+  const executeAttackCommand = async (target: CombatEnemyDto): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
@@ -244,15 +262,6 @@ export function useGameCommands() {
     gameStore.appendMessage('user', `J'attaque ${target}!`);
     gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
-
-    try {
-      await sendToGemini(`I attack ${target}`, gameStore, processInstructions);
-    } catch (err) {
-      gameStore.messages.pop();
-      gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
-    } finally {
-      gameStore.sending = false;
-    }
   };
 
   /**

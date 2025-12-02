@@ -16,59 +16,80 @@ interface AttackQueueItem {
 }
 
 // Pure helper functions
-function createInitialCombatState() {
-  return {
-    inCombat: ref(false),
-    roundNumber: ref(1),
-    enemies: ref<CombatEnemyDto[]>([]),
-    turnOrder: ref<CombatantDto[]>([]),
-    playerInitiative: ref(0),
-    currentTarget: ref<string | null>(null),
-    actionToken: ref<string | null>(null),
-    phase: ref<CombatPhase>('PLAYER_TURN'),
-    expectedDto: ref<string>('AttackRequestDto'),
-  };
-}
 
-function createAttackModalState() {
-  return {
-    showAttackResultModal: ref(false),
-    currentAttackResult: ref<AttackResultDto | null>(null),
-    isCurrentAttackPlayerAttack: ref(true),
-    attackResultQueue: ref<AttackQueueItem[]>([]),
-    isAnimatingAttacks: ref(false),
-  };
-}
+export const useCombatStore = defineStore('combatStore', () => {
+  const inCombat = ref(false);
+  const roundNumber = ref(1);
+  const enemies = ref<CombatEnemyDto[]>([]);
+  const turnOrder = ref<CombatantDto[]>([]);
+  const playerInitiative = ref(0);
+  const currentTarget = ref<CombatEnemyDto | null>(null);
+  const actionToken = ref<string | null>(null);
+  const phase = ref<CombatPhase>('PLAYER_TURN');
+  const expectedDto = ref<string>('AttackRequestDto');
+  const showAttackResultModal = ref(false);
+  const currentAttackResult = ref<AttackResultDto | null>(null);
+  const isCurrentAttackPlayerAttack = ref(true);
+  const attackResultQueue = ref<AttackQueueItem[]>([]);
+  const isAnimatingAttacks = ref(false);
 
-function updateEnemiesFromResult(enemies: Ref<CombatEnemyDto[]>, remainingEnemies: CombatEnemyDto[]): void {
-  remainingEnemies.forEach((updatedEnemy) => {
-    const existingEnemy = enemies.value.find(e => e.id === updatedEnemy.id);
-    if (existingEnemy) {
-      existingEnemy.hp = updatedEnemy.hp;
+  const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
+  const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
+  const hasValidTarget = computed(() => validTargets.value.length > 0);
+
+  const initializeCombat = (response: CombatStateDto): void => {
+    console.log('[combatStore] initializeCombat', response);
+    inCombat.value = response.inCombat;
+    roundNumber.value = response.roundNumber;
+    playerInitiative.value = response.player.initiative ?? 0;
+    enemies.value = response.enemies ?? [];
+    turnOrder.value = response.turnOrder ?? [];
+    actionToken.value = response.actionToken ?? null;
+    phase.value = response.phase ?? 'PLAYER_TURN';
+    expectedDto.value = response.expectedDto ?? 'AttackRequestDto';
+    if (response.enemies.length > 0) {
+      [currentTarget.value] = response.enemies;
     }
+  };
+
+  const selectNextAliveTarget = (enemies: Ref<CombatEnemyDto[]>): CombatEnemyDto | null => enemies.value.find(e => e.hp > 0) || null;
+
+  const updateEnemiesFromResult = (enemies: Ref<CombatEnemyDto[]>, remainingEnemies: CombatEnemyDto[]) => enemies.value.map((enemy) => {
+    const updatedEnemy = remainingEnemies.find(e => e.id === enemy.id);
+    return updatedEnemy
+      ? {
+          ...enemy,
+          hp: updatedEnemy.hp,
+        }
+      : enemy;
   });
-}
 
-function selectNextAliveTarget(enemies: Ref<CombatEnemyDto[]>, currentTarget: Ref<string | null>): void {
-  if (!currentTarget.value) return;
-  const targetEnemy = enemies.value.find(e => e.name === currentTarget.value);
-  if (!targetEnemy || targetEnemy.hp <= 0) {
-    const firstAlive = enemies.value.find(e => e.hp > 0);
-    currentTarget.value = firstAlive?.name ?? null;
-  }
-}
+  const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
+    enemies.value = updateEnemiesFromResult(enemies, result.remainingEnemies);
+    roundNumber.value = result.roundNumber;
+    if (result.combatEnded) {
+      inCombat.value = false;
+      phase.value = 'COMBAT_ENDED';
+      actionToken.value = null;
+    }
+    currentTarget.value = selectNextAliveTarget(enemies);
+  };
 
-function createActions(
-  combatState: ReturnType<typeof createInitialCombatState>,
-  modalState: ReturnType<typeof createAttackModalState>,
-  initializeCombat: (response: CombatStateDto) => void,
-  clearCombat: () => void,
-) {
-  const setTarget = (targetName: string) => {
-    const enemy = combatState.enemies.value.find(
-      e => e.name.toLowerCase() === targetName.toLowerCase() && e.hp > 0,
-    );
-    if (enemy) combatState.currentTarget.value = enemy.name;
+  const clearCombat = () => {
+    inCombat.value = false;
+    roundNumber.value = 1;
+    enemies.value = [];
+    turnOrder.value = [];
+    playerInitiative.value = 0;
+    currentTarget.value = null;
+    actionToken.value = null;
+    phase.value = 'PLAYER_TURN';
+    expectedDto.value = 'AttackRequestDto';
+    showAttackResultModal.value = false;
+    currentAttackResult.value = null;
+    isCurrentAttackPlayerAttack.value = true;
+    attackResultQueue.value = [];
+    isAnimatingAttacks.value = false;
   };
 
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
@@ -92,106 +113,72 @@ function createActions(
   };
 
   const setActionToken = (token: string | null, newPhase?: CombatPhase, newExpectedDto?: string) => {
-    combatState.actionToken.value = token;
-    if (newPhase) combatState.phase.value = newPhase;
-    if (newExpectedDto) combatState.expectedDto.value = newExpectedDto;
+    actionToken.value = token;
+    if (newPhase) phase.value = newPhase;
+    if (newExpectedDto) expectedDto.value = newExpectedDto;
   };
 
   const queueAttackResults = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
-    playerAttacks.forEach(result => modalState.attackResultQueue.value.push({
+    playerAttacks.forEach(result => attackResultQueue.value.push({
       result,
       isPlayerAttack: true,
     }));
-    enemyAttacks.forEach(result => modalState.attackResultQueue.value.push({
+    enemyAttacks.forEach(result => attackResultQueue.value.push({
       result,
       isPlayerAttack: false,
     }));
   };
 
   const showNextAttackResult = (): boolean => {
-    if (modalState.attackResultQueue.value.length === 0) {
-      modalState.isAnimatingAttacks.value = false;
+    if (attackResultQueue.value.length === 0) {
+      isAnimatingAttacks.value = false;
       return false;
     }
-    const next = modalState.attackResultQueue.value.shift();
+    const next = attackResultQueue.value.shift();
     if (next) {
-      modalState.currentAttackResult.value = next.result;
-      modalState.isCurrentAttackPlayerAttack.value = next.isPlayerAttack;
-      modalState.showAttackResultModal.value = true;
+      currentAttackResult.value = next.result;
+      isCurrentAttackPlayerAttack.value = next.isPlayerAttack;
+      showAttackResultModal.value = true;
     }
     return true;
   };
 
   const closeAttackResultModal = () => {
-    modalState.showAttackResultModal.value = false;
+    showAttackResultModal.value = false;
     setTimeout(() => showNextAttackResult(), 300);
   };
 
   const startAttackAnimation = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
     queueAttackResults(playerAttacks, enemyAttacks);
-    modalState.isAnimatingAttacks.value = true;
+    isAnimatingAttacks.value = true;
     showNextAttackResult();
   };
 
   return {
-    setTarget,
-    startCombat,
-    fetchStatus,
-    setActionToken,
-    queueAttackResults,
-    showNextAttackResult,
-    closeAttackResultModal,
-    startAttackAnimation,
-  };
-}
-
-export const useCombatStore = defineStore('combatStore', () => {
-  const combatState = createInitialCombatState();
-  const modalState = createAttackModalState();
-
-  const aliveEnemies = computed(() => combatState.enemies.value.filter(e => (e.hp ?? 0) > 0));
-  const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
-  const hasValidTarget = computed(() => validTargets.value.length > 0);
-
-  const initializeCombat = (response: CombatStateDto): void => {
-    console.log('[combatStore] initializeCombat', response);
-    combatState.inCombat.value = response.inCombat;
-    combatState.roundNumber.value = response.roundNumber;
-    combatState.playerInitiative.value = response.player.initiative ?? 0;
-    combatState.enemies.value = response.enemies ?? [];
-    combatState.turnOrder.value = response.turnOrder ?? [];
-    combatState.actionToken.value = response.actionToken ?? null;
-    combatState.phase.value = response.phase ?? 'PLAYER_TURN';
-    combatState.expectedDto.value = response.expectedDto ?? 'AttackRequestDto';
-    if (response.enemies.length > 0) {
-      combatState.currentTarget.value = response.enemies[0].name;
-    }
-  };
-
-  const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
-    updateEnemiesFromResult(combatState.enemies, result.remainingEnemies);
-    combatState.roundNumber.value = result.roundNumber;
-    if (result.combatEnded) {
-      combatState.inCombat.value = false;
-      combatState.phase.value = 'COMBAT_ENDED';
-      combatState.actionToken.value = null;
-    }
-    selectNextAliveTarget(combatState.enemies, combatState.currentTarget);
-  };
-
-  const clearCombat = () => Object.assign(combatState, createInitialCombatState());
-
-  const actions = createActions(combatState, modalState, initializeCombat, clearCombat);
-
-  return {
-    ...combatState,
-    ...modalState,
+    inCombat,
+    enemies,
+    currentTarget,
+    roundNumber,
+    actionToken,
+    phase,
+    expectedDto,
+    playerInitiative,
+    turnOrder,
+    showAttackResultModal,
+    currentAttackResult,
+    isCurrentAttackPlayerAttack,
+    attackResultQueue,
+    isAnimatingAttacks,
     aliveEnemies,
     validTargets,
     hasValidTarget,
     initializeCombat,
     updateFromTurnResult,
     clearCombat,
-    ...actions,
+    startCombat,
+    fetchStatus,
+    setActionToken,
+    startAttackAnimation,
+    closeAttackResultModal,
   };
 });

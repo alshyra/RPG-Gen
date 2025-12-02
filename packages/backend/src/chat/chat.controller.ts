@@ -11,17 +11,16 @@ import {
 import {
   ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
-import { UserDocument } from '../auth/user.schema.js';
 import { CharacterService } from '../character/character.service.js';
 import { CharacterResponseDto } from '../character/dto/index.js';
 import { GeminiTextService } from '../external/text/gemini-text.service.js';
+import type { RPGRequest } from '../global.types.js';
 import { ConversationService } from './conversation.service.js';
-import { GameInstructionProcessor } from './game-instruction.processor.js';
 import { ChatMessageDto } from './dto/index.js';
+import { GameInstructionProcessor } from './game-instruction.processor.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
 const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
@@ -79,11 +78,11 @@ export class ChatController {
     description: 'Chat processing failed',
   })
   async chat(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body() chatMessageDto: ChatMessageDto,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
     this.logger.log(`Received chat request for characterId ${characterId} with message: ${chatMessageDto}...`);
 
@@ -114,10 +113,10 @@ export class ChatController {
     description: 'History retrieval failed',
   })
   async getHistory(
-    @Req() req: Request,
+    @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ) {
-    const user = req.user as UserDocument;
+    const { user } = req;
     const userId = user._id.toString();
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
 
