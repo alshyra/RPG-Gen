@@ -6,12 +6,12 @@
         univers et commence immédiatement.
       </p>
 
-      <!-- Characters list handled by CharactersGrid component -->
+      <!-- Characters list handled by CharactersMenu component -->
       <div class="mt-6">
         <h3 class="text-lg font-semibold mb-4 text-slate-200">
           Mes personnages
         </h3>
-        <CharactersGrid />
+        <CharactersMenu />
       </div>
     </section>
 
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import CharactersGrid from '../components/character/CharactersGrid.vue';
+import CharactersMenu from '../components/home/CharactersMenu.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterServiceApi } from '../apis/characterApi';
 import { useRouter } from 'vue-router';
@@ -62,9 +62,4 @@ const createDndCharacter = async () => {
   }
 };
 
-// character summary logic is handled in the CharactersGrid component
-
-// Character actions are handled inside the CharactersGrid component
 </script>
-
-<style scoped></style>

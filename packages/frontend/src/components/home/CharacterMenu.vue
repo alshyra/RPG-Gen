@@ -44,19 +44,10 @@
           :aria-label="`Supprimer ${character.name || 'personnage'}`"
           @click.stop="onDelete(character)"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <Trash2
             class="h-4 w-4 text-slate-200"
-            viewBox="0 0 20 20"
-            fill="currentColor"
             aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M6 2a1 1 0 00-1 1v1H3a1 1 0 100 2h14a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm2 6a1 1 0 00-2 0v6a1 1 0 102 0V8zm4 0a1 1 0 10-2 0v6a1 1 0 102 0V8z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          />
         </UiButton>
       </div>
     </div>
@@ -66,6 +57,7 @@
 <script setup lang="ts">
 import { characterServiceApi } from '@/apis/characterApi';
 import UiButton from '@/components/ui/UiButton.vue';
+import { Trash2 } from 'lucide-vue-next';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   ref,
