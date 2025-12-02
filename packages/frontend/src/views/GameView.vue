@@ -21,23 +21,23 @@
       <!-- Right: roll modal - hidden on mobile, shown as overlay -->
       <aside class="hidden lg:block lg:col-span-3 lg:row-span-1">
         <RollResultModal
-          :is-open="gameStore.showRollModal"
+          :is-open="showRollModal"
           @confirm="confirmRoll"
-          @close="() => (gameStore.showRollModal = false)"
+          @close="closeRoll"
         />
       </aside>
     </div>
 
     <!-- Roll modal overlay for mobile -->
     <div
-      v-if="gameStore.showRollModal"
+      v-if="showRollModal"
       class="lg:hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
     >
       <div class="w-full max-w-md">
         <RollResultModal
           :is-open="true"
           @confirm="confirmRoll"
-          @close="() => (gameStore.showRollModal = false)"
+          @close="closeRoll"
         />
       </div>
     </div>
@@ -49,16 +49,13 @@
       @close="() => (characterStore.showDeathModal = false)"
     />
 
-    <!-- Combat result modal for attack animations -->
-    <CombatResultModal v-if="combatStore.currentAttackResult" />
-    <!-- Mask behind the floating chat bar to hide underlying content -->
+    <CombatResultModal v-if="showAttackResultModal" />
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-30 pointer-events-none">
       <div class="pointer-events-none">
         <div :class="[ 'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm', inCombat ? 'rounded-b-lg' : 'rounded-lg' ]" />
       </div>
     </div>
 
-    <!-- Floating chat bar -->
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-50 pointer-events-none">
       <CombatPanel v-if="inCombat" />
       <div class="pointer-events-auto">
@@ -70,6 +67,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -101,8 +99,17 @@ const router = useRouter();
 const route = useRoute();
 const gameStore = useGameStore();
 const characterStore = useCharacterStore();
+const combatStore = useCombatStore();
+
 const ui = useUiStore();
 const characterId = computed(() => route.params.characterId as string);
+
+// expose reactive refs for template usage
+const { showRollModal } = storeToRefs(gameStore);
+
+const closeRoll = () => {
+  showRollModal.value = false;
+};
 
 // Composables
 const { startGame } = useGameSession();
@@ -110,9 +117,10 @@ const { sendMessage } = useGameMessages();
 const { confirmRoll } = useGameRolls();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
-const combatStore = useCombatStore();
-const { inCombat } = storeToRefs(combatStore);
-
+const {
+  inCombat,
+} = storeToRefs(combatStore);
+const { showAttackResultModal } = storeToRefs(combatStore);
 /**
  * Handle sending a message - either as a command or regular message
  */

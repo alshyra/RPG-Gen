@@ -38,35 +38,6 @@
     </div>
   </transition>
 
-  <!-- Roll modal (server requested roll) - delegated to autonomous component -->
-  <RollDamageModal />
-
-  <!-- Attack result modal - teleported to body to avoid pointer-events:none inheritance -->
-  <Teleport to="body">
-    <div
-      v-if="showAttackResultModal"
-      class="fixed inset-0 z-70 flex items-center justify-center"
-    >
-      <div
-        data-cy="attack-result-modal"
-        class="bg-slate-900 border border-slate-700 p-4 rounded shadow-lg w-96"
-      >
-        <div class="text-lg font-semibold mb-2">
-          Attack Result
-        </div>
-        <pre class="text-sm text-slate-200 mb-3">{{ currentAttackResult }}</pre>
-        <div class="flex justify-end">
-          <UiButton
-            class="px-3 py-1 rounded bg-emerald-600"
-            @click="combatStore.closeAttackResultModal"
-          >
-            OK
-          </UiButton>
-        </div>
-      </div>
-    </div>
-  </Teleport>
-
   <!-- Collapsed handle (still visible when combat present) -->
   <transition name="combat-handle">
     <div
@@ -108,16 +79,15 @@ import {
   ref,
   watch,
 } from 'vue';
-import RollDamageModal from '../RollDamageModal.vue';
 import CombatHeader from './CombatHeader.vue';
 import ParticipantsGrid from './ParticipantsGrid.vue';
 import TurnOrder from './TurnOrder.vue';
 
+import UiButton from '@/components/ui/UiButton.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
-import UiButton from '@/components/ui/UiButton.vue';
 
 const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
@@ -125,12 +95,6 @@ const ui = useUiStore();
 
 const {
   inCombat, roundNumber, phase,
-} = storeToRefs(combatStore);
-
-// Expose turn order and index from the store for the template
-const {
-  showAttackResultModal,
-  currentAttackResult,
 } = storeToRefs(combatStore);
 
 const isEndingTurn = ref(false);
@@ -145,9 +109,6 @@ const endTurnButtonClass = computed(() => {
   return 'bg-purple-600 hover:bg-purple-700 text-white';
 });
 
-// participants are computed inside `ParticipantsGrid` now
-
-// Measure expanded panel height and animate max-height (Accordion-like behavior)
 const containerEl = ref<HTMLElement | null>(null);
 const height = ref<number>(0);
 

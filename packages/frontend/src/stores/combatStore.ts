@@ -31,7 +31,6 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentAttackResult = ref<AttackResultDto | null>(null);
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
-  const isAnimatingAttacks = ref(false);
   const currentTurnIndex = ref(0);
 
   // D&D 5e Action Economy
@@ -124,6 +123,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     currentTarget.value = selectNextAliveTarget(enemies);
   };
 
+  // eslint-disable-next-line max-statements
   const clearCombat = () => {
     inCombat.value = false;
     roundNumber.value = 1;
@@ -138,7 +138,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     currentAttackResult.value = null;
     isCurrentAttackPlayerAttack.value = true;
     attackResultQueue.value = [];
-    isAnimatingAttacks.value = false;
     currentTurnIndex.value = 0;
     actionRemaining.value = 1;
     actionMax.value = 1;
@@ -172,24 +171,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     if (newExpectedDto) expectedDto.value = newExpectedDto;
   };
 
-  const setCurrentTarget = (target: CombatEnemyDto | null) => {
-    currentTarget.value = target;
-  };
-
-  const queueAttackResults = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
-    playerAttacks.forEach(result => attackResultQueue.value.push({
-      result,
-      isPlayerAttack: true,
-    }));
-    enemyAttacks.forEach(result => attackResultQueue.value.push({
-      result,
-      isPlayerAttack: false,
-    }));
-  };
-
   const showNextAttackResult = (): boolean => {
     if (attackResultQueue.value.length === 0) {
-      isAnimatingAttacks.value = false;
       return false;
     }
     const next = attackResultQueue.value.shift();
@@ -206,12 +189,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     setTimeout(() => showNextAttackResult(), 300);
   };
 
-  const startAttackAnimation = (playerAttacks: AttackResultDto[], enemyAttacks: AttackResultDto[]) => {
-    queueAttackResults(playerAttacks, enemyAttacks);
-    isAnimatingAttacks.value = true;
-    showNextAttackResult();
-  };
-
   /**
    * End the current player activation and advance turn.
    * This triggers enemy actions until the next player activation.
@@ -223,11 +200,6 @@ export const useCombatStore = defineStore('combatStore', () => {
 
     // Update state from response
     updateFromTurnResult(response);
-
-    // Show enemy attack animations if any
-    if (response.enemyAttacks && response.enemyAttacks.length > 0) {
-      startAttackAnimation([], response.enemyAttacks);
-    }
 
     // Refresh full status to get new action token
     await fetchStatus(characterId);
@@ -250,7 +222,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     currentAttackResult,
     isCurrentAttackPlayerAttack,
     attackResultQueue,
-    isAnimatingAttacks,
     // Action economy
     actionRemaining,
     actionMax,
@@ -269,11 +240,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     updateFromTurnResult,
     updateEnemiesOnly,
     clearCombat,
-    setCurrentTarget,
     startCombat,
     fetchStatus,
     setActionToken,
-    startAttackAnimation,
     closeAttackResultModal,
     endActivation,
   };

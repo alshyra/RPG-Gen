@@ -3,7 +3,6 @@ import { ref } from 'vue';
 
 export const useUiStore = defineStore('ui', () => {
   const isMenuOpen = ref(false);
-  const isSomeFlag = ref(false); // placeholder for future flags
   const isCombatOpen = ref(true);
 
   const toggleMenu = () => {
@@ -23,7 +22,6 @@ export const useUiStore = defineStore('ui', () => {
 
   return {
     isMenuOpen,
-    isSomeFlag,
     isCombatOpen,
     toggleMenu,
     setMenu,

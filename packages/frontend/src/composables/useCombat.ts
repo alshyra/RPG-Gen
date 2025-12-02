@@ -1,14 +1,18 @@
-import { useGameStore } from '../stores/gameStore';
+import type {
+  CombatEnemyDto,
+  CombatStartInstructionMessageDto,
+  GameInstructionDto,
+  HpInstructionMessageDto,
+  RollInstructionMessageDto,
+  TurnResultWithInstructionsDto,
+  XpInstructionMessageDto,
+} from '@rpg-gen/shared';
+import { isHpInstruction, isRollInstruction, isXpInstruction } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
+import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
-import { combatService } from '../apis/combatApi';
-import type {
-  CombatStartInstructionMessageDto, TurnResultWithInstructionsDto, RollInstructionMessageDto,
-  HpInstructionMessageDto, XpInstructionMessageDto, GameInstructionDto,
-  CombatEnemyDto,
-} from '@rpg-gen/shared';
-import { isRollInstruction, isHpInstruction, isXpInstruction } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
+import { useGameStore } from '../stores/gameStore';
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -70,22 +74,6 @@ function processAttackInstructions(
   instructions.forEach(instr => processSingleCombatInstruction(instr, gameStore, characterStore, combatStore));
 }
 
-// ----- Attack Helpers -----
-async function performAttack(characterId: string, target: CombatEnemyDto, token: string | null): Promise<TurnResultWithInstructionsDto> {
-  if (!token) {
-    throw new Error('Action token is required for attack');
-  }
-  return combatService.attackWithToken(characterId, token, target);
-}
-
-const handleAttackAnimations = (attackResponse: TurnResultWithInstructionsDto, combatStore: CombatStore): void => {
-  const playerAttacks = attackResponse.playerAttacks ?? [];
-  const enemyAttacks = attackResponse.enemyAttacks ?? [];
-  if (playerAttacks.length > 0 || enemyAttacks.length > 0) {
-    combatStore.startAttackAnimation(playerAttacks, enemyAttacks);
-  }
-};
-
 const handleCombatEndFromResponse = (attackResponse: TurnResultWithInstructionsDto, gameStore: GameStore, combatStore: CombatStore): void => {
   if (attackResponse.victory) {
     gameStore.appendMessage('system', '🏆 Combat terminé - Victoire!');
@@ -102,6 +90,9 @@ export function useCombat() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
+  const {
+    currentTarget, showAttackResultModal,
+  } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   const displayCombatStartSuccess = (combatState: {
@@ -143,32 +134,20 @@ export function useCombat() {
     attackResponse: TurnResultWithInstructionsDto,
     characterId: string,
   ): Promise<void> => {
-    // Check for roll instructions BEFORE updating state
-    const hasRoll = Array.isArray(attackResponse.instructions) && attackResponse.instructions.some(instr => isRollInstruction(instr as any));
-    console.log('[useCombat] handleAttackSuccess hasRoll:', hasRoll, 'instructions:', attackResponse.instructions);
-
-    // If we have a roll instruction, process it FIRST before updateFromTurnResult
-    // This sets expectedDto to 'DiceThrowDto' before the phase is potentially reset
+    const hasRoll = attackResponse.instructions && attackResponse.instructions.some(isRollInstruction);
     if (hasRoll && attackResponse.instructions) {
       processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
-      console.log('[useCombat] After processAttackInstructions: phase=', combatStore.phase, 'expectedDto=', combatStore.expectedDto);
     }
 
-    // Now update combat state - on hit with roll, don't update phase (it would reset expectedDto)
     if (!hasRoll) {
       combatStore.updateFromTurnResult(attackResponse);
     } else {
-      // Manually update only what's needed without resetting phase/expectedDto
-      // updateFromTurnResult sets phase=PLAYER_TURN which resets expectedDto
-      // We already set expectedDto='DiceThrowDto' in processRollInstruction above
       combatStore.updateEnemiesOnly(attackResponse.remainingEnemies, attackResponse.roundNumber);
     }
 
-    handleAttackAnimations(attackResponse, combatStore);
     if (currentCharacter.value) currentCharacter.value.hp = attackResponse.playerHp;
     gameStore.appendMessage('assistant', attackResponse.narrative);
 
-    // Process non-roll instructions (XP, HP, etc.)
     if (!hasRoll && attackResponse.instructions) {
       processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
     }
@@ -176,8 +155,6 @@ export function useCombat() {
     if (attackResponse.combatEnded) {
       handleCombatEndFromResponse(attackResponse, gameStore, combatStore);
     } else if (!hasRoll) {
-      // If server sent a roll instruction, avoid immediately refreshing status
-      // which regenerates a new action token and would close the roll modal.
       await combatStore.fetchStatus(characterId);
     }
   };
@@ -190,18 +167,11 @@ export function useCombat() {
     gameStore.appendMessage('user', `J'attaque ${target.name}!`);
     gameStore.sending = true;
 
-    // Store the target so sendRollResult can use it later
-    combatStore.setCurrentTarget(target);
-
+    currentTarget.value = target;
     try {
-      const { characterId } = currentCharacter.value;
-      console.log('[useCombat] executeAttack ->', {
-        characterId,
-        targetName: target.name,
-        actionToken: combatStore.actionToken,
-      });
-      const attackResponse = await performAttack(characterId, target, combatStore.actionToken);
-      await handleAttackSuccess(attackResponse, characterId);
+      const attackResponse = await combatService.attackWithToken(currentCharacter.value.characterId, combatStore.actionToken!, target);
+      showAttackResultModal.value = true;
+      await handleAttackSuccess(attackResponse, currentCharacter.value.characterId);
     } catch (err) {
       gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
     } finally {
@@ -249,17 +219,9 @@ export function useCombat() {
    * Check if currently in combat
    */
   const checkCombatStatus = async (): Promise<boolean> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return false;
-
-    try {
-      console.log('[useCombat] checking combat status for', character.characterId);
-      const status = await combatStore.fetchStatus(character.characterId);
-      console.log('[useCombat] fetched combat status', status);
-      return status.inCombat;
-    } catch {
-      return false;
-    }
+    if (!currentCharacter.value) return false;
+    const { inCombat } = await combatStore.fetchStatus(currentCharacter.value?.characterId);
+    return inCombat;
   };
 
   return {
