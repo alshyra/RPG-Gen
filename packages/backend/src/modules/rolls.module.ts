@@ -1,13 +1,9 @@
 import { Module } from '@nestjs/common';
 import { RollsController } from '../controllers/rolls.controller.js';
-import { CharacterModule } from './character.module.js';
-import { CombatModule } from './combat.module.js';
-import { GameInstructionProcessor } from '../domain/chat/game-instruction.processor.js';
+import { ChatModule } from './chat.module.js';
 
 @Module({
-  imports: [CharacterModule, CombatModule],
+  imports: [ChatModule],
   controllers: [RollsController],
-  providers: [GameInstructionProcessor],
-  exports: [GameInstructionProcessor],
 })
 export class RollsModule {}
