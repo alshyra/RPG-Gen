@@ -1,5 +1,5 @@
 import test from 'ava';
-import { CharacterService } from '../src/character/character.service.js';
+import { CharacterService } from '../src/domain/character/character.service.js';
 
 // Minimal fake model to emulate Mongoose document constructor + save
 class FakeCharacterModel {

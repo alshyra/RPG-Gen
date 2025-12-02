@@ -1,5 +1,5 @@
 import test from 'ava';
-import type { CombatStartRequestDto } from '../src/combat/dto/index.js';
+import type { CombatStartRequestDto } from '../src/domain/combat/dto/index.js';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 
 // Mock the CombatService without MongoDB dependency for unit testing

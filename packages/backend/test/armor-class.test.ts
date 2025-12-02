@@ -1,7 +1,7 @@
 import test from 'ava';
 import {
   calculateArmorClass, getDexModifier, parseArmorAc,
-} from '../src/character/armor-class.util.js';
+} from '../src/domain/character/armor-class.util.js';
 import type {
   CharacterResponseDto, ItemResponseDto,
 } from '@rpg-gen/shared';

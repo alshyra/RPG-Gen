@@ -1,7 +1,7 @@
 import test from 'ava';
 import {
   parseAIResponse, parseInstructions, cleanNarrativeText,
-} from '../src/external/text/ai-parser.util.js';
+} from '../src/infra/external/ai-parser.util.js';
 
 test('parses JSON from a ```json``` code block', (t) => {
   const input = 'You see a wound.\n```json\n{"type":"hp","hp":-5}\n```\nAnd the party reacts.';

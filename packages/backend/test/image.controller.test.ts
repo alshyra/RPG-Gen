@@ -1,5 +1,5 @@
 import test from 'ava';
-import { ImageController } from '../src/image/image.controller.js';
+import { ImageController } from '../src/controllers/image.controller.js';
 import type { Request } from 'express';
 
 class FakeGeminiImageService {
@@ -38,15 +38,15 @@ class FakeCharacterService {
 
 const controller = new ImageController(new FakeGeminiImageService() as any, new FakeImageService() as any, new FakeCharacterService() as any);
 
-const fakeReq = { user: { _id: 'user1' } } as Request;
+const fakeReq = { user: { _id: 'user1' } } as unknown as Request;
 
 test('generateAvatar accepts string payload (characterId)', async (t) => {
-  const res = await controller.generateAvatar(fakeReq, 'character-1');
+  const res = await controller.generateAvatar(fakeReq as any, 'character-1');
   t.truthy(res);
   t.truthy(res.imageUrl);
   t.true(res.imageUrl.startsWith('data:image/jpeg;base64,'));
 });
 
 test('generateAvatar throws when missing characterId', async (t) => {
-  await t.throwsAsync(async () => await controller.generateAvatar(fakeReq, undefined as any));
+  await t.throwsAsync(async () => await controller.generateAvatar(fakeReq as any, undefined as any));
 });

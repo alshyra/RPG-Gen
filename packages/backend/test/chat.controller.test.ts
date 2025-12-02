@@ -1,5 +1,5 @@
 import test from 'ava';
-import { ChatController } from '../src/chat/chat.controller.js';
+import { ChatController } from '../src/controllers/chat.controller.js';
 
 test('chat.chat initializes session when missing and replies', async (t) => {
   let initialized = false;

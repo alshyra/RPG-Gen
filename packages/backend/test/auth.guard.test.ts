@@ -1,6 +1,6 @@
 import test from 'ava';
-import { JwtAuthGuard } from '../src/auth/jwt-auth.guard.js';
-import { GoogleAuthGuard } from '../src/auth/google-auth.guard.js';
+import { JwtAuthGuard } from '../src/domain/auth/jwt-auth.guard.js';
+import { GoogleAuthGuard } from '../src/domain/auth/google-auth.guard.js';
 
 // Minimal fake ExecutionContext to exercise guard logic.
 function fakeContext() {

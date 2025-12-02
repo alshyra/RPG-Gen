@@ -1,5 +1,5 @@
 import test from 'ava';
-import { ActionStatus } from '../src/combat/action-record.schema.js';
+import { ActionStatus } from '../src/infra/mongo/action-record.schema.js';
 
 test('ActionStatus enum contains expected values', (t) => {
   t.truthy(ActionStatus.PENDING);

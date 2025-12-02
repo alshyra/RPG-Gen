@@ -1,5 +1,5 @@
 import test from 'ava';
-import { DiceController } from '../src/dice/dice.controller.js';
+import { DiceController } from '../src/controllers/dice.controller.js';
 
 test('rollDiceExpr parses and rolls correctly with deterministic RNG', (t) => {
   const seq = [
