@@ -38,7 +38,15 @@
         {{ phaseLabel }}
       </div>
     </div>
-
+    <UiButton
+      data-cy="end-turn-button"
+      :class="endTurnButtonClass"
+      :disabled="!canEndTurn || isEndingTurn"
+      @click="onEndTurn"
+    >
+      <span v-if="isEndingTurn">En cours...</span>
+      <span v-else>Fin de tour</span>
+    </UiButton>
     <button
       class="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 border border-slate-700 shadow-md border-b-0 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
       :aria-expanded="isCombatOpen"
@@ -51,19 +59,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import UiButton from '@/components/ui/UiButton.vue';
+import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
-import { storeToRefs } from 'pinia';
 import {
-  Flag,
   Activity,
-  Star,
   ChevronUp,
+  Flag,
+  Star,
 } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
 
 const combatStore = useCombatStore();
 const ui = useUiStore();
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 const {
   roundNumber,
   actionRemaining,
@@ -93,6 +105,32 @@ const phaseClass = computed(() => {
     default: return 'bg-green-600 text-white';
   }
 });
+
+const isEndingTurn = ref(false);
+
+// Can end turn only during player turn
+const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
+
+const endTurnButtonClass = computed(() => {
+  if (!canEndTurn.value) {
+    return 'bg-slate-600 text-slate-400 cursor-not-allowed';
+  }
+  return 'bg-purple-600 hover:bg-purple-700 text-white';
+});
+
+const onEndTurn = async () => {
+  if (!currentCharacter.value || isEndingTurn.value) return;
+
+  try {
+    isEndingTurn.value = true;
+    await combatStore.endActivation(currentCharacter.value.characterId);
+  } catch (e) {
+    console.error('Failed to end turn', e);
+  } finally {
+    isEndingTurn.value = false;
+  }
+};
+
 </script>
 
 <style scoped></style>

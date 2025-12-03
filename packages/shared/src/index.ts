@@ -1,6 +1,6 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
-export * from './api-types'
-export * from './type-guards'
+export * from './api-types';
+export * from './type-guards';
 
 // Auto-generated type aliases from OpenAPI components.schemas
 export type AbilityScoresResponseDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];
@@ -14,7 +14,8 @@ export type CharacterIdBodyDto = import('./api-types').components['schemas']['Ch
 export type CharacterResponseDto = import('./api-types').components['schemas']['CharacterResponseDto'];
 export type ChatMessageDto = import('./api-types').components['schemas']['ChatMessageDto'];
 export type CombatEndDto = import('./api-types').components['schemas']['CombatEndDto'];
-export type CombatEndInstructionMessageDto = import('./api-types').components['schemas']['CombatEndInstructionMessageDto'];
+export type CombatRollRequestDto = import('./api-types').components['schemas']['CombatRollRequestDto'];
+export type CombatRollResultDto = import('./api-types').components['schemas']['CombatRollResultDto'];
 export type CombatEndResponseDto = import('./api-types').components['schemas']['CombatEndResponseDto'];
 export type CombatEndResultDto = import('./api-types').components['schemas']['CombatEndResultDto'];
 export type CombatEnemyDto = import('./api-types').components['schemas']['CombatEnemyDto'];

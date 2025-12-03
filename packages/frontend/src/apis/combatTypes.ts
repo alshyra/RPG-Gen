@@ -1,5 +1,5 @@
 import {
-  CombatEndInstructionMessageDto, CombatStartInstructionMessageDto,
+  CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
 
 /**
@@ -19,17 +19,4 @@ export function isCombatStartInstruction(obj: unknown): obj is CombatStartInstru
   });
 }
 
-/**
- * Type guard for combat end instruction
- */
-export function isCombatEndInstruction(obj: unknown): obj is CombatEndInstructionMessageDto {
-  if (typeof obj !== 'object' || obj === null) return false;
-  const record = obj as Record<string, unknown>;
-  if (typeof record.combat_end !== 'object' || record.combat_end === null) return false;
-
-  const combatEnd = record.combat_end as Record<string, unknown>;
-  return typeof combatEnd.victory === 'boolean'
-    && typeof combatEnd.xp_gained === 'number'
-    && typeof combatEnd.player_hp === 'number'
-    && Array.isArray(combatEnd.enemies_defeated);
-}
+// Combat end is handled via server responses (CombatEndResponseDto); the AI should not emit a combat_end instruction.

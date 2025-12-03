@@ -28,7 +28,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const phase = ref<CombatPhase>('PLAYER_TURN');
   const expectedDto = ref<string>('AttackRequestDto');
   const showAttackResultModal = ref(false);
-  const currentAttackResult = ref<AttackResultDto | null>(null);
+  const currentAttackResult = ref<TurnResultWithInstructionsDto>();
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
   const currentTurnIndex = ref(0);
@@ -89,18 +89,45 @@ export const useCombatStore = defineStore('combatStore', () => {
   });
 
   const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
-    enemies.value = updateEnemiesFromResult(enemies, result.remainingEnemies);
-    roundNumber.value = result.roundNumber;
+    // prefer the included state snapshot to avoid relying on duplicated turn fields
+    const s = result.state;
+    if (s) {
+      enemies.value = s.enemies ?? updateEnemiesFromResult(enemies, result.remainingEnemies);
+      roundNumber.value = s.roundNumber ?? result.roundNumber;
+      turnOrder.value = s.turnOrder ?? turnOrder.value;
+      currentTurnIndex.value = s.currentTurnIndex ?? currentTurnIndex.value;
+      playerInitiative.value = s.player?.initiative ?? playerInitiative.value;
+      expectedDto.value = s.expectedDto ?? expectedDto.value;
+      actionRemaining.value = s.actionRemaining ?? actionRemaining.value;
+      actionMax.value = s.actionMax ?? actionMax.value;
+      bonusActionRemaining.value = s.bonusActionRemaining ?? bonusActionRemaining.value;
+      bonusActionMax.value = s.bonusActionMax ?? bonusActionMax.value;
+      phase.value = s.phase ?? phase.value;
+    } else {
+      enemies.value = updateEnemiesFromResult(enemies, result.remainingEnemies);
+      roundNumber.value = result.roundNumber;
+    }
 
     // Update action economy from result
-    if (result.actionRemaining !== undefined) actionRemaining.value = result.actionRemaining;
-    if (result.actionMax !== undefined) actionMax.value = result.actionMax;
-    if (result.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.bonusActionRemaining;
-    if (result.bonusActionMax !== undefined) bonusActionMax.value = result.bonusActionMax;
-    if (result.phase) {
-      phase.value = result.phase;
+    // action economy may be returned directly, but prefer values from result.state when available
+    if (result.state) {
+      if (result.state.actionRemaining !== undefined) actionRemaining.value = result.state.actionRemaining;
+      if (result.state.actionMax !== undefined) actionMax.value = result.state.actionMax;
+      if (result.state.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.state.bonusActionRemaining;
+      if (result.state.bonusActionMax !== undefined) bonusActionMax.value = result.state.bonusActionMax;
+      if (result.state.phase) {
+        phase.value = result.state.phase;
+        // If phase returned to PLAYER_TURN, reset expectedDto to accept new attacks
+        if (result.state.phase === 'PLAYER_TURN') {
+          expectedDto.value = 'AttackRequestDto';
+        }
+      }
+    } else if ((result as any).phase) {
+      // legacy fallback: some older servers returned phase at top-level
+      const p = (result as any).phase as unknown as typeof phase.value;
+      phase.value = p;
       // If phase returned to PLAYER_TURN, reset expectedDto to accept new attacks
-      if (result.phase === 'PLAYER_TURN') {
+      if (p === 'PLAYER_TURN') {
         expectedDto.value = 'AttackRequestDto';
       }
     }
@@ -135,7 +162,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     phase.value = 'PLAYER_TURN';
     expectedDto.value = 'AttackRequestDto';
     showAttackResultModal.value = false;
-    currentAttackResult.value = null;
+    currentAttackResult.value = undefined;
     isCurrentAttackPlayerAttack.value = true;
     attackResultQueue.value = [];
     currentTurnIndex.value = 0;
@@ -169,24 +196,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     actionToken.value = token;
     if (newPhase) phase.value = newPhase;
     if (newExpectedDto) expectedDto.value = newExpectedDto;
-  };
-
-  const showNextAttackResult = (): boolean => {
-    if (attackResultQueue.value.length === 0) {
-      return false;
-    }
-    const next = attackResultQueue.value.shift();
-    if (next) {
-      currentAttackResult.value = next.result;
-      isCurrentAttackPlayerAttack.value = next.isPlayerAttack;
-      showAttackResultModal.value = true;
-    }
-    return true;
-  };
-
-  const closeAttackResultModal = () => {
-    showAttackResultModal.value = false;
-    setTimeout(() => showNextAttackResult(), 300);
   };
 
   /**
@@ -243,7 +252,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     startCombat,
     fetchStatus,
     setActionToken,
-    closeAttackResultModal,
     endActivation,
   };
 });

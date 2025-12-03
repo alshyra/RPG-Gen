@@ -7,10 +7,6 @@ import { DiceModule } from './dice.module.js';
 import {
   CombatSession, CombatSessionSchema,
 } from '../infra/mongo/combat-session.schema.js';
-import {
-  ActionRecord, ActionRecordSchema,
-} from '../infra/mongo/action-record.schema.js';
-import { ActionRecordService } from '../domain/combat/action-record.service.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 
 @Module({
@@ -22,21 +18,17 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
         name: CombatSession.name,
         schema: CombatSessionSchema,
       },
-      {
-        name: ActionRecord.name,
-        schema: ActionRecordSchema,
-      },
     ]),
   ],
   controllers: [CombatController],
   providers: [
     CombatService,
-    ActionRecordService,
+
     CombatOrchestrator,
   ],
   exports: [
     CombatService,
-    ActionRecordService,
+
     CombatOrchestrator,
   ],
 })

@@ -8,7 +8,6 @@ import type {
 } from '@rpg-gen/shared';
 import { conversationService } from '../apis/conversationApi';
 import {
-  isCombatEndInstruction,
   isCombatStartInstruction,
 } from '../apis/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
@@ -138,13 +137,6 @@ export function useGameMessages() {
       } else if (isCombatStartInstruction(item)) {
         // Delegate to combat composable
         combat.initializeCombat(item);
-      } else if (isCombatEndInstruction(item)) {
-        // Delegate to combat composable
-        combat.handleCombatEnd(
-          item.combat_end.victory,
-          item.combat_end.xp_gained,
-          item.combat_end.enemies_defeated,
-        );
       }
     });
   };

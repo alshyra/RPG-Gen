@@ -34,7 +34,7 @@ class CombatService {
    * Execute an attack against a target using an action token for idempotency
    */
   async attackWithToken(characterId: string, actionToken: string, target: CombatEnemyDto): Promise<TurnResultWithInstructionsDto> {
-    const response = await api.POST('/api/combat/{characterId}/attack/{actionToken}', {
+    const { data } = await api.POST('/api/combat/{characterId}/attack/{actionToken}', {
       params: {
         path: {
           characterId,
@@ -43,7 +43,8 @@ class CombatService {
       },
       body: { targetId: target.id },
     });
-    return getData<TurnResultWithInstructionsDto>(response);
+    if (!data) throw Error('Attack With Token didnt respond');
+    return data;
   }
 
   /**
@@ -68,18 +69,20 @@ class CombatService {
   async resolveRollWithToken(
     characterId: string,
     actionToken: string,
-    payload: DiceThrowDto,
+    diceThrowDto: DiceThrowDto & { action?: string;
+      target?: string; },
   ): Promise<TurnResultWithInstructionsDto> {
-    const response = await api.POST('/api/combat/{characterId}/resolve-roll/{actionToken}', {
+    const { data } = await api.POST('/api/combat/{characterId}/resolve-roll/{actionToken}', {
       params: {
         path: {
           characterId,
           actionToken,
         },
       },
-      body: payload,
+      body: diceThrowDto,
     });
-    return getData<TurnResultWithInstructionsDto>(response);
+    if (!data) throw Error('No response received from resolveRollWithToken');
+    return data;
   }
 
   /**

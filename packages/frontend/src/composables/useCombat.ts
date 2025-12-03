@@ -1,99 +1,31 @@
 import type {
   CombatEnemyDto,
   CombatStartInstructionMessageDto,
-  GameInstructionDto,
-  HpInstructionMessageDto,
-  RollInstructionMessageDto,
-  TurnResultWithInstructionsDto,
-  XpInstructionMessageDto,
 } from '@rpg-gen/shared';
-import { isHpInstruction, isRollInstruction, isXpInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
+// rollsService not used here — combat roll submission is handled in useGameRolls
 
-type GameStore = ReturnType<typeof useGameStore>;
-type CharacterStore = ReturnType<typeof useCharacterStore>;
-type CombatStore = ReturnType<typeof useCombatStore>;
+// local store types not required here — composable remains small and focused
 
-// ----- Instruction Processors -----
-function processRollInstruction(instr: RollInstructionMessageDto, gameStore: GameStore, combatStore: CombatStore): void {
-  const {
-    dices, meta,
-  } = instr;
-  const rollInstr: RollInstructionMessageDto = {
-    type: 'roll',
-    dices,
-    advantage: 'none',
-    description: meta?.target ? `Attack vs ${meta.target} (AC ${meta.targetAc ?? '??'})` : undefined,
-    meta,
-  };
-
-  combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
-  gameStore.pendingInstruction = rollInstr;
-  const bonus = meta?.attackBonus ? ` +${meta.attackBonus}` : '';
-  const target = meta?.target ? ` vs ${meta.target} (AC ${meta.targetAc})` : '';
-  gameStore.appendMessage('system', `🎲 Roll needed: ${dices}${bonus}${target}`);
-}
-
-function processXpInstruction(instr: XpInstructionMessageDto, gameStore: GameStore, characterStore: CharacterStore): void {
-  gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
-  characterStore.updateXp(instr.xp);
-}
-
-function processHpInstruction(instr: HpInstructionMessageDto, gameStore: GameStore, characterStore: CharacterStore): void {
-  const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-  gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
-  characterStore.updateHp(instr.hp);
-  if (characterStore.isDead) characterStore.showDeathModal = true;
-}
-
-function processSingleCombatInstruction(
-  instr: GameInstructionDto,
-  gameStore: GameStore,
-  characterStore: CharacterStore,
-  combatStore: CombatStore,
-): void {
-  if (isRollInstruction(instr)) {
-    processRollInstruction(instr, gameStore, combatStore);
-  } else if (isXpInstruction(instr)) {
-    processXpInstruction(instr, gameStore, characterStore);
-  } else if (isHpInstruction(instr)) {
-    processHpInstruction(instr, gameStore, characterStore);
-  }
-}
-
-function processAttackInstructions(
-  instructions: GameInstructionDto[],
-  gameStore: GameStore,
-  characterStore: CharacterStore,
-  combatStore: CombatStore,
-): void {
-  instructions.forEach(instr => processSingleCombatInstruction(instr, gameStore, characterStore, combatStore));
-}
-
-const handleCombatEndFromResponse = (attackResponse: TurnResultWithInstructionsDto, gameStore: GameStore, combatStore: CombatStore): void => {
-  if (attackResponse.victory) {
-    gameStore.appendMessage('system', '🏆 Combat terminé - Victoire!');
-  } else if (attackResponse.defeat) {
-    gameStore.appendMessage('system', '💀 Combat terminé - Défaite...');
-  }
-  combatStore.clearCombat();
-};
+// instruction processors intentionally not used inside this composable — handled in other modules (useGameRolls)
 
 /**
  * Composable for combat-specific actions and state management
  */
+
 export function useCombat() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const {
-    currentTarget, showAttackResultModal,
+    currentTarget, showAttackResultModal, currentAttackResult,
   } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
+  // uiStore omitted — not used here
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -130,33 +62,15 @@ export function useCombat() {
     }
   };
 
-  const handleAttackSuccess = async (
-    attackResponse: TurnResultWithInstructionsDto,
-    characterId: string,
-  ): Promise<void> => {
-    const hasRoll = attackResponse.instructions && attackResponse.instructions.some(isRollInstruction);
-    if (hasRoll && attackResponse.instructions) {
-      processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
-    }
+  // handlePlayerFailedAttack intentionally removed: not needed in this composable
 
-    if (!hasRoll) {
-      combatStore.updateFromTurnResult(attackResponse);
-    } else {
-      combatStore.updateEnemiesOnly(attackResponse.remainingEnemies, attackResponse.roundNumber);
+  const throwDamageDice = () => {
+    if (!currentCharacter.value?.characterId) throw Error('Character is not defined');
+    const rollInstr = currentAttackResult.value?.rollInstruction ?? (currentAttackResult.value as any)?.instructions?.[0];
+    if (!rollInstr || rollInstr.type !== 'roll') {
+      throw Error('currentAttackResult doesnt not have a valid roll instruction');
     }
-
-    if (currentCharacter.value) currentCharacter.value.hp = attackResponse.playerHp;
-    gameStore.appendMessage('assistant', attackResponse.narrative);
-
-    if (!hasRoll && attackResponse.instructions) {
-      processAttackInstructions(attackResponse.instructions, gameStore, characterStore, combatStore);
-    }
-
-    if (attackResponse.combatEnded) {
-      handleCombatEndFromResponse(attackResponse, gameStore, combatStore);
-    } else if (!hasRoll) {
-      await combatStore.fetchStatus(characterId);
-    }
+    combatService.resolveRollWithToken(currentCharacter.value?.characterId, combatStore.actionToken!, rollInstr);
   };
 
   /**
@@ -169,9 +83,10 @@ export function useCombat() {
 
     currentTarget.value = target;
     try {
-      const attackResponse = await combatService.attackWithToken(currentCharacter.value.characterId, combatStore.actionToken!, target);
+      currentAttackResult.value = await combatService.attackWithToken(currentCharacter.value.characterId, combatStore.actionToken!, target);
       showAttackResultModal.value = true;
-      await handleAttackSuccess(attackResponse, currentCharacter.value.characterId);
+      const rollInstr = currentAttackResult.value?.rollInstruction ?? (currentAttackResult?.value as any)?.instructions?.[0];
+      if (!rollInstr?.type || rollInstr.type == 'roll') return;
     } catch (err) {
       gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
     } finally {
@@ -227,6 +142,7 @@ export function useCombat() {
   return {
     // Actions
     initializeCombat,
+    throwDamageDice,
     executeAttack,
     handleCombatEnd,
     fleeCombat,

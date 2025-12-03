@@ -4,7 +4,7 @@ import {
 import {
   ApiBody, ApiOperation, ApiTags, ApiResponse, ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { DiceThrowDto } from '../domain/dice/dice.dto.js';
+import { DiceThrowDto } from '../domain/dice/dto/dice.js';
 
 type AdvantageType = 'advantage' | 'disadvantage' | 'none';
 

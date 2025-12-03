@@ -46,12 +46,12 @@ export class ChatOrchestrator {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
 
     const handlerMap: Record<string, (instr: GameInstructionDto) => Promise<void>> = {
-      roll: (instr) => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
-      hp: (instr) => this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
-      xp: (instr) => this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
-      inventory: (instr) => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
-      spell: (instr) => this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
-      combat_start: (instr) => this.handleCombatStart(userId, characterId, characterDto, instr as CombatStartInstructionMessageDto),
+      roll: instr => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
+      hp: instr => this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
+      xp: instr => this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
+      inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
+      spell: instr => this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
+      combat_start: instr => this.handleCombatStart(userId, characterId, characterDto, instr as CombatStartInstructionMessageDto),
       combat_end: () => this.handleCombatEnd(userId, characterId, characterDto),
     };
 

@@ -1,27 +1,19 @@
 import {
   BadRequestException,
-  ConflictException,
-  GoneException,
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { CharacterService } from '../../domain/character/character.service.js';
-import type { CharacterResponseDto } from '../../domain/character/dto/index.js';
+import type { RollInstructionMessageDto } from '../../domain/chat/dto/index.js';
 import { CombatService } from '../../domain/combat/combat.service.js';
-import { ActionRecordService } from '../../domain/combat/action-record.service.js';
-import {
-  ActionRecord,
-  ActionStatus,
-} from '../../infra/mongo/action-record.schema.js';
-import { DiceService } from '../../domain/dice/dice.service.js';
 import type {
+  CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
   TurnResultWithInstructionsDto,
-  CombatEndResponseDto,
-  DiceThrowDto,
 } from '../../domain/combat/dto/index.js';
-import type { RollInstructionMessageDto } from '../../domain/chat/dto/index.js';
+import { DiceService } from '../../domain/dice/dice.service.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -40,7 +32,7 @@ export class CombatOrchestrator {
   constructor(
     private readonly combatService: CombatService,
     private readonly characterService: CharacterService,
-    private readonly actionRecordService: ActionRecordService,
+    // ActionRecordService removed — orchestrator will no longer persist action tokens.
     private readonly diceService: DiceService,
   ) {}
 
@@ -57,11 +49,8 @@ export class CombatOrchestrator {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
 
-    const actionToken = await this.actionRecordService.generateToken({
-      requesterId: userId,
-      combatId: characterId,
-      expectedDto: 'AttackRequestDto',
-    });
+    // Generate ephemeral token for client convenience (no persistence / idempotence)
+    const actionToken = `t-${randomUUID()}`;
 
     this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
 
@@ -78,10 +67,10 @@ export class CombatOrchestrator {
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
    */
+  // eslint-disable-next-line max-statements
   async processAttack(
     userId: string,
     characterId: string,
-    actionToken: string,
     targetId: string,
   ): Promise<TurnResultWithInstructionsDto> {
     // Validate combat is active
@@ -89,17 +78,10 @@ export class CombatOrchestrator {
       throw new BadRequestException('Character is not in combat');
     }
 
-    // Acquire action token
-    const acquired = await this.acquireActionToken(actionToken, userId, characterId, 'AttackRequestDto');
-    if (acquired.alreadyApplied) {
-      return acquired.record.resultPayload as TurnResultWithInstructionsDto;
-    }
+    // No action token persistence — we proceed directly
 
     const state = await this.combatService.getCombatState(characterId);
-    if (!state) {
-      await this.actionRecordService.setFailed(actionToken, { error: 'No combat state found' });
-      throw new BadRequestException('No combat state found');
-    }
+    if (!state) throw new BadRequestException('No combat state found');
 
     // Find target enemy
     const targetEnemy = state.enemies.find(
@@ -107,7 +89,6 @@ export class CombatOrchestrator {
     );
     if (!targetEnemy) {
       const validTargets = await this.combatService.getValidTargets(characterId);
-      await this.actionRecordService.setFailed(actionToken, { error: 'Invalid target' });
       throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
     }
 
@@ -122,28 +103,25 @@ export class CombatOrchestrator {
     if (!hit) {
       // Miss: apply zero damage and advance turn
       const res = await this.combatService.applyDamageToEnemy(characterId, targetEnemy.name, 0);
-      if (!res) {
-        await this.actionRecordService.setFailed(actionToken, { error: 'Failed to advance turn after miss' });
-        throw new BadRequestException('Failed to advance turn after miss');
-      }
-      await this.actionRecordService.setApplied(actionToken, res, { requesterId: userId });
+      if (!res) throw new BadRequestException('Failed to advance turn after miss');
       return res;
     }
 
     // Hit: instruct client to roll damage
-    const instructions: RollInstructionMessageDto[] = [
-      {
-        type: 'roll',
-        dices: state.player.damageDice || '1d4',
-        modifierValue: state.player.damageBonus || 0,
-        meta: {
-          action: 'damage',
-          target: targetEnemy.name,
-          damageBonus: state.player.damageBonus || 0,
-        },
-        description: `Damage to ${targetEnemy.name}`,
+    const instructions: RollInstructionMessageDto = {
+      type: 'roll',
+      dices: state.player.damageDice || '1d4',
+      modifierValue: state.player.damageBonus || 0,
+      meta: {
+        action: 'damage',
+        target: targetEnemy.name,
+        damageBonus: state.player.damageBonus || 0,
       },
-    ];
+      description: `Damage to ${targetEnemy.name}`,
+    };
+
+    // mark state as awaiting client damage roll and return a minimal turn result
+    state.phase = 'AWAITING_DAMAGE_ROLL';
 
     const response: TurnResultWithInstructionsDto = {
       turnNumber: state.currentTurnIndex,
@@ -153,95 +131,18 @@ export class CombatOrchestrator {
       combatEnded: false,
       victory: false,
       defeat: false,
+      state,
       remainingEnemies: state.enemies,
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: `Attaque réussie (${die} + ${state.player.attackBonus || 0} = ${totalAttack} vs AC ${targetEnemy.ac}). Lancez les dégâts.`,
-      instructions,
+      rollInstruction: instructions,
+      // state contains action economy and phase; avoid flattening these fields here
     };
 
-    // Store partial attack info for damage resolution
-    const partial = {
-      attackRoll: die,
-      attackBonus: state.player.attackBonus,
-      totalAttack,
-      targetAc: targetEnemy.ac,
-      hit: true,
-      critical,
-      fumble,
-    };
-    await this.actionRecordService.setPendingWithExpected(actionToken, 'DiceThrowDto', partial, { requesterId: userId });
+    // No persistence of token state — resolving of rolls will be handled directly
 
     return response;
-  }
-
-  /**
-   * Resolve a damage roll and apply damage to target.
-   */
-  async resolveRoll(
-    userId: string,
-    characterId: string,
-    actionToken: string,
-    diceThrowDto: DiceThrowDto,
-  ): Promise<TurnResultWithInstructionsDto> {
-    this.logger.debug(`Resolving roll for character ${characterId} with token ${actionToken} and payload ${JSON.stringify(diceThrowDto)}`);
-    if (!diceThrowDto || !diceThrowDto.action) {
-      throw new BadRequestException('Invalid roll resolution payload', `${JSON.stringify(diceThrowDto)}`);
-    }
-
-    if (!(await this.combatService.isInCombat(characterId))) {
-      throw new BadRequestException('Character is not in combat');
-    }
-
-    // Validate character ownership
-    await this.characterService.findByCharacterId(userId, characterId);
-
-    // Load and validate existing token
-    const existing = await this.actionRecordService.getByToken(actionToken);
-    if (!existing) throw new GoneException('Action token not found or expired');
-    if (String(existing.requesterId) !== userId) {
-      throw new ConflictException('Action token consumed by another requester');
-    }
-    if (existing.status === ActionStatus.APPLIED) {
-      return existing.resultPayload as TurnResultWithInstructionsDto;
-    }
-    if (existing.expectedDto !== 'DiceThrowDto') {
-      throw new BadRequestException('This action token is not awaiting a dice throw');
-    }
-
-    // Acquire token atomically
-    const acquired = await this.actionRecordService.tryAcquire(actionToken, {
-      requesterId: userId,
-      combatId: characterId,
-      expectedDto: 'DiceThrowDto',
-    });
-    if (!acquired.acquired) {
-      const rec = acquired.record as ActionRecord | null;
-      if (rec && rec.status === ActionStatus.APPLIED) {
-        return rec.resultPayload as TurnResultWithInstructionsDto;
-      }
-      throw new ConflictException('Unable to acquire action token for processing');
-    }
-
-    try {
-      if (diceThrowDto.action !== 'damage') {
-        throw new BadRequestException('resolve-roll expects action = "damage" in this flow');
-      }
-
-      const partial = existing.resultPayload as { hit?: boolean } | undefined;
-      if (!partial || !partial.hit) {
-        throw new BadRequestException('No pending successful attack associated with this token');
-      }
-
-      const result = await this.combatService.applyDamageToEnemy(characterId, diceThrowDto.target, diceThrowDto.total);
-      if (!result) throw new BadRequestException('Failed to apply damage');
-
-      await this.actionRecordService.setApplied(actionToken, result, { requesterId: userId });
-      return result;
-    } catch (err) {
-      await this.actionRecordService.setFailed(actionToken, { error: String(err) });
-      throw err;
-    }
   }
 
   /**
@@ -250,45 +151,20 @@ export class CombatOrchestrator {
   async getStatus(
     userId: string,
     characterId: string,
-  ): Promise<(CombatStateDto & { actionToken?: string;
-    expectedDto?: string;
-    validTargets?: string[]; }) | { characterId: string;
-      inCombat: false;
-      narrative: string; }> {
+  ): Promise<CombatStateDto> {
     await this.characterService.findByCharacterId(userId, characterId);
 
     const inCombat = await this.combatService.isInCombat(characterId);
-    if (!inCombat) {
-      return {
-        characterId,
-        inCombat: false,
-        narrative: 'Aucun combat en cours.',
-      };
-    }
+    if (!inCombat) throw new BadRequestException('No combat at the moment');
 
     const state = await this.combatService.getCombatState(characterId);
-    if (!state) {
-      return {
-        characterId,
-        inCombat: false,
-        narrative: 'Aucun combat en cours.',
-      };
-    }
-
-    const actionToken = await this.actionRecordService.generateToken({
-      requesterId: userId,
-      combatId: characterId,
-      expectedDto: 'AttackRequestDto',
-    });
+    if (!state) throw new BadRequestException('No combat at the moment');
 
     return {
       ...state,
       enemies: state.enemies.filter(e => e.hp > 0),
       validTargets: await this.combatService.getValidTargets(characterId),
-      narrative: (await this.combatService.getCombatSummary(characterId)) ?? undefined,
       phase: 'PLAYER_TURN' as const,
-      actionToken,
-      expectedDto: 'AttackRequestDto',
     };
   }
 
@@ -359,42 +235,7 @@ export class CombatOrchestrator {
   /**
    * Acquire and validate an action token.
    */
-  private async acquireActionToken(
-    actionToken: string,
-    userId: string,
-    combatId: string,
-    expectedDto: string,
-  ): Promise<{ alreadyApplied: boolean;
-    record: ActionRecord; }> {
-    const exists = await this.actionRecordService.getByToken(actionToken);
-    if (!exists) throw new GoneException('Action token not found or expired');
-
-    const acquire = await this.actionRecordService.tryAcquire(actionToken, {
-      requesterId: userId,
-      combatId,
-      expectedDto,
-      idempotencyKey: undefined,
-    });
-
-    if (!acquire.acquired) {
-      const record = acquire.record as ActionRecord | null;
-      if (record && String(record.requesterId) !== userId) {
-        throw new ConflictException('Action token already consumed by another requester');
-      }
-      if (record && record.status === ActionStatus.APPLIED) {
-        return {
-          alreadyApplied: true,
-          record,
-        };
-      }
-      throw new BadRequestException('Unable to acquire action token');
-    }
-
-    return {
-      alreadyApplied: false,
-      record: acquire.record as ActionRecord,
-    };
-  }
+  // Token persistence removed — no-op / not needed
 
   /**
    * End the current player activation and advance turns.

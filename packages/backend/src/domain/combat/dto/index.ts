@@ -4,9 +4,10 @@ export * from './CombatantDto.js';
 export * from './CombatStateDto.js';
 export * from './AttackResultDto.js';
 export * from './TurnResultDto.js';
-export * from './TurnResultWithInstructionsDto.js';
+export * from './AttackResponseDto.js';
 export * from './CombatStartRequestDto.js';
+export * from './CombatRollResultDto.js';
 export * from './CombatEndResultDto.js';
 export * from './CombatEndResponseDto.js';
 export * from './AttackRequestDto.js';
-export * from './DiceThrowDto.js';
+// client dice result DTO removed; frontend uses shared DiceThrowDto instead

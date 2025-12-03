@@ -14,7 +14,6 @@ import type {
   InventoryItemDto, WeaponMeta,
 } from '../character/dto/index.js';
 import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
-import type { XpInstructionMessageDto } from '../chat/dto/index.js';
 import { DiceService } from '../dice/dice.service.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import { AttackResultDto } from './dto/AttackResultDto.js';
@@ -24,7 +23,7 @@ import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
 import { TurnResultDto } from './dto/TurnResultDto.js';
-import { TurnResultWithInstructionsDto } from './dto/TurnResultWithInstructionsDto.js';
+import { TurnResultWithInstructionsDto } from './dto/AttackResponseDto.js';
 
 /**
  * Service managing combat state and mechanics.
@@ -244,6 +243,7 @@ export class CombatService {
   /**
    * Initialize combat state from combat_start instruction
    */
+  // eslint-disable-next-line max-statements
   async initializeCombat(
     character: CharacterResponseDto,
     combatStart: CombatStartRequestDto,
@@ -432,35 +432,6 @@ export class CombatService {
     return isPlayerAttack
       ? `Votre attaque touche ${result.target}${critText}! Vous infligez ${result.totalDamage} points de dégâts (PV: ${result.targetHpAfter}/${result.targetHpBefore + result.totalDamage}).`
       : `${result.attacker} vous frappe${critText} et inflige ${result.totalDamage} points de dégâts. Vous êtes à ${result.targetHpAfter} PV.`;
-  }
-
-  /**
-   * Process player attack command
-   */
-  async processPlayerAttack(characterId: string, targetName: string): Promise<TurnResultDto | null> {
-    const state = await this.getCombatState(characterId);
-    if (!state || !state.inCombat) {
-      return null;
-    }
-
-    // Find target enemy
-    const targetEnemy = state.enemies.find(
-      e => e.name.toLowerCase() === targetName.toLowerCase() && e.hp > 0,
-    );
-
-    if (!targetEnemy) {
-      // If no exact match, try partial match
-      const partialMatch = state.enemies.find(
-        e => e.name.toLowerCase()
-          .includes(targetName.toLowerCase()) && e.hp > 0,
-      );
-      if (!partialMatch) {
-        return null;
-      }
-      return this.executeTurn(state, partialMatch);
-    }
-
-    return this.executeTurn(state, targetEnemy);
   }
 
   /**
@@ -761,7 +732,15 @@ export class CombatService {
    * Build victory result when all enemies are defeated
    */
   private async buildVictoryResult(state: CombatStateDto, characterId: string, enemy: CombatEnemyDto, damageDealt: number): Promise<TurnResultWithInstructionsDto> {
-    const end = await this.endCombat(characterId);
+    // Build a final turn result. Do NOT award XP here: awarding and cleanup are handled by the orchestrator
+    // so that the API layer may present a dedicated end-combat response. We include a snapshot of state
+    // so the client can render the final situation.
+    const stateSnapshot: CombatStateDto = {
+      ...state,
+      inCombat: false,
+      enemies: [],
+    };
+
     return {
       turnNumber: state.currentTurnIndex,
       roundNumber: state.roundNumber,
@@ -774,14 +753,8 @@ export class CombatService {
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: `Vous infligez ${damageDealt} dégâts et terrassez ${enemy.name}. Victoire!`,
-      instructions: end
-        ? [
-            {
-              type: 'xp',
-              xp: end.xpGained,
-            } as XpInstructionMessageDto,
-          ]
-        : [],
+      // final state snapshot is available in `state` (XP is awarded by the orchestrator at combat end)
+      state: stateSnapshot,
     };
   }
 
@@ -854,7 +827,7 @@ export class CombatService {
    * Apply damage reported by client to a named enemy and persist state.
    * Decrements action counter. Does NOT auto-advance turn - player must call end-activation.
    */
-  async applyDamageToEnemy(characterId: string, targetName: string, damage: number): Promise<TurnResultWithInstructionsDto | TurnResultDto | null> {
+  async applyDamageToEnemy(characterId: string, targetName: string, damage: number, diceResult?: import('../dice/dto/dice.js').DiceThrowDto): Promise<TurnResultWithInstructionsDto | TurnResultDto | null> {
     const state = await this.getCombatState(characterId);
     if (!state?.inCombat) return null;
 
@@ -896,13 +869,10 @@ export class CombatService {
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: narrativeParts.join('\n\n'),
-      instructions: [],
-      // Include action economy for client
-      actionRemaining: state.actionRemaining,
-      actionMax: state.actionMax,
-      bonusActionRemaining: state.bonusActionRemaining,
-      bonusActionMax: state.bonusActionMax,
-      phase: state.phase,
+      // No generic instructions in combat DTO now – echo resolved dice result when provided
+      diceResult: diceResult,
+      state,
+      // Use `state` snapshot for action economy and phase — do not duplicate fields here
     };
 
     return turnResult;
@@ -1090,7 +1060,6 @@ export class CombatService {
     if (defeatResult) {
       return {
         ...defeatResult,
-        instructions: [],
       };
     }
 
@@ -1107,13 +1076,9 @@ export class CombatService {
       playerHp: state.player.hp,
       playerHpMax: state.player.hpMax,
       narrative: narrativeParts.join('\n\n'),
-      instructions: [],
-      // Include action economy in response for client
-      actionRemaining: state.actionRemaining,
-      actionMax: state.actionMax,
-      bonusActionRemaining: state.bonusActionRemaining,
-      bonusActionMax: state.bonusActionMax,
-      phase: state.phase,
+      // previously instructions[] kept for compatibility; now no generic instruction array in the combat DTO
+      // include state snapshot; avoid duplicating action economy and phase fields at top-level
+      state,
     };
 
     return result;

@@ -8,7 +8,6 @@ import {
   SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
   CombatStartInstructionMessageDto,
-  CombatEndInstructionMessageDto,
   GameInstructionDto,
 } from './GameInstructionDto.js';
 
@@ -19,7 +18,6 @@ import {
   SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
   CombatStartInstructionMessageDto,
-  CombatEndInstructionMessageDto,
 )
 export class ChatMessageDto {
   @ApiProperty({
@@ -46,7 +44,7 @@ export class ChatMessageDto {
         { $ref: getSchemaPath(SpellInstructionMessageDto) },
         { $ref: getSchemaPath(InventoryInstructionMessageDto) },
         { $ref: getSchemaPath(CombatStartInstructionMessageDto) },
-        { $ref: getSchemaPath(CombatEndInstructionMessageDto) },
+        // combat end is handled by the API response shape (CombatEndResponseDto) and not an AI instruction
       ],
     },
   })

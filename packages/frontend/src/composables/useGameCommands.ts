@@ -1,6 +1,6 @@
 import { conversationService } from '../apis/conversationApi';
 import { characterServiceApi } from '../apis/characterApi';
-import { isCombatEndInstruction, isCombatStartInstruction } from '../apis/combatTypes';
+import { isCombatStartInstruction } from '../apis/combatTypes';
 import type {
   RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto, GameInstructionDto,
   InventoryInstructionMessageDto,
@@ -170,13 +170,15 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      await sendToGemini(`I cast the spell ${spell.name}`, [{
-        type: 'spell',
-        action: 'cast',
-        name: spell.name,
-        description: spell.description,
-        level: spell.level,
-      } as SpellInstructionMessageDto]);
+      await sendToGemini(`I cast the spell ${spell.name}`, [
+        {
+          type: 'spell',
+          action: 'cast',
+          name: spell.name,
+          description: spell.description,
+          level: spell.level,
+        } as SpellInstructionMessageDto,
+      ]);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to cast spell: ${spell.name}`);
@@ -203,11 +205,13 @@ export function useGameCommands() {
     gameStore.sending = true;
 
     try {
-      await sendToGemini(`I use the item ${item.name}`, [{
-        type: 'inventory',
-        action: 'use',
-        name: item._id,
-      } as InventoryInstructionMessageDto]);
+      await sendToGemini(`I use the item ${item.name}`, [
+        {
+          type: 'inventory',
+          action: 'use',
+          name: item._id,
+        } as InventoryInstructionMessageDto,
+      ]);
     } catch {
       gameStore.messages.pop();
       gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
@@ -286,11 +290,6 @@ export function useGameCommands() {
         processInventoryInstruction(instr, gameStore, characterStore);
       } else if (isCombatStartInstruction(item)) {
         combat.initializeCombat(item);
-      } else if (isCombatEndInstruction(item)) {
-        const {
-          victory, xp_gained, enemies_defeated,
-        } = item.combat_end;
-        combat.handleCombatEnd(victory, xp_gained, enemies_defeated);
       }
     });
   };

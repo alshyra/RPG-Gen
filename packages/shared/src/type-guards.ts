@@ -11,7 +11,9 @@ type XpInstructionMessageDto = components['schemas']['XpInstructionMessageDto'];
 type SpellInstructionMessageDto = components['schemas']['SpellInstructionMessageDto'];
 type InventoryInstructionMessageDto = components['schemas']['InventoryInstructionMessageDto'];
 type CombatStartInstructionMessageDto = components['schemas']['CombatStartInstructionMessageDto'];
-type CombatEndInstructionMessageDto = components['schemas']['CombatEndInstructionMessageDto'];
+// combat_end instruction removed (server returns CombatEndResponseDto via API)
+type CombatRollRequestDto = components['schemas']['CombatRollRequestDto'];
+type CombatRollResultDto = components['schemas']['CombatRollResultDto'];
 
 /**
  * Union type for all game instructions
@@ -22,8 +24,7 @@ export type GameInstructionDto
     | XpInstructionMessageDto
     | SpellInstructionMessageDto
     | InventoryInstructionMessageDto
-    | CombatStartInstructionMessageDto
-    | CombatEndInstructionMessageDto;
+    | CombatStartInstructionMessageDto;
 
 /**
  * Type guard for unknown instruction objects
@@ -77,8 +78,16 @@ export function isCombatStartInstruction(instruction: unknown): instruction is C
 /**
  * Type guard for combat end instructions
  */
-export function isCombatEndInstruction(instruction: unknown): instruction is CombatEndInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'combat_end' && isObject(instruction.combat_end);
+/** Type guard for Combat roll requests (alias for RollInstructionMessageDto in combat flows) */
+export function isCombatRollRequest(instruction: unknown): instruction is CombatRollRequestDto {
+  return isRollInstruction(instruction);
+}
+
+/** Type guard for resolved combat roll payloads submitted by client (CombatRollResultDto) */
+export function isCombatRollResult(payload: unknown): payload is CombatRollResultDto {
+  if (!isObject(payload)) return false;
+  const p = payload as Record<string, unknown>;
+  return Array.isArray(p.rolls) && typeof p.total === 'number';
 }
 
 /**
@@ -92,7 +101,6 @@ export function isGameInstruction(instruction: unknown): instruction is GameInst
     || isSpellInstruction(instruction)
     || isInventoryInstruction(instruction)
     || isCombatStartInstruction(instruction)
-    || isCombatEndInstruction(instruction)
   );
 }
 

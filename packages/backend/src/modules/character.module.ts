@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ItemDefinitionController } from '../controllers/item-definition.controller.js';
 import {
   ItemDefinition, ItemDefinitionSchema,
 } from '../infra/mongo/item-definition.schema.js';
@@ -24,10 +23,7 @@ import {
       },
     ]),
   ],
-  controllers: [
-    CharacterController,
-    ItemDefinitionController,
-  ],
+  controllers: [CharacterController],
   providers: [
     CharacterService,
     ItemDefinitionService,

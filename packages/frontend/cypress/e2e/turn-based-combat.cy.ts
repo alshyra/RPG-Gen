@@ -107,7 +107,7 @@ describe('Turn-based combat flow', () => {
           cy.wait('@attackReq')
             .its('response.body')
             .then((body) => {
-              const hasRollInstruction = body.instructions?.some((i: any) => i.type === 'roll');
+              const hasRollInstruction = (body.rollInstruction && body.rollInstruction.type === 'roll') || body.instructions?.some((i: any) => i.type === 'roll');
               if (hasRollInstruction) {
                 // Hit: roll modal should appear for damage roll
                 cy.get('[data-cy="roll-damage-modal"]', { timeout: 5000 })
@@ -163,7 +163,7 @@ describe('Turn-based combat flow', () => {
       cy.wait('@attackReq')
         .its('response.body')
         .then((body) => {
-          const hasRollInstruction = body.instructions?.some((i: any) => i.type === 'roll');
+          const hasRollInstruction = (body.rollInstruction && body.rollInstruction.type === 'roll') || body.instructions?.some((i: any) => i.type === 'roll');
           if (hasRollInstruction) {
             // Hit: handle roll modal (perform a real roll then send)
             cy.get('[data-cy="roll-damage-modal"]', { timeout: 5000 })

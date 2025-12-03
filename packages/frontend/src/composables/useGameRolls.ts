@@ -167,13 +167,12 @@ export function useGameRolls() {
   ): Promise<void> => {
     updateCombatStoreFromResponse(resp);
 
-    if (resp.instructions && resp.instructions.length > 0) {
-      processAttackInstructions(resp.instructions);
-    }
+    const instrs = resp.rollInstruction ? [resp.rollInstruction] : ((resp as any).instructions ?? []);
+    if (instrs && instrs.length > 0) processAttackInstructions(instrs);
     if (resp.narrative) gameStore.appendMessage('assistant', resp.narrative);
 
     // Hide modal if no further rolls needed
-    if (!resp.instructions?.length) {
+    if (!instrs?.length) {
       gameStore.pendingInstruction = null;
       gameStore.showRollModal = false;
     }
@@ -191,6 +190,7 @@ export function useGameRolls() {
     } catch {
     // best-effort
     }
+    // XP is awarded at explicit end-of-combat flows, not embedded in turn results.
   };
 
   const buildRollData = (
@@ -246,8 +246,9 @@ export function useGameRolls() {
       target,
     };
     const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
-    if (resp?.instructions && resp.instructions.length > 0) {
-      processResponseInstructions(resp.instructions);
+    const responseInstrs = resp.rollInstruction ? [resp.rollInstruction] : ((resp as any).instructions ?? []);
+    if (responseInstrs && responseInstrs.length > 0) {
+      processResponseInstructions(responseInstrs);
     } else {
       gameStore.appendMessage('system', 'Roll submitted to combat');
     }

@@ -21,19 +21,6 @@
           <TurnOrder />
           <ParticipantsGrid />
         </div>
-
-        <!-- End Turn Button -->
-        <div class="flex justify-end mt-2">
-          <UiButton
-            data-cy="end-turn-button"
-            :class="endTurnButtonClass"
-            :disabled="!canEndTurn || isEndingTurn"
-            @click="onEndTurn"
-          >
-            <span v-if="isEndingTurn">En cours...</span>
-            <span v-else>Fin de tour</span>
-          </UiButton>
-        </div>
       </div>
     </div>
   </transition>
@@ -72,7 +59,6 @@
 <script setup lang="ts">
 import { ChevronUp } from 'lucide-vue-next';
 import {
-  computed,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -83,31 +69,16 @@ import CombatHeader from './CombatHeader.vue';
 import ParticipantsGrid from './ParticipantsGrid.vue';
 import TurnOrder from './TurnOrder.vue';
 
-import UiButton from '@/components/ui/UiButton.vue';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
 
 const combatStore = useCombatStore();
-const characterStore = useCharacterStore();
 const ui = useUiStore();
-
+const { isCombatOpen } = storeToRefs(ui);
 const {
-  inCombat, roundNumber, phase,
+  inCombat, roundNumber,
 } = storeToRefs(combatStore);
-
-const isEndingTurn = ref(false);
-
-// Can end turn only during player turn
-const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
-
-const endTurnButtonClass = computed(() => {
-  if (!canEndTurn.value) {
-    return 'bg-slate-600 text-slate-400 cursor-not-allowed';
-  }
-  return 'bg-purple-600 hover:bg-purple-700 text-white';
-});
 
 const containerEl = ref<HTMLElement | null>(null);
 const height = ref<number>(0);
@@ -128,25 +99,12 @@ onBeforeUnmount(() => {
 
 // Recompute height when open state changes
 watch(
-  () => ui.isCombatOpen,
+  () => isCombatOpen,
   async () => {
     await nextTick();
     updateHeight();
   },
 );
-
-const onEndTurn = async () => {
-  if (!characterStore.currentCharacter || isEndingTurn.value) return;
-
-  try {
-    isEndingTurn.value = true;
-    await combatStore.endActivation(characterStore.currentCharacter.characterId);
-  } catch (e) {
-    console.error('Failed to end turn', e);
-  } finally {
-    isEndingTurn.value = false;
-  }
-};
 
 </script>
 
