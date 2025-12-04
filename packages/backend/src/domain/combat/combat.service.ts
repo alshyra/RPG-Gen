@@ -18,13 +18,11 @@ import type {
 import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
 import { DiceService } from '../dice/dice.service.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
-import { AttackResultDto } from './dto/AttackResultDto.js';
 import { CombatantDto } from './dto/CombatantDto.js';
 import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
 import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
-import { TurnResultDto } from './dto/TurnResultDto.js';
 import { AttackResponseDto } from './dto/AttackResponseDto.js';
 import { DiceResultDto } from '../dice/dto/DiceResultDto.js';
 
@@ -721,7 +719,6 @@ export class CombatService {
         ac: state.player.ac,
         hp: state.player.hp,
       },
-      false,
     );
   }
 

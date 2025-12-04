@@ -11,8 +11,7 @@
  * - Turn advancement and round progression
  * - Turn order rebuild after enemy death
  */
-import anyTest from 'ava';
-const test = anyTest as any; // AVA ESM/TS interop — use `any` here in tests to avoid import typing issues at runtime
+import test from 'ava';
 import { CombatModule } from '../../src/modules/combat.module.js';
 import { CombatService } from '../../src/domain/combat/combat.service.js';
 import { CharacterService } from '../../src/domain/character/character.service.js';
@@ -25,6 +24,7 @@ import {
   type TestAppContext,
 } from '../helpers/test-app.js';
 import { createMockDiceService } from '../mocks/dice.mock.js';
+import util from 'util';
 
 // ============= Test Context =============
 
@@ -85,23 +85,35 @@ function createCombatStartRequest(numEnemies: number): CombatStartRequestDto {
 // ============= Setup & Teardown =============
 
 async function setupCombatTest(diceRolls: number[]): Promise<CombatTestContext> {
-  const mockDice = createMockDiceService({ rolls: diceRolls });
+  try {
+    const mockDice = createMockDiceService({ rolls: diceRolls });
 
-  const ctx = await createTestApp([CombatModule], [
-    {
-      provide: DiceService,
-      useValue: mockDice,
-    },
-  ]);
+    const ctx = await createTestApp([CombatModule], [
+      {
+        provide: DiceService,
+        useValue: mockDice,
+      },
+    ]);
 
-  const combatService = ctx.module.get(CombatService);
-  const characterService = ctx.module.get(CharacterService);
+    const combatService = ctx.module.get(CombatService);
+    const characterService = ctx.module.get(CharacterService);
 
-  return {
-    ctx,
-    combatService,
-    characterService,
-  };
+    return {
+      ctx,
+      combatService,
+      characterService,
+    };
+  } catch (err) {
+    // Helpful logging to diagnose thrown non-Error values during test bootstrap
+    // Note: `err` might be a function/class instead of an Error
+    // so we inspect and rethrow for the test runner to show the trace
+    const inspected = util.inspect(err, {
+      showHidden: true,
+      depth: null,
+    });
+    console.error('Error while setting up test context:', inspected);
+    throw err;
+  }
 }
 
 // ============= Turn Order Tests =============
