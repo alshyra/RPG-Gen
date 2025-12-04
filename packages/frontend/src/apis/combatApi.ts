@@ -2,8 +2,9 @@
  * Combat service for interacting with the backend combat API
  */
 import type {
-  CombatStartRequestDto, CombatStateDto, TurnResultWithInstructionsDto, CombatEndResponseDto, DiceThrowDto,
-  CombatEnemyDto,
+  CombatEndResponseDto,
+  CombatStartRequestDto, CombatStateDto,
+  CombatantDto,
 } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
@@ -33,12 +34,11 @@ class CombatService {
   /**
    * Execute an attack against a target using an action token for idempotency
    */
-  async attackWithToken(characterId: string, actionToken: string, target: CombatEnemyDto): Promise<TurnResultWithInstructionsDto> {
-    const { data } = await api.POST('/api/combat/{characterId}/attack/{actionToken}', {
+  async attackWithToken(characterId: string, target: CombatantDto) {
+    const { data } = await api.POST('/api/combat/{characterId}/attack', {
       params: {
         path: {
           characterId,
-          actionToken,
         },
       },
       body: { targetId: target.id },
@@ -59,41 +59,19 @@ class CombatService {
    * End combat (flee)
    */
   async endCombat(characterId: string): Promise<CombatEndResponseDto> {
-    const response = await api.POST('/api/combat/{characterId}/end', { params: { path: { characterId } } });
-    return getData<CombatEndResponseDto>(response);
-  }
-
-  /**
-   * Submit a resolved damage roll using action token for idempotency
-   */
-  async resolveRollWithToken(
-    characterId: string,
-    actionToken: string,
-    diceThrowDto: DiceThrowDto & { action?: string;
-      target?: string; },
-  ): Promise<TurnResultWithInstructionsDto> {
-    const { data } = await api.POST('/api/combat/{characterId}/resolve-roll/{actionToken}', {
-      params: {
-        path: {
-          characterId,
-          actionToken,
-        },
-      },
-      body: diceThrowDto,
-    });
-    if (!data) throw Error('No response received from resolveRollWithToken');
-    return data;
+    const response = await api.POST('/api/combat/{characterId}/flee', { params: { path: { characterId } } });
+    return getData(response);
   }
 
   /**
    * End the current player activation and advance to next turn.
    * This triggers enemy actions automatically until the next player activation.
    */
-  async endActivation(characterId: string): Promise<TurnResultWithInstructionsDto> {
-    const response = await api.POST('/api/combat/{characterId}/end-activation', {
+  async endActivation(characterId: string) {
+    const response = await api.POST('/api/combat/{characterId}/end-turn', {
       params: { path: { characterId } },
     });
-    return getData<TurnResultWithInstructionsDto>(response);
+    return getData(response);
   }
 }
 

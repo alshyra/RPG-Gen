@@ -11,7 +11,9 @@
           }
         },
         "summary": "Initiate Google OAuth login",
-        "tags": ["auth"]
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/api/auth/google/callback": {
@@ -24,7 +26,9 @@
           }
         },
         "summary": "Google OAuth callback",
-        "tags": ["auth"]
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/api/auth/profile": {
@@ -44,7 +48,9 @@
           }
         },
         "summary": "Get current user profile",
-        "tags": ["auth"]
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/api/auth/logout": {
@@ -57,7 +63,9 @@
           }
         },
         "summary": "Logout (client should clear token)",
-        "tags": ["auth"]
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/api/chat/{characterId}": {
@@ -107,7 +115,9 @@
           }
         ],
         "summary": "Send prompt to Gemini (chat)",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/api/chat/{characterId}/history": {
@@ -150,7 +160,9 @@
           }
         ],
         "summary": "Get conversation history for a character",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/api/characters": {
@@ -185,7 +197,9 @@
           }
         ],
         "summary": "Create a new character",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       },
       "get": {
         "operationId": "CharacterController_findAll",
@@ -211,7 +225,9 @@
           }
         ],
         "summary": "Get all characters for the current user",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/deceased": {
@@ -239,7 +255,9 @@
           }
         ],
         "summary": "Get all deceased characters",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}": {
@@ -276,7 +294,9 @@
           }
         ],
         "summary": "Get a specific character by ID",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       },
       "put": {
         "operationId": "CharacterController_update",
@@ -323,7 +343,9 @@
           }
         ],
         "summary": "Update a character",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       },
       "delete": {
         "operationId": "CharacterController_delete",
@@ -358,7 +380,9 @@
           }
         ],
         "summary": "Delete a character",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/kill": {
@@ -405,7 +429,9 @@
           }
         ],
         "summary": "Mark a character as deceased",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/inventory": {
@@ -452,7 +478,9 @@
           }
         ],
         "summary": "Add an item to character's inventory",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/inventory/equip": {
@@ -496,7 +524,9 @@
           }
         ],
         "summary": "Equip an item by definitionId (weapon only)",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/inventory/{itemId}": {
@@ -551,7 +581,9 @@
           }
         ],
         "summary": "Update an item in character's inventory",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       },
       "delete": {
         "operationId": "CharacterController_removeInventory",
@@ -604,7 +636,9 @@
           }
         ],
         "summary": "Remove an item from character's inventory",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/inspiration/grant": {
@@ -654,7 +688,9 @@
           }
         ],
         "summary": "Grant inspiration point(s) to a character",
-        "tags": ["characters"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/characters/{characterId}/inspiration/spend": {
@@ -694,47 +730,9 @@
           }
         ],
         "summary": "Spend an inspiration point",
-        "tags": ["characters"]
-      }
-    },
-    "/api/items": {
-      "get": {
-        "operationId": "ItemDefinitionController_list",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["ItemDefinition"]
-      }
-    },
-    "/api/items/{definitionId}": {
-      "get": {
-        "operationId": "ItemDefinitionController_get",
-        "parameters": [
-          {
-            "name": "definitionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ItemDefinitionDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["ItemDefinition"]
+        "tags": [
+          "characters"
+        ]
       }
     },
     "/api/combat/{characterId}/start": {
@@ -778,23 +776,17 @@
           }
         ],
         "summary": "Initialize combat with enemies",
-        "tags": ["combat"]
+        "tags": [
+          "combat"
+        ]
       }
     },
-    "/api/combat/{characterId}/attack/{actionToken}": {
+    "/api/combat/{characterId}/attack": {
       "post": {
         "operationId": "CombatController_attack",
         "parameters": [
           {
             "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "actionToken",
             "required": true,
             "in": "path",
             "schema": {
@@ -818,7 +810,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
+                  "$ref": "#/components/schemas/AttackResponseDto"
                 }
               }
             }
@@ -829,60 +821,10 @@
             "bearer": []
           }
         ],
-        "summary": "Execute player attack in combat",
-        "tags": ["combat"]
-      }
-    },
-    "/api/combat/{characterId}/resolve-roll/{actionToken}": {
-      "post": {
-        "operationId": "CombatController_resolveRoll",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "actionToken",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiceThrowDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Resolve a client-side roll (damage) and apply its effects",
-        "tags": ["combat"]
+        "summary": "Execute player attack in combat, determine if player hit his target",
+        "tags": [
+          "combat"
+        ]
       }
     },
     "/api/combat/{characterId}/status": {
@@ -916,12 +858,14 @@
           }
         ],
         "summary": "Get current combat status",
-        "tags": ["combat"]
+        "tags": [
+          "combat"
+        ]
       }
     },
-    "/api/combat/{characterId}/end-activation": {
+    "/api/combat/{characterId}/end-turn": {
       "post": {
-        "operationId": "CombatController_endActivation",
+        "operationId": "CombatController_endTurn",
         "parameters": [
           {
             "name": "characterId",
@@ -938,7 +882,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TurnResultWithInstructionsDto"
+                  "$ref": "#/components/schemas/CombatStateDto"
                 }
               }
             }
@@ -950,12 +894,14 @@
           }
         ],
         "summary": "End current player activation and advance turn (triggers enemy actions)",
-        "tags": ["combat"]
+        "tags": [
+          "combat"
+        ]
       }
     },
-    "/api/combat/{characterId}/end": {
+    "/api/combat/{characterId}/flee": {
       "post": {
-        "operationId": "CombatController_endCombat",
+        "operationId": "CombatController_flee",
         "parameters": [
           {
             "name": "characterId",
@@ -984,7 +930,9 @@
           }
         ],
         "summary": "Force end current combat (flee)",
-        "tags": ["combat"]
+        "tags": [
+          "combat"
+        ]
       }
     },
     "/api/dice": {
@@ -996,7 +944,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DiceRequest"
+                "$ref": "#/components/schemas/DiceRequestDto"
               }
             }
           }
@@ -1007,7 +955,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DiceThrowDto"
+                  "$ref": "#/components/schemas/DiceResultDto"
                 }
               }
             }
@@ -1017,7 +965,9 @@
           }
         },
         "summary": "Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20",
-        "tags": ["dice"]
+        "tags": [
+          "dice"
+        ]
       }
     },
     "/api/image": {
@@ -1040,7 +990,9 @@
           }
         },
         "summary": "Generate image from prompt",
-        "tags": ["image"]
+        "tags": [
+          "image"
+        ]
       }
     },
     "/api/image/generate-avatar": {
@@ -1078,7 +1030,9 @@
           }
         ],
         "summary": "Generate character avatar from description",
-        "tags": ["image"]
+        "tags": [
+          "image"
+        ]
       }
     },
     "/api/health": {
@@ -1090,7 +1044,9 @@
             "description": ""
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/api/rolls/{characterId}": {
@@ -1137,7 +1093,9 @@
           }
         ],
         "summary": "Submit resolved roll(s) (non-chat) for processing",
-        "tags": ["rolls"]
+        "tags": [
+          "rolls"
+        ]
       }
     }
   },
@@ -1178,7 +1136,12 @@
             "description": "URL de la photo de profil de l'utilisateur"
           }
         },
-        "required": ["id", "email", "displayName", "picture"]
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "picture"
+        ]
       },
       "RollMetaDto": {
         "type": "object",
@@ -1215,7 +1178,9 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["roll"]
+            "enum": [
+              "roll"
+            ]
           },
           "dices": {
             "type": "string",
@@ -1236,7 +1201,11 @@
           "advantage": {
             "type": "string",
             "description": "Advantage type",
-            "enum": ["advantage", "disadvantage", "none"]
+            "enum": [
+              "advantage",
+              "disadvantage",
+              "none"
+            ]
           },
           "meta": {
             "description": "Optional metadata for combat rolls",
@@ -1247,7 +1216,10 @@
             ]
           }
         },
-        "required": ["type", "dices"]
+        "required": [
+          "type",
+          "dices"
+        ]
       },
       "HpInstructionMessageDto": {
         "type": "object",
@@ -1255,14 +1227,19 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["hp"]
+            "enum": [
+              "hp"
+            ]
           },
           "hp": {
             "type": "number",
             "description": "Amount of HP change"
           }
         },
-        "required": ["type", "hp"]
+        "required": [
+          "type",
+          "hp"
+        ]
       },
       "XpInstructionMessageDto": {
         "type": "object",
@@ -1270,14 +1247,19 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["xp"]
+            "enum": [
+              "xp"
+            ]
           },
           "xp": {
             "type": "number",
             "description": "Amount of XP gained"
           }
         },
-        "required": ["type", "xp"]
+        "required": [
+          "type",
+          "xp"
+        ]
       },
       "SpellInstructionMessageDto": {
         "type": "object",
@@ -1285,12 +1267,18 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["spell"]
+            "enum": [
+              "spell"
+            ]
           },
           "action": {
             "type": "string",
             "description": "Spell action",
-            "enum": ["learn", "cast", "forget"]
+            "enum": [
+              "learn",
+              "cast",
+              "forget"
+            ]
           },
           "name": {
             "type": "string",
@@ -1309,7 +1297,11 @@
             "description": "Spell description"
           }
         },
-        "required": ["type", "action", "name"]
+        "required": [
+          "type",
+          "action",
+          "name"
+        ]
       },
       "InventoryInstructionMessageDto": {
         "type": "object",
@@ -1317,12 +1309,18 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["inventory"]
+            "enum": [
+              "inventory"
+            ]
           },
           "action": {
             "type": "string",
             "description": "Inventory action",
-            "enum": ["add", "remove", "use"]
+            "enum": [
+              "add",
+              "remove",
+              "use"
+            ]
           },
           "name": {
             "type": "string",
@@ -1337,7 +1335,11 @@
             "description": "Item description"
           }
         },
-        "required": ["type", "action", "name"]
+        "required": [
+          "type",
+          "action",
+          "name"
+        ]
       },
       "CombatStartEntryDto": {
         "type": "object",
@@ -1367,7 +1369,11 @@
             "description": "Damage bonus (optional)"
           }
         },
-        "required": ["name", "hp", "ac"]
+        "required": [
+          "name",
+          "hp",
+          "ac"
+        ]
       },
       "CombatStartInstructionMessageDto": {
         "type": "object",
@@ -1375,7 +1381,9 @@
           "type": {
             "type": "string",
             "description": "Instruction type",
-            "enum": ["combat_start"]
+            "enum": [
+              "combat_start"
+            ]
           },
           "combat_start": {
             "description": "Combat start entries",
@@ -1385,40 +1393,10 @@
             }
           }
         },
-        "required": ["type", "combat_start"]
-      },
-      "CombatEndDto": {
-        "type": "object",
-        "properties": {
-          "victory": {
-            "type": "boolean",
-            "description": "Victory state"
-          },
-          "xp_gained": {
-            "type": "number",
-            "description": "XP gained"
-          },
-          "player_hp": {
-            "type": "number",
-            "description": "Player's HP at the end"
-          },
-          "enemies_defeated": {
-            "description": "Enemies that were defeated",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "fled": {
-            "type": "boolean",
-            "description": "Flee indicator"
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative summary"
-          }
-        },
-        "required": ["victory", "xp_gained", "player_hp", "enemies_defeated", "narrative"]
+        "required": [
+          "type",
+          "combat_start"
+        ]
       },
       "ChatMessageDto": {
         "type": "object",
@@ -1426,7 +1404,11 @@
           "role": {
             "type": "string",
             "description": "Message role",
-            "enum": ["user", "assistant", "system"]
+            "enum": [
+              "user",
+              "assistant",
+              "system"
+            ]
           },
           "narrative": {
             "type": "string",
@@ -1459,7 +1441,10 @@
             }
           }
         },
-        "required": ["role", "narrative"]
+        "required": [
+          "role",
+          "narrative"
+        ]
       },
       "CreateCharacterBodyDto": {
         "type": "object",
@@ -1469,7 +1454,9 @@
             "description": "Game world (e.g., dnd, vtm)"
           }
         },
-        "required": ["world"]
+        "required": [
+          "world"
+        ]
       },
       "RaceResponseDto": {
         "type": "object",
@@ -1490,7 +1477,9 @@
             }
           }
         },
-        "required": ["mods"]
+        "required": [
+          "mods"
+        ]
       },
       "AbilityScoresResponseDto": {
         "type": "object",
@@ -1551,7 +1540,7 @@
           }
         }
       },
-      "ItemResponseDto": {
+      "InventoryItemDto": {
         "type": "object",
         "properties": {
           "_id": {
@@ -1579,9 +1568,24 @@
             "description": "Is equipped"
           },
           "meta": {
-            "type": "object",
-            "description": "Item metadata",
-            "additionalProperties": true
+            "description": "Arbitrary item meta",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/WeaponMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ArmorMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ConsumableMeta"
+              },
+              {
+                "$ref": "#/components/schemas/PackMeta"
+              },
+              {
+                "$ref": "#/components/schemas/ToolMeta"
+              }
+            ]
           }
         }
       },
@@ -1606,7 +1610,9 @@
             "additionalProperties": true
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "CharacterResponseDto": {
         "type": "object",
@@ -1700,13 +1706,16 @@
           "state": {
             "type": "string",
             "description": "Character state",
-            "enum": ["draft", "created"]
+            "enum": [
+              "draft",
+              "created"
+            ]
           },
           "inventory": {
             "description": "Character inventory",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ItemResponseDto"
+              "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
           "spells": {
@@ -1717,7 +1726,13 @@
             }
           }
         },
-        "required": ["characterId", "world", "portrait", "isDeceased", "state"]
+        "required": [
+          "characterId",
+          "world",
+          "portrait",
+          "isDeceased",
+          "state"
+        ]
       },
       "DeceasedCharacterResponseDto": {
         "type": "object",
@@ -1811,13 +1826,16 @@
           "state": {
             "type": "string",
             "description": "Character state",
-            "enum": ["draft", "created"]
+            "enum": [
+              "draft",
+              "created"
+            ]
           },
           "inventory": {
             "description": "Character inventory",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ItemResponseDto"
+              "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
           "spells": {
@@ -1828,7 +1846,13 @@
             }
           }
         },
-        "required": ["characterId", "world", "portrait", "isDeceased", "state"]
+        "required": [
+          "characterId",
+          "world",
+          "portrait",
+          "isDeceased",
+          "state"
+        ]
       },
       "UpdateCharacterRequestDto": {
         "type": "object",
@@ -1906,13 +1930,16 @@
           "state": {
             "type": "string",
             "description": "Character state",
-            "enum": ["draft", "created"]
+            "enum": [
+              "draft",
+              "created"
+            ]
           },
           "inventory": {
             "description": "Character inventory",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ItemResponseDto"
+              "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
           "spells": {
@@ -1939,7 +1966,9 @@
           "type": {
             "type": "string",
             "description": "Type discriminator for weapons",
-            "enum": ["weapon"]
+            "enum": [
+              "weapon"
+            ]
           },
           "cost": {
             "type": "object",
@@ -1976,7 +2005,9 @@
           "type": {
             "type": "string",
             "description": "Type discriminator for armor",
-            "enum": ["armor"]
+            "enum": [
+              "armor"
+            ]
           },
           "cost": {
             "type": "object",
@@ -2014,7 +2045,9 @@
           "type": {
             "type": "string",
             "description": "Type discriminator for consumables",
-            "enum": ["consumable"]
+            "enum": [
+              "consumable"
+            ]
           },
           "cost": {
             "type": "object",
@@ -2040,7 +2073,9 @@
           "type": {
             "type": "string",
             "description": "Type discriminator for packs",
-            "enum": ["pack"]
+            "enum": [
+              "pack"
+            ]
           },
           "cost": {
             "type": "object",
@@ -2062,7 +2097,9 @@
           "type": {
             "type": "string",
             "description": "Type discriminator for tools",
-            "enum": ["tool"]
+            "enum": [
+              "tool"
+            ]
           },
           "cost": {
             "type": "object",
@@ -2150,7 +2187,9 @@
             ]
           }
         },
-        "required": ["definitionId"]
+        "required": [
+          "definitionId"
+        ]
       },
       "EquipInventoryDto": {
         "type": "object",
@@ -2161,7 +2200,9 @@
             "example": "weapon-rapier"
           }
         },
-        "required": ["definitionId"]
+        "required": [
+          "definitionId"
+        ]
       },
       "RemoveInventoryBodyDto": {
         "type": "object",
@@ -2202,43 +2243,11 @@
             ]
           }
         },
-        "required": ["ok", "inspirationPoints", "character"]
-      },
-      "ItemDefinitionDto": {
-        "type": "object",
-        "properties": {
-          "definitionId": {
-            "type": "string",
-            "description": "Unique identifier for the item definition",
-            "example": "sword_of_flames_001"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the item",
-            "example": "Sword of Flames"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description of the item",
-            "example": "A magical sword that burns with eternal flames",
-            "default": ""
-          },
-          "meta": {
-            "type": "object",
-            "description": "Metadata containing item properties and stats",
-            "example": {
-              "damage": 10,
-              "durability": 100,
-              "rarity": "rare"
-            }
-          },
-          "isEditable": {
-            "type": "boolean",
-            "description": "Whether this item definition can be modified",
-            "default": true
-          }
-        },
-        "required": ["definitionId", "name", "description", "meta", "isEditable"]
+        "required": [
+          "ok",
+          "inspirationPoints",
+          "character"
+        ]
       },
       "CombatStartRequestDto": {
         "type": "object",
@@ -2251,118 +2260,8 @@
             }
           }
         },
-        "required": ["combat_start"]
-      },
-      "CombatEnemyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique enemy ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Enemy name"
-          },
-          "hp": {
-            "type": "number",
-            "description": "Current hit points"
-          },
-          "hpMax": {
-            "type": "number",
-            "description": "Maximum hit points"
-          },
-          "ac": {
-            "type": "number",
-            "description": "Armor class"
-          },
-          "portrait": {
-            "type": "string",
-            "description": "Optional portrait URL or data URI"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional short description for the enemy"
-          },
-          "initiative": {
-            "type": "number",
-            "description": "Initiative order value"
-          },
-          "attackBonus": {
-            "type": "number",
-            "description": "Attack bonus for the enemy"
-          },
-          "damageDice": {
-            "type": "string",
-            "description": "Damage dice expression (e.g., 1d8)"
-          },
-          "damageBonus": {
-            "type": "number",
-            "description": "Damage bonus to add to damage roll"
-          }
-        },
         "required": [
-          "id",
-          "name",
-          "hp",
-          "hpMax",
-          "ac",
-          "initiative",
-          "attackBonus",
-          "damageDice",
-          "damageBonus"
-        ]
-      },
-      "CombatPlayerDto": {
-        "type": "object",
-        "properties": {
-          "characterId": {
-            "type": "string",
-            "description": "Character ID of the player"
-          },
-          "name": {
-            "type": "string",
-            "description": "Player name"
-          },
-          "hp": {
-            "type": "number",
-            "description": "Current hit points"
-          },
-          "hpMax": {
-            "type": "number",
-            "description": "Maximum hit points"
-          },
-          "ac": {
-            "type": "number",
-            "description": "Armor class"
-          },
-          "initiative": {
-            "type": "number",
-            "description": "Initiative order value"
-          },
-          "attackBonus": {
-            "type": "number",
-            "description": "Attack bonus for the player"
-          },
-          "damageDice": {
-            "type": "string",
-            "description": "Damage dice expression (e.g., 1d8)"
-          },
-          "damageBonus": {
-            "type": "number",
-            "description": "Damage bonus to add to damage roll"
-          }
-        },
-        "required": [
-          "characterId",
-          "name",
-          "hp",
-          "hpMax",
-          "ac",
-          "initiative",
-          "attackBonus",
-          "damageDice",
-          "damageBonus"
+          "combat_start"
         ]
       },
       "CombatantDto": {
@@ -2384,16 +2283,37 @@
             "type": "boolean",
             "description": "Whether combatant is player character"
           },
-          "originId": {
-            "type": "string",
-            "description": "Original ID for duplicated player entries (all share same originId)"
-          },
-          "activationIndex": {
+          "hp": {
             "type": "number",
-            "description": "Activation index for player duplicates (0-based)"
+            "description": "Current hit points (enemies only)"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points (enemies only)"
+          },
+          "ac": {
+            "type": "number",
+            "description": "Armor class (enemies only)"
+          },
+          "attackBonus": {
+            "type": "number",
+            "description": "Enemy attack bonus (enemies only)"
+          },
+          "damageDice": {
+            "type": "string",
+            "description": "Enemy damage dice expression (enemies only), e.g. \"1d6\""
+          },
+          "damageBonus": {
+            "type": "number",
+            "description": "Enemy damage bonus (enemies only)"
           }
         },
-        "required": ["id", "name", "initiative", "isPlayer"]
+        "required": [
+          "id",
+          "name",
+          "initiative",
+          "isPlayer"
+        ]
       },
       "CombatStateDto": {
         "type": "object",
@@ -2410,14 +2330,14 @@
             "description": "Active enemies",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CombatEnemyDto"
+              "$ref": "#/components/schemas/CombatantDto"
             }
           },
           "player": {
             "description": "Player state",
             "allOf": [
               {
-                "$ref": "#/components/schemas/CombatPlayerDto"
+                "$ref": "#/components/schemas/CombatantDto"
               }
             ]
           },
@@ -2450,7 +2370,12 @@
           "phase": {
             "type": "string",
             "description": "Current combat phase",
-            "enum": ["PLAYER_TURN", "AWAITING_DAMAGE_ROLL", "ENEMY_TURN", "COMBAT_ENDED"]
+            "enum": [
+              "PLAYER_TURN",
+              "AWAITING_DAMAGE_ROLL",
+              "ENEMY_TURN",
+              "COMBAT_ENDED"
+            ]
           },
           "actionToken": {
             "type": "string",
@@ -2495,195 +2420,11 @@
             "description": "Target ID to attack"
           }
         },
-        "required": ["targetId"]
-      },
-      "AttackResultDto": {
-        "type": "object",
-        "properties": {
-          "attacker": {
-            "type": "string",
-            "description": "Attacker identifier"
-          },
-          "target": {
-            "type": "string",
-            "description": "Target identifier"
-          },
-          "attackRoll": {
-            "type": "number",
-            "description": "Raw attack roll"
-          },
-          "attackBonus": {
-            "type": "number",
-            "description": "Attack bonus applied"
-          },
-          "totalAttack": {
-            "type": "number",
-            "description": "Total attack value (roll + bonus)"
-          },
-          "targetAc": {
-            "type": "number",
-            "description": "Target's AC"
-          },
-          "hit": {
-            "type": "boolean",
-            "description": "Whether the attack hit"
-          },
-          "critical": {
-            "type": "boolean",
-            "description": "Whether the attack was a critical hit"
-          },
-          "fumble": {
-            "type": "boolean",
-            "description": "Whether the attack was a fumble"
-          },
-          "damageRoll": {
-            "description": "Individual dice results for the damage roll",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "damageBonus": {
-            "type": "number",
-            "description": "Damage bonus applied"
-          },
-          "totalDamage": {
-            "type": "number",
-            "description": "Total damage applied"
-          },
-          "targetHpBefore": {
-            "type": "number",
-            "description": "Target's HP before the attack"
-          },
-          "targetHpAfter": {
-            "type": "number",
-            "description": "Target's HP after the attack"
-          },
-          "targetDefeated": {
-            "type": "boolean",
-            "description": "Whether the target was defeated"
-          }
-        },
         "required": [
-          "attacker",
-          "target",
-          "attackRoll",
-          "attackBonus",
-          "totalAttack",
-          "targetAc",
-          "hit",
-          "critical",
-          "fumble",
-          "damageRoll",
-          "damageBonus",
-          "totalDamage",
-          "targetHpBefore",
-          "targetHpAfter",
-          "targetDefeated"
+          "targetId"
         ]
       },
-      "TurnResultWithInstructionsDto": {
-        "type": "object",
-        "properties": {
-          "turnNumber": {
-            "type": "number",
-            "description": "Turn number"
-          },
-          "roundNumber": {
-            "type": "number",
-            "description": "Round number"
-          },
-          "playerAttacks": {
-            "description": "Attacks performed by player",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AttackResultDto"
-            }
-          },
-          "enemyAttacks": {
-            "description": "Attacks performed by enemies",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AttackResultDto"
-            }
-          },
-          "combatEnded": {
-            "type": "boolean",
-            "description": "Whether combat ended after this turn"
-          },
-          "victory": {
-            "type": "boolean",
-            "description": "Whether the player emerged victorious"
-          },
-          "defeat": {
-            "type": "boolean",
-            "description": "Whether the player was defeated"
-          },
-          "remainingEnemies": {
-            "description": "Remaining enemies after the turn",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CombatEnemyDto"
-            }
-          },
-          "playerHp": {
-            "type": "number",
-            "description": "Player's current HP after the turn"
-          },
-          "playerHpMax": {
-            "type": "number",
-            "description": "Player's max HP"
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative text summarizing the turn"
-          },
-          "instructions": {
-            "type": "array",
-            "description": "Optional set of frontend instructions to apply after the turn",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/RollInstructionMessageDto"
-                },
-                {
-                  "$ref": "#/components/schemas/HpInstructionMessageDto"
-                },
-                {
-                  "$ref": "#/components/schemas/XpInstructionMessageDto"
-                },
-                {
-                  "$ref": "#/components/schemas/SpellInstructionMessageDto"
-                },
-                {
-                  "$ref": "#/components/schemas/InventoryInstructionMessageDto"
-                },
-                {
-                  "$ref": "#/components/schemas/CombatStartInstructionMessageDto"
-                }
-              ]
-            }
-          },
-          "state": {
-            "$ref": "#/components/schemas/CombatStateDto",
-            "description": "Snapshot of combat state after this turn — preferred to duplicating fields in the turn result"
-          }
-        },
-        "required": [
-          "turnNumber",
-          "roundNumber",
-          "playerAttacks",
-          "enemyAttacks",
-          "combatEnded",
-          "victory",
-          "defeat",
-          "remainingEnemies",
-          "playerHp",
-          "playerHpMax",
-          "narrative"
-        ]
-      },
-      "DiceThrowDto": {
+      "DiceResultDto": {
         "type": "object",
         "properties": {
           "rolls": {
@@ -2693,7 +2434,32 @@
               "type": "number"
             }
           },
-          "mod": {
+          "modifierValue": {
+            "type": "number",
+            "description": "Modifier applied to the total"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total result (sum of rolls + modifier)"
+          }
+        },
+        "required": [
+          "rolls",
+          "modifierValue",
+          "total"
+        ]
+      },
+      "CombatDiceResultDto": {
+        "type": "object",
+        "properties": {
+          "rolls": {
+            "description": "Individual dice roll results",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "modifierValue": {
             "type": "number",
             "description": "Modifier applied to the total"
           },
@@ -2701,41 +2467,99 @@
             "type": "number",
             "description": "Total result (sum of rolls + modifier)"
           },
-          "advantage": {
-            "type": "string",
-            "description": "Advantage type used for this roll",
-            "enum": ["advantage", "disadvantage", "none"]
-          },
-          "keptRoll": {
+          "damageTotal": {
             "type": "number",
-            "description": "The roll that was kept (when using advantage/disadvantage)"
+            "description": "Total damage dealt by the roll"
           },
-          "discardedRoll": {
-            "type": "number",
-            "description": "The roll that was discarded (when using advantage/disadvantage)"
+          "isCrit": {
+            "type": "boolean",
+            "description": "Whether this damage roll was a critical hit"
           }
         },
-        "required": ["rolls", "mod", "total"]
+        "required": [
+          "rolls",
+          "modifierValue",
+          "total"
+        ]
       },
-      "CombatRollResultDto": {
+      "AttackResponseDto": {
         "type": "object",
-        "description": "Resolved combat roll result (client -> server). Extends DiceThrowDto with optional action and target fields.",
-        "allOf": [{ "$ref": "#/components/schemas/DiceThrowDto" }],
         "properties": {
-          "action": {
-            "type": "string",
-            "description": "Optional action id (e.g., attack or damage)"
+          "diceResult": {
+            "description": "Result of the hit roll for frontend display purposes.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiceResultDto"
+              }
+            ]
           },
-          "target": {
-            "type": "string",
-            "description": "Optional target identifier (e.g., enemy name or id)"
+          "damageDiceResult": {
+            "description": "Damage roll result (includes isCrit and damageTotal), present when an attack hits.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatDiceResultDto"
+              }
+            ]
+          },
+          "damageTotal": {
+            "type": "number",
+            "description": "Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable)."
+          },
+          "isCrit": {
+            "type": "boolean",
+            "description": "Whether the hit was a critical strike."
+          },
+          "combatState": {
+            "description": "Returns the state of the combat",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatStateDto"
+              }
+            ]
           }
-        }
+        },
+        "required": [
+          "combatState"
+        ]
       },
-      "CombatRollRequestDto": {
+      "CombatEndDto": {
         "type": "object",
-        "description": "Combat roll request (AI -> system). Alias for RollInstructionMessageDto",
-        "allOf": [{ "$ref": "#/components/schemas/RollInstructionMessageDto" }]
+        "properties": {
+          "victory": {
+            "type": "boolean",
+            "description": "Victory state"
+          },
+          "xp_gained": {
+            "type": "number",
+            "description": "XP gained"
+          },
+          "player_hp": {
+            "type": "number",
+            "description": "Player's HP at the end"
+          },
+          "enemies_defeated": {
+            "description": "Enemies that were defeated",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fled": {
+            "type": "boolean",
+            "description": "Flee indicator"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative summary"
+          }
+        },
+        "required": [
+          "victory",
+          "xp_gained",
+          "player_hp",
+          "enemies_defeated",
+          "narrative"
+        ]
       },
       "CombatEndResultDto": {
         "type": "object",
@@ -2749,7 +2573,9 @@
             ]
           }
         },
-        "required": ["combat_end"]
+        "required": [
+          "combat_end"
+        ]
       },
       "CombatEndResponseDto": {
         "type": "object",
@@ -2770,22 +2596,24 @@
             }
           }
         },
-        "required": ["success", "message"]
+        "required": [
+          "success",
+          "message"
+        ]
       },
-      "DiceRequest": {
+      "DiceRequestDto": {
         "type": "object",
         "properties": {
           "expr": {
-            "type": "string",
-            "description": "Dice expression (e.g., 1d20+5, 2d6, 1d8-2)"
+            "type": "string"
           },
           "advantage": {
-            "type": "string",
-            "description": "Advantage type for d20 rolls",
-            "enum": ["advantage", "disadvantage", "none"]
+            "type": "string"
           }
         },
-        "required": ["expr"]
+        "required": [
+          "expr"
+        ]
       },
       "ImageRequestDto": {
         "type": "object",
@@ -2803,7 +2631,9 @@
             "description": "Model to use"
           }
         },
-        "required": ["prompt"]
+        "required": [
+          "prompt"
+        ]
       },
       "CharacterIdBodyDto": {
         "type": "object",
@@ -2813,7 +2643,9 @@
             "description": "UUID of the character"
           }
         },
-        "required": ["characterId"]
+        "required": [
+          "characterId"
+        ]
       },
       "AvatarResponseDto": {
         "type": "object",
@@ -2823,7 +2655,9 @@
             "description": "Generated avatar image URL or base64 data"
           }
         },
-        "required": ["imageUrl"]
+        "required": [
+          "imageUrl"
+        ]
       },
       "SubmitRollDto": {
         "type": "object",
@@ -2836,7 +2670,9 @@
             }
           }
         },
-        "required": ["instructions"]
+        "required": [
+          "instructions"
+        ]
       }
     }
   }

@@ -3,7 +3,7 @@
  * Type-safe API calls for character management
  */
 import type {
-  CharacterResponseDto, CreateInventoryItemDto, ItemResponseDto, UpdateCharacterRequestDto,
+  CharacterResponseDto, CreateInventoryItemDto, InventoryItemDto, UpdateCharacterRequestDto,
 } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
@@ -19,7 +19,7 @@ const getData = <T>(response: {
 };
 
 // Convert ItemDto to OpenAPI CreateInventoryItemDto format
-const toOpenApiInventoryItem = (item: Partial<ItemResponseDto>): CreateInventoryItemDto => ({
+const toOpenApiInventoryItem = (item: Partial<InventoryItemDto>): CreateInventoryItemDto => ({
   definitionId: item.definitionId ?? '',
   _id: item._id,
   name: item.name,
@@ -54,7 +54,7 @@ export const characterApi = {
   getCharacterById: async (characterId: string): Promise<CharacterResponseDto | null> => {
     try {
       const response = await api.GET('/api/characters/{characterId}', { params: { path: { characterId } } });
-      return getData<CharacterResponseDto>(response);
+      return getData(response);
     } catch {
       return null;
     }
@@ -86,7 +86,7 @@ export const characterApi = {
       params: { path: { characterId } },
       body: { deathLocation },
     });
-    return getData<CharacterResponseDto>(response);
+    return getData(response);
   },
 
   /**
@@ -94,18 +94,18 @@ export const characterApi = {
    */
   getDeceasedCharacters: async (): Promise<CharacterResponseDto[]> => {
     const response = await api.GET('/api/characters/deceased');
-    return getData<CharacterResponseDto[]>(response);
+    return getData(response);
   },
 
   /**
    * Add an item to character's inventory
    */
-  addInventoryItem: async (characterId: string, item: Partial<ItemResponseDto>): Promise<CharacterResponseDto> => {
+  addInventoryItem: async (characterId: string, item: Partial<InventoryItemDto>): Promise<CharacterResponseDto> => {
     const response = await api.POST('/api/characters/{characterId}/inventory', {
       params: { path: { characterId } },
       body: toOpenApiInventoryItem(item),
     });
-    return getData<CharacterResponseDto>(response);
+    return getData(response);
   },
 
   /**
@@ -116,7 +116,7 @@ export const characterApi = {
       params: { path: { characterId } },
       body: { definitionId },
     });
-    return getData<CharacterResponseDto>(response);
+    return getData(response);
   },
 
   /**
@@ -132,7 +132,7 @@ export const characterApi = {
       },
       body: updates,
     });
-    return getData<CharacterResponseDto>(response);
+    return getData(response);
   },
 
   /**
@@ -148,7 +148,7 @@ export const characterApi = {
       },
       body: { qty },
     });
-    return getData<CharacterResponseDto>(response);
+    return getData(response);
   },
 
   /**
@@ -159,7 +159,7 @@ export const characterApi = {
       params: { path: { characterId } },
       body: { amount },
     });
-    const result = getData<{ character: CharacterResponseDto }>(response);
+    const result = getData(response);
     return result.character;
   },
 
@@ -168,7 +168,7 @@ export const characterApi = {
    */
   spendInspiration: async (characterId: string): Promise<CharacterResponseDto> => {
     const response = await api.POST('/api/characters/{characterId}/inspiration/spend', { params: { path: { characterId } } });
-    const result = getData<{ character: CharacterResponseDto }>(response);
+    const result = getData(response);
     return result.character;
   },
 
@@ -177,18 +177,7 @@ export const characterApi = {
    */
   generateAvatar: async (characterId: string): Promise<string> => {
     const response = await api.POST('/api/image/generate-avatar', { body: { characterId } });
-    const result = getData<{ imageUrl: string }>(response);
+    const result = getData(response);
     return result.imageUrl;
   },
-
-  /**
-   * Get item definitions
-   */
-  getItemDefinitions: async (): Promise<unknown[]> => {
-    const response = await api.GET('/api/items');
-    return getData<unknown[]>(response);
-  },
 };
-
-// Re-export with compatible name for drop-in replacement
-export { characterApi as characterServiceApi };

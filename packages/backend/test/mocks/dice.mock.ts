@@ -1,8 +1,4 @@
-/**
- * Mock DiceService for deterministic testing.
- * Allows tests to control dice roll outcomes.
- */
-import type { DiceThrowDto } from '../../src/domain/dice/dto/dice.js';
+import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
 
 export interface MockDiceRollConfig {
   /** Fixed roll values to return sequentially */
@@ -27,16 +23,15 @@ export function createMockDiceService(config: MockDiceRollConfig = {}) {
     /**
      * Mock rollDiceExpr - returns configured values
      */
-    rollDiceExpr: (_expr: string, _rand?: () => number, _advantage?: string): DiceThrowDto => {
+    rollDiceExpr: (_expr: string, _rand?: () => number, _advantage?: string): DiceResultDto => {
       // Cycle through configured rolls if multiple calls
       const rollValue = defaultRolls[callIndex % defaultRolls.length];
       callIndex++;
 
       return {
         rolls: [rollValue],
-        mod: 0,
+        modifierValue: 0,
         total: config.total ?? rollValue,
-        advantage: 'none',
       };
     },
 
