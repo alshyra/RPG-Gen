@@ -30,7 +30,7 @@ export class CombatOrchestrator {
   private readonly logger = new Logger(CombatOrchestrator.name);
 
   constructor(
-    private readonly combatService: CombatAppService,
+    private readonly combatAppService: CombatAppService,
     private readonly characterService: CharacterService,
     private readonly diceService: DiceService,
   ) {}
@@ -46,14 +46,14 @@ export class CombatOrchestrator {
     combatStartRequest: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
-    let state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
+    let state = await this.combatAppService.initializeCombat(characterDto, combatStartRequest, userId);
 
     // Early return when there are no enemy turns before the player activation
     if (state.turnOrder.length === 0 || state.turnOrder[0].isPlayer) {
       this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
       return {
         ...state,
-        narrative: (await this.combatService.getCombatSummary(characterId)) ?? undefined,
+        narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
         phase: 'PLAYER_TURN' as const,
       };
     }
@@ -76,9 +76,9 @@ export class CombatOrchestrator {
     state = processedState;
 
     if (playerDefeated) {
-      await this.combatService.saveCombatState(state);
+      await this.combatAppService.saveCombatState(state);
       this.logger.log(`Combat initialized (and ended) for ${characterId} after initial enemy turns`);
-      const narrative = (await this.combatService.getCombatSummary(characterId)) ?? undefined;
+      const narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
       return {
         ...state,
         narrative,
@@ -87,12 +87,12 @@ export class CombatOrchestrator {
     }
 
     // Advance to player's activation and reset economy
-    const finalState = await this.combatService.getCombatState(characterId);
+    const finalState = await this.combatAppService.getCombatState(characterId);
     finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
     finalState.phase = 'PLAYER_TURN';
     finalState.actionRemaining = finalState.actionMax ?? 1;
     finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
-    await this.combatService.saveCombatState(finalState);
+    await this.combatAppService.saveCombatState(finalState);
 
     // Use freshest state for return
     state = finalState;
@@ -101,7 +101,7 @@ export class CombatOrchestrator {
 
     return {
       ...state,
-      narrative: (await this.combatService.getCombatSummary(characterId)) ?? undefined,
+      narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
       phase: 'PLAYER_TURN' as const,
     };
   }
@@ -115,18 +115,18 @@ export class CombatOrchestrator {
     targetId: string,
   ): Promise<AttackResponseDto> {
     // Validate combat is active
-    if (!(await this.combatService.isInCombat(characterId))) {
+    if (!(await this.combatAppService.isInCombat(characterId))) {
       throw new BadRequestException('Character is not in combat');
     }
 
-    let combatState = await this.combatService.getCombatState(characterId);
+    let combatState = await this.combatAppService.getCombatState(characterId);
 
     // Find target enemy
     const targetEnemy = combatState.enemies.find(
       enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && (enemy.hp ?? 0) > 0,
     );
     if (!targetEnemy) {
-      const validTargets = await this.combatService.getValidTargets(characterId);
+      const validTargets = await this.combatAppService.getValidTargets(characterId);
       throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
     }
 
@@ -135,8 +135,8 @@ export class CombatOrchestrator {
 
     if (!attackRoll.hit) {
       // Decrement action (via CombatService) and persist to avoid client exploit / state mismatch
-      combatState = this.combatService.actionEconomyService.decrementAction(combatState);
-      await this.combatService.saveCombatState(combatState);
+      combatState = this.combatAppService.decrementAction(combatState);
+      await this.combatAppService.saveCombatState(combatState);
 
       return {
         combatState,
@@ -148,7 +148,7 @@ export class CombatOrchestrator {
     const damageResult = this.diceService.rollDamage(combatState.player.damageDice, attackRoll.isCrit, combatState.player.damageBonus);
 
     // Apply damage and finalize via CombatService (persist, consume action, maybe end combat)
-    const finalState = await this.combatService.applyPlayerDamage(characterId, targetEnemy.id, damageResult.damageTotal);
+    const finalState = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal); // or delegate with dice results
 
     return {
       combatState: finalState,
@@ -164,7 +164,7 @@ export class CombatOrchestrator {
    * retourner un tableau d'attaques
    */
   public async endPlayerTurn(characterId: string): Promise<CombatStateDto> {
-    const combatState = await this.combatService.getCombatState(characterId);
+    const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException('combat state not found');
 
     combatState.phase = 'ENEMY_TURN';
@@ -179,13 +179,13 @@ export class CombatOrchestrator {
     );
 
     // After enemies have acted, set back to player's turn and persist
-    const finalState = await this.combatService.getCombatState(characterId);
+    const finalState = await this.combatAppService.getCombatState(characterId);
     if (finalState) {
       finalState.phase = 'PLAYER_TURN';
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.actionRemaining = finalState.actionMax ?? 1;
       finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
-      await this.combatService.saveCombatState(finalState);
+      await this.combatAppService.saveCombatState(finalState);
       return finalState;
     }
 
@@ -201,15 +201,15 @@ export class CombatOrchestrator {
   ): Promise<CombatStateDto> {
     await this.characterService.findByCharacterId(userId, characterId);
 
-    const inCombat = await this.combatService.isInCombat(characterId);
+    const inCombat = await this.combatAppService.isInCombat(characterId);
     if (!inCombat) throw new BadRequestException('No combat at the moment');
 
-    const state = await this.combatService.getCombatState(characterId);
+    const state = await this.combatAppService.getCombatState(characterId);
     if (!state) throw new BadRequestException('No combat at the moment');
 
     return {
       ...state,
-      validTargets: await this.combatService.getValidTargets(characterId),
+      validTargets: await this.combatAppService.getValidTargets(characterId),
     };
   }
 
@@ -222,14 +222,14 @@ export class CombatOrchestrator {
       throw new BadRequestException('Character not found');
     }
 
-    if (!(await this.combatService.isInCombat(characterId))) {
+    if (!(await this.combatAppService.isInCombat(characterId))) {
       return {
         success: false,
         message: 'Aucun combat en cours.',
       };
     }
 
-    await this.combatService.endCombat(characterId);
+    await this.combatAppService.endCombat(characterId);
     this.logger.log(`Combat forcefully ended for ${characterId}`);
 
     return {
@@ -277,7 +277,7 @@ export class CombatOrchestrator {
 
       const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
       // applyEnemyDamage returns a refreshed state
-      const updated = await this.combatService.applyEnemyDamage(characterId, damageResult.damageTotal);
+      const updated = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
       acc.state = updated;
       acc.playerDefeated = !!(updated.player && updated.player.hp <= 0);
       return acc;

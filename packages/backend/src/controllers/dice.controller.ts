@@ -6,10 +6,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { DiceService } from 'src/domain/dice/dice.service.js';
-import { type AdvantageType } from 'src/domain/dice/dto/dice.js';
-import { DiceRequestDto } from 'src/domain/dice/dto/DiceRequestDto.js';
-import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
+import { DiceService } from '../domain/dice/dice.service.js';
+import { type AdvantageType } from '../domain/dice/dto/dice.js';
+import { DiceRequestDto } from '../domain/dice/dto/DiceRequestDto.js';
+import { DiceResultDto } from '../domain/dice/dto/DiceResultDto.js';
 
 @ApiTags('dice')
 @Controller('dice')

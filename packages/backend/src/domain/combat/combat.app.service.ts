@@ -4,13 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import {
-  CombatSession, CombatSessionDocument,
-} from '../../infra/mongo/combat-session.schema.js';
-import {
-  calculateArmorClass, getDexModifier,
-} from '../character/armor-class.util.js';
+import type { Model } from 'mongoose';
+import { CombatSession } from '../../infra/mongo/combat-session.schema.js';
+import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
 import type {
   CharacterResponseDto,
   InventoryItemDto, WeaponMeta,
@@ -19,9 +15,9 @@ import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
 import { CombatantDto } from './dto/CombatantDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
+import { ActionEconomyService } from './services/action-economy.service.js';
 import { InitService } from './services/init.service.js';
 import { TurnOrderService } from './services/turn-order.service.js';
-import { ActionEconomyService } from './services/action-economy.service.js';
 
 /**
  * Service managing combat state and mechanics.
@@ -32,11 +28,15 @@ export class CombatAppService {
   private readonly logger = new Logger(CombatAppService.name);
 
   constructor(
-    @InjectModel(CombatSession.name) private combatSessionModel: Model<CombatSessionDocument>,
+    @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
     private readonly initService: InitService,
     private readonly turnOrderService: TurnOrderService,
-    public readonly actionEconomyService: ActionEconomyService,
+    private readonly actionEconomyService: ActionEconomyService,
   ) {}
+
+  public decrementAction(state: CombatStateDto): CombatStateDto {
+    return this.actionEconomyService.decrementAction(state);
+  }
 
   /**
    * Get ability modifier for attack calculations
