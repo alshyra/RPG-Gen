@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CharacterService } from '../../domain/character/character.service.js';
-import type { RollInstructionMessageDto } from '../../domain/chat/dto/index.js';
 import { CombatService } from '../../domain/combat/combat.service.js';
 import type {
   AttackResponseDto,
@@ -16,6 +15,7 @@ import type {
 } from '../../domain/combat/dto/index.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
 import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
+import { CombatDiceResultDto } from 'src/domain/dice/dto/CombatDiceResultDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -78,7 +78,7 @@ export class CombatOrchestrator {
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
    */
-  // eslint-disable-next-line max-statements
+
   async processAttack(
     characterId: string,
     targetId: string,
@@ -93,7 +93,7 @@ export class CombatOrchestrator {
 
     // Find target enemy
     const targetEnemy = combatState.enemies.find(
-      e => e.id.toLowerCase() === (targetId || '').toLowerCase() && e.hp > 0,
+      enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && enemy.hp > 0,
     );
     if (!targetEnemy) {
       const validTargets = await this.combatService.getValidTargets(characterId);
@@ -110,26 +110,8 @@ export class CombatOrchestrator {
       };
     }
 
-    // Hit: instruct client to roll damage
-    const rollInstruction: RollInstructionMessageDto = {
-      type: 'roll',
-      dices: combatState.player.damageDice,
-      modifierValue: combatState.player.damageBonus,
-      meta: {
-        action: 'damage',
-        target: targetEnemy.name,
-        damageBonus: combatState.player.damageBonus,
-      },
-      description: `Damage to ${targetEnemy.name}`,
-    };
-
-    combatState.phase = 'AWAITING_DAMAGE_ROLL';
-    await this.combatService.saveCombatState(combatState);
-    return {
-      combatState,
-      diceResult,
-      rollInstruction,
-    };
+    // Hit: immediately roll damage and apply
+    return this.applyDamage(characterId, targetEnemy.id, diceResult);
   }
 
   /**
@@ -141,20 +123,107 @@ export class CombatOrchestrator {
     if (!combatState || !combatState.validTargets) throw new NotFoundException('combat state not found');
 
     combatState.phase = 'ENEMY_TURN';
-    const attacks = combatState.enemies
+    const enemyActivations = combatState.enemies
       .filter(enemy => enemy.hp > 0)
-      .map(enemy => this.combatService.processSingleEnemyActivation(combatState, enemy))
-    attacks.forEach((attack) => {
-        attack.
-      })
+      .map(enemy => this.combatService.processSingleEnemyActivation(combatState, enemy));
+
+    // Wait for all activations to process (processSingleEnemyActivation might be async)
+    const attacksResults = await Promise.all(enemyActivations);
+    // You can log/process attacksResults if needed
+    // ...existing code...
     combatState.phase = 'PLAYER_TURN';
     return combatState;
   }
 
-  public applyDamage() {
-    // exit if combatState.phase != 'AWAITING_DAMAGE_ROLL'
-    // else roll damge dice and return to front result
-    // consume action
+  public async applyDamage(
+    characterId: string,
+    targetId: string,
+    attackDiceResult: DiceResultDto,
+  ): Promise<AttackResponseDto> {
+    const combatState = await this.combatService.getCombatState(characterId);
+    if (!combatState) throw new NotFoundException('No combat state found');
+
+    const target = combatState.enemies.find(e => e.id.toLowerCase() === (targetId || '').toLowerCase());
+    if (!target) {
+      const validTargets = await this.combatService.getValidTargets(characterId);
+      throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
+    }
+
+    const isCrit = this.isCritical(attackDiceResult);
+
+    const {
+      baseDamage, extraDamage,
+    } = this.rollDamageDiceForPlayer(combatState, isCrit);
+
+    const damageTotal = this.computeDamageTotal(baseDamage, extraDamage, combatState.player.damageBonus);
+
+    const combatDamageDiceResult = this.buildCombatDiceResult(baseDamage, isCrit, damageTotal);
+
+    // Apply and persist effects
+    await this.persistAndConsumeAction(combatState, target, damageTotal);
+
+    // Optionally finalize combat and retrieve updated state
+    const finalState = await this.finalizeCombatIfNeeded(characterId, combatState);
+
+    return {
+      combatState: finalState,
+      diceResult: attackDiceResult,
+      damageDiceResult: combatDamageDiceResult,
+      damageTotal,
+      isCrit,
+    };
+  }
+
+  // Private helpers
+  private isCritical(attackDiceResult: DiceResultDto): boolean {
+    const firstRoll = attackDiceResult.rolls && attackDiceResult.rolls.length ? attackDiceResult.rolls[0] : null;
+    return firstRoll === 20;
+  }
+
+  private rollDamageDiceForPlayer(combatState: CombatStateDto, isCrit: boolean): { baseDamage: DiceResultDto;
+    extraDamage?: DiceResultDto; } {
+    const baseDamage = this.diceService.rollDiceExpr(combatState.player.damageDice);
+    const extraDamage = isCrit ? this.diceService.rollDiceExpr(combatState.player.damageDice) : undefined;
+    return {
+      baseDamage,
+      extraDamage,
+    };
+  }
+
+  private computeDamageTotal(base?: DiceResultDto, extra?: DiceResultDto, damageBonus = 0): number {
+    const totalFrom = (diceResultParam?: DiceResultDto): number => {
+      if (!diceResultParam) return 0;
+      if (typeof diceResultParam.total === 'number') return diceResultParam.total;
+      if (Array.isArray(diceResultParam.rolls) && diceResultParam.rolls.length) {
+        return diceResultParam.rolls.reduce((sum, value) => sum + value, 0);
+      }
+      return 0;
+    };
+
+    return totalFrom(base) + totalFrom(extra) + (damageBonus ?? 0);
+  }
+
+  private buildCombatDiceResult(baseDamage: DiceResultDto, isCrit: boolean, damageTotal: number): CombatDiceResultDto {
+    return {
+      ...baseDamage,
+      isCrit,
+      damageTotal,
+    };
+  }
+
+  private async persistAndConsumeAction(combatState: CombatStateDto, target: any, damageTotal: number): Promise<void> {
+    target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
+    await this.combatService.saveCombatState(combatState);
+    this.combatService.decrementAction(combatState);
+  }
+
+  private async finalizeCombatIfNeeded(characterId: string, combatState: CombatStateDto): Promise<CombatStateDto> {
+    const anyAlive = combatState.enemies.some(e => e.hp > 0);
+    if (!anyAlive) {
+      await this.combatService.endCombat(characterId);
+      return this.combatService.getCombatState(characterId);
+    }
+    return combatState;
   }
 
   /**

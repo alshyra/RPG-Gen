@@ -75,21 +75,6 @@ export class CombatController {
     return this.combatOrchestrator.processAttack(characterId, targetId);
   }
 
-  @Post(':characterId/apply-damage')
-  @ApiOperation({ summary: 'Execute player damage in combat, determine damage dealt' })
-  @ApiResponse({
-    status: 200,
-    type: AttackResponseDto,
-  })
-  @ApiBody({ type: AttackRequestDto })
-  async applyDamage(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Body('targetId') targetId: string,
-  ): Promise<AttackResponseDto> {
-    return this.combatOrchestrator.applyDamage(characterId, targetId);
-  }
-
   @Get(':characterId/status')
   @ApiOperation({ summary: 'Get current combat status' })
   @ApiResponse({

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable, Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -422,11 +423,11 @@ export class CombatService {
   /**
    * Retrieve the current combat state from the database
    */
-  async getCombatState(characterId: string): Promise<CombatStateDto | null> {
+  async getCombatState(characterId: string): Promise<CombatStateDto> {
     const doc = await this.combatSessionModel.findOne({ characterId })
       .lean()
       .exec();
-    if (!doc) return null;
+    if (!doc) throw new NotFoundException('Combat session not found');
 
     const state: CombatStateDto = {
       characterId: doc.characterId,
