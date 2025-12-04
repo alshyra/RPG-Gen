@@ -3,7 +3,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { CharacterService } from '../../domain/character/character.service.js';
-import { CombatService } from '../../domain/combat/combat.service.js';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import type { CharacterResponseDto } from '../../domain/character/dto/index.js';
 import type {
   CombatStartInstructionMessageDto,
@@ -30,7 +30,7 @@ export class ChatOrchestrator {
 
   constructor(
     private readonly characterService: CharacterService,
-    private readonly combatService: CombatService,
+    private readonly combatService: CombatAppService,
   ) {}
 
   /**

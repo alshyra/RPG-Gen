@@ -28,14 +28,14 @@ import { ActionEconomyService } from './services/action-economy.service.js';
  * Simplified to expose only methods consumed by the orchestrator.
  */
 @Injectable()
-export class CombatService {
-  private readonly logger = new Logger(CombatService.name);
+export class CombatAppService {
+  private readonly logger = new Logger(CombatAppService.name);
 
   constructor(
     @InjectModel(CombatSession.name) private combatSessionModel: Model<CombatSessionDocument>,
     private readonly initService: InitService,
     private readonly turnOrderService: TurnOrderService,
-    private readonly actionEconomyService: ActionEconomyService,
+    public readonly actionEconomyService: ActionEconomyService,
   ) {}
 
   /**

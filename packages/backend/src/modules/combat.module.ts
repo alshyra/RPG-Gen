@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CombatController } from '../controllers/combat.controller.js';
-import { CombatService } from '../domain/combat/combat.service.js';
+import { CombatAppService } from '../domain/combat/combat.app.service.js';
 import { CharacterModule } from './character.module.js';
 import { DiceModule } from './dice.module.js';
 import {
@@ -22,12 +22,12 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
   ],
   controllers: [CombatController],
   providers: [
-    CombatService,
+    CombatAppService,
 
     CombatOrchestrator,
   ],
   exports: [
-    CombatService,
+    CombatAppService,
 
     CombatOrchestrator,
   ],

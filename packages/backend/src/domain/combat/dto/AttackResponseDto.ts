@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
-import { CombatDiceResultDto } from 'src/domain/dice/dto/CombatDiceResultDto.js';
+import { DiceResultDto } from '../../../domain/dice/dto/DiceResultDto.js';
+import { CombatDiceResultDto } from '../../../domain/dice/dto/CombatDiceResultDto.js';
 import { CombatStateDto } from './CombatStateDto.js';
 
 export class AttackResponseDto {

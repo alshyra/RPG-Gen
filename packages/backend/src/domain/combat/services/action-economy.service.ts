@@ -6,19 +6,25 @@ export class ActionEconomyService {
   /**
    * Decrement standard action on the state. Returns true if consumed.
    */
-  decrementAction(state: CombatStateDto): boolean {
-    if ((state.actionRemaining ?? 0) <= 0) return false;
-    state.actionRemaining = (state.actionRemaining ?? 1) - 1;
-    return true;
+  decrementAction(state: CombatStateDto): CombatStateDto {
+    if ((state.actionRemaining ?? 0) <= 0) return state;
+
+    return {
+      ...state,
+      actionRemaining: state.actionRemaining ?? 1 - 1,
+    };
   }
 
   /**
    * Decrement bonus action on the state. Returns true if consumed.
    */
-  decrementBonusAction(state: CombatStateDto): boolean {
-    if ((state.bonusActionRemaining ?? 0) <= 0) return false;
-    state.bonusActionRemaining = (state.bonusActionRemaining ?? 1) - 1;
-    return true;
+  decrementBonusAction(state: CombatStateDto): CombatStateDto {
+    if ((state.bonusActionRemaining ?? 0) <= 0) return state;
+
+    return {
+      ...state,
+      bonusActionRemaining: (state.bonusActionRemaining ?? 1) - 1,
+    };
   }
 
   /**

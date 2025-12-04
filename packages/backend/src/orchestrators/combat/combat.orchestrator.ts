@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CharacterService } from '../../domain/character/character.service.js';
-import { CombatService } from '../../domain/combat/combat.service.js';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import type {
   AttackResponseDto,
   CombatEndResponseDto,
@@ -30,7 +30,7 @@ export class CombatOrchestrator {
   private readonly logger = new Logger(CombatOrchestrator.name);
 
   constructor(
-    private readonly combatService: CombatService,
+    private readonly combatService: CombatAppService,
     private readonly characterService: CharacterService,
     private readonly diceService: DiceService,
   ) {}
@@ -135,7 +135,7 @@ export class CombatOrchestrator {
 
     if (!attackRoll.hit) {
       // Decrement action (via CombatService) and persist to avoid client exploit / state mismatch
-      combatState = this.combatService.decrementAction(combatState);
+      combatState = this.combatService.actionEconomyService.decrementAction(combatState);
       await this.combatService.saveCombatState(combatState);
 
       return {

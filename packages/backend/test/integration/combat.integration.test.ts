@@ -13,7 +13,7 @@
  */
 import test from 'ava';
 import { CombatModule } from '../../src/modules/combat.module.js';
-import { CombatService } from '../../src/domain/combat/combat.service.js';
+import { CombatAppService } from '../../src/domain/combat/combat.app.service.js';
 import { CharacterService } from '../../src/domain/character/character.service.js';
 import { DiceService } from '../../src/domain/dice/dice.service.js';
 import type { CharacterResponseDto } from '../../src/domain/character/dto/index.js';
@@ -30,7 +30,7 @@ import util from 'util';
 
 interface CombatTestContext {
   ctx: TestAppContext;
-  combatService: CombatService;
+  combatService: CombatAppService;
   characterService: CharacterService;
 }
 
@@ -95,7 +95,7 @@ async function setupCombatTest(diceRolls: number[]): Promise<CombatTestContext> 
       },
     ]);
 
-    const combatService = ctx.module.get(CombatService);
+    const combatService = ctx.module.get(CombatAppService);
     const characterService = ctx.module.get(CharacterService);
 
     return {
