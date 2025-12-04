@@ -724,4 +724,31 @@ export class CombatService {
       false,
     );
   }
+
+  /**
+   * Apply damage to target and persist state. Decrements action and finalizes combat if needed.
+   * Returns the updated combatState.
+   */
+  async applyPlayerDamage(characterId: string, targetId: string, damageTotal: number): Promise<CombatStateDto> {
+    const state = await this.getCombatState(characterId);
+    if (!state) throw new BadRequestException('No active combat found for character.');
+
+    const target = state.enemies.find(enemy => enemy.id.toLowerCase() === targetId.toLowerCase());
+    if (!target) throw new BadRequestException('Target not found in combat');
+
+    target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
+    await this.saveCombatState(state);
+
+    // Consume a player action
+    this.decrementAction(state);
+
+    // Finalize combat if needed (all enemies dead)
+    const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
+    if (!anyAlive) {
+      await this.endCombat(characterId);
+      return this.getCombatState(characterId);
+    }
+
+    return state;
+  }
 }

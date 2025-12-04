@@ -10,6 +10,7 @@ import { CombatService } from '../../domain/combat/combat.service.js';
 import type {
   AttackResponseDto,
   CombatEndResponseDto,
+  CombatEnemyDto,
   CombatStartRequestDto,
   CombatStateDto,
 } from '../../domain/combat/dto/index.js';
@@ -45,13 +46,9 @@ export class CombatOrchestrator {
     userId: string,
     characterId: string,
     combatStartRequest: CombatStartRequestDto,
-  ): Promise<CombatStateDto & { actionToken: string;
-    expectedDto: string; }> {
+  ): Promise<CombatStateDto> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
-
-    // Generate ephemeral token for client convenience (no persistence / idempotence)
-    const actionToken = `t-${randomUUID()}`;
 
     this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
 
@@ -59,26 +56,13 @@ export class CombatOrchestrator {
       ...state,
       narrative: (await this.combatService.getCombatSummary(characterId)) ?? undefined,
       phase: 'PLAYER_TURN' as const,
-      actionToken,
-      expectedDto: 'AttackRequestDto',
     };
-  }
-
-  private rollAttackDice(attackBonus: number, targetEnemyAc: number): [boolean, DiceResultDto] {
-    const diceResult = this.diceService.rollDiceExpr('1d20');
-    const [die] = diceResult.rolls;
-    const totalAttack = die + attackBonus;
-    const critical = die === 20;
-    const fumble = die === 1;
-    const hit = critical || (totalAttack >= targetEnemyAc && !fumble);
-    return [hit, diceResult];
   }
 
   /**
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
    */
-
   async processAttack(
     characterId: string,
     targetId: string,
@@ -100,18 +84,30 @@ export class CombatOrchestrator {
       throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
     }
 
-    const [hit, diceResult] = this.rollAttackDice(combatState.player.attackBonus, targetEnemy.ac);
+    // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
+    const attackRoll = this.diceService.rollAttack(combatState.player.attackBonus, targetEnemy.ac);
 
-    if (!hit) {
+    if (!attackRoll.hit) {
       this.combatService.decrementAction(combatState);
       return {
         combatState,
-        diceResult,
+        diceResult: attackRoll.diceResult,
       };
     }
 
-    // Hit: immediately roll damage and apply
-    return this.applyDamage(characterId, targetEnemy.id, diceResult);
+    // Hit: roll damage via DiceService (handles crit doubling) and get the damage result DTO
+    const damageResult = this.diceService.rollDamage(combatState.player.damageDice, attackRoll.isCrit, combatState.player.damageBonus);
+
+    // Apply damage and finalize via CombatService (persist, consume action, maybe end combat)
+    const finalState = await this.combatService.applyPlayerDamage(characterId, targetEnemy.id, damageResult.damageTotal);
+
+    return {
+      combatState: finalState,
+      diceResult: attackRoll.diceResult,
+      damageDiceResult: damageResult,
+      damageTotal: damageResult.damageTotal,
+      isCrit: damageResult.isCrit,
+    };
   }
 
   /**
@@ -132,97 +128,6 @@ export class CombatOrchestrator {
     // You can log/process attacksResults if needed
     // ...existing code...
     combatState.phase = 'PLAYER_TURN';
-    return combatState;
-  }
-
-  public async applyDamage(
-    characterId: string,
-    targetId: string,
-    attackDiceResult: DiceResultDto,
-  ): Promise<AttackResponseDto> {
-    const combatState = await this.combatService.getCombatState(characterId);
-    if (!combatState) throw new NotFoundException('No combat state found');
-
-    const target = combatState.enemies.find(e => e.id.toLowerCase() === (targetId || '').toLowerCase());
-    if (!target) {
-      const validTargets = await this.combatService.getValidTargets(characterId);
-      throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
-    }
-
-    const isCrit = this.isCritical(attackDiceResult);
-
-    const {
-      baseDamage, extraDamage,
-    } = this.rollDamageDiceForPlayer(combatState, isCrit);
-
-    const damageTotal = this.computeDamageTotal(baseDamage, extraDamage, combatState.player.damageBonus);
-
-    const combatDamageDiceResult = this.buildCombatDiceResult(baseDamage, isCrit, damageTotal);
-
-    // Apply and persist effects
-    await this.persistAndConsumeAction(combatState, target, damageTotal);
-
-    // Optionally finalize combat and retrieve updated state
-    const finalState = await this.finalizeCombatIfNeeded(characterId, combatState);
-
-    return {
-      combatState: finalState,
-      diceResult: attackDiceResult,
-      damageDiceResult: combatDamageDiceResult,
-      damageTotal,
-      isCrit,
-    };
-  }
-
-  // Private helpers
-  private isCritical(attackDiceResult: DiceResultDto): boolean {
-    const firstRoll = attackDiceResult.rolls && attackDiceResult.rolls.length ? attackDiceResult.rolls[0] : null;
-    return firstRoll === 20;
-  }
-
-  private rollDamageDiceForPlayer(combatState: CombatStateDto, isCrit: boolean): { baseDamage: DiceResultDto;
-    extraDamage?: DiceResultDto; } {
-    const baseDamage = this.diceService.rollDiceExpr(combatState.player.damageDice);
-    const extraDamage = isCrit ? this.diceService.rollDiceExpr(combatState.player.damageDice) : undefined;
-    return {
-      baseDamage,
-      extraDamage,
-    };
-  }
-
-  private computeDamageTotal(base?: DiceResultDto, extra?: DiceResultDto, damageBonus = 0): number {
-    const totalFrom = (diceResultParam?: DiceResultDto): number => {
-      if (!diceResultParam) return 0;
-      if (typeof diceResultParam.total === 'number') return diceResultParam.total;
-      if (Array.isArray(diceResultParam.rolls) && diceResultParam.rolls.length) {
-        return diceResultParam.rolls.reduce((sum, value) => sum + value, 0);
-      }
-      return 0;
-    };
-
-    return totalFrom(base) + totalFrom(extra) + (damageBonus ?? 0);
-  }
-
-  private buildCombatDiceResult(baseDamage: DiceResultDto, isCrit: boolean, damageTotal: number): CombatDiceResultDto {
-    return {
-      ...baseDamage,
-      isCrit,
-      damageTotal,
-    };
-  }
-
-  private async persistAndConsumeAction(combatState: CombatStateDto, target: any, damageTotal: number): Promise<void> {
-    target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
-    await this.combatService.saveCombatState(combatState);
-    this.combatService.decrementAction(combatState);
-  }
-
-  private async finalizeCombatIfNeeded(characterId: string, combatState: CombatStateDto): Promise<CombatStateDto> {
-    const anyAlive = combatState.enemies.some(e => e.hp > 0);
-    if (!anyAlive) {
-      await this.combatService.endCombat(characterId);
-      return this.combatService.getCombatState(characterId);
-    }
     return combatState;
   }
 

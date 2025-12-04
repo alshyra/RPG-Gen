@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AdvantageType } from './dto/dice.js';
 import { DiceResultDto } from './dto/DiceResultDto.js';
+import { CombatDiceResultDto } from './dto/CombatDiceResultDto.js';
 
 @Injectable()
 export class DiceService {
@@ -46,7 +47,7 @@ export class DiceService {
       diceSides,
       modifierValue,
     };
-  };
+  }
 
   rollDiceExpr(
     expr: string,
@@ -63,5 +64,43 @@ export class DiceService {
     }
 
     return this.rollNormal(diceCount, diceSides, modifierValue, rand);
+  }
+
+  rollAttack(attackBonus: number, targetAc: number): { hit: boolean;
+    isCrit: boolean;
+    diceResult: DiceResultDto; } {
+    const diceResult = this.rollDiceExpr('1d20');
+    const [die] = diceResult.rolls;
+    const totalAttack = die + attackBonus;
+    const isCrit = die === 20;
+    const fumble = die === 1;
+    const hit = isCrit || (totalAttack >= targetAc && !fumble);
+    return {
+      hit,
+      isCrit,
+      diceResult,
+    };
+  }
+
+  private computeTotal(diceResult?: DiceResultDto): number {
+    if (!diceResult) return 0;
+    if (typeof diceResult.total === 'number') return diceResult.total;
+    if (Array.isArray(diceResult.rolls) && diceResult.rolls.length) return diceResult.rolls.reduce((s, v) => s + v, 0);
+    return 0;
+  };
+
+  rollDamage(expression: string, isCrit: boolean, damageBonus = 0): CombatDiceResultDto {
+    const base = this.rollDiceExpr(expression);
+    const extra = isCrit ? this.rollDiceExpr(expression) : undefined;
+
+    const total = this.computeTotal(base) + this.computeTotal(extra) + (damageBonus ?? 0);
+
+    const result: CombatDiceResultDto = {
+      ...base,
+      isCrit,
+      damageTotal: total,
+    };
+
+    return result;
   }
 }
