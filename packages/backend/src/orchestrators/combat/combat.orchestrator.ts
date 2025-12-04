@@ -2,18 +2,20 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CharacterService } from '../../domain/character/character.service.js';
 import type { RollInstructionMessageDto } from '../../domain/chat/dto/index.js';
 import { CombatService } from '../../domain/combat/combat.service.js';
 import type {
+  AttackResponseDto,
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
-  TurnResultWithInstructionsDto,
 } from '../../domain/combat/dto/index.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
+import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -32,7 +34,6 @@ export class CombatOrchestrator {
   constructor(
     private readonly combatService: CombatService,
     private readonly characterService: CharacterService,
-    // ActionRecordService removed — orchestrator will no longer persist action tokens.
     private readonly diceService: DiceService,
   ) {}
 
@@ -63,28 +64,35 @@ export class CombatOrchestrator {
     };
   }
 
+  private rollAttackDice(attackBonus: number, targetEnemyAc: number): [boolean, DiceResultDto] {
+    const diceResult = this.diceService.rollDiceExpr('1d20');
+    const [die] = diceResult.rolls;
+    const totalAttack = die + attackBonus;
+    const critical = die === 20;
+    const fumble = die === 1;
+    const hit = critical || (totalAttack >= targetEnemyAc && !fumble);
+    return [hit, diceResult];
+  }
+
   /**
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
    */
   // eslint-disable-next-line max-statements
   async processAttack(
-    userId: string,
     characterId: string,
     targetId: string,
-  ): Promise<TurnResultWithInstructionsDto> {
+  ): Promise<AttackResponseDto> {
     // Validate combat is active
     if (!(await this.combatService.isInCombat(characterId))) {
       throw new BadRequestException('Character is not in combat');
     }
 
-    // No action token persistence — we proceed directly
-
-    const state = await this.combatService.getCombatState(characterId);
-    if (!state) throw new BadRequestException('No combat state found');
+    const combatState = await this.combatService.getCombatState(characterId);
+    if (!combatState) throw new BadRequestException('No combat state found');
 
     // Find target enemy
-    const targetEnemy = state.enemies.find(
+    const targetEnemy = combatState.enemies.find(
       e => e.id.toLowerCase() === (targetId || '').toLowerCase() && e.hp > 0,
     );
     if (!targetEnemy) {
@@ -92,57 +100,61 @@ export class CombatOrchestrator {
       throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
     }
 
-    // Server-side attack roll
-    const attackRoll = this.diceService.rollDiceExpr('1d20');
-    const [die] = attackRoll.rolls;
-    const totalAttack = die + (state.player.attackBonus || 0);
-    const critical = die === 20;
-    const fumble = die === 1;
-    const hit = critical || (totalAttack >= targetEnemy.ac && !fumble);
+    const [hit, diceResult] = this.rollAttackDice(combatState.player.attackBonus, targetEnemy.ac);
 
     if (!hit) {
-      // Miss: apply zero damage and advance turn
-      const res = await this.combatService.applyDamageToEnemy(characterId, targetEnemy.name, 0);
-      if (!res) throw new BadRequestException('Failed to advance turn after miss');
-      return res;
+      this.combatService.decrementAction(combatState);
+      return {
+        combatState,
+        diceResult,
+      };
     }
 
     // Hit: instruct client to roll damage
-    const instructions: RollInstructionMessageDto = {
+    const rollInstruction: RollInstructionMessageDto = {
       type: 'roll',
-      dices: state.player.damageDice || '1d4',
-      modifierValue: state.player.damageBonus || 0,
+      dices: combatState.player.damageDice,
+      modifierValue: combatState.player.damageBonus,
       meta: {
         action: 'damage',
         target: targetEnemy.name,
-        damageBonus: state.player.damageBonus || 0,
+        damageBonus: combatState.player.damageBonus,
       },
       description: `Damage to ${targetEnemy.name}`,
     };
 
-    // mark state as awaiting client damage roll and return a minimal turn result
-    state.phase = 'AWAITING_DAMAGE_ROLL';
-
-    const response: TurnResultWithInstructionsDto = {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks: [],
-      enemyAttacks: [],
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      state,
-      remainingEnemies: state.enemies,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: `Attaque réussie (${die} + ${state.player.attackBonus || 0} = ${totalAttack} vs AC ${targetEnemy.ac}). Lancez les dégâts.`,
-      rollInstruction: instructions,
-      // state contains action economy and phase; avoid flattening these fields here
+    combatState.phase = 'AWAITING_DAMAGE_ROLL';
+    await this.combatService.saveCombatState(combatState);
+    return {
+      combatState,
+      diceResult,
+      rollInstruction,
     };
+  }
 
-    // No persistence of token state — resolving of rolls will be handled directly
+  /**
+   * faut faire jouer tous les enemies et calculer les dégats
+   * retourner un tableau d'attaques
+   */
+  public async endPlayerTurn(characterId: string): Promise<CombatStateDto> {
+    const combatState = await this.combatService.getCombatState(characterId);
+    if (!combatState || !combatState.validTargets) throw new NotFoundException('combat state not found');
 
-    return response;
+    combatState.phase = 'ENEMY_TURN';
+    const attacks = combatState.enemies
+      .filter(enemy => enemy.hp > 0)
+      .map(enemy => this.combatService.processSingleEnemyActivation(combatState, enemy))
+    attacks.forEach((attack) => {
+        attack.
+      })
+    combatState.phase = 'PLAYER_TURN';
+    return combatState;
+  }
+
+  public applyDamage() {
+    // exit if combatState.phase != 'AWAITING_DAMAGE_ROLL'
+    // else roll damge dice and return to front result
+    // consume action
   }
 
   /**
@@ -162,9 +174,7 @@ export class CombatOrchestrator {
 
     return {
       ...state,
-      enemies: state.enemies.filter(e => e.hp > 0),
       validTargets: await this.combatService.getValidTargets(characterId),
-      phase: 'PLAYER_TURN' as const,
     };
   }
 
@@ -203,62 +213,5 @@ export class CombatOrchestrator {
         },
       ],
     };
-  }
-
-  /**
-   * Process combat end after victory (distribute XP, generate loot).
-   * Called internally when combat ends with victory.
-   */
-  async processCombatVictory(
-    userId: string,
-    characterId: string,
-  ): Promise<{ xpGained: number;
-    enemiesDefeated: string[]; }> {
-    const result = await this.combatService.endCombat(characterId);
-    if (!result) {
-      return {
-        xpGained: 0,
-        enemiesDefeated: [],
-      };
-    }
-
-    // Distribute XP to character
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    const newXp = (character.totalXp || 0) + result.xpGained;
-    await this.characterService.update(userId, characterId, { totalXp: newXp });
-
-    this.logger.log(`Combat victory for ${characterId}: +${result.xpGained} XP`);
-
-    return result;
-  }
-
-  /**
-   * Acquire and validate an action token.
-   */
-  // Token persistence removed — no-op / not needed
-
-  /**
-   * End the current player activation and advance turns.
-   * Resolves enemy activations automatically until next player turn.
-   */
-  async endPlayerActivation(
-    userId: string,
-    characterId: string,
-  ): Promise<TurnResultWithInstructionsDto> {
-    // Validate character ownership
-    await this.characterService.findByCharacterId(userId, characterId);
-
-    if (!(await this.combatService.isInCombat(characterId))) {
-      throw new BadRequestException('Character is not in combat');
-    }
-
-    const result = await this.combatService.endPlayerActivation(characterId);
-    if (!result) {
-      throw new BadRequestException('Failed to end player activation');
-    }
-
-    this.logger.log(`Player activation ended for ${characterId}. New round: ${result.roundNumber}`);
-
-    return result;
   }
 }

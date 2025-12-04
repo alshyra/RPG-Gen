@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable, Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -23,7 +24,8 @@ import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
 import { TurnResultDto } from './dto/TurnResultDto.js';
-import { TurnResultWithInstructionsDto } from './dto/AttackResponseDto.js';
+import { AttackResponseDto } from './dto/AttackResponseDto.js';
+import { DiceResultDto } from '../dice/dto/DiceResultDto.js';
 
 /**
  * Service managing combat state and mechanics.
@@ -69,14 +71,10 @@ export class CombatService {
   private getPlayerDamageDice(character: CharacterResponseDto): string {
     // Prefer equipped item with a definitionId and lookup its definition for damage
     const equipped = character.inventory?.find(i => i.equipped && i.definitionId);
-    if (equipped && equipped.definitionId) {
-      try {
-        return '1d4';
-      } catch {
-        return '1d4';
-      }
+    if (equipped?.meta && isWeaponMeta(equipped.meta)) {
+      return equipped.meta.damage || '1d6';
     }
-    return '1d4';
+    return '1d6';
   }
 
   /**
@@ -179,9 +177,6 @@ export class CombatService {
    * alternating activations following D&D style initiative.
    */
   private buildTurnOrder(characterId: string, player: CombatPlayerDto, enemies: CombatEnemyDto[]): CombatantDto[] {
-    const aliveEnemies = enemies.filter(e => e.hp > 0);
-    const numPlayerActivations = Math.max(1, aliveEnemies.length);
-
     // Create enemy entries
     const enemyEntries: CombatantDto[] = enemies.map(e => ({
       id: e.id,
@@ -190,20 +185,15 @@ export class CombatService {
       isPlayer: false,
     }));
 
-    // Create duplicated player entries
-    const playerEntries: CombatantDto[] = Array.from({ length: numPlayerActivations }, (_, idx) => ({
-      id: `${characterId}#${idx}`,
-      name: player.name,
-      initiative: player.initiative,
-      isPlayer: true,
-      originId: characterId,
-      activationIndex: idx,
-    }));
-
     // Combine and sort by initiative (descending)
     const allCombatants = [
       ...enemyEntries,
-      ...playerEntries,
+      {
+        id: characterId,
+        name: player.name,
+        initiative: player.initiative,
+        isPlayer: true,
+      },
     ];
 
     // Sort by initiative desc, then by isPlayer (enemies first on tie for fairness)
@@ -212,32 +202,6 @@ export class CombatService {
       // On tie, enemies act before player
       return a.isPlayer ? 1 : -1;
     });
-  }
-
-  /**
-   * Rebuild turn order after enemy death, maintaining player duplications = alive enemies
-   */
-  private rebuildTurnOrderAfterDeath(state: CombatStateDto): void {
-    const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-    if (aliveEnemies.length === 0) return;
-
-    // Get current combatant before rebuild
-    const currentCombatant = state.turnOrder[state.currentTurnIndex];
-
-    // Rebuild turn order
-    state.turnOrder = this.buildTurnOrder(
-      state.characterId,
-      state.player,
-      state.enemies,
-    );
-
-    // Try to find same combatant in new order
-    if (currentCombatant) {
-      const newIndex = state.turnOrder.findIndex(c => c.id === currentCombatant.id);
-      state.currentTurnIndex = newIndex >= 0 ? newIndex : 0;
-    } else {
-      state.currentTurnIndex = 0;
-    }
   }
 
   /**
@@ -355,7 +319,6 @@ export class CombatService {
       ac: number;
       hp: number;
     },
-    _isPlayerAttack: boolean,
   ): AttackResultDto {
     // Roll attack
     const attackRoll = this.diceService.rollDiceExpr('1d20');
@@ -435,152 +398,9 @@ export class CombatService {
   }
 
   /**
-   * Execute a full combat turn
-   */
-  // eslint-disable-next-line max-statements
-  private async executeTurn(state: CombatStateDto, targetEnemy: CombatEnemyDto): Promise<TurnResultDto> {
-    const playerAttacks: AttackResultDto[] = [];
-    const enemyAttacks: AttackResultDto[] = [];
-    const narrativeParts: string[] = [];
-
-    const { turnOrder } = state;
-    const totalCombatants = turnOrder.length;
-
-    // Process each combatant in initiative order starting from currentTurnIndex
-    // Build ordered combatant list starting from currentTurnIndex
-    const orderedCombatants = Array.from({ length: totalCombatants })
-      .map((_, offset) => turnOrder[(state.currentTurnIndex + offset) % totalCombatants]);
-
-    let finalResult: TurnResultDto | null = null;
-
-    // eslint-disable-next-line max-statements
-    orderedCombatants.some((combatant) => {
-      if (!state.inCombat) return true;
-
-      if (combatant.isPlayer) {
-        const currentTarget = state.enemies.find(e => e.name.toLowerCase() === targetEnemy.name.toLowerCase());
-        if (currentTarget && currentTarget.hp > 0) {
-          const playerAttack = this.performAttack(
-            {
-              name: state.player.name,
-              attackBonus: state.player.attackBonus,
-              damageDice: state.player.damageDice,
-              damageBonus: state.player.damageBonus,
-            },
-            {
-              name: currentTarget.name,
-              ac: currentTarget.ac,
-              hp: currentTarget.hp,
-            },
-            true,
-          );
-
-          currentTarget.hp = playerAttack.targetHpAfter;
-          playerAttacks.push(playerAttack);
-          narrativeParts.push(this.generateAttackNarrative(playerAttack, true));
-
-          const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-          if (aliveEnemies.length === 0) {
-            state.inCombat = false;
-            finalResult = {
-              turnNumber: state.currentTurnIndex,
-              roundNumber: state.roundNumber,
-              playerAttacks,
-              enemyAttacks,
-              combatEnded: true,
-              victory: true,
-              defeat: false,
-              remainingEnemies: [],
-              playerHp: state.player.hp,
-              playerHpMax: state.player.hpMax,
-              narrative: narrativeParts.join('\n\n') + '\n\nVictoire! Tous les ennemis ont été vaincus!',
-            };
-            this.logger.log(`Combat ended for ${state.characterId}: Victory`);
-            return true;
-          }
-        }
-        return false;
-      }
-
-      const enemy = state.enemies.find(e => e.id === combatant.id && e.hp > 0);
-      if (enemy) {
-        const enemyAttack = this.performAttack(
-          {
-            name: enemy.name,
-            attackBonus: enemy.attackBonus,
-            damageDice: enemy.damageDice,
-            damageBonus: enemy.damageBonus,
-          },
-          {
-            name: state.player.name,
-            ac: state.player.ac,
-            hp: state.player.hp,
-          },
-          false,
-        );
-
-        state.player.hp = enemyAttack.targetHpAfter;
-        enemyAttacks.push(enemyAttack);
-        narrativeParts.push(this.generateAttackNarrative(enemyAttack, false));
-
-        if (state.player.hp <= 0) {
-          state.inCombat = false;
-          finalResult = {
-            turnNumber: state.currentTurnIndex,
-            roundNumber: state.roundNumber,
-            playerAttacks,
-            enemyAttacks,
-            combatEnded: true,
-            victory: false,
-            defeat: true,
-            remainingEnemies: state.enemies.filter(e => e.hp > 0),
-            playerHp: 0,
-            playerHpMax: state.player.hpMax,
-            narrative: narrativeParts.join('\n\n') + '\n\nDéfaite... Vous tombez inconscient.',
-          };
-          this.logger.log(`Combat ended for ${state.characterId}: Defeat`);
-          return true;
-        }
-      }
-
-      return false;
-    });
-
-    if (finalResult) {
-      await this.saveCombatState(state);
-      return finalResult;
-    }
-
-    // Advance current turn index to next combatant for subsequent turns
-    state.currentTurnIndex = (state.currentTurnIndex + 1) % totalCombatants;
-    // Increment round number after a full pass
-    state.roundNumber++;
-
-    // Persist updated state
-    await this.saveCombatState(state);
-
-    const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-    const turnResult: TurnResultDto = {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks,
-      enemyAttacks,
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      remainingEnemies: aliveEnemies,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: narrativeParts.join('\n\n') + '\n\nUtilisez /attack [nom_ennemi] pour continuer le combat.',
-    };
-
-    return turnResult;
-  }
-
-  /**
    * Save combat state to database
    */
-  private async saveCombatState(state: CombatStateDto): Promise<void> {
+  public async saveCombatState(state: CombatStateDto): Promise<void> {
     await this.combatSessionModel.findOneAndUpdate(
       { characterId: state.characterId },
       {
@@ -729,36 +549,6 @@ export class CombatService {
   }
 
   /**
-   * Build victory result when all enemies are defeated
-   */
-  private async buildVictoryResult(state: CombatStateDto, characterId: string, enemy: CombatEnemyDto, damageDealt: number): Promise<TurnResultWithInstructionsDto> {
-    // Build a final turn result. Do NOT award XP here: awarding and cleanup are handled by the orchestrator
-    // so that the API layer may present a dedicated end-combat response. We include a snapshot of state
-    // so the client can render the final situation.
-    const stateSnapshot: CombatStateDto = {
-      ...state,
-      inCombat: false,
-      enemies: [],
-    };
-
-    return {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks: [],
-      enemyAttacks: [],
-      combatEnded: true,
-      victory: true,
-      defeat: false,
-      remainingEnemies: [],
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: `Vous infligez ${damageDealt} dégâts et terrassez ${enemy.name}. Victoire!`,
-      // final state snapshot is available in `state` (XP is awarded by the orchestrator at combat end)
-      state: stateSnapshot,
-    };
-  }
-
-  /**
    * Build turn result after processing damage and enemy attacks
    */
   private buildDamageTurnResult(
@@ -827,55 +617,28 @@ export class CombatService {
    * Apply damage reported by client to a named enemy and persist state.
    * Decrements action counter. Does NOT auto-advance turn - player must call end-activation.
    */
-  async applyDamageToEnemy(characterId: string, targetName: string, damage: number, diceResult?: import('../dice/dto/dice.js').DiceThrowDto): Promise<TurnResultWithInstructionsDto | TurnResultDto | null> {
+  async applyDamageToEnemy(characterId: string, targetName: string, damage: number, diceResult?: DiceResultDto): Promise<AttackResponseDto> {
     const state = await this.getCombatState(characterId);
-    if (!state?.inCombat) return null;
+    if (!state?.inCombat) throw new BadRequestException('No active combat found for character.');
 
     // Decrement action (attack consumes an action)
     this.decrementAction(state);
 
     const result = this.applyDamageToTargetEnemy(state, targetName, damage);
-    if (!result) return null;
-
-    // Update turn order if enemy died
-    if (result.enemy.hp <= 0) {
-      this.rebuildTurnOrderAfterDeath(state);
-    }
+    if (!result) throw new BadRequestException(`Target enemy not found: ${targetName}`);
 
     await this.saveCombatState(state);
 
     const alive = state.enemies.filter(e => e.hp > 0);
     if (alive.length === 0) {
-      return this.buildVictoryResult(state, characterId, result.enemy, result.damageDealt);
+      state.narrative = 'Combat ended';
+      state.inCombat = false;
     }
 
-    let narrativeParts = [`Vous infligez ${result.damageDealt} dégâts à ${result.enemy.name} (PV restants: ${result.enemy.hp}).`];
-
-    if (result.damageDealt == 0) {
-      narrativeParts = [`Vous ratez votre attaque contre ${result.enemy.name} et n'infligez aucun dégât.`];
-    }
-
-    // Return result WITHOUT auto-advancing turn
-    // Player must explicitly call end-activation to advance
-    const turnResult: TurnResultWithInstructionsDto = {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks: [],
-      enemyAttacks: [],
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      remainingEnemies: alive,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: narrativeParts.join('\n\n'),
-      // No generic instructions in combat DTO now – echo resolved dice result when provided
-      diceResult: diceResult,
-      state,
-      // Use `state` snapshot for action economy and phase — do not duplicate fields here
+    return {
+      combatState: state,
+      diceResult,
     };
-
-    return turnResult;
   }
 
   /**
@@ -941,13 +704,11 @@ export class CombatService {
   /**
    * Process a single enemy activation (one enemy attacks)
    */
-  private processSingleEnemyActivation(
+  public processSingleEnemyActivation(
     state: CombatStateDto,
     enemy: CombatEnemyDto,
-    enemyAttacks: AttackResultDto[],
-    narrativeParts: string[],
-  ): TurnResultDto | null {
-    const enemyAttack = this.performAttack(
+  ): AttackResultDto {
+    return this.performAttack(
       {
         name: enemy.name,
         attackBonus: enemy.attackBonus,
@@ -961,126 +722,5 @@ export class CombatService {
       },
       false,
     );
-
-    state.player.hp = enemyAttack.targetHpAfter;
-    enemyAttacks.push(enemyAttack);
-    narrativeParts.push(this.generateAttackNarrative(enemyAttack, false));
-
-    if (state.player.hp <= 0) {
-      state.inCombat = false;
-      state.phase = 'COMBAT_ENDED';
-      return {
-        turnNumber: state.currentTurnIndex,
-        roundNumber: state.roundNumber,
-        playerAttacks: [],
-        enemyAttacks,
-        combatEnded: true,
-        victory: false,
-        defeat: true,
-        remainingEnemies: state.enemies.filter(e => e.hp > 0),
-        playerHp: 0,
-        playerHpMax: state.player.hpMax,
-        narrative: narrativeParts.join('\n\n') + '\n\nDéfaite... Vous tombez inconscient.',
-      };
-    }
-    return null;
-  }
-
-  /**
-   * Advance turn to next combatant, processing enemy activations automatically.
-   * Stops when reaching a player activation or end of round.
-   */
-  private advanceTurn(
-    state: CombatStateDto,
-    enemyAttacks: AttackResultDto[],
-    narrativeParts: string[],
-  ): TurnResultDto | null {
-    const totalCombatants = state.turnOrder.length;
-    let iterations = 0;
-    const maxIterations = totalCombatants + 1;
-
-    while (iterations < maxIterations) {
-      iterations++;
-      state.currentTurnIndex = (state.currentTurnIndex + 1) % totalCombatants;
-
-      // Check if we completed a round
-      if (state.currentTurnIndex === 0) {
-        state.roundNumber++;
-        this.logger.debug(`Round ${state.roundNumber} started for ${state.characterId}`);
-      }
-
-      const currentCombatant = state.turnOrder[state.currentTurnIndex];
-
-      if (currentCombatant.isPlayer) {
-        // Player's turn - reset action economy and stop
-        this.resetActionEconomy(state);
-        state.phase = 'PLAYER_TURN';
-        return null;
-      }
-
-      // Enemy turn - process attack
-      const enemy = state.enemies.find(e => e.id === currentCombatant.id && e.hp > 0);
-      if (enemy) {
-        state.phase = 'ENEMY_TURN';
-        const defeatResult = this.processSingleEnemyActivation(state, enemy, enemyAttacks, narrativeParts);
-        if (defeatResult) return defeatResult;
-      }
-      // If enemy dead, continue to next combatant
-    }
-
-    // Fallback - should not reach here normally
-    state.phase = 'PLAYER_TURN';
-    this.resetActionEconomy(state);
-    return null;
-  }
-
-  /**
-   * End the current player activation explicitly.
-   * This is the main entry point for advancing turns - player must call this.
-   * Enemy activations are resolved automatically until next player activation.
-   */
-  async endPlayerActivation(characterId: string): Promise<TurnResultWithInstructionsDto | null> {
-    const state = await this.getCombatState(characterId);
-    if (!state?.inCombat) return null;
-
-    const currentCombatant = state.turnOrder[state.currentTurnIndex];
-    if (!currentCombatant?.isPlayer) {
-      this.logger.warn(`endPlayerActivation called but current combatant is not player: ${currentCombatant?.name}`);
-      return null;
-    }
-
-    const enemyAttacks: AttackResultDto[] = [];
-    const narrativeParts: string[] = [`Vous terminez votre tour.`];
-
-    // Advance turn and process enemy activations
-    const defeatResult = this.advanceTurn(state, enemyAttacks, narrativeParts);
-
-    await this.saveCombatState(state);
-
-    if (defeatResult) {
-      return {
-        ...defeatResult,
-      };
-    }
-
-    // Build result with enemy attacks
-    const result: TurnResultWithInstructionsDto = {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks: [],
-      enemyAttacks,
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      remainingEnemies: state.enemies.filter(e => e.hp > 0),
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: narrativeParts.join('\n\n'),
-      // previously instructions[] kept for compatibility; now no generic instruction array in the combat DTO
-      // include state snapshot; avoid duplicating action economy and phase fields at top-level
-      state,
-    };
-
-    return result;
   }
 }

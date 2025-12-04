@@ -18,7 +18,6 @@ import {
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
-  TurnResultWithInstructionsDto,
 } from '../domain/combat/dto/index.js';
 import type { RPGRequest } from '../global.types.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
@@ -73,8 +72,7 @@ export class CombatController {
     @Param('characterId') characterId: string,
     @Body('targetId') targetId: string,
   ): Promise<AttackResponseDto> {
-    const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(userId, characterId, targetId);
+    return this.combatOrchestrator.processAttack(characterId, targetId);
   }
 
   @Post(':characterId/apply-damage')
@@ -88,9 +86,8 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
     @Body('targetId') targetId: string,
-  ): Promise<TurnResultWithInstructionsDto> {
-    const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(userId, characterId, targetId);
+  ): Promise<AttackResponseDto> {
+    return this.combatOrchestrator.applyDamage(characterId, targetId);
   }
 
   @Get(':characterId/status')
@@ -111,15 +108,14 @@ export class CombatController {
   @ApiOperation({ summary: 'End current player activation and advance turn (triggers enemy actions)' })
   @ApiResponse({
     status: 200,
-    type: TurnResultWithInstructionsDto,
+    type: CombatStateDto,
     description: 'Returns result of enemy actions and new player turn state',
   })
-  async endActivation(
+  async endTurn(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
-  ): Promise<TurnResultWithInstructionsDto> {
-    const userId = req.user._id.toString();
-    return this.combatOrchestrator.endPlayerActivation(userId, characterId);
+  ): Promise<CombatStateDto> {
+    return this.combatOrchestrator.endPlayerTurn(characterId);
   }
 
   @Post(':characterId/flee')
