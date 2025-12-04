@@ -19,6 +19,9 @@ import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
 import { CombatantDto } from './dto/CombatantDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
+import { InitService } from './services/init.service.js';
+import { TurnOrderService } from './services/turn-order.service.js';
+import { ActionEconomyService } from './services/action-economy.service.js';
 
 /**
  * Service managing combat state and mechanics.
@@ -30,6 +33,9 @@ export class CombatService {
 
   constructor(
     @InjectModel(CombatSession.name) private combatSessionModel: Model<CombatSessionDocument>,
+    private readonly initService: InitService,
+    private readonly turnOrderService: TurnOrderService,
+    private readonly actionEconomyService: ActionEconomyService,
   ) {}
 
   /**
@@ -155,21 +161,8 @@ export class CombatService {
    * Build enemies list with rolled initiatives (no external services)
    */
   private buildEnemies(combatStart: CombatStartRequestDto) {
-    return combatStart.combat_start.map((enemy, idx) => {
-      const initRoll = this.rollD20();
-      return new CombatantDto({
-        id: `enemy-${idx + 1}`,
-        isPlayer: false,
-        name: enemy.name,
-        hp: enemy.hp,
-        hpMax: enemy.hp,
-        ac: enemy.ac,
-        initiative: initRoll,
-        attackBonus: enemy.attack_bonus ?? 3,
-        damageDice: enemy.damage_dice ?? '1d6',
-        damageBonus: enemy.damage_bonus ?? 1,
-      });
-    });
+    // move to InitService
+    return this.initService.buildEnemies(combatStart);
   }
 
   /**
@@ -208,7 +201,7 @@ export class CombatService {
     }
 
     const enemies = this.buildEnemies(combatStart);
-    const turnOrder = this.buildTurnOrder(characterId, player, enemies);
+    const turnOrder = this.turnOrderService.buildTurnOrder(characterId, player, enemies);
 
     const actionMax = 1;
     const bonusActionMax = 1;
@@ -268,33 +261,6 @@ export class CombatService {
     }
 
     return state;
-  }
-
-  /**
-   * Build sorted turn order from player and enemies.
-   */
-  private buildTurnOrder(characterId: string, player: CombatantDto, enemies: CombatantDto[]): CombatantDto[] {
-    const enemyEntries: CombatantDto[] = enemies.map(e => new CombatantDto({
-      id: e.id,
-      name: e.name,
-      initiative: e.initiative,
-      isPlayer: false,
-    }));
-
-    const allCombatants = [
-      ...enemyEntries,
-      new CombatantDto({
-        id: characterId,
-        name: player.name,
-        initiative: player.initiative,
-        isPlayer: true,
-      }),
-    ];
-
-    return allCombatants.sort((a, b) => {
-      if (b.initiative !== a.initiative) return b.initiative - a.initiative;
-      return a.isPlayer ? 1 : -1;
-    });
   }
 
   /**
@@ -377,7 +343,7 @@ export class CombatService {
     await this.saveCombatState(state);
 
     // Consume a player action
-    this.decrementAction(state);
+    this.actionEconomyService.decrementAction(state);
 
     // Finalize combat if needed (all enemies dead)
     const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
@@ -420,24 +386,6 @@ export class CombatService {
       + `Vos PV: ${state.player.hp}/${state.player.hpMax}\n`
       + `Ennemis: ${enemyList}\n`
       + `Utilisez /attack [nom_ennemi] pour attaquer.`;
-  }
-
-  /**
-   * Decrement action counter after an attack.
-   * Returns false if no actions remaining.
-   */
-  decrementAction(state: CombatStateDto): boolean {
-    if ((state.actionRemaining ?? 0) <= 0) return false;
-    state.actionRemaining = (state.actionRemaining ?? 1) - 1;
-    return true;
-  }
-
-  /**
-   * Reset action economy for a new player activation
-   */
-  private resetActionEconomy(state: CombatStateDto): void {
-    state.actionRemaining = state.actionMax ?? 1;
-    state.bonusActionRemaining = state.bonusActionMax ?? 1;
   }
 
   /**

@@ -119,8 +119,7 @@ export class CombatOrchestrator {
       throw new BadRequestException('Character is not in combat');
     }
 
-    const combatState = await this.combatService.getCombatState(characterId);
-    if (!combatState) throw new BadRequestException('No combat state found');
+    let combatState = await this.combatService.getCombatState(characterId);
 
     // Find target enemy
     const targetEnemy = combatState.enemies.find(
@@ -135,7 +134,10 @@ export class CombatOrchestrator {
     const attackRoll = this.diceService.rollAttack(combatState.player.attackBonus, targetEnemy.ac ?? 0);
 
     if (!attackRoll.hit) {
-      this.combatService.decrementAction(combatState);
+      // Decrement action (via CombatService) and persist to avoid client exploit / state mismatch
+      combatState = this.combatService.decrementAction(combatState);
+      await this.combatService.saveCombatState(combatState);
+
       return {
         combatState,
         diceResult: attackRoll.diceResult,
