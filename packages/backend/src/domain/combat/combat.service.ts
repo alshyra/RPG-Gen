@@ -16,19 +16,13 @@ import type {
   InventoryItemDto, WeaponMeta,
 } from '../character/dto/index.js';
 import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
-import { DiceService } from '../dice/dice.service.js';
-import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
 import { CombatantDto } from './dto/CombatantDto.js';
-import { CombatEnemyDto } from './dto/CombatEnemyDto.js';
-import { CombatPlayerDto } from './dto/CombatPlayerDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
-import { AttackResponseDto } from './dto/AttackResponseDto.js';
-import { DiceResultDto } from '../dice/dto/DiceResultDto.js';
 
 /**
  * Service managing combat state and mechanics.
- * Combat state is persisted to MongoDB for durability across restarts.
+ * Simplified to expose only methods consumed by the orchestrator.
  */
 @Injectable()
 export class CombatService {
@@ -36,8 +30,6 @@ export class CombatService {
 
   constructor(
     @InjectModel(CombatSession.name) private combatSessionModel: Model<CombatSessionDocument>,
-    private itemDefinitionService: ItemDefinitionService,
-    private diceService: DiceService,
   ) {}
 
   /**
@@ -79,9 +71,10 @@ export class CombatService {
   /**
    * Build base player combat stats
    */
-  private buildBasePlayerStats(character: CharacterResponseDto): CombatPlayerDto {
-    return {
-      characterId: character.characterId,
+  private buildBasePlayerStats(character: CharacterResponseDto): CombatantDto {
+    return new CombatantDto({
+      id: character.characterId,
+      isPlayer: true,
       name: character.name ?? 'Hero',
       hp: character.hp ?? character.hpMax ?? 10,
       hpMax: character.hpMax ?? 10,
@@ -90,7 +83,7 @@ export class CombatService {
       attackBonus: this.calculatePlayerAttackBonus(character),
       damageDice: this.getPlayerDamageDice(character),
       damageBonus: this.calculatePlayerDamageBonus(character),
-    };
+    });
   }
 
   /**
@@ -134,7 +127,7 @@ export class CombatService {
   /**
    * Update player stats based on equipped weapon
    */
-  private updatePlayerWeaponStats(player: CombatPlayerDto, character: CharacterResponseDto): void {
+  private updatePlayerWeaponStats(player: CombatantDto, character: CharacterResponseDto): void {
     if (!character.inventory) return;
     const equipped = this.findEquippedWeapon(character.inventory);
     if (!equipped) return;
@@ -151,73 +144,61 @@ export class CombatService {
   }
 
   /**
-   * Build enemy list with rolled initiatives
+   * Local d20 roll for initiatives.
+   * CombatService must not call other domain services.
    */
-  private buildEnemies(combatStart: CombatStartRequestDto): CombatEnemyDto[] {
+  private rollD20(): number {
+    return Math.floor(Math.random() * 20) + 1;
+  }
+
+  /**
+   * Build enemies list with rolled initiatives (no external services)
+   */
+  private buildEnemies(combatStart: CombatStartRequestDto) {
     return combatStart.combat_start.map((enemy, idx) => {
-      const initRoll = this.diceService.rollDiceExpr('1d20');
-      return {
+      const initRoll = this.rollD20();
+      return new CombatantDto({
         id: `enemy-${idx + 1}`,
+        isPlayer: false,
         name: enemy.name,
         hp: enemy.hp,
         hpMax: enemy.hp,
         ac: enemy.ac,
-        initiative: initRoll.total,
+        initiative: initRoll,
         attackBonus: enemy.attack_bonus ?? 3,
         damageDice: enemy.damage_dice ?? '1d6',
         damageBonus: enemy.damage_bonus ?? 1,
-      };
+      });
     });
   }
 
   /**
-   * Build sorted turn order from player and enemies.
-   * Player is duplicated N times (N = number of alive enemies) to allow
-   * alternating activations following D&D style initiative.
+   * Initialize combat state from combat_start instruction (no initial activations)
    */
-  private buildTurnOrder(characterId: string, player: CombatPlayerDto, enemies: CombatEnemyDto[]): CombatantDto[] {
-    // Create enemy entries
-    const enemyEntries: CombatantDto[] = enemies.map(e => ({
-      id: e.id,
-      name: e.name,
-      initiative: e.initiative,
-      isPlayer: false,
-    }));
-
-    // Combine and sort by initiative (descending)
-    const allCombatants = [
-      ...enemyEntries,
-      {
-        id: characterId,
-        name: player.name,
-        initiative: player.initiative,
-        isPlayer: true,
-      },
-    ];
-
-    // Sort by initiative desc, then by isPlayer (enemies first on tie for fairness)
-    return allCombatants.sort((a, b) => {
-      if (b.initiative !== a.initiative) return b.initiative - a.initiative;
-      // On tie, enemies act before player
-      return a.isPlayer ? 1 : -1;
-    });
-  }
-
-  /**
-   * Initialize combat state from combat_start instruction
-   */
-  // eslint-disable-next-line max-statements
   async initializeCombat(
     character: CharacterResponseDto,
     combatStart: CombatStartRequestDto,
     userId: string,
   ): Promise<CombatStateDto> {
     const { characterId } = character;
+    const state = this.buildInitialState(character, combatStart);
+
+    // Persist initial state (do NOT perform dice/attack resolution here)
+    await this.persistSessionWithUser(state, userId);
+    this.logger.log(`Combat initialized for ${characterId} with ${state.enemies.length} enemies`);
+    return state;
+  }
+
+  /**
+   * Build initial combat state.
+   */
+  private buildInitialState(character: CharacterResponseDto, combatStart: CombatStartRequestDto): CombatStateDto {
+    const { characterId } = character;
     const player = this.buildBasePlayerStats(character);
 
     // Roll player initiative
-    const playerInitRoll = this.diceService.rollDiceExpr('1d20');
-    player.initiative = playerInitRoll.total + getDexModifier(character);
+    const playerInitRoll = this.rollD20();
+    player.initiative = playerInitRoll + getDexModifier(character);
 
     // Update player stats based on equipped weapon
     try {
@@ -229,7 +210,6 @@ export class CombatService {
     const enemies = this.buildEnemies(combatStart);
     const turnOrder = this.buildTurnOrder(characterId, player, enemies);
 
-    // D&D 5e default action economy: 1 action + 1 bonus action per activation
     const actionMax = 1;
     const bonusActionMax = 1;
 
@@ -239,7 +219,6 @@ export class CombatService {
       enemies,
       player,
       turnOrder,
-      // start at the first combatant (index 0) by default; may be adjusted below
       currentTurnIndex: 0,
       roundNumber: 1,
       phase: 'PLAYER_TURN',
@@ -249,48 +228,15 @@ export class CombatService {
       bonusActionMax,
     };
 
-    if (state.turnOrder.length > 0 && !state.turnOrder[0].isPlayer) {
-      const enemyAttacks: AttackResultDto[] = [];
-      const narrativeParts: string[] = [];
+    return state;
+  }
 
-      // Walk turn order from index 0 until a player activation is found
-      for (let idx = 0; idx < state.turnOrder.length; idx++) {
-        const combatant = state.turnOrder[idx];
-        if (combatant.isPlayer) {
-          // Set current index to this player activation and reset action economy
-          state.currentTurnIndex = idx;
-          this.resetActionEconomy(state);
-          state.phase = 'PLAYER_TURN';
-          break;
-        }
-
-        // Enemy activation: find enemy and process single attack
-        const enemy = state.enemies.find(e => e.id === combatant.id && e.hp > 0);
-        if (enemy) {
-          state.phase = 'ENEMY_TURN';
-          const defeatResult = this.processSingleEnemyActivation(state, enemy, enemyAttacks, narrativeParts);
-          if (defeatResult) {
-            // Player defeated during initial enemy activations
-            await this.combatSessionModel.findOneAndUpdate(
-              { characterId },
-              {
-                userId,
-                ...state,
-              },
-              {
-                upsert: true,
-                new: true,
-              },
-            );
-            this.logger.log(`Combat initialized (and ended) for ${characterId} after initial enemy activations`);
-            return state;
-          }
-        }
-      }
-    }
-
+  /**
+   * Persist state and attach userId (used during initialization)
+   */
+  private async persistSessionWithUser(state: CombatStateDto, userId: string): Promise<void> {
     await this.combatSessionModel.findOneAndUpdate(
-      { characterId },
+      { characterId: state.characterId },
       {
         userId,
         ...state,
@@ -300,100 +246,66 @@ export class CombatService {
         new: true,
       },
     );
-
-    this.logger.log(`Combat initialized for ${characterId} with ${enemies.length} enemies`);
-    return state;
-  }
-
-  // eslint-disable-next-line max-statements
-  private performAttack(
-    attacker: {
-      name: string;
-      attackBonus: number;
-      damageDice: string;
-      damageBonus: number;
-    },
-    target: {
-      name: string;
-      ac: number;
-      hp: number;
-    },
-  ): AttackResultDto {
-    // Roll attack
-    const attackRoll = this.diceService.rollDiceExpr('1d20');
-    const [dieRoll] = attackRoll.rolls;
-    const totalAttack = dieRoll + attacker.attackBonus;
-
-    const critical = dieRoll === 20;
-    const fumble = dieRoll === 1;
-    const hit = (critical || (totalAttack >= target.ac && !fumble));
-
-    let damageRoll: number[] = [];
-    let totalDamage = 0;
-
-    if (hit) {
-      // Roll damage
-      const damageResult = this.diceService.rollDiceExpr(attacker.damageDice);
-      damageRoll = damageResult.rolls;
-
-      // Critical hit doubles dice damage
-      let diceTotal = damageRoll.reduce((sum, d) => sum + d, 0);
-      if (critical) {
-        diceTotal *= 2;
-      }
-
-      totalDamage = diceTotal + attacker.damageBonus;
-      if (totalDamage < 0) totalDamage = 0;
-    }
-
-    const targetHpAfter = Math.max(0, target.hp - totalDamage);
-
-    return {
-      attacker: attacker.name,
-      target: target.name,
-      attackRoll: dieRoll,
-      attackBonus: attacker.attackBonus,
-      totalAttack,
-      targetAc: target.ac,
-      hit,
-      critical,
-      fumble,
-      damageRoll,
-      damageBonus: attacker.damageBonus,
-      totalDamage,
-      targetHpBefore: target.hp,
-      targetHpAfter,
-      targetDefeated: targetHpAfter <= 0,
-    };
   }
 
   /**
-   * Generate narrative text for an attack result
+   * Finalize state after initial enemy activations (set turn index, reset economy)
    */
-  private generateAttackNarrative(result: AttackResultDto, isPlayerAttack: boolean): string {
-    if (result.fumble) {
-      return isPlayerAttack
-        ? `Vous tentez de frapper ${result.target} mais votre attaque échoue lamentablement (1 naturel).`
-        : `${result.attacker} tente de vous frapper mais rate complètement son attaque (1 naturel).`;
+  private finalizeInitialActivations(state: CombatStateDto, playerIndex: number): void {
+    state.currentTurnIndex = playerIndex >= 0 ? playerIndex : 0;
+    this.resetActionEconomy(state);
+    state.phase = 'PLAYER_TURN';
+  }
+
+  /**
+   * Apply damage from an enemy to the player and persist state.
+   * This method deliberately does not roll dice and does not handle attack logic.
+   */
+  async applyEnemyDamage(characterId: string, damageTotal: number): Promise<CombatStateDto> {
+    const state = await this.getCombatState(characterId);
+    if (!state) throw new BadRequestException('No active combat found for character.');
+
+    // Reduce player HP
+    state.player.hp = Math.max(0, (state.player.hp ?? 0) - Math.max(0, Math.floor(damageTotal)));
+
+    // Persist state
+    await this.saveCombatState(state);
+
+    // If player dies, finalize combat cleanup
+    if (state.player.hp <= 0) {
+      state.inCombat = false;
+      await this.endCombat(characterId);
+      return state;
     }
 
-    if (!result.hit) {
-      return isPlayerAttack
-        ? `Vous attaquez ${result.target} (${result.totalAttack} vs CA ${result.targetAc}) mais votre coup ne passe pas.`
-        : `${result.attacker} vous attaque (${result.totalAttack} vs CA ${result.targetAc}) mais rate son coup.`;
-    }
+    return state;
+  }
 
-    const critText = result.critical ? ' (Coup critique!)' : '';
+  /**
+   * Build sorted turn order from player and enemies.
+   */
+  private buildTurnOrder(characterId: string, player: CombatantDto, enemies: CombatantDto[]): CombatantDto[] {
+    const enemyEntries: CombatantDto[] = enemies.map(e => new CombatantDto({
+      id: e.id,
+      name: e.name,
+      initiative: e.initiative,
+      isPlayer: false,
+    }));
 
-    if (result.targetDefeated) {
-      return isPlayerAttack
-        ? `Votre attaque touche ${result.target}${critText}! Vous infligez ${result.totalDamage} points de dégâts et le terrassez!`
-        : `${result.attacker} vous frappe${critText} et inflige ${result.totalDamage} points de dégâts. Vous tombez inconscient!`;
-    }
+    const allCombatants = [
+      ...enemyEntries,
+      new CombatantDto({
+        id: characterId,
+        name: player.name,
+        initiative: player.initiative,
+        isPlayer: true,
+      }),
+    ];
 
-    return isPlayerAttack
-      ? `Votre attaque touche ${result.target}${critText}! Vous infligez ${result.totalDamage} points de dégâts (PV: ${result.targetHpAfter}/${result.targetHpBefore + result.totalDamage}).`
-      : `${result.attacker} vous frappe${critText} et inflige ${result.totalDamage} points de dégâts. Vous êtes à ${result.targetHpAfter} PV.`;
+    return allCombatants.sort((a, b) => {
+      if (b.initiative !== a.initiative) return b.initiative - a.initiative;
+      return a.isPlayer ? 1 : -1;
+    });
   }
 
   /**
@@ -404,7 +316,7 @@ export class CombatService {
       { characterId: state.characterId },
       {
         inCombat: state.inCombat,
-        enemies: state.enemies,
+        enemies: state.enemies, // unified CombatantDto[]
         player: state.player,
         turnOrder: state.turnOrder,
         currentTurnIndex: state.currentTurnIndex,
@@ -427,12 +339,22 @@ export class CombatService {
       .exec();
     if (!doc) throw new NotFoundException('Combat session not found');
 
+    // Convert raw DB objects into class instances for consistent runtime behavior
+    const enemies = Array.isArray(doc.enemies) ? doc.enemies.map(e => new CombatantDto(e)) : [];
+    const player = doc.player
+      ? new CombatantDto(doc.player)
+      : new CombatantDto({
+          id: characterId,
+          isPlayer: true,
+        });
+    const turnOrder = Array.isArray(doc.turnOrder) ? doc.turnOrder.map(t => new CombatantDto(t)) : [];
+
     const state: CombatStateDto = {
       characterId: doc.characterId,
       inCombat: !!doc.inCombat,
-      enemies: (doc.enemies as CombatEnemyDto[]) ?? [],
-      player: doc.player as CombatPlayerDto,
-      turnOrder: (doc.turnOrder as CombatantDto[]) ?? [],
+      enemies,
+      player,
+      turnOrder,
       currentTurnIndex: doc.currentTurnIndex ?? 0,
       roundNumber: doc.roundNumber ?? 1,
       phase: (doc.phase as CombatStateDto['phase']) ?? 'PLAYER_TURN',
@@ -454,190 +376,31 @@ export class CombatService {
   }
 
   /**
-   * Process enemy attacks and return defeat result if player is defeated
+   * Apply damage reported by client to a named enemy and persist state.
+   * Decrements action counter.
    */
-  private processEnemyAttacks(
-    state: CombatStateDto,
-    aliveEnemies: CombatEnemyDto[],
-    enemyAttacks: AttackResultDto[],
-    narrativeParts: string[],
-    playerAttacks: AttackResultDto[],
-  ): TurnResultDto | null {
-    let defeatResult: TurnResultDto | null = null;
-
-    aliveEnemies.some((enemy) => {
-      const enemyAttack = this.performAttack(
-        {
-          name: enemy.name,
-          attackBonus: enemy.attackBonus,
-          damageDice: enemy.damageDice,
-          damageBonus: enemy.damageBonus,
-        },
-        {
-          name: state.player.name,
-          ac: state.player.ac,
-          hp: state.player.hp,
-        },
-        false,
-      );
-
-      // Update player HP
-      state.player.hp = enemyAttack.targetHpAfter;
-      enemyAttacks.push(enemyAttack);
-      narrativeParts.push(this.generateAttackNarrative(enemyAttack, false));
-
-      // Check for defeat
-      if (state.player.hp <= 0) {
-        state.inCombat = false;
-        defeatResult = {
-          turnNumber: state.currentTurnIndex,
-          roundNumber: state.roundNumber,
-          playerAttacks,
-          enemyAttacks,
-          combatEnded: true,
-          victory: false,
-          defeat: true,
-          remainingEnemies: aliveEnemies,
-          playerHp: 0,
-          playerHpMax: state.player.hpMax,
-          narrative: narrativeParts.join('\n\n') + '\n\nDéfaite... Vous tombez inconscient.',
-        };
-
-        this.logger.log(`Combat ended for ${state.characterId}: Defeat`);
-        return true; // Stop processing further enemies
-      }
-
-      return false; // Continue processing
-    });
-
-    return defeatResult;
-  }
-
-  /**
-   * Calculate XP reward for defeated enemies
-   */
-  calculateXpReward(enemies: CombatEnemyDto[]): number {
-    // Simple XP calculation based on enemy HP totals
-    // In a full implementation, this would use CR tables
-    return enemies.reduce((total, enemy) => total + enemy.hpMax * 10, 0);
-  }
-
-  /**
-   * End combat and generate final result
-   */
-  async endCombat(characterId: string): Promise<{
-    xpGained: number;
-    enemiesDefeated: string[];
-  } | null> {
+  async applyPlayerDamage(characterId: string, targetId: string, damageTotal: number): Promise<CombatStateDto> {
     const state = await this.getCombatState(characterId);
-    if (!state) {
-      return null;
-    }
+    if (!state) throw new BadRequestException('No active combat found for character.');
 
-    const defeatedEnemies = state.enemies.filter(e => e.hp <= 0);
-    const xpGained = this.calculateXpReward(defeatedEnemies);
+    const target = state.enemies.find(enemy => enemy.id.toLowerCase() === targetId.toLowerCase());
+    if (!target) throw new BadRequestException('Target not found in combat');
 
-    // Delete combat session from database
-    await this.combatSessionModel.deleteOne({ characterId });
-    this.logger.log(`Combat cleaned up for ${characterId}`);
-
-    return {
-      xpGained,
-      enemiesDefeated: defeatedEnemies.map(e => e.name),
-    };
-  }
-
-  /**
-   * Build turn result after processing damage and enemy attacks
-   */
-  private buildDamageTurnResult(
-    state: CombatStateDto,
-    playerAttacks: AttackResultDto[],
-    enemyAttacks: AttackResultDto[],
-    narrativeParts: string[],
-  ): TurnResultDto {
-    return {
-      turnNumber: state.currentTurnIndex,
-      roundNumber: state.roundNumber,
-      playerAttacks,
-      enemyAttacks,
-      combatEnded: false,
-      victory: false,
-      defeat: false,
-      remainingEnemies: state.enemies,
-      playerHp: state.player.hp,
-      playerHpMax: state.player.hpMax,
-      narrative: narrativeParts.join('\n\n'),
-    };
-  }
-
-  /**
-   * Find enemy and apply damage, returning damage dealt
-   */
-  private applyDamageToTargetEnemy(state: CombatStateDto, targetName: string, damage: number): {
-    enemy: CombatEnemyDto;
-    damageDealt: number;
-  } | null {
-    const enemy = state.enemies.find(e => e.name.toLowerCase() === targetName.toLowerCase());
-    if (!enemy) return null;
-    const before = enemy.hp;
-    enemy.hp = Math.max(0, enemy.hp - Math.max(0, Math.floor(damage)));
-    return {
-      enemy,
-      damageDealt: before - enemy.hp,
-    };
-  }
-
-  /**
-   * Process enemy attacks and advance turn if needed
-   */
-  private async processDamageEnemyPhase(
-    state: CombatStateDto,
-    alive: CombatEnemyDto[],
-    narrativeParts: string[],
-  ): Promise<TurnResultDto | null> {
-    const playerAttacks: AttackResultDto[] = [];
-    const enemyAttacks: AttackResultDto[] = [];
-
-    const enemyResult = this.processEnemyAttacks(state, alive, enemyAttacks, narrativeParts, playerAttacks);
-    if (enemyResult) {
-      await this.saveCombatState(state);
-      return enemyResult;
-    }
-
-    state.currentTurnIndex = (state.currentTurnIndex + 1) % state.turnOrder.length;
-    state.roundNumber++;
+    target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
     await this.saveCombatState(state);
 
-    return this.buildDamageTurnResult(state, playerAttacks, enemyAttacks, narrativeParts);
-  }
-
-  /**
-   * Apply damage reported by client to a named enemy and persist state.
-   * Decrements action counter. Does NOT auto-advance turn - player must call end-activation.
-   */
-  async applyDamageToEnemy(characterId: string, targetName: string, damage: number, diceResult?: DiceResultDto): Promise<AttackResponseDto> {
-    const state = await this.getCombatState(characterId);
-    if (!state?.inCombat) throw new BadRequestException('No active combat found for character.');
-
-    // Decrement action (attack consumes an action)
+    // Consume a player action
     this.decrementAction(state);
 
-    const result = this.applyDamageToTargetEnemy(state, targetName, damage);
-    if (!result) throw new BadRequestException(`Target enemy not found: ${targetName}`);
-
-    await this.saveCombatState(state);
-
-    const alive = state.enemies.filter(e => e.hp > 0);
-    if (alive.length === 0) {
-      state.narrative = 'Combat ended';
-      state.inCombat = false;
+    // Finalize combat if needed (all enemies dead)
+    const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
+    if (!anyAlive) {
+      // persist and cleanup
+      await this.endCombat(characterId);
+      return this.getCombatState(characterId);
     }
 
-    return {
-      combatState: state,
-      diceResult,
-    };
+    return state;
   }
 
   /**
@@ -683,16 +446,6 @@ export class CombatService {
   }
 
   /**
-   * Decrement bonus action counter.
-   * Returns false if no bonus actions remaining.
-   */
-  decrementBonusAction(state: CombatStateDto): boolean {
-    if ((state.bonusActionRemaining ?? 0) <= 0) return false;
-    state.bonusActionRemaining = (state.bonusActionRemaining ?? 1) - 1;
-    return true;
-  }
-
-  /**
    * Reset action economy for a new player activation
    */
   private resetActionEconomy(state: CombatStateDto): void {
@@ -701,51 +454,34 @@ export class CombatService {
   }
 
   /**
-   * Process a single enemy activation (one enemy attacks)
+   * Calculate XP reward for defeated enemies
    */
-  public processSingleEnemyActivation(
-    state: CombatStateDto,
-    enemy: CombatEnemyDto,
-  ): AttackResultDto {
-    return this.performAttack(
-      {
-        name: enemy.name,
-        attackBonus: enemy.attackBonus,
-        damageDice: enemy.damageDice,
-        damageBonus: enemy.damageBonus,
-      },
-      {
-        name: state.player.name,
-        ac: state.player.ac,
-        hp: state.player.hp,
-      },
-    );
+  calculateXpReward(enemies: CombatantDto[]): number {
+    return enemies.reduce((total, enemy) => total + (enemy.hpMax ?? 0) * 10, 0);
   }
 
   /**
-   * Apply damage to target and persist state. Decrements action and finalizes combat if needed.
-   * Returns the updated combatState.
+   * End combat and generate final result (cleanup)
    */
-  async applyPlayerDamage(characterId: string, targetId: string, damageTotal: number): Promise<CombatStateDto> {
+  async endCombat(characterId: string): Promise<{
+    xpGained: number;
+    enemiesDefeated: string[];
+  } | null> {
     const state = await this.getCombatState(characterId);
-    if (!state) throw new BadRequestException('No active combat found for character.');
-
-    const target = state.enemies.find(enemy => enemy.id.toLowerCase() === targetId.toLowerCase());
-    if (!target) throw new BadRequestException('Target not found in combat');
-
-    target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
-    await this.saveCombatState(state);
-
-    // Consume a player action
-    this.decrementAction(state);
-
-    // Finalize combat if needed (all enemies dead)
-    const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
-    if (!anyAlive) {
-      await this.endCombat(characterId);
-      return this.getCombatState(characterId);
+    if (!state) {
+      return null;
     }
 
-    return state;
+    // Enemies with hp <= 0 are defeated
+    const defeatedEnemies = state.enemies.filter(e => (e.hp ?? 0) <= 0);
+    const xpGained = this.calculateXpReward(defeatedEnemies);
+
+    await this.combatSessionModel.deleteOne({ characterId });
+    this.logger.log(`Combat cleaned up for ${characterId}`);
+
+    return {
+      xpGained,
+      enemiesDefeated: defeatedEnemies.map(e => e.name),
+    };
   }
 }

@@ -1,8 +1,7 @@
 import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { CombatEnemyDto } from './CombatEnemyDto.js';
-import { CombatPlayerDto } from './CombatPlayerDto.js';
+import { CombatantDto } from './CombatantDto.js';
 import { CombatantDto } from './CombatantDto.js';
 import {
   IsString, IsBoolean, IsArray, IsNumber, IsOptional, ValidateNested,
@@ -22,20 +21,20 @@ export class CombatStateDto {
 
   @ApiProperty({
     description: 'Active enemies',
-    type: [CombatEnemyDto],
+    type: [CombatantDto],
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CombatEnemyDto)
-  enemies: CombatEnemyDto[];
+  @Type(() => CombatantDto)
+  enemies: CombatantDto[];
 
   @ApiProperty({
     description: 'Player state',
-    type: CombatPlayerDto,
+    type: CombatantDto,
   })
   @ValidateNested()
-  @Type(() => CombatPlayerDto)
-  player: CombatPlayerDto;
+  @Type(() => CombatantDto)
+  player: CombatantDto;
 
   @ApiProperty({
     description: 'Turn order for combat',

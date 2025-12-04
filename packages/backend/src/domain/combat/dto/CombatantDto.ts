@@ -22,13 +22,41 @@ export class CombatantDto {
   @IsBoolean()
   isPlayer: boolean;
 
-  @ApiPropertyOptional({ description: 'Original ID for duplicated player entries (all share same originId)' })
-  @IsOptional()
-  @IsString()
-  originId?: string;
-
-  @ApiPropertyOptional({ description: 'Activation index for player duplicates (0-based)' })
+  @ApiPropertyOptional({ description: 'Current hit points (enemies only)' })
   @IsOptional()
   @IsNumber()
-  activationIndex?: number;
+  hp?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum hit points (enemies only)' })
+  @IsOptional()
+  @IsNumber()
+  hpMax?: number;
+
+  @ApiPropertyOptional({ description: 'Armor class (enemies only)' })
+  @IsOptional()
+  @IsNumber()
+  ac?: number;
+
+  @ApiPropertyOptional({ description: 'Enemy attack bonus (enemies only)' })
+  @IsOptional()
+  @IsNumber()
+  attackBonus?: number;
+
+  @ApiPropertyOptional({ description: 'Enemy damage dice expression (enemies only), e.g. "1d6"' })
+  @IsOptional()
+  @IsString()
+  damageDice?: string;
+
+  @ApiPropertyOptional({ description: 'Enemy damage bonus (enemies only)' })
+  @IsOptional()
+  @IsNumber()
+  damageBonus?: number;
+
+  constructor(init?: Partial<CombatantDto>) {
+    // assign provided fields
+    Object.assign(this, init);
+    // defaults
+    if (this.isPlayer === undefined) this.isPlayer = false;
+    if (this.initiative === undefined) this.initiative = 0;
+  }
 }

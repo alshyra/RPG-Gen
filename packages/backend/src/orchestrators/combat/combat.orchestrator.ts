@@ -4,19 +4,16 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { CharacterService } from '../../domain/character/character.service.js';
 import { CombatService } from '../../domain/combat/combat.service.js';
 import type {
   AttackResponseDto,
   CombatEndResponseDto,
-  CombatEnemyDto,
   CombatStartRequestDto,
   CombatStateDto,
+  CombatantDto,
 } from '../../domain/combat/dto/index.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
-import { DiceResultDto } from 'src/domain/dice/dto/DiceResultDto.js';
-import { CombatDiceResultDto } from 'src/domain/dice/dto/CombatDiceResultDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -42,13 +39,63 @@ export class CombatOrchestrator {
    * Initialize combat for a character.
    * Loads character data, initializes combat state, and generates first action token.
    */
+  // eslint-disable-next-line max-statements
   async startCombat(
     userId: string,
     characterId: string,
     combatStartRequest: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
-    const state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
+    let state = await this.combatService.initializeCombat(characterDto, combatStartRequest, userId);
+
+    // Early return when there are no enemy turns before the player activation
+    if (state.turnOrder.length === 0 || state.turnOrder[0].isPlayer) {
+      this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
+      return {
+        ...state,
+        narrative: (await this.combatService.getCombatSummary(characterId)) ?? undefined,
+        phase: 'PLAYER_TURN' as const,
+      };
+    }
+
+    // If turn order begins with an enemy, simulate initial turns here
+    const playerIndex = state.turnOrder.findIndex(c => c.isPlayer);
+    const enemyTurnsBeforeFirstPlayer = playerIndex >= 0 ? state.turnOrder.slice(0, playerIndex) : state.turnOrder.slice();
+
+    // Process sequentially — stop if the player dies
+    const {
+      state: processedState, playerDefeated,
+    } = await this.processCombatantTurns(
+      characterId,
+      state,
+      enemyTurnsBeforeFirstPlayer,
+      (c: CombatantDto) => (c.isPlayer ? undefined : c.id), // no "as" casts needed
+    );
+
+    // Update to processed state
+    state = processedState;
+
+    if (playerDefeated) {
+      await this.combatService.saveCombatState(state);
+      this.logger.log(`Combat initialized (and ended) for ${characterId} after initial enemy turns`);
+      const narrative = (await this.combatService.getCombatSummary(characterId)) ?? undefined;
+      return {
+        ...state,
+        narrative,
+        phase: 'PLAYER_TURN' as const,
+      };
+    }
+
+    // Advance to player's activation and reset economy
+    const finalState = await this.combatService.getCombatState(characterId);
+    finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
+    finalState.phase = 'PLAYER_TURN';
+    finalState.actionRemaining = finalState.actionMax ?? 1;
+    finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
+    await this.combatService.saveCombatState(finalState);
+
+    // Use freshest state for return
+    state = finalState;
 
     this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
 
@@ -77,7 +124,7 @@ export class CombatOrchestrator {
 
     // Find target enemy
     const targetEnemy = combatState.enemies.find(
-      enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && enemy.hp > 0,
+      enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && (enemy.hp ?? 0) > 0,
     );
     if (!targetEnemy) {
       const validTargets = await this.combatService.getValidTargets(characterId);
@@ -85,7 +132,7 @@ export class CombatOrchestrator {
     }
 
     // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
-    const attackRoll = this.diceService.rollAttack(combatState.player.attackBonus, targetEnemy.ac);
+    const attackRoll = this.diceService.rollAttack(combatState.player.attackBonus, targetEnemy.ac ?? 0);
 
     if (!attackRoll.hit) {
       this.combatService.decrementAction(combatState);
@@ -116,19 +163,31 @@ export class CombatOrchestrator {
    */
   public async endPlayerTurn(characterId: string): Promise<CombatStateDto> {
     const combatState = await this.combatService.getCombatState(characterId);
-    if (!combatState || !combatState.validTargets) throw new NotFoundException('combat state not found');
+    if (!combatState) throw new NotFoundException('combat state not found');
 
     combatState.phase = 'ENEMY_TURN';
-    const enemyActivations = combatState.enemies
-      .filter(enemy => enemy.hp > 0)
-      .map(enemy => this.combatService.processSingleEnemyActivation(combatState, enemy));
 
-    // Wait for all activations to process (processSingleEnemyActivation might be async)
-    const attacksResults = await Promise.all(enemyActivations);
-    // You can log/process attacksResults if needed
-    // ...existing code...
-    combatState.phase = 'PLAYER_TURN';
-    return combatState;
+    // Process enemy turns in order; an early stop is required if the player dies
+    const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
+    await this.processCombatantTurns(
+      characterId,
+      combatState,
+      aliveEnemies,
+      (e: CombatantDto) => e.id,
+    );
+
+    // After enemies have acted, set back to player's turn and persist
+    const finalState = await this.combatService.getCombatState(characterId);
+    if (finalState) {
+      finalState.phase = 'PLAYER_TURN';
+      finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
+      finalState.actionRemaining = finalState.actionMax ?? 1;
+      finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
+      await this.combatService.saveCombatState(finalState);
+      return finalState;
+    }
+
+    throw new NotFoundException('combat state not found after enemy turns');
   }
 
   /**
@@ -187,5 +246,44 @@ export class CombatOrchestrator {
         },
       ],
     };
+  }
+
+  /**
+   * Process a sequence of combatant turns (enemy or turn-order entries).
+   * - items: array of CombatantDto (turn order entries; enemy objects will have hp/ac etc set)
+   * - getEnemyId maps an item to an enemyId (returns undefined to skip e.g. player entries).
+   */
+  private async processCombatantTurns(
+    characterId: string,
+    state: CombatStateDto,
+    items: CombatantDto[],
+    getEnemyId: (item: CombatantDto) => string | undefined,
+  ): Promise<{ state: CombatStateDto;
+    playerDefeated: boolean; }> {
+    const result = await items.reduce(async (prevPromise, item) => {
+      const acc = await prevPromise;
+      if (acc.playerDefeated) return acc;
+
+      const enemyId = getEnemyId(item);
+      if (!enemyId) return acc;
+
+      const enemy = acc.state.enemies.find(e => e.id === enemyId && (e.hp ?? 0) > 0);
+      if (!enemy) return acc;
+
+      const attackRoll = this.diceService.rollAttack(enemy.attackBonus ?? 0, acc.state.player.ac);
+      if (!attackRoll.hit) return acc;
+
+      const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
+      // applyEnemyDamage returns a refreshed state
+      const updated = await this.combatService.applyEnemyDamage(characterId, damageResult.damageTotal);
+      acc.state = updated;
+      acc.playerDefeated = !!(updated.player && updated.player.hp <= 0);
+      return acc;
+    }, Promise.resolve({
+      state,
+      playerDefeated: false,
+    }));
+
+    return result;
   }
 }
