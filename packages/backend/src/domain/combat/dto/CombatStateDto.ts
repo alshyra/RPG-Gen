@@ -2,7 +2,6 @@ import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
 import { CombatantDto } from './CombatantDto.js';
-import { CombatantDto } from './CombatantDto.js';
 import {
   IsString, IsBoolean, IsArray, IsNumber, IsOptional, ValidateNested,
 } from 'class-validator';
@@ -109,4 +108,28 @@ export class CombatStateDto {
   @IsOptional()
   @IsNumber()
   bonusActionMax?: number;
+
+  constructor(init?: Partial<CombatStateDto>) {
+    Object.assign(this, init);
+    if (!this.player || !this.enemies || !this.turnOrder) {
+      throw new Error('CombatStateDto requires player, enemies, and turnOrder to be provided');
+    }
+    // defaults
+    this.enemies = this.enemies ?? [];
+    this.player = this.player ?? new CombatantDto({
+      isPlayer: true,
+      id: '',
+      initiative: 0,
+    });
+    this.turnOrder = this.turnOrder ?? [];
+    this.characterId = this.characterId ?? '';
+    this.inCombat = this.inCombat ?? false;
+    this.currentTurnIndex = this.currentTurnIndex ?? 0;
+    this.roundNumber = this.roundNumber ?? 1;
+    this.phase = this.phase ?? 'PLAYER_TURN';
+    this.actionRemaining = this.actionRemaining ?? 1;
+    this.actionMax = this.actionMax ?? 1;
+    this.bonusActionRemaining = this.bonusActionRemaining ?? 1;
+    this.bonusActionMax = this.bonusActionMax ?? 1;
+  }
 }

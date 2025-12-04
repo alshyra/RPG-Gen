@@ -213,7 +213,7 @@ export class CombatService {
     const actionMax = 1;
     const bonusActionMax = 1;
 
-    const state: CombatStateDto = {
+    return new CombatStateDto({
       characterId,
       inCombat: true,
       enemies,
@@ -226,9 +226,7 @@ export class CombatService {
       actionMax,
       bonusActionRemaining: bonusActionMax,
       bonusActionMax,
-    };
-
-    return state;
+    });
   }
 
   /**
@@ -246,15 +244,6 @@ export class CombatService {
         new: true,
       },
     );
-  }
-
-  /**
-   * Finalize state after initial enemy activations (set turn index, reset economy)
-   */
-  private finalizeInitialActivations(state: CombatStateDto, playerIndex: number): void {
-    state.currentTurnIndex = playerIndex >= 0 ? playerIndex : 0;
-    this.resetActionEconomy(state);
-    state.phase = 'PLAYER_TURN';
   }
 
   /**
@@ -338,7 +327,7 @@ export class CombatService {
       .lean()
       .exec();
     if (!doc) throw new NotFoundException('Combat session not found');
-
+    if (!doc.player) throw new NotFoundException('Combat session malformed: missing player');
     // Convert raw DB objects into class instances for consistent runtime behavior
     const enemies = Array.isArray(doc.enemies) ? doc.enemies.map(e => new CombatantDto(e)) : [];
     const player = doc.player
@@ -349,7 +338,7 @@ export class CombatService {
         });
     const turnOrder = Array.isArray(doc.turnOrder) ? doc.turnOrder.map(t => new CombatantDto(t)) : [];
 
-    const state: CombatStateDto = {
+    return new CombatStateDto({
       characterId: doc.characterId,
       inCombat: !!doc.inCombat,
       enemies,
@@ -362,9 +351,7 @@ export class CombatService {
       actionMax: doc.actionMax ?? 1,
       bonusActionRemaining: doc.bonusActionRemaining ?? 1,
       bonusActionMax: doc.bonusActionMax ?? 1,
-    };
-
-    return state;
+    });
   }
 
   /**

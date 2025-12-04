@@ -2,7 +2,9 @@ import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
 import {
-  IsString, IsNumber, IsBoolean, IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsString,
 } from 'class-validator';
 
 export class CombatantDto {
@@ -23,34 +25,28 @@ export class CombatantDto {
   isPlayer: boolean;
 
   @ApiPropertyOptional({ description: 'Current hit points (enemies only)' })
-  @IsOptional()
   @IsNumber()
-  hp?: number;
+  hp: number;
 
   @ApiPropertyOptional({ description: 'Maximum hit points (enemies only)' })
-  @IsOptional()
   @IsNumber()
-  hpMax?: number;
+  hpMax: number;
 
   @ApiPropertyOptional({ description: 'Armor class (enemies only)' })
-  @IsOptional()
   @IsNumber()
-  ac?: number;
+  ac: number;
 
   @ApiPropertyOptional({ description: 'Enemy attack bonus (enemies only)' })
-  @IsOptional()
   @IsNumber()
-  attackBonus?: number;
+  attackBonus: number;
 
   @ApiPropertyOptional({ description: 'Enemy damage dice expression (enemies only), e.g. "1d6"' })
-  @IsOptional()
   @IsString()
-  damageDice?: string;
+  damageDice: string;
 
   @ApiPropertyOptional({ description: 'Enemy damage bonus (enemies only)' })
-  @IsOptional()
   @IsNumber()
-  damageBonus?: number;
+  damageBonus: number;
 
   constructor(init?: Partial<CombatantDto>) {
     // assign provided fields
