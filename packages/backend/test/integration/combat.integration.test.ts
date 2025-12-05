@@ -464,9 +464,9 @@ test('applyPlayerDamage returns final snapshot and endResult when last enemy die
     t.truthy(result.state, 'Result should contain state');
     t.false(result.state.inCombat, 'Combat should be ended (inCombat false)');
     t.truthy(result.endResult, 'Result should contain endResult when combat ends');
-    t.truthy(result.endResult?.xpGained, 'endResult should contain xpGained');
-    t.truthy(result.endResult?.enemiesDefeated, 'endResult should contain enemiesDefeated');
-    t.true((result.endResult?.enemiesDefeated?.length ?? 0) > 0, 'At least one enemy should be defeated');
+    t.truthy(result.endResult?.xp_gained, 'endResult should contain xpGained');
+    t.truthy(result.endResult?.enemies_defeated, 'endResult should contain enemiesDefeated');
+    t.true((result.endResult?.enemies_defeated?.length ?? 0) > 0, 'At least one enemy should be defeated');
   } finally {
     await closeTestApp(testCtx.ctx);
   }
@@ -488,8 +488,8 @@ test('applyEnemyDamage returns final snapshot when player dies', async (t) => {
     const result = await testCtx.combatService.applyEnemyDamage(character.characterId, 999);
 
     t.truthy(result, 'Result should be returned');
-    t.false(result.inCombat, 'Combat should be ended (player dead)');
-    t.true(result.player.hp <= 0, 'Player HP should be 0 or less');
+    t.false(result.state.inCombat, 'Combat should be ended (player dead)');
+    t.true(result.state.player.hp <= 0, 'Player HP should be 0 or less');
   } finally {
     await closeTestApp(testCtx.ctx);
   }
@@ -510,7 +510,7 @@ test('endPlayerTurn returns final snapshot when player dies (not 404)', async (t
     const { CombatOrchestrator } = await import('../../src/orchestrators/combat/index.js');
     const orchestrator = testCtx.ctx.module.get(CombatOrchestrator);
     // Call endPlayerTurn - this should not throw but return an EndPlayerTurnResponseDto
-    const resp = await orchestrator.endPlayerTurn(character.characterId);
+    const resp = await orchestrator.endPlayerTurn(TEST_USER_ID, character.characterId);
     t.truthy(resp, 'endPlayerTurn should return a response');
     t.true(resp.playerDefeated === true, 'Player should be marked as defeated');
     t.false(resp.combatState?.inCombat ?? true, 'CombatState should indicate combat ended');
@@ -540,7 +540,7 @@ test('processAttack returns combatEnd when killing last enemy', async (t) => {
     t.truthy(enemy, 'There should be one enemy');
 
     // Execute attack via orchestrator
-    const resp = await orchestrator.processAttack(character.characterId, enemy.id);
+    const resp = await orchestrator.processAttack(TEST_USER_ID, character.characterId, enemy.id);
 
     t.truthy(resp, 'processAttack should return a response');
     t.truthy(resp.combatState, 'Response should contain combatState');
@@ -551,6 +551,13 @@ test('processAttack returns combatEnd when killing last enemy', async (t) => {
       t.true(resp.combatEnd?.victory === true, 'combatEnd.victory should be true');
       t.truthy(typeof resp.combatEnd?.xp_gained === 'number', 'combatEnd should have xp_gained');
       t.truthy(Array.isArray(resp.combatEnd?.enemies_defeated), 'combatEnd should have enemies_defeated array');
+
+      // Ensure we saved the assistant 'combat_end' instruction to conversation history
+      const convService = testCtx.ctx.module.get((await import('../../src/domain/chat/conversation.service.js')).ConversationService);
+      const hist = await convService.getHistory(TEST_USER_ID, character.characterId);
+      t.truthy(hist && hist.length > 0, 'Conversation history should exist');
+      const hasCombatEndInstr = hist?.some(m => (m.instructions || []).some(i => (i as any).type === 'combat_end'));
+      t.true(hasCombatEndInstr, 'Conversation history should contain a combat_end instruction');
     }
   } finally {
     await closeTestApp(testCtx.ctx);

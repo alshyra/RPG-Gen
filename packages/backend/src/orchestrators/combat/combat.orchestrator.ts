@@ -17,6 +17,8 @@ import type {
 import { CombatEndDto } from '../../domain/combat/dto/CombatEndDto.js';
 import type { EnemyAttackLogDto } from '../../domain/combat/dto/EnemyAttackLogDto.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
+import { ConversationService } from '../../domain/chat/conversation.service.js';
+import type { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -36,6 +38,7 @@ export class CombatOrchestrator {
     private readonly combatAppService: CombatAppService,
     private readonly characterService: CharacterService,
     private readonly diceService: DiceService,
+    private readonly conversationService: ConversationService,
   ) {}
 
   /**
@@ -69,6 +72,7 @@ export class CombatOrchestrator {
     const {
       state: processedState, playerDefeated,
     } = await this.processCombatantTurns(
+      userId,
       characterId,
       state,
       enemyTurnsBeforeFirstPlayer,
@@ -115,6 +119,7 @@ export class CombatOrchestrator {
    */
   // eslint-disable-next-line max-statements
   async processAttack(
+    userId: string,
     characterId: string,
     targetId: string,
   ): Promise<AttackResponseDto> {
@@ -186,6 +191,21 @@ export class CombatOrchestrator {
           this.logger.warn(`Failed to apply XP to character ${characterId}: ${err}`);
         }
       }
+      // Persist a conversation assistant message with the combat_end instruction
+      try {
+        await this.conversationService.append(userId, characterId, {
+          role: 'assistant',
+          narrative: combatEnd.narrative ?? '',
+          instructions: [
+            {
+              type: 'combat_end',
+              combat_end: combatEnd,
+            },
+          ],
+        });
+      } catch (e) {
+        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+      }
     }
 
     return response;
@@ -196,7 +216,7 @@ export class CombatOrchestrator {
    * Returns attack logs for frontend to replay with animations.
    */
   // eslint-disable-next-line max-statements
-  public async endPlayerTurn(characterId: string): Promise<EndPlayerTurnResponseDto> {
+  public async endPlayerTurn(userId: string, characterId: string): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException('combat state not found');
 
@@ -205,6 +225,7 @@ export class CombatOrchestrator {
     // Process enemy turns in order; collect attack logs
     const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
     const enemyTurnResult = await this.processEnemyTurnsWithLogs(
+      userId,
       characterId,
       combatState,
       aliveEnemies,
@@ -242,6 +263,7 @@ export class CombatOrchestrator {
    * Process a single enemy attack and return the log entry.
    */
   private async processEnemyAttack(
+    userId: string,
     characterId: string,
     enemy: CombatantDto,
     currentState: CombatStateDto,
@@ -275,7 +297,36 @@ export class CombatOrchestrator {
     attackLog.damageRoll = damageResult;
     attackLog.damageTotal = damageResult.damageTotal;
 
-    const updatedState = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
+    const applyResult = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
+    const updatedState = applyResult.state;
+
+    // If applyResult indicates combat ended (player dead), persist a chat message
+    if (applyResult.endResult) {
+      try {
+        const combatEnd = new CombatEndDto();
+        combatEnd.victory = false;
+        combatEnd.xp_gained = applyResult.endResult.xpGained ?? 0;
+        combatEnd.player_hp = updatedState.player.hp;
+        combatEnd.enemies_defeated = applyResult.endResult.enemiesDefeated ?? [];
+        combatEnd.narrative = `Vous avez été vaincu...`;
+        const msg: ChatMessageDto = {
+          role: 'assistant',
+          narrative: combatEnd.narrative,
+          instructions: [
+            {
+              type: 'combat_end',
+              victory: combatEnd.victory,
+              xp: combatEnd.xp_gained,
+              player_hp: combatEnd.player_hp,
+              enemies_defeated: combatEnd.enemies_defeated,
+            } as any,
+          ],
+        };
+        await this.conversationService.append(userId, characterId, msg);
+      } catch (e) {
+        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+      }
+    }
 
     return {
       log: attackLog,
@@ -289,6 +340,7 @@ export class CombatOrchestrator {
    * Process enemy attacks and collect logs for each attack.
    */
   private async processEnemyTurnsWithLogs(
+    userId: string,
     characterId: string,
     state: CombatStateDto,
     enemies: CombatantDto[],
@@ -302,7 +354,7 @@ export class CombatOrchestrator {
       const acc = await accPromise;
       if (acc.playerDefeated || (enemy.hp ?? 0) <= 0) return acc;
 
-      const attackResult = await this.processEnemyAttack(characterId, enemy, acc.state);
+      const attackResult = await this.processEnemyAttack(userId, characterId, enemy, acc.state);
 
       return {
         state: attackResult.state,
@@ -381,6 +433,7 @@ export class CombatOrchestrator {
    * - getEnemyId maps an item to an enemyId (returns undefined to skip e.g. player entries).
    */
   private async processCombatantTurns(
+    userId: string,
     characterId: string,
     state: CombatStateDto,
     items: CombatantDto[],
@@ -402,9 +455,35 @@ export class CombatOrchestrator {
 
       const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
       // applyEnemyDamage returns a refreshed state
-      const updated = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
-      acc.state = updated;
-      acc.playerDefeated = !!(updated.player && updated.player.hp <= 0);
+      const updatedResult = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
+      acc.state = updatedResult.state;
+      acc.playerDefeated = !!(updatedResult.state.player && updatedResult.state.player.hp <= 0);
+      if (updatedResult.endResult) {
+        try {
+          const combatEnd = new CombatEndDto();
+          combatEnd.victory = false;
+          combatEnd.xp_gained = updatedResult.endResult.xpGained ?? 0;
+          combatEnd.player_hp = updatedResult.state.player.hp;
+          combatEnd.enemies_defeated = updatedResult.endResult.enemiesDefeated ?? [];
+          combatEnd.narrative = `Vous avez été vaincu...`;
+          const msg: ChatMessageDto = {
+            role: 'assistant',
+            narrative: combatEnd.narrative,
+            instructions: [
+              {
+                type: 'combat_end',
+                victory: combatEnd.victory,
+                xp: combatEnd.xp_gained,
+                player_hp: combatEnd.player_hp,
+                enemies_defeated: combatEnd.enemies_defeated,
+              } as any,
+            ],
+          };
+          await this.conversationService.append(userId, characterId, msg);
+        } catch (e) {
+          this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+        }
+      }
       return acc;
     }, Promise.resolve({
       state,

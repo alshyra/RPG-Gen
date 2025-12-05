@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CharacterModule } from './character.module.js';
 import { CombatModule } from './combat.module.js';
@@ -19,7 +19,7 @@ import {
       },
     ]),
     CharacterModule,
-    CombatModule,
+    forwardRef(() => CombatModule),
   ],
   controllers: [ChatController],
   providers: [
@@ -27,6 +27,6 @@ import {
     ConversationService,
     ChatOrchestrator,
   ],
-  exports: [ChatOrchestrator],
+  exports: [ChatOrchestrator, ConversationService],
 })
 export class ChatModule {}

@@ -7,8 +7,8 @@ import {
   XpInstructionMessageDto,
   SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
-  CombatStartInstructionMessageDto,
   GameInstructionDto,
+  CombatEndInstructionMessageDto,
 } from './GameInstructionDto.js';
 import { IsArray, IsString } from 'class-validator';
 
@@ -18,7 +18,7 @@ import { IsArray, IsString } from 'class-validator';
   XpInstructionMessageDto,
   SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
-  CombatStartInstructionMessageDto,
+  CombatEndInstructionMessageDto,
 )
 export class ChatMessageDto {
   @ApiProperty({

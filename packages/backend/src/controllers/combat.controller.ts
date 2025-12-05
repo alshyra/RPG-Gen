@@ -73,7 +73,8 @@ export class CombatController {
     @Param('characterId') characterId: string,
     @Body('targetId') targetId: string,
   ): Promise<AttackResponseDto> {
-    return this.combatOrchestrator.processAttack(characterId, targetId);
+    const userId = req.user._id.toString();
+    return this.combatOrchestrator.processAttack(userId, characterId, targetId);
   }
 
   @Get(':characterId/status')
@@ -101,7 +102,8 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ): Promise<EndPlayerTurnResponseDto> {
-    return this.combatOrchestrator.endPlayerTurn(characterId);
+    const userId = req.user._id.toString();
+    return this.combatOrchestrator.endPlayerTurn(userId, characterId);
   }
 
   @Post(':characterId/flee')

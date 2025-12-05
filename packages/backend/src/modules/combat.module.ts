@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CombatController } from '../controllers/combat.controller.js';
 import { CombatAppService } from '../domain/combat/combat.app.service.js';
@@ -6,6 +6,7 @@ import { InitService } from '../domain/combat/services/init.service.js';
 import { TurnOrderService } from '../domain/combat/services/turn-order.service.js';
 import { ActionEconomyService } from '../domain/combat/services/action-economy.service.js';
 import { CharacterModule } from './character.module.js';
+import { ChatModule } from './chat.module.js';
 import { DiceModule } from './dice.module.js';
 import {
   CombatSession, CombatSessionSchema,
@@ -16,6 +17,7 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
   imports: [
     CharacterModule,
     DiceModule,
+    forwardRef(() => ChatModule),
     MongooseModule.forFeature([
       {
         name: CombatSession.name,

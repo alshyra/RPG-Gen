@@ -244,7 +244,8 @@ export class CombatAppService {
    * Apply damage from an enemy to the player and persist state.
    * This method deliberately does not roll dice and does not handle attack logic.
    */
-  async applyEnemyDamage(characterId: string, damageTotal: number): Promise<CombatStateDto> {
+  async applyEnemyDamage(characterId: string, damageTotal: number): Promise<{ state: CombatStateDto;
+    endResult?: Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>; }> {
     const state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException('No active combat found for character.');
 
@@ -257,11 +258,14 @@ export class CombatAppService {
     // If player dies, finalize combat cleanup
     if (state.player.hp <= 0) {
       state.inCombat = false;
-      await this.endCombat(characterId);
-      return state;
+      const endResult = await this.endCombat(characterId);
+      return {
+        state,
+        endResult,
+      };
     }
 
-    return state;
+    return { state };
   }
 
   /**
