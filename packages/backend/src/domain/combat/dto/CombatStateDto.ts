@@ -58,14 +58,6 @@ export class CombatStateDto {
   narrative?: string;
 
   @ApiPropertyOptional({
-    description: 'Valid targets available to player',
-    type: [String],
-  })
-  @IsOptional()
-  @IsArray()
-  validTargets?: string[];
-
-  @ApiPropertyOptional({
     description: 'Current combat phase',
     enum: [
       'PLAYER_TURN',

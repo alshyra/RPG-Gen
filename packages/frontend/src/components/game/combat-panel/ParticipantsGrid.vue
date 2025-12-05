@@ -2,7 +2,7 @@
   <div class="-mx-1 px-1">
     <div class="flex flex-nowrap sm:flex-wrap gap-1 overflow-x-auto sm:overflow-visible overflow-y-hidden">
       <div
-        v-for="(p, idx) in aliveEnemies"
+        v-for="(p, idx) in enemies"
         :key="p.id || idx"
         class="shrink-0 p-1"
         :style="{ width: '120px', height: '120px' }"
@@ -41,6 +41,6 @@ defineEmits<(e: 'acted', payload?: unknown) => void>();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 const combatStore = useCombatStore();
-const { aliveEnemies } = storeToRefs(combatStore);
+const { enemies } = storeToRefs(combatStore);
 
 </script>

@@ -1,4 +1,4 @@
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import { useCharacterStore } from '@/stores/characterStore';
 import {
   RollInstructionMessageDto,
@@ -127,7 +127,7 @@ export const useGameSession = () => {
 
   const fetchAndSetCharacter = async (charId: string) => {
     try {
-      const fetched = await characterServiceApi.getCharacterById(charId);
+      const fetched = await characterApi.getCharacterById(charId);
       if (!fetched) return undefined;
       currentCharacter.value = fetched;
       return fetched;

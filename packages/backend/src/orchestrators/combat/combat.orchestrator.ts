@@ -125,9 +125,11 @@ export class CombatOrchestrator {
     const targetEnemy = combatState.enemies.find(
       enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && (enemy.hp ?? 0) > 0,
     );
+    const validTargetIds = combatState.enemies.filter(e => (e.hp ?? 0) > 0)
+      .map(e => e.id)
+      .join(', ');
     if (!targetEnemy) {
-      const validTargets = await this.combatAppService.getValidTargets(characterId);
-      throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargets.join(', ')}`);
+      throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargetIds}`);
     }
 
     // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
@@ -207,10 +209,7 @@ export class CombatOrchestrator {
     const state = await this.combatAppService.getCombatState(characterId);
     if (!state) throw new BadRequestException('No combat at the moment');
 
-    return {
-      ...state,
-      validTargets: await this.combatAppService.getValidTargets(characterId),
-    };
+    return state;
   }
 
   /**

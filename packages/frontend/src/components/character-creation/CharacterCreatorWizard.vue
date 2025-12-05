@@ -97,7 +97,7 @@
 
 <script setup lang="ts">
 import FullPageLoader from '@/components/ui/FullPageLoader.vue';
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import { conversationService } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
@@ -210,9 +210,9 @@ const saveFinalCharacter = async () => {
 
 const generateAndApplyAvatar = async () => {
   try {
-    const imageUrl = await characterServiceApi.generateAvatar(currentCharacter.value!.characterId);
+    const imageUrl = await characterApi.generateAvatar(currentCharacter.value!.characterId);
     try {
-      const refreshed = await characterServiceApi.getCharacterById(currentCharacter.value!.characterId);
+      const refreshed = await characterApi.getCharacterById(currentCharacter.value!.characterId);
       if (refreshed) currentCharacter.value = refreshed;
       else currentCharacter.value!.portrait = imageUrl;
     } catch {

@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   onMounted,
@@ -55,7 +55,7 @@ const isLoading = ref(false);
 const loadCharacters = async () => {
   try {
     isLoading.value = true;
-    const res = await characterServiceApi.getAllCharacters();
+    const res = await characterApi.getAllCharacters();
     characters.value = res || [];
   } catch (e) {
     console.error('Failed to load characters', e);

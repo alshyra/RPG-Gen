@@ -78,7 +78,7 @@ import {
 import {
   useRoute, useRouter,
 } from 'vue-router';
-import { characterServiceApi } from '../apis/characterApi';
+import { characterApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import CombatResultModal from '../components/game/CombatResultModal.vue';
 import DeathModal from '../components/game/DeathModal.vue';
@@ -158,7 +158,7 @@ onMounted(async () => {
 // Handle character death
 const onDeathConfirm = async () => {
   if (!characterStore.currentCharacter?.characterId) return;
-  await characterServiceApi.killCharacter(characterId.value, characterStore.currentCharacter.world);
+  await characterApi.killCharacter(characterId.value, characterStore.currentCharacter.world);
   characterStore.showDeathModal = false;
   router.push('/');
 };

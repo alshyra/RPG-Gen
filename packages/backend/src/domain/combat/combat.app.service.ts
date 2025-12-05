@@ -357,19 +357,6 @@ export class CombatAppService {
   }
 
   /**
-   * Get list of valid targets for player
-   */
-  async getValidTargets(characterId: string): Promise<string[]> {
-    const state = await this.getCombatState(characterId);
-    if (!state || !state.inCombat) {
-      return [];
-    }
-
-    return state.enemies.filter(e => e.hp > 0)
-      .map(e => e.id);
-  }
-
-  /**
    * Get combat status summary
    */
   async getCombatSummary(characterId: string): Promise<string | null> {

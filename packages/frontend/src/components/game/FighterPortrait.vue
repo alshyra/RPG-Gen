@@ -71,7 +71,7 @@ import {
   computed, onMounted, ref,
 } from 'vue';
 import { useCombat } from '@/composables/useCombat';
-import type { CombatEnemyDto } from '@rpg-gen/shared';
+import type { CombatantDto } from '@rpg-gen/shared';
 import { useCharacterStore } from '@/stores/characterStore';
 import {
   pickBestPortrait, getFallbackPortrait,
@@ -82,7 +82,7 @@ import { storeToRefs } from 'pinia';
 const {
   enemy, isPlayer,
 } = defineProps<{
-  enemy: CombatEnemyDto | null;
+  enemy: CombatantDto | null;
   isPlayer?: boolean;
 }>();
 const combatStore = useCombatStore();
@@ -91,7 +91,7 @@ const { currentCharacter } = storeToRefs(characterStore);
 const combat = useCombat();
 
 const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (enemy?.name ?? 'Enemy')));
-const descriptionText = computed(() => enemy?.description ?? '');
+const descriptionText = computed(() => enemy?.name ?? '');
 
 const enemyDisplayHp = computed(() => isPlayer ? (currentCharacter.value?.hp ?? 0) : (enemy?.hp ?? 0));
 const enemyDisplayMax = computed(() => isPlayer ? (currentCharacter.value?.hpMax ?? '-') : (enemy?.hpMax ?? '-'));
@@ -111,10 +111,6 @@ onMounted(async () => {
   }
   if (!enemy) {
     resolvedPortrait.value = `/images/enemies/enemy.png`;
-    return;
-  }
-  if (enemy.portrait) {
-    resolvedPortrait.value = enemy.portrait;
     return;
   }
   const byManifest = await pickBestPortrait(enemy.name || enemy.id || 'enemy');

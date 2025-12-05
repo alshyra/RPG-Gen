@@ -1,5 +1,5 @@
 import { conversationService } from '../apis/conversationApi';
-import { characterServiceApi } from '../apis/characterApi';
+import { characterApi } from '../apis/characterApi';
 import { isCombatStartInstruction } from '../apis/combatTypes';
 import type {
   RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto, GameInstructionDto,
@@ -134,6 +134,7 @@ export function useGameCommands() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
+    const target = combatStore.aliveEnemies.find(e => e.id.toLocaleLowerCase() === command.target.toLowerCase());
     switch (command.type) {
       case 'cast':
         await executeCastCommand(command.target);
@@ -145,7 +146,6 @@ export function useGameCommands() {
         await executeEquipCommand(command.target);
         break;
       case 'attack':
-        const target = combatStore.aliveEnemies.find(e => e.id.toLocaleLowerCase() === command.target.toLowerCase());
         if (!target) throw new Error(`Enemy not found: ${command.target} maybe name is used instead of id`);
         await executeAttackCommand(target);
         break;
@@ -244,7 +244,7 @@ export function useGameCommands() {
     gameStore.appendMessage('system', 'Equipping...');
 
     await executeWithLoading(async () => {
-      const updated = await characterServiceApi.equipInventoryItem(character.characterId, item.definitionId!);
+      const updated = await characterApi.equipInventoryItem(character.characterId, item.definitionId!);
       characterStore.currentCharacter = updated;
       gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);

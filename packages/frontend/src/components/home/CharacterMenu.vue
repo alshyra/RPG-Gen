@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import UiButton from '@/components/ui/UiButton.vue';
 import { Trash2 } from 'lucide-vue-next';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
@@ -93,7 +93,7 @@ const onDelete = async (character: CharacterResponseDto) => {
   if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) return;
   deletingCharacterId.value = character.characterId;
   try {
-    await characterServiceApi.deleteCharacter(character.characterId);
+    await characterApi.deleteCharacter(character.characterId);
     emit('deleted', character.characterId);
   } catch (e) {
     console.error('Failed to delete character', e);

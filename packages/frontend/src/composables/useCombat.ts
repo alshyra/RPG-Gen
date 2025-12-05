@@ -1,5 +1,5 @@
 import type {
-  CombatEnemyDto,
+  CombatantDto,
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
@@ -22,7 +22,7 @@ export function useCombat() {
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const {
-    currentTarget, showAttackResultModal, currentAttackResult,
+    currentTarget, currentAttackResult, enemies,
   } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
   // uiStore omitted — not used here
@@ -62,31 +62,23 @@ export function useCombat() {
     }
   };
 
-  // handlePlayerFailedAttack intentionally removed: not needed in this composable
-
-  const throwDamageDice = () => {
-    if (!currentCharacter.value?.characterId) throw Error('Character is not defined');
-    const rollInstr = currentAttackResult.value?.rollInstruction ?? (currentAttackResult.value as any)?.instructions?.[0];
-    if (!rollInstr || rollInstr.type !== 'roll') {
-      throw Error('currentAttackResult doesnt not have a valid roll instruction');
-    }
-    combatService.resolveRollWithToken(currentCharacter.value?.characterId, combatStore.actionToken!, rollInstr);
-  };
-
   /**
    * Execute an attack against a target using actionToken for idempotency
    */
-  const executeAttack = async (target: CombatEnemyDto): Promise<void> => {
+  const executeAttack = async (target: CombatantDto): Promise<void> => {
     if (!currentCharacter.value) return;
     gameStore.appendMessage('user', `J'attaque ${target.name}!`);
     gameStore.sending = true;
 
     currentTarget.value = target;
     try {
-      currentAttackResult.value = await combatService.attackWithToken(currentCharacter.value.characterId, combatStore.actionToken!, target);
-      showAttackResultModal.value = true;
-      const rollInstr = currentAttackResult.value?.rollInstruction ?? (currentAttackResult?.value as any)?.instructions?.[0];
-      if (!rollInstr?.type || rollInstr.type == 'roll') return;
+      currentAttackResult.value = await combatService.attack(currentCharacter.value.characterId, target);
+      enemies.value = currentAttackResult.value.combatState.enemies;
+      if (currentAttackResult.value.damageTotal && currentAttackResult.value.damageTotal > 0) {
+        gameStore.appendMessage('system', `✅ Attaque réussie contre ${target.name}! Dégâts infligés: ${currentAttackResult.value.damageTotal}`);
+      } else {
+        gameStore.appendMessage('system', `❌ Attaque manquée contre ${target.name}.`);
+      }
     } catch (err) {
       gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
     } finally {
@@ -142,7 +134,6 @@ export function useCombat() {
   return {
     // Actions
     initializeCombat,
-    throwDamageDice,
     executeAttack,
     handleCombatEnd,
     fleeCombat,

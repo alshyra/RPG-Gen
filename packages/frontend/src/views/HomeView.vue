@@ -34,7 +34,7 @@
 import { ref } from 'vue';
 import CharactersMenu from '../components/home/CharactersMenu.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { characterServiceApi } from '../apis/characterApi';
+import { characterApi } from '../apis/characterApi';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -43,7 +43,7 @@ const creating = ref(false);
 const createDndCharacter = async () => {
   creating.value = true;
   try {
-    const newChar = await characterServiceApi.createCharacter('dnd');
+    const newChar = await characterApi.createCharacter('dnd');
     if (newChar && newChar.characterId) {
       // Navigate to character creation step 1 for the new character
       router.push({

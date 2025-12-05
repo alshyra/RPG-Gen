@@ -1,4 +1,4 @@
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import {
   CharacterResponseDto, ItemResponseDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto,
 } from '@rpg-gen/shared';
@@ -88,13 +88,13 @@ export const useCharacterStore = defineStore('character', () => {
   const removeInventoryItem = async (definitionId: ItemResponseDto['definitionId'], quantity = 1) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;
     currentCharacter.value.inventory = updateInventoryQuantity(currentCharacter.value.inventory, definitionId, quantity);
-    const updated = await characterServiceApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
+    const updated = await characterApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
     currentCharacter.value = updated;
   };
 
   const addInventoryItem = async (item: Partial<ItemResponseDto>) => {
     if (!currentCharacter.value?.characterId || !item) return;
-    const updated = await characterServiceApi.addInventoryItem(currentCharacter.value.characterId, item);
+    const updated = await characterApi.addInventoryItem(currentCharacter.value.characterId, item);
     currentCharacter.value = updated;
   };
 
@@ -107,29 +107,29 @@ export const useCharacterStore = defineStore('character', () => {
 
   const grantInspiration = async (amount = 1) => {
     if (!currentCharacter.value?.characterId) return;
-    const updated = await characterServiceApi.grantInspiration(currentCharacter.value.characterId, amount);
+    const updated = await characterApi.grantInspiration(currentCharacter.value.characterId, amount);
     currentCharacter.value = updated;
   };
 
   const spendInspiration = async () => {
     if (!currentCharacter.value?.characterId) return;
-    const updated = await characterServiceApi.spendInspiration(currentCharacter.value.characterId);
+    const updated = await characterApi.spendInspiration(currentCharacter.value.characterId);
     currentCharacter.value = updated;
   };
 
   const createCharacter = async (world: string) => {
-    const newChar = await characterServiceApi.createCharacter(world);
+    const newChar = await characterApi.createCharacter(world);
     currentCharacter.value = newChar;
     return newChar;
   };
 
   const updateCharacter = async (characterId: string, character: UpdateCharacterRequestDto) => {
-    await characterServiceApi.saveCharacter(characterId, character);
+    await characterApi.saveCharacter(characterId, character);
   };
 
   watch(currentCharacterId, async (id) => {
     if (!id) return;
-    const res = await characterServiceApi.getCharacterById(id);
+    const res = await characterApi.getCharacterById(id);
     currentCharacter.value = res || undefined;
   }, { immediate: true });
 

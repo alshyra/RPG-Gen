@@ -2,6 +2,7 @@
  * Combat service for interacting with the backend combat API
  */
 import type {
+  AttackResponseDto,
   CombatEndResponseDto,
   CombatStartRequestDto, CombatStateDto,
   CombatantDto,
@@ -34,7 +35,7 @@ class CombatService {
   /**
    * Execute an attack against a target using an action token for idempotency
    */
-  async attackWithToken(characterId: string, target: CombatantDto) {
+  async attack(characterId: string, target: CombatantDto): Promise<AttackResponseDto> {
     const { data } = await api.POST('/api/combat/{characterId}/attack', {
       params: {
         path: {

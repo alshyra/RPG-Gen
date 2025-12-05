@@ -5,6 +5,7 @@ import {
 import { combatService } from '../apis/combatApi';
 import type {
   CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto, AttackResultDto, CombatStateDto,
+  AttackResponseDto,
 } from '@rpg-gen/shared';
 import type { CombatPhase } from '@rpg-gen/shared';
 import type { Ref } from 'vue';
@@ -20,15 +21,15 @@ interface AttackQueueItem {
 export const useCombatStore = defineStore('combatStore', () => {
   const inCombat = ref(false);
   const roundNumber = ref(1);
-  const enemies = ref<CombatEnemyDto[]>([]);
+  const enemies = ref<CombatantDto[]>([]);
   const turnOrder = ref<CombatantDto[]>([]);
   const playerInitiative = ref(0);
-  const currentTarget = ref<CombatEnemyDto | null>(null);
+  const currentTarget = ref<CombatantDto | null>(null);
   const actionToken = ref<string | null>(null);
   const phase = ref<CombatPhase>('PLAYER_TURN');
   const expectedDto = ref<string>('AttackRequestDto');
   const showAttackResultModal = ref(false);
-  const currentAttackResult = ref<TurnResultWithInstructionsDto>();
+  const currentAttackResult = ref<AttackResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
   const currentTurnIndex = ref(0);
@@ -76,9 +77,9 @@ export const useCombatStore = defineStore('combatStore', () => {
     }
   };
 
-  const selectNextAliveTarget = (enemies: Ref<CombatEnemyDto[]>): CombatEnemyDto | null => enemies.value.find(e => e.hp > 0) || null;
+  const selectNextAliveTarget = (enemies: Ref<CombatantDto[]>): CombatantDto | null => enemies.value.find(e => e.hp > 0) || null;
 
-  const updateEnemiesFromResult = (enemies: Ref<CombatEnemyDto[]>, remainingEnemies: CombatEnemyDto[]) => enemies.value.map((enemy) => {
+  const updateEnemiesFromResult = (enemies: Ref<CombatantDto[]>, remainingEnemies: CombatantDto[]) => enemies.value.map((enemy) => {
     const updatedEnemy = remainingEnemies.find(e => e.id === enemy.id);
     return updatedEnemy
       ? {

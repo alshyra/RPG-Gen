@@ -29,7 +29,7 @@ vi.mock('@/stores/characterStore', () => ({
 }));
 
 vi.mock('@/apis/characterApi', async () => ({
-  characterServiceApi: {
+  characterApi: {
     generateAvatar: vi.fn(async (_: string) => 'data:image/png;base64,avatar'),
     getCharacterById: vi.fn(async (_: string) => ({
       ...currentCharacter.value,
@@ -84,7 +84,7 @@ describe('CharacterCreatorWizard finish flow', () => {
     const genPromise = new Promise<string>((resolve) => {
       genResolve = resolve;
     });
-    (api.characterServiceApi.generateAvatar as any).mockImplementation(() => genPromise);
+    (api.characterApi.generateAvatar as any).mockImplementation(() => genPromise);
 
     const conv = await import('@/apis/conversationApi');
     let startResolve: (v?: any) => void = () => {};
