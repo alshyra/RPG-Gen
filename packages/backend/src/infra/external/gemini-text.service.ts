@@ -5,7 +5,9 @@ import {
   Injectable, InternalServerErrorException, Logger,
 } from '@nestjs/common';
 import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
-import { parseAIResponse } from './ai-parser.util.js';
+import { GameInstructionDto } from '../../domain/chat/dto/GameInstructionDto.js';
+import { aiResponseSchema } from './gemini-schemas.js';
+import { geminiResponseJsonSchema } from './gemini-json-schema.js';
 
 @Injectable()
 export class GeminiTextService {
@@ -30,6 +32,7 @@ export class GeminiTextService {
     if (this.chatClients.has(sessionId)) return;
 
     this.logger.debug(`Creating new chat client for session ${sessionId}`);
+
     const chat = this.client.chats.create({
       model: this.model,
       history: initialHistory.map(message => ({
@@ -39,20 +42,40 @@ export class GeminiTextService {
       config: {
         systemInstruction,
         temperature: 0.7,
+        responseMimeType: 'application/json',
+        responseJsonSchema: geminiResponseJsonSchema,
       },
     });
     this.chatClients.set(sessionId, chat);
   }
 
-  async sendMessage(sessionId: string, message: string) {
+  async sendMessage(sessionId: string, message: string): Promise<ChatMessageDto> {
     const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
 
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
     const { text } = await chat.sendMessage({ message });
-    this.logger.debug(`Received response for session ${sessionId}`, text);
+    this.logger.debug(`Received structured response for session ${sessionId}`, text);
     if (!text) throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
-    return parseAIResponse(text);
+
+    // Parse and validate the JSON response from Gemini using Zod
+    try {
+      const parsed = JSON.parse(text);
+      const validated = aiResponseSchema.parse(parsed);
+
+      // Construct the ChatMessageDto from validated data
+      // Zod validation ensures the structure matches our schema
+      const chatMessage: ChatMessageDto = {
+        role: 'assistant',
+        narrative: validated.narrative,
+        instructions: validated.instructions as GameInstructionDto[] | undefined,
+      };
+
+      return chatMessage;
+    } catch (error) {
+      this.logger.error('Failed to parse Gemini structured response', error, text);
+      throw new InternalServerErrorException('Invalid AI response format');
+    }
   }
 
   clearChat(sessionId: string) {

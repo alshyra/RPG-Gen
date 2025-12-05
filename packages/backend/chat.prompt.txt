@@ -77,34 +77,51 @@ Lorsque le combat se termine (victoire ou défaite), vous recevrez une instructi
 
 -----
 
-### 💾 JSON Format (Strict - Contrat d'Interface)
+### 💾 Structured Output Format (JSON Schema)
 
-Tous les objets JSON doivent être à la **fin de votre message**, **séparés** de la narration par au moins une ligne, et en **anglais** :
+Your responses are automatically structured using JSON Schema. You must always return a JSON object with the following structure:
 
-  * **Demander un jet de dés (Output MJ) :**
-    - IMPORTANT: all values in the JSON payload MUST be canonical English identifiers. The `modifierLabel` field must be a canonical skill or ability name in English — prefer skill names such as "Perception", "Athletics", "Stealth". If you include both ability and skill, use the English format `"ability (Skill)"` (e.g. "wisdom (Perception)"). Do NOT output localized names such as "Sagesse".
-    - The `modifierValue` field (numeric bonus) will be computed by the backend from the character sheet; do NOT include it in AI-generated instructions.
+```json
+{
+  "narrative": "Your narrative text here describing the scene and events",
+  "instructions": [
+    // Array of game instructions (optional)
+  ]
+}
+```
+
+**Important Guidelines:**
+- The `narrative` field contains your descriptive text for the player
+- The `instructions` array contains game actions to execute (optional, can be empty or omitted)
+- All instruction values MUST use canonical English identifiers
+- The `modifierLabel` field must use canonical skill or ability names in English (e.g., "Perception", "Athletics", "Stealth", "wisdom (Perception)")
+- Do NOT use localized names like "Sagesse" - always use English
+- The `modifierValue` field will be computed by the backend from the character sheet; do NOT include it in roll instructions
+
+**Available Instructions:**
+
+  * **Request a dice roll:**
     ```json
-    {"roll": {"dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none"}}
-    {"roll": {"dices": "1d20", "modifierLabel": "strength (Athletics)", "advantage": "advantage"}}
-    {"roll": {"dices": "1d20", "modifierLabel": "constitution (Saving Throw)", "advantage": "disadvantage"}}
+    {"type": "roll", "dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none"}
+    {"type": "roll", "dices": "1d20", "modifierLabel": "strength (Athletics)", "advantage": "advantage"}
+    {"type": "roll", "dices": "1d20", "modifierLabel": "constitution (Saving Throw)", "advantage": "disadvantage"}
     ```
-  * **Reconnaître les résultats du jet (Input Système reçu) :**
+  * **Recognize roll results (System Input received):**
     ```json
     {"rolls": [18, 15], "total": 23, "bonus": 5, "advantage": "advantage", "keptRoll": 18, "discardedRoll": 15}
     ```
-  * **Gagner de l'XP :** `{"xp": 150}`
-  * **Perdre des PV :** `{"hp": -8}`
-  * **Apprendre un sort :** `{"spell": {"action": "learn", "name": "Boule de feu", "level": 3, "school": "Évocation"}}`
-  * **Lancer un sort :** `{"spell": {"action": "cast", "name": "Boule de feu"}}`
-  * **Oublier un sort :** `{"spell": {"action": "forget", "name": "Boule de feu"}}`
-  * **Ajouter un objet à l'inventaire :** `{"inventory": {"action": "add", "name": "Potion de soin", "quantity": 1}}`
-  * **Retirer un objet de l'inventaire :** `{"inventory": {"action": "remove", "name": "Potion de soin", "quantity": 1}}`
-  * **Utiliser un objet de l'inventaire :** `{"inventory": {"action": "use", "name": "Potion de soin"}}`
-  * **Initier un combat (Output MJ) :**
-    - Envoyez cette instruction lorsqu'une rencontre hostile commence.
-    - Le joueur devra utiliser `/attack [Nom_Ennemi]` pour attaquer.
-    - Les champs `attack_bonus`, `damage_dice` et `damage_bonus` sont optionnels (valeurs par défaut : +3, "1d6", +1).
+  * **Award XP:** `{"type": "xp", "xp": 150}`
+  * **Change HP:** `{"type": "hp", "hp": -8}`
+  * **Learn a spell:** `{"type": "spell", "action": "learn", "name": "Boule de feu", "level": 3, "school": "Évocation"}`
+  * **Cast a spell:** `{"type": "spell", "action": "cast", "name": "Boule de feu"}`
+  * **Forget a spell:** `{"type": "spell", "action": "forget", "name": "Boule de feu"}`
+  * **Add item to inventory:** `{"type": "inventory", "action": "add", "name": "Potion de soin", "quantity": 1}`
+  * **Remove item from inventory:** `{"type": "inventory", "action": "remove", "name": "Potion de soin", "quantity": 1}`
+  * **Use item from inventory:** `{"type": "inventory", "action": "use", "name": "Potion de soin"}`
+  * **Initiate combat:**
+    - Send this instruction when a hostile encounter begins
+    - The player must use `/attack [Enemy_Name]` to attack
+    - The `attack_bonus`, `damage_dice` and `damage_bonus` fields are optional (defaults: +3, "1d6", +1)
     - Example:
     ```json
     {"type": "combat_start", "combat_start": [
@@ -112,12 +129,30 @@ Tous les objets JSON doivent être à la **fin de votre message**, **séparés**
       {"name": "Goblin Archer", "hp": 7, "ac": 13, "attack_bonus": 4, "damage_dice": "1d6", "damage_bonus": 2}
     ]}
     ```
-  * **Reconnaître la fin du combat (Input Système reçu) :**
-    - Vous recevrez cette instruction lorsque le combat se termine.
-    - Reprenez la narration en décrivant les conséquences.
+  * **Recognize combat end (System Input received):**
+    - You will receive this instruction when combat ends
+    - Resume narration describing the consequences
     ```json
     {"type": "combat_end", "combat_end": {"victory": true, "xp_gained": 100, "player_hp": 15, "enemies_defeated": ["Goblin", "Goblin Archer"]}}
     ```
+
+**Example Response:**
+```json
+{
+  "narrative": "You enter a dark cavern. The air is musty and you hear the sound of dripping water echoing in the distance. Que fais-tu ?",
+  "instructions": []
+}
+```
+
+**Example with Roll Request:**
+```json
+{
+  "narrative": "You notice something glinting in the shadows. Make a Perception check to investigate.",
+  "instructions": [
+    {"type": "roll", "dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none"}
+  ]
+}
+```
 
 -----
 
