@@ -13,6 +13,7 @@ import {
   GenericMeta,
   type InventoryItemMeta,
 } from './InventoryItemMeta.js';
+import { ItemDefinition } from 'src/infra/mongo/item-definition.schema.js';
 
 @ApiExtraModels(WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta)
 export class CreateInventoryItemDto {
@@ -61,4 +62,12 @@ export class CreateInventoryItemDto {
   @IsOptional()
   @IsObject()
   meta?: InventoryItemMeta;
+
+  constructor(item: ItemDefinition) {
+    this.definitionId = item.definitionId;
+    this.name = item.name;
+    this.description = item.description;
+    this.meta = item.meta;
+    this.qty = 1;
+  }
 }

@@ -7,6 +7,7 @@ import { CombatModule } from './modules/combat.module.js';
 import { DiceModule } from './modules/dice.module.js';
 import { HealthModule } from './modules/health.module.js';
 import { ImageModule } from './modules/image.module.js';
+import { InventoryModule } from './modules/inventory.module.js';
 import { RollsModule } from './modules/rolls.module.js';
 
 @Module({
@@ -22,6 +23,7 @@ import { RollsModule } from './modules/rolls.module.js';
     ImageModule,
     HealthModule,
     CharacterModule,
+    InventoryModule,
     RollsModule,
   ],
 })

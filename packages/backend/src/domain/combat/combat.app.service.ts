@@ -264,6 +264,26 @@ export class CombatAppService {
   }
 
   /**
+   * Apply healing to the player and persist state.
+   * Used when player uses a healing potion or receives healing.
+   */
+  async applyPlayerHeal(characterId: string, healAmount: number): Promise<CombatStateDto> {
+    const state = await this.getCombatState(characterId);
+    if (!state) throw new BadRequestException('No active combat found for character.');
+
+    // Increase player HP, capped at max
+    const currentHp = state.player.hp ?? 0;
+    const maxHp = state.player.hpMax ?? currentHp;
+    state.player.hp = Math.min(currentHp + Math.max(0, Math.floor(healAmount)), maxHp);
+
+    // Persist state
+    await this.saveCombatState(state);
+
+    this.logger.log(`Player healed for ${healAmount} HP, now at ${state.player.hp}/${maxHp}`);
+    return state;
+  }
+
+  /**
    * Save combat state to database
    */
   public async saveCombatState(state: CombatStateDto): Promise<void> {

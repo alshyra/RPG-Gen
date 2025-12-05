@@ -477,7 +477,7 @@ test('applyEnemyDamage returns final snapshot when player dies', async (t) => {
     });
     const combatStart = createCombatStartRequest(1);
 
-    const initState = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+    await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
 
     // Apply large enemy damage to kill player
     const result = await testCtx.combatService.applyEnemyDamage(character.characterId, 999);
@@ -499,10 +499,11 @@ test('endPlayerTurn returns final snapshot when player dies (not 404)', async (t
       hp: 5,
     });
     const combatStart = createCombatStartRequest(1);
-    const initState = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+    await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
 
     // Now, simulate enemy turn resulting in player death by invoking the orchestrator
-    const orchestrator = testCtx.ctx.module.get('CombatOrchestrator');
+    const { CombatOrchestrator } = await import('../../src/orchestrators/combat/index.js');
+    const orchestrator = testCtx.ctx.module.get(CombatOrchestrator);
     // Call endPlayerTurn - this should not throw but return an EndPlayerTurnResponseDto
     const resp = await orchestrator.endPlayerTurn(character.characterId);
     t.truthy(resp, 'endPlayerTurn should return a response');

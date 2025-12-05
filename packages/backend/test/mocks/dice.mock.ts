@@ -57,6 +57,45 @@ export function createMockDiceService(config: MockDiceRollConfig = {}) {
     },
 
     /**
+     * Mock rollAttack - returns a fixed attack result
+     */
+    rollAttack: (_attackBonus: number, _targetAc: number): { hit: boolean;
+      isCrit: boolean;
+      diceResult: DiceResultDto; } => {
+      const rollValue = defaultRolls[callIndex % defaultRolls.length];
+      callIndex++;
+      return {
+        hit: rollValue >= 10,
+        isCrit: rollValue === 20,
+        diceResult: {
+          rolls: [rollValue],
+          modifierValue: 0,
+          total: config.total ?? rollValue,
+        },
+      };
+    },
+
+    /**
+     * Mock rollDamage - returns a fixed damage result
+     */
+    rollDamage: (_expression: string, isCrit: boolean, damageBonus = 0): { rolls: number[];
+      modifierValue: number;
+      total: number;
+      isCrit: boolean;
+      damageTotal: number; } => {
+      const rollValue = defaultRolls[callIndex % defaultRolls.length];
+      callIndex++;
+      const total = config.total ?? rollValue;
+      return {
+        rolls: [rollValue],
+        modifierValue: 0,
+        total,
+        isCrit,
+        damageTotal: total + damageBonus,
+      };
+    },
+
+    /**
      * Reset call counter (useful between test cases)
      */
     reset: () => {

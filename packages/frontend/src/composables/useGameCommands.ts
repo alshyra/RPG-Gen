@@ -221,7 +221,8 @@ export function useGameCommands() {
         {
           type: 'inventory',
           action: 'use',
-          name: item._id,
+          name: item.name ?? '',
+          itemId: item._id,
         } as InventoryInstructionMessageDto,
       ]);
     } catch {

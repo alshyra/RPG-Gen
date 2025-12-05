@@ -22,6 +22,9 @@ export class InventoryInstructionMessageDto {
   @ApiProperty({ description: 'Item name' })
   name: string;
 
+  @ApiPropertyOptional({ description: 'Inventory item _id (required for use action)' })
+  itemId?: string;
+
   @ApiPropertyOptional({ description: 'Quantity' })
   quantity?: number;
 
