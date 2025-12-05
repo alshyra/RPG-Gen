@@ -74,7 +74,7 @@ describe('Combat flow', () => {
           });
 
         // Intercept the attack request so we can wait for the backend to process it
-        cy.intercept('POST', '**/api/combat/*/attack/*')
+        cy.intercept('POST', '**/api/combat/*/attack')
           .as('attackReq');
 
         // Find the first enemy tile and click its attack button
