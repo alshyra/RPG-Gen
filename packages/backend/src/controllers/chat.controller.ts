@@ -127,29 +127,21 @@ export class ChatController {
     return this.conversationService.getHistory(userId, characterId);
   }
 
+  private hasCombatStart(m: ChatMessageDto) {
+    return m.role === 'assistant' && m.instructions && m.instructions.some(i => i.type === 'combat_start');
+  }
+
   private async processHistoricalCombat(
     messages: ChatMessageDto[] | undefined,
     userId: string,
     characterId: string,
   ): Promise<void> {
     if (!messages?.length) return;
+    const lastMessage = messages[messages.length - 1]; // last message
+    const combatInstrs = lastMessage?.instructions?.find(i => i.type === 'combat_start');
+    if (!combatInstrs) return;
 
-    type MessageWithInstructions = ChatMessageDto & { instructions?: { type: string }[] };
-    const hasCombatStart = (m: MessageWithInstructions) => m.role === 'assistant' && m.instructions?.some(i => i.type === 'combat_start');
-
-    const lastAssistant = [...messages].reverse()
-      .find(hasCombatStart) as MessageWithInstructions | undefined;
-    if (!lastAssistant?.instructions) return;
-
-    const combatInstrs = lastAssistant.instructions.filter(i => i.type === 'combat_start');
-    if (!combatInstrs.length) return;
-
-    try {
-      await this.chatOrchestrator.processInstructions(userId, characterId, combatInstrs);
-      this.logger.log(`Processed historical combat_start for ${characterId}`);
-    } catch (e) {
-      this.logger.warn(`Failed to process historical combat_start for ${characterId}: ${(e as Error)?.message}`);
-    }
+    await this.chatOrchestrator.processInstructions(userId, characterId, [combatInstrs]);
   }
 
   private async initSessionAndStartIfNeeded(
