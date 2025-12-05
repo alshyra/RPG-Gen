@@ -5,6 +5,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
 import type { INestApplication } from '@nestjs/common';
 import type { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
@@ -29,7 +32,13 @@ export async function createTestApp(
   }[],
 ): Promise<TestAppContext> {
   // Start in-memory MongoDB
-  const mongoServer = await MongoMemoryServer.create();
+  // Use a unique download/cache directory per test run to avoid lockfile collisions
+  // seen in concurrent CI runners or previous cached binaries. We pick a tmpdir path
+  // using the process pid and timestamp to ensure uniqueness.
+  const downloadDir = path.join(os.tmpdir(), `mongodb-binaries-${process.pid}-${Date.now()}`);
+  // Make sure directory exists before passing to the server
+  await fs.promises.mkdir(downloadDir, { recursive: true });
+  const mongoServer = await MongoMemoryServer.create({ binary: { downloadDir } });
   const mongoUri = mongoServer.getUri();
 
   // Build testing module

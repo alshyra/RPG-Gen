@@ -24,3 +24,14 @@ Two lightweight, unauthenticated endpoints are available to check server readine
 - GET /health → { status: 'ok', pid, uptime, timestamp }
 
 These are suitable for load balancer and Kubernetes readiness/liveness checks.
+
+## Testing notes — mongodb-memory-server cache/lockfile issues
+
+CI environments that run tests in parallel can hit lockfile conflicts when the
+default mongodb-memory-server cache directory is shared across runs. To make
+tests robust we configure a unique temporary download/cache directory for the
+test Mongo instances (see `test/helpers/test-app.ts`). This prevents
+UnableToUnlockLockfileError in CI and local parallel test runs.
+
+If you need to customise this behavior in CI, you can set the
+MONGOMS_DOWNLOAD_DIR env var to a directory unique for the job or runner.
