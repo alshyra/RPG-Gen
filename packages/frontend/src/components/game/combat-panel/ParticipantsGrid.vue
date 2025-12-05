@@ -6,7 +6,7 @@
         :key="p.id || idx"
         class="shrink-0 p-1"
         :style="{ width: '120px', height: '120px' }"
-        :data-cy="p.id"
+        :data-cy="`enemy-${idx}`"
       >
         <FighterPortrait
           :fighter="p"

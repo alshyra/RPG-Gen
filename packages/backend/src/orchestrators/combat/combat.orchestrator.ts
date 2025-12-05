@@ -189,6 +189,22 @@ export class CombatOrchestrator {
         await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
         this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
       }
+
+      // Persist combat_end instruction to conversation history
+      try {
+        await this.conversationService.append(userId, characterId, {
+          role: 'assistant',
+          narrative: combatEnd.narrative,
+          instructions: [
+            {
+              type: 'combat_end',
+              combat_end: combatEnd,
+            },
+          ],
+        });
+      } catch (e) {
+        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+      }
     }
 
     return response;

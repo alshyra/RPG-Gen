@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import {
-  ArmorMeta, ConsumableMeta, GenericMeta, PackMeta, ToolMeta, WeaponMeta, type InventoryItemMeta,
+  ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, WeaponMeta, type InventoryItemMeta,
 } from './InventoryItemMeta.js';
 import { IsObject, IsOptional } from 'class-validator';
 

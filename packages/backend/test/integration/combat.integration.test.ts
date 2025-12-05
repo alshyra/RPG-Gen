@@ -524,7 +524,24 @@ test('processAttack returns combatEnd when killing last enemy', async (t) => {
   const testCtx = await setupCombatTest([15, 10, 20, 20]); // init rolls + attack roll + damage roll
 
   try {
-    const character = createTestCharacter({ characterId: 'attack-combat-end-char' });
+    // Create a real character in the database
+    const charDoc = await testCtx.characterService.create(TEST_USER_ID, 'test-world');
+    // Update the character with combat-ready stats
+    await testCtx.characterService.update(TEST_USER_ID, charDoc.characterId, {
+      hp: 20,
+      hpMax: 20,
+      scores: {
+        Str: 16,
+        Dex: 14,
+        Con: 14,
+        Int: 10,
+        Wis: 12,
+        Cha: 8,
+      },
+    });
+
+    const character = await testCtx.characterService.findByCharacterId(TEST_USER_ID, charDoc.characterId);
+
     // Create a single enemy with low HP
     const combatStart = createCombatStartRequest(1);
     combatStart.combat_start[0].hp = 1;

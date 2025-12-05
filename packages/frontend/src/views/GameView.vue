@@ -84,7 +84,7 @@ const combat = useCombat();
 const {
   inCombat,
 } = storeToRefs(combatStore);
-const { showAttackResultModal } = storeToRefs(combatStore);
+
 /**
  * Handle sending a message - either as a command or regular message
  */

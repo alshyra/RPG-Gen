@@ -33,6 +33,8 @@ describe('Turn-based combat flow', () => {
     // Navigate to game view with combat ready
     cy.intercept('GET', '**/api/characters')
       .as('getCharacters');
+    cy.intercept('GET', '**/api/combat/*/status')
+      .as('combatStatus');
     cy.visit('/home');
     cy.wait('@getCharacters', { timeout: 15000 });
 
@@ -43,6 +45,15 @@ describe('Turn-based combat flow', () => {
 
     cy.url()
       .should('match', /\/(game)\/[A-Za-z0-9-]+/);
+
+    // Wait for combat status to be loaded
+    cy.wait('@combatStatus', { timeout: 10000 });
+
+    // Wait for combat panel to be visible with enemies
+    cy.get('[data-cy="combat-panel"]', { timeout: 10000 })
+      .should('exist');
+    cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
+      .should('have.length.gte', 1);
 
     cy.url()
       .then((u: string) => {

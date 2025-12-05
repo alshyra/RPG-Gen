@@ -46,7 +46,7 @@ const sharedRules = {
 };
 
 export default defineConfig([
-  { ignores: ['**/dist/**', '**/node_modules/**', 'packages/shared/src/openapi.json'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', 'packages/shared/src/openapi.json', 'packages/shared/src/api-types.ts', 'packages/shared/src/index.ts'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   tseslint.configs.stylistic,

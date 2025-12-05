@@ -44,28 +44,46 @@ describe('Combat flow', () => {
       .then((charId: string) => {
       // If the UI landed on the character creation step, navigate directly to the game page
         // Trigger a combat start on the backend for this character
-        cy.wait(500);
+        // Wait for the combat status API call to complete
+        cy.intercept('GET', '**/api/combat/*/status')
+          .as('combatStatus');
+        cy.wait('@combatStatus', { timeout: 10000 });
 
-        // Combat Panel should be visible
-        cy.get('[data-cy="combat-panel"]')
+        // Combat Panel should be visible (with longer timeout for combat to initialize)
+        cy.get('[data-cy="combat-panel"]', { timeout: 10000 })
           .should('exist');
 
-        // Expect at least one enemy tile plus the player portrait
+        // Debug: log what's in the combat panel
+        cy.get('[data-cy="combat-panel"]')
+          .then(($panel) => {
+            cy.log('Combat panel content: ' + $panel.html()
+              .substring(0, 500));
+          });
+
+        // Wait for enemies to be rendered
+        cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
+          .should('have.length.gte', 1);
+
+        // Debug: log the enemy elements
         cy.get('[data-cy^="enemy-"]')
-          .its('length')
-          .should('be.gte', 1);
+          .then(($enemies) => {
+            cy.log('Found ' + $enemies.length + ' enemies');
+            $enemies.each((i, el) => {
+              cy.log('Enemy ' + i + ': ' + el.outerHTML.substring(0, 200));
+            });
+          });
 
         // Intercept the attack request so we can wait for the backend to process it
         cy.intercept('POST', '**/api/combat/*/attack/*')
           .as('attackReq');
 
-        // Find the first enemy tile by deterministic selector and click its attack button
+        // Find the first enemy tile and click its attack button
+        // Use a more flexible selector that works within the enemy container
         cy.get('[data-cy="enemy-0"]')
           .should('exist')
-          .within(() => {
-            cy.get('[data-cy="attack-button"]')
-              .click();
-          });
+          .find('[data-cy="attack-button"]')
+          .should('exist')
+          .click();
 
         // Wait for the backend attack call to complete (precedes roll modal)
         cy.wait('@attackReq', { timeout: 10000 });

@@ -67,7 +67,6 @@ export class ConversationService {
     if (error || !data) {
       throw new Error('Failed to send structured message');
     }
-    debugger;
     return data;
   }
 }

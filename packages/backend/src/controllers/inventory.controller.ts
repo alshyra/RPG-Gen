@@ -6,7 +6,6 @@ import {
   Post,
   Req,
   UseGuards,
-  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,

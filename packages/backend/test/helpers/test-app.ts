@@ -42,10 +42,10 @@ export async function createTestApp(
 
   // Apply provider overrides (e.g., mock DiceService)
   if (overrides) {
-    for (const override of overrides) {
+    overrides.forEach((override) => {
       moduleBuilder = moduleBuilder.overrideProvider(override.provide)
         .useValue(override.useValue);
-    }
+    });
   }
 
   const module = await moduleBuilder.compile();
@@ -77,7 +77,8 @@ export async function closeTestApp(ctx: TestAppContext): Promise<void> {
  */
 export async function clearDatabase(ctx: TestAppContext): Promise<void> {
   const { collections } = ctx.mongoConnection;
-  for (const key of Object.keys(collections)) {
-    await collections[key].deleteMany({});
-  }
+  const keys = Object.keys(collections);
+  await Promise.all(
+    keys.map(key => collections[key].deleteMany({})),
+  );
 }
