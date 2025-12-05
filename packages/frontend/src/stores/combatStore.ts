@@ -4,15 +4,15 @@ import {
 } from 'vue';
 import { combatService } from '../apis/combatApi';
 import type {
-  CombatantDto, TurnResultWithInstructionsDto, CombatEnemyDto, CombatStartRequestDto, AttackResultDto, CombatStateDto,
-  AttackResponseDto,
+  CombatantDto, CombatStartRequestDto, CombatStateDto,
+  AttackResponseDto, EndPlayerTurnResponseDto,
 } from '@rpg-gen/shared';
 import type { CombatPhase } from '@rpg-gen/shared';
 import type { Ref } from 'vue';
 
 // Helper types
 interface AttackQueueItem {
-  result: AttackResultDto;
+  result: AttackResponseDto;
   isPlayerAttack: boolean;
 }
 
@@ -22,6 +22,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const inCombat = ref(false);
   const roundNumber = ref(1);
   const enemies = ref<CombatantDto[]>([]);
+  const player = ref<CombatantDto | null>(null);
   const turnOrder = ref<CombatantDto[]>([]);
   const playerInitiative = ref(0);
   const currentTarget = ref<CombatantDto | null>(null);
@@ -58,6 +59,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     console.log('[combatStore] initializeCombat', response);
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
+    player.value = response.player ?? null;
     playerInitiative.value = response.player.initiative ?? 0;
     enemies.value = response.enemies ?? [];
     turnOrder.value = response.turnOrder ?? [];
@@ -77,7 +79,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     }
   };
 
-  const selectNextAliveTarget = (enemies: Ref<CombatantDto[]>): CombatantDto | null => enemies.value.find(e => e.hp > 0) || null;
+  const selectNextAliveTarget = (enemies: Ref<CombatantDto[]>): CombatantDto | null => enemies.value.find(e => (e.hp ?? 0) > 0) || null;
 
   const updateEnemiesFromResult = (enemies: Ref<CombatantDto[]>, remainingEnemies: CombatantDto[]) => enemies.value.map((enemy) => {
     const updatedEnemy = remainingEnemies.find(e => e.id === enemy.id);
@@ -89,11 +91,12 @@ export const useCombatStore = defineStore('combatStore', () => {
       : enemy;
   });
 
-  const updateFromTurnResult = (result: TurnResultWithInstructionsDto) => {
-    // prefer the included state snapshot to avoid relying on duplicated turn fields
-    const s = result.state;
+  const updateFromTurnResult = (result: EndPlayerTurnResponseDto) => {
+    // EndPlayerTurnResponseDto has combatState property with the updated state
+    const s = result.combatState;
     if (s) {
-      enemies.value = s.enemies ?? updateEnemiesFromResult(enemies, result.remainingEnemies);
+      enemies.value = s.enemies ?? enemies.value;
+      player.value = s.player ?? player.value;
       roundNumber.value = s.roundNumber ?? result.roundNumber;
       turnOrder.value = s.turnOrder ?? turnOrder.value;
       currentTurnIndex.value = s.currentTurnIndex ?? currentTurnIndex.value;
@@ -105,35 +108,26 @@ export const useCombatStore = defineStore('combatStore', () => {
       bonusActionMax.value = s.bonusActionMax ?? bonusActionMax.value;
       phase.value = s.phase ?? phase.value;
     } else {
-      enemies.value = updateEnemiesFromResult(enemies, result.remainingEnemies);
       roundNumber.value = result.roundNumber;
     }
 
-    // Update action economy from result
-    // action economy may be returned directly, but prefer values from result.state when available
-    if (result.state) {
-      if (result.state.actionRemaining !== undefined) actionRemaining.value = result.state.actionRemaining;
-      if (result.state.actionMax !== undefined) actionMax.value = result.state.actionMax;
-      if (result.state.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.state.bonusActionRemaining;
-      if (result.state.bonusActionMax !== undefined) bonusActionMax.value = result.state.bonusActionMax;
-      if (result.state.phase) {
-        phase.value = result.state.phase;
+    // Update action economy from combatState
+    if (result.combatState) {
+      if (result.combatState.actionRemaining !== undefined) actionRemaining.value = result.combatState.actionRemaining;
+      if (result.combatState.actionMax !== undefined) actionMax.value = result.combatState.actionMax;
+      if (result.combatState.bonusActionRemaining !== undefined) bonusActionRemaining.value = result.combatState.bonusActionRemaining;
+      if (result.combatState.bonusActionMax !== undefined) bonusActionMax.value = result.combatState.bonusActionMax;
+      if (result.combatState.phase) {
+        phase.value = result.combatState.phase;
         // If phase returned to PLAYER_TURN, reset expectedDto to accept new attacks
-        if (result.state.phase === 'PLAYER_TURN') {
+        if (result.combatState.phase === 'PLAYER_TURN') {
           expectedDto.value = 'AttackRequestDto';
         }
       }
-    } else if ((result as any).phase) {
-      // legacy fallback: some older servers returned phase at top-level
-      const p = (result as any).phase as unknown as typeof phase.value;
-      phase.value = p;
-      // If phase returned to PLAYER_TURN, reset expectedDto to accept new attacks
-      if (p === 'PLAYER_TURN') {
-        expectedDto.value = 'AttackRequestDto';
-      }
     }
 
-    if (result.combatEnded) {
+    // Check if combat ended via playerDefeated or empty enemies
+    if (result.playerDefeated || (result.combatState?.enemies?.length === 0)) {
       inCombat.value = false;
       phase.value = 'COMBAT_ENDED';
       actionToken.value = null;
@@ -145,7 +139,7 @@ export const useCombatStore = defineStore('combatStore', () => {
    * Update only enemies and round number without touching phase/expectedDto.
    * Used when attack hits and a roll instruction is pending.
    */
-  const updateEnemiesOnly = (remainingEnemies: CombatEnemyDto[], newRoundNumber: number) => {
+  const updateEnemiesOnly = (remainingEnemies: CombatantDto[], newRoundNumber: number) => {
     enemies.value = updateEnemiesFromResult(enemies, remainingEnemies);
     roundNumber.value = newRoundNumber;
     currentTarget.value = selectNextAliveTarget(enemies);
@@ -220,6 +214,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   return {
     inCombat,
     enemies,
+    player,
     currentTarget,
     roundNumber,
     actionToken,

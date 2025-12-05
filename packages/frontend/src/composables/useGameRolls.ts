@@ -1,8 +1,7 @@
 import type {
-  DiceThrowDto,
+  DiceResultDto,
   GameInstructionDto,
   RollInstructionMessageDto,
-  TurnResultWithInstructionsDto,
 } from '@rpg-gen/shared';
 import {
   isHpInstruction,
@@ -16,7 +15,6 @@ import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 import { useCombatStore } from '../stores/combatStore';
-import { combatService } from '../apis/combatApi';
 
 export function useGameRolls() {
   const gameStore = useGameStore();
@@ -108,107 +106,105 @@ export function useGameRolls() {
     else if (isHpInstruction(instr)) handleAdditionalHp(instr);
   };
 
-  const processResponseInstructions = (
-    instructions: GameInstructionDto[],
-  ): void => {
-    instructions.forEach(instr => processSingleInstruction(instr));
-  };
-
   // ─────────────────────────────────────────────────────────────────────────────
-  // Combat roll helpers
+  // Combat roll helpers - CURRENTLY UNUSED
+  // These functions are kept for reference but are commented out as the
+  // old TurnResultWithInstructionsDto type no longer exists.
+  // The backend now uses AttackResponseDto for attack results.
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const updateCombatStoreFromResponse = (resp: TurnResultWithInstructionsDto | null): void => {
-    if (!resp) return;
-    if (resp.remainingEnemies ?? resp.playerHp ?? resp.roundNumber) {
-      try {
-        combatStore.updateFromTurnResult(resp);
-      } catch {
-      // best-effort update
-      }
-    }
-  };
+  // const processResponseInstructions = (
+  //   instructions: GameInstructionDto[],
+  // ): void => {
+  //   instructions.forEach(instr => processSingleInstruction(instr));
+  // };
 
-  const handleDamageEnemyHpDisplay = (
-    resp: TurnResultWithInstructionsDto,
-    targetName: string,
-  ): void => {
-    if (!Array.isArray(resp.remainingEnemies)) return;
-    const updated = resp.remainingEnemies.find(e => e.name === targetName);
-    if (!updated) return;
-    const hpNow = typeof updated.hp === 'number' ? updated.hp : undefined;
-    const hpMax = updated.hpMax ?? undefined;
-    if (typeof hpNow !== 'number') return;
-    gameStore.appendMessage('system', `🩸 ${targetName} a ${hpNow}${hpMax ? `/${hpMax}` : ''} PV restants`);
-    if (hpNow <= 0) gameStore.appendMessage('system', `☠️ ${targetName} est vaincu !`);
-  };
+  // const updateCombatStoreFromResponse = (resp: AttackResponseDto | null): void => {
+  //   if (!resp) return;
+  //   if (resp.combatState) {
+  //     try {
+  //       combatStore.initializeCombat(resp.combatState);
+  //     } catch {
+  //     // best-effort update
+  //     }
+  //   }
+  // };
 
-  const processSingleAttackInstruction = (
-    instr: GameInstructionDto,
-  ): void => {
-    if (isRollInstruction(instr)) {
-      gameStore.pendingInstruction = instr;
-      gameStore.appendMessage('system', `🎲 ${instr.description ?? 'Additional roll required'}: ${instr.dices}`);
-    } else if (isXpInstruction(instr)) {
-      handleAdditionalXp(instr);
-    } else if (isHpInstruction(instr)) {
-      handleAdditionalHp(instr);
-    }
-  };
+  // const handleDamageEnemyHpDisplay = (
+  //   resp: AttackResponseDto,
+  //   targetName: string,
+  // ): void => {
+  //   if (!resp.combatState?.enemies || !Array.isArray(resp.combatState.enemies)) return;
+  //   const updated = resp.combatState.enemies.find((e: { name: string }) => e.name === targetName);
+  //   if (!updated) return;
+  //   const hpNow = typeof updated.hp === 'number' ? updated.hp : undefined;
+  //   const hpMax = updated.hpMax ?? undefined;
+  //   if (typeof hpNow !== 'number') return;
+  //   gameStore.appendMessage('system', `🩸 ${targetName} a ${hpNow}${hpMax ? `/${hpMax}` : ''} PV restants`);
+  //   if (hpNow <= 0) gameStore.appendMessage('system', `☠️ ${targetName} est vaincu !`);
+  // };
 
-  const processAttackInstructions = (
-    instructions: GameInstructionDto[],
-  ): void => {
-    instructions.forEach(instr => processSingleAttackInstruction(instr));
-  };
+  // const processSingleAttackInstruction = (
+  //   instr: GameInstructionDto,
+  // ): void => {
+  //   if (isRollInstruction(instr)) {
+  //     gameStore.pendingInstruction = instr;
+  //     gameStore.appendMessage('system', `🎲 ${instr.description ?? 'Additional roll required'}: ${instr.dices}`);
+  //   } else if (isXpInstruction(instr)) {
+  //     handleAdditionalXp(instr);
+  //   } else if (isHpInstruction(instr)) {
+  //     handleAdditionalHp(instr);
+  //   }
+  // };
 
-  const handleAttackRollResponse = async (
-    resp: TurnResultWithInstructionsDto,
-  ): Promise<void> => {
-    updateCombatStoreFromResponse(resp);
+  // const processAttackInstructions = (
+  //   instructions: GameInstructionDto[],
+  // ): void => {
+  //   instructions.forEach(instr => processSingleAttackInstruction(instr));
+  // };
 
-    const instrs = resp.rollInstruction ? [resp.rollInstruction] : ((resp as any).instructions ?? []);
-    if (instrs && instrs.length > 0) processAttackInstructions(instrs);
-    if (resp.narrative) gameStore.appendMessage('assistant', resp.narrative);
+  // Unused in new API - kept for reference
+  // const handleAttackRollResponse = async (
+  //   resp: AttackResponseDto,
+  // ): Promise<void> => {
+  //   updateCombatStoreFromResponse(resp);
+  //   // AttackResponseDto no longer has rollInstruction or narrative properties
+  //   gameStore.pendingInstruction = null;
+  //   gameStore.showRollModal = false;
+  // };
 
-    // Hide modal if no further rolls needed
-    if (!instrs?.length) {
-      gameStore.pendingInstruction = null;
-      gameStore.showRollModal = false;
-    }
-  };
-
-  const handleDamageRollResponse = async (
-    resp: TurnResultWithInstructionsDto,
-    targetName: string,
-    damageTotal: number,
-  ): Promise<void> => {
-    updateCombatStoreFromResponse(resp);
-    gameStore.appendMessage('system', `💥 Dégâts infligés à ${targetName}: ${damageTotal}`);
-    try {
-      handleDamageEnemyHpDisplay(resp, targetName);
-    } catch {
-    // best-effort
-    }
-    // XP is awarded at explicit end-of-combat flows, not embedded in turn results.
-  };
+  // Unused in new API - kept for reference
+  // const handleDamageRollResponse = async (
+  //   resp: AttackResponseDto,
+  //   targetName: string,
+  //   damageTotal: number,
+  // ): Promise<void> => {
+  //   updateCombatStoreFromResponse(resp);
+  //   gameStore.appendMessage('system', `💥 Dégâts infligés à ${targetName}: ${damageTotal}`);
+  //   try {
+  //     handleDamageEnemyHpDisplay(resp, targetName);
+  //   } catch {
+  //   // best-effort
+  //   }
+  // };
 
   const buildRollData = (
-    rollResult: DiceThrowDto,
+    rollResult: DiceResultDto,
     instr: RollInstructionMessageDto,
     skillName: string,
     skillBonus: number,
   ) => {
     const { meta } = instr;
+    // DiceResultDto no longer has advantage/keptRoll/discardedRoll - use instruction data instead
     return {
       skillName,
       rolls: rollResult.rolls,
       bonus: skillBonus,
       total: rollResult.total + skillBonus,
       diceNotation: instr.dices,
-      advantage: rollResult.advantage,
-      keptRoll: rollResult.keptRoll,
-      discardedRoll: rollResult.discardedRoll,
+      advantage: instr.advantage,
+      keptRoll: null,
+      discardedRoll: null,
       action: meta?.action,
       target: meta?.target,
       targetAc: typeof meta?.targetAc === 'number' ? meta.targetAc : null,
@@ -224,34 +220,37 @@ export function useGameRolls() {
   // Roll submission helpers (module-level)
   // ─────────────────────────────────────────────────────────────────────────────
 
+  // TODO: submitCombatRoll uses resolveRollWithToken which no longer exists in the API
+  // The new combat system uses attack() directly on combat targets
+  // This function needs to be refactored or removed
   const submitCombatRoll = async (
-    characterId: string,
-    total: number,
-    rolls: number[],
+    _characterId: string,
+    _total: number,
+    _rolls: number[],
   ): Promise<void> => {
-    const { actionToken } = combatStore;
-    if (!actionToken) {
-      gameStore.appendMessage('system', 'No action token available for combat roll');
-      return;
-    }
-    const pending = gameStore.pendingInstruction;
-    const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
-    const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
-    const payload: DiceThrowDto & { action?: string;
-      target?: string; } = {
-      rolls,
-      mod: 0,
-      total,
-      action,
-      target,
-    };
-    const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
-    const responseInstrs = resp.rollInstruction ? [resp.rollInstruction] : ((resp as any).instructions ?? []);
-    if (responseInstrs && responseInstrs.length > 0) {
-      processResponseInstructions(responseInstrs);
-    } else {
-      gameStore.appendMessage('system', 'Roll submitted to combat');
-    }
+    // const { actionToken } = combatStore;
+    // if (!actionToken) {
+    //   gameStore.appendMessage('system', 'No action token available for combat roll');
+    //   return;
+    // }
+    // const pending = gameStore.pendingInstruction;
+    // const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
+    // const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
+    // const payload: DiceResultDto & { action?: string; target?: string; } = {
+    //   rolls,
+    //   mod: 0,
+    //   total,
+    //   action,
+    //   target,
+    // };
+    // const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
+    // const responseInstrs = resp.rollInstruction ? [resp.rollInstruction] : [];
+    // if (responseInstrs && responseInstrs.length > 0) {
+    //   processResponseInstructions(responseInstrs);
+    // } else {
+    //   gameStore.appendMessage('system', 'Roll submitted to combat');
+    // }
+    gameStore.appendMessage('system', 'Combat roll submission not yet implemented in new API');
   };
 
   const submitNonCombatRoll = async (
@@ -320,35 +319,35 @@ export function useGameRolls() {
     };
   };
 
+  // TODO: handleConfirmAttack uses resolveRollWithToken which no longer exists
+  // The new combat system handles attacks differently via combatService.attack()
   const handleConfirmAttack = async (): Promise<void> => {
-    const {
-      rolls, total,
-    } = gameStore.rollData;
-    const characterId = characterStore.currentCharacter?.characterId;
-    const { actionToken } = combatStore;
-    if (!characterId || !actionToken) {
-      gameStore.appendMessage('system', 'No character or action token; cannot resolve attack.');
-      return;
-    }
-    const pending = gameStore.pendingInstruction;
-    const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
-    const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
-    const payload: DiceThrowDto & { action?: string;
-      target?: string; } = {
-      rolls: rolls ?? [],
-      mod: 0,
-      total: total ?? 0,
-      action,
-      target,
-    };
-    const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
-    if (resp) await handleAttackRollResponse(resp);
+    // const { rolls, total } = gameStore.rollData;
+    // const characterId = characterStore.currentCharacter?.characterId;
+    // const { actionToken } = combatStore;
+    // if (!characterId || !actionToken) {
+    //   gameStore.appendMessage('system', 'No character or action token; cannot resolve attack.');
+    //   return;
+    // }
+    // const pending = gameStore.pendingInstruction;
+    // const action = pending && isRollInstruction(pending) ? pending.meta?.action : undefined;
+    // const target = pending && isRollInstruction(pending) ? pending.meta?.target : undefined;
+    // const payload: DiceResultDto & { action?: string; target?: string; } = {
+    //   rolls: rolls ?? [],
+    //   mod: 0,
+    //   total: total ?? 0,
+    //   action,
+    //   target,
+    // };
+    // const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
+    // if (resp) await handleAttackRollResponse(resp);
+    gameStore.appendMessage('system', 'Attack confirmation not yet implemented in new API');
   };
 
+  // TODO: handleConfirmDamage uses resolveRollWithToken which no longer exists
+  // The new combat system handles damage differently
   const handleConfirmDamage = async (pending: RollInstructionMessageDto): Promise<void> => {
-    const {
-      total, rolls,
-    } = gameStore.rollData;
+    const { total } = gameStore.rollData;
     const { meta } = pending;
     const targetName = meta?.target;
     const damageTotal = total ?? 0;
@@ -357,21 +356,21 @@ export function useGameRolls() {
       gameStore.appendMessage('system', `💥 Dégâts: ${damageTotal}`);
       return;
     }
-    const characterId = characterStore.currentCharacter?.characterId;
-    const { actionToken } = combatStore;
-    if (!characterId || !actionToken) return;
-    const payload: DiceThrowDto & { action?: string;
-      target?: string; } = {
-      rolls: rolls ?? [],
-      mod: 0,
-      total: damageTotal,
-      action: 'damage',
-      target: targetName,
-    };
-    const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
-    if (resp && targetName) {
-      await handleDamageRollResponse(resp, targetName, damageTotal);
-    }
+    // const characterId = characterStore.currentCharacter?.characterId;
+    // const { actionToken } = combatStore;
+    // if (!characterId || !actionToken) return;
+    // const payload: DiceResultDto & { action?: string; target?: string; } = {
+    //   rolls: rolls ?? [],
+    //   mod: 0,
+    //   total: damageTotal,
+    //   action: 'damage',
+    //   target: targetName,
+    // };
+    // const resp = await combatService.resolveRollWithToken(characterId, actionToken, payload);
+    // if (resp && targetName) {
+    //   await handleDamageRollResponse(resp, targetName, damageTotal);
+    // }
+    gameStore.appendMessage('system', `Damage: ${damageTotal} to ${targetName ?? 'target'} (confirmation pending new API)`);
   };
 
   const handleConfirmNonCombat = async (criticalNote: string): Promise<void> => {
@@ -410,7 +409,7 @@ export function useGameRolls() {
     await handleConfirmNonCombat(criticalNote);
     closeModal();
   };
-  const onDiceRolled = async (rollResult: DiceThrowDto): Promise<void> => {
+  const onDiceRolled = async (rollResult: DiceResultDto): Promise<void> => {
     const pending = gameStore.pendingInstruction;
     if (!pending || !isRollInstruction(pending)) return;
     const skillName = pending.modifierLabel ?? 'Roll';

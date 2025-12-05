@@ -12,7 +12,9 @@ import type {
   CombatStartRequestDto,
   CombatStateDto,
   CombatantDto,
+  EndPlayerTurnResponseDto,
 } from '../../domain/combat/dto/index.js';
+import type { EnemyAttackLogDto } from '../../domain/combat/dto/EnemyAttackLogDto.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
 
 /**
@@ -162,22 +164,21 @@ export class CombatOrchestrator {
   }
 
   /**
-   * faut faire jouer tous les enemies et calculer les dégats
-   * retourner un tableau d'attaques
+   * End player turn and process all enemy attacks.
+   * Returns attack logs for frontend to replay with animations.
    */
-  public async endPlayerTurn(characterId: string): Promise<CombatStateDto> {
+  public async endPlayerTurn(characterId: string): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException('combat state not found');
 
     combatState.phase = 'ENEMY_TURN';
 
-    // Process enemy turns in order; an early stop is required if the player dies
+    // Process enemy turns in order; collect attack logs
     const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
-    await this.processCombatantTurns(
+    const enemyTurnResult = await this.processEnemyTurnsWithLogs(
       characterId,
       combatState,
       aliveEnemies,
-      (e: CombatantDto) => e.id,
     );
 
     // After enemies have acted, set back to player's turn and persist
@@ -185,13 +186,103 @@ export class CombatOrchestrator {
     if (finalState) {
       finalState.phase = 'PLAYER_TURN';
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
+      finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
       finalState.actionRemaining = finalState.actionMax ?? 1;
       finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
       await this.combatAppService.saveCombatState(finalState);
-      return finalState;
+
+      return {
+        roundNumber: finalState.roundNumber,
+        attackLogs: enemyTurnResult.attackLogs,
+        totalDamageToPlayer: enemyTurnResult.totalDamage,
+        playerDefeated: enemyTurnResult.playerDefeated,
+        combatState: finalState,
+      };
     }
 
     throw new NotFoundException('combat state not found after enemy turns');
+  }
+
+  /**
+   * Process a single enemy attack and return the log entry.
+   */
+  private async processEnemyAttack(
+    characterId: string,
+    enemy: CombatantDto,
+    currentState: CombatStateDto,
+  ): Promise<{
+    log: EnemyAttackLogDto;
+    damage: number;
+    state: CombatStateDto;
+    playerDefeated: boolean;
+  }> {
+    const attackRoll = this.diceService.rollAttack(enemy.attackBonus ?? 0, currentState.player.ac);
+
+    const attackLog: EnemyAttackLogDto = {
+      attackerId: enemy.id,
+      attackerName: enemy.name,
+      targetId: characterId,
+      hit: attackRoll.hit,
+      attackRoll: attackRoll.diceResult,
+      isCrit: attackRoll.isCrit,
+    };
+
+    if (!attackRoll.hit) {
+      return {
+        log: attackLog,
+        damage: 0,
+        state: currentState,
+        playerDefeated: false,
+      };
+    }
+
+    const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
+    attackLog.damageRoll = damageResult;
+    attackLog.damageTotal = damageResult.damageTotal;
+
+    const updatedState = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
+
+    return {
+      log: attackLog,
+      damage: damageResult.damageTotal,
+      state: updatedState,
+      playerDefeated: updatedState.player.hp <= 0,
+    };
+  }
+
+  /**
+   * Process enemy attacks and collect logs for each attack.
+   */
+  private async processEnemyTurnsWithLogs(
+    characterId: string,
+    state: CombatStateDto,
+    enemies: CombatantDto[],
+  ): Promise<{
+    state: CombatStateDto;
+    attackLogs: EnemyAttackLogDto[];
+    totalDamage: number;
+    playerDefeated: boolean;
+  }> {
+    const result = await enemies.reduce(async (accPromise, enemy) => {
+      const acc = await accPromise;
+      if (acc.playerDefeated || (enemy.hp ?? 0) <= 0) return acc;
+
+      const attackResult = await this.processEnemyAttack(characterId, enemy, acc.state);
+
+      return {
+        state: attackResult.state,
+        attackLogs: [...acc.attackLogs, attackResult.log],
+        totalDamage: acc.totalDamage + attackResult.damage,
+        playerDefeated: attackResult.playerDefeated,
+      };
+    }, Promise.resolve({
+      state,
+      attackLogs: [] as EnemyAttackLogDto[],
+      totalDamage: 0,
+      playerDefeated: false,
+    }));
+
+    return result;
   }
 
   /**

@@ -5,3 +5,5 @@ export * from './CombatEndResponseDto.js';
 export * from './CombatEndResultDto.js';
 export * from './CombatStartRequestDto.js';
 export * from './CombatStateDto.js';
+export * from './EnemyAttackLogDto.js';
+export * from './EndPlayerTurnResponseDto.js';

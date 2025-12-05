@@ -12,8 +12,7 @@ type SpellInstructionMessageDto = components['schemas']['SpellInstructionMessage
 type InventoryInstructionMessageDto = components['schemas']['InventoryInstructionMessageDto'];
 type CombatStartInstructionMessageDto = components['schemas']['CombatStartInstructionMessageDto'];
 // combat_end instruction removed (server returns CombatEndResponseDto via API)
-type CombatRollRequestDto = components['schemas']['CombatRollRequestDto'];
-type CombatRollResultDto = components['schemas']['CombatRollResultDto'];
+// CombatRollRequestDto and CombatRollResultDto no longer exist in the schema
 
 /**
  * Union type for all game instructions
@@ -75,20 +74,8 @@ export function isCombatStartInstruction(instruction: unknown): instruction is C
   return isObject(instruction) && instruction.type === 'combat_start' && Array.isArray(instruction.combat_start);
 }
 
-/**
- * Type guard for combat end instructions
- */
-/** Type guard for Combat roll requests (alias for RollInstructionMessageDto in combat flows) */
-export function isCombatRollRequest(instruction: unknown): instruction is CombatRollRequestDto {
-  return isRollInstruction(instruction);
-}
-
-/** Type guard for resolved combat roll payloads submitted by client (CombatRollResultDto) */
-export function isCombatRollResult(payload: unknown): payload is CombatRollResultDto {
-  if (!isObject(payload)) return false;
-  const p = payload as Record<string, unknown>;
-  return Array.isArray(p.rolls) && typeof p.total === 'number';
-}
+// Removed: isCombatRollRequest and isCombatRollResult - types no longer exist in schema
+// Use isRollInstruction for roll-related type guards
 
 /**
  * Type guard for any valid game instruction

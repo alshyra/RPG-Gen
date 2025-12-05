@@ -1,6 +1,6 @@
 import { characterApi } from '@/apis/characterApi';
 import {
-  CharacterResponseDto, ItemResponseDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto,
+  CharacterResponseDto, InventoryItemDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto,
 } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import {
@@ -18,10 +18,10 @@ const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellR
 });
 
 const updateInventoryQuantity = (
-  inventory: ItemResponseDto[] | undefined,
+  inventory: InventoryItemDto[] | undefined,
   definitionId: string,
   quantity: number,
-): ItemResponseDto[] => (inventory ?? [])
+): InventoryItemDto[] => (inventory ?? [])
   .map((item) => {
     if (item.definitionId !== definitionId) return item;
     return {
@@ -32,13 +32,19 @@ const updateInventoryQuantity = (
   .filter(i => (i.qty ?? 0) > 0);
 
 const findItemByIdentifier = (
-  inventory: ItemResponseDto[],
+  inventory: InventoryItemDto[],
   identifier: string,
-): ItemResponseDto | undefined => inventory.find(
+): InventoryItemDto | undefined => inventory.find(
   i => i._id === identifier || i.definitionId === identifier || i.name === identifier,
 );
 
-const isItemUsable = (item: ItemResponseDto): boolean => !!item.meta?.usable || !!item.meta?.consumable;
+const isItemUsable = (item: InventoryItemDto): boolean => {
+  // Check if meta is consumable type with usable property
+  if (item.meta && 'type' in item.meta && item.meta.type === 'consumable') {
+    return !!(item.meta as { usable?: boolean }).usable;
+  }
+  return false;
+};
 
 const createHpUpdater = (charRef: Ref<CharacterResponseDto | undefined>) => (delta: number) => {
   if (!charRef.value) return;
@@ -85,14 +91,14 @@ export const useCharacterStore = defineStore('character', () => {
   const learnSpell = spellManager.learn;
   const forgetSpell = spellManager.forget;
 
-  const removeInventoryItem = async (definitionId: ItemResponseDto['definitionId'], quantity = 1) => {
+  const removeInventoryItem = async (definitionId: InventoryItemDto['definitionId'], quantity = 1) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;
     currentCharacter.value.inventory = updateInventoryQuantity(currentCharacter.value.inventory, definitionId, quantity);
     const updated = await characterApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
     currentCharacter.value = updated;
   };
 
-  const addInventoryItem = async (item: Partial<ItemResponseDto>) => {
+  const addInventoryItem = async (item: Partial<InventoryItemDto>) => {
     if (!currentCharacter.value?.characterId || !item) return;
     const updated = await characterApi.addInventoryItem(currentCharacter.value.characterId, item);
     currentCharacter.value = updated;

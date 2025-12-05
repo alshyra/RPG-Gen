@@ -1,31 +1,34 @@
 <template>
   <div class="bg-slate-700/50 rounded-lg p-4 mb-4">
-    {{ currentAttackResult?.narrative }}
-
-    <div>
-      {{ rollInstructions?.description }}
+    <div
+      v-if="currentAttackResult?.diceResult"
+      class="text-white"
+    >
+      <div class="text-lg font-semibold mb-2">
+        Jet d'attaque
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-bold">{{ currentAttackResult.diceResult.total }}</span>
+        <span class="text-slate-400">
+          ({{ currentAttackResult.diceResult.rolls.join(' + ') }} + {{ currentAttackResult.diceResult.modifierValue }})
+        </span>
+      </div>
+      <div
+        v-if="currentAttackResult.isCrit"
+        class="text-yellow-400 font-bold mt-1"
+      >
+        ⚔️ CRITIQUE!
+      </div>
     </div>
-
-    {{ rollInstructions?.dices }} + {{ rollInstructions?.modifierValue }}
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useCombatStore } from '@/stores/combatStore';
-import { computed } from 'vue';
-// note: no local UI button or combat composable used here — template only reads current attack
 
 const combatStore = useCombatStore();
 const { currentAttackResult } = storeToRefs(combatStore);
-const rollInstructions = computed(() => {
-  const rollInstr = currentAttackResult?.value?.rollInstruction ?? (currentAttackResult?.value as any)?.instructions?.[0];
-  if (!rollInstr || rollInstr.type !== 'roll') return undefined;
-  return rollInstr;
-});
-
-// no need for currentAttack inside this component right now
-
 </script>
 
 <style scoped></style>

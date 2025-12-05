@@ -1,7 +1,7 @@
 import { rollDice } from '@/apis/diceApi';
 import type {
   ChatMessageDto,
-  DiceThrowDto,
+  DiceResultDto,
   GameInstructionDto,
 } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
@@ -33,8 +33,8 @@ function toStoredRole(role: DisplayRole): StoredRole {
 }
 
 export const useGameStore = defineStore('gameStore', () => {
-  const rolls = ref<DiceThrowDto[]>([]);
-  const latestRoll = ref<DiceThrowDto | null>(null);
+  const rolls = ref<DiceResultDto[]>([]);
+  const latestRoll = ref<DiceResultDto | null>(null);
   const rollData = ref<RollModalData>({});
 
   // Minimal game session/message/pending instruction state used across app
@@ -47,14 +47,11 @@ export const useGameStore = defineStore('gameStore', () => {
 
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
-    const res: DiceThrowDto = await rollDice(expr, advantage);
-    const payload: DiceThrowDto = {
+    const res: DiceResultDto = await rollDice(expr, advantage);
+    const payload: DiceResultDto = {
       rolls: res.rolls,
-      mod: res.mod,
+      modifierValue: res.modifierValue,
       total: res.total,
-      advantage: res.advantage,
-      keptRoll: res.keptRoll,
-      discardedRoll: res.discardedRoll,
     };
     rolls.value.push(payload);
     latestRoll.value = payload;

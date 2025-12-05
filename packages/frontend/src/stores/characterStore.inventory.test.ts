@@ -97,21 +97,25 @@ describe('characterStore inventory persistence', () => {
       world: 'dnd',
       portrait: '',
       isDeceased: false,
+      state: 'created',
       inventory: [
         {
           _id: 'i1',
           name: 'Potion',
           qty: 2,
-          meta: { usable: true },
+          meta: {
+            type: 'consumable',
+            usable: true,
+          },
         },
         {
           _id: 'i2',
           name: 'Tent',
           qty: 1,
-          meta: {},
+          meta: { type: 'tool' },
         },
       ],
-    } as any;
+    };
 
     const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem')
       .mockResolvedValue({
@@ -121,10 +125,10 @@ describe('characterStore inventory persistence', () => {
             _id: 'i2',
             name: 'Tent',
             qty: 1,
-            meta: {},
+            meta: { type: 'tool' },
           },
         ],
-      } as any);
+      });
 
     // Using Potion (consumable) should call remove
     await store.useInventoryItem('Potion');

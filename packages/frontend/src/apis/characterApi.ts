@@ -181,3 +181,6 @@ export const characterApi = {
     return result.imageUrl;
   },
 };
+
+// Alias for backward compatibility with tests
+export const characterServiceApi = characterApi;

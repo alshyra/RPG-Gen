@@ -150,7 +150,7 @@
 
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
-import { ItemResponseDto } from '@rpg-gen/shared';
+import { InventoryItemDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import {
   onBeforeUnmount, ref,
@@ -158,10 +158,28 @@ import {
 import UiInputCheckbox from '../../ui/UiInputCheckbox.vue';
 import UiInputNumber from '../../ui/UiInputNumber.vue';
 
+// Local type to allow string values for cost/weight which the schema incorrectly defines as Record<string, never>
+type LocalInventoryItem = Omit<InventoryItemDto, 'meta'> & {
+  meta?: {
+    type?: string;
+    class?: string;
+    cost?: string;
+    weight?: string;
+    damage?: string;
+    properties?: string[];
+    starter?: boolean;
+    ac?: string;
+    strength?: string;
+    stealth?: string;
+    usable?: boolean;
+    [key: string]: unknown;
+  };
+};
+
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const basePack: ItemResponseDto[] = [
+const basePack: LocalInventoryItem[] = [
   {
     definitionId: 'pack-backpack',
     name: 'Sac à dos',
@@ -207,7 +225,7 @@ const basePack: ItemResponseDto[] = [
 ];
 
 // Weapon choices — separate main weapons from secondary items (shield/bow)
-const availableMainWeapons: ItemResponseDto[] = [
+const availableMainWeapons: LocalInventoryItem[] = [
   {
     definitionId: 'weapon-dagger',
     name: 'Dague',
@@ -276,7 +294,7 @@ const availableMainWeapons: ItemResponseDto[] = [
 const chosenMainWeapon = ref(availableMainWeapons[0]);
 const availableMainWeaponsDefinitionIds = availableMainWeapons.map(w => w.definitionId);
 
-const availableSecondaryItems: ItemResponseDto[] = [
+const availableSecondaryItems: LocalInventoryItem[] = [
   {
     definitionId: 'weapon-shortbow',
     name: 'Shortbow',
@@ -314,7 +332,7 @@ const availableSecondaryItems: ItemResponseDto[] = [
 ];
 
 // Armor choice (pick one among a few armor options)
-const availableArmors: ItemResponseDto[] = [
+const availableArmors: LocalInventoryItem[] = [
   {
     definitionId: 'armor-leather',
     name: 'Leather',
@@ -347,72 +365,84 @@ const availableArmors: ItemResponseDto[] = [
   },
 ];
 const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
-const chosenArmor = ref<ItemResponseDto | null>(availableArmors[0]);
+const chosenArmor = ref<LocalInventoryItem | null>(availableArmors[0]);
 
 const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map(i => i.definitionId);
-const chosenSecondaryItem = ref<ItemResponseDto>(availableSecondaryItems[0]);
-const weaponIsSelected = (weapon: ItemResponseDto) => (currentCharacter.value?.inventory || [])
+const chosenSecondaryItem = ref<LocalInventoryItem>(availableSecondaryItems[0]);
+const weaponIsSelected = (weapon: LocalInventoryItem) => (currentCharacter.value?.inventory || [])
   .some(i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name);
 
-const armorIsSelected = (armor: ItemResponseDto) => (currentCharacter.value?.inventory || [])
+const armorIsSelected = (armor: LocalInventoryItem) => (currentCharacter.value?.inventory || [])
   .some(i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name);
 
-const toggleArmor = (armor: ItemResponseDto) => {
+const toggleArmor = (armor: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenArmor.value = armor;
   console.log('Toggling armor:', armor);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
     .filter(i => !availableArmorDefinitionIds.includes(i.definitionId || '') && !availableMainWeaponsDefinitionIds.includes(i.definitionId || '') && !availableSecondaryItemsDefinitionIds.includes(i.definitionId || ''));
 
-  currentCharacter.value.inventory = [
+  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
+  const newInventory = [
     chosenMainWeapon.value,
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is ItemResponseDto => !!i);
+  ].filter((i): i is LocalInventoryItem => !!i);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  currentCharacter.value.inventory = newInventory as any;
 };
 
-const toggleWeapon = (weapon: ItemResponseDto) => {
+const toggleWeapon = (weapon: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenMainWeapon.value = weapon;
   console.log('Toggling weapon:', weapon);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
     .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId || ''));
 
-  currentCharacter.value.inventory = [
+  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
+  const newInventory = [
     chosenMainWeapon.value,
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is ItemResponseDto => !!i);
+  ].filter((i): i is LocalInventoryItem => !!i);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  currentCharacter.value.inventory = newInventory as any;
 };
 
-const toggleSecondaryItem = (item: ItemResponseDto) => {
+const toggleSecondaryItem = (item: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenSecondaryItem.value = item;
   console.log('Toggling secondary item:', item);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
     .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId || ''));
 
-  currentCharacter.value.inventory = [
+  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
+  const newInventory = [
     chosenMainWeapon.value,
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is ItemResponseDto => !!i);
+  ].filter((i): i is LocalInventoryItem => !!i);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  currentCharacter.value.inventory = newInventory as any;
 };
 
 onBeforeUnmount(async () => {
   try {
     if (!currentCharacter.value?.characterId) return;
     chosenMainWeapon.value.equipped = true;
+    // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
+    const inventoryToSave = [
+      chosenMainWeapon.value,
+      chosenSecondaryItem.value,
+      chosenArmor.value,
+      ...basePack,
+    ].filter((i): i is LocalInventoryItem => !!i);
     await characterStore.updateCharacter(currentCharacter.value.characterId, {
-      inventory: [
-        chosenMainWeapon.value,
-        chosenSecondaryItem.value,
-        chosenArmor.value,
-        ...basePack,
-      ].filter((i): i is ItemResponseDto => !!i),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inventory: inventoryToSave as any,
     });
   } catch (error) {
     console.error('Failed to save inventory on unmount:', error);

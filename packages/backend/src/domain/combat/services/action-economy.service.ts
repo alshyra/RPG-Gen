@@ -11,7 +11,7 @@ export class ActionEconomyService {
 
     return {
       ...state,
-      actionRemaining: state.actionRemaining ?? 1 - 1,
+      actionRemaining: (state.actionRemaining ?? 1) - 1,
     };
   }
 

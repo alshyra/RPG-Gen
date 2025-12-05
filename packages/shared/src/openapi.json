@@ -878,11 +878,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns result of enemy actions and new player turn state",
+            "description": "Returns attack logs for animations and new player turn state",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CombatStateDto"
+                  "$ref": "#/components/schemas/EndPlayerTurnResponseDto"
                 }
               }
             }
@@ -2360,13 +2360,6 @@
             "type": "string",
             "description": "Narrative summary of current combat"
           },
-          "validTargets": {
-            "description": "Valid targets available to player",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "phase": {
             "type": "string",
             "description": "Current combat phase",
@@ -2519,6 +2512,104 @@
           }
         },
         "required": [
+          "combatState"
+        ]
+      },
+      "EnemyAttackLogDto": {
+        "type": "object",
+        "properties": {
+          "attackerId": {
+            "type": "string",
+            "description": "ID of the attacking enemy",
+            "example": "goblin-1"
+          },
+          "attackerName": {
+            "type": "string",
+            "description": "Name of the attacking enemy",
+            "example": "Goblin"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "ID of the target (player characterId)",
+            "example": "char-123"
+          },
+          "hit": {
+            "type": "boolean",
+            "description": "Whether the attack hit the target",
+            "example": true
+          },
+          "attackRoll": {
+            "description": "Attack roll result",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiceResultDto"
+              }
+            ]
+          },
+          "damageRoll": {
+            "description": "Damage roll result (only present if hit)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatDiceResultDto"
+              }
+            ]
+          },
+          "damageTotal": {
+            "type": "number",
+            "description": "Total damage dealt (0 if miss)",
+            "example": 5
+          },
+          "isCrit": {
+            "type": "boolean",
+            "description": "Whether the attack was a critical hit",
+            "example": false
+          }
+        },
+        "required": [
+          "attackerId",
+          "attackerName",
+          "targetId",
+          "hit"
+        ]
+      },
+      "EndPlayerTurnResponseDto": {
+        "type": "object",
+        "properties": {
+          "roundNumber": {
+            "type": "number",
+            "description": "The current round number after enemy turn",
+            "example": 2
+          },
+          "attackLogs": {
+            "description": "List of enemy attack logs in execution order",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnemyAttackLogDto"
+            }
+          },
+          "totalDamageToPlayer": {
+            "type": "number",
+            "description": "Total damage dealt to the player this turn",
+            "example": 12
+          },
+          "playerDefeated": {
+            "type": "boolean",
+            "description": "Whether the player was defeated this turn",
+            "example": false
+          },
+          "combatState": {
+            "description": "Updated combat state after all enemy actions",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatStateDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "roundNumber",
+          "attackLogs",
+          "totalDamageToPlayer",
           "combatState"
         ]
       },

@@ -95,10 +95,10 @@ import {
   generateUseCommand, generateEquipCommand,
 } from '@/utils/chatCommands';
 import { storeToRefs } from 'pinia';
-import type { ItemResponseDto } from '@rpg-gen/shared';
+import type { InventoryItemDto } from '@rpg-gen/shared';
 
-// Extended item type with known meta fields
-interface InventoryItem extends ItemResponseDto {
+// Extended item type with meta fields - using type instead of interface to avoid inheritance issues
+type InventoryItem = Omit<InventoryItemDto, 'meta'> & {
   meta?: {
     type?: string;
     class?: string;
@@ -106,7 +106,7 @@ interface InventoryItem extends ItemResponseDto {
     consumable?: boolean;
     [key: string]: unknown;
   };
-}
+};
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -126,7 +126,7 @@ const groupedItems = computed(() => {
   (items.value || []).forEach((it) => {
     if (it.meta?.type === 'weapon') groups.Weapons.push(it);
     else if (it.meta?.type === 'armor' || it.meta?.class === 'Shield') groups.Armor.push(it);
-    else if (it.meta?.usable || it.meta?.consumable) groups.Consumables.push(it);
+    else if (it.meta?.type === 'consumable' && it.meta?.usable) groups.Consumables.push(it);
     else groups.Other.push(it);
   });
   // Sort each group with equipped items first

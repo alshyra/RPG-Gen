@@ -324,8 +324,13 @@ export class CombatAppService {
    * Quick check whether a character currently has an active combat
    */
   async isInCombat(characterId: string): Promise<boolean> {
-    const state = await this.getCombatState(characterId);
-    return !!state && state.inCombat === true;
+    try {
+      const state = await this.getCombatState(characterId);
+      return !!state && state.inCombat === true;
+    } catch {
+      // No combat session found
+      return false;
+    }
   }
 
   /**
@@ -333,17 +338,20 @@ export class CombatAppService {
    * Decrements action counter.
    */
   async applyPlayerDamage(characterId: string, targetId: string, damageTotal: number): Promise<CombatStateDto> {
-    const state = await this.getCombatState(characterId);
+    let state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException('No active combat found for character.');
 
     const target = state.enemies.find(enemy => enemy.id.toLowerCase() === targetId.toLowerCase());
     if (!target) throw new BadRequestException('Target not found in combat');
 
     target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
-    await this.saveCombatState(state);
 
-    // Consume a player action
-    this.actionEconomyService.decrementAction(state);
+    // Consume a player action BEFORE saving
+    state = this.actionEconomyService.decrementAction(state);
+    // Update enemies with the modified target
+    state.enemies = state.enemies.map(e => (e.id === target.id ? target : e));
+
+    await this.saveCombatState(state);
 
     // Finalize combat if needed (all enemies dead)
     const anyAlive = state.enemies.some(enemy => enemy.hp > 0);

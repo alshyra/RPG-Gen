@@ -10,7 +10,7 @@ vi.mock('@/apis/diceApi', async () => ({
   rollDice: vi.fn()
     .mockResolvedValue({
       rolls: [17],
-      mod: 0,
+      modifierValue: 0,
       total: 17,
     }),
 }));
@@ -27,7 +27,7 @@ it('doRoll should call diceService and store latest roll', async () => {
   expect(payload)
     .toEqual({
       rolls: [17],
-      mod: 0,
+      modifierValue: 0,
       total: 17,
     });
   expect(s.latestRoll).not.toBe(null);
@@ -36,7 +36,7 @@ it('doRoll should call diceService and store latest roll', async () => {
   expect(s.rolls[0])
     .toEqual({
       rolls: [17],
-      mod: 0,
+      modifierValue: 0,
       total: 17,
     });
 });

@@ -90,7 +90,7 @@ const launchDamageRoll = async () => {
   } as any;
 
   // mark combat store expected dto / phase
-  combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceThrowDto');
+  combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceResultDto');
 
   gameStore.pendingInstruction = rollInstr;
 

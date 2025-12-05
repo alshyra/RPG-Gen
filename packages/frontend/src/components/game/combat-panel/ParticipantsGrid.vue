@@ -9,7 +9,7 @@
         :data-cy="p.id"
       >
         <FighterPortrait
-          :enemy="p"
+          :fighter="p"
           :is-player="false"
         />
       </div>
@@ -21,7 +21,7 @@
           data-cy="current-player-portrait"
         >
           <FighterPortrait
-            :enemy="null"
+            :fighter="null"
             :is-player="true"
           />
         </div>

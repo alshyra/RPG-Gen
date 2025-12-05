@@ -17,31 +17,7 @@
       <main class="lg:col-span-9 flex flex-col min-h-0 overflow-auto">
         <router-view />
       </main>
-
-      <!-- Right: roll modal - hidden on mobile, shown as overlay -->
-      <aside class="hidden lg:block lg:col-span-3 lg:row-span-1">
-        <RollResultModal
-          :is-open="showRollModal"
-          @confirm="confirmRoll"
-          @close="closeRoll"
-        />
-      </aside>
     </div>
-
-    <!-- Roll modal overlay for mobile -->
-    <div
-      v-if="showRollModal"
-      class="lg:hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-    >
-      <div class="w-full max-w-md">
-        <RollResultModal
-          :is-open="true"
-          @confirm="confirmRoll"
-          @close="closeRoll"
-        />
-      </div>
-    </div>
-
     <!-- Death modal -->
     <DeathModal
       :is-open="characterStore.showDeathModal"
@@ -80,7 +56,6 @@ import {
 } from 'vue-router';
 import { characterApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
-import CombatResultModal from '../components/game/CombatResultModal.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';

@@ -1,10 +1,10 @@
-import type { DiceThrowDto } from '@rpg-gen/shared';
+import type { DiceResultDto } from '@rpg-gen/shared';
 import apiClient from './apiClient';
 
 export const rollDice = async (
   expr: string,
   advantage?: 'advantage' | 'disadvantage' | 'none',
-): Promise<DiceThrowDto> => {
+): Promise<DiceResultDto> => {
   const {
     data, error,
   } = await apiClient.POST('/api/dice', {

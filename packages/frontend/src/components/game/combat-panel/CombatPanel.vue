@@ -18,7 +18,6 @@
           class="card p-1 mb-2 max-h-44 mt-3"
           data-cy="combat-panel"
         >
-          <TurnOrder />
           <ParticipantsGrid />
         </div>
       </div>
@@ -67,7 +66,6 @@ import {
 } from 'vue';
 import CombatHeader from './CombatHeader.vue';
 import ParticipantsGrid from './ParticipantsGrid.vue';
-import TurnOrder from './TurnOrder.vue';
 
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';

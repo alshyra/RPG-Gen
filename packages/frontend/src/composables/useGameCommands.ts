@@ -3,8 +3,7 @@ import { characterApi } from '../apis/characterApi';
 import { isCombatStartInstruction } from '../apis/combatTypes';
 import type {
   RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto, GameInstructionDto,
-  InventoryInstructionMessageDto,
-  CombatEnemyDto,
+  InventoryInstructionMessageDto, CombatantDto,
 } from '@rpg-gen/shared';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
@@ -253,7 +252,7 @@ export function useGameCommands() {
   /**
    * Execute an attack command - uses backend combat system when in combat
    */
-  const executeAttackCommand = async (target: CombatEnemyDto): Promise<void> => {
+  const executeAttackCommand = async (target: CombatantDto): Promise<void> => {
     const character = characterStore.currentCharacter;
     if (!character) return;
 

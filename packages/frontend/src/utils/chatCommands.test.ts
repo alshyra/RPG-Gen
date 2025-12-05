@@ -262,23 +262,29 @@ describe('chatCommands', () => {
         name: 'Health Potion',
         qty: 3,
         description: 'Restores HP',
-        meta: { consumable: true },
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
       },
       {
         name: 'Sword',
         qty: 1,
-        meta: {},
+        meta: { type: 'weapon' as const },
       },
       {
         name: 'Shield',
         qty: 1,
         description: 'Blocks attacks',
-        meta: {},
+        meta: { type: 'armor' as const },
       },
       {
         name: 'Scroll of Fire',
         qty: 1,
-        meta: { usable: true },
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
       },
     ];
 
@@ -364,7 +370,10 @@ describe('chatCommands', () => {
       {
         name: 'Health Potion',
         qty: 1,
-        meta: { consumable: true },
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
       },
     ];
 
@@ -433,12 +442,15 @@ describe('chatCommands', () => {
         {
           name: 'Health Potion',
           qty: 1,
-          meta: { consumable: true },
+          meta: {
+            type: 'consumable' as const,
+            usable: true,
+          },
         },
         {
           name: 'Sword',
           qty: 1,
-          meta: {},
+          meta: { type: 'weapon' as const },
         },
       ];
       const result = getAllSuggestions('/use ', mockSpells, items, 5);

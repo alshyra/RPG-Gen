@@ -1,5 +1,5 @@
 import {
-  ItemResponseDto, SpellResponseDto,
+  InventoryItemDto, SpellResponseDto,
 } from '@rpg-gen/shared';
 
 export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
@@ -154,7 +154,7 @@ export const getArgumentSuggestions = (
   command: CommandType,
   partialArg: string,
   spells: SpellResponseDto[] = [],
-  inventory: ItemResponseDto[] = [],
+  inventory: InventoryItemDto[] = [],
   characterLevel = 1,
   validTargets: string[] = [],
 ): ArgumentSuggestion[] => {
@@ -181,7 +181,9 @@ export const getArgumentSuggestions = (
       // Only show usable/consumable items for /use command
       return inventory
         .filter((item) => {
-          const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
+          // Check if meta is consumable type with usable property
+          const isUsable = item.meta && 'type' in item.meta && item.meta.type === 'consumable'
+            && !!(item.meta as { usable?: boolean }).usable;
           const matchesName = (item.name ?? '').toLowerCase()
             .includes(partial);
           return isUsable && matchesName;
@@ -230,7 +232,7 @@ export const getArgumentSuggestions = (
 export const getAllSuggestions = (
   input: string,
   spells: SpellResponseDto[] = [],
-  inventory: ItemResponseDto[] = [],
+  inventory: InventoryItemDto[] = [],
   characterLevel = 1,
   validTargets: string[] = [],
 ): SuggestionResult => {

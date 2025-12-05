@@ -18,6 +18,7 @@ import {
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
+  EndPlayerTurnResponseDto,
 } from '../domain/combat/dto/index.js';
 import type { RPGRequest } from '../global.types.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
@@ -93,13 +94,13 @@ export class CombatController {
   @ApiOperation({ summary: 'End current player activation and advance turn (triggers enemy actions)' })
   @ApiResponse({
     status: 200,
-    type: CombatStateDto,
-    description: 'Returns result of enemy actions and new player turn state',
+    type: EndPlayerTurnResponseDto,
+    description: 'Returns attack logs for animations and new player turn state',
   })
   async endTurn(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
-  ): Promise<CombatStateDto> {
+  ): Promise<EndPlayerTurnResponseDto> {
     return this.combatOrchestrator.endPlayerTurn(characterId);
   }
 

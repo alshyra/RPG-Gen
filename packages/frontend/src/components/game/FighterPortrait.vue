@@ -1,7 +1,7 @@
 <template>
   <div
     class="fighter-card relative bg-slate-800/40 rounded overflow-hidden flex items-stretch"
-    :data-cy="isPlayer ? 'player-portrait' : ('enemy-portrait-' + enemy?.id)"
+    :data-cy="isPlayer ? 'player-portrait' : ('enemy-portrait-' + fighter?.id)"
   >
     <div class="relative w-full h-full">
       <img
@@ -11,14 +11,17 @@
       >
 
       <div class="absolute top-1 left-1 bg-black/25 text-[10px] text-white px-1.5 py-0.5 rounded">
-        <div class="font-medium">
+        <div
+          v-if="!isPlayer"
+          class="font-medium"
+        >
           {{ title }}
         </div>
-        <div class="text-[10px] text-slate-200">
-          AC: {{ enemy?.ac ?? '-' }}
-        </div>
-        <div class="text-[10px] text-slate-200">
-          Init: {{ enemy?.initiative ?? '-' }}
+        <div
+          v-if="ac!= '-'"
+          class="text-[10px] text-slate-200"
+        >
+          AC: {{ ac ?? '-' }}
         </div>
       </div>
 
@@ -45,7 +48,7 @@
         <div
           class="relative w-3 h-full bg-slate-700 rounded overflow-hidden"
           data-cy="hp-bar"
-          :data-hp="String(enemyDisplayHp)"
+          :data-hp="String(fighterDisplayHp)"
         >
           <div
             class="absolute left-0 right-0 bottom-0 bg-linear-to-t from-red-600 to-red-400"
@@ -53,14 +56,10 @@
           />
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="text-[9px] font-mono text-white transform -rotate-90 whitespace-nowrap">
-              {{ enemyDisplayHp }} / {{ enemyDisplayMax }}
+              {{ fighterDisplayHp }} / {{ fighterDisplayMaxHp }}
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="absolute left-2 top-12 right-2 text-[10px] text-slate-100/90 px-2 line-clamp-2 hidden sm:block">
-        {{ descriptionText }}
       </div>
     </div>
   </div>
@@ -80,24 +79,25 @@ import { useCombatStore } from '@/stores/combatStore';
 import { storeToRefs } from 'pinia';
 
 const {
-  enemy, isPlayer,
+  fighter, isPlayer,
 } = defineProps<{
-  enemy: CombatantDto | null;
+  fighter: CombatantDto | null;
   isPlayer?: boolean;
 }>();
 const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
+const { player: combatPlayer } = storeToRefs(combatStore);
 const combat = useCombat();
 
-const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (enemy?.name ?? 'Enemy')));
-const descriptionText = computed(() => enemy?.name ?? '');
-
-const enemyDisplayHp = computed(() => isPlayer ? (currentCharacter.value?.hp ?? 0) : (enemy?.hp ?? 0));
-const enemyDisplayMax = computed(() => isPlayer ? (currentCharacter.value?.hpMax ?? '-') : (enemy?.hpMax ?? '-'));
+const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy')));
+// For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
+const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
+const fighterDisplayHp = computed(() => isPlayer ? (currentCharacter.value?.hp ?? 0) : (fighter?.hp ?? 0));
+const fighterDisplayMaxHp = computed(() => isPlayer ? (currentCharacter.value?.hpMax ?? '-') : (fighter?.hpMax ?? '-'));
 const hpPct = computed(() => {
-  const hp = Number(enemyDisplayHp.value || 0);
-  const max = typeof enemyDisplayMax.value === 'number' ? Number(enemyDisplayMax.value) : undefined;
+  const hp = Number(fighterDisplayHp.value || 0);
+  const max = typeof fighterDisplayMaxHp.value === 'number' ? Number(fighterDisplayMaxHp.value) : undefined;
   if (!max || max <= 0) return '0%';
   return ((Math.max(0, hp) / max) * 100) + '%';
 });
@@ -109,20 +109,20 @@ onMounted(async () => {
     resolvedPortrait.value = currentCharacter.value?.portrait || `/images/enemies/hero.png`;
     return;
   }
-  if (!enemy) {
+  if (!fighter) {
     resolvedPortrait.value = `/images/enemies/enemy.png`;
     return;
   }
-  const byManifest = await pickBestPortrait(enemy.name || enemy.id || 'enemy');
-  resolvedPortrait.value = byManifest || getFallbackPortrait(enemy.name || enemy.id || 'enemy');
+  const byManifest = await pickBestPortrait(fighter.name || fighter.id || 'enemy');
+  resolvedPortrait.value = byManifest || getFallbackPortrait(fighter.name || fighter.id || 'enemy');
 });
 
-const showAttackButton = computed(() => !isPlayer && (enemy?.hp ?? 0) > 0);
+const showAttackButton = computed(() => !isPlayer && (fighter?.hp ?? 0) > 0);
 const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
 
 const doAttack = async () => {
-  if (!enemy || !currentCharacter.value?.characterId) return;
-  await combat.executeAttack(enemy);
+  if (!fighter || !currentCharacter.value?.characterId) return;
+  await combat.executeAttack(fighter);
   await combatStore.fetchStatus(currentCharacter.value.characterId);
 };
 </script>
