@@ -56,6 +56,7 @@ const seedItemDefinitions = async (app: INestApplication, logger: Logger) => {
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
+      logLevels: ['log', 'error', 'warn', 'debug', 'verbose'],
       colors: true,
       json: true,
     }),

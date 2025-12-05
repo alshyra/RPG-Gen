@@ -276,7 +276,7 @@ export class CharacterService {
     });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
-    const item = (character.inventory || []).find(it => it._id === itemId);
+    const item = (character.inventory || []).find(it => it.definitionId === itemId);
     if (!item) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
 
     if (updates.name !== undefined) item.name = updates.name;
@@ -297,7 +297,7 @@ export class CharacterService {
     });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
-    const idx = (character.inventory || []).findIndex(it => it._id === itemId);
+    const idx = (character.inventory || []).findIndex(it => it.definitionId === itemId);
     if (idx === -1) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
 
     if (qtyToRemove > 0) {

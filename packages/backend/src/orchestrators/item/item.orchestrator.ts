@@ -9,7 +9,7 @@ import { DiceService } from '../../domain/dice/dice.service.js';
 import type { InventoryInstructionMessageDto } from '../../domain/chat/dto/index.js';
 import type { CombatStateDto } from '../../domain/combat/dto/CombatStateDto.js';
 import { CreateInventoryItemDto, type CharacterResponseDto, type InventoryItemDto } from '../../domain/character/dto/index.js';
-import { ItemDefinitionService } from 'src/domain/item-definition/item-definition.service.js';
+import { ItemDefinitionService } from '../../domain/item-definition/item-definition.service.js';
 
 interface ConsumableMetaWithHeal {
   type: 'consumable';
@@ -21,8 +21,7 @@ interface ConsumableMetaWithHeal {
 
 function isConsumableWithHeal(meta: unknown): meta is ConsumableMetaWithHeal {
   if (!meta || typeof meta !== 'object') return false;
-  const m = meta as Record<string, unknown>;
-  return m.type === 'consumable';
+  return (meta as Record<string, unknown>).type === 'consumable';
 }
 
 export interface UseItemResult {
@@ -129,27 +128,28 @@ export class ItemOrchestrator {
    */
   async useItem(userId: string, characterId: string, itemId: string): Promise<UseItemResult> {
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    const item = character.inventory?.find(i => i._id === itemId);
-    if (!item) throw new BadRequestException(`Item ${itemId} not found in inventory`);
 
-    const { meta } = item;
-    if (!isConsumableWithHeal(meta)) throw new BadRequestException(`Item ${item.name} is not a consumable`);
+    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(itemId);
+    if (!itemDefinition) throw new BadRequestException(`Item definition ${itemId} not found`);
+
+    const { meta } = itemDefinition;
+    if (!isConsumableWithHeal(meta)) throw new BadRequestException(`Item ${itemDefinition.name} is not a consumable`);
 
     const inCombat = await this.combatService.isInCombat(characterId);
-    this.validateContext(item, meta, inCombat);
+    this.validateContext(itemDefinition, meta, inCombat);
 
     const healAmount = meta.healDice ? this.diceService.rollDiceExpr(meta.healDice).total : 0;
     await this.characterService.removeInventoryItem(userId, characterId, itemId, 1);
-    this.logger.log(`Item ${item.name} consumed by character ${characterId}`);
+    this.logger.log(`Item ${itemDefinition.name} consumed by character ${characterId}`);
 
-    if (healAmount > 0 && inCombat) return this.applyHealInCombat(characterId, healAmount, item.name ?? 'Item');
-    if (healAmount > 0) return this.applyHealOutOfCombat(userId, characterId, character, healAmount, item.name ?? 'Item');
+    if (healAmount > 0 && inCombat) return this.applyHealInCombat(characterId, healAmount, itemDefinition.name ?? 'Item');
+    if (healAmount > 0) return this.applyHealOutOfCombat(userId, characterId, character, healAmount, itemDefinition.name ?? 'Item');
 
     const updatedCharacter = await this.characterService.findByCharacterId(userId, characterId);
     return {
       success: true,
       character: updatedCharacter,
-      message: `${item.name} used.`,
+      message: `${itemDefinition.name} used.`,
     };
   }
 }

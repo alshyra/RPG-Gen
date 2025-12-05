@@ -275,7 +275,7 @@ export class CombatAppService {
     const currentHp = state.player.hp ?? 0;
     const maxHp = state.player.hpMax ?? currentHp;
     state.player.hp = Math.min(currentHp + Math.max(0, Math.floor(healAmount)), maxHp);
-
+    state.bonusActionRemaining = Math.max(0, (state.bonusActionRemaining ?? 0) - 1);
     // Persist state
     await this.saveCombatState(state);
 

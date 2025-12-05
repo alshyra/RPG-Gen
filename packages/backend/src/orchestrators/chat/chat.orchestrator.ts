@@ -49,7 +49,7 @@ export class ChatOrchestrator {
       roll: instr => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
       hp: instr => this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
       xp: instr => this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
-      inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
+      // inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
       spell: instr => this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
       combat_start: instr => this.handleCombatStart(userId, characterId, characterDto, instr as CombatStartInstructionMessageDto),
       combat_end: () => this.handleCombatEnd(userId, characterId, characterDto),
@@ -111,26 +111,6 @@ export class ChatOrchestrator {
     this.logger.log(`Applied XP instruction: +${xp} to ${characterId} => ${newXp}`);
   }
 
-  private async handleInventory(
-    userId: string,
-    characterId: string,
-    instr: InventoryInstructionMessageDto,
-  ): Promise<void> {
-    try {
-      if (instr.action === 'add') {
-        this.logger.warn(`Inventory add skipped for ${characterId}: cannot map name to definitionId for ${instr.name}`);
-      } else if (instr.action === 'remove') {
-        await this.characterService.removeInventoryItem(userId, characterId, String(instr.name), instr.quantity || 1);
-        this.logger.log(`Inventory remove applied for ${characterId}: ${instr.name}`);
-      } else if (instr.action === 'use') {
-        await this.characterService.removeInventoryItem(userId, characterId, String(instr.name), 1);
-        this.logger.log(`Inventory use applied for ${characterId}: ${instr.name}`);
-      }
-    } catch (e) {
-      this.logger.warn(`Inventory instruction failed for ${characterId}: ${(e as Error)?.message}`);
-    }
-  }
-
   private async handleSpell(
     userId: string,
     characterId: string,
@@ -168,7 +148,7 @@ export class ChatOrchestrator {
     instr: CombatStartInstructionMessageDto,
   ): Promise<void> {
     try {
-      // Skip if combat is already in progress to avoid resetting HP/initiative/turn on page refresh
+      this.logger.log(`Handling combat start for ${characterId} from instruction`);
       const alreadyInCombat = await this.combatService.isInCombat(characterId);
       if (alreadyInCombat) {
         this.logger.log(`Combat already active for ${characterId}, skipping re-initialization`);

@@ -1,15 +1,20 @@
-import { conversationService } from '../apis/conversationApi';
+import { inventoryApi } from '@/apis/inventoryApi';
+import type {
+  CharacterResponseDto,
+  CombatantDto,
+  GameInstructionDto,
+  InventoryItemDto,
+  RollInstructionMessageDto, SpellInstructionMessageDto,
+  UseItemResponseDto,
+} from '@rpg-gen/shared';
 import { characterApi } from '../apis/characterApi';
 import { isCombatStartInstruction } from '../apis/combatTypes';
-import type {
-  RollInstructionMessageDto, SpellInstructionMessageDto, CharacterResponseDto, GameInstructionDto,
-  InventoryInstructionMessageDto, CombatantDto,
-} from '@rpg-gen/shared';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 import { useCombat } from './useCombat';
+import { conversationService } from '@/apis/conversationApi';
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -92,6 +97,47 @@ export function useGameCommands() {
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const combat = useCombat();
+
+  // Helper to trigger UI and loading state for using an item
+  const prepareUseCommand = (item: InventoryItemDto) => {
+    gameStore.appendMessage('user', `I use ${item.name}!`);
+    gameStore.appendMessage('system', '...thinking...');
+    gameStore.sending = true;
+  };
+
+  // Execute the API call and handle the response
+  const executeUseItemRequest = async (characterId: string, item: {
+    name?: string;
+    definitionId?: string;
+  }) => {
+    const defId = item.definitionId;
+    if (!defId) {
+      gameStore.messages.pop();
+      gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
+      return;
+    }
+
+    try {
+      const response = await inventoryApi.useItem(characterId, defId);
+      handleUseItemResponse(response);
+    } catch {
+      gameStore.messages.pop();
+      gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
+    } finally {
+      gameStore.sending = false;
+    }
+  };
+
+  // Deduplicated response handling (uses inferred type from API)
+  const handleUseItemResponse = (response: UseItemResponseDto) => {
+    if (typeof response.healAmount === 'number') {
+      const character = characterStore.currentCharacter;
+      if (!character) return;
+      character.hp = response.healAmount + (character.hp ?? 0);
+      // Keep combat HP in sync with healing, as is done in other flows
+      syncHpToCombatIfNeeded(response.healAmount);
+    }
+  };
 
   const syncHpToCombatIfNeeded = (hp: number) => {
     if (!combatStore.inCombat) return;
@@ -207,30 +253,13 @@ export function useGameCommands() {
     if (!character) return;
 
     const item = findItem(character, itemName);
-    if (!item) {
+    if (!item || !item.definitionId) {
       gameStore.appendMessage('system', `❌ Item not found: ${itemName}`);
       return;
     }
 
-    gameStore.appendMessage('user', `I use ${item.name}!`);
-    gameStore.appendMessage('system', '...thinking...');
-    gameStore.sending = true;
-
-    try {
-      await sendToGemini(`I use the item ${item.name}`, [
-        {
-          type: 'inventory',
-          action: 'use',
-          name: item.name ?? '',
-          itemId: item._id,
-        } as InventoryInstructionMessageDto,
-      ]);
-    } catch {
-      gameStore.messages.pop();
-      gameStore.appendMessage('system', `❌ Failed to use item: ${item.name}`);
-    } finally {
-      gameStore.sending = false;
-    }
+    prepareUseCommand(item);
+    await executeUseItemRequest(character.characterId, item);
   };
 
   /**

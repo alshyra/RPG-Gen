@@ -25,7 +25,6 @@
       @close="() => (characterStore.showDeathModal = false)"
     />
 
-    <CombatResultModal v-if="showAttackResultModal" />
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-30 pointer-events-none">
       <div class="pointer-events-none">
         <div :class="[ 'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm', inCombat ? 'rounded-b-lg' : 'rounded-lg' ]" />

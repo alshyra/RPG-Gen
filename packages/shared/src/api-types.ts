@@ -412,6 +412,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/characters/{characterId}/inventory/use': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Use an item from inventory */
+    post: operations['InventoryController_useItem'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/rolls/{characterId}': {
     parameters: {
       query?: never;
@@ -530,6 +547,8 @@ export interface components {
       action: 'add' | 'remove' | 'use';
       /** @description Item name */
       name: string;
+      /** @description Inventory item _id (required for use action) */
+      itemId?: string;
       /** @description Quantity */
       quantity?: number;
       /** @description Item description */
@@ -826,6 +845,12 @@ export interface components {
       starter?: boolean;
       /** @description Whether the item can be used directly */
       usable?: boolean;
+      /** @description Whether the item can be used in combat (e.g., potions) */
+      combatUsable?: boolean;
+      /** @description Whether the item can be used during rest (e.g., rations) */
+      restUsable?: boolean;
+      /** @description Heal dice expression (e.g., "2d4+2") */
+      healDice?: string;
     };
     PackMeta: {
       /**
@@ -1104,6 +1129,26 @@ export interface components {
     AvatarResponseDto: {
       /** @description Generated avatar image URL or base64 data */
       imageUrl: string;
+    };
+    UseItemRequestDto: {
+      /**
+             * @description The inventory item _id to use
+             * @example abc123-def456
+             */
+      itemId: string;
+    };
+    Function: Record<string, never>;
+    UseItemResponseDto: {
+      /** @description Whether the item was successfully used */
+      success: boolean;
+      /** @description Amount healed (if applicable) */
+      healAmount?: number;
+      /** @description Updated combat state (if in combat) */
+      combatState?: components['schemas']['Function'];
+      /** @description Updated character (if not in combat) */
+      character?: components['schemas']['Function'];
+      /** @description Human-readable result message */
+      message: string;
     };
     SubmitRollDto: {
       /** @description Resolved instructions array */
@@ -1778,6 +1823,36 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: {
+        headers: Record<string, unknown>;
+        content?: never;
+      };
+    };
+  };
+  InventoryController_useItem: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Character ID */
+        characterId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UseItemRequestDto'];
+      };
+    };
+    responses: {
+      /** @description Item used successfully */
+      200: {
+        headers: Record<string, unknown>;
+        content: {
+          'application/json': components['schemas']['UseItemResponseDto'];
+        };
+      };
+      /** @description Bad request (item not found, wrong context, etc.) */
+      400: {
         headers: Record<string, unknown>;
         content?: never;
       };

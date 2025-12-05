@@ -1,6 +1,6 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
-export * from './api-types';
-export * from './type-guards';
+export * from './api-types'
+export * from './type-guards'
 
 // Auto-generated type aliases from OpenAPI components.schemas
 export type AbilityScoresResponseDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];
@@ -31,6 +31,7 @@ export type DiceResultDto = import('./api-types').components['schemas']['DiceRes
 export type EndPlayerTurnResponseDto = import('./api-types').components['schemas']['EndPlayerTurnResponseDto'];
 export type EnemyAttackLogDto = import('./api-types').components['schemas']['EnemyAttackLogDto'];
 export type EquipInventoryDto = import('./api-types').components['schemas']['EquipInventoryDto'];
+export type Function = import('./api-types').components['schemas']['Function'];
 export type GenericMeta = import('./api-types').components['schemas']['GenericMeta'];
 export type GrantInspirationBodyDto = import('./api-types').components['schemas']['GrantInspirationBodyDto'];
 export type HpInstructionMessageDto = import('./api-types').components['schemas']['HpInstructionMessageDto'];
@@ -50,5 +51,7 @@ export type SpellResponseDto = import('./api-types').components['schemas']['Spel
 export type SubmitRollDto = import('./api-types').components['schemas']['SubmitRollDto'];
 export type ToolMeta = import('./api-types').components['schemas']['ToolMeta'];
 export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];
+export type UseItemRequestDto = import('./api-types').components['schemas']['UseItemRequestDto'];
+export type UseItemResponseDto = import('./api-types').components['schemas']['UseItemResponseDto'];
 export type WeaponMeta = import('./api-types').components['schemas']['WeaponMeta'];
 export type XpInstructionMessageDto = import('./api-types').components['schemas']['XpInstructionMessageDto'];

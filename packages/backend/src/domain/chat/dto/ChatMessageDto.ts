@@ -10,6 +10,7 @@ import {
   CombatStartInstructionMessageDto,
   GameInstructionDto,
 } from './GameInstructionDto.js';
+import { IsArray, IsString } from 'class-validator';
 
 @ApiExtraModels(
   RollInstructionMessageDto,
@@ -28,9 +29,11 @@ export class ChatMessageDto {
       'system',
     ],
   })
+  @IsString()
   role: 'user' | 'assistant' | 'system';
 
   @ApiProperty({ description: 'Narrative text (for assistant messages)' })
+  @IsString()
   narrative: string;
 
   @ApiPropertyOptional({
@@ -48,5 +51,6 @@ export class ChatMessageDto {
       ],
     },
   })
+  @IsArray()
   instructions?: GameInstructionDto[];
 }

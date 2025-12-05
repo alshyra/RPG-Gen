@@ -116,6 +116,7 @@ export class ChatController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ) {
+    this.logger.log(`Fetching chat history for characterId ${characterId}...`);
     const { user } = req;
     const userId = user._id.toString();
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);

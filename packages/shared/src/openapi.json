@@ -1049,6 +1049,56 @@
         ]
       }
     },
+    "/api/characters/{characterId}/inventory/use": {
+      "post": {
+        "operationId": "InventoryController_useItem",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "description": "Character ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UseItemRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item used successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UseItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (item not found, wrong context, etc.)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Use an item from inventory",
+        "tags": [
+          "inventory"
+        ]
+      }
+    },
     "/api/rolls/{characterId}": {
       "post": {
         "operationId": "RollsController_submitRoll",
@@ -1325,6 +1375,10 @@
           "name": {
             "type": "string",
             "description": "Item name"
+          },
+          "itemId": {
+            "type": "string",
+            "description": "Inventory item _id (required for use action)"
           },
           "quantity": {
             "type": "number",
@@ -2064,6 +2118,18 @@
           "usable": {
             "type": "boolean",
             "description": "Whether the item can be used directly"
+          },
+          "combatUsable": {
+            "type": "boolean",
+            "description": "Whether the item can be used in combat (e.g., potions)"
+          },
+          "restUsable": {
+            "type": "boolean",
+            "description": "Whether the item can be used during rest (e.g., rations)"
+          },
+          "healDice": {
+            "type": "string",
+            "description": "Heal dice expression (e.g., \"2d4+2\")"
           }
         }
       },
@@ -2748,6 +2814,60 @@
         },
         "required": [
           "imageUrl"
+        ]
+      },
+      "UseItemRequestDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "The inventory item _id to use",
+            "example": "abc123-def456"
+          }
+        },
+        "required": [
+          "itemId"
+        ]
+      },
+      "Function": {
+        "type": "object",
+        "properties": {}
+      },
+      "UseItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the item was successfully used"
+          },
+          "healAmount": {
+            "type": "number",
+            "description": "Amount healed (if applicable)"
+          },
+          "combatState": {
+            "description": "Updated combat state (if in combat)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Function"
+              }
+            ]
+          },
+          "character": {
+            "description": "Updated character (if not in combat)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Function"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable result message"
+          }
+        },
+        "required": [
+          "success",
+          "message"
         ]
       },
       "SubmitRollDto": {

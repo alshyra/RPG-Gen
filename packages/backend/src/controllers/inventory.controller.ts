@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -50,7 +51,7 @@ export class InventoryController {
     @Param('characterId') characterId: string,
     @Body() body: UseItemRequestDto,
   ): Promise<UseItemResponseDto> {
-    const { userId } = req.user;
+    const userId = req.user.userId || req.user.id;
     this.logger.log(`User ${userId} using item ${body.itemId} for character ${characterId}`);
     return this.itemOrchestrator.useItem(userId, characterId, body.itemId);
   }
