@@ -1,0 +1,115 @@
+[
+  { "name": "Goblin", "hp": 7, "ac": 15, "attack_bonus": 2, "damage_dice": "1d4", "damage_bonus": 2 },
+  {
+    "name": "Kobold",
+    "hp": 5,
+    "ac": 12,
+    "attack_bonus": 4,
+    "damage_dice": "1d4",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Poisseux",
+    "hp": 22,
+    "ac": 8,
+    "attack_bonus": 2,
+    "damage_dice": "1d6",
+    "damage_bonus": 1
+  },
+  {
+    "name": "Orque",
+    "hp": 15,
+    "ac": 13,
+    "attack_bonus": 5,
+    "damage_dice": "1d12",
+    "damage_bonus": 3
+  },
+  {
+    "name": "Squelette",
+    "hp": 13,
+    "ac": 13,
+    "attack_bonus": 4,
+    "damage_dice": "1d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Bête de l'ombre",
+    "hp": 38,
+    "ac": 13,
+    "attack_bonus": 5,
+    "damage_dice": "2d6",
+    "damage_bonus": 3
+  },
+  {
+    "name": "Ogre",
+    "hp": 59,
+    "ac": 11,
+    "attack_bonus": 6,
+    "damage_dice": "2d8",
+    "damage_bonus": 4
+  },
+  {
+    "name": "Gargouille",
+    "hp": 52,
+    "ac": 15,
+    "attack_bonus": 4,
+    "damage_dice": "1d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Mante religieuse géante",
+    "hp": 33,
+    "ac": 15,
+    "attack_bonus": 4,
+    "damage_dice": "1d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Bugbear",
+    "hp": 27,
+    "ac": 16,
+    "attack_bonus": 4,
+    "damage_dice": "2d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Chauve-souris géante",
+    "hp": 22,
+    "ac": 13,
+    "attack_bonus": 4,
+    "damage_dice": "1d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Spectre",
+    "hp": 22,
+    "ac": 12,
+    "attack_bonus": 4,
+    "damage_dice": "1d8",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Loup sanguinaire",
+    "hp": 26,
+    "ac": 14,
+    "attack_bonus": 4,
+    "damage_dice": "2d4",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Chef gobelin",
+    "hp": 21,
+    "ac": 15,
+    "attack_bonus": 4,
+    "damage_dice": "1d6",
+    "damage_bonus": 2
+  },
+  {
+    "name": "Hobgobelin",
+    "hp": 11,
+    "ac": 18,
+    "attack_bonus": 3,
+    "damage_dice": "1d8",
+    "damage_bonus": 1
+  }
+]

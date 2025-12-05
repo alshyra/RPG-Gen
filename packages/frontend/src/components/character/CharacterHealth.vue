@@ -23,17 +23,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
-const props = defineProps<{ hp?: string | number; animate?: boolean }>();
+import {
+  ref, watch, onMounted, computed,
+} from 'vue';
+const props = defineProps<{
+  hp?: string | number;
+  animate?: boolean;
+}>();
 
 const beating = ref(false);
 let timer: ReturnType<typeof setTimeout> | null = null;
 
+interface HpObject {
+  current?: number;
+  max?: number;
+}
+
 const displayedHp = computed(() => {
-  const v: any = props.hp as any;
+  const v = props.hp;
   if (v == null) return '';
   if (typeof v === 'object') {
-    if (v.current != null && v.max != null) return `${v.current}/${v.max}`;
+    const hpObj = v as HpObject;
+    if (hpObj.current != null && hpObj.max != null) return `${hpObj.current}/${hpObj.max}`;
     return JSON.stringify(v);
   }
   return String(v);

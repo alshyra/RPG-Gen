@@ -25,7 +25,5 @@ defineProps<{
   modelValue?: string | number; // Currently selected value
 }>();
 
-defineEmits<{
-  (e: 'update:modelValue', value: string | number): void;
-}>();
+defineEmits<(e: 'update:modelValue', value: string | number) => void>();
 </script>

@@ -25,6 +25,12 @@ for (let i = 0; i < argv.length; i++) {
     opts.count = parseInt(argv[++i], 10);
   } else if (a === '--cleanup') {
     opts.cleanup = true;
+  } else if (a === '--ready') {
+    // create a fully-ready character (hp, stats, equipped weapon)
+    opts.ready = true;
+  } else if (a === '--with-chat') {
+    // append an assistant message with a combat_start instruction so combat initializes on history load
+    opts.withChat = true;
   } else if (a === '--help' || a === '-h') {
     console.log(`Usage: node scripts/prepare-e2e-db.mjs [--url <API_URL>] [--count <n>] [--cleanup]`);
     process.exit(0);
@@ -45,7 +51,11 @@ async function request(path, options = {}) {
   });
   const text = await res.text();
   let json;
-  try { json = JSON.parse(text); } catch(e) { json = text; }
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    json = text;
+  }
   return { status: res.status, body: json, raw: text };
 }
 
@@ -92,7 +102,7 @@ async function main() {
     try {
       log('Creating character', i, '...');
       const create = await request('/api/characters', { method: 'POST', body: { world: 'dnd' } });
-      if (![200,201].includes(create.status)) {
+      if (![200, 201].includes(create.status)) {
         log('Failed to create character ', create.status, create.body || create.raw);
         continue;
       }
@@ -104,10 +114,68 @@ async function main() {
       }
 
       // update with a clear name so UI shows it
-      const name = `e2e-${new Date().toISOString().replace(/[:.]/g,'')}-${i}`;
-      await request(`/api/characters/${characterId}`, { method: 'PUT', body: { name } });
+      const name = `e2e-${new Date().toISOString().replace(/[:.]/g, '')}-${i}`;
+      const updateBody = { name };
+
+      // If --ready provided, set typical D&D starter stats and HP, equip a starter weapon
+      if (opts.ready) {
+        updateBody.hp = 12;
+        updateBody.hpMax = 12;
+        updateBody.proficiency = 2;
+        updateBody.scores = { Str: 14, Dex: 14, Con: 12, Int: 10, Wis: 10, Cha: 10 };
+        updateBody.portrait = '/images/portraits/default.png';
+        updateBody.world = 'dnd';
+        updateBody.state = 'created';
+      }
+
+      await request(`/api/characters/${characterId}`, { method: 'PUT', body: updateBody });
       log('Created characterId', characterId, 'name', name);
       created.push({ characterId, name });
+
+      // If ready, add a starter weapon and equip it
+      if (opts.ready) {
+        try {
+          // Add a rapier (starter weapon) to inventory and mark as equipped
+          const invResp = await request(`/api/characters/${characterId}/inventory`, {
+            method: 'POST',
+            body: {
+              definitionId: 'weapon-rapier',
+              name: 'Rapier',
+              qty: 1,
+              equipped: true,
+              meta: { type: 'weapon' },
+            },
+          });
+          if (![200, 201].includes(invResp.status)) {
+            log('Failed to add inventory for', characterId, invResp.status, invResp.body || invResp.raw);
+          } else {
+            // Ensure equipped via equip endpoint (some controllers expect definitionId equip)
+            await request(`/api/characters/${characterId}/inventory/equip`, { method: 'POST', body: { definitionId: 'weapon-rapier' } });
+          }
+        } catch (e) {
+          log('Failed to add/equip starter weapon', e?.message || e);
+        }
+      }
+
+      // Optionally start combat directly via the combat API
+      if (opts.withChat) {
+        try {
+          // Start combat directly via the combat API
+          const combatStartBody = {
+            combat_start: [
+              { name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 },
+            ],
+          };
+          const combatResp = await request(`/api/combat/${characterId}/start`, { method: 'POST', body: combatStartBody });
+          if (![200, 201].includes(combatResp.status)) {
+            log('Failed to start combat for', characterId, combatResp.status, combatResp.body || combatResp.raw);
+          } else {
+            log('Started combat for', characterId);
+          }
+        } catch (e) {
+          log('Failed to start combat for', characterId, e?.message || e);
+        }
+      }
     } catch (e) {
       log('Error creating character', e?.message || e);
     }
@@ -117,4 +185,7 @@ async function main() {
   console.table(created);
 }
 
-main().catch(e => { console.error('Unexpected error', e); process.exit(2); });
+main().catch((e) => {
+  console.error('Unexpected error', e);
+  process.exit(2);
+});

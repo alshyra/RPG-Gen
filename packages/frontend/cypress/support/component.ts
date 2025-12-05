@@ -12,9 +12,7 @@ import '../../src/styles.css';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
-    interface Chainable {
-      mount: typeof mount;
-    }
+    interface Chainable { mount: typeof mount }
   }
 }
 

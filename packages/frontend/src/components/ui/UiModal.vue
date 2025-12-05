@@ -11,13 +11,9 @@
 </template>
 
 <script setup lang="ts">
-interface Props {
-  isOpen: boolean;
-}
+interface Props { isOpen: boolean }
 
-interface Emits {
-  close: [];
-}
+interface Emits { close: [] }
 
 defineProps<Props>();
 const emit = defineEmits<Emits>();

@@ -28,7 +28,7 @@
           </template>
           <UiMarkdown
             v-else
-            :text="m.text"
+            :narrative="m.narrative"
           />
         </div>
       </div>
@@ -37,17 +37,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import {
+  onMounted, ref, watch,
+} from 'vue';
 import UiMarkdown from '@/components/ui/UiMarkdown.vue';
 import UiSkeleton from '@/components/ui/UiSkeleton.vue';
 import { useGameStore } from '@/stores/gameStore';
-import type { ChatMessage } from '@rpg-gen/shared';
+import { ChatMessageDto } from '@rpg-gen/shared';
 
 const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
-const isLoadingMessage = (message: ChatMessage): boolean =>
-  message.role === 'system' && message.text === '...thinking...';
+const isLoadingMessage = (message: ChatMessageDto): boolean => message.role === 'system' && message.narrative === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(
@@ -55,7 +56,10 @@ watch(
   () => {
     if (messagesPane.value) {
       setTimeout(() => {
-        messagesPane.value!.scrollTop = messagesPane.value!.scrollHeight;
+        // Re-check ref inside setTimeout since it may have become null during navigation
+        if (messagesPane.value) {
+          messagesPane.value.scrollTop = messagesPane.value.scrollHeight;
+        }
       }, 50);
     }
   },

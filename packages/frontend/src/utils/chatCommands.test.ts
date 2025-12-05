@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import {
+  describe, it, expect,
+} from 'vitest';
 import {
   isCommand,
   parseCommand,
@@ -16,270 +18,446 @@ import {
 describe('chatCommands', () => {
   describe('isCommand', () => {
     it('returns true for strings starting with /', () => {
-      expect(isCommand('/cast fireball')).toBe(true);
-      expect(isCommand('/use potion')).toBe(true);
+      expect(isCommand('/cast fireball'))
+        .toBe(true);
+      expect(isCommand('/use potion'))
+        .toBe(true);
     });
 
     it('returns false for regular messages', () => {
-      expect(isCommand('Hello world')).toBe(false);
-      expect(isCommand('I want to cast fireball')).toBe(false);
+      expect(isCommand('Hello world'))
+        .toBe(false);
+      expect(isCommand('I want to cast fireball'))
+        .toBe(false);
     });
   });
 
   describe('parseCommand', () => {
     it('parses /cast command', () => {
       const result = parseCommand('/cast fireball');
-      expect(result).toEqual({ type: 'cast', target: 'fireball' });
+      expect(result)
+        .toEqual({
+          type: 'cast',
+          target: 'fireball',
+        });
     });
 
     it('parses /use command', () => {
       const result = parseCommand('/use health potion');
-      expect(result).toEqual({ type: 'use', target: 'health potion' });
+      expect(result)
+        .toEqual({
+          type: 'use',
+          target: 'health potion',
+        });
     });
 
     it('parses /equip command', () => {
       const result = parseCommand('/equip sword');
-      expect(result).toEqual({ type: 'equip', target: 'sword' });
+      expect(result)
+        .toEqual({
+          type: 'equip',
+          target: 'sword',
+        });
     });
 
     it('parses /attack command', () => {
       const result = parseCommand('/attack goblin');
-      expect(result).toEqual({ type: 'attack', target: 'goblin' });
+      expect(result)
+        .toEqual({
+          type: 'attack',
+          target: 'goblin',
+        });
     });
 
     it('is case insensitive for command type', () => {
-      expect(parseCommand('/CAST fireball')).toEqual({ type: 'cast', target: 'fireball' });
-      expect(parseCommand('/Use potion')).toEqual({ type: 'use', target: 'potion' });
+      expect(parseCommand('/CAST fireball'))
+        .toEqual({
+          type: 'cast',
+          target: 'fireball',
+        });
+      expect(parseCommand('/Use potion'))
+        .toEqual({
+          type: 'use',
+          target: 'potion',
+        });
     });
 
     it('returns null for invalid commands', () => {
-      expect(parseCommand('/invalid command')).toBeNull();
-      expect(parseCommand('/jump high')).toBeNull();
+      expect(parseCommand('/invalid command'))
+        .toBeNull();
+      expect(parseCommand('/jump high'))
+        .toBeNull();
     });
 
     it('returns null for commands without target', () => {
-      expect(parseCommand('/cast')).toBeNull();
-      expect(parseCommand('/use')).toBeNull();
+      expect(parseCommand('/cast'))
+        .toBeNull();
+      expect(parseCommand('/use'))
+        .toBeNull();
     });
 
     it('returns null for non-command strings', () => {
-      expect(parseCommand('hello world')).toBeNull();
-      expect(parseCommand('')).toBeNull();
+      expect(parseCommand('hello world'))
+        .toBeNull();
+      expect(parseCommand(''))
+        .toBeNull();
     });
 
     it('handles whitespace correctly', () => {
-      expect(parseCommand('  /cast fireball  ')).toEqual({ type: 'cast', target: 'fireball' });
-      expect(parseCommand('/use   health potion')).toEqual({ type: 'use', target: 'health potion' });
+      expect(parseCommand('  /cast fireball  '))
+        .toEqual({
+          type: 'cast',
+          target: 'fireball',
+        });
+      expect(parseCommand('/use   health potion'))
+        .toEqual({
+          type: 'use',
+          target: 'health potion',
+        });
     });
   });
 
   describe('command generators', () => {
     it('generates use command', () => {
-      expect(generateUseCommand('health potion')).toBe('/use health potion');
+      expect(generateUseCommand('health potion'))
+        .toBe('/use health potion');
     });
 
     it('generates cast command', () => {
-      expect(generateCastCommand('fireball')).toBe('/cast fireball');
+      expect(generateCastCommand('fireball'))
+        .toBe('/cast fireball');
     });
 
     it('generates equip command', () => {
-      expect(generateEquipCommand('sword')).toBe('/equip sword');
+      expect(generateEquipCommand('sword'))
+        .toBe('/equip sword');
     });
 
     it('generates attack command', () => {
-      expect(generateAttackCommand('goblin')).toBe('/attack goblin');
+      expect(generateAttackCommand('goblin'))
+        .toBe('/attack goblin');
     });
   });
 
   describe('getCommandSuggestions', () => {
     it('returns all commands when input is just /', () => {
       const suggestions = getCommandSuggestions('/');
-      expect(suggestions).toHaveLength(COMMAND_DEFINITIONS.length);
-      expect(suggestions).toEqual(COMMAND_DEFINITIONS);
+      expect(suggestions)
+        .toHaveLength(COMMAND_DEFINITIONS.length);
+      expect(suggestions)
+        .toEqual(COMMAND_DEFINITIONS);
     });
 
     it('returns matching commands for partial input', () => {
       const suggestions = getCommandSuggestions('/ca');
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].command).toBe('cast');
+      expect(suggestions)
+        .toHaveLength(1);
+      expect(suggestions[0].command)
+        .toBe('cast');
     });
 
     it('returns multiple matches when applicable', () => {
       const suggestions = getCommandSuggestions('/a');
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].command).toBe('attack');
+      expect(suggestions)
+        .toHaveLength(1);
+      expect(suggestions[0].command)
+        .toBe('attack');
     });
 
     it('returns empty array for non-command input', () => {
-      expect(getCommandSuggestions('hello')).toEqual([]);
-      expect(getCommandSuggestions('')).toEqual([]);
+      expect(getCommandSuggestions('hello'))
+        .toEqual([]);
+      expect(getCommandSuggestions(''))
+        .toEqual([]);
     });
 
     it('returns empty array when command has argument', () => {
-      expect(getCommandSuggestions('/cast fireball')).toEqual([]);
-      expect(getCommandSuggestions('/use potion')).toEqual([]);
+      expect(getCommandSuggestions('/cast fireball'))
+        .toEqual([]);
+      expect(getCommandSuggestions('/use potion'))
+        .toEqual([]);
     });
 
     it('is case insensitive', () => {
       const suggestionsLower = getCommandSuggestions('/ca');
       const suggestionsUpper = getCommandSuggestions('/CA');
-      expect(suggestionsLower).toEqual(suggestionsUpper);
+      expect(suggestionsLower)
+        .toEqual(suggestionsUpper);
     });
 
     it('returns commands matching prefix', () => {
       const suggestions = getCommandSuggestions('/e');
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].command).toBe('equip');
+      expect(suggestions)
+        .toHaveLength(1);
+      expect(suggestions[0].command)
+        .toBe('equip');
     });
 
     it('returns empty array when no command matches', () => {
-      expect(getCommandSuggestions('/xyz')).toEqual([]);
-      expect(getCommandSuggestions('/jump')).toEqual([]);
+      expect(getCommandSuggestions('/xyz'))
+        .toEqual([]);
+      expect(getCommandSuggestions('/jump'))
+        .toEqual([]);
     });
   });
 
   describe('parseActiveCommand', () => {
     it('parses command with space', () => {
       const result = parseActiveCommand('/cast ');
-      expect(result.command).toBe('cast');
-      expect(result.argumentPartial).toBe('');
+      expect(result.command)
+        .toBe('cast');
+      expect(result.argumentPartial)
+        .toBe('');
     });
 
     it('parses command with partial argument', () => {
       const result = parseActiveCommand('/cast fire');
-      expect(result.command).toBe('cast');
-      expect(result.argumentPartial).toBe('fire');
+      expect(result.command)
+        .toBe('cast');
+      expect(result.argumentPartial)
+        .toBe('fire');
     });
 
     it('returns null command for non-command input', () => {
       const result = parseActiveCommand('hello');
-      expect(result.command).toBeNull();
+      expect(result.command)
+        .toBeNull();
     });
 
     it('returns null command for invalid command', () => {
       const result = parseActiveCommand('/invalid ');
-      expect(result.command).toBeNull();
+      expect(result.command)
+        .toBeNull();
     });
   });
 
   describe('getArgumentSuggestions', () => {
     const mockSpells = [
-      { name: 'Fireball', level: 3, description: 'A ball of fire', meta: {} },
-      { name: 'Ice Storm', level: 4, description: 'Freezing storm', meta: {} },
-      { name: 'Fire Shield', level: 4, meta: {} },
-      { name: 'Magic Missile', level: 1, meta: {} },
+      {
+        name: 'Fireball',
+        level: 3,
+        description: 'A ball of fire',
+        meta: {},
+      },
+      {
+        name: 'Ice Storm',
+        level: 4,
+        description: 'Freezing storm',
+        meta: {},
+      },
+      {
+        name: 'Fire Shield',
+        level: 4,
+        meta: {},
+      },
+      {
+        name: 'Magic Missile',
+        level: 1,
+        meta: {},
+      },
     ];
 
     const mockInventory = [
-      { name: 'Health Potion', qty: 3, description: 'Restores HP', meta: { consumable: true } },
-      { name: 'Sword', qty: 1, meta: {} },
-      { name: 'Shield', qty: 1, description: 'Blocks attacks', meta: {} },
-      { name: 'Scroll of Fire', qty: 1, meta: { usable: true } },
+      {
+        name: 'Health Potion',
+        qty: 3,
+        description: 'Restores HP',
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
+      },
+      {
+        name: 'Sword',
+        qty: 1,
+        meta: { type: 'weapon' as const },
+      },
+      {
+        name: 'Shield',
+        qty: 1,
+        description: 'Blocks attacks',
+        meta: { type: 'armor' as const },
+      },
+      {
+        name: 'Scroll of Fire',
+        qty: 1,
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
+      },
     ];
 
     it('returns spell suggestions for /cast command filtered by character level', () => {
       // Level 5 character can cast all spells up to level 5
       const suggestions = getArgumentSuggestions('cast', '', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(4);
-      expect(suggestions.every(s => s.type === 'spell')).toBe(true);
+      expect(suggestions)
+        .toHaveLength(4);
+      expect(suggestions.every(s => s.type === 'spell'))
+        .toBe(true);
     });
 
     it('filters spells by character level', () => {
       // Level 3 character can only cast spells up to level 3
       const suggestions = getArgumentSuggestions('cast', '', mockSpells, mockInventory, 3);
-      expect(suggestions).toHaveLength(2);
-      expect(suggestions.map(s => s.name)).toContain('Fireball');
-      expect(suggestions.map(s => s.name)).toContain('Magic Missile');
+      expect(suggestions)
+        .toHaveLength(2);
+      expect(suggestions.map(s => s.name))
+        .toContain('Fireball');
+      expect(suggestions.map(s => s.name))
+        .toContain('Magic Missile');
       expect(suggestions.map(s => s.name)).not.toContain('Ice Storm');
       expect(suggestions.map(s => s.name)).not.toContain('Fire Shield');
     });
 
     it('filters spells by partial name and level', () => {
       const suggestions = getArgumentSuggestions('cast', 'fire', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(2);
-      expect(suggestions.map(s => s.name)).toContain('Fireball');
-      expect(suggestions.map(s => s.name)).toContain('Fire Shield');
+      expect(suggestions)
+        .toHaveLength(2);
+      expect(suggestions.map(s => s.name))
+        .toContain('Fireball');
+      expect(suggestions.map(s => s.name))
+        .toContain('Fire Shield');
     });
 
     it('returns only usable/consumable items for /use command', () => {
       const suggestions = getArgumentSuggestions('use', '', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(2);
-      expect(suggestions.every(s => s.type === 'item')).toBe(true);
-      expect(suggestions.map(s => s.name)).toContain('Health Potion');
-      expect(suggestions.map(s => s.name)).toContain('Scroll of Fire');
+      expect(suggestions)
+        .toHaveLength(2);
+      expect(suggestions.every(s => s.type === 'item'))
+        .toBe(true);
+      expect(suggestions.map(s => s.name))
+        .toContain('Health Potion');
+      expect(suggestions.map(s => s.name))
+        .toContain('Scroll of Fire');
       expect(suggestions.map(s => s.name)).not.toContain('Sword');
       expect(suggestions.map(s => s.name)).not.toContain('Shield');
     });
 
     it('returns all items for /equip command', () => {
       const suggestions = getArgumentSuggestions('equip', '', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(4);
-      expect(suggestions.every(s => s.type === 'item')).toBe(true);
+      expect(suggestions)
+        .toHaveLength(4);
+      expect(suggestions.every(s => s.type === 'item'))
+        .toBe(true);
     });
 
     it('filters usable items by partial name', () => {
       const suggestions = getArgumentSuggestions('use', 'potion', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].name).toBe('Health Potion');
+      expect(suggestions)
+        .toHaveLength(1);
+      expect(suggestions[0].name)
+        .toBe('Health Potion');
     });
 
     it('returns empty array for /attack command', () => {
       const suggestions = getArgumentSuggestions('attack', '', mockSpells, mockInventory, 5);
-      expect(suggestions).toHaveLength(0);
+      expect(suggestions)
+        .toHaveLength(0);
     });
   });
 
   describe('getAllSuggestions', () => {
-    const mockSpells = [{ name: 'Fireball', level: 3, meta: {} }];
+    const mockSpells = [
+      {
+        name: 'Fireball',
+        level: 3,
+        meta: {},
+      },
+    ];
 
-    const mockInventory = [{ name: 'Health Potion', qty: 1, meta: { consumable: true } }];
+    const mockInventory = [
+      {
+        name: 'Health Potion',
+        qty: 1,
+        meta: {
+          type: 'consumable' as const,
+          usable: true,
+        },
+      },
+    ];
 
     it('returns command suggestions for partial command', () => {
       const result = getAllSuggestions('/ca', mockSpells, mockInventory, 5);
-      expect(result.type).toBe('command');
-      expect(result.commandSuggestions).toHaveLength(1);
-      expect(result.argumentSuggestions).toHaveLength(0);
+      expect(result.type)
+        .toBe('command');
+      expect(result.commandSuggestions)
+        .toHaveLength(1);
+      expect(result.argumentSuggestions)
+        .toHaveLength(0);
     });
 
     it('returns argument suggestions after command with space', () => {
       const result = getAllSuggestions('/cast ', mockSpells, mockInventory, 5);
-      expect(result.type).toBe('argument');
-      expect(result.commandSuggestions).toHaveLength(0);
-      expect(result.argumentSuggestions).toHaveLength(1);
-      expect(result.activeCommand).toBe('cast');
+      expect(result.type)
+        .toBe('argument');
+      expect(result.commandSuggestions)
+        .toHaveLength(0);
+      expect(result.argumentSuggestions)
+        .toHaveLength(1);
+      expect(result.activeCommand)
+        .toBe('cast');
     });
 
     it('returns filtered argument suggestions', () => {
       const result = getAllSuggestions('/cast fire', mockSpells, mockInventory, 5);
-      expect(result.type).toBe('argument');
-      expect(result.argumentSuggestions).toHaveLength(1);
-      expect(result.argumentSuggestions[0].name).toBe('Fireball');
+      expect(result.type)
+        .toBe('argument');
+      expect(result.argumentSuggestions)
+        .toHaveLength(1);
+      expect(result.argumentSuggestions[0].name)
+        .toBe('Fireball');
     });
 
     it('returns empty suggestions for non-command input', () => {
       const result = getAllSuggestions('hello', mockSpells, mockInventory, 5);
-      expect(result.commandSuggestions).toHaveLength(0);
-      expect(result.argumentSuggestions).toHaveLength(0);
+      expect(result.commandSuggestions)
+        .toHaveLength(0);
+      expect(result.argumentSuggestions)
+        .toHaveLength(0);
     });
 
     it('filters spells by character level in getAllSuggestions', () => {
       const spells = [
-        { name: 'Fireball', level: 3, meta: {} },
-        { name: 'Meteor Swarm', level: 9, meta: {} },
+        {
+          name: 'Fireball',
+          level: 3,
+          meta: {},
+        },
+        {
+          name: 'Meteor Swarm',
+          level: 9,
+          meta: {},
+        },
       ];
       const result = getAllSuggestions('/cast ', spells, mockInventory, 3);
-      expect(result.argumentSuggestions).toHaveLength(1);
-      expect(result.argumentSuggestions[0].name).toBe('Fireball');
+      expect(result.argumentSuggestions)
+        .toHaveLength(1);
+      expect(result.argumentSuggestions[0].name)
+        .toBe('Fireball');
     });
 
     it('filters items by usable/consumable in getAllSuggestions for /use', () => {
       const items = [
-        { name: 'Health Potion', qty: 1, meta: { consumable: true } },
-        { name: 'Sword', qty: 1, meta: {} },
+        {
+          name: 'Health Potion',
+          qty: 1,
+          meta: {
+            type: 'consumable' as const,
+            usable: true,
+          },
+        },
+        {
+          name: 'Sword',
+          qty: 1,
+          meta: { type: 'weapon' as const },
+        },
       ];
       const result = getAllSuggestions('/use ', mockSpells, items, 5);
-      expect(result.argumentSuggestions).toHaveLength(1);
-      expect(result.argumentSuggestions[0].name).toBe('Health Potion');
+      expect(result.argumentSuggestions)
+        .toHaveLength(1);
+      expect(result.argumentSuggestions[0].name)
+        .toBe('Health Potion');
     });
   });
 });

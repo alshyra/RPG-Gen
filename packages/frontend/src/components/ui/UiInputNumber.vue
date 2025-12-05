@@ -32,9 +32,7 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: number): void;
-}>();
+const emit = defineEmits<(e: 'update:modelValue', value: number) => void>();
 
 const displayValue = computed(() => props.modelValue ?? 0);
 const stepValue = computed(() => props.step ?? 1);

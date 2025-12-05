@@ -14,14 +14,25 @@
   {
     "definitionId": "potion-health",
     "name": "Potion de soin",
-    "description": "Soigne un peu de PV",
-    "meta": { "type": "consumable", "usable": true }
+    "description": "Soigne 2d4+2 PV",
+    "meta": {
+      "type": "consumable",
+      "usable": true,
+      "combatUsable": true,
+      "restUsable": false,
+      "healDice": "2d4+2"
+    }
   },
   {
     "definitionId": "food-rations",
     "name": "Rations",
     "description": "Portion pour un repas",
-    "meta": { "type": "consumable", "usable": true }
+    "meta": {
+      "type": "consumable",
+      "usable": true,
+      "combatUsable": false,
+      "restUsable": true
+    }
   },
   {
     "definitionId": "rope-15m",

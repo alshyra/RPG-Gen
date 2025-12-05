@@ -1,9 +1,6 @@
-/**
- * Chat command parser utility
- * Parses commands like /cast spell1, /equip sword, /attack target, /use item
- */
-
-import type { ItemDto, SpellDto } from '@rpg-gen/shared';
+import {
+  InventoryItemDto, SpellResponseDto,
+} from '@rpg-gen/shared';
 
 export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
 
@@ -21,7 +18,7 @@ export interface CommandDefinition {
 export interface ArgumentSuggestion {
   name: string;
   description?: string;
-  type: 'spell' | 'item';
+  type: 'spell' | 'item' | 'target';
 }
 
 export type SuggestionType = 'command' | 'argument';
@@ -48,10 +45,26 @@ const VALID_COMMANDS: CommandType[] = [
  * (ordered consistently with VALID_COMMANDS)
  */
 export const COMMAND_DEFINITIONS: CommandDefinition[] = [
-  { command: 'cast', description: 'Lancer un sort', usage: '/cast <sort>' },
-  { command: 'equip', description: 'Équiper un objet', usage: '/equip <objet>' },
-  { command: 'attack', description: 'Attaquer une cible', usage: '/attack <cible>' },
-  { command: 'use', description: 'Utiliser un objet', usage: '/use <objet>' },
+  {
+    command: 'cast',
+    description: 'Lancer un sort',
+    usage: '/cast <sort>',
+  },
+  {
+    command: 'equip',
+    description: 'Équiper un objet',
+    usage: '/equip <objet>',
+  },
+  {
+    command: 'attack',
+    description: 'Attaquer une cible',
+    usage: '/attack <cible>',
+  },
+  {
+    command: 'use',
+    description: 'Utiliser un objet',
+    usage: '/use <objet>',
+  },
 ];
 
 /**
@@ -60,7 +73,8 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
  * @returns Array of matching command definitions
  */
 export const getCommandSuggestions = (input: string): CommandDefinition[] => {
-  const trimmed = input.trim().toLowerCase();
+  const trimmed = input.trim()
+    .toLowerCase();
 
   // Only provide suggestions if input starts with /
   if (!trimmed.startsWith('/')) {
@@ -81,24 +95,32 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
   }
 
   // Filter commands that start with the partial input
-  return COMMAND_DEFINITIONS.filter(def =>
-    def.command.startsWith(partial),
-  );
+  return COMMAND_DEFINITIONS.filter(def => def.command.startsWith(partial));
 };
 
 /**
  * Parse the current command from input to determine what type of argument is expected
  */
-export const parseActiveCommand = (input: string): { command: CommandType | null; argumentPartial: string } => {
-  const trimmed = input.trim().toLowerCase();
+export const parseActiveCommand = (input: string): {
+  command: CommandType | null;
+  argumentPartial: string;
+} => {
+  const trimmed = input.trim()
+    .toLowerCase();
 
   if (!trimmed.startsWith('/')) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   const match = trimmed.match(COMMAND_WITH_SPACE_REGEX);
   if (!match) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   const [
@@ -108,7 +130,10 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {
-    return { command: null, argumentPartial: '' };
+    return {
+      command: null,
+      argumentPartial: '',
+    };
   }
 
   return {
@@ -128,9 +153,10 @@ export const parseActiveCommand = (input: string): { command: CommandType | null
 export const getArgumentSuggestions = (
   command: CommandType,
   partialArg: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
-  characterLevel: number = 1,
+  spells: SpellResponseDto[] = [],
+  inventory: InventoryItemDto[] = [],
+  characterLevel = 1,
+  validTargets: string[] = [],
 ): ArgumentSuggestion[] => {
   const partial = partialArg.toLowerCase();
 
@@ -140,7 +166,8 @@ export const getArgumentSuggestions = (
       return spells
         .filter((spell) => {
           const spellLevel = spell.level || 0;
-          const matchesName = spell.name.toLowerCase().includes(partial);
+          const matchesName = spell.name.toLowerCase()
+            .includes(partial);
           const matchesLevel = spellLevel <= characterLevel;
           return matchesName && matchesLevel;
         })
@@ -154,8 +181,11 @@ export const getArgumentSuggestions = (
       // Only show usable/consumable items for /use command
       return inventory
         .filter((item) => {
-          const isUsable = !!item.meta?.usable || !!item.meta?.consumable;
-          const matchesName = (item.name ?? '').toLowerCase().includes(partial);
+          // Check if meta is consumable type with usable property
+          const isUsable = item.meta && 'type' in item.meta && item.meta.type === 'consumable'
+            && !!(item.meta as { usable?: boolean }).usable;
+          const matchesName = (item.name ?? '').toLowerCase()
+            .includes(partial);
           return isUsable && matchesName;
         })
         .filter(item => item.name !== undefined)
@@ -168,7 +198,8 @@ export const getArgumentSuggestions = (
     case 'equip':
       // Show all items for /equip command
       return inventory
-        .filter(item => (item.name ?? '').toLowerCase().includes(partial))
+        .filter(item => (item.name ?? '').toLowerCase()
+          .includes(partial))
         .filter(item => item.name !== undefined)
         .map(item => ({
           name: item.name!,
@@ -177,8 +208,14 @@ export const getArgumentSuggestions = (
         }));
 
     case 'attack':
-      // For attack, we don't have a list of targets, so no suggestions
-      return [];
+      // For attack, suggest valid targets (enemy names) if provided
+      return validTargets
+        .filter(name => name.toLowerCase()
+          .includes(partial))
+        .map(name => ({
+          name,
+          type: 'target' as const,
+        }));
 
     default:
       return [];
@@ -194,9 +231,10 @@ export const getArgumentSuggestions = (
  */
 export const getAllSuggestions = (
   input: string,
-  spells: SpellDto[] = [],
-  inventory: ItemDto[] = [],
-  characterLevel: number = 1,
+  spells: SpellResponseDto[] = [],
+  inventory: InventoryItemDto[] = [],
+  characterLevel = 1,
+  validTargets: string[] = [],
 ): SuggestionResult => {
   const trimmed = input.trim();
 
@@ -222,10 +260,19 @@ export const getAllSuggestions = (
   }
 
   // Command with space - check for argument suggestions
-  const { command, argumentPartial } = parseActiveCommand(input);
+  const {
+    command, argumentPartial,
+  } = parseActiveCommand(input);
 
   if (command) {
-    const argumentSuggestions = getArgumentSuggestions(command, argumentPartial, spells, inventory, characterLevel);
+    const argumentSuggestions = getArgumentSuggestions(
+      command,
+      argumentPartial,
+      spells,
+      inventory,
+      characterLevel,
+      validTargets,
+    );
     return {
       type: 'argument',
       commandSuggestions: [],

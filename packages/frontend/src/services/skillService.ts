@@ -1,4 +1,4 @@
-import type { CharacterDto } from '@rpg-gen/shared';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 import { DnDRulesService } from './dndRulesService';
 
 /**
@@ -13,12 +13,100 @@ const abilityMap: Record<string, string> = {
   charisma: 'Cha',
 };
 
+type Scores = Record<string, number>;
+interface SkillEntry { name?: string;
+  proficient?: boolean;
+  modifier?: number; }
+
 /**
  * Calculate ability modifier from score
  */
-function getAbilityModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
+const getAbilityModifier = (score: number) => Math.floor((score - 10) / 2);
+
+/**
+ * Get ability score from character scores
+ */
+const getAbilityScore = (scores: Scores | undefined, key: string): number => (scores?.[key] ?? 10);
+
+/**
+ * Find a skill in the character's skills array (case-insensitive)
+ */
+const findCharacterSkill = (
+  skills: SkillEntry[] | undefined,
+  skillName: string,
+): SkillEntry | undefined => skills?.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+
+/**
+ * Find a skill in DnD rules (case-insensitive)
+ */
+const findRulesSkill = (skillName: string) => DnDRulesService.getAllSkills()
+  .find(s => s.name.toLowerCase() === skillName.toLowerCase());
+
+/**
+ * Calculate modifier for a skill using rules mapping
+ */
+const calculateSkillModifier = (
+  character: CharacterResponseDto,
+  skillName: string,
+): number | undefined => {
+  const rulesSkill = findRulesSkill(skillName);
+  if (!rulesSkill || !character.scores) return undefined;
+
+  const abilityScore = getAbilityScore(character.scores as Scores, rulesSkill.ability);
+  let modifier = getAbilityModifier(abilityScore);
+
+  const charSkill = findCharacterSkill(character.skills as SkillEntry[], skillName);
+  if (charSkill?.proficient) modifier += character.proficiency ?? 2;
+
+  return modifier;
+};
+
+/**
+ * Handle "Ability (Skill)" format e.g., "Strength (Athletics)"
+ */
+const handleAbilitySkillFormat = (
+  character: CharacterResponseDto,
+  abilityName: string,
+  skillName: string,
+): number => {
+  // First try using DnD rules mapping
+  const rulesModifier = calculateSkillModifier(character, skillName);
+  if (rulesModifier !== undefined) return rulesModifier;
+
+  // Fallback: try character's skills array
+  const charSkill = findCharacterSkill(character.skills as SkillEntry[], skillName);
+  if (charSkill?.modifier !== undefined) return charSkill.modifier;
+
+  // Final fallback: use ability modifier directly
+  const abilityKey = abilityMap[abilityName.toLowerCase()];
+  if (!abilityKey || !character.scores) return 0;
+
+  const abilityScore = getAbilityScore(character.scores as Scores, abilityKey);
+  let modifier = getAbilityModifier(abilityScore);
+  if (charSkill?.proficient) modifier += character.proficiency ?? 2;
+
+  return modifier;
+};
+
+/**
+ * Handle pure ability check (e.g., "Strength")
+ */
+const handleAbilityCheck = (character: CharacterResponseDto, abilityName: string): number | undefined => {
+  const abilityKey = abilityMap[abilityName.toLowerCase()];
+  if (!abilityKey || !character.scores) return undefined;
+  return getAbilityModifier(getAbilityScore(character.scores as Scores, abilityKey));
+};
+
+/**
+ * Handle skill lookup in character's skills array
+ */
+const handleSkillLookup = (character: CharacterResponseDto, skillName: string): number | undefined => {
+  const charSkill = findCharacterSkill(character.skills as SkillEntry[], skillName);
+  if (!charSkill) return undefined;
+
+  if (typeof charSkill.modifier === 'number') return charSkill.modifier;
+  return calculateSkillModifier(character, skillName) ?? charSkill.modifier ?? 0;
+};
 
 /**
  * Get the bonus for a specific skill check
@@ -26,95 +114,27 @@ function getAbilityModifier(score: number): number {
  * - "Perception Check" - looks up skill modifier
  * - "Strength (Athletics) Check" - uses ability + skill proficiency if applicable
  * - "Strength Check" - uses just the ability modifier
- * @param character The character to get the skill bonus from
- * @param skillNameWithCheck Skill name with "Check" suffix
- * @returns The skill bonus modifier
  */
-
-// eslint-disable-next-line max-statements
 export const getSkillBonus = (
-  character: CharacterDto | null,
+  character: CharacterResponseDto | null,
   skillNameWithCheck: string,
 ): number => {
   if (!character) return 0;
 
-  // Remove " Check" suffix
-  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '').trim();
-
-  // Check for format "Ability (Skill)" e.g. "Strength (Athletics)" — allow unicode and spaces
+  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '')
+    .trim();
   const abilitySkillMatch = nameWithoutCheck.match(/^(.+?)\s*\((.+?)\)$/u);
 
   if (abilitySkillMatch) {
-    const abilityNameRaw = abilitySkillMatch[1].trim();
-    const skillName = abilitySkillMatch[2].trim();
-
-    // Prefer to resolve the skill using the DnD mapping (handles canonical skill->ability mapping)
-    const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === skillName.toLowerCase());
-    if (rulesSkill && character.scores) {
-      // compute from the ability tied to the skill
-      const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
-      let modifier = getAbilityModifier(abilityScore);
-
-      // if character has this skill and is proficient, add proficiency
-      if (character.skills && Array.isArray(character.skills)) {
-        const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
-        if (skill && skill.proficient) modifier += character.proficiency ?? 2;
-      }
-      return modifier;
-    }
-
-    // Fallback: try to map ability name to internal ability key (expect english keys)
-    const abilityName = abilityNameRaw.toLowerCase();
-    const abilityKey = abilityMap[abilityName];
-    if (!abilityKey || !character.scores) {
-      // If still unknown, attempt to resolve the skill itself in the character's skills array
-      if (character.skills && Array.isArray(character.skills)) {
-        const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
-        if (skill) return skill.modifier ?? 0;
-      }
-      return 0;
-    }
-
-    const abilityScore = (character.scores as Record<string, number>)[abilityKey] ?? 10;
-    let modifier = getAbilityModifier(abilityScore);
-    if (character.skills && Array.isArray(character.skills)) {
-      const skill = character.skills.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
-      if (skill && skill.proficient) modifier += character.proficiency ?? 2;
-    }
-    return modifier;
+    return handleAbilitySkillFormat(character, abilitySkillMatch[1].trim(), abilitySkillMatch[2].trim());
   }
 
-  // Check for pure ability check (e.g., "Strength Check")
-  const abilityName = nameWithoutCheck.toLowerCase();
-  const abilityKey = abilityMap[abilityName];
-  if (abilityKey && character.scores) {
-    const abilityScore = (character.scores as Record<string, number>)[abilityKey] ?? 10;
-    return getAbilityModifier(abilityScore);
-  }
+  const abilityResult = handleAbilityCheck(character, nameWithoutCheck);
+  if (abilityResult !== undefined) return abilityResult;
 
-  // Try to find the skill in character's skills array (legacy format)
-  if (character.skills && Array.isArray(character.skills)) {
-    const skill = character.skills.find(s =>
-      (s.name ?? '').toLowerCase() === nameWithoutCheck.toLowerCase(),
-    );
-    if (skill) {
-      // If an explicit modifier is present, use it. Otherwise compute based on ability + proficiency.
-      if (typeof skill.modifier === 'number') return skill.modifier;
+  const skillResult = handleSkillLookup(character, nameWithoutCheck);
+  if (skillResult !== undefined) return skillResult;
 
-      // Compute using rules mapping
-      const rulesSkill = DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === nameWithoutCheck.toLowerCase());
-      if (rulesSkill && character.scores) {
-        const abilityScore = (character.scores as Record<string, number>)[rulesSkill.ability] ?? 10;
-        let modifier = getAbilityModifier(abilityScore);
-        if (skill.proficient) modifier += character.proficiency ?? 2;
-        return modifier;
-      }
-
-      return skill.modifier ?? 0;
-    }
-  }
-
-  // Fallback: return 0 if skill not found
   console.warn(`Skill/Ability "${nameWithoutCheck}" not found for character`);
   return 0;
 };

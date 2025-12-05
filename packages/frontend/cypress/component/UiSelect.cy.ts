@@ -3,9 +3,7 @@ import UiSelect from '../../src/components/ui/UiSelect.vue';
 describe('UiSelect Component', () => {
   it('should render a select element', () => {
     cy.mount(UiSelect, {
-      props: {
-        modelValue: 'option1',
-      },
+      props: { modelValue: 'option1' },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -14,14 +12,13 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select').should('exist');
+    cy.get('select')
+      .should('exist');
   });
 
   it('should display the selected value', () => {
     cy.mount(UiSelect, {
-      props: {
-        modelValue: 'option2',
-      },
+      props: { modelValue: 'option2' },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -31,7 +28,8 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select').should('have.value', 'option2');
+    cy.get('select')
+      .should('have.value', 'option2');
   });
 
   it('should emit update:modelValue when selection changes', () => {
@@ -50,17 +48,17 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select').select('option2');
-    cy.wrap(null).then(() => {
-      expect(onUpdate).to.have.been.calledWith('option2');
-    });
+    cy.get('select')
+      .select('option2');
+    cy.wrap(null)
+      .then(() => {
+        expect(onUpdate).to.have.been.calledWith('option2');
+      });
   });
 
   it('should render multiple options', () => {
     cy.mount(UiSelect, {
-      props: {
-        modelValue: 'option1',
-      },
+      props: { modelValue: 'option1' },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -71,7 +69,8 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select option').should('have.length', 4);
+    cy.get('select option')
+      .should('have.length', 4);
   });
 
   it('should allow changing selection multiple times', () => {
@@ -90,26 +89,26 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select').select('option2');
-    cy.get('select').select('option3');
-    cy.get('select').select('option1');
+    cy.get('select')
+      .select('option2');
+    cy.get('select')
+      .select('option3');
+    cy.get('select')
+      .select('option1');
 
-    cy.wrap(null).then(() => {
-      expect(onUpdate).to.have.been.calledThrice;
-      expect(onUpdate.firstCall).to.have.been.calledWith('option2');
-      expect(onUpdate.secondCall).to.have.been.calledWith('option3');
-      expect(onUpdate.thirdCall).to.have.been.calledWith('option1');
-    });
+    cy.wrap(null)
+      .then(() => {
+        expect(onUpdate).to.have.been.calledThrice;
+        expect(onUpdate.firstCall).to.have.been.calledWith('option2');
+        expect(onUpdate.secondCall).to.have.been.calledWith('option3');
+        expect(onUpdate.thirdCall).to.have.been.calledWith('option1');
+      });
   });
 
   it('should have correct styling classes', () => {
     cy.mount(UiSelect, {
-      props: {
-        modelValue: 'test',
-      },
-      slots: {
-        default: '<option value="test">Test</option>',
-      },
+      props: { modelValue: 'test' },
+      slots: { default: '<option value="test">Test</option>' },
     });
 
     cy.get('select')

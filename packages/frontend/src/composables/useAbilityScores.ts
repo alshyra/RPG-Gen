@@ -1,10 +1,24 @@
-import { ABILITIES, DEFAULT_BASE_SCORES } from '@/services/dndRulesService';
+import {
+  ABILITIES, DEFAULT_BASE_SCORES,
+} from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
-import { CharacterDto } from '@rpg-gen/shared';
+import { CharacterResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
-export const COST = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9, 16: 12, 17: 15, 18: 19 } as const;
+export const COST = {
+  8: 0,
+  9: 1,
+  10: 2,
+  11: 3,
+  12: 4,
+  13: 5,
+  14: 7,
+  15: 9,
+  16: 12,
+  17: 15,
+  18: 19,
+} as const;
 
 const useAbilityScores = () => {
   const characterStore = useCharacterStore();
@@ -24,7 +38,7 @@ const useAbilityScores = () => {
     ability: typeof ABILITIES[number],
     newValue: number,
     maxBudget = 27,
-    initialScores?: CharacterDto['scores'],
+    initialScores?: CharacterResponseDto['scores'],
   ) => {
     if (!currentCharacter.value) return { allowed: false };
 
@@ -33,8 +47,8 @@ const useAbilityScores = () => {
     if (initialScores) {
       // Level-up mode: budget is the number of direct +1 increases available above initial scores
       const currentIncrease = (current - (initialScores?.[ability] ?? 8)) || 0;
-      const currentUsed = Object.keys(initialScores)
-        .map(k => Math.max(0, (characterScores.value[k as keyof typeof initialScores] ?? 8) - ((initialScores as any)[k] ?? 8)))
+      const currentUsed = (Object.keys(initialScores) as (keyof typeof initialScores)[])
+        .map(k => Math.max(0, (characterScores.value[k] ?? 8) - (initialScores[k] ?? 8)))
         .reduce((s, v) => s + v, 0);
       const newIncrease = Math.max(0, newValue - (initialScores?.[ability] ?? 8));
       newUsed = currentUsed - currentIncrease + newIncrease;
@@ -48,7 +62,10 @@ const useAbilityScores = () => {
 
     currentCharacter.value = {
       ...currentCharacter.value,
-      scores: { ...characterScores.value, [ability]: newValue },
+      scores: {
+        ...characterScores.value,
+        [ability]: newValue,
+      },
     };
     return { allowed: true };
   };

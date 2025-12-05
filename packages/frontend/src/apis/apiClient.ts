@@ -12,9 +12,7 @@ import { authService } from './authApi';
 const baseUrl = window.location.origin;
 
 // Create the openapi-fetch client with proper typing
-const client = createClient<paths>({
-  baseUrl,
-});
+const client = createClient<paths>({ baseUrl });
 
 // Add auth middleware
 client.use({

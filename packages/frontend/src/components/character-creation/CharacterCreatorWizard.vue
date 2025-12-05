@@ -97,13 +97,17 @@
 
 <script setup lang="ts">
 import FullPageLoader from '@/components/ui/FullPageLoader.vue';
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@/apis/characterApi';
 import { conversationService } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  computed, ref,
+} from 'vue';
+import {
+  useRoute, useRouter,
+} from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
 import UiLoader from '../ui/UiLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -119,7 +123,14 @@ const route = useRoute();
 const isLoading = ref(false);
 const loadingTitle = ref('');
 const loadingSubtitle = ref('');
-const steps = ['Informations', 'Classe et Capacités', 'Compétences', 'Sorts', 'Inventaire', 'Avatar'];
+const steps = [
+  'Informations',
+  'Classe et Capacités',
+  'Compétences',
+  'Sorts',
+  'Inventaire',
+  'Avatar',
+];
 
 const characterStore = useCharacterStore();
 const { updateCharacter } = characterStore;
@@ -136,11 +147,18 @@ const currentStep = computed({
   },
   set: (value: number) => {
     const charId = (route.params.characterId as string) || currentCharacter.value?.characterId;
-    router.push({ name: 'character-step', params: { characterId: charId, step: value + 1 } });
+    router.push({
+      name: 'character-step',
+      params: {
+        characterId: charId,
+        step: value + 1,
+      },
+    });
   },
 });
 
-const chosenSkills = computed(() => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0);
+const chosenSkills = computed(() => (currentCharacter.value?.skills || [])
+  .filter(skill => !!skill.proficient).length || 0);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -184,17 +202,17 @@ const saveFinalCharacter = async () => {
     state: 'created',
     hpMax,
     hp: hpMax,
-    skills: currentCharacter.value!.skills,
-    spells: currentCharacter.value!.spells,
-    ...(currentCharacter.value!.inventory ? { inventory: currentCharacter.value!.inventory } : {}),
+    skills: currentCharacter.value.skills,
+    spells: currentCharacter.value.spells,
+    ...(currentCharacter.value.inventory ? { inventory: currentCharacter.value.inventory } : {}),
   });
 };
 
 const generateAndApplyAvatar = async () => {
   try {
-    const imageUrl = await characterServiceApi.generateAvatar(currentCharacter.value!.characterId);
+    const imageUrl = await characterApi.generateAvatar(currentCharacter.value!.characterId);
     try {
-      const refreshed = await characterServiceApi.getCharacterById(currentCharacter.value!.characterId);
+      const refreshed = await characterApi.getCharacterById(currentCharacter.value!.characterId);
       if (refreshed) currentCharacter.value = refreshed;
       else currentCharacter.value!.portrait = imageUrl;
     } catch {
@@ -216,7 +234,10 @@ const initConversationForCharacter = async () => {
 };
 
 const navigateToGame = async () => {
-  await router.push({ name: 'game', params: { characterId: currentCharacter.value!.characterId } });
+  await router.push({
+    name: 'game',
+    params: { characterId: currentCharacter.value!.characterId },
+  });
 };
 
 const finishCreation = async () => {

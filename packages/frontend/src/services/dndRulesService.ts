@@ -3,7 +3,7 @@
  * Handles ability calculations, HP, proficiency, etc.
  */
 
-import { AbilityScoresDto } from '@rpg-gen/shared';
+import { AbilityScoresResponseDto } from '@rpg-gen/shared';
 import { getCurrentLevel } from '../utils/dndLevels';
 
 export const ABILITIES = [
@@ -14,57 +14,164 @@ export const ABILITIES = [
   'Wis',
   'Cha',
 ] as const;
-export const DEFAULT_BASE_SCORES = { Str: 15, Dex: 14, Con: 13, Int: 12, Wis: 10, Cha: 8 } as const;
+export const DEFAULT_BASE_SCORES = {
+  Str: 15,
+  Dex: 14,
+  Con: 13,
+  Int: 12,
+  Wis: 10,
+  Cha: 8,
+} as const;
 
-interface RaceModifiers {
-  [key: string]: number;
-}
+type RaceModifiers = Record<string, number>;
 
-interface HitDieMap {
-  [className: string]: number;
-}
+type HitDieMap = Record<string, number>;
 
 interface Skill {
   name: string;
   ability: typeof ABILITIES[number];
 }
 
-interface ClassProficiencies {
-  [className: string]: string[]; // skill names
-}
+type ClassProficiencies = Record<string, string[]>;
 
 // D&D 5e Skills mapped to abilities
 const SKILLS: Skill[] = [
-  { name: 'Acrobatics', ability: 'Dex' },
-  { name: 'Animal Handling', ability: 'Wis' },
-  { name: 'Arcana', ability: 'Int' },
-  { name: 'Athletics', ability: 'Str' },
-  { name: 'Deception', ability: 'Cha' },
-  { name: 'History', ability: 'Int' },
-  { name: 'Insight', ability: 'Wis' },
-  { name: 'Intimidation', ability: 'Cha' },
-  { name: 'Investigation', ability: 'Int' },
-  { name: 'Medicine', ability: 'Wis' },
-  { name: 'Nature', ability: 'Int' },
-  { name: 'Perception', ability: 'Wis' },
-  { name: 'Performance', ability: 'Cha' },
-  { name: 'Persuasion', ability: 'Cha' },
-  { name: 'Religion', ability: 'Int' },
-  { name: 'Sleight of Hand', ability: 'Dex' },
-  { name: 'Stealth', ability: 'Dex' },
-  { name: 'Survival', ability: 'Wis' },
+  {
+    name: 'Acrobatics',
+    ability: 'Dex',
+  },
+  {
+    name: 'Animal Handling',
+    ability: 'Wis',
+  },
+  {
+    name: 'Arcana',
+    ability: 'Int',
+  },
+  {
+    name: 'Athletics',
+    ability: 'Str',
+  },
+  {
+    name: 'Deception',
+    ability: 'Cha',
+  },
+  {
+    name: 'History',
+    ability: 'Int',
+  },
+  {
+    name: 'Insight',
+    ability: 'Wis',
+  },
+  {
+    name: 'Intimidation',
+    ability: 'Cha',
+  },
+  {
+    name: 'Investigation',
+    ability: 'Int',
+  },
+  {
+    name: 'Medicine',
+    ability: 'Wis',
+  },
+  {
+    name: 'Nature',
+    ability: 'Int',
+  },
+  {
+    name: 'Perception',
+    ability: 'Wis',
+  },
+  {
+    name: 'Performance',
+    ability: 'Cha',
+  },
+  {
+    name: 'Persuasion',
+    ability: 'Cha',
+  },
+  {
+    name: 'Religion',
+    ability: 'Int',
+  },
+  {
+    name: 'Sleight of Hand',
+    ability: 'Dex',
+  },
+  {
+    name: 'Stealth',
+    ability: 'Dex',
+  },
+  {
+    name: 'Survival',
+    ability: 'Wis',
+  },
 ];
 
 export const ALLOWED_RACES = [
-  { id: 'human', name: 'Humain', mods: { Str: 1, Dex: 1, Con: 1, Int: 1, Wis: 1, Cha: 1 } },
-  { id: 'dwarf', name: 'Nain', mods: { Con: 2 } },
-  { id: 'elf', name: 'Elfe', mods: { Dex: 2 } },
-  { id: 'halfling', name: 'Halfelin', mods: { Dex: 2 } },
-  { id: 'gnome', name: 'Gnome', mods: { Int: 2 } },
-  { id: 'half-elf', name: 'Demi-elfe', mods: { Cha: 2 } },
-  { id: 'half-orc', name: 'Demi-orc', mods: { Str: 2, Con: 1 } },
-  { id: 'tiefling', name: 'Tieffelin', mods: { Cha: 2, Int: 1 } },
-  { id: 'dragonborn', name: 'Drakéide', mods: { Str: 2, Cha: 1 } },
+  {
+    id: 'human',
+    name: 'Humain',
+    mods: {
+      Str: 1,
+      Dex: 1,
+      Con: 1,
+      Int: 1,
+      Wis: 1,
+      Cha: 1,
+    },
+  },
+  {
+    id: 'dwarf',
+    name: 'Nain',
+    mods: { Con: 2 },
+  },
+  {
+    id: 'elf',
+    name: 'Elfe',
+    mods: { Dex: 2 },
+  },
+  {
+    id: 'halfling',
+    name: 'Halfelin',
+    mods: { Dex: 2 },
+  },
+  {
+    id: 'gnome',
+    name: 'Gnome',
+    mods: { Int: 2 },
+  },
+  {
+    id: 'half-elf',
+    name: 'Demi-elfe',
+    mods: { Cha: 2 },
+  },
+  {
+    id: 'half-orc',
+    name: 'Demi-orc',
+    mods: {
+      Str: 2,
+      Con: 1,
+    },
+  },
+  {
+    id: 'tiefling',
+    name: 'Tieffelin',
+    mods: {
+      Cha: 2,
+      Int: 1,
+    },
+  },
+  {
+    id: 'dragonborn',
+    name: 'Drakéide',
+    mods: {
+      Str: 2,
+      Cha: 1,
+    },
+  },
 ] as const;
 
 export const CLASSES_LIST = [
@@ -85,7 +192,7 @@ export const GENDERS = [
   'male',
   'female',
 ] as const;
-export const DEFAULT_RACE = ALLOWED_RACES[0];
+export const [DEFAULT_RACE] = ALLOWED_RACES;
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
@@ -210,7 +317,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
 };
 
 // How many skills can be chosen per class
-const CLASS_SKILL_CHOICES: { [className: string]: number } = {
+const CLASS_SKILL_CHOICES: Record<string, number> = {
   Barbarian: 2,
   Bard: 3,
   Cleric: 2,
@@ -257,11 +364,12 @@ export class DnDRulesService {
     raceModifiers: RaceModifiers,
   ): Record<string, number> {
     const result = { ...baseScores };
-    Object.keys(raceModifiers).forEach((key) => {
-      if (result[key] !== undefined) {
-        result[key] += raceModifiers[key];
-      }
-    });
+    Object.keys(raceModifiers)
+      .forEach((key) => {
+        if (result[key] !== undefined) {
+          result[key] += raceModifiers[key];
+        }
+      });
     return result;
   }
 
@@ -278,7 +386,7 @@ export class DnDRulesService {
   /**
    * Get proficiency bonus for a given level or total XP
    */
-  static getProficiencyBonus(levelOrXp: number, isXp: boolean = false): number {
+  static getProficiencyBonus(levelOrXp: number, isXp = false): number {
     const xp = isXp ? levelOrXp : undefined;
     if (xp !== undefined) {
       const level = getCurrentLevel(xp);
@@ -319,29 +427,81 @@ export class DnDRulesService {
    * and used for character creation UI only.
    */
   static getAvailableSpellsForClass(className: string) {
-    const base: { name: string; level: number; description?: string }[] = [];
+    const base: {
+      name: string;
+      level: number;
+      description?: string;
+    }[] = [];
     switch (className) {
       case 'Wizard':
-        base.push({ name: 'Magic Missile', level: 1, description: 'Un missile magique qui touche automatiquement.' });
-        base.push({ name: 'Fireball', level: 3, description: 'Une explosion de feu qui inflige des dégâts.' });
-        base.push({ name: 'Mage Armor', level: 1, description: 'Une armure magique protectrice.' });
+        base.push({
+          name: 'Magic Missile',
+          level: 1,
+          description: 'Un missile magique qui touche automatiquement.',
+        });
+        base.push({
+          name: 'Fireball',
+          level: 3,
+          description: 'Une explosion de feu qui inflige des dégâts.',
+        });
+        base.push({
+          name: 'Mage Armor',
+          level: 1,
+          description: 'Une armure magique protectrice.',
+        });
         break;
       case 'Cleric':
-        base.push({ name: 'Cure Wounds', level: 1, description: 'Soigne une créature proche.' });
-        base.push({ name: 'Bless', level: 1, description: 'Augmente l\'attaque et le jet de sauvegarde d\'alliés.' });
-        base.push({ name: 'Spiritual Weapon', level: 2, description: 'Crée une arme spirituelle qui attaque.' });
+        base.push({
+          name: 'Cure Wounds',
+          level: 1,
+          description: 'Soigne une créature proche.',
+        });
+        base.push({
+          name: 'Bless',
+          level: 1,
+          description: 'Augmente l\'attaque et le jet de sauvegarde d\'alliés.',
+        });
+        base.push({
+          name: 'Spiritual Weapon',
+          level: 2,
+          description: 'Crée une arme spirituelle qui attaque.',
+        });
         break;
       case 'Druid':
-        base.push({ name: 'Entangle', level: 1, description: 'Enracine les ennemis au sol.' });
-        base.push({ name: 'Produce Flame', level: 0, description: 'Une flamme facile qui attaque à distance.' });
+        base.push({
+          name: 'Entangle',
+          level: 1,
+          description: 'Enracine les ennemis au sol.',
+        });
+        base.push({
+          name: 'Produce Flame',
+          level: 0,
+          description: 'Une flamme facile qui attaque à distance.',
+        });
         break;
       case 'Bard':
-        base.push({ name: 'Vicious Mockery', level: 0, description: 'Une insulte magique qui inflige des dégâts psychiques.' });
-        base.push({ name: 'Healing Word', level: 1, description: 'Un soin à distance.' });
+        base.push({
+          name: 'Vicious Mockery',
+          level: 0,
+          description: 'Une insulte magique qui inflige des dégâts psychiques.',
+        });
+        base.push({
+          name: 'Healing Word',
+          level: 1,
+          description: 'Un soin à distance.',
+        });
         break;
       case 'Sorcerer':
-        base.push({ name: 'Shield', level: 1, description: 'Bouclier magique instantané.' });
-        base.push({ name: 'Magic Missile', level: 1, description: 'Un missile magique qui touche automatiquement.' });
+        base.push({
+          name: 'Shield',
+          level: 1,
+          description: 'Bouclier magique instantané.',
+        });
+        base.push({
+          name: 'Magic Missile',
+          level: 1,
+          description: 'Un missile magique qui touche automatiquement.',
+        });
         break;
       default:
         return [];
@@ -353,7 +513,7 @@ export class DnDRulesService {
   /**
    * Calculate skill modifier for a given skill and ability scores
    */
-  static calculateSkillModifier(skillName: string, scores: AbilityScoresDto, proficiency: number, isProficient: boolean): number {
+  static calculateSkillModifier(skillName: string, scores: AbilityScoresResponseDto, proficiency: number, isProficient: boolean): number {
     const skill = SKILLS.find(s => s.name === skillName);
     if (!skill) return 0;
 
@@ -371,9 +531,24 @@ export class DnDRulesService {
     baseScores: Record<string, number>,
     className: string,
     raceModifiers: RaceModifiers,
-    raceInfo: any,
+    raceInfo: { id?: string;
+      name?: string;
+      mods: Record<string, number>; },
     selectedSkills?: string[],
-  ): any {
+  ): {
+    name: string;
+    scores: Record<string, number>;
+    hp: number;
+    hpMax: number;
+    classes: { name: string;
+      level: number; }[];
+    race: typeof raceInfo;
+    totalXp: number;
+    proficiency: number;
+    skills: { name: string;
+      proficient: boolean;
+      modifier: number; }[];
+  } {
     // Apply racial bonuses
     const finalScores = this.applyRacialModifiers(baseScores, raceModifiers);
 
@@ -395,7 +570,12 @@ export class DnDRulesService {
       scores: finalScores,
       hp,
       hpMax: hp,
-      classes: [{ name: className, level: 1 }],
+      classes: [
+        {
+          name: className,
+          level: 1,
+        },
+      ],
       race: raceInfo,
       totalXp: 0,
       proficiency,

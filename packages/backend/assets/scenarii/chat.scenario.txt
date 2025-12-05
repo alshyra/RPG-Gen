@@ -37,7 +37,7 @@ Elara lève les yeux vers toi un instant, ses traits sont tirés, mais elle **ne
 **Génère immédiatement le jet de dés pour l'évaluation de l'ambiance.**
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "wisdom (Perception)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none" } }
 ```
 
 **Résolution du jet de Perception (À appliquer après réception du résultat) :**
@@ -58,7 +58,7 @@ Elara lève les yeux vers toi un instant, ses traits sont tirés, mais elle **ne
 **Génère** le jet pour examiner le panier.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "wisdom (Survival)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "wisdom (Survival)", "advantage": "none" } }
 ```
 
 **Résolution du jet de Survie (À appliquer après réception du résultat) :**
@@ -82,7 +82,7 @@ Le joueur se rend au Vieux Puits. **Décris** le puits ancien, la mousse noire e
 **Génère** le jet pour trouver les pistes principales.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "intelligence (Investigation)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "intelligence (Investigation)", "advantage": "none" } }
 ```
 
 **Résolution du jet d'Investigation (À appliquer après réception du résultat) :**
@@ -95,7 +95,7 @@ Le joueur se rend au Vieux Puits. **Décris** le puits ancien, la mousse noire e
 **Décris** le Bûcheron Gérald travaillant à proximité. S'il est interrogé gentiment, **Génère** le jet social.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "charisma (Persuasion)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "charisma (Persuasion)", "advantage": "none" } }
 ```
 
 - _Si Réussite (DD 10) :_ Gérald révèle les **"gloussements étouffés"** et une odeur de viande avariée près du puits.
@@ -115,7 +115,7 @@ La piste mène à un poste d'observation mal dissimulé. **Décris** la présenc
 **Décris** la découverte de l'écharpe de Jorin et de la note. **Génère** le jet pour déchiffrer.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "intelligence (Arcana)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "intelligence (Arcana)", "advantage": "none" } }
 ```
 
 - _Si Réussite (DD 14) :_ Le joueur déchiffre le mot "**Cachette**" et le nom : "**Krot-Shok**".
@@ -138,7 +138,7 @@ La piste s'arrête devant une petite **cascade asséchée** cachant une crevasse
 **Génère** le jet pour se hisser.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "strength (Athletics)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "strength (Athletics)", "advantage": "none" } }
 ```
 
 **Résolution du jet d'Athlétisme (À appliquer après réception du résultat) :**
@@ -154,7 +154,7 @@ La piste s'arrête devant une petite **cascade asséchée** cachant une crevasse
 **Génère** le jet de Religion pour identifier le culte.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "intelligence (Religion)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "intelligence (Religion)", "advantage": "none" } }
 ```
 
 - _Si Réussite (DD 12) :_ **Révèle** les glyphes comme étant liés au **Culte de la Chair** des Marais.
@@ -198,7 +198,7 @@ Si le joueur tente de faire tomber la Haute Pierre :
 **Génère** le jet de Force.
 
 ```json
-{ "roll": { "dices": "1d20", "modifier": "strength (Athletics)", "advantage": "none" } }
+{ "roll": { "dices": "1d20", "modifierLabel": "strength (Athletics)", "advantage": "none" } }
 ```
 
 - _Si Réussite (DD 15) :_ La pierre vacille et fait tomber Krot-Shok, mettant fin au combat.

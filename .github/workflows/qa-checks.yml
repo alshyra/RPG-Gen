@@ -86,14 +86,18 @@ jobs:
             name: "authentication"
           - path: "cypress/e2e/character-creation.cy.ts"
             name: "character-creation"
+          - path: "cypress/e2e/combat.cy.ts"
+            name: "combat"
+          - path: "cypress/e2e/game-pages.cy.ts"
+            name: "game-pages"
           - path: "cypress/e2e/home.cy.ts"
             name: "home"
           - path: "cypress/e2e/navigation.cy.ts"
             name: "navigation"
           - path: "cypress/e2e/smoke.cy.ts"
             name: "smoke"
-          - path: "cypress/e2e/world-selection.cy.ts"
-            name: "world-selection"
+          - path: "cypress/e2e/turn-based-combat.cy.ts"
+            name: "turn-based-combat"
 
     steps:
       - name: Checkout

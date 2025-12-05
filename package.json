@@ -17,14 +17,23 @@
     "e2e:cleanup-db": "node scripts/prepare-e2e-db.mjs -- --cleanup",
     "test": "npm run test:backend && npm run test:frontend",
     "test:e2e": "npm -w rpg-gemini-frontend run test:e2e",
+    "test:e2e:open": "npm -w rpg-gemini-frontend run test:e2e:open",
     "generate:openapi": "npm --workspace rpg-gemini-backend run generate:openapi",
-    "lint": "npm --workspace rpg-gemini-backend run lint && npm --workspace rpg-gemini-frontend run lint"
+    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint .",
+    "lint:fix": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint . --fix"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "@eslint/js": "^9.39.1",
+    "@types/express": "^5.0.6",
+    "concurrently": "^8.2.0",
+    "eslint": "^9.39.1",
+    "express": "^5.2.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.0"
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.12",
+    "jsonc-simple-parser": "^3.0.0",
     "tsconfig-paths": "^4.2.0"
   }
 }

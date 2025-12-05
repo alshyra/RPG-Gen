@@ -1,4 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import {
+  createRouter, createWebHistory,
+} from 'vue-router';
 import LandingView from '../views/LandingView.vue';
 import HomeView from '../views/HomeView.vue';
 import GameView from '../views/GameView.vue';
@@ -15,19 +17,58 @@ import AuthCallbackView from '../views/AuthCallbackView.vue';
 import { authService } from '../apis/authApi';
 
 const routes = [
-  { path: '/', name: 'landing', component: LandingView, meta: { public: true } },
-  { path: '/login', name: 'login', component: LoginView, meta: { public: true } },
-  { path: '/auth/callback', name: 'auth-callback', component: AuthCallbackView, meta: { public: true } },
-  { path: '/home', name: 'home', component: HomeView },
+  {
+    path: '/',
+    name: 'landing',
+    component: LandingView,
+    meta: { public: true },
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: { public: true },
+  },
+  {
+    path: '/auth/callback',
+    name: 'auth-callback',
+    component: AuthCallbackView,
+    meta: { public: true },
+  },
+  {
+    path: '/home',
+    name: 'home',
+    component: HomeView,
+  },
   {
     path: '/game/:characterId',
     component: GameView,
     children: [
-      { path: '', name: 'game', component: MessagesView },
-      { path: 'inventory', name: 'game-inventory', component: InventoryView },
-      { path: 'skills', name: 'game-skills', component: SkillsView },
-      { path: 'spells', name: 'game-spells', component: SpellsView },
-      { path: 'quest', name: 'game-quest', component: QuestView },
+      {
+        path: '',
+        name: 'game',
+        component: MessagesView,
+      },
+      {
+        path: 'inventory',
+        name: 'game-inventory',
+        component: InventoryView,
+      },
+      {
+        path: 'skills',
+        name: 'game-skills',
+        component: SkillsView,
+      },
+      {
+        path: 'spells',
+        name: 'game-spells',
+        component: SpellsView,
+      },
+      {
+        path: 'quest',
+        name: 'game-quest',
+        component: QuestView,
+      },
     ],
   },
   {
@@ -35,8 +76,16 @@ const routes = [
     name: 'character-step',
     component: CharacterCreatorView,
   },
-  { path: '/levelup/:world?', name: 'levelup', component: CharacterLevelupView },
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
+  {
+    path: '/levelup/:world?',
+    name: 'levelup',
+    component: CharacterLevelupView,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFoundView,
+  },
 ];
 
 const router = createRouter({

@@ -6,114 +6,60 @@
         univers et commence immédiatement.
       </p>
 
-      <!-- List of all saved characters -->
-      <div
-        v-if="characters.length > 0"
-        class="mt-6"
-      >
+      <!-- Characters list handled by CharactersMenu component -->
+      <div class="mt-6">
         <h3 class="text-lg font-semibold mb-4 text-slate-200">
           Mes personnages
         </h3>
-        <div class="space-y-3">
-          <div
-            v-for="character in characters"
-            :key="character.characterId"
-            class="p-4 bg-slate-800/50 rounded-lg flex items-center justify-between hover:bg-slate-800/70 transition-colors"
-          >
-            <div class="text-left flex-1">
-              <div class="text-lg font-semibold">
-                {{ character.name || 'Personnage inconnu' }}
-              </div>
-              <div class="text-xs text-slate-400">
-                {{ getCharSummary(character) }}
-              </div>
-              <div class="text-xs text-slate-500 mt-1">
-                {{ character.world }} • HP: {{ character.hp }}/{{ character.hpMax }} • XP: {{ character.totalXp || 0 }}
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <UiButton
-                variant="primary"
-                @click="resumeCharacter(character)"
-              >
-                Reprendre
-              </UiButton>
-              <UiButton
-                variant="ghost"
-                :is-loading="deletingCharacterId === character.characterId"
-                @click="deleteCharacter(character)"
-              >
-                Supprimer
-              </UiButton>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Message if no characters -->
-      <div
-        v-else
-        class="mt-6 p-4 bg-slate-800/30 rounded-lg text-slate-400"
-      >
-        Aucun personnage créé. Sélectionnez un univers ci-dessous pour commencer !
+        <CharactersMenu />
       </div>
     </section>
 
-    <div class="max-w-2xl w-full mx-auto mt-8">
-      <WorldSelector />
+    <div class="max-w-2xl w-full mx-auto mt-8 text-center">
+      <p class="text-slate-300 mb-3">
+        Créer un nouveau personnage — uniquement pour D&D.
+      </p>
+      <UiButton
+        variant="primary"
+        :is-loading="creating"
+        @click="createDndCharacter"
+      >
+        Créer un personnage (D&D)
+      </UiButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { CharacterDto } from '@rpg-gen/shared';
-import { onMounted, ref } from 'vue';
-import WorldSelector from '../components/game/WorldSelector.vue';
+import { ref } from 'vue';
+import CharactersMenu from '../components/home/CharactersMenu.vue';
 import UiButton from '../components/ui/UiButton.vue';
-import { characterServiceApi } from '../apis/characterApi';
+import { characterApi } from '../apis/characterApi';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const characters = ref<Partial<CharacterDto>[]>([]);
-const deletingCharacterId = ref<string | null>(null);
+const creating = ref(false);
 
-const getCharSummary = (character: Partial<CharacterDto>): string => {
-  const classes = character.classes || [];
-  return classes
-    .map(character => (character?.name ? `${character.name} Niveau ${character.level}` : ''))
-    .filter(Boolean)
-    .join(', ');
-};
-
-const resumeCharacter = (character: Partial<CharacterDto>) => {
-  if (character.state === 'draft') {
-    router.push({ name: 'character-step', params: { characterId: character.characterId, step: 1 } });
-    return;
-  }
-  router.push({ name: 'game', params: { characterId: character.characterId } });
-};
-
-const deleteCharacter = async (character: Partial<CharacterDto>) => {
-  if (!character.characterId) return;
-  if (window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
-    deletingCharacterId.value = character.characterId;
-    try {
-      await characterServiceApi.deleteCharacter(character.characterId);
-      await loadCharacters();
-    } finally {
-      deletingCharacterId.value = null;
+const createDndCharacter = async () => {
+  creating.value = true;
+  try {
+    const newChar = await characterApi.createCharacter('dnd');
+    if (newChar && newChar.characterId) {
+      // Navigate to character creation step 1 for the new character
+      router.push({
+        name: 'character-step',
+        params: {
+          characterId: newChar.characterId,
+          step: 1,
+        },
+      });
     }
+  } catch (e) {
+    console.error('Failed to create DnD character', e);
+    window.alert('La création du personnage a échoué.');
+  } finally {
+    creating.value = false;
   }
 };
 
-const loadCharacters = async () => {
-  const res = await characterServiceApi.getAllCharacters();
-  characters.value = res;
-};
-
-onMounted(async () => {
-  await loadCharacters();
-});
 </script>
-
-<style scoped></style>

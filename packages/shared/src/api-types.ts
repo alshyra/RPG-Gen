@@ -191,6 +191,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/characters/{characterId}/inventory/equip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Equip an item by definitionId (weapon only) */
+        post: operations["CharacterController_equipInventory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters/{characterId}/inventory/{itemId}": {
         parameters: {
             query?: never;
@@ -243,14 +260,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/items": {
+    "/api/combat/{characterId}/start": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["ItemDefinitionController_list"];
+        get?: never;
+        put?: never;
+        /** Initialize combat with enemies */
+        post: operations["CombatController_startCombat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/attack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute player attack in combat, determine if player hit his target */
+        post: operations["CombatController_attack"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current combat status */
+        get: operations["CombatController_getStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -259,16 +311,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/items/{definitionId}": {
+    "/api/combat/{characterId}/end-turn": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["ItemDefinitionController_get"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** End current player activation and advance turn (triggers enemy actions) */
+        post: operations["CombatController_endTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/flee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Force end current combat (flee) */
+        post: operations["CombatController_flee"];
         delete?: never;
         options?: never;
         head?: never;
@@ -342,6 +412,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/characters/{characterId}/inventory/use": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Use an item from inventory */
+        post: operations["InventoryController_useItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rolls/{characterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit resolved roll(s) (non-chat) for processing */
+        post: operations["RollsController_submitRoll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -356,15 +460,32 @@ export interface components {
             /** @description URL de la photo de profil de l'utilisateur */
             picture: string;
         };
-        ChatRequestDto: {
-            /** @description User message to send to the AI */
-            message: string;
+        RollMetaDto: {
+            /** @description Attack bonus to apply */
+            attackBonus?: number;
+            /** @description Target name */
+            target?: string;
+            /** @description Target armor class */
+            targetAc?: number;
+            /** @description Damage dice expression */
+            damageDice?: string;
+            /** @description Damage bonus to apply */
+            damageBonus?: number;
+            /** @description Action type (e.g., attack, damage) */
+            action?: string;
         };
-        RollInstructionDto: {
+        RollInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "roll";
             /** @description Dice expression (e.g., 1d20+5) */
             dices: string;
-            /** @description Modifier */
-            modifier?: Record<string, never>;
+            /** @description Semantic modifier label (e.g., "wisdom (Perception)") */
+            modifierLabel?: string;
+            /** @description Numeric modifier to apply to the roll (e.g., +3) */
+            modifierValue?: number;
             /** @description Roll description */
             description?: string;
             /**
@@ -372,8 +493,33 @@ export interface components {
              * @enum {string}
              */
             advantage?: "advantage" | "disadvantage" | "none";
+            /** @description Optional metadata for combat rolls */
+            meta?: components["schemas"]["RollMetaDto"];
         };
-        SpellInstructionDataDto: {
+        HpInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "hp";
+            /** @description Amount of HP change */
+            hp: number;
+        };
+        XpInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "xp";
+            /** @description Amount of XP gained */
+            xp: number;
+        };
+        SpellInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "spell";
             /**
              * @description Spell action
              * @enum {string}
@@ -388,7 +534,12 @@ export interface components {
             /** @description Spell description */
             description?: string;
         };
-        InventoryInstructionDataDto: {
+        InventoryInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "inventory";
             /**
              * @description Inventory action
              * @enum {string}
@@ -396,49 +547,58 @@ export interface components {
             action: "add" | "remove" | "use";
             /** @description Item name */
             name: string;
+            /** @description Inventory item _id (required for use action) */
+            itemId?: string;
             /** @description Quantity */
             quantity?: number;
             /** @description Item description */
             description?: string;
         };
-        GameInstructionDto: {
+        CombatEndDto: {
+            /** @description Victory state */
+            victory: boolean;
+            /** @description XP gained */
+            xp_gained: number;
+            /** @description Player's HP at the end */
+            player_hp: number;
+            /** @description Enemies that were defeated */
+            enemies_defeated: string[];
+            /** @description Flee indicator */
+            fled?: boolean;
+            /** @description Narrative summary */
+            narrative: string;
+        };
+        CombatEndInstructionMessageDto: {
+            /** @description Combat end information */
+            combat_end: components["schemas"]["CombatEndDto"];
             /**
              * @description Instruction type
              * @enum {string}
              */
-            type?: "roll" | "xp" | "hp" | "spell" | "inventory";
-            /** @description Roll instruction data */
-            roll?: components["schemas"]["RollInstructionDto"];
-            /** @description HP change */
-            hp?: number;
-            /** @description XP gained */
-            xp?: number;
-            /** @description Spell instruction */
-            spell?: components["schemas"]["SpellInstructionDataDto"];
-            /** @description Inventory instruction */
-            inventory?: components["schemas"]["InventoryInstructionDataDto"];
+            type: "combat_end";
         };
-        ChatResponseDto: {
-            /** @description Narrative text from the AI (cleaned) */
-            text: string;
-            /** @description Game instructions extracted from the response */
-            instructions: components["schemas"]["GameInstructionDto"][];
-            /** @description AI model used */
-            model: string;
-            /** @description Token usage statistics */
-            usage?: {
-                [key: string]: unknown;
-            };
-            /** @description Raw response (null by default) */
-            raw?: Record<string, never>;
+        CombatStartEntryDto: {
+            /** @description Enemy name */
+            name: string;
+            /** @description Enemy HP */
+            hp: number;
+            /** @description Enemy AC */
+            ac: number;
+            /** @description Attack bonus (optional) */
+            attack_bonus?: number;
+            /** @description Damage dice (optional) */
+            damage_dice?: string;
+            /** @description Damage bonus (optional) */
+            damage_bonus?: number;
         };
-        MessageMetaDto: {
-            /** @description AI model version used */
-            model?: string;
-            /** @description Token usage statistics */
-            usage?: {
-                [key: string]: unknown;
-            };
+        CombatStartInstructionMessageDto: {
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "combat_start";
+            /** @description Combat start entries */
+            combat_start: components["schemas"]["CombatStartEntryDto"][];
         };
         ChatMessageDto: {
             /**
@@ -446,16 +606,10 @@ export interface components {
              * @enum {string}
              */
             role: "user" | "assistant" | "system";
-            /** @description Message text content */
-            text: string;
-            /** @description Unix timestamp of the message */
-            timestamp: number;
-            /** @description Message metadata */
-            meta?: components["schemas"]["MessageMetaDto"];
             /** @description Narrative text (for assistant messages) */
-            narrative?: string;
+            narrative: string;
             /** @description Game instructions (for assistant messages) */
-            instructions?: components["schemas"]["GameInstructionDto"][];
+            instructions?: (components["schemas"]["RollInstructionMessageDto"] | components["schemas"]["HpInstructionMessageDto"] | components["schemas"]["XpInstructionMessageDto"] | components["schemas"]["SpellInstructionMessageDto"] | components["schemas"]["InventoryInstructionMessageDto"] | components["schemas"]["CombatStartInstructionMessageDto"])[];
         };
         CreateCharacterBodyDto: {
             /** @description Game world (e.g., dnd, vtm) */
@@ -499,7 +653,7 @@ export interface components {
             /** @description Skill modifier */
             modifier?: number;
         };
-        ItemResponseDto: {
+        InventoryItemDto: {
             /** @description Item ID */
             _id?: string;
             /** @description Definition ID */
@@ -512,10 +666,8 @@ export interface components {
             description?: string;
             /** @description Is equipped */
             equipped?: boolean;
-            /** @description Item metadata */
-            meta?: {
-                [key: string]: unknown;
-            };
+            /** @description Arbitrary item meta */
+            meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
         SpellResponseDto: {
             /** @description Spell name */
@@ -572,7 +724,7 @@ export interface components {
              */
             state: "draft" | "created";
             /** @description Character inventory */
-            inventory?: components["schemas"]["ItemResponseDto"][];
+            inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
         };
@@ -619,7 +771,7 @@ export interface components {
              */
             state: "draft" | "created";
             /** @description Character inventory */
-            inventory?: components["schemas"]["ItemResponseDto"][];
+            inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
         };
@@ -658,13 +810,9 @@ export interface components {
              */
             state?: "draft" | "created";
             /** @description Character inventory */
-            inventory?: components["schemas"]["ItemResponseDto"][];
+            inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
-        };
-        MessageResponseDto: {
-            /** @description Response message */
-            message: string;
         };
         KillCharacterBodyDto: {
             /** @description Location where character died */
@@ -724,6 +872,12 @@ export interface components {
             starter?: boolean;
             /** @description Whether the item can be used directly */
             usable?: boolean;
+            /** @description Whether the item can be used in combat (e.g., potions) */
+            combatUsable?: boolean;
+            /** @description Whether the item can be used during rest (e.g., rations) */
+            restUsable?: boolean;
+            /** @description Heal dice expression (e.g., "2d4+2") */
+            healDice?: string;
         };
         PackMeta: {
             /**
@@ -777,6 +931,13 @@ export interface components {
             /** @description Arbitrary item meta */
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
+        EquipInventoryDto: {
+            /**
+             * @description Definition id of the item to equip
+             * @example weapon-rapier
+             */
+            definitionId: string;
+        };
         RemoveInventoryBodyDto: {
             /** @description Quantity to remove (-1 = remove all) */
             qty?: number;
@@ -796,31 +957,173 @@ export interface components {
             /** @description Updated character */
             character: components["schemas"]["CharacterResponseDto"];
         };
-        DiceRequest: {
-            /** @description Dice expression (e.g., 1d20+5, 2d6, 1d8-2) */
-            expr: string;
+        CombatStartRequestDto: {
+            /** @description Array of enemies to initialize combat with */
+            combat_start: components["schemas"]["CombatStartEntryDto"][];
+        };
+        CombatantDto: {
+            /** @description ID of the combatant (player character or enemy) */
+            id: string;
+            /** @description Combatant name */
+            name: string;
+            /** @description Initiative order value */
+            initiative: number;
+            /** @description Whether combatant is player character */
+            isPlayer: boolean;
+            /** @description Current hit points (enemies only) */
+            hp?: number;
+            /** @description Maximum hit points (enemies only) */
+            hpMax?: number;
+            /** @description Armor class (enemies only) */
+            ac?: number;
+            /** @description Enemy attack bonus (enemies only) */
+            attackBonus?: number;
+            /** @description Enemy damage dice expression (enemies only), e.g. "1d6" */
+            damageDice?: string;
+            /** @description Enemy damage bonus (enemies only) */
+            damageBonus?: number;
+        };
+        CombatStateDto: {
+            /** @description Character ID */
+            characterId: string;
+            /** @description Whether currently in combat */
+            inCombat: boolean;
+            /** @description Active enemies */
+            enemies: components["schemas"]["CombatantDto"][];
+            /** @description Player state */
+            player: components["schemas"]["CombatantDto"];
+            /** @description Turn order for combat */
+            turnOrder: components["schemas"]["CombatantDto"][];
+            /** @description Index of current turn in turnOrder */
+            currentTurnIndex: number;
+            /** @description Current round number */
+            roundNumber: number;
+            /** @description Narrative summary of current combat */
+            narrative?: string;
             /**
-             * @description Advantage type for d20 rolls
+             * @description Current combat phase
              * @enum {string}
              */
-            advantage?: "advantage" | "disadvantage" | "none";
+            phase?: "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";
+            /** @description Remaining standard actions for current activation */
+            actionRemaining?: number;
+            /** @description Maximum standard actions per activation */
+            actionMax?: number;
+            /** @description Remaining bonus actions for current activation */
+            bonusActionRemaining?: number;
+            /** @description Maximum bonus actions per activation */
+            bonusActionMax?: number;
         };
-        DiceThrowDto: {
+        AttackRequestDto: {
+            /** @description Target ID to attack */
+            targetId: string;
+        };
+        DiceResultDto: {
             /** @description Individual dice roll results */
             rolls: number[];
             /** @description Modifier applied to the total */
-            mod: number;
+            modifierValue: number;
             /** @description Total result (sum of rolls + modifier) */
             total: number;
+        };
+        CombatDiceResultDto: {
+            /** @description Individual dice roll results */
+            rolls: number[];
+            /** @description Modifier applied to the total */
+            modifierValue: number;
+            /** @description Total result (sum of rolls + modifier) */
+            total: number;
+            /** @description Total damage dealt by the roll */
+            damageTotal?: number;
+            /** @description Whether this damage roll was a critical hit */
+            isCrit?: boolean;
+        };
+        AttackResponseDto: {
+            /** @description Result of the hit roll for frontend display purposes. */
+            diceResult?: components["schemas"]["DiceResultDto"];
+            /** @description Damage roll result (includes isCrit and damageTotal), present when an attack hits. */
+            damageDiceResult?: components["schemas"]["CombatDiceResultDto"];
+            /** @description Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable). */
+            damageTotal?: number;
+            /** @description Whether the hit was a critical strike. */
+            isCrit?: boolean;
+            /** @description Returns the state of the combat */
+            combatState: components["schemas"]["CombatStateDto"];
+            /** @description Combat end information (present when combat ends due to this attack) */
+            combatEnd?: components["schemas"]["CombatEndDto"];
+        };
+        EnemyAttackLogDto: {
             /**
-             * @description Advantage type used for this roll
-             * @enum {string}
+             * @description ID of the attacking enemy
+             * @example goblin-1
              */
-            advantage?: "advantage" | "disadvantage" | "none";
-            /** @description The roll that was kept (when using advantage/disadvantage) */
-            keptRoll?: number;
-            /** @description The roll that was discarded (when using advantage/disadvantage) */
-            discardedRoll?: number;
+            attackerId: string;
+            /**
+             * @description Name of the attacking enemy
+             * @example Goblin
+             */
+            attackerName: string;
+            /**
+             * @description ID of the target (player characterId)
+             * @example char-123
+             */
+            targetId: string;
+            /**
+             * @description Whether the attack hit the target
+             * @example true
+             */
+            hit: boolean;
+            /** @description Attack roll result */
+            attackRoll?: components["schemas"]["DiceResultDto"];
+            /** @description Damage roll result (only present if hit) */
+            damageRoll?: components["schemas"]["CombatDiceResultDto"];
+            /**
+             * @description Total damage dealt (0 if miss)
+             * @example 5
+             */
+            damageTotal?: number;
+            /**
+             * @description Whether the attack was a critical hit
+             * @example false
+             */
+            isCrit?: boolean;
+        };
+        EndPlayerTurnResponseDto: {
+            /**
+             * @description The current round number after enemy turn
+             * @example 2
+             */
+            roundNumber: number;
+            /** @description List of enemy attack logs in execution order */
+            attackLogs: components["schemas"]["EnemyAttackLogDto"][];
+            /**
+             * @description Total damage dealt to the player this turn
+             * @example 12
+             */
+            totalDamageToPlayer: number;
+            /**
+             * @description Whether the player was defeated this turn
+             * @example false
+             */
+            playerDefeated?: boolean;
+            /** @description Updated combat state after all enemy actions */
+            combatState: components["schemas"]["CombatStateDto"];
+        };
+        CombatEndResultDto: {
+            /** @description Combat end information */
+            combat_end: components["schemas"]["CombatEndDto"];
+        };
+        CombatEndResponseDto: {
+            /** @description Whether the operation succeeded */
+            success: boolean;
+            /** @description Human readable message */
+            message: string;
+            /** @description Optional instructions returned after ending combat */
+            instructions?: components["schemas"]["CombatEndResultDto"][];
+        };
+        DiceRequestDto: {
+            expr: string;
+            advantage?: string;
         };
         ImageRequestDto: {
             /** @description API token (optional) */
@@ -837,6 +1140,30 @@ export interface components {
         AvatarResponseDto: {
             /** @description Generated avatar image URL or base64 data */
             imageUrl: string;
+        };
+        UseItemRequestDto: {
+            /**
+             * @description The inventory item _id to use
+             * @example abc123-def456
+             */
+            itemId: string;
+        };
+        Function: Record<string, never>;
+        UseItemResponseDto: {
+            /** @description Whether the item was successfully used */
+            success: boolean;
+            /** @description Amount healed (if applicable) */
+            healAmount?: number;
+            /** @description Updated combat state (if in combat) */
+            combatState?: components["schemas"]["Function"];
+            /** @description Updated character (if not in combat) */
+            character?: components["schemas"]["Function"];
+            /** @description Human-readable result message */
+            message: string;
+        };
+        SubmitRollDto: {
+            /** @description Resolved instructions array */
+            instructions: components["schemas"]["RollInstructionMessageDto"][];
         };
     };
     responses: never;
@@ -929,17 +1256,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChatRequestDto"];
+                "application/json": components["schemas"]["ChatMessageDto"];
             };
         };
         responses: {
-            /** @description Chat response with narrative and instructions */
+            /** @description Chat message (assistant) with narrative and instructions */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatResponseDto"];
+                    "application/json": components["schemas"]["ChatMessageDto"];
                 };
             };
             /** @description Invalid request */
@@ -1110,7 +1437,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UpdateCharacterRequestDto"];
+                    "application/json": components["schemas"]["CharacterResponseDto"];
                 };
             };
             /** @description Character not found */
@@ -1139,7 +1466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MessageResponseDto"];
+                    "application/json": Record<string, never>;
                 };
             };
             /** @description Character not found */
@@ -1214,6 +1541,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CharacterController_equipInventory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EquipInventoryDto"];
+            };
+        };
+        responses: {
+            /** @description Character updated with equipped item */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
         };
     };
@@ -1361,29 +1714,62 @@ export interface operations {
             };
         };
     };
-    ItemDefinitionController_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ItemDefinitionController_get: {
+    CombatController_startCombat: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                definitionId: string;
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CombatStartRequestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_attack: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttackRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttackResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_getStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
             };
             cookie?: never;
         };
@@ -1393,7 +1779,52 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_endTurn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returns attack logs for animations and new player turn state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndPlayerTurnResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_flee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatEndResponseDto"];
+                };
             };
         };
     };
@@ -1406,7 +1837,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DiceRequest"];
+                "application/json": components["schemas"]["DiceRequestDto"];
             };
         };
         responses: {
@@ -1416,7 +1847,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DiceThrowDto"];
+                    "application/json": components["schemas"]["DiceResultDto"];
                 };
             };
             /** @description Invalid dice expression */
@@ -1495,6 +1926,65 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    InventoryController_useItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Character ID */
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UseItemRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Item used successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UseItemResponseDto"];
+                };
+            };
+            /** @description Bad request (item not found, wrong context, etc.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RollsController_submitRoll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitRollDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RollInstructionMessageDto"][];
+                };
             };
         };
     };

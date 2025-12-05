@@ -15,7 +15,7 @@ declare global {
        * Custom command to select an element by data-cy attribute.
        * @example cy.dataCy('submit-button')
        */
-      dataCy(value: string): Chainable<JQuery<HTMLElement>>;
+      dataCy(value: string): Chainable<JQuery>;
 
       /**
        * Ensure the client is authenticated for a test run by contacting the real
@@ -36,12 +36,23 @@ declare global {
        * @param opts.count number of characters to create
        * @param opts.url optional API url
        */
-      prepareE2EDb(opts?: { count?: number; url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
+      prepareE2EDb(opts?: {
+        count?: number;
+        url?: string;
+      }): Chainable<{
+        ok: boolean;
+        output?: string;
+        error?: string;
+      }>;
 
       /**
        * Cleanup the E2E DB (remove characters created for tests)
        */
-      cleanupE2EDb(opts?: { url?: string }): Chainable<{ ok: boolean; output?: string; error?: string }>;
+      cleanupE2EDb(opts?: { url?: string }): Chainable<{
+        ok: boolean;
+        output?: string;
+        error?: string;
+      }>;
 
       // setupApiMocks is removed — tests should call real backend endpoints for E2E.
     }

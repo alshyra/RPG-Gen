@@ -52,8 +52,9 @@ import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount } from 'vue';
-import type { SpellDto } from '@rpg-gen/shared';
+import {
+  computed, onBeforeUnmount,
+} from 'vue';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -61,16 +62,25 @@ const { currentCharacter } = storeToRefs(characterStore);
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
 const availableSpells = computed(() => DnDRulesService
   .getAvailableSpellsForClass(primaryClass.value)
-  .filter(s => s.level <= 1),
-);
+  .filter(s => s.level <= 1));
 
 const spellIsSelected = (name: string) => (currentCharacter.value?.spells || []).some(s => s.name === name);
 
-const toggleSpell = async (s: { name: string; level: number; description?: string }, selected: boolean) => {
+const toggleSpell = async (s: {
+  name: string;
+  level: number;
+  description?: string;
+}, selected: boolean) => {
   if (!currentCharacter.value) return;
 
   if (selected) {
-    characterStore.learnSpell({ name: s.name, level: s.level, description: s.description ?? '', meta: {} } as SpellDto);
+    characterStore.learnSpell({
+      type: 'spell',
+      action: 'learn',
+      name: s.name,
+      level: s.level,
+      description: s.description ?? '',
+    });
   } else {
     characterStore.forgetSpell(s.name);
   }
@@ -79,9 +89,7 @@ const toggleSpell = async (s: { name: string; level: number; description?: strin
 onBeforeUnmount(async () => {
   try {
     if (!currentCharacter.value?.characterId) return;
-    await characterStore.updateCharacter(currentCharacter.value.characterId, {
-      spells: currentCharacter.value.spells || [],
-    });
+    await characterStore.updateCharacter(currentCharacter.value.characterId, { spells: currentCharacter.value.spells || [] });
   } catch (err) {
     console.error('Failed to save spells on unmount:', err);
   }

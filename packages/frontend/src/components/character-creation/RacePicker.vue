@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ALLOWED_RACES } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
-import { RaceDto } from '@rpg-gen/shared';
+import { RaceResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
@@ -31,21 +31,23 @@ const allowedRaces = computed(() => ALLOWED_RACES);
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const additionalSelectedClass = (allowedRace: RaceDto) =>
-  currentCharacter.value?.race?.id === allowedRace.id
-    ? 'border-indigo-500 bg-indigo-600/20'
-    : 'border-slate-700';
+const additionalSelectedClass = (allowedRace: RaceResponseDto) => currentCharacter.value?.race?.id === allowedRace.id
+  ? 'border-indigo-500 bg-indigo-600/20'
+  : 'border-slate-700';
 
-const summaryMods = (mods: RaceDto['mods']) => {
+const summaryMods = (mods: RaceResponseDto['mods']) => {
   try {
     return Object
       .entries(mods)
-      .map(([attributeName, statAdjustment]) => `${attributeName}${(statAdjustment) >= 0 ? '+' + (statAdjustment) : statAdjustment}`)
+      .map(([
+        attributeName,
+        statAdjustment,
+      ]) => `${attributeName}${(statAdjustment) >= 0 ? '+' + (statAdjustment) : statAdjustment}`)
       .join(' ');
   } catch { return ''; }
 };
 
-const onRaceUpdate = (race: RaceDto) => {
+const onRaceUpdate = (race: RaceResponseDto) => {
   if (!currentCharacter.value) return;
 
   currentCharacter.value.race = race;
