@@ -1,6 +1,6 @@
 Ceci est une instruction pour faciliter la gestion des scénarios dans le backend.
 
-Le joueur arrive dans une arene face à 2 gobelins, le combat commence immédiatement.
+Le joueur arrive dans une arene face à 1 gobelin, le combat commence immédiatement.
 
 stats: 
 { "name": "Goblin-1", "hp": 7, "ac": 10, "attack_bonus": 0, "damage_dice": "1d4", "damage_bonus": 0 },

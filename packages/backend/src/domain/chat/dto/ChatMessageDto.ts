@@ -9,6 +9,7 @@ import {
   InventoryInstructionMessageDto,
   GameInstructionDto,
   CombatEndInstructionMessageDto,
+  CombatStartInstructionMessageDto,
 } from './GameInstructionDto.js';
 import { IsArray, IsString } from 'class-validator';
 
@@ -19,6 +20,7 @@ import { IsArray, IsString } from 'class-validator';
   SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
   CombatEndInstructionMessageDto,
+  CombatStartInstructionMessageDto,
 )
 export class ChatMessageDto {
   @ApiProperty({

@@ -28,4 +28,8 @@ export class CombatEndDto {
   @ApiProperty({ description: 'Narrative summary' })
   @IsString()
   narrative: string;
+
+  constructor(combatEnd?: Partial<CombatEndDto>) {
+    Object.assign(this, combatEnd);
+  }
 }

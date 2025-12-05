@@ -15,6 +15,7 @@ export type CharacterResponseDto = import('./api-types').components['schemas']['
 export type ChatMessageDto = import('./api-types').components['schemas']['ChatMessageDto'];
 export type CombatDiceResultDto = import('./api-types').components['schemas']['CombatDiceResultDto'];
 export type CombatEndDto = import('./api-types').components['schemas']['CombatEndDto'];
+export type CombatEndInstructionMessageDto = import('./api-types').components['schemas']['CombatEndInstructionMessageDto'];
 export type CombatEndResponseDto = import('./api-types').components['schemas']['CombatEndResponseDto'];
 export type CombatEndResultDto = import('./api-types').components['schemas']['CombatEndResultDto'];
 export type CombatStartEntryDto = import('./api-types').components['schemas']['CombatStartEntryDto'];

@@ -554,6 +554,29 @@ export interface components {
             /** @description Item description */
             description?: string;
         };
+        CombatEndDto: {
+            /** @description Victory state */
+            victory: boolean;
+            /** @description XP gained */
+            xp_gained: number;
+            /** @description Player's HP at the end */
+            player_hp: number;
+            /** @description Enemies that were defeated */
+            enemies_defeated: string[];
+            /** @description Flee indicator */
+            fled?: boolean;
+            /** @description Narrative summary */
+            narrative: string;
+        };
+        CombatEndInstructionMessageDto: {
+            /** @description Combat end information */
+            combat_end: components["schemas"]["CombatEndDto"];
+            /**
+             * @description Instruction type
+             * @enum {string}
+             */
+            type: "combat_end";
+        };
         CombatStartEntryDto: {
             /** @description Enemy name */
             name: string;
@@ -1014,20 +1037,6 @@ export interface components {
             damageTotal?: number;
             /** @description Whether this damage roll was a critical hit */
             isCrit?: boolean;
-        };
-        CombatEndDto: {
-            /** @description Victory state */
-            victory: boolean;
-            /** @description XP gained */
-            xp_gained: number;
-            /** @description Player's HP at the end */
-            player_hp: number;
-            /** @description Enemies that were defeated */
-            enemies_defeated: string[];
-            /** @description Flee indicator */
-            fled?: boolean;
-            /** @description Narrative summary */
-            narrative: string;
         };
         AttackResponseDto: {
             /** @description Result of the hit roll for frontend display purposes. */

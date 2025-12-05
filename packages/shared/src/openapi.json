@@ -1395,6 +1395,69 @@
           "name"
         ]
       },
+      "CombatEndDto": {
+        "type": "object",
+        "properties": {
+          "victory": {
+            "type": "boolean",
+            "description": "Victory state"
+          },
+          "xp_gained": {
+            "type": "number",
+            "description": "XP gained"
+          },
+          "player_hp": {
+            "type": "number",
+            "description": "Player's HP at the end"
+          },
+          "enemies_defeated": {
+            "description": "Enemies that were defeated",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fled": {
+            "type": "boolean",
+            "description": "Flee indicator"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative summary"
+          }
+        },
+        "required": [
+          "victory",
+          "xp_gained",
+          "player_hp",
+          "enemies_defeated",
+          "narrative"
+        ]
+      },
+      "CombatEndInstructionMessageDto": {
+        "type": "object",
+        "properties": {
+          "combat_end": {
+            "description": "Combat end information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Instruction type",
+            "enum": [
+              "combat_end"
+            ]
+          }
+        },
+        "required": [
+          "combat_end",
+          "type"
+        ]
+      },
       "CombatStartEntryDto": {
         "type": "object",
         "properties": {
@@ -2531,45 +2594,6 @@
           "rolls",
           "modifierValue",
           "total"
-        ]
-      },
-      "CombatEndDto": {
-        "type": "object",
-        "properties": {
-          "victory": {
-            "type": "boolean",
-            "description": "Victory state"
-          },
-          "xp_gained": {
-            "type": "number",
-            "description": "XP gained"
-          },
-          "player_hp": {
-            "type": "number",
-            "description": "Player's HP at the end"
-          },
-          "enemies_defeated": {
-            "description": "Enemies that were defeated",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "fled": {
-            "type": "boolean",
-            "description": "Flee indicator"
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative summary"
-          }
-        },
-        "required": [
-          "victory",
-          "xp_gained",
-          "player_hp",
-          "enemies_defeated",
-          "narrative"
         ]
       },
       "AttackResponseDto": {

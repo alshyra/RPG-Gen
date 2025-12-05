@@ -12,6 +12,7 @@ import {
   CombatSession, CombatSessionSchema,
 } from '../infra/mongo/combat-session.schema.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
+import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
     InitService,
     TurnOrderService,
     ActionEconomyService,
-
+    GeminiTextService,
     // App service facade
     CombatAppService,
 

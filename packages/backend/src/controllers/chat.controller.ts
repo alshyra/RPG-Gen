@@ -94,7 +94,7 @@ export class ChatController {
       previousChatMessages,
     );
     await this.conversationService.append(userId, characterId, chatMessageDto);
-    return this.getGMResponse(userId, characterId, chatMessageDto.narrative);
+    return this.chatOrchestrator.getGMResponse(userId, characterId, chatMessageDto.narrative);
   }
 
   @Get('/:characterId/history')
@@ -160,38 +160,11 @@ export class ChatController {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(characterId, this.initPrompt(character), previousChatMessages ?? []);
     if (!previousChatMessages) {
-      await this.getGMResponse(userId, characterId, 'Tu peux commencer l\'aventure');
+      await this.chatOrchestrator.getGMResponse(userId, characterId, 'Tu peux commencer l\'aventure');
     }
   }
 
   private initPrompt(character: CharacterResponseDto) {
     return `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`;
-  }
-
-  private async getGMResponse(
-    userId: string,
-    characterId: string,
-    userText: string,
-  ) {
-    const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
-    const assistantMsg = {
-      role: 'assistant' as const,
-      narrative: parsed.narrative || '',
-      instructions: parsed.instructions || [],
-    };
-
-    // Save assistant reply to history
-    await this.conversationService.append(userId, characterId, assistantMsg);
-
-    // Process game instructions (apply side-effects) if any
-    if (Array.isArray(parsed.instructions) && parsed.instructions.length > 0) {
-      try {
-        await this.chatOrchestrator.processInstructions(userId, characterId, parsed.instructions);
-      } catch (e) {
-        this.logger.warn(`Instruction processing failed for ${characterId}: ${(e as Error)?.message}`);
-      }
-    }
-
-    return assistantMsg;
   }
 }

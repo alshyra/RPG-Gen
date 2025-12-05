@@ -8,6 +8,7 @@ import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
+import { conversationService } from '@/apis/conversationApi';
 
 /**
  * Composable for combat-specific actions and state management
@@ -127,7 +128,7 @@ export function useCombat() {
   /**
    * Handle combat end instruction
    */
-  const handleCombatEnd = (victory: boolean, xpGained: number, enemiesDefeated: string[]): void => {
+  const handleCombatEnd = async (victory: boolean, xpGained: number, enemiesDefeated: string[]): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
       combatStore.clearCombat();
@@ -141,6 +142,12 @@ export function useCombat() {
       gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
       characterStore.updateXp(xpGained);
     }
+    const gmResponse = await conversationService.sendStructuredMessage({
+      role: 'system',
+      instructions: [],
+      narrative: 'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
+    });
+    gameStore.appendMessage('assistant', gmResponse.narrative);
   };
 
   /**

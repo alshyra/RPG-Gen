@@ -3,17 +3,18 @@ import {
   Logger,
 } from '@nestjs/common';
 import { CharacterService } from '../../domain/character/character.service.js';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import type { CharacterResponseDto } from '../../domain/character/dto/index.js';
+import { ConversationService } from '../../domain/chat/conversation.service.js';
 import type {
   CombatStartInstructionMessageDto,
   GameInstructionDto,
   HpInstructionMessageDto,
-  InventoryInstructionMessageDto,
   RollInstructionMessageDto,
   SpellInstructionMessageDto,
   XpInstructionMessageDto,
 } from '../../domain/chat/dto/index.js';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
+import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.
@@ -31,12 +32,37 @@ export class ChatOrchestrator {
   constructor(
     private readonly characterService: CharacterService,
     private readonly combatService: CombatAppService,
+    private readonly conversationService: ConversationService,
+    private readonly geminiTexteService: GeminiTextService,
   ) {}
+
+  public async getGMResponse(
+    userId: string,
+    characterId: string,
+    userText: string,
+  ) {
+    const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
+    const assistantMsg = {
+      role: 'assistant' as const,
+      narrative: parsed.narrative || '',
+      instructions: parsed.instructions || [],
+    };
+
+    // Save assistant reply to history
+    await this.conversationService.append(userId, characterId, assistantMsg);
+
+    // Process game instructions (apply side-effects) if any
+    if (Array.isArray(parsed.instructions) && parsed.instructions.length > 0) {
+      await this.processInstructions(userId, characterId, parsed.instructions);
+    }
+
+    return assistantMsg;
+  }
 
   /**
    * Process an array of GameInstructionDto and apply side-effects.
    * Returns pending roll instructions that require client action.
-   */
+  */
   async processInstructions(
     userId: string,
     characterId: string,
@@ -44,7 +70,6 @@ export class ChatOrchestrator {
   ): Promise<{ pendingRolls: RollInstructionMessageDto[] }> {
     const pendingRolls: RollInstructionMessageDto[] = [];
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
-
     const handlerMap: Record<string, (instr: GameInstructionDto) => Promise<void>> = {
       roll: instr => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
       hp: instr => this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
@@ -52,20 +77,12 @@ export class ChatOrchestrator {
       // inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
       spell: instr => this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
       combat_start: instr => this.handleCombatStart(userId, characterId, characterDto, instr as CombatStartInstructionMessageDto),
-      combat_end: () => this.handleCombatEnd(userId, characterId, characterDto),
     };
 
     await Promise.all(
-      instructions.map(async (instruction) => {
-        const handler = handlerMap[instruction.type];
-        if (handler) {
-          try {
-            await handler(instruction);
-          } catch (e) {
-            this.logger.warn(`Failed to apply instruction for ${characterId}: ${(e as Error)?.message}`);
-          }
-        }
-      }),
+      instructions
+        .filter(instruction => handlerMap[instruction.type])
+        .map(async instruction => handlerMap[instruction.type](instruction)),
     );
 
     return { pendingRolls };
@@ -158,23 +175,6 @@ export class ChatOrchestrator {
       this.logger.log(`Combat initialized for ${characterId} from instruction`);
     } catch (e) {
       this.logger.warn(`Failed to initialize combat for ${characterId}: ${(e as Error)?.message}`);
-    }
-  }
-
-  private async handleCombatEnd(
-    userId: string,
-    characterId: string,
-    characterDto: CharacterResponseDto,
-  ): Promise<void> {
-    try {
-      const result = await this.combatService.endCombat(characterId);
-      if (result && result.xpGained) {
-        const newXp = (characterDto?.totalXp || 0) + (result.xpGained || 0);
-        await this.characterService.update(userId, characterId, { totalXp: newXp });
-      }
-      this.logger.log(`Combat end processed for ${characterId}`);
-    } catch (e) {
-      this.logger.warn(`Failed to end combat for ${characterId}: ${(e as Error)?.message}`);
     }
   }
 }

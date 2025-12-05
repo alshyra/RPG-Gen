@@ -1,4 +1,5 @@
 export * from './ChatMessageDto.js';
+export * from './CombatStartInstructionMessageDto.js';
 export * from './CombatEndInstructionMessageDto.js';
 export * from './GameInstructionDto.js';
 export * from './HpInstructionMessageDto.js';
