@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  Injectable, Logger,
+  Injectable, InternalServerErrorException, Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,6 +13,7 @@ import type {
 } from '../character/dto/index.js';
 import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
 import { CombatantDto } from './dto/CombatantDto.js';
+import { CombatEndDto } from './dto/CombatEndDto.js';
 import { CombatStartRequestDto } from './dto/CombatStartRequestDto.js';
 import { CombatStateDto } from './dto/CombatStateDto.js';
 import { ActionEconomyService } from './services/action-economy.service.js';
@@ -356,8 +357,16 @@ export class CombatAppService {
   /**
    * Apply damage reported by client to a named enemy and persist state.
    * Decrements action counter.
+   * Returns both the updated state and optionally the endResult when combat ends.
    */
-  async applyPlayerDamage(characterId: string, targetId: string, damageTotal: number): Promise<CombatStateDto> {
+  async applyPlayerDamage(
+    characterId: string,
+    targetId: string,
+    damageTotal: number,
+  ): Promise<{
+    state: CombatStateDto;
+    endResult?: Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>;
+  }> {
     let state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException('No active combat found for character.');
 
@@ -376,13 +385,16 @@ export class CombatAppService {
     // Finalize combat if needed (all enemies dead)
     const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
     if (!anyAlive) {
-      // persist and cleanup
-      await this.endCombat(characterId);
+      // persist and cleanup - capture the endResult before deleting the session
+      const endResult = await this.endCombat(characterId);
       state.inCombat = false;
-      return state;
+      return {
+        state,
+        endResult,
+      };
     }
 
-    return state;
+    return { state };
   }
 
   /**
@@ -414,14 +426,9 @@ export class CombatAppService {
   /**
    * End combat and generate final result (cleanup)
    */
-  async endCombat(characterId: string): Promise<{
-    xpGained: number;
-    enemiesDefeated: string[];
-  } | null> {
+  async endCombat(characterId: string): Promise<Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>> {
     const state = await this.getCombatState(characterId);
-    if (!state) {
-      return null;
-    }
+    if (!state) throw new InternalServerErrorException('Combat session not found during cleanup');
 
     // Enemies with hp <= 0 are defeated
     const defeatedEnemies = state.enemies.filter(e => (e.hp ?? 0) <= 0);
@@ -431,8 +438,8 @@ export class CombatAppService {
     this.logger.log(`Combat cleaned up for ${characterId}`);
 
     return {
-      xpGained,
-      enemiesDefeated: defeatedEnemies.map(e => e.name),
+      xp_gained: xpGained,
+      enemies_defeated: defeatedEnemies.map(e => e.name),
     };
   }
 }

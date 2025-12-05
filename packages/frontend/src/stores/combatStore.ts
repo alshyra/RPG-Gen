@@ -24,9 +24,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const turnOrder = ref<CombatantDto[]>([]);
   const playerInitiative = ref(0);
   const currentTarget = ref<CombatantDto | null>(null);
-  const actionToken = ref<string | null>(null);
   const phase = ref<CombatPhase>('PLAYER_TURN');
-  const expectedDto = ref<string>('AttackRequestDto');
   const showAttackResultModal = ref(false);
   const currentAttackResult = ref<AttackResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
@@ -69,9 +67,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
     currentTurnIndex.value = response.currentTurnIndex ?? 0;
-    actionToken.value = response.actionToken ?? null;
     phase.value = response.phase ?? 'PLAYER_TURN';
-    expectedDto.value = response.expectedDto ?? 'AttackRequestDto';
   };
 
   const setActionEconomy = (response: CombatStateDto): void => {
@@ -126,10 +122,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     roundNumber.value = combatState.roundNumber ?? roundNumber.value;
     turnOrder.value = combatState.turnOrder ?? turnOrder.value;
     currentTurnIndex.value = combatState.currentTurnIndex ?? currentTurnIndex.value;
-    expectedDto.value = combatState.expectedDto ?? expectedDto.value;
-    actionToken.value = combatState.actionToken ?? actionToken.value;
     phase.value = combatState.phase ?? phase.value;
-    if (combatState.phase === 'PLAYER_TURN') expectedDto.value = 'AttackRequestDto';
   };
 
   const applyTurnActionEconomy = (s: CombatStateDto): void => {
@@ -143,7 +136,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     if (result.playerDefeated || (result.combatState?.enemies?.length === 0)) {
       inCombat.value = false;
       phase.value = 'COMBAT_ENDED';
-      actionToken.value = null;
     }
   };
 
@@ -182,9 +174,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const resetCombatState = (): void => {
     inCombat.value = false;
     roundNumber.value = 1;
-    actionToken.value = null;
     phase.value = 'PLAYER_TURN';
-    expectedDto.value = 'AttackRequestDto';
     currentTurnIndex.value = 0;
   };
 
@@ -224,12 +214,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     return response;
   };
 
-  const setActionToken = (token: string | null, newPhase?: CombatPhase, newExpectedDto?: string): void => {
-    actionToken.value = token;
-    if (newPhase) phase.value = newPhase;
-    if (newExpectedDto) expectedDto.value = newExpectedDto;
-  };
-
   const endActivation = async (characterId: string) => {
     const response = await combatService.endActivation(characterId);
     if (response.attackLogs?.length) {
@@ -245,9 +229,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     player,
     currentTarget,
     roundNumber,
-    actionToken,
     phase,
-    expectedDto,
     playerInitiative,
     turnOrder,
     currentTurnIndex,
@@ -277,7 +259,6 @@ export const useCombatStore = defineStore('combatStore', () => {
     clearCombat,
     startCombat,
     fetchStatus,
-    setActionToken,
     endActivation,
   };
 });

@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DiceResultDto } from '../../../domain/dice/dto/DiceResultDto.js';
 import { CombatDiceResultDto } from '../../../domain/dice/dto/CombatDiceResultDto.js';
 import { CombatStateDto } from './CombatStateDto.js';
+import { CombatEndDto } from './CombatEndDto.js';
 
 export class AttackResponseDto {
   @ApiPropertyOptional({
@@ -33,4 +34,10 @@ export class AttackResponseDto {
     type: CombatStateDto,
   })
   combatState: CombatStateDto;
+
+  @ApiPropertyOptional({
+    description: 'Combat end information (present when combat ends due to this attack)',
+    type: CombatEndDto,
+  })
+  combatEnd?: CombatEndDto;
 }

@@ -84,11 +84,13 @@ export function useCombat() {
   };
 
   const checkCombatVictory = (result: AttackResponseDto): void => {
-    const allEnemiesDead = result.combatState.enemies.every(e => (e.hp ?? 0) <= 0);
-    if (!result.combatState.inCombat || allEnemiesDead) {
-      gameStore.appendMessage('system', '🏆 Victoire! Tous les ennemis sont vaincus.');
-      combatStore.clearCombat();
-    }
+    // First check if backend returned explicit combatEnd
+    if (!result.combatEnd) return;
+    handleCombatEnd(
+      result.combatEnd.victory,
+      result.combatEnd.xp_gained,
+      result.combatEnd.enemies_defeated,
+    );
   };
 
   const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
@@ -126,19 +128,19 @@ export function useCombat() {
    * Handle combat end instruction
    */
   const handleCombatEnd = (victory: boolean, xpGained: number, enemiesDefeated: string[]): void => {
-    if (victory) {
-      gameStore.appendMessage('system', '🏆 Victoire!');
-      if (enemiesDefeated.length > 0) {
-        gameStore.appendMessage('system', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
-      }
-      if (xpGained > 0) {
-        gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
-        characterStore.updateXp(xpGained);
-      }
-    } else {
+    if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
+      combatStore.clearCombat();
+      return;
     }
-    combatStore.clearCombat();
+    gameStore.appendMessage('system', '🏆 Victoire!');
+    if (enemiesDefeated.length > 0) {
+      gameStore.appendMessage('system', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
+    }
+    if (xpGained > 0) {
+      gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
+      characterStore.updateXp(xpGained);
+    }
   };
 
   /**

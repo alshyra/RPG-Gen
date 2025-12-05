@@ -14,6 +14,7 @@ import type {
   CombatantDto,
   EndPlayerTurnResponseDto,
 } from '../../domain/combat/dto/index.js';
+import { CombatEndDto } from '../../domain/combat/dto/CombatEndDto.js';
 import type { EnemyAttackLogDto } from '../../domain/combat/dto/EnemyAttackLogDto.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
 
@@ -112,6 +113,7 @@ export class CombatOrchestrator {
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
    */
+  // eslint-disable-next-line max-statements
   async processAttack(
     characterId: string,
     targetId: string,
@@ -152,21 +154,48 @@ export class CombatOrchestrator {
     const damageResult = this.diceService.rollDamage(combatState.player.damageDice, attackRoll.isCrit, combatState.player.damageBonus);
 
     // Apply damage and finalize via CombatService (persist, consume action, maybe end combat)
-    const finalState = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal); // or delegate with dice results
+    const applyResult = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal);
+    const finalState = applyResult.state;
 
-    return {
+    // Build base response
+    const response: AttackResponseDto = {
       combatState: finalState,
       diceResult: attackRoll.diceResult,
       damageDiceResult: damageResult,
       damageTotal: damageResult.damageTotal,
       isCrit: damageResult.isCrit,
     };
+
+    // If combat ended, attach combatEnd and apply XP to character
+    if (applyResult.endResult) {
+      const combatEnd = new CombatEndDto();
+      combatEnd.victory = true;
+      combatEnd.xp_gained = applyResult.endResult.xp_gained;
+      combatEnd.player_hp = finalState.player.hp;
+      combatEnd.enemies_defeated = applyResult.endResult.enemies_defeated;
+      combatEnd.narrative = `Victoire! Vous avez vaincu ${applyResult.endResult.enemies_defeated.join(', ')}.`;
+
+      response.combatEnd = combatEnd;
+
+      // Apply XP to character
+      if (applyResult.endResult.xp_gained > 0) {
+        try {
+          await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
+          this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
+        } catch (err) {
+          this.logger.warn(`Failed to apply XP to character ${characterId}: ${err}`);
+        }
+      }
+    }
+
+    return response;
   }
 
   /**
    * End player turn and process all enemy attacks.
    * Returns attack logs for frontend to replay with animations.
    */
+  // eslint-disable-next-line max-statements
   public async endPlayerTurn(characterId: string): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException('combat state not found');

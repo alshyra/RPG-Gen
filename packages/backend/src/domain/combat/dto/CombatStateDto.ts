@@ -70,16 +70,6 @@ export class CombatStateDto {
   @IsString()
   phase?: CombatPhase;
 
-  @ApiPropertyOptional({ description: 'Action token for idempotent action submission' })
-  @IsOptional()
-  @IsString()
-  actionToken?: string;
-
-  @ApiPropertyOptional({ description: 'Expected DTO type for the next action (e.g., AttackRequestDto, DiceThrowDto)' })
-  @IsOptional()
-  @IsString()
-  expectedDto?: string;
-
   // D&D 5e Action Economy
   @ApiPropertyOptional({ description: 'Remaining standard actions for current activation' })
   @IsOptional()

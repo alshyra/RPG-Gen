@@ -2436,14 +2436,6 @@
               "COMBAT_ENDED"
             ]
           },
-          "actionToken": {
-            "type": "string",
-            "description": "Action token for idempotent action submission"
-          },
-          "expectedDto": {
-            "type": "string",
-            "description": "Expected DTO type for the next action (e.g., AttackRequestDto, DiceThrowDto)"
-          },
           "actionRemaining": {
             "type": "number",
             "description": "Remaining standard actions for current activation"
@@ -2541,6 +2533,45 @@
           "total"
         ]
       },
+      "CombatEndDto": {
+        "type": "object",
+        "properties": {
+          "victory": {
+            "type": "boolean",
+            "description": "Victory state"
+          },
+          "xp_gained": {
+            "type": "number",
+            "description": "XP gained"
+          },
+          "player_hp": {
+            "type": "number",
+            "description": "Player's HP at the end"
+          },
+          "enemies_defeated": {
+            "description": "Enemies that were defeated",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fled": {
+            "type": "boolean",
+            "description": "Flee indicator"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative summary"
+          }
+        },
+        "required": [
+          "victory",
+          "xp_gained",
+          "player_hp",
+          "enemies_defeated",
+          "narrative"
+        ]
+      },
       "AttackResponseDto": {
         "type": "object",
         "properties": {
@@ -2573,6 +2604,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/CombatStateDto"
+              }
+            ]
+          },
+          "combatEnd": {
+            "description": "Combat end information (present when combat ends due to this attack)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
               }
             ]
           }
@@ -2677,45 +2716,6 @@
           "attackLogs",
           "totalDamageToPlayer",
           "combatState"
-        ]
-      },
-      "CombatEndDto": {
-        "type": "object",
-        "properties": {
-          "victory": {
-            "type": "boolean",
-            "description": "Victory state"
-          },
-          "xp_gained": {
-            "type": "number",
-            "description": "XP gained"
-          },
-          "player_hp": {
-            "type": "number",
-            "description": "Player's HP at the end"
-          },
-          "enemies_defeated": {
-            "description": "Enemies that were defeated",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "fled": {
-            "type": "boolean",
-            "description": "Flee indicator"
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative summary"
-          }
-        },
-        "required": [
-          "victory",
-          "xp_gained",
-          "player_hp",
-          "enemies_defeated",
-          "narrative"
         ]
       },
       "CombatEndResultDto": {

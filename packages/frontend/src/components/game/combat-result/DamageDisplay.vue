@@ -39,28 +39,16 @@
       >
         (Dégâts doublés par le critique!)
       </div>
-
-      <!-- Button to initiate damage roll when dice are present and not already rolled -->
-      <div class="mt-4">
-        <UiButton
-          @click="launchDamageRoll"
-        >
-          Lancer le jet de dégâts
-        </UiButton>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useCombatStore } from '@/stores/combatStore';
-import { useGameStore } from '@/stores/gameStore';
-import UiButton from '@/components/ui/UiButton.vue';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 const combatStore = useCombatStore();
-const gameStore = useGameStore();
 const { currentAttackResult } = storeToRefs(combatStore);
 
 const currentAttack = computed(() => {
@@ -68,40 +56,4 @@ const currentAttack = computed(() => {
   if (!r) return undefined;
   return r.state?.playerAttacks?.[0] ?? r.playerAttacks?.[0] ?? r;
 });
-// no local computed helpers used anymore; we rely directly on currentAttack in template
-
-const launchDamageRoll = async () => {
-  if (!currentAttackResult.value) return;
-
-  // Build a pending roll instruction for damage and set it on the game store
-  const diceExpr = currentAttack.value.damageDice ?? '';
-  const target = currentAttack.value.target ?? undefined;
-
-  const rollInstr = {
-    type: 'roll',
-    dices: diceExpr,
-    advantage: 'none',
-    description: `Damage vs ${target ?? 'target'}`,
-    meta: {
-      action: 'damage',
-      target,
-      damageBonus: currentAttack.value.damageBonus,
-    },
-  } as any;
-
-  // mark combat store expected dto / phase
-  combatStore.setActionToken(combatStore.actionToken, 'AWAITING_DAMAGE_ROLL', 'DiceResultDto');
-
-  gameStore.pendingInstruction = rollInstr;
-
-  try {
-    // Trigger an immediate roll using the dice expression — this will set latestRoll
-    // and the roll-handling composable will pick it up and show the roll modal
-    await gameStore.doRoll(diceExpr, 'none');
-  } catch (e) {
-    console.error('Failed to perform damage roll', e);
-  }
-};
 </script>
-
-<style scoped></style>

@@ -49,7 +49,7 @@ class CombatService {
   }
 
   /**
-   * Get current combat status (includes actionToken for next action)
+   * Get current combat status
    */
   async getStatus(characterId: string): Promise<CombatStateDto> {
     const response = await api.GET('/api/combat/{characterId}/status', { params: { path: { characterId } } });

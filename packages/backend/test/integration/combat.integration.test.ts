@@ -442,7 +442,7 @@ test('endCombat cleans up combat state', async (t) => {
   }
 });
 
-test('applyPlayerDamage returns final snapshot when last enemy dies', async (t) => {
+test('applyPlayerDamage returns final snapshot and endResult when last enemy dies', async (t) => {
   const testCtx = await setupCombatTest([15, 10]);
 
   try {
@@ -457,11 +457,16 @@ test('applyPlayerDamage returns final snapshot when last enemy dies', async (t) 
     const [enemy] = initState.enemies;
     t.truthy(enemy, 'There should be one enemy');
 
-    // Apply 2 damage, should kill and end combat, but function should return a snapshot rather than throw
+    // Apply 2 damage, should kill and end combat
     const result = await testCtx.combatService.applyPlayerDamage(character.characterId, enemy.id, 2);
 
     t.truthy(result, 'Result should be returned');
-    t.false(result.inCombat, 'Combat should be ended (inCombat false)');
+    t.truthy(result.state, 'Result should contain state');
+    t.false(result.state.inCombat, 'Combat should be ended (inCombat false)');
+    t.truthy(result.endResult, 'Result should contain endResult when combat ends');
+    t.truthy(result.endResult?.xpGained, 'endResult should contain xpGained');
+    t.truthy(result.endResult?.enemiesDefeated, 'endResult should contain enemiesDefeated');
+    t.true((result.endResult?.enemiesDefeated?.length ?? 0) > 0, 'At least one enemy should be defeated');
   } finally {
     await closeTestApp(testCtx.ctx);
   }
@@ -509,6 +514,44 @@ test('endPlayerTurn returns final snapshot when player dies (not 404)', async (t
     t.truthy(resp, 'endPlayerTurn should return a response');
     t.true(resp.playerDefeated === true, 'Player should be marked as defeated');
     t.false(resp.combatState?.inCombat ?? true, 'CombatState should indicate combat ended');
+  } finally {
+    await closeTestApp(testCtx.ctx);
+  }
+});
+
+test('processAttack returns combatEnd when killing last enemy', async (t) => {
+  // Use mocked dice that always hit (roll 20) and deal high damage
+  const testCtx = await setupCombatTest([15, 10, 20, 20]); // init rolls + attack roll + damage roll
+
+  try {
+    const character = createTestCharacter({ characterId: 'attack-combat-end-char' });
+    // Create a single enemy with low HP
+    const combatStart = createCombatStartRequest(1);
+    combatStart.combat_start[0].hp = 1;
+
+    await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+
+    // Get orchestrator
+    const { CombatOrchestrator } = await import('../../src/orchestrators/combat/index.js');
+    const orchestrator = testCtx.ctx.module.get(CombatOrchestrator);
+
+    const state = await testCtx.combatService.getCombatState(character.characterId);
+    const [enemy] = state.enemies;
+    t.truthy(enemy, 'There should be one enemy');
+
+    // Execute attack via orchestrator
+    const resp = await orchestrator.processAttack(character.characterId, enemy.id);
+
+    t.truthy(resp, 'processAttack should return a response');
+    t.truthy(resp.combatState, 'Response should contain combatState');
+
+    // If the attack killed the enemy, combatEnd should be present
+    if (resp.damageTotal && resp.damageTotal > 0) {
+      t.truthy(resp.combatEnd, 'Response should contain combatEnd when last enemy is killed');
+      t.true(resp.combatEnd?.victory === true, 'combatEnd.victory should be true');
+      t.truthy(typeof resp.combatEnd?.xp_gained === 'number', 'combatEnd should have xp_gained');
+      t.truthy(Array.isArray(resp.combatEnd?.enemies_defeated), 'combatEnd should have enemies_defeated array');
+    }
   } finally {
     await closeTestApp(testCtx.ctx);
   }

@@ -125,6 +125,22 @@ export class CharacterService {
     this.logger.log(`Character deleted: ${characterId} for user ${userId}`);
   }
 
+  /**
+   * Add XP to a character by characterId only (for use in combat orchestrator).
+   * Returns the updated total XP.
+   */
+  async addXp(characterId: string, xpToAdd: number): Promise<number> {
+    const character = await this.characterModel.findOne({ characterId });
+    if (!character) {
+      throw new NotFoundException(`Character ${characterId} not found`);
+    }
+    const newTotal = (character.totalXp || 0) + xpToAdd;
+    character.totalXp = newTotal;
+    await character.save();
+    this.logger.log(`Added ${xpToAdd} XP to ${characterId}, new total: ${newTotal}`);
+    return newTotal;
+  }
+
   async markAsDeceased(
     userId: string,
     characterId: string,
