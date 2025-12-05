@@ -29,12 +29,7 @@ const processXpInstruction = (xp: number, gameStore: GameStore, characterStore: 
   characterStore.updateXp(xp);
 };
 
-const processHpInstruction = (hp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
-  const hpChange = hp > 0 ? `+${hp}` : hp;
-  gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
-  characterStore.updateHp(hp);
-  if (characterStore.isDead) characterStore.showDeathModal = true;
-};
+// Keep combat HP in sync when an HP instruction arrives while in combat
 
 const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
   const spell = instr as {
@@ -98,6 +93,24 @@ export function useGameCommands() {
   const combatStore = useCombatStore();
   const combat = useCombat();
 
+  const syncHpToCombatIfNeeded = (hp: number) => {
+    if (!combatStore.inCombat) return;
+    if (!combatStore.player) return;
+    // Apply delta
+    const newHp = Math.max(0, (combatStore.player.hp ?? 0) + (hp ?? 0));
+    combatStore.player = {
+      ...combatStore.player,
+      hp: newHp,
+    };
+  };
+
+  const processHpInstruction = (hp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
+    const hpChange = hp > 0 ? `+${hp}` : hp;
+    gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
+    characterStore.updateHp(hp);
+    syncHpToCombatIfNeeded(hp);
+    if (characterStore.isDead) characterStore.showDeathModal = true;
+  };
   const sendToGemini = async (
     message: string,
     instructions: GameInstructionDto[] = [],

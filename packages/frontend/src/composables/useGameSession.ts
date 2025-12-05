@@ -55,16 +55,21 @@ export const useGameSession = () => {
 
   const { isInitializing } = storeToRefs(gameStore);
 
-  const {
-    checkCombatStatus, initializeCombat,
-  } = useCombat();
+  const { checkCombatStatus } = useCombat();
 
-  const handleCombatStartInstruction = async (instr: CombatStartInstructionMessageDto) => {
-    console.log('[useGameSession] detected combat_start in history — fetching status', instr);
+  const handleCombatStartInstruction = async (_instr: CombatStartInstructionMessageDto) => {
     try {
+      // On page refresh, just restore combat state from backend
+      // Do NOT call initializeCombat(instr) which would create a NEW combat
       const inCombat = await checkCombatStatus();
-      if (!inCombat) await initializeCombat(instr);
+      if (inCombat) {
+        // fetchStatus already initialized the store, just log
+        gameStore.appendMessage('system', '⚔️ Combat en cours restauré.');
+      } else {
+        gameStore.appendMessage('system', '⚔️ Combat terminé.');
+      }
     } catch (e) {
+      gameStore.appendMessage('system', '⚠️ Impossible de vérifier le statut du combat.');
       console.error('[useGameSession] failed to fetch combat status after combat_start', e);
     }
   };

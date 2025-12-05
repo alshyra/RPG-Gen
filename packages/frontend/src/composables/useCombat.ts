@@ -1,4 +1,5 @@
 import type {
+  AttackResponseDto,
   CombatantDto,
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
@@ -7,11 +8,6 @@ import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
-// rollsService not used here — combat roll submission is handled in useGameRolls
-
-// local store types not required here — composable remains small and focused
-
-// instruction processors intentionally not used inside this composable — handled in other modules (useGameRolls)
 
 /**
  * Composable for combat-specific actions and state management
@@ -22,10 +18,11 @@ export function useCombat() {
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
   const {
-    currentTarget, currentAttackResult, enemies,
+    currentTarget,
+    currentAttackResult,
+    currentPlayerAttackLog,
   } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
-  // uiStore omitted — not used here
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -62,25 +59,64 @@ export function useCombat() {
     }
   };
 
+  const displayAttackResultMessage = (target: CombatantDto, result: AttackResponseDto): void => {
+    const {
+      damageTotal,
+      isCrit,
+    } = result;
+    if (damageTotal && damageTotal > 0) {
+      const critMsg = isCrit ? ' (CRITIQUE!)' : '';
+      gameStore.appendMessage('system', `✅ Attaque réussie contre ${target.name}! Dégâts: ${damageTotal}${critMsg}`);
+    } else {
+      gameStore.appendMessage('system', `❌ Attaque manquée contre ${target.name}.`);
+    }
+  };
+
+  const handleAttackError = (err: unknown): void => {
+    const message = err instanceof Error ? err.message : 'Failed to attack';
+    const sessionLost = message.includes('Combat session not found') || message.includes('Character is not in combat');
+    if (sessionLost) {
+      combatStore.clearCombat();
+      gameStore.appendMessage('system', '⚠️ Combat terminé (session introuvable) — l\'état a été réinitialisé.');
+    } else {
+      gameStore.appendMessage('system', `❌ Erreur: ${message}`);
+    }
+  };
+
+  const checkCombatVictory = (result: AttackResponseDto): void => {
+    const allEnemiesDead = result.combatState.enemies.every(e => (e.hp ?? 0) <= 0);
+    if (!result.combatState.inCombat || allEnemiesDead) {
+      gameStore.appendMessage('system', '🏆 Victoire! Tous les ennemis sont vaincus.');
+      combatStore.clearCombat();
+    }
+  };
+
+  const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+  const showPlayerAttackAnimation = async (result: AttackResponseDto): Promise<void> => {
+    currentPlayerAttackLog.value = result;
+    await delay(combatStore.PLAYER_ATTACK_DELAY_MS);
+    currentPlayerAttackLog.value = null;
+  };
+
   /**
-   * Execute an attack against a target using actionToken for idempotency
+   * Execute an attack against a target
    */
   const executeAttack = async (target: CombatantDto): Promise<void> => {
     if (!currentCharacter.value) return;
     gameStore.appendMessage('user', `J'attaque ${target.name}!`);
     gameStore.sending = true;
-
     currentTarget.value = target;
+
     try {
-      currentAttackResult.value = await combatService.attack(currentCharacter.value.characterId, target);
-      enemies.value = currentAttackResult.value.combatState.enemies;
-      if (currentAttackResult.value.damageTotal && currentAttackResult.value.damageTotal > 0) {
-        gameStore.appendMessage('system', `✅ Attaque réussie contre ${target.name}! Dégâts infligés: ${currentAttackResult.value.damageTotal}`);
-      } else {
-        gameStore.appendMessage('system', `❌ Attaque manquée contre ${target.name}.`);
-      }
+      const result = await combatService.attack(currentCharacter.value.characterId, target);
+      currentAttackResult.value = result;
+      combatStore.initializeCombat(result.combatState);
+      await showPlayerAttackAnimation(result);
+      displayAttackResultMessage(target, result);
+      checkCombatVictory(result);
     } catch (err) {
-      gameStore.appendMessage('system', `❌ Erreur: ${err instanceof Error ? err.message : 'Failed to attack'}`);
+      handleAttackError(err);
     } finally {
       gameStore.sending = false;
     }

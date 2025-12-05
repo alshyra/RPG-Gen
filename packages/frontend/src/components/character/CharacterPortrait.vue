@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
 import { computed } from 'vue';
 import {
   getCurrentLevel, getXpProgress,
@@ -62,9 +63,16 @@ interface InventoryItem {
 }
 
 const characterStore = useCharacterStore();
+const combatStore = useCombatStore();
 const { currentCharacter } = storeToRefs(characterStore);
+const {
+  inCombat, player: combatPlayer,
+} = storeToRefs(combatStore);
 
 const hp = computed(() => {
+  if (inCombat.value && combatPlayer.value) {
+    return `${combatPlayer.value.hp ?? 0}/${combatPlayer.value.hpMax ?? 12}`;
+  }
   if (!currentCharacter.value) return '0/0';
   return `${currentCharacter.value.hp || 0}/${currentCharacter.value.hpMax || 12}`;
 });
@@ -121,6 +129,8 @@ const computeArmorAc = (armor: InventoryItem, dexMod: number, shieldBonus: numbe
 };
 
 const ac = computed(() => {
+  // If combat is active, prefer combat player's AC (derived at combat init)
+  if (inCombat.value && combatPlayer.value) return combatPlayer.value.ac ?? '-';
   if (!currentCharacter.value) return '-';
 
   const charValue = getCharValue();

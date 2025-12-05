@@ -13,7 +13,8 @@ interface AttackQueueItem {
   isPlayerAttack: boolean;
 }
 
-const ANIMATION_DELAY_MS = 800;
+const ENEMY_ATTACK_DELAY_MS = 800;
+const PLAYER_ATTACK_DELAY_MS = 1500;
 
 export const useCombatStore = defineStore('combatStore', () => {
   const inCombat = ref(false);
@@ -33,6 +34,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentTurnIndex = ref(0);
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
+  const currentPlayerAttackLog = ref<AttackResponseDto | null>(null);
 
   const actionRemaining = ref(1);
   const actionMax = ref(1);
@@ -103,7 +105,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     if (log.hit && log.damageTotal) {
       applyDamageToPlayer(log.damageTotal);
     }
-    await delay(ANIMATION_DELAY_MS);
+    await delay(ENEMY_ATTACK_DELAY_MS);
   };
 
   const processAttackLogs = async (logs: EnemyAttackLogDto[]): Promise<void> => {
@@ -267,6 +269,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     isPlayerTurn,
     isProcessingEnemyTurn,
     currentEnemyAttackLog,
+    currentPlayerAttackLog,
+    PLAYER_ATTACK_DELAY_MS,
     initializeCombat,
     updateFromTurnResult,
     updateEnemiesOnly,

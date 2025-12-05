@@ -7,6 +7,7 @@ import {
   computed, Ref, ref, watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCombatStore } from './combatStore';
 
 // --- Module-level helper functions to reduce statements in store ---
 
@@ -50,6 +51,14 @@ const createHpUpdater = (charRef: Ref<CharacterResponseDto | undefined>) => (del
   if (!charRef.value) return;
   charRef.value.hp = Math.max(0, (charRef.value.hp || 0) + delta);
   if (charRef.value.hp === 0) charRef.value.isDeceased = true;
+  // Also update combat state player hp if in combat
+  const combatStore = useCombatStore();
+  if (combatStore.inCombat && combatStore.player && combatStore.player.id === charRef.value.characterId) {
+    combatStore.player = {
+      ...combatStore.player,
+      hp: Math.max(0, (combatStore.player.hp ?? 0) + delta),
+    };
+  }
 };
 
 const createXpUpdater = (charRef: Ref<CharacterResponseDto | undefined>) => (xp: number) => {

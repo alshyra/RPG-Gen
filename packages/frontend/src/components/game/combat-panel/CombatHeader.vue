@@ -70,6 +70,7 @@ import {
   Star,
 } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
+import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
 
 const combatStore = useCombatStore();
@@ -107,6 +108,7 @@ const phaseClass = computed(() => {
 });
 
 const isEndingTurn = ref(false);
+const gameStore = useGameStore();
 
 // Can end turn only during player turn
 const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
@@ -125,7 +127,13 @@ const onEndTurn = async () => {
     isEndingTurn.value = true;
     await combatStore.endActivation(currentCharacter.value.characterId);
   } catch (e) {
-    console.error('Failed to end turn', e);
+    const message = e instanceof Error ? e.message : String(e);
+    if (message.includes('Combat session not found') || message.includes('No active combat found')) {
+      combatStore.clearCombat();
+      gameStore.appendMessage('system', '⚠️ Combat terminé (session introuvable) — l\'état a été réinitialisé.');
+    } else {
+      console.error('Failed to end turn', e);
+    }
   } finally {
     isEndingTurn.value = false;
   }

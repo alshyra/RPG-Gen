@@ -87,14 +87,24 @@ const {
 const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
-const { player: combatPlayer } = storeToRefs(combatStore);
+const {
+  player: combatPlayer, inCombat,
+} = storeToRefs(combatStore);
 const combat = useCombat();
 
 const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy')));
 // For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
 const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
-const fighterDisplayHp = computed(() => isPlayer ? (currentCharacter.value?.hp ?? 0) : (fighter?.hp ?? 0));
-const fighterDisplayMaxHp = computed(() => isPlayer ? (currentCharacter.value?.hpMax ?? '-') : (fighter?.hpMax ?? '-'));
+const fighterDisplayHp = computed(() => {
+  if (isPlayer && inCombat.value && combatPlayer.value) return combatPlayer.value.hp ?? 0;
+  if (isPlayer) return currentCharacter.value?.hp ?? 0;
+  return fighter?.hp ?? 0;
+});
+const fighterDisplayMaxHp = computed(() => {
+  if (isPlayer && inCombat.value && combatPlayer.value) return combatPlayer.value.hpMax ?? '-';
+  if (isPlayer) return currentCharacter.value?.hpMax ?? '-';
+  return fighter?.hpMax ?? '-';
+});
 const hpPct = computed(() => {
   const hp = Number(fighterDisplayHp.value || 0);
   const max = typeof fighterDisplayMaxHp.value === 'number' ? Number(fighterDisplayMaxHp.value) : undefined;
@@ -123,7 +133,6 @@ const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
 const doAttack = async () => {
   if (!fighter || !currentCharacter.value?.characterId) return;
   await combat.executeAttack(fighter);
-  await combatStore.fetchStatus(currentCharacter.value.characterId);
 };
 </script>
 

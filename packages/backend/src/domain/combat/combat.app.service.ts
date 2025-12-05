@@ -358,7 +358,8 @@ export class CombatAppService {
     if (!anyAlive) {
       // persist and cleanup
       await this.endCombat(characterId);
-      return this.getCombatState(characterId);
+      state.inCombat = false;
+      return state;
     }
 
     return state;

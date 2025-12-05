@@ -24,6 +24,10 @@
     </div>
   </transition>
 
+  <!-- Enemy attack overlay for animations -->
+  <EnemyAttackOverlay />
+  <PlayerAttackOverlay />
+
   <!-- Collapsed handle (still visible when combat present) -->
   <transition name="combat-handle">
     <div
@@ -65,6 +69,8 @@ import {
   watch,
 } from 'vue';
 import CombatHeader from './CombatHeader.vue';
+import EnemyAttackOverlay from './EnemyAttackOverlay.vue';
+import PlayerAttackOverlay from './PlayerAttackOverlay.vue';
 import ParticipantsGrid from './ParticipantsGrid.vue';
 
 import { useCombatStore } from '@/stores/combatStore';

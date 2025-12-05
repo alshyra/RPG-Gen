@@ -441,3 +441,74 @@ test('endCombat cleans up combat state', async (t) => {
     await closeTestApp(testCtx.ctx);
   }
 });
+
+test('applyPlayerDamage returns final snapshot when last enemy dies', async (t) => {
+  const testCtx = await setupCombatTest([15, 10]);
+
+  try {
+    const character = createTestCharacter({ characterId: 'kill-last-enemy-char' });
+    // Create a single enemy with 1 HP to ensure a killing blow
+    const combatStart = createCombatStartRequest(1);
+    // Override enemy hp to 1
+    combatStart.combat_start[0].hp = 1;
+
+    const initState = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+
+    const [enemy] = initState.enemies;
+    t.truthy(enemy, 'There should be one enemy');
+
+    // Apply 2 damage, should kill and end combat, but function should return a snapshot rather than throw
+    const result = await testCtx.combatService.applyPlayerDamage(character.characterId, enemy.id, 2);
+
+    t.truthy(result, 'Result should be returned');
+    t.false(result.inCombat, 'Combat should be ended (inCombat false)');
+  } finally {
+    await closeTestApp(testCtx.ctx);
+  }
+});
+
+test('applyEnemyDamage returns final snapshot when player dies', async (t) => {
+  const testCtx = await setupCombatTest([15, 10]);
+
+  try {
+    const character = createTestCharacter({
+      characterId: 'player-dies-char',
+      hp: 5,
+    });
+    const combatStart = createCombatStartRequest(1);
+
+    const initState = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+
+    // Apply large enemy damage to kill player
+    const result = await testCtx.combatService.applyEnemyDamage(character.characterId, 999);
+
+    t.truthy(result, 'Result should be returned');
+    t.false(result.inCombat, 'Combat should be ended (player dead)');
+    t.true(result.player.hp <= 0, 'Player HP should be 0 or less');
+  } finally {
+    await closeTestApp(testCtx.ctx);
+  }
+});
+
+test('endPlayerTurn returns final snapshot when player dies (not 404)', async (t) => {
+  const testCtx = await setupCombatTest([15, 10]);
+
+  try {
+    const character = createTestCharacter({
+      characterId: 'end-turn-player-dies',
+      hp: 5,
+    });
+    const combatStart = createCombatStartRequest(1);
+    const initState = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+
+    // Now, simulate enemy turn resulting in player death by invoking the orchestrator
+    const orchestrator = testCtx.ctx.module.get('CombatOrchestrator');
+    // Call endPlayerTurn - this should not throw but return an EndPlayerTurnResponseDto
+    const resp = await orchestrator.endPlayerTurn(character.characterId);
+    t.truthy(resp, 'endPlayerTurn should return a response');
+    t.true(resp.playerDefeated === true, 'Player should be marked as defeated');
+    t.false(resp.combatState?.inCombat ?? true, 'CombatState should indicate combat ended');
+  } finally {
+    await closeTestApp(testCtx.ctx);
+  }
+});

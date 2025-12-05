@@ -57,12 +57,10 @@ import {
 import { characterApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import DeathModal from '../components/game/DeathModal.vue';
-import RollResultModal from '../components/game/RollResultModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
 import { useCombat } from '../composables/useCombat';
 import { useGameCommands } from '../composables/useGameCommands';
 import { useGameMessages } from '../composables/useGameMessages';
-import { useGameRolls } from '../composables/useGameRolls';
 import { useGameSession } from '../composables/useGameSession';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
@@ -79,17 +77,9 @@ const combatStore = useCombatStore();
 const ui = useUiStore();
 const characterId = computed(() => route.params.characterId as string);
 
-// expose reactive refs for template usage
-const { showRollModal } = storeToRefs(gameStore);
-
-const closeRoll = () => {
-  showRollModal.value = false;
-};
-
 // Composables
 const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
-const { confirmRoll } = useGameRolls();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
 const {

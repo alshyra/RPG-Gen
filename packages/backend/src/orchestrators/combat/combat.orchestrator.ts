@@ -181,26 +181,32 @@ export class CombatOrchestrator {
       aliveEnemies,
     );
 
-    // After enemies have acted, set back to player's turn and persist
-    const finalState = await this.combatAppService.getCombatState(characterId);
-    if (finalState) {
+    const finalState = enemyTurnResult.state;
+
+    if (!finalState) throw new NotFoundException('combat state not found after enemy turns');
+
+    // If the enemy turn did not end the combat (player still alive), advance to next player
+    // activation and persist the refreshed state.
+    if (!enemyTurnResult.playerDefeated) {
       finalState.phase = 'PLAYER_TURN';
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
       finalState.actionRemaining = finalState.actionMax ?? 1;
       finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
       await this.combatAppService.saveCombatState(finalState);
-
-      return {
-        roundNumber: finalState.roundNumber,
-        attackLogs: enemyTurnResult.attackLogs,
-        totalDamageToPlayer: enemyTurnResult.totalDamage,
-        playerDefeated: enemyTurnResult.playerDefeated,
-        combatState: finalState,
-      };
+    } else {
+      // If player died, the session may have been cleaned up by endCombat; ensure finalState
+      // reflects combat end.
+      finalState.inCombat = false;
     }
 
-    throw new NotFoundException('combat state not found after enemy turns');
+    return {
+      roundNumber: finalState.roundNumber,
+      attackLogs: enemyTurnResult.attackLogs,
+      totalDamageToPlayer: enemyTurnResult.totalDamage,
+      playerDefeated: enemyTurnResult.playerDefeated,
+      combatState: finalState,
+    };
   }
 
   /**

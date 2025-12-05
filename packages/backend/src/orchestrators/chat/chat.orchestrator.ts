@@ -168,6 +168,12 @@ export class ChatOrchestrator {
     instr: CombatStartInstructionMessageDto,
   ): Promise<void> {
     try {
+      // Skip if combat is already in progress to avoid resetting HP/initiative/turn on page refresh
+      const alreadyInCombat = await this.combatService.isInCombat(characterId);
+      if (alreadyInCombat) {
+        this.logger.log(`Combat already active for ${characterId}, skipping re-initialization`);
+        return;
+      }
       await this.combatService.initializeCombat(characterDto, { combat_start: instr.combat_start }, userId);
       this.logger.log(`Combat initialized for ${characterId} from instruction`);
     } catch (e) {
