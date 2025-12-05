@@ -1,6 +1,11 @@
 /**
  * JSON Schema for Gemini structured output
  * This defines the expected response structure from Gemini AI
+ *
+ * Note: This is manually defined rather than auto-generated from Zod schemas
+ * because it provides better control over the exact JSON Schema format that
+ * Gemini expects, including proper handling of oneOf discriminators and
+ * detailed property descriptions.
  */
 
 export const geminiResponseJsonSchema = {

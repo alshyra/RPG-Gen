@@ -64,7 +64,9 @@ export class GeminiTextService {
       const validated = aiResponseSchema.parse(parsed);
 
       // Construct the ChatMessageDto from validated data
-      // Zod validation ensures the structure matches our schema
+      // Zod validation ensures the structure matches our schema at runtime
+      // The type assertion is necessary because TypeScript cannot automatically
+      // infer the structural equivalence between Zod-inferred types and our DTOs
       const chatMessage: ChatMessageDto = {
         role: 'assistant',
         narrative: validated.narrative,
@@ -73,7 +75,12 @@ export class GeminiTextService {
 
       return chatMessage;
     } catch (error) {
-      this.logger.error('Failed to parse Gemini structured response', error, text);
+      // Log error details without exposing full response content
+      this.logger.error('Failed to parse Gemini structured response', {
+        error: error instanceof Error ? error.message : String(error),
+        responseLength: text.length,
+        responsePreview: text.slice(0, 100),
+      });
       throw new InternalServerErrorException('Invalid AI response format');
     }
   }
