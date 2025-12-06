@@ -76,7 +76,8 @@ describe('Combat flow', () => {
           });
 
         // ensure we have at least one enemy rendered after the attempt above
-        cy.get('[data-cy^="enemy-"]', { timeout: 10000 }).should('have.length.gte', 1);
+        cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
+          .should('have.length.gte', 1);
 
         // Debug: log the enemy elements
         cy.get('[data-cy^="enemy-"]')
