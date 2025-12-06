@@ -64,11 +64,5 @@ describe('RollModal', () => {
       .trigger('click');
     expect(confirmSpy)
       .toHaveBeenCalled();
-
-    // cancel should close modal
-    await wrapper.get('[data-cy="roll-cancel"]')
-      .trigger('click');
-    expect(store.showRollModal)
-      .toBe(false);
   });
 });

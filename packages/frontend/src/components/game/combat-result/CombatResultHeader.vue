@@ -20,11 +20,9 @@ const {
 } = storeToRefs(combatStore);
 
 const currentAttack = computed(() => {
-  const r = currentAttackResult?.value;
+  const r = currentAttackResult?.value as any;
   console.warn('FIXTYPE: currentAttackResult', r);
   if (!r) return undefined;
   return r.state?.playerAttacks?.[0] ?? r.playerAttacks?.[0] ?? r;
 });
 </script>
-
-<style scoped></style>
