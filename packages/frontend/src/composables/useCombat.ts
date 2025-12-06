@@ -102,22 +102,41 @@ export function useCombat() {
     currentPlayerAttackLog.value = null;
   };
 
+  /* Helpers to keep executeAttack small (reduce statement count) */
+  const beginAttack = (target: CombatantDto) => {
+    gameStore.appendMessage('user', `J'attaque ${target.name}!`);
+    gameStore.sending = true;
+    currentTarget.value = target;
+  };
+
+  const processAttackResult = async (result: AttackResponseDto, target: CombatantDto) => {
+    currentAttackResult.value = result;
+    combatStore.initializeCombat(result.combatState);
+    await showPlayerAttackAnimation(result);
+    displayAttackResultMessage(target, result);
+    checkCombatVictory(result);
+  };
+
   /**
    * Execute an attack against a target
    */
   const executeAttack = async (target: CombatantDto): Promise<void> => {
     if (!currentCharacter.value) return;
-    gameStore.appendMessage('user', `J'attaque ${target.name}!`);
-    gameStore.sending = true;
-    currentTarget.value = target;
+
+    // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
+    if (!combatStore.canPlayerAct || !combatStore.isPlayerTurn) {
+      gameStore.appendMessage('system', 'Vous ne pouvez pas attaquer pour le moment — plus d\'actions ou ce n\'est pas votre tour.');
+      return;
+    }
+
+    // Prevent duplicate calls while a send is in progress
+    if (gameStore.sending) return;
+
+    beginAttack(target);
 
     try {
       const result = await combatService.attack(currentCharacter.value.characterId, target);
-      currentAttackResult.value = result;
-      combatStore.initializeCombat(result.combatState);
-      await showPlayerAttackAnimation(result);
-      displayAttackResultMessage(target, result);
-      checkCombatVictory(result);
+      await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);
     } finally {

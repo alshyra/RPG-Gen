@@ -127,10 +127,6 @@ export class ChatController {
     return this.conversationService.getHistory(userId, characterId);
   }
 
-  private hasCombatStart(m: ChatMessageDto) {
-    return m.role === 'assistant' && m.instructions && m.instructions.some(i => i.type === 'combat_start');
-  }
-
   private async processHistoricalCombat(
     messages: ChatMessageDto[] | undefined,
     userId: string,

@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { showAlert } from '@/composables/useModal';
 import CharactersMenu from '../components/home/CharactersMenu.vue';
 import UiButton from '../components/ui/UiButton.vue';
 import { characterApi } from '../apis/characterApi';
@@ -56,7 +57,7 @@ const createDndCharacter = async () => {
     }
   } catch (e) {
     console.error('Failed to create DnD character', e);
-    window.alert('La création du personnage a échoué.');
+    await showAlert('La création du personnage a échoué.');
   } finally {
     creating.value = false;
   }
