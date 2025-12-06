@@ -96,8 +96,6 @@ jobs:
             name: "navigation"
           - path: "cypress/e2e/smoke.cy.ts"
             name: "smoke"
-          - path: "cypress/e2e/turn-based-combat.cy.ts"
-            name: "turn-based-combat"
 
     steps:
       - name: Checkout

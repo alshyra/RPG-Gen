@@ -49,6 +49,7 @@ export class GeminiTextService {
     this.chatClients.set(sessionId, chat);
   }
 
+  // eslint-disable-next-line max-statements
   async sendMessage(sessionId: string, message: string): Promise<ChatMessageDto> {
     const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
@@ -58,19 +59,14 @@ export class GeminiTextService {
     this.logger.debug(`Received structured response for session ${sessionId}`, text);
     if (!text) throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
 
-    // Parse and validate the JSON response from Gemini using Zod
     try {
       const parsed = JSON.parse(text);
 
-      // Some model outputs may return an instruction envelope like { type: 'x', payload: { ... } }
-      // while our Zod schema expects the instruction properties to live at the top level
-      // (e.g. { type: 'combat_start', combat_start: [...] }). Normalize such cases here
-      // before running the stricter aiResponseSchema validation.
       let normalized = parsed;
       if (Array.isArray(parsed?.instructions)) {
         normalized = {
           ...parsed,
-          instructions: parsed.instructions.map((inst: any) => {
+          instructions: parsed.instructions.map((inst) => {
             if (inst && typeof inst === 'object' && 'payload' in inst && typeof inst.payload === 'object') {
               // Merge payload fields into the instruction, prefer payload fields but keep type from wrapper
               return {
