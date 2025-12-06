@@ -95,6 +95,7 @@ import {
   generateUseCommand, generateEquipCommand,
 } from '@/utils/chatCommands';
 import { storeToRefs } from 'pinia';
+import { showAlert } from '@/composables/useModal';
 import type { InventoryItemDto } from '@rpg-gen/shared';
 
 // Extended item type with meta fields - using type instead of interface to avoid inheritance issues
@@ -154,7 +155,7 @@ const onEquipItem = (itemName: string) => {
   insertCommand(generateEquipCommand(itemName));
 };
 
-const onCardClick = (item: InventoryItem) => {
+const onCardClick = async (item: InventoryItem) => {
   const { name } = item;
   if (!name) return;
 
@@ -171,7 +172,7 @@ const onCardClick = (item: InventoryItem) => {
   }
 
   // Default: show a small info
-  window.alert('Aucune action associée à cet objet.');
+  await showAlert('Aucune action associée à cet objet.');
 };
 
 const getIconClass = (item: InventoryItem): string => {

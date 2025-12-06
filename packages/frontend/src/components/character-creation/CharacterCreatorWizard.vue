@@ -98,7 +98,7 @@
 <script setup lang="ts">
 import FullPageLoader from '@/components/ui/FullPageLoader.vue';
 import { characterApi } from '@/apis/characterApi';
-import { conversationService } from '@/apis/conversationApi';
+import { conversationApi } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
@@ -227,7 +227,7 @@ const initConversationForCharacter = async () => {
   try {
     loadingTitle.value = 'Création de l\'univers...';
     loadingSubtitle.value = 'Préparation du premier prompt du Maître de Jeu...';
-    if (currentCharacter.value) await conversationService.startGame(currentCharacter.value);
+    if (currentCharacter.value) await conversationApi.startGame(currentCharacter.value);
   } catch (e) {
     console.warn('Failed to initialize conversation/history', e);
   }

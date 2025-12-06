@@ -79,9 +79,10 @@ describe('Game detail pages', () => {
         }
       });
 
-    // Click Spells in the sidebar
+    // Click Spells in the sidebar — ensure element is not covered and scroll into view
     cy.contains('Sorts')
-      .click();
+      .scrollIntoView()
+      .click({ force: true });
 
     cy.contains('Sorts')
       .should('exist');

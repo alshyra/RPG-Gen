@@ -4,9 +4,12 @@
       <HeaderBar />
     </div>
     <router-view />
+    <!-- Global modal handler for alert/confirm replacements of window.alert/confirm -->
+    <UiAlertModal />
   </div>
 </template>
 
 <script setup lang="ts">
 import HeaderBar from './components/layout/HeaderBar.vue';
+import UiAlertModal from './components/ui/UiAlertModal.vue';
 </script>

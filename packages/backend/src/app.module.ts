@@ -8,7 +8,6 @@ import { DiceModule } from './modules/dice.module.js';
 import { HealthModule } from './modules/health.module.js';
 import { ImageModule } from './modules/image.module.js';
 import { InventoryModule } from './modules/inventory.module.js';
-import { RollsModule } from './modules/rolls.module.js';
 
 @Module({
   imports: [
@@ -24,7 +23,6 @@ import { RollsModule } from './modules/rolls.module.js';
     HealthModule,
     CharacterModule,
     InventoryModule,
-    RollsModule,
   ],
 })
 export class AppModule {}

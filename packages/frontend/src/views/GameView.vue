@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen p-2 lg:p-4 gap-2 pb-24">
+  <div class="flex flex-col min-h-[calc(100vh-4rem)] p-2 lg:p-4 gap-2 pb-24">
     <!-- Backdrop for mobile sidebar (controlled by ui store) -->
     <div
       v-if="ui.isMenuOpen"
@@ -9,13 +9,24 @@
 
     <!-- Main content area (fills remaining space) -->
     <div
-      class="grid lg:grid-cols-12 gap-2 flex-1 min-h-0 overflow-hidden"
+      class="grid lg:grid-cols-12 gap-2 flex-1 min-h-0"
       style="grid-template-rows: 1fr auto;"
     >
-      <CharacterInfoPanel />
+      <div class="lg:col-span-3">
+        <!-- Desktop : fixed/sticky left panel so it doesn't scroll with the main content -->
+        <div class="lg:sticky lg:top-4 lg:self-start lg:h-[calc(100vh-250px)] lg:z-10">
+          <CharacterInfoPanel />
+        </div>
+      </div>
       <!-- Center: messages (or detail views via child routes) -->
-      <main class="lg:col-span-9 flex flex-col min-h-0 overflow-auto">
-        <router-view />
+      <main class="lg:col-span-9 flex flex-col min-h-0 overflow-hidden">
+        <!-- Only this inner area scrolls; header/other siblings stay fixed -->
+        <div
+          class="flex-1 min-h-0 overflow-auto"
+          :style="{ maxHeight: contentMaxHeight }"
+        >
+          <router-view />
+        </div>
       </main>
     </div>
     <!-- Death modal -->
@@ -24,6 +35,9 @@
       @confirm="onDeathConfirm"
       @close="() => (characterStore.showDeathModal = false)"
     />
+
+    <!-- Roll confirmation modal (shows when store.showRollModal is true) -->
+    <RollModal />
 
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-30 pointer-events-none">
       <div class="pointer-events-none">
@@ -56,6 +70,7 @@ import {
 import { characterApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import DeathModal from '../components/game/DeathModal.vue';
+import RollModal from '../components/game/RollModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
 import { useCombat } from '../composables/useCombat';
 import { useGameCommands } from '../composables/useGameCommands';
@@ -84,6 +99,24 @@ const combat = useCombat();
 const {
   inCombat,
 } = storeToRefs(combatStore);
+const { pendingInstruction } = storeToRefs(gameStore);
+
+// Ensure rolls watcher / handlers are active for the whole view
+// (useGameRolls registers a watch on latestRoll and exposes confirm/reroll)
+import { useGameRolls } from '@/composables/useGameRolls';
+useGameRolls();
+
+// Replace bottom padding with a max-height so content never scrolls under the fixed bars.
+// Keep different values for combat/non-combat states.
+const contentMaxHeight = computed(() => {
+  if (pendingInstruction.value?.type === 'roll') {
+    return 'calc(100vh - 200px)';
+  }
+  if (inCombat.value) {
+    return 'calc(100vh - 12rem)';
+  }
+  return 'calc(100vh - 160px)';
+});
 
 /**
  * Handle sending a message - either as a command or regular message

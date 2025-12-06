@@ -28,9 +28,11 @@
       <div class="absolute bottom-1 left-1 right-1 flex items-center justify-center">
         <div class="mx-2 pointer-events-auto">
           <button
-            v-if="showAttackButton"
-            class="px-2 py-0.5 text-[11px] rounded bg-amber-400 hover:bg-amber-300 text-amber-900"
+            v-if="!isPlayer && (fighter?.hp ?? 0) > 0"
+            :disabled="!showAttackButton"
+            class="px-2 py-0.5 text-[11px] rounded bg-amber-400 hover:bg-amber-300 text-amber-900 disabled:bg-slate-600 disabled:text-slate-400"
             data-cy="attack-button"
+            :aria-disabled="!showAttackButton"
             @click.prevent="doAttack"
           >
             Attaquer
@@ -76,6 +78,7 @@ import {
   pickBestPortrait, getFallbackPortrait,
 } from '@/composables/usePortraits';
 import { useCombatStore } from '@/stores/combatStore';
+import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 
 const {
@@ -91,6 +94,7 @@ const {
   player: combatPlayer, inCombat,
 } = storeToRefs(combatStore);
 const combat = useCombat();
+const gameStore = useGameStore();
 
 const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy')));
 // For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
@@ -127,7 +131,17 @@ onMounted(async () => {
   resolvedPortrait.value = byManifest || getFallbackPortrait(fighter.name || fighter.id || 'enemy');
 });
 
-const showAttackButton = computed(() => !isPlayer && (fighter?.hp ?? 0) > 0);
+// Attack button should be active only when all the following are true:
+// - card is an enemy (not the player)
+// - enemy is alive
+// - it's currently the player's activation
+// - player has at least one action remaining
+// - no active sending in progress (to avoid duplicate clicks)
+const showAttackButton = computed(() => !isPlayer
+  && (fighter?.hp ?? 0) > 0
+  && combatStore.canPlayerAct
+  && combatStore.isPlayerTurn
+  && !gameStore.sending);
 const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
 
 const doAttack = async () => {

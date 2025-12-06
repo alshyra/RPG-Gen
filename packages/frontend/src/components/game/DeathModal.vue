@@ -3,15 +3,16 @@
     :is-open="isOpen"
     @close="close"
   >
-    <!-- Death Header -->
-    <div class="text-center mb-6">
-      <h2 class="text-4xl font-black text-red-500 mb-2">
-        ⚰️ Fin du Voyage
-      </h2>
-      <div class="text-sm text-slate-400">
-        {{ characterName }} a succombé...
+    <template #header>
+      <div class="text-center mb-6">
+        <h2 class="text-4xl font-black text-red-500 mb-2">
+          ⚰️ Fin du Voyage
+        </h2>
+        <div class="text-sm text-slate-400">
+          {{ characterName }} a succombé...
+        </div>
       </div>
-    </div>
+    </template>
 
     <!-- Death Message -->
     <div class="bg-slate-700/50 rounded-lg p-4 mb-6 border border-red-500/30">
@@ -35,15 +36,15 @@
       <div>Niveau atteint: <span class="text-amber-400">{{ characterLevel }}</span></div>
     </div>
 
-    <!-- Action Button -->
-    <div class="flex">
-      <button
-        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-        @click="confirmDeath"
-      >
-        Retour à l'accueil
-      </button>
-    </div>
+    <template #footer>
+      <div class="flex">
+        <UiButton
+          @click="confirmDeath"
+        >
+          Retour à l'accueil
+        </UiButton>
+      </div>
+    </template>
   </UiModal>
 </template>
 
@@ -53,6 +54,7 @@ import UiModal from '../ui/UiModal.vue';
 import { getCurrentLevel } from '../../utils/dndLevels';
 import { storeToRefs } from 'pinia';
 import { useCharacterStore } from '@/stores/characterStore';
+import UiButton from '../ui/UiButton.vue';
 
 interface Props { isOpen: boolean }
 

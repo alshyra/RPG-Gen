@@ -7,12 +7,14 @@ import {
 import { useGameStore } from './gameStore';
 
 vi.mock('@/apis/diceApi', async () => ({
-  rollDice: vi.fn()
-    .mockResolvedValue({
-      rolls: [17],
-      modifierValue: 0,
-      total: 17,
-    }),
+  diceApi: {
+    roll: vi.fn()
+      .mockResolvedValue({
+        rolls: [17],
+        modifierValue: 0,
+        total: 17,
+      }),
+  },
 }));
 
 beforeEach(() => {

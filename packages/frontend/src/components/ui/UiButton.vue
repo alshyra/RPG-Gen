@@ -47,7 +47,7 @@ import {
 import UiLoader from './UiLoader.vue';
 
 const props = defineProps<{
-  variant?: 'primary' | 'ghost';
+  variant?: 'primary' | 'ghost' | 'secondary';
   isLoading?: boolean;
   disabled?: boolean;
   to?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
@@ -57,6 +57,7 @@ const emit = defineEmits(['click']);
 
 const variantClass = computed(() => {
   if (props.variant === 'ghost') return 'bg-white/10 text-white';
+  if (props.variant === 'secondary') return 'bg-amber-500 text-white';
   return 'bg-gradient-to-r from-purple-500 to-pink-500 text-white';
 });
 

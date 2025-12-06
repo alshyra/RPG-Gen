@@ -62,6 +62,7 @@ import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   ref,
 } from 'vue';
+import { showAlert, showConfirm } from '@/composables/useModal';
 import { useRouter } from 'vue-router';
 const emit = defineEmits<(e: 'deleted', id: string) => void>();
 
@@ -90,14 +91,14 @@ const onResume = (character: CharacterResponseDto) => {
 
 const onDelete = async (character: CharacterResponseDto) => {
   if (!character.characterId) return;
-  if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) return;
+  if (!(await showConfirm('Êtes-vous sûr de vouloir supprimer ce personnage ?'))) return;
   deletingCharacterId.value = character.characterId;
   try {
     await characterApi.deleteCharacter(character.characterId);
     emit('deleted', character.characterId);
   } catch (e) {
     console.error('Failed to delete character', e);
-    window.alert('Impossible de supprimer le personnage.');
+    await showAlert('Impossible de supprimer le personnage.');
   } finally {
     deletingCharacterId.value = null;
   }

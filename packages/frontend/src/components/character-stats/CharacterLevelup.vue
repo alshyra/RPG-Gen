@@ -16,7 +16,7 @@
         </div>
 
         <!-- New Level Preview -->
-        <div class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4 border-2 border-green-600">
+        <div class="rounded-md bg-slate-800 border-2 border-green-600 p-4 mb-4">
           <div class="text-center">
             <div class="text-sm text-slate-400 mb-2">
               Next Level
@@ -43,7 +43,7 @@
         <!-- ASI Indicator -->
         <div
           v-if="levelUpReward.hasASI"
-          class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4 bg-yellow-900/30 border-yellow-700"
+          class="rounded-md bg-yellow-900/30 border border-yellow-700 p-4 mb-4"
         >
           <div class="text-yellow-400 text-sm font-medium">
             ✨ Ability Score Improvement Available
@@ -72,7 +72,7 @@
 
       <!-- Right: Confirm/Cancel -->
       <div class="md:w-2/3 flex flex-col gap-3">
-        <div class="rounded-md bg-slate-800 border border-slate-700 p-4 bg-slate-900/50 p-6 text-center">
+        <div class="rounded-md bg-slate-900/50 border border-slate-700 p-6 text-center">
           <div class="text-lg font-medium mb-4">
             Ready to level up to {{ nextLevel }}?
           </div>
@@ -137,7 +137,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import { conversationService } from '../../apis/conversationApi';
+import { conversationApi } from '../../apis/conversationApi';
 
 interface Props {
   world?: string;
@@ -213,7 +213,7 @@ const executeLevelUp = async (): Promise<void> => {
 
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await conversationService.sendMessage(levelupMsg);
+  await conversationApi.sendMessage(levelupMsg);
   // gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
 
   // Return to game

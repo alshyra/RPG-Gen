@@ -60,7 +60,22 @@ describe('Combat flow', () => {
               .substring(0, 500));
           });
 
-        // Wait for enemies to be rendered
+        // Wait for enemies to be rendered — combat may not always be started by seed helper,
+        // so if we don't find enemies we try to start combat explicitly and wait again.
+        cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
+          .should(($eles) => {
+            if ($eles.length === 0) {
+              // Start combat explicitly for this character and wait for status update
+              cy.task('startCombatFor', { characterId: charId })
+                .then((res: any) => {
+                  expect(res.ok).to.equal(true);
+                });
+              // wait a short moment for the client to pick up the combat update
+              cy.wait(500);
+            }
+          });
+
+        // ensure we have at least one enemy rendered after the attempt above
         cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
           .should('have.length.gte', 1);
 

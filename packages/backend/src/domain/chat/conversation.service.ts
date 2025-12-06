@@ -34,15 +34,12 @@ export class ConversationService {
       'combat_start',
       'combat_end',
     ];
-    return history.messages.map((msg) => {
-      const instrs = (msg.instructions || [])
-        .filter((v): v is GameInstructionDto => availablesTypes.includes(v.type));
-      return {
-        role: msg.role,
-        narrative: msg.narrative,
-        instructions: instrs.length ? instrs : undefined,
-      };
-    });
+    return history.messages.map(msg => ({
+      role: msg.role,
+      narrative: msg.narrative,
+      instructions: (msg.instructions || [])
+        .filter((v): v is GameInstructionDto => availablesTypes.includes(v.type)),
+    }));
   }
 
   getAbilityScore(character: CharacterResponseDto, key: keyof AbilityScoresResponseDto): number {

@@ -1,4 +1,4 @@
-import { rollDice } from '@/apis/diceApi';
+import { diceApi } from '@/apis/diceApi';
 import type {
   ChatMessageDto,
   DiceResultDto,
@@ -47,15 +47,10 @@ export const useGameStore = defineStore('gameStore', () => {
 
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
-    const res: DiceResultDto = await rollDice(expr, advantage);
-    const payload: DiceResultDto = {
-      rolls: res.rolls,
-      modifierValue: res.modifierValue,
-      total: res.total,
-    };
-    rolls.value.push(payload);
-    latestRoll.value = payload;
-    return payload;
+    const diceResultDto = await diceApi.roll(expr, advantage);
+    rolls.value.push(diceResultDto);
+    latestRoll.value = diceResultDto;
+    return diceResultDto;
   };
 
   // Basic helpers expected by many composables / components
