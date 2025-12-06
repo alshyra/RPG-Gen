@@ -1,20 +1,20 @@
 import { inventoryApi } from '@/apis/inventoryApi';
-import type {
-  CharacterResponseDto,
-  CombatantDto,
-  GameInstructionDto,
-  InventoryItemDto,
-  RollInstructionMessageDto, SpellInstructionMessageDto,
-  UseItemResponseDto,
+import {
+  isCombatStartInstruction,
+  type CharacterResponseDto,
+  type CombatantDto,
+  type GameInstructionDto,
+  type InventoryItemDto,
+  type RollInstructionMessageDto, type SpellInstructionMessageDto,
+  type UseItemResponseDto,
 } from '@rpg-gen/shared';
 import { characterApi } from '../apis/characterApi';
-import { isCombatStartInstruction } from '../apis/combatTypes';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 import { useCombat } from './useCombat';
-import { conversationService } from '@/apis/conversationApi';
+import { conversationApi } from '@/apis/conversationApi';
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -161,7 +161,7 @@ export function useGameCommands() {
     message: string,
     instructions: GameInstructionDto[] = [],
   ): Promise<void> => {
-    const response = await conversationService.sendMessage(message, instructions);
+    const response = await conversationApi.sendMessage(message, instructions);
     gameStore.messages.pop();
     gameStore.appendMessage('assistant', response.narrative);
     processInstructions(response.instructions ?? []);

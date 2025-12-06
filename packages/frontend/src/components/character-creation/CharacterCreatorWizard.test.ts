@@ -91,7 +91,7 @@ describe('CharacterCreatorWizard finish flow', () => {
     const startPromise = new Promise<any>((resolve) => {
       startResolve = resolve;
     });
-    (conv.conversationService.startGame as any).mockImplementation(() => startPromise);
+    (conv.conversationApi.startGame as any).mockImplementation(() => startPromise);
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {

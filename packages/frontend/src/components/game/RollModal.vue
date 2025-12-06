@@ -50,7 +50,7 @@
           data-cy="roll-send"
           variant="primary"
           :is-loading="gameStore.sending"
-          @click="confirmRoll"
+          @click="closeModal"
         >
           Send Result
         </UiButton>
@@ -66,18 +66,27 @@ import DieD20 from './DieD20.vue';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import { useGameRolls } from '@/composables/useGameRolls';
+import { useGameMessages } from '@/composables/useGameMessages';
 
 const gameStore = useGameStore();
-const { rollData } = storeToRefs(gameStore);
+const gameMessages = useGameMessages();
+const {
+  rollData, showRollModal, pendingInstruction,
+} = storeToRefs(gameStore);
 
 // instantiate composable to get handlers (confirmRoll, rerollDice)
 const {
   confirmRoll, rerollDice,
 } = useGameRolls();
 
-const closeModal = () => {
-  confirmRoll();
-  gameStore.showRollModal = false;
+const closeModal = async () => {
+  const message = await confirmRoll();
+  if (!message) return;
+
+  gameStore.appendMessage(message.role, message.narrative);
+  gameMessages.processInstructions(message.instructions || []);
+  showRollModal.value = false;
+  pendingInstruction.value = null;
 };
 </script>
 

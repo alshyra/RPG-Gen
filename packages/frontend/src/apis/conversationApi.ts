@@ -1,7 +1,7 @@
 import { CharacterResponseDto, type GameInstructionDto } from '@rpg-gen/shared';
 import apiClient from './apiClient';
 
-export class ConversationService {
+export class ConversationApi {
   private characterId: string | null = null;
 
   /**
@@ -70,4 +70,5 @@ export class ConversationService {
     return data;
   }
 }
-export const conversationService = new ConversationService();
+const conversationApi = new ConversationApi();
+export { conversationApi };

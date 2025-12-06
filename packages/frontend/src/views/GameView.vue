@@ -99,6 +99,7 @@ const combat = useCombat();
 const {
   inCombat,
 } = storeToRefs(combatStore);
+const { pendingInstruction } = storeToRefs(gameStore);
 
 // Ensure rolls watcher / handlers are active for the whole view
 // (useGameRolls registers a watch on latestRoll and exposes confirm/reroll)
@@ -107,7 +108,15 @@ useGameRolls();
 
 // Replace bottom padding with a max-height so content never scrolls under the fixed bars.
 // Keep different values for combat/non-combat states.
-const contentMaxHeight = computed(() => (inCombat.value ? 'calc(100vh - 10rem)' : 'calc(100vh - 160px)'));
+const contentMaxHeight = computed(() => {
+  if (pendingInstruction.value?.type === 'roll') {
+    return 'calc(100vh - 200px)';
+  }
+  if (inCombat.value) {
+    return 'calc(100vh - 12rem)';
+  }
+  return 'calc(100vh - 160px)';
+});
 
 /**
  * Handle sending a message - either as a command or regular message

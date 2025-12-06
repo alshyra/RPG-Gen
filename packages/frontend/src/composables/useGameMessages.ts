@@ -1,15 +1,13 @@
-import type {
-  ChatMessageDto,
-  RollInstructionMessageDto,
-  HpInstructionMessageDto,
-  XpInstructionMessageDto,
-  SpellInstructionMessageDto,
-  InventoryInstructionMessageDto,
-} from '@rpg-gen/shared';
-import { conversationService } from '../apis/conversationApi';
 import {
+  type ChatMessageDto,
+  type RollInstructionMessageDto,
+  type HpInstructionMessageDto,
+  type XpInstructionMessageDto,
+  type SpellInstructionMessageDto,
+  type InventoryInstructionMessageDto,
   isCombatStartInstruction,
-} from '../apis/combatTypes';
+} from '@rpg-gen/shared';
+import { conversationApi } from '../apis/conversationApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 import { useCombat } from './useCombat';
@@ -44,7 +42,7 @@ export function useGameMessages() {
     gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
     try {
-      const response = await conversationService.sendMessage(messageText);
+      const response = await conversationApi.sendMessage(messageText);
       handleMessageResponse(response);
     } catch (e: unknown) {
       handleMessageError(e);

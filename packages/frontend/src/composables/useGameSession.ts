@@ -16,7 +16,7 @@ import { useCombat } from './useCombat';
 import {
   useRoute, useRouter,
 } from 'vue-router';
-import { conversationService } from '../apis/conversationApi';
+import { conversationApi } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
 type DisplayRole = 'user' | 'assistant' | 'system';
@@ -59,11 +59,8 @@ export const useGameSession = () => {
 
   const handleCombatStartInstruction = async (_instr: CombatStartInstructionMessageDto) => {
     try {
-      // On page refresh, just restore combat state from backend
-      // Do NOT call initializeCombat(instr) which would create a NEW combat
       const inCombat = await checkCombatStatus();
       if (inCombat) {
-        // fetchStatus already initialized the store, just log
         gameStore.appendMessage('system', '⚔️ Combat en cours restauré.');
       } else {
         gameStore.appendMessage('system', '⚔️ Combat terminé.');
@@ -162,7 +159,7 @@ export const useGameSession = () => {
     isInitializing.value = true;
     try {
       if (char.isDeceased) showDeathModal.value = true;
-      const messages = await conversationService.startGame(char);
+      const messages = await conversationApi.startGame(char);
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);

@@ -137,7 +137,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import { conversationService } from '../../apis/conversationApi';
+import { conversationApi } from '../../apis/conversationApi';
 
 interface Props {
   world?: string;
@@ -213,7 +213,7 @@ const executeLevelUp = async (): Promise<void> => {
 
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await conversationService.sendMessage(levelupMsg);
+  await conversationApi.sendMessage(levelupMsg);
   // gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
 
   // Return to game
