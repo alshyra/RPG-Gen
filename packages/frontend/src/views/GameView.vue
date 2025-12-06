@@ -36,6 +36,9 @@
       @close="() => (characterStore.showDeathModal = false)"
     />
 
+    <!-- Roll confirmation modal (shows when store.showRollModal is true) -->
+    <RollModal />
+
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-30 pointer-events-none">
       <div class="pointer-events-none">
         <div :class="[ 'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm', inCombat ? 'rounded-b-lg' : 'rounded-lg' ]" />
@@ -67,6 +70,7 @@ import {
 import { characterApi } from '../apis/characterApi';
 import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import DeathModal from '../components/game/DeathModal.vue';
+import RollModal from '../components/game/RollModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
 import { useCombat } from '../composables/useCombat';
 import { useGameCommands } from '../composables/useGameCommands';
@@ -95,6 +99,11 @@ const combat = useCombat();
 const {
   inCombat,
 } = storeToRefs(combatStore);
+
+// Ensure rolls watcher / handlers are active for the whole view
+// (useGameRolls registers a watch on latestRoll and exposes confirm/reroll)
+import { useGameRolls } from '@/composables/useGameRolls';
+useGameRolls();
 
 // Replace bottom padding with a max-height so content never scrolls under the fixed bars.
 // Keep different values for combat/non-combat states.
