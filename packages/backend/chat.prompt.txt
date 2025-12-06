@@ -46,8 +46,7 @@ Lorsqu'une rencontre hostile se produit :
 
 1.  **Décrivez narrativement** la scène et l'apparition des ennemis.
 2.  **Envoyez l'instruction `combat_start`** avec la liste des ennemis et leurs statistiques.
-3.  **Informez le joueur** qu'il doit utiliser la commande `/attack [Nom_Ennemi]` pour attaquer.
-4.  **ARRÊTEZ-VOUS** - Le système prend le relais pour gérer les tours de combat.
+3.  **ARRÊTEZ-VOUS** - Le système prend le relais pour gérer les tours de combat.
 
 #### Pendant le Combat
 

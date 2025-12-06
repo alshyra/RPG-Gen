@@ -61,12 +61,30 @@ export class GeminiTextService {
     // Parse and validate the JSON response from Gemini using Zod
     try {
       const parsed = JSON.parse(text);
-      const validated = aiResponseSchema.parse(parsed);
 
-      // Construct the ChatMessageDto from validated data
-      // Zod validation ensures the structure matches our schema at runtime
-      // The type assertion is necessary because TypeScript cannot automatically
-      // infer the structural equivalence between Zod-inferred types and our DTOs
+      // Some model outputs may return an instruction envelope like { type: 'x', payload: { ... } }
+      // while our Zod schema expects the instruction properties to live at the top level
+      // (e.g. { type: 'combat_start', combat_start: [...] }). Normalize such cases here
+      // before running the stricter aiResponseSchema validation.
+      let normalized = parsed;
+      if (Array.isArray(parsed?.instructions)) {
+        normalized = {
+          ...parsed,
+          instructions: parsed.instructions.map((inst: any) => {
+            if (inst && typeof inst === 'object' && 'payload' in inst && typeof inst.payload === 'object') {
+              // Merge payload fields into the instruction, prefer payload fields but keep type from wrapper
+              return {
+                type: inst.type,
+                ...inst.payload,
+              };
+            }
+            return inst;
+          }),
+        };
+      }
+
+      const validated = aiResponseSchema.parse(normalized);
+
       const chatMessage: ChatMessageDto = {
         role: 'assistant',
         narrative: validated.narrative,
