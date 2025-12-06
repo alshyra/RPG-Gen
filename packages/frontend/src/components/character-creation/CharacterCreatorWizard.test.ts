@@ -40,7 +40,7 @@ vi.mock('@/apis/characterApi', async () => ({
 
 vi.mock('@/services/dndRulesService', () => ({ DnDRulesService: { calculateHpForLevel1: () => 10 } }));
 
-vi.mock('@/apis/conversationApi', async () => ({ conversationService: { startGame: vi.fn(async () => []) } }));
+vi.mock('@/apis/conversationApi', async () => ({ conversationApi: { startGame: vi.fn(async () => []) } }));
 
 describe('CharacterCreatorWizard finish flow', () => {
   it('generates avatar, refreshes store and navigates to game', async () => {

@@ -8,6 +8,8 @@ describe('UiAlertModal', () => {
     const wrapper = mount(UiAlertModal);
 
     const p = showAlert('Hello world');
+    // wait for modal to render
+    await wrapper.vm.$nextTick();
 
     // modal should be visible
     expect(useModalState().isOpen)
@@ -27,6 +29,7 @@ describe('UiAlertModal', () => {
 
     // Cancel path
     const p1 = showConfirm('Are you sure?');
+    await wrapper.vm.$nextTick();
     expect(useModalState().isOpen)
       .toBe(true);
     await wrapper.get('[data-cy="modal-cancel"]')
@@ -37,6 +40,7 @@ describe('UiAlertModal', () => {
 
     // OK path
     const p2 = showConfirm('Go?');
+    await wrapper.vm.$nextTick();
     expect(useModalState().isOpen)
       .toBe(true);
     await wrapper.get('[data-cy="modal-ok"]')
