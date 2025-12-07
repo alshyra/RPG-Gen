@@ -33,7 +33,7 @@
             class="px-2 py-0.5 text-[11px] rounded bg-amber-400 hover:bg-amber-300 text-amber-900 disabled:bg-slate-600 disabled:text-slate-400"
             data-cy="attack-button"
             :aria-disabled="!showAttackButton"
-            @click.prevent="doAttack"
+            @click.prevent="openActionSelector"
           >
             Attaquer
           </button>
@@ -65,6 +65,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Spell/Action Selector Modal -->
+  <SpellSelector
+    :is-open="showSpellSelector"
+    :target="fighter"
+    :character-spells="currentCharacter?.spells || []"
+    @close="showSpellSelector = false"
+    @attack="handleAttack"
+  />
 </template>
 
 <script setup lang="ts">
@@ -80,6 +89,7 @@ import {
 import { useCombatStore } from '@/stores/combatStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
+import SpellSelector from './combat-panel/SpellSelector.vue';
 
 const {
   fighter, isPlayer,
@@ -144,9 +154,15 @@ const showAttackButton = computed(() => !isPlayer
   && !gameStore.sending);
 const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
 
-const doAttack = async () => {
-  if (!fighter || !currentCharacter.value?.characterId) return;
-  await combat.executeAttack(fighter);
+const showSpellSelector = ref(false);
+
+const openActionSelector = () => {
+  showSpellSelector.value = true;
+};
+
+const handleAttack = async (target: CombatantDto, spellName?: string) => {
+  if (!currentCharacter.value?.characterId) return;
+  await combat.executeAttack(target, spellName);
 };
 </script>
 

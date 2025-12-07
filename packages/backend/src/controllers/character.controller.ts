@@ -18,6 +18,7 @@ import {
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import type { RPGRequest } from '../global.types.js';
 import { CharacterService } from '../domain/character/character.service.js';
+import { LevelUpService } from '../domain/character/levelup.service.js';
 import { CreateInventoryItemDto } from '../domain/character/dto/CreateInventoryItemDto.js';
 import { EquipInventoryDto } from '../domain/character/dto/EquipInventoryDto.js';
 import {
@@ -29,6 +30,7 @@ import {
   KillCharacterBodyDto,
   RemoveInventoryBodyDto,
   UpdateCharacterRequestDto,
+  LevelUpApplyDto,
 } from '../domain/character/dto/index.js';
 
 @ApiTags('characters')
@@ -38,7 +40,10 @@ import {
 export class CharacterController {
   private readonly logger = new Logger(CharacterController.name);
 
-  constructor(private characterService: CharacterService) {}
+  constructor(
+    private characterService: CharacterService,
+    private levelUpService: LevelUpService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new character' })
@@ -208,6 +213,44 @@ export class CharacterController {
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
     return this.characterService.toCharacterDto(character);
+  }
+
+  @Get(':characterId/levelup/:className')
+  @ApiOperation({ summary: 'Get level-up options for a class for this character' })
+  @ApiResponse({
+    status: 200,
+    description: 'Level-up options',
+    type: Object,
+  })
+  async getLevelUpOptions(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+    @Param('className') className: string,
+  ) {
+    const userId = req.user._id.toString();
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    if (!character) throw new BadRequestException('Character not found');
+    const options = await this.levelUpService.getOptionsForClass(character, className);
+    return options;
+  }
+
+  @Post(':characterId/levelup/:className')
+  @ApiOperation({ summary: 'Apply level-up choices for a character class' })
+  @ApiBody({ type: LevelUpApplyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated character after levelup',
+    type: CharacterResponseDto,
+  })
+  async applyLevelUp(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+    @Param('className') className: string,
+    @Body() body: LevelUpApplyDto,
+  ) {
+    const userId = req.user._id.toString();
+    const updated = await this.levelUpService.applyLevelUp(userId, characterId, className, body);
+    return updated;
   }
 
   @Post(':characterId/inventory/equip')

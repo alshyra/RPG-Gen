@@ -18,6 +18,7 @@ import type {
   EndPlayerTurnResponseDto,
 } from '../../domain/combat/dto/index.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
+import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
 import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
 
 /**
@@ -38,6 +39,7 @@ export class CombatOrchestrator {
     private readonly combatAppService: CombatAppService,
     private readonly characterService: CharacterService,
     private readonly diceService: DiceService,
+    private readonly spellDefinitionService: SpellDefinitionService,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
   ) {}
@@ -117,12 +119,14 @@ export class CombatOrchestrator {
   /**
    * Process a player attack action.
    * Validates token, performs attack roll, and returns result or damage roll instruction.
+   * If spellName is provided, uses spell mechanics instead of weapon attack.
    */
   // eslint-disable-next-line max-statements
   async processAttack(
     userId: string,
     characterId: string,
     targetId: string,
+    spellName?: string,
   ): Promise<AttackResponseDto> {
     // Validate combat is active
     if (!(await this.combatAppService.isInCombat(characterId))) {
@@ -140,6 +144,11 @@ export class CombatOrchestrator {
       .join(', ');
     if (!targetEnemy) {
       throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargetIds}`);
+    }
+
+    // If spell name provided, use spell attack/save mechanics
+    if (spellName) {
+      return this.processSpellAttack(userId, characterId, targetId, targetEnemy, combatState, spellName);
     }
 
     // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
@@ -207,6 +216,126 @@ export class CombatOrchestrator {
       }
     }
 
+    return response;
+  }
+
+  /**
+   * Process a spell attack (attack roll or saving throw based).
+   * MVP: No spell slot tracking, cantrips and level 1 spells usable freely.
+   */
+  // eslint-disable-next-line max-statements
+  private async processSpellAttack(
+    userId: string,
+    characterId: string,
+    targetId: string,
+    targetEnemy: CombatantDto,
+    combatState: CombatStateDto,
+    spellName: string,
+  ): Promise<AttackResponseDto> {
+    // Load spell definition
+    const spellDef = await this.spellDefinitionService.findByName(spellName);
+    if (!spellDef) {
+      throw new BadRequestException(`Spell not found: ${spellName}`);
+    }
+
+    const damageDice = spellDef.meta?.damageDice || '1d4';
+    const saveType = spellDef.meta?.saveType;
+
+    // Calculate spell DC (8 + proficiency + spellcasting ability modifier)
+    // For MVP, using Charisma as default spellcasting ability
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const chaMod = Math.floor(((character.scores?.Cha ?? 10) - 10) / 2);
+    const proficiency = character.proficiency ?? 2;
+    const spellDC = 8 + proficiency + chaMod;
+
+    let hit = false;
+    let isCrit = false;
+    let attackRoll: { hit: boolean;
+      isCrit: boolean;
+      diceResult: { rolls: number[];
+        modifierValue: number;
+        total: number; }; } | undefined;
+    let saveRoll: { success: boolean;
+      diceResult: { rolls: number[];
+        modifierValue: number;
+        total: number; }; } | undefined;
+
+    if (saveType) {
+      // Saving throw spell
+      // Get target's save bonus (for MVP, use a default or estimate from enemy stats)
+      const savingThrowBonus = 0; // MVP: default, could be enhanced with enemy stat tracking
+      saveRoll = this.diceService.rollSave(savingThrowBonus, spellDC);
+      hit = !saveRoll.success; // Damage on failed save
+    } else {
+      // Attack roll spell (like fire bolt, ray of frost)
+      // Use player's spell attack bonus (proficiency + spellcasting mod)
+      const spellAttackBonus = proficiency + chaMod;
+      attackRoll = this.diceService.rollAttack(spellAttackBonus, targetEnemy.ac ?? 0);
+      hit = attackRoll.hit;
+      isCrit = attackRoll.isCrit;
+    }
+
+    if (!hit) {
+      // Miss or successful save
+      combatState = this.combatAppService.decrementAction(combatState);
+      await this.combatAppService.saveCombatState(combatState);
+
+      return {
+        combatState,
+        diceResult: attackRoll?.diceResult || saveRoll?.diceResult,
+      };
+    }
+
+    // Hit or failed save: roll damage
+    const damageResult = this.diceService.rollDamage(damageDice, isCrit, 0);
+
+    // Apply damage
+    const applyResult = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal);
+    const finalState = applyResult.state;
+
+    // Build response
+    const response: AttackResponseDto = {
+      combatState: finalState,
+      diceResult: attackRoll?.diceResult || saveRoll?.diceResult,
+      damageDiceResult: damageResult,
+      damageTotal: damageResult.damageTotal,
+      isCrit: damageResult.isCrit,
+    };
+
+    // Handle combat end if applicable
+    if (applyResult.endResult) {
+      const combatEnd = new CombatEndDto({
+        victory: true,
+        xp_gained: applyResult.endResult.xp_gained,
+        player_hp: finalState.player.hp,
+        enemies_defeated: applyResult.endResult.enemies_defeated,
+        narrative: `Victoire! Vous avez vaincu ${applyResult.endResult.enemies_defeated.join(', ')}.`,
+      });
+
+      response.combatEnd = combatEnd;
+
+      if (applyResult.endResult.xp_gained > 0) {
+        await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
+        this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
+      }
+
+      try {
+        await this.conversationService.append(userId, characterId, {
+          role: 'assistant',
+          narrative: combatEnd.narrative,
+          instructions: [
+            {
+              type: 'combat_end',
+              combat_end: combatEnd,
+            },
+          ],
+        });
+      } catch (e) {
+        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+      }
+    }
+
+    this.logger.log(`Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`);
     return response;
   }
 

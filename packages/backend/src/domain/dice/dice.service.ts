@@ -103,4 +103,22 @@ export class DiceService {
 
     return result;
   }
+
+  /**
+   * Roll a saving throw for a target against a spell DC.
+   * @param savingThrowBonus - The target's saving throw modifier
+   * @param spellDC - The spell save DC (typically 8 + proficiency + casting ability modifier)
+   * @returns Whether the save succeeded and the dice result
+   */
+  rollSave(savingThrowBonus: number, spellDC: number): { success: boolean;
+    diceResult: DiceResultDto; } {
+    const diceResult = this.rollDiceExpr('1d20');
+    const [die] = diceResult.rolls;
+    const totalSave = die + savingThrowBonus;
+    const success = die === 20 || totalSave >= spellDC; // Natural 20 always succeeds
+    return {
+      success,
+      diceResult,
+    };
+  }
 }

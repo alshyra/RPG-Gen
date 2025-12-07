@@ -13,6 +13,8 @@ export * from './KillCharacterBodyDto.js';
 export * from './RemoveInventoryBodyDto.js';
 export * from './GrantInspirationBodyDto.js';
 export * from './UpdateCharacterRequestDto.js';
+export * from './LevelUpOptionsDto.js';
+export * from './LevelUpApplyDto.js';
 export * from './InventoryItemMeta.js';
 export * from './CreateInventoryItemDto.js';
 export * from './EquipInventoryDto.js';

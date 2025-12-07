@@ -93,6 +93,7 @@ export class CharacterService {
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
+    if (updates.spells !== undefined) updateDoc.spells = updates.spells;
 
     const character = await this.characterModel.findOneAndUpdate(
       {

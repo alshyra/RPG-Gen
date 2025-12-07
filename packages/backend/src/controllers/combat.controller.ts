@@ -71,10 +71,10 @@ export class CombatController {
   async attack(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
-    @Body('targetId') targetId: string,
+    @Body() body: AttackRequestDto,
   ): Promise<AttackResponseDto> {
     const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(userId, characterId, targetId);
+    return this.combatOrchestrator.processAttack(userId, characterId, body.targetId, body.spellName);
   }
 
   @Get(':characterId/status')

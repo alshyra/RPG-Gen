@@ -1,0 +1,484 @@
+{
+  "allowedSpellsByLevel": {
+    "0": [
+      {
+        "name": "Assistance",
+        "definitionId": "spell-0-assistance"
+      },
+      {
+        "name": "Flamme sacrée",
+        "definitionId": "spell-0-flamme-sacree"
+      },
+      {
+        "name": "Glas",
+        "definitionId": "spell-0-glas"
+      },
+      {
+        "name": "Lumière",
+        "definitionId": "spell-0-lumiere"
+      },
+      {
+        "name": "Mot de radiance",
+        "definitionId": "spell-0-mot-de-radiance"
+      },
+      {
+        "name": "Réparation",
+        "definitionId": "spell-0-reparation"
+      },
+      {
+        "name": "Résistance",
+        "definitionId": "spell-0-resistance"
+      },
+      {
+        "name": "Stabilisation",
+        "definitionId": "spell-0-stabilisation"
+      },
+      {
+        "name": "Thaumaturgie",
+        "definitionId": "spell-0-thaumaturgie"
+      }
+    ],
+    "1": [
+      {
+        "name": "Bénédiction",
+        "definitionId": "spell-1-benediction"
+      },
+      {
+        "name": "Blessure",
+        "definitionId": "spell-1-blessure"
+      },
+      {
+        "name": "Bouclier de la foi",
+        "definitionId": "spell-1-bouclier-de-la-foi"
+      },
+      {
+        "name": "Cérémonie",
+        "definitionId": "spell-1-ceremonie"
+      },
+      {
+        "name": "Création ou destruction d'eau",
+        "definitionId": "spell-1-creation-ou-destruction-d-eau"
+      },
+      {
+        "name": "Détection de la magie",
+        "definitionId": "spell-1-detection-de-la-magie"
+      },
+      {
+        "name": "Détection du mal et du bien",
+        "definitionId": "spell-1-detection-du-mal-et-du-bien"
+      },
+      {
+        "name": "Détection du poison et des maladies",
+        "definitionId": "spell-1-detection-du-poison-et-des-maladies"
+      },
+      {
+        "name": "Éclair traçant",
+        "definitionId": "spell-1-eclair-tracant"
+      },
+      {
+        "name": "Fléau",
+        "definitionId": "spell-1-fleau"
+      },
+      {
+        "name": "Injonction",
+        "definitionId": "spell-1-injonction"
+      },
+      {
+        "name": "Mot de guérison",
+        "definitionId": "spell-1-mot-de-guerison"
+      },
+      {
+        "name": "Protection contre le mal et le bien",
+        "definitionId": "spell-1-protection-contre-le-mal-et-le-bien"
+      },
+      {
+        "name": "Purification de nourriture et d'eau",
+        "definitionId": "spell-1-purification-de-nourriture-et-d-eau"
+      },
+      {
+        "name": "Sanctuaire",
+        "definitionId": "spell-1-sanctuaire"
+      },
+      {
+        "name": "Soins",
+        "definitionId": "spell-1-soins"
+      }
+    ],
+    "2": [
+      {
+        "name": "Aide",
+        "definitionId": "spell-2-aide"
+      },
+      {
+        "name": "Amélioration de caractéristique",
+        "definitionId": "spell-2-amelioration-de-caracteristique"
+      },
+      {
+        "name": "Apaisement des émotions",
+        "definitionId": "spell-2-apaisement-des-emotions"
+      },
+      {
+        "name": "Arme spirituelle",
+        "definitionId": "spell-2-arme-spirituelle"
+      },
+      {
+        "name": "Augure",
+        "definitionId": "spell-2-augure"
+      },
+      {
+        "name": "Cécité/Surdité",
+        "definitionId": "spell-2-cecite-surdite"
+      },
+      {
+        "name": "Flamme éternelle",
+        "definitionId": "spell-2-flamme-eternelle"
+      },
+      {
+        "name": "Immobilisation de personne",
+        "definitionId": "spell-2-immobilisation-de-personne"
+      },
+      {
+        "name": "Lien de protection",
+        "definitionId": "spell-2-lien-de-protection"
+      },
+      {
+        "name": "Localisation d'objet",
+        "definitionId": "spell-2-localisation-d-objet"
+      },
+      {
+        "name": "Préservation des morts",
+        "definitionId": "spell-2-preservation-des-morts"
+      },
+      {
+        "name": "Prière de guérison",
+        "definitionId": "spell-2-priere-de-guerison"
+      },
+      {
+        "name": "Protection contre le poison",
+        "definitionId": "spell-2-protection-contre-le-poison"
+      },
+      {
+        "name": "Restauration partielle",
+        "definitionId": "spell-2-restauration-partielle"
+      },
+      {
+        "name": "Sens des pièges",
+        "definitionId": "spell-2-sens-des-pieges"
+      },
+      {
+        "name": "Silence",
+        "definitionId": "spell-2-silence"
+      },
+      {
+        "name": "Zone de vérité",
+        "definitionId": "spell-2-zone-de-verite"
+      }
+    ],
+    "3": [
+      {
+        "name": "Animation des morts",
+        "definitionId": "spell-3-animation-des-morts"
+      },
+      {
+        "name": "Cercle magique",
+        "definitionId": "spell-3-cercle-magique"
+      },
+      {
+        "name": "Clairvoyance",
+        "definitionId": "spell-3-clairvoyance"
+      },
+      {
+        "name": "Communication à distance",
+        "definitionId": "spell-3-communication-a-distance"
+      },
+      {
+        "name": "Communication avec les morts",
+        "definitionId": "spell-3-communication-avec-les-morts"
+      },
+      {
+        "name": "Création de nourriture et d'eau",
+        "definitionId": "spell-3-creation-de-nourriture-et-d-eau"
+      },
+      {
+        "name": "Délivrance des malédictions",
+        "definitionId": "spell-3-delivrance-des-maledictions"
+      },
+      {
+        "name": "Dissipation de la magie",
+        "definitionId": "spell-3-dissipation-de-la-magie"
+      },
+      {
+        "name": "Don des langues",
+        "definitionId": "spell-3-don-des-langues"
+      },
+      {
+        "name": "Esprits gardiens",
+        "definitionId": "spell-3-esprits-gardiens"
+      },
+      {
+        "name": "Fusion dans la pierre",
+        "definitionId": "spell-3-fusion-dans-la-pierre"
+      },
+      {
+        "name": "Glyphe de protection",
+        "definitionId": "spell-3-glyphe-de-protection"
+      },
+      {
+        "name": "Lueur d'espoir",
+        "definitionId": "spell-3-lueur-d-espoir"
+      },
+      {
+        "name": "Lumière du jour",
+        "definitionId": "spell-3-lumiere-du-jour"
+      },
+      {
+        "name": "Malédiction",
+        "definitionId": "spell-3-malediction"
+      },
+      {
+        "name": "Marche sur l'eau",
+        "definitionId": "spell-3-marche-sur-l-eau"
+      },
+      {
+        "name": "Mort simulée",
+        "definitionId": "spell-3-mort-simulee"
+      },
+      {
+        "name": "Mot de guérison de groupe",
+        "definitionId": "spell-3-mot-de-guerison-de-groupe"
+      },
+      {
+        "name": "Protection contre une énergie",
+        "definitionId": "spell-3-protection-contre-une-energie"
+      },
+      {
+        "name": "Retour à la vie",
+        "definitionId": "spell-3-retour-a-la-vie"
+      },
+      {
+        "name": "Transfert de vie",
+        "definitionId": "spell-3-transfert-de-vie"
+      },
+      {
+        "name": "Voile spirituel",
+        "definitionId": "spell-3-voile-spirituel"
+      }
+    ],
+    "4": [
+      {
+        "name": "Bannissement",
+        "definitionId": "spell-4-bannissement"
+      },
+      {
+        "name": "Contrôle de l'eau",
+        "definitionId": "spell-4-controle-de-l-eau"
+      },
+      {
+        "name": "Divination",
+        "definitionId": "spell-4-divination"
+      },
+      {
+        "name": "Façonnage de la pierre",
+        "definitionId": "spell-4-faconnage-de-la-pierre"
+      },
+      {
+        "name": "Gardien de la foi",
+        "definitionId": "spell-4-gardien-de-la-foi"
+      },
+      {
+        "name": "Liberté de mouvement",
+        "definitionId": "spell-4-liberte-de-mouvement"
+      },
+      {
+        "name": "Localisation de créature",
+        "definitionId": "spell-4-localisation-de-creature"
+      },
+      {
+        "name": "Protection contre la mort",
+        "definitionId": "spell-4-protection-contre-la-mort"
+      }
+    ],
+    "5": [
+      {
+        "name": "Arme sacrée",
+        "definitionId": "spell-5-arme-sacree"
+      },
+      {
+        "name": "Aube",
+        "definitionId": "spell-5-aube"
+      },
+      {
+        "name": "Colonne de flamme",
+        "definitionId": "spell-5-colonne-de-flamme"
+      },
+      {
+        "name": "Communion",
+        "definitionId": "spell-5-communion"
+      },
+      {
+        "name": "Contagion",
+        "definitionId": "spell-5-contagion"
+      },
+      {
+        "name": "Contrat",
+        "definitionId": "spell-5-contrat"
+      },
+      {
+        "name": "Convocation de céleste",
+        "definitionId": "spell-5-convocation-de-celeste"
+      },
+      {
+        "name": "Dissipation du mal et du bien",
+        "definitionId": "spell-5-dissipation-du-mal-et-du-bien"
+      },
+      {
+        "name": "Fléau d'insectes",
+        "definitionId": "spell-5-fleau-d-insectes"
+      },
+      {
+        "name": "Mythes et légendes",
+        "definitionId": "spell-5-mythes-et-legendes"
+      },
+      {
+        "name": "Quête",
+        "definitionId": "spell-5-quete"
+      },
+      {
+        "name": "Rappel à la vie",
+        "definitionId": "spell-5-rappel-a-la-vie"
+      },
+      {
+        "name": "Restauration supérieure",
+        "definitionId": "spell-5-restauration-superieure"
+      },
+      {
+        "name": "Sanctification",
+        "definitionId": "spell-5-sanctification"
+      },
+      {
+        "name": "Scrutation",
+        "definitionId": "spell-5-scrutation"
+      },
+      {
+        "name": "Soins de groupe",
+        "definitionId": "spell-5-soins-de-groupe"
+      }
+    ],
+    "6": [
+      {
+        "name": "Allié planaire",
+        "definitionId": "spell-6-allie-planaire"
+      },
+      {
+        "name": "Barrière de lames",
+        "definitionId": "spell-6-barriere-de-lames"
+      },
+      {
+        "name": "Contamination",
+        "definitionId": "spell-6-contamination"
+      },
+      {
+        "name": "Création de mort-vivant",
+        "definitionId": "spell-6-creation-de-mort-vivant"
+      },
+      {
+        "name": "Festin des héros",
+        "definitionId": "spell-6-festin-des-heros"
+      },
+      {
+        "name": "Guérison",
+        "definitionId": "spell-6-guerison"
+      },
+      {
+        "name": "Interdiction",
+        "definitionId": "spell-6-interdiction"
+      },
+      {
+        "name": "Mot de retour",
+        "definitionId": "spell-6-mot-de-retour"
+      },
+      {
+        "name": "Sens de l'orientation",
+        "definitionId": "spell-6-sens-de-l-orientation"
+      },
+      {
+        "name": "Vision suprême",
+        "definitionId": "spell-6-vision-supreme"
+      }
+    ],
+    "7": [
+      {
+        "name": "Changement de plan",
+        "definitionId": "spell-7-changement-de-plan"
+      },
+      {
+        "name": "Forme éthérée",
+        "definitionId": "spell-7-forme-etheree"
+      },
+      {
+        "name": "Invocation de céleste",
+        "definitionId": "spell-7-invocation-de-celeste"
+      },
+      {
+        "name": "Parole divine",
+        "definitionId": "spell-7-parole-divine"
+      },
+      {
+        "name": "Régénération",
+        "definitionId": "spell-7-regeneration"
+      },
+      {
+        "name": "Résurrection",
+        "definitionId": "spell-7-resurrection"
+      },
+      {
+        "name": "Symbole",
+        "definitionId": "spell-7-symbole"
+      },
+      {
+        "name": "Tempête de feu",
+        "definitionId": "spell-7-tempete-de-feu"
+      },
+      {
+        "name": "Temple des dieux",
+        "definitionId": "spell-7-temple-des-dieux"
+      }
+    ],
+    "8": [
+      {
+        "name": "Aura sacrée",
+        "definitionId": "spell-8-aura-sacree"
+      },
+      {
+        "name": "Champ antimagie",
+        "definitionId": "spell-8-champ-antimagie"
+      },
+      {
+        "name": "Contrôle du climat",
+        "definitionId": "spell-8-controle-du-climat"
+      },
+      {
+        "name": "Tremblement de terre",
+        "definitionId": "spell-8-tremblement-de-terre"
+      }
+    ],
+    "9": [
+      {
+        "name": "Guérison de groupe",
+        "definitionId": "spell-9-guerison-de-groupe"
+      },
+      {
+        "name": "Portail",
+        "definitionId": "spell-9-portail"
+      },
+      {
+        "name": "Projection astrale",
+        "definitionId": "spell-9-projection-astrale"
+      },
+      {
+        "name": "Résurrection suprême",
+        "definitionId": "spell-9-resurrection-supreme"
+      }
+    ]
+  }
+}

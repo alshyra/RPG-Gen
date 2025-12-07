@@ -120,7 +120,7 @@ export function useCombat() {
   /**
    * Execute an attack against a target
    */
-  const executeAttack = async (target: CombatantDto): Promise<void> => {
+  const executeAttack = async (target: CombatantDto, spellName?: string): Promise<void> => {
     if (!currentCharacter.value) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
@@ -135,7 +135,7 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatService.attack(currentCharacter.value.characterId, target);
+      const result = await combatService.attack(currentCharacter.value.characterId, target, spellName);
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);

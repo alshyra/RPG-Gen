@@ -35,14 +35,17 @@ class CombatService {
   /**
    * Execute an attack against a target using an action token for idempotency
    */
-  async attack(characterId: string, target: CombatantDto): Promise<AttackResponseDto> {
+  async attack(characterId: string, target: CombatantDto, spellName?: string): Promise<AttackResponseDto> {
     const { data } = await api.POST('/api/combat/{characterId}/attack', {
       params: {
         path: {
           characterId,
         },
       },
-      body: { targetId: target.id },
+      body: {
+        targetId: target.id,
+        ...(spellName && { spellName }),
+      },
     });
     if (!data) throw Error('Attack With Token didnt respond');
     return data;
