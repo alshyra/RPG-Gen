@@ -62,14 +62,17 @@
 </template>
 
 <script setup lang="ts">
-import type { CombatantDto, SpellResponseDto } from '@rpg-gen/shared';
+import { useCharacterStore } from '@/stores/characterStore';
+import type { CombatantDto } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
 const props = defineProps<{
   isOpen: boolean;
   target: CombatantDto | null;
-  characterSpells: SpellResponseDto[];
 }>();
+const characterStore = useCharacterStore();
+const { currentCharacter } = storeToRefs(characterStore);
 
 const emit = defineEmits<{
   close: [];
@@ -77,7 +80,11 @@ const emit = defineEmits<{
 }>();
 
 // Filter to only offensive spells (cantrips and level 1 for MVP)
-const availableSpells = computed(() => props.characterSpells.filter(spell => spell.level !== undefined && spell.level <= 1));
+const availableSpells = computed(() => {
+  const char = currentCharacter?.value;
+  const spells = char?.spells ?? [];
+  return spells.filter(spell => typeof spell.level !== 'undefined' && spell.level <= 1);
+});
 
 const close = () => {
   emit('close');

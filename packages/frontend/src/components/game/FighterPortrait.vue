@@ -70,7 +70,6 @@
   <SpellSelector
     :is-open="showSpellSelector"
     :target="fighter"
-    :character-spells="currentCharacter?.spells || []"
     @close="showSpellSelector = false"
     @attack="handleAttack"
   />

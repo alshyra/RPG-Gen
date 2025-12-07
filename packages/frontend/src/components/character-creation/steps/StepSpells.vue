@@ -121,7 +121,7 @@ import { storeToRefs } from 'pinia';
 import {
   computed, onBeforeUnmount, ref, watch,
 } from 'vue';
-import { SpellResponseDto } from '@rpg-gen/shared';
+import { LevelUpOptionsDto, SpellResponseDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
@@ -144,7 +144,7 @@ const selectedCantripsCount = computed(() => {
 
 const selectedSpellsCount = computed(() => {
   if (!currentCharacter.value?.spells) return 0;
-  return currentCharacter.value.spells.filter(s => (s.level) > 0).length;
+  return currentCharacter.value.spells.filter(s => s.level > 0).length;
 });
 
 // Fetch spells from backend when class is set
@@ -154,7 +154,7 @@ const setDefaultSpells = () => {
   spellsKnown.value = 0;
 };
 
-const applyOptions = (options: any) => {
+const applyOptions = (options: LevelUpOptionsDto) => {
   availableSpells.value = options.unlockedSpells || [];
   cantripsKnown.value = options.cantripsKnown || 0;
   spellsKnown.value = options.spellsKnown || 0;
