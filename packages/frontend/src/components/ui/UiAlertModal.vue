@@ -18,7 +18,7 @@
       </div>
     </div>
     <template #footer>
-      <div class="flex justify-end pt-4">
+      <div class="flex justify-end pt-4 gap-3">
         <UiButton
           v-if="state.type === 'confirm'"
           variant="primary"

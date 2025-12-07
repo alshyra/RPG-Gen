@@ -483,6 +483,102 @@
         ]
       }
     },
+    "/api/characters/{characterId}/levelup/{className}": {
+      "get": {
+        "operationId": "CharacterController_getLevelUpOptions",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "className",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Level-up options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get level-up options for a class for this character",
+        "tags": [
+          "characters"
+        ]
+      },
+      "post": {
+        "operationId": "CharacterController_applyLevelUp",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "className",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LevelUpApplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated character after levelup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apply level-up choices for a character class",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
     "/api/characters/{characterId}/inventory/equip": {
       "post": {
         "operationId": "CharacterController_equipInventory",
@@ -1096,55 +1192,6 @@
         "summary": "Use an item from inventory",
         "tags": [
           "inventory"
-        ]
-      }
-    },
-    "/api/rolls/{characterId}": {
-      "post": {
-        "operationId": "RollsController_submitRoll",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitRollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RollInstructionMessageDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Submit resolved roll(s) (non-chat) for processing",
-        "tags": [
-          "rolls"
         ]
       }
     }
@@ -2320,6 +2367,25 @@
           "definitionId"
         ]
       },
+      "LevelUpApplyDto": {
+        "type": "object",
+        "properties": {
+          "addSpells": {
+            "description": "List of spell definitionIds to add to the character",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "abilityIncreases": {
+            "description": "Ability score increases, e.g. [{ ability: \"Str\", inc: 1 }] ",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "EquipInventoryDto": {
         "type": "object",
         "properties": {
@@ -2532,6 +2598,10 @@
           "targetId": {
             "type": "string",
             "description": "Target ID to attack"
+          },
+          "spellName": {
+            "type": "string",
+            "description": "Optional spell name to cast instead of weapon attack"
           }
         },
         "required": [
@@ -2892,21 +2962,6 @@
         "required": [
           "success",
           "message"
-        ]
-      },
-      "SubmitRollDto": {
-        "type": "object",
-        "properties": {
-          "instructions": {
-            "description": "Resolved instructions array",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RollInstructionMessageDto"
-            }
-          }
-        },
-        "required": [
-          "instructions"
         ]
       }
     }

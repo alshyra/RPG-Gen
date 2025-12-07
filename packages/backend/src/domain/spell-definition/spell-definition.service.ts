@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import {
   SpellDefinition, SpellDefinitionDocument,
 } from '../../infra/mongo/spell-definition.schema.js';
+import { spellsArraySchema } from './validators.js';
 
 @Injectable()
 export class SpellDefinitionService {
@@ -85,14 +86,41 @@ export class SpellDefinitionService {
     }
   }
 
-  async seedFromJson(spells: Partial<SpellDefinition>[]): Promise<void> {
-    this.logger.log(`Seeding ${spells.length} spell definitions...`);
+  async seedFromJson(rawSpells: unknown): Promise<void> {
+    const incoming = Array.isArray(rawSpells) ? rawSpells : [];
+    this.logger.log(`Seeding ${incoming.length} raw spell definitions...`);
 
-    const results = await Promise.all(spells.map(this.insertSpell.bind(this)));
+    try {
+      const parsed = spellsArraySchema.parse(incoming);
+      // parsed is an array of coerced/validated spell objects
+      const validated: Partial<SpellDefinition>[] = parsed.map(ok => ({
+        definitionId: ok.definitionId,
+        name: ok.name,
+        level: ok.level,
+        school: ok.school,
+        castingTime: ok.castingTime,
+        range: ok.range,
+        components: ok.components,
+        duration: ok.duration,
+        ritual: ok.ritual,
+        description: ok.description,
+        meta: ok.meta,
+      }));
 
-    const imported = results.filter(r => r === 'imported').length;
-    const skipped = results.filter(r => r === 'skipped').length;
+      this.logger.log(`Seeding ${validated.length} validated spell definitions...`);
 
-    this.logger.log(`Spell definitions seeded: ${imported} imported, ${skipped} skipped`);
+      const results = await Promise.all(validated.map(this.insertSpell.bind(this)));
+
+      const imported = results.filter(r => r === 'imported').length;
+      const skipped = results.filter(r => r === 'skipped').length;
+
+      this.logger.log(`Spell definitions seeded: ${imported} imported, ${skipped} skipped`);
+      return;
+    } catch (err) {
+      // zod throws on parse failures; surface a readable error so callers/CI will see the problem
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Spell seed validation failed: ${message}`);
+      throw new Error(`Spell seed validation failed: ${message}`);
+    }
   }
 }

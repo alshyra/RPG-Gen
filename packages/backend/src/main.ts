@@ -65,6 +65,11 @@ const seedSpellDefinitions = async (app: INestApplication, logger: Logger) => {
   }
 };
 
+const seedData = async (app: INestApplication, logger: Logger) => Promise.all([
+  seedItemDefinitions(app, logger),
+  seedSpellDefinitions(app, logger),
+]);
+
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
@@ -85,8 +90,7 @@ const bootstrap = async () => {
   const logger = new Logger('Bootstrap');
   const port = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 3001;
   await app.listen(port, '0.0.0.0');
-  await seedItemDefinitions(app, logger);
-  await seedSpellDefinitions(app, logger);
+  await seedData(app, logger);
   const url = await app.getUrl();
   logger.log(`Backend started and listen at ${url}`);
   logger.log(`📚 Swagger docs available at: ${url}/docs`);

@@ -138,6 +138,7 @@ import {
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { conversationApi } from '../../apis/conversationApi';
+import { levelUpApi } from '@/apis/levelUpApi';
 
 interface Props {
   world?: string;
@@ -208,7 +209,17 @@ const executeLevelUp = async (): Promise<void> => {
   // Save to backend using the character store
   const characterStore = useCharacterStore();
   if (updatedCharacter.characterId) {
-    await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+    // Prefer the dedicated LevelUp API for applying the level-up server-side when available
+    try {
+      await levelUpApi.applyLevelUp(updatedCharacter.characterId, className.value, {
+        // No explicit spells/asi chosen in this flow — we apply the bare level-up server-side.
+        addSpells: [],
+        abilityIncreases: [],
+      });
+    } catch (e) {
+      // Fallback: save the computed character changes
+      await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+    }
   }
 
   // Send to backend

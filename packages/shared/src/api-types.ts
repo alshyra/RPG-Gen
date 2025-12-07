@@ -191,6 +191,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/characters/{characterId}/levelup/{className}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get level-up options for a class for this character */
+        get: operations["CharacterController_getLevelUpOptions"];
+        put?: never;
+        /** Apply level-up choices for a character class */
+        post: operations["CharacterController_applyLevelUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters/{characterId}/inventory/equip": {
         parameters: {
             query?: never;
@@ -423,23 +441,6 @@ export interface paths {
         put?: never;
         /** Use an item from inventory */
         post: operations["InventoryController_useItem"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rolls/{characterId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit resolved roll(s) (non-chat) for processing */
-        post: operations["RollsController_submitRoll"];
         delete?: never;
         options?: never;
         head?: never;
@@ -931,6 +932,12 @@ export interface components {
             /** @description Arbitrary item meta */
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
+        LevelUpApplyDto: {
+            /** @description List of spell definitionIds to add to the character */
+            addSpells?: string[];
+            /** @description Ability score increases, e.g. [{ ability: "Str", inc: 1 }] */
+            abilityIncreases?: string[];
+        };
         EquipInventoryDto: {
             /**
              * @description Definition id of the item to equip
@@ -1017,6 +1024,8 @@ export interface components {
         AttackRequestDto: {
             /** @description Target ID to attack */
             targetId: string;
+            /** @description Optional spell name to cast instead of weapon attack */
+            spellName?: string;
         };
         DiceResultDto: {
             /** @description Individual dice roll results */
@@ -1160,10 +1169,6 @@ export interface components {
             character?: components["schemas"]["Function"];
             /** @description Human-readable result message */
             message: string;
-        };
-        SubmitRollDto: {
-            /** @description Resolved instructions array */
-            instructions: components["schemas"]["RollInstructionMessageDto"][];
         };
     };
     responses: never;
@@ -1541,6 +1546,56 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CharacterController_getLevelUpOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+                className: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Level-up options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    CharacterController_applyLevelUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+                className: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LevelUpApplyDto"];
+            };
+        };
+        responses: {
+            /** @description Updated character after levelup */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
         };
     };
@@ -1960,31 +2015,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    RollsController_submitRoll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitRollDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RollInstructionMessageDto"][];
-                };
             };
         };
     };

@@ -16,6 +16,7 @@
       >
         <UiInputCheckbox
           size="md"
+          :name="`skill-${skill}`"
           :model-value="proficientSkills.includes(skill)"
           :disabled="proficientSkills.length >= skillsToChoose && !proficientSkills.includes(skill)"
           @update:model-value="(val: boolean) => setSkillProficiency(skill, val)"
