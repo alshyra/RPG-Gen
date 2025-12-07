@@ -15,6 +15,7 @@ const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellR
   name: spell.name,
   level: spell.level,
   description: spell.description,
+  definitionId: spell.definitionId,
   meta: {},
 });
 

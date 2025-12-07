@@ -3,7 +3,7 @@
  * Handles ability calculations, HP, proficiency, etc.
  */
 
-import { AbilityScoresResponseDto, SpellResponseDto } from '@rpg-gen/shared';
+import { AbilityScoresResponseDto } from '@rpg-gen/shared';
 import { getCurrentLevel } from '../utils/dndLevels';
 
 export const ABILITIES = [
@@ -420,106 +420,6 @@ export class DnDRulesService {
    */
   static getAllSkills(): Skill[] {
     return SKILLS;
-  }
-
-  /**
-   * Return a small sample list of spells for a class. This is intentionally small
-   * and used for character creation UI only.
-   */
-  // Return a small sample list of spells for a class (UI helper)
-  // Use the shared SpellResponseDto type so callers can optionally persist by definitionId later.
-  static getAvailableSpellsForClass(className: string): SpellResponseDto[] {
-    const base: SpellResponseDto[] = [];
-    switch (className) {
-      case 'Wizard':
-        base.push({
-          name: 'Magic Missile',
-          // sample definitionId — the frontend doesn't need canonical ids for the local UIs
-          // but we include them when available so UI can persist selections by id later.
-          meta: { definitionId: 'spell-1-magic-missile' },
-          level: 1,
-          description: 'Un missile magique qui touche automatiquement.',
-        });
-        base.push({
-          name: 'Fireball',
-          meta: { definitionId: 'spell-3-fireball' },
-          level: 3,
-          description: 'Une explosion de feu qui inflige des dégâts.',
-        });
-        base.push({
-          name: 'Mage Armor',
-          meta: { definitionId: 'spell-1-mage-armor' },
-          level: 1,
-          description: 'Une armure magique protectrice.',
-        });
-        break;
-      case 'Cleric':
-        base.push({
-          name: 'Cure Wounds',
-          meta: { definitionId: 'spell-1-cure-wounds' },
-          level: 1,
-          description: 'Soigne une créature proche.',
-        });
-        base.push({
-          name: 'Bless',
-          meta: { definitionId: 'spell-1-bless' },
-          level: 1,
-          description: 'Augmente l\'attaque et le jet de sauvegarde d\'alliés.',
-        });
-        base.push({
-          name: 'Spiritual Weapon',
-          meta: { definitionId: 'spell-2-spiritual-weapon' },
-          level: 2,
-          description: 'Crée une arme spirituelle qui attaque.',
-        });
-        break;
-      case 'Druid':
-        base.push({
-          name: 'Entangle',
-          meta: { definitionId: 'spell-1-entangle' },
-          level: 1,
-          description: 'Enracine les ennemis au sol.',
-        });
-        base.push({
-          name: 'Produce Flame',
-          meta: { definitionId: 'spell-0-produce-flame' },
-          level: 0,
-          description: 'Une flamme facile qui attaque à distance.',
-        });
-        break;
-      case 'Bard':
-        base.push({
-          name: 'Vicious Mockery',
-          meta: { definitionId: 'spell-0-vicious-mockery' },
-          level: 0,
-          description: 'Une insulte magique qui inflige des dégâts psychiques.',
-        });
-        base.push({
-          name: 'Healing Word',
-          meta: { definitionId: 'spell-1-healing-word' },
-          level: 1,
-          description: 'Un soin à distance.',
-        });
-        break;
-      case 'Sorcerer':
-        base.push({
-          name: 'Shield',
-          meta: { definitionId: 'spell-1-shield' },
-          level: 1,
-          description: 'Bouclier magique instantané.',
-        });
-        base.push({
-          name: 'Magic Missile',
-          meta: { definitionId: 'spell-1-magic-missile' },
-          level: 1,
-          description: 'Un missile magique qui touche automatiquement.',
-        });
-        break;
-      default:
-        return [];
-    }
-
-    return base;
   }
 
   /**

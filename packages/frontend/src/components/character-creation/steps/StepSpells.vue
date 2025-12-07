@@ -25,11 +25,12 @@
       >
         <div
           v-for="availableSpell in availableSpells"
-          :key="availableSpell.name"
+          :key="availableSpell.definitionId || availableSpell.name"
           class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
         >
           <UiInputCheckbox
-            :model-value="spellIsSelected(availableSpell.name)"
+            :name="`spell-${availableSpell.name}`"
+            :model-value="spellIsSelected(availableSpell.definitionId || '')"
             @update:model-value="(val) => toggleSpell(availableSpell, val)"
           >
             <div class="flex-1">
@@ -49,29 +50,44 @@
 
 <script setup lang="ts">
 import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
-import { DnDRulesService } from '@/services/dndRulesService';
+import { classesApi } from '@/apis/classesApi';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import {
-  computed, onBeforeUnmount,
+  computed, onBeforeUnmount, ref, watch,
 } from 'vue';
+import { SpellResponseDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const availableSpells = computed(() => DnDRulesService
-  .getAvailableSpellsForClass(primaryClass.value)
-  .filter(s => s.level <= 1));
+const availableSpells = ref<SpellResponseDto[]>([]);
+const isLoadingSpells = ref(false);
 
-const spellIsSelected = (name: string) => (currentCharacter.value?.spells || []).some(s => s.name === name);
+// Fetch spells from backend when class is set
+watch(primaryClass, async (className) => {
+  if (!className) {
+    availableSpells.value = [];
+    return;
+  }
 
-const toggleSpell = async (s: {
-  name: string;
-  level: number;
-  description?: string;
-}, selected: boolean) => {
-  if (!currentCharacter.value) return;
+  isLoadingSpells.value = true;
+  try {
+    const options = await classesApi.getLevelOptions(className, 1);
+    availableSpells.value = options.unlockedSpells || [];
+  } catch (err) {
+    console.error('Failed to fetch spells for class:', err);
+    availableSpells.value = [];
+  } finally {
+    isLoadingSpells.value = false;
+  }
+}, { immediate: true });
+
+const spellIsSelected = (definitionId: string) => (currentCharacter.value?.spells || []).some(s => s.definitionId === definitionId);
+
+const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
+  if (!currentCharacter.value || !s.definitionId) return;
 
   if (selected) {
     characterStore.learnSpell({
@@ -80,6 +96,7 @@ const toggleSpell = async (s: {
       name: s.name,
       level: s.level,
       description: s.description ?? '',
+      definitionId: s.definitionId,
     });
   } else {
     characterStore.forgetSpell(s.name);

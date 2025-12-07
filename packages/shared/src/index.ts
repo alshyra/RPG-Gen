@@ -42,6 +42,7 @@ export type InventoryInstructionMessageDto = import('./api-types').components['s
 export type InventoryItemDto = import('./api-types').components['schemas']['InventoryItemDto'];
 export type KillCharacterBodyDto = import('./api-types').components['schemas']['KillCharacterBodyDto'];
 export type LevelUpApplyDto = import('./api-types').components['schemas']['LevelUpApplyDto'];
+export type LevelUpOptionsDto = import('./api-types').components['schemas']['LevelUpOptionsDto'];
 export type PackMeta = import('./api-types').components['schemas']['PackMeta'];
 export type RaceResponseDto = import('./api-types').components['schemas']['RaceResponseDto'];
 export type RemoveInventoryBodyDto = import('./api-types').components['schemas']['RemoveInventoryBodyDto'];

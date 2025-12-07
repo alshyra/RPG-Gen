@@ -484,48 +484,6 @@
       }
     },
     "/api/characters/{characterId}/levelup/{className}": {
-      "get": {
-        "operationId": "CharacterController_getLevelUpOptions",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "className",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Level-up options",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get level-up options for a class for this character",
-        "tags": [
-          "characters"
-        ]
-      },
       "post": {
         "operationId": "CharacterController_applyLevelUp",
         "parameters": [
@@ -1066,6 +1024,47 @@
         ]
       }
     },
+    "/api/classes/{className}/levels/{level}": {
+      "get": {
+        "operationId": "ClassesController_getLevelOptions",
+        "parameters": [
+          {
+            "name": "className",
+            "required": true,
+            "in": "path",
+            "description": "Name of the class (e.g., Bard, Cleric)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "required": true,
+            "in": "path",
+            "description": "Level number (1-20)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class-level options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelUpOptionsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get class-level options for a specific level",
+        "tags": [
+          "classes"
+        ]
+      }
+    },
     "/api/image": {
       "post": {
         "operationId": "ImageController_generate",
@@ -1392,6 +1391,10 @@
           "description": {
             "type": "string",
             "description": "Spell description"
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Spell definition ID for deterministic persistence"
           }
         },
         "required": [
@@ -1756,6 +1759,10 @@
       "SpellResponseDto": {
         "type": "object",
         "properties": {
+          "definitionId": {
+            "type": "string",
+            "description": "Canonical spell definition ID"
+          },
           "name": {
             "type": "string",
             "description": "Spell name"
@@ -2864,6 +2871,46 @@
         },
         "required": [
           "expr"
+        ]
+      },
+      "LevelUpOptionsDto": {
+        "type": "object",
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "Class name"
+          },
+          "currentLevel": {
+            "type": "number",
+            "description": "Current level in class"
+          },
+          "nextLevel": {
+            "type": "number",
+            "description": "Next level number (current + 1)"
+          },
+          "unlockedSpells": {
+            "description": "List of unlocked spells available at that level",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          },
+          "asiAvailable": {
+            "type": "boolean",
+            "description": "Whether an Ability Score Improvement (or feat) is available at this level"
+          },
+          "proficiencyIncrease": {
+            "type": "boolean",
+            "description": "Whether proficiency bonus increases at this level"
+          }
+        },
+        "required": [
+          "className",
+          "currentLevel",
+          "nextLevel",
+          "unlockedSpells",
+          "asiAvailable",
+          "proficiencyIncrease"
         ]
       },
       "ImageRequestDto": {

@@ -198,8 +198,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get level-up options for a class for this character */
-        get: operations["CharacterController_getLevelUpOptions"];
+        get?: never;
         put?: never;
         /** Apply level-up choices for a character class */
         post: operations["CharacterController_applyLevelUp"];
@@ -380,6 +379,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/classes/{className}/levels/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get class-level options for a specific level */
+        get: operations["ClassesController_getLevelOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/image": {
         parameters: {
             query?: never;
@@ -534,6 +550,8 @@ export interface components {
             school?: string;
             /** @description Spell description */
             description?: string;
+            /** @description Spell definition ID for deterministic persistence */
+            definitionId?: string;
         };
         InventoryInstructionMessageDto: {
             /**
@@ -671,6 +689,8 @@ export interface components {
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
         SpellResponseDto: {
+            /** @description Canonical spell definition ID */
+            definitionId?: string;
             /** @description Spell name */
             name: string;
             /** @description Spell level */
@@ -1134,6 +1154,20 @@ export interface components {
             expr: string;
             advantage?: string;
         };
+        LevelUpOptionsDto: {
+            /** @description Class name */
+            className: string;
+            /** @description Current level in class */
+            currentLevel: number;
+            /** @description Next level number (current + 1) */
+            nextLevel: number;
+            /** @description List of unlocked spells available at that level */
+            unlockedSpells: components["schemas"]["SpellResponseDto"][];
+            /** @description Whether an Ability Score Improvement (or feat) is available at this level */
+            asiAvailable: boolean;
+            /** @description Whether proficiency bonus increases at this level */
+            proficiencyIncrease: boolean;
+        };
         ImageRequestDto: {
             /** @description API token (optional) */
             token?: string;
@@ -1549,29 +1583,6 @@ export interface operations {
             };
         };
     };
-    CharacterController_getLevelUpOptions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-                className: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Level-up options */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
     CharacterController_applyLevelUp: {
         parameters: {
             query?: never;
@@ -1911,6 +1922,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    ClassesController_getLevelOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Name of the class (e.g., Bard, Cleric) */
+                className: string;
+                /** @description Level number (1-20) */
+                level: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Class-level options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LevelUpOptionsDto"];
+                };
             };
         };
     };

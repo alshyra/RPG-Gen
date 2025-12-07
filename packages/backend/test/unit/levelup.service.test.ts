@@ -5,6 +5,7 @@ function makeMockCharacterService(initialCharacter) {
   return {
     findByCharacterId: async () => initialCharacter,
     update: async (_userId, _characterId, updates) => Object.assign(initialCharacter, updates),
+    toCharacterDto: char => char, // Mock toCharacterDto to return the character as-is
   };
 }
 

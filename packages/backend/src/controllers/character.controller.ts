@@ -215,25 +215,6 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Get(':characterId/levelup/:className')
-  @ApiOperation({ summary: 'Get level-up options for a class for this character' })
-  @ApiResponse({
-    status: 200,
-    description: 'Level-up options',
-    type: Object,
-  })
-  async getLevelUpOptions(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Param('className') className: string,
-  ) {
-    const userId = req.user._id.toString();
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) throw new BadRequestException('Character not found');
-    const options = await this.levelUpService.getOptionsForClass(character, className);
-    return options;
-  }
-
   @Post(':characterId/levelup/:className')
   @ApiOperation({ summary: 'Apply level-up choices for a character class' })
   @ApiBody({ type: LevelUpApplyDto })

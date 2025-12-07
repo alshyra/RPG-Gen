@@ -92,14 +92,41 @@ describe('Character creation single flow', () => {
     cy.contains('button', 'Suivant')
       .click();
 
-    // spells - pick first checkbox if present
-    // spells - pick first visible spell checkbox if present
-    cy.get('[data-testid="ui-checkbox"]')
-      .then(($s) => {
-        if ($s.length) cy.wrap($s)
-          .first()
-          .click({ force: true });
-      });
+    // spells - select specific Bard cantrips and level-1 spells
+    // cantrips (choose 2): Main de mage, Message
+    cy.contains('Main de mage')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+    cy.contains('Message')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+
+    // level-1 spells (choose 4): Mot de guérison, Soins, Murmures dissonants, Sommeil
+    cy.contains('Mot de guérison')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+    cy.contains('Soins')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+    cy.contains('Murmures dissonants')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+    cy.contains('Sommeil')
+      .parent()
+      .parent()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+
     cy.contains('button', 'Suivant')
       .click();
 

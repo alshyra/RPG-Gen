@@ -31,8 +31,9 @@ export class LevelUpService {
     // For MVP: unlocked spells are all spells with level === nextLevel
     const unlocked = await this.spellDefService.findByLevel(nextLevel);
 
-    // Map SpellDefinition -> SpellResponseDto to keep DTO contract
+    // Map SpellDefinition -> SpellResponseDto to keep DTO contract (now including definitionId)
     const unlockedSpells: SpellResponseDto[] = (unlocked || []).map(s => ({
+      definitionId: s.definitionId,
       name: s.name,
       level: s.level,
       description: s.description ?? undefined,
