@@ -361,6 +361,8 @@ export class CharacterService {
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
       inventory: doc.inventory,
+      // Include spells so the API returns the currently known spells for the character
+      spells: doc.spells,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,

@@ -1,3 +1,5 @@
+/* eslint-env node */
+/* eslint-disable no-undef */
 import fs from 'fs';
 import path from 'path';
 
@@ -31,7 +33,7 @@ for (const lvl of Object.keys(allowed)) {
 }
 
 console.log(`${className} allowed spells check:`);
-for (const lvl of Object.keys(report).sort((a,b)=>Number(a)-Number(b))) {
+for (const lvl of Object.keys(report).sort((a, b) => Number(a) - Number(b))) {
   const r = report[lvl];
   console.log(`level ${lvl}: ${r.present}/${r.total} found, ${r.missing.length} missing`);
 }

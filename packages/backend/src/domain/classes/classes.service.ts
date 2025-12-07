@@ -76,19 +76,19 @@ export class ClassesService {
     const allowedDefinitionIds = new Set<string>();
 
     // Collect all allowed spells from level 0 up to the requested level
-    for (let lvl = 0; lvl <= level; lvl++) {
-      const spellsAtLevel = classData.allowedSpellsByLevel[lvl.toString()] || [];
-      spellsAtLevel.forEach((spell) => {
-        if (spell.definitionId) {
-          allowedDefinitionIds.add(spell.definitionId);
-        }
+    Array.from({ length: level + 1 }, (_, i) => i)
+      .forEach((lvl) => {
+        const spellsAtLevel = classData.allowedSpellsByLevel[lvl.toString()] || [];
+        spellsAtLevel.forEach((spell) => {
+          if (spell.definitionId) allowedDefinitionIds.add(spell.definitionId);
+        });
       });
-    }
 
     // Fetch all spells from level 0 up to requested level
+    const levels = Array.from({ length: level + 1 }, (_, i) => i);
     const allSpells: SpellResponseDto[] = [];
-    for (let lvl = 0; lvl <= level; lvl++) {
-      const spellsAtLevel = await this.spellDefService.findByLevel(lvl);
+    const spellsPerLevel = await Promise.all(levels.map(lvl => this.spellDefService.findByLevel(lvl)));
+    spellsPerLevel.forEach((spellsAtLevel) => {
       const mapped = spellsAtLevel.map(s => ({
         definitionId: s.definitionId,
         name: s.name,
@@ -97,7 +97,7 @@ export class ClassesService {
         meta: s.meta ?? {},
       }));
       allSpells.push(...mapped);
-    }
+    });
 
     // Filter to only allowed spells for this class
     const unlockedSpells = allSpells.filter(spell => spell.definitionId && allowedDefinitionIds.has(spell.definitionId));

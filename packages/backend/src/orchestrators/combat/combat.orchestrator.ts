@@ -271,8 +271,9 @@ export class CombatOrchestrator {
       // Use player's spell attack bonus (proficiency + spellcasting mod)
       const spellAttackBonus = proficiency + chaMod;
       attackRoll = this.diceService.rollAttack(spellAttackBonus, targetEnemy.ac ?? 0);
-      hit = attackRoll.hit;
-      isCrit = attackRoll.isCrit;
+      ({
+        hit, isCrit,
+      } = attackRoll);
     }
 
     if (!hit) {

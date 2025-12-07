@@ -142,7 +142,10 @@ export const useCharacterStore = defineStore('character', () => {
   };
 
   const updateCharacter = async (characterId: string, character: UpdateCharacterRequestDto) => {
-    await characterApi.saveCharacter(characterId, character);
+    const updated = await characterApi.saveCharacter(characterId, character);
+    // keep local store in sync with server response
+    currentCharacter.value = updated;
+    return updated;
   };
 
   watch(currentCharacterId, async (id) => {

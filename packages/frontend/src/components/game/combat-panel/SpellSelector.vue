@@ -76,9 +76,8 @@ const emit = defineEmits<{
   attack: [target: CombatantDto, spellName?: string];
 }>();
 
-const availableSpells = computed(() =>
-  // Filter to only offensive spells (cantrips and level 1 for MVP)
-  props.characterSpells.filter(spell => spell.level !== undefined && spell.level <= 1));
+// Filter to only offensive spells (cantrips and level 1 for MVP)
+const availableSpells = computed(() => props.characterSpells.filter(spell => spell.level !== undefined && spell.level <= 1));
 
 const close = () => {
   emit('close');

@@ -31,7 +31,10 @@ test('seedFromJson rejects the entire seed if any entry is invalid', async (t) =
 test('seedFromJson coerces unknown attackType to undefined and still accepts the entry', async (t) => {
   const svc = new SpellDefinitionService({} as any);
   const captured: any[] = [];
-  svc.insertSpell = async (s: any) => { captured.push(s); return 'imported'; };
+  svc.insertSpell = async (s: any) => {
+    captured.push(s);
+    return 'imported';
+  };
 
   const raw = [
     {

@@ -148,44 +148,62 @@ const selectedSpellsCount = computed(() => {
 });
 
 // Fetch spells from backend when class is set
-watch(primaryClass, async (className) => {
+const setDefaultSpells = () => {
+  availableSpells.value = [];
+  cantripsKnown.value = 0;
+  spellsKnown.value = 0;
+};
+
+const applyOptions = (options: any) => {
+  availableSpells.value = options.unlockedSpells || [];
+  cantripsKnown.value = options.cantripsKnown || 0;
+  spellsKnown.value = options.spellsKnown || 0;
+};
+
+const loadSpellsForClass = async (className: string | undefined) => {
   if (!className) {
-    availableSpells.value = [];
-    cantripsKnown.value = 0;
-    spellsKnown.value = 0;
+    setDefaultSpells();
     return;
   }
 
   isLoadingSpells.value = true;
   try {
     const options = await classesApi.getLevelOptions(className, 1);
-    availableSpells.value = options.unlockedSpells || [];
-    cantripsKnown.value = options.cantripsKnown || 0;
-    spellsKnown.value = options.spellsKnown || 0;
+    applyOptions(options);
   } catch (err) {
     console.error('Failed to fetch spells for class:', err);
-    availableSpells.value = [];
-    cantripsKnown.value = 0;
-    spellsKnown.value = 0;
+    setDefaultSpells();
   } finally {
     isLoadingSpells.value = false;
   }
+};
+
+watch(primaryClass, (className) => {
+  void loadSpellsForClass(className);
 }, { immediate: true });
 
 const spellIsSelected = (definitionId: string) => (currentCharacter.value?.spells || []).some(s => s.definitionId === definitionId);
+
+const persistSpells = async () => {
+  if (!currentCharacter.value?.characterId) return;
+  try {
+    await characterStore.updateCharacter(currentCharacter.value.characterId, { spells: currentCharacter.value.spells || [] });
+  } catch (err) {
+    console.error('Failed to persist spells:', err);
+  }
+};
+
+const canAddSpell = (s: SpellResponseDto) => {
+  const isCantrip = s.level === 0;
+  return isCantrip ? selectedCantripsCount.value < cantripsKnown.value : selectedSpellsCount.value < spellsKnown.value;
+};
 
 const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
   if (!currentCharacter.value || !s.definitionId) return;
 
   if (selected) {
     // Check limits before adding
-    const isCantrip = s.level === 0;
-    if (isCantrip && selectedCantripsCount.value >= cantripsKnown.value) {
-      return; // Already at limit
-    }
-    if (!isCantrip && selectedSpellsCount.value >= spellsKnown.value) {
-      return; // Already at limit
-    }
+    if (!canAddSpell(s)) return;
 
     characterStore.learnSpell({
       type: 'spell',
@@ -198,14 +216,11 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
   } else {
     characterStore.forgetSpell(s.name);
   }
+
+  await persistSpells();
 };
 
 onBeforeUnmount(async () => {
-  try {
-    if (!currentCharacter.value?.characterId) return;
-    await characterStore.updateCharacter(currentCharacter.value.characterId, { spells: currentCharacter.value.spells || [] });
-  } catch (err) {
-    console.error('Failed to save spells on unmount:', err);
-  }
+  await persistSpells();
 });
 </script>
