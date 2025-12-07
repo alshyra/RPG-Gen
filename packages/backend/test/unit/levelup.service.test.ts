@@ -103,7 +103,7 @@ test('applyLevelUp increments class level and adds spells and ASI', async (t) =>
   const service = new LevelUpService(mockCharService as any, mockSpellService as any);
 
   const updated = await service.applyLevelUp('u1', 'c2', 'Cleric', {
-    addSpells: ['spell-2-healing-word'],
+    newSpellIds: ['spell-2-healing-word'],
     abilityIncreases: [
       {
         ability: 'Wis',

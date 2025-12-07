@@ -384,7 +384,7 @@ const toggleArmor = (armor: LocalInventoryItem) => {
   chosenArmor.value = armor;
   console.log('Toggling armor:', armor);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => !availableArmorDefinitionIds.includes(i.definitionId || '') && !availableMainWeaponsDefinitionIds.includes(i.definitionId || '') && !availableSecondaryItemsDefinitionIds.includes(i.definitionId || ''));
+    .filter(i => !availableArmorDefinitionIds.includes(i.definitionId) && !availableMainWeaponsDefinitionIds.includes(i.definitionId) && !availableSecondaryItemsDefinitionIds.includes(i.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -402,7 +402,7 @@ const toggleWeapon = (weapon: LocalInventoryItem) => {
   chosenMainWeapon.value = weapon;
   console.log('Toggling weapon:', weapon);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId || ''));
+    .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -420,7 +420,7 @@ const toggleSecondaryItem = (item: LocalInventoryItem) => {
   chosenSecondaryItem.value = item;
   console.log('Toggling secondary item:', item);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId || ''));
+    .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [

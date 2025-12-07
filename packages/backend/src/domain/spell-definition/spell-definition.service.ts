@@ -1,5 +1,6 @@
 import {
   Injectable, Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -28,9 +29,11 @@ export class SpellDefinitionService {
       .exec();
   }
 
-  async findByDefinitionId(definitionId: string): Promise<SpellDefinition | null> {
-    return this.model.findOne({ definitionId })
+  async findByDefinitionId(definitionId: string): Promise<SpellDefinition> {
+    const result = await this.model.findOne({ definitionId })
       .exec();
+    if (!result) throw new NotFoundException(`SpellDefinition not found: ${definitionId}`);
+    return result;
   }
 
   async findByLevel(level: number): Promise<SpellDefinition[]> {

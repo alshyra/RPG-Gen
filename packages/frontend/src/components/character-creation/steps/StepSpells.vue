@@ -47,13 +47,13 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div
               v-for="cantrip in cantrips"
-              :key="cantrip.definitionId || cantrip.name"
+              :key="cantrip.definitionId"
               class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
             >
               <UiInputCheckbox
                 :name="`spell-${cantrip.name}`"
-                :model-value="spellIsSelected(cantrip.definitionId || '')"
-                :disabled="!spellIsSelected(cantrip.definitionId || '') && selectedCantripsCount >= cantripsKnown"
+                :model-value="spellIsSelected(cantrip.definitionId)"
+                :disabled="!spellIsSelected(cantrip.definitionId) && selectedCantripsCount >= cantripsKnown"
                 @update:model-value="(val) => toggleSpell(cantrip, val)"
               >
                 <div class="flex-1">
@@ -87,13 +87,13 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div
               v-for="spell in spells"
-              :key="spell.definitionId || spell.name"
+              :key="spell.definitionId"
               class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
             >
               <UiInputCheckbox
                 :name="`spell-${spell.name}`"
-                :model-value="spellIsSelected(spell.definitionId || '')"
-                :disabled="!spellIsSelected(spell.definitionId || '') && selectedSpellsCount >= spellsKnown"
+                :model-value="spellIsSelected(spell.definitionId)"
+                :disabled="!spellIsSelected(spell.definitionId) && selectedSpellsCount >= spellsKnown"
                 @update:model-value="(val) => toggleSpell(spell, val)"
               >
                 <div class="flex-1">
@@ -144,7 +144,7 @@ const selectedCantripsCount = computed(() => {
 
 const selectedSpellsCount = computed(() => {
   if (!currentCharacter.value?.spells) return 0;
-  return currentCharacter.value.spells.filter(s => (s.level ?? 0) > 0).length;
+  return currentCharacter.value.spells.filter(s => (s.level) > 0).length;
 });
 
 // Fetch spells from backend when class is set

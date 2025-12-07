@@ -31,7 +31,7 @@ export class Item {
   description: string;
 
   @Prop({
-    required: false,
+    required: true,
     type: String,
   })
   definitionId: string;

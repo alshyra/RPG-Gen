@@ -24,4 +24,10 @@ export class Spell {
 
   @Prop({ type: Object })
   meta: Record<string, any>;
+
+  @Prop({
+    required: true,
+    type: String,
+  })
+  definitionId: string;
 }

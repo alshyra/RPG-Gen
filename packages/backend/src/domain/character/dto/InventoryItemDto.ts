@@ -1,29 +1,38 @@
-import { ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsNumber, IsObject,
+  IsString,
+} from 'class-validator';
 import {
   ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, WeaponMeta, type InventoryItemMeta,
 } from './InventoryItemMeta.js';
-import { IsObject, IsOptional } from 'class-validator';
 
 export class InventoryItemDto<MetaType = InventoryItemMeta> {
   @ApiPropertyOptional({ description: 'Item ID' })
   _id?: string;
 
-  @ApiPropertyOptional({ description: 'Definition ID' })
-  definitionId?: string;
+  @ApiProperty({ description: 'Definition ID' })
+  @IsString()
+  definitionId: string;
 
-  @ApiPropertyOptional({ description: 'Item name' })
-  name?: string;
+  @ApiProperty({ description: 'Item name' })
+  @IsString()
+  name: string;
 
   @ApiPropertyOptional({ description: 'Quantity' })
+  @IsNumber()
   qty?: number;
 
-  @ApiPropertyOptional({ description: 'Item description' })
-  description?: string;
+  @ApiProperty({ description: 'Item description' })
+  @IsString()
+  description: string;
 
-  @ApiPropertyOptional({ description: 'Is equipped' })
-  equipped?: boolean;
+  @ApiProperty({ description: 'Is equipped' })
+  @IsBoolean()
+  equipped: boolean;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Arbitrary item meta',
     oneOf: [
       { $ref: getSchemaPath(WeaponMeta) },
@@ -33,7 +42,6 @@ export class InventoryItemDto<MetaType = InventoryItemMeta> {
       { $ref: getSchemaPath(ToolMeta) },
     ],
   })
-  @IsOptional()
   @IsObject()
-  meta?: MetaType;
+  meta: MetaType;
 }

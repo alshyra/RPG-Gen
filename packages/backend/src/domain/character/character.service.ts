@@ -270,7 +270,7 @@ export class CharacterService {
     const newItem: Item = {
       _id: crypto.randomUUID(),
       name: item.name || itemDefinition?.name,
-      definitionId: item.definitionId || (itemDefinition?.definitionId),
+      definitionId: item.definitionId,
       qty: item.qty || 1,
       description: item.description ?? itemDefinition?.description,
       equipped: item.equipped || false,

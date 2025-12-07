@@ -680,29 +680,29 @@ export interface components {
             /** @description Item ID */
             _id?: string;
             /** @description Definition ID */
-            definitionId?: string;
+            definitionId: string;
             /** @description Item name */
-            name?: string;
+            name: string;
             /** @description Quantity */
             qty?: number;
             /** @description Item description */
-            description?: string;
+            description: string;
             /** @description Is equipped */
-            equipped?: boolean;
+            equipped: boolean;
             /** @description Arbitrary item meta */
-            meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
+            meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
         SpellResponseDto: {
             /** @description Canonical spell definition ID */
-            definitionId?: string;
+            definitionId: string;
             /** @description Spell name */
             name: string;
             /** @description Spell level */
-            level?: number;
+            level: number;
             /** @description Spell description */
             description?: string;
             /** @description Spell metadata */
-            meta?: {
+            meta: {
                 [key: string]: unknown;
             };
         };
@@ -958,7 +958,7 @@ export interface components {
         };
         LevelUpApplyDto: {
             /** @description List of spell definitionIds to add to the character */
-            addSpells?: string[];
+            newSpellIds?: string[];
             /** @description Ability score increases, e.g. [{ ability: "Str", inc: 1 }] */
             abilityIncreases?: string[];
         };

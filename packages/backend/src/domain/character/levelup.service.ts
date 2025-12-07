@@ -93,7 +93,7 @@ export class LevelUpService {
     } = this.getClassLevelInfo(character, className);
 
     // Validate selected spells levels
-    const addSpells = payload.addSpells ?? [];
+    const addSpells = payload.newSpellIds ?? [];
     if (addSpells.length > 0) {
       const invalid = await this.validateSelectedSpells(addSpells, nextLevel);
       if (invalid.length > 0) throw new BadRequestException(`Invalid spells for level ${nextLevel}: ${invalid.join(', ')}`);
@@ -103,7 +103,7 @@ export class LevelUpService {
     this.ensureClassLevel(character, idx, className, nextLevel);
 
     // Add spells to character.spells (SpellResponseDto)
-    const newSpells = this.buildSpellResponses(addSpells, character.spells || []);
+    const newSpells = await this.buildSpellResponses(addSpells, character.spells || []);
     const updatedSpells = [...(character.spells || []), ...newSpells];
 
     // Apply ability increases if any
@@ -121,10 +121,10 @@ export class LevelUpService {
     return this.characterService.toCharacterDto(saved);
   }
 
-  private async validateSelectedSpells(addSpells: string[], nextLevel: number): Promise<string[]> {
+  private async validateSelectedSpells(newSpellIds: string[], nextLevel: number): Promise<string[]> {
     // Perform validation in parallel to avoid banned loop constructs.
-    const checks = await Promise.all(addSpells.map(async (defId) => {
-      const def = await this.spellDefService.findByDefinitionId(defId) || await this.spellDefService.findByName(defId);
+    const checks = await Promise.all(newSpellIds.map(async (defId) => {
+      const def = await this.spellDefService.findByDefinitionId(defId);
       return {
         defId,
         def,
@@ -139,18 +139,18 @@ export class LevelUpService {
     }, [] as string[]);
   }
 
-  private buildSpellResponses(addSpells: string[], existingSpells: SpellResponseDto[] = []): SpellResponseDto[] {
-    const existingNames = new Set(existingSpells.map(s => s.name));
-    const responses: SpellResponseDto[] = [];
-    addSpells.forEach((name) => {
-      if (existingNames.has(name)) return;
-      responses.push({
-        name,
-        description: '',
-        meta: {},
-      });
-    });
-    return responses;
+  private async buildSpellResponses(newSpellIds: string[], existingSpells: SpellResponseDto[] = []): Promise<SpellResponseDto[]> {
+    const existingSpellIds = new Set(existingSpells.map(s => s.definitionId));
+    const results = await Promise.all(newSpellIds
+      .filter(id => !existingSpellIds.has(id))
+      .map(id => this.spellDefService.findByDefinitionId(id)));
+    return results.map(r => ({
+      definitionId: r.definitionId,
+      name: r.name,
+      level: r.level,
+      description: r.description,
+      meta: r.meta ?? {},
+    } as SpellResponseDto));
   }
 
   private applyAbilityIncreases(
