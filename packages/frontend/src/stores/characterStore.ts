@@ -16,7 +16,7 @@ const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellR
   level: spell.level,
   description: spell.description,
   definitionId: spell.definitionId,
-  meta: {},
+  meta: spell.meta || {},
 });
 
 const updateInventoryQuantity = (
@@ -70,6 +70,8 @@ const createXpUpdater = (charRef: Ref<CharacterResponseDto | undefined>) => (xp:
 const createSpellManager = (charRef: Ref<CharacterResponseDto | undefined>) => ({
   learn: (spell: SpellInstructionMessageDto) => {
     if (!charRef.value) return;
+
+    if (charRef.value.spells && charRef.value.spells.some(s => s.definitionId === spell.definitionId)) return;
     charRef.value = {
       ...charRef.value,
       spells: [...(charRef.value.spells || []), convertSpellInstructionToDto(spell)],

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full flex flex-col max-h-screen overflow-hidden">
+  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full flex flex-col max-h-[calc(100vh-120px)] overflow-hidden">
     <!-- Header with restore draft button -->
     <div class="flex justify-between mb-3 lg:mb-4">
       <div class="flex-1">

@@ -4,9 +4,9 @@ import {
 import { IsNumber, IsString } from 'class-validator';
 
 export class SpellResponseDto {
-  @ApiProperty({ description: 'Canonical spell definition ID' })
+  @ApiPropertyOptional({ description: 'Canonical spell definition ID' })
   @IsString()
-  definitionId: string;
+  definitionId?: string;
 
   @ApiProperty({ description: 'Spell name' })
   @IsString()

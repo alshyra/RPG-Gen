@@ -1395,12 +1395,18 @@
           "definitionId": {
             "type": "string",
             "description": "Spell definition ID for deterministic persistence"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Spell metadata",
+            "additionalProperties": true
           }
         },
         "required": [
           "type",
           "action",
-          "name"
+          "name",
+          "definitionId"
         ]
       },
       "InventoryInstructionMessageDto": {
@@ -2902,6 +2908,14 @@
           "proficiencyIncrease": {
             "type": "boolean",
             "description": "Whether proficiency bonus increases at this level"
+          },
+          "cantripsKnown": {
+            "type": "number",
+            "description": "Number of cantrips (level 0 spells) the character can know at this level"
+          },
+          "spellsKnown": {
+            "type": "number",
+            "description": "Number of spells (level 1+) the character can know at this level"
           }
         },
         "required": [
@@ -2910,7 +2924,9 @@
           "nextLevel",
           "unlockedSpells",
           "asiAvailable",
-          "proficiencyIncrease"
+          "proficiencyIncrease",
+          "cantripsKnown",
+          "spellsKnown"
         ]
       },
       "ImageRequestDto": {

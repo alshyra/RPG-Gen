@@ -10,7 +10,16 @@ interface ClassLevelData {
   className: string;
   hitDie: string;
   primarySpellAbility: string;
-  levels: any[];
+  levels: {
+    level: number;
+    proficiencyBonus: number;
+    cantripsKnown?: number;
+    spellsKnown?: number;
+    spellSlots?: Record<string, number>;
+    features: any[];
+    choices: any[];
+    unlockedSpells: any[];
+  }[];
   allowedSpellsByLevel: Record<string, { name: string;
     definitionId: string; }[]>;
 }
@@ -57,6 +66,12 @@ export class ClassesService {
   async getOptionsForLevel(className: string, level: number): Promise<LevelUpOptionsDto> {
     const classData = await this.loadClassData(className);
 
+    // Find the level data for this specific level
+    const levelData = classData.levels.find(l => l.level === level);
+    if (!levelData) {
+      throw new NotFoundException(`Level ${level} not found for class ${className}`);
+    }
+
     // Get allowed spell definitionIds for this class at all levels up to and including current level
     const allowedDefinitionIds = new Set<string>();
 
@@ -94,9 +109,11 @@ export class ClassesService {
       unlockedSpells,
       asiAvailable: this.ASI_LEVELS.includes(level),
       proficiencyIncrease: this.PROFICIENCY_INCREASE_LEVELS.includes(level),
+      cantripsKnown: levelData.cantripsKnown ?? 0,
+      spellsKnown: levelData.spellsKnown ?? 0,
     };
 
-    this.logger.log(`Fetched class-level options for ${className} level ${level}: ${unlockedSpells.length} spells (filtered from ${allSpells.length} total)`);
+    this.logger.log(`Fetched class-level options for ${className} level ${level}: ${unlockedSpells.length} spells (filtered from ${allSpells.length} total), limits: ${levelData.cantripsKnown} cantrips, ${levelData.spellsKnown} spells`);
     return options;
   }
 }

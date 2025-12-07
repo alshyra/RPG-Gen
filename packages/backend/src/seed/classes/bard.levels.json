@@ -19,7 +19,11 @@
           "name": "Inspiration bardique",
           "description": "d6: bonus action, uses = Charisma mod (min 1). Recharge: long rest.",
           "meta": {
-            "die": "d6"
+            "die": "d6",
+            "usesAbility": "Cha",
+            "usesType": "modifier",
+            "usesMin": 1,
+            "recharge": "longRest"
           }
         },
         {

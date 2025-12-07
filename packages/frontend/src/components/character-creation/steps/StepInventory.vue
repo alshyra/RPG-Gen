@@ -27,6 +27,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center justify-between gap-3"
           >
             <UiInputCheckbox
+              :name="`base-item-${item.definitionId}`"
               :model-value="true"
               disabled
               class="accent-indigo-500"
@@ -67,6 +68,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
+              :name="`weapon-${availableWeapon.definitionId}`"
               :model-value="weaponIsSelected(availableWeapon)"
               @update:model-value="() => toggleWeapon(availableWeapon)"
             >
@@ -98,6 +100,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
+              :name="`secondary-item-${secondaryItem.definitionId}`"
               :model-value="weaponIsSelected(secondaryItem)"
               @update:model-value="() => toggleSecondaryItem(secondaryItem)"
             >
@@ -130,6 +133,7 @@
           class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
         >
           <UiInputCheckbox
+            :name="`armor-${armor.definitionId}`"
             :model-value="armorIsSelected(armor)"
             @update:model-value="() => toggleArmor(armor)"
           >

@@ -551,7 +551,11 @@ export interface components {
             /** @description Spell description */
             description?: string;
             /** @description Spell definition ID for deterministic persistence */
-            definitionId?: string;
+            definitionId: string;
+            /** @description Spell metadata */
+            meta?: {
+                [key: string]: unknown;
+            };
         };
         InventoryInstructionMessageDto: {
             /**
@@ -1167,6 +1171,10 @@ export interface components {
             asiAvailable: boolean;
             /** @description Whether proficiency bonus increases at this level */
             proficiencyIncrease: boolean;
+            /** @description Number of cantrips (level 0 spells) the character can know at this level */
+            cantripsKnown: number;
+            /** @description Number of spells (level 1+) the character can know at this level */
+            spellsKnown: number;
         };
         ImageRequestDto: {
             /** @description API token (optional) */

@@ -47,6 +47,8 @@ export class LevelUpService {
       unlockedSpells,
       asiAvailable: this.ASI_LEVELS.includes(nextLevel),
       proficiencyIncrease: this.PROFICIENCY_INCREASE_LEVELS.includes(nextLevel),
+      cantripsKnown: 0, // Legacy method - not class-data-driven, set to 0
+      spellsKnown: 0, // Legacy method - not class-data-driven, set to 0
     };
 
     return options;

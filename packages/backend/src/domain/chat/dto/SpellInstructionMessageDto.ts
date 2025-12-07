@@ -41,4 +41,10 @@ export class SpellInstructionMessageDto {
   @ApiProperty({ description: 'Spell definition ID for deterministic persistence' })
   @IsString()
   definitionId: string;
+
+  @ApiPropertyOptional({
+    description: 'Spell metadata',
+    additionalProperties: true,
+  })
+  meta?: Record<string, unknown>;
 }
