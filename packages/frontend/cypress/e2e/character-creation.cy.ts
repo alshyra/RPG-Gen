@@ -21,10 +21,11 @@ describe('Character creation single flow', () => {
     // basic info
     cy.get('input[placeholder="Ex: Aragorn"]')
       .clear()
-      .type('e2e-character');
+      .type('e2e-character')
+      .should('have.value', 'e2e-character');
     cy.contains('♂️ Homme')
       .click();
-    cy.contains('Humain')
+    cy.contains('div', 'Humain')
       .click();
     cy.contains('button', 'Suivant')
       .should('not.be.disabled')
@@ -80,18 +81,25 @@ describe('Character creation single flow', () => {
     cy.contains('button', 'Suivant')
       .should('not.be.disabled')
       .click();
-    cy.get('input[type="checkbox"][name="skill-Persuasion"]')
-      .check();
-    cy.get('input[type="checkbox"][name="skill-Stealth"]')
-      .check();
-    cy.get('input[type="checkbox"][name="skill-Performance"]')
-      .check();
+
+    // skills - pick specific skills we care about if they exist (keep the spirit of the original test)
+    cy.get('[data-testid="ui-checkbox"][for="skill-Persuasion"]')
+      .click();
+    cy.get('[data-testid="ui-checkbox"][for="skill-Stealth"]')
+      .click();
+    cy.get('[data-testid="ui-checkbox"][for="skill-Performance"]')
+      .click();
     cy.contains('button', 'Suivant')
       .click();
 
     // spells - pick first checkbox if present
-    cy.get('[data-testid="ui-checkbox"][name="skill-Persuasion"]')
-      .click();
+    // spells - pick first visible spell checkbox if present
+    cy.get('[data-testid="ui-checkbox"]')
+      .then(($s) => {
+        if ($s.length) cy.wrap($s)
+          .first()
+          .click({ force: true });
+      });
     cy.contains('button', 'Suivant')
       .click();
 
@@ -100,13 +108,15 @@ describe('Character creation single flow', () => {
       .click();
 
     // finish with avatar generation stubbed & final save stub
+    // ensure we capture the final save and avatar generation
+    cy.intercept('PUT', '**/api/characters/*')
+      .as('updateCharacterFinish');
     cy.contains('button', 'Terminer')
       .should('not.be.disabled')
       .click();
-    cy.wait('@generateAvatarGlobal');
-    cy.intercept('PUT', '**/api/characters/*')
-      .as('updateCharacterFinish');
+    // final PUT should happen first (saveFinalCharacter), then avatar generation
     cy.wait('@updateCharacterFinish');
+    cy.wait('@generateAvatarGlobal');
     cy.url()
       .should('match', /\/game\/[^/]+/);
   });

@@ -39,32 +39,23 @@ Cypress.Commands.add('ensureAuth', () => {
       win.localStorage.setItem('rpg-auth-token', e2eToken);
     });
 
-  // Stub the /api/auth/profile and /api/characters endpoints to avoid requiring a real backend
+  // Stub the /api/auth/profile and avoid doing a real network request here — set localStorage directly.
+  const profile = {
+    name: 'Test User',
+    email: 'test@example.com',
+    picture: 'http://localhost/avatar.png',
+  };
+
   cy.intercept('GET', '/api/auth/profile', {
     statusCode: 200,
-    body: {
-      name: 'Test User',
-      email: 'test@example.com',
-      picture: 'http://localhost/avatar.png',
-    },
+    body: profile,
   })
     .as('getProfile');
 
-  // Fetch profile and set local storage using the stubbed response
-  cy.request({
-    url: '/api/auth/profile',
-    failOnStatusCode: false,
-  })
-    .then((resp) => {
-      if (resp?.status === 200 && resp?.body) {
-        cy.window()
-          .then((win) => {
-            win.localStorage.setItem('rpg-user-data', JSON.stringify(resp.body));
-          });
-        return;
-      }
-
-      throw new Error('ensureAuth failed: /api/auth/profile did not return a profile. Ensure backend is up or provide a mock.');
+  // Set user profile directly in localStorage so tests don't rely on an actual backend response
+  cy.window()
+    .then((win) => {
+      win.localStorage.setItem('rpg-user-data', JSON.stringify(profile));
     });
 });
 
