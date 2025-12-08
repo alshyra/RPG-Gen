@@ -1,58 +1,52 @@
-## 💻 Prompt pour GitHub Copilot / Claude
+## 💻 Prompt pour Intégrer les Sprites avec Konva.js
 
-L'objectif est de demander un composant **Vue.js** qui gère la logique d'affichage de la grille, l'affichage des jetons (tokens) des unités, et l'interactivité pour le mouvement.
+Ce prompt est en trois parties : le contexte, la logique de chargement Konva, et la mise à jour du rendu.
 
-### 1\. Contexte du Projet et des Outils
+### 1\. Contexte et Objectif (Rappel des Contrats)
 
 ```prompt
-Je travaille sur un projet de jeu de rôle tactique tour par tour en utilisant Vue.js (Composition API) et TypeScript. La logique de jeu (la matrice de carte, les positions des unités) est gérée par un backend NestJS.
+Je travaille sur le composant Vue.js/Konva.js nommé "CombatGrid.vue" (Composition API, TypeScript).
 
-Je souhaite utiliser **Konva.js** pour la visualisation 2D de la carte de combat. Konva.js est déjà installé.
+L'objectif est de remplacer les Konva.Circle de mes unités (tokens) par des Konva.Image, en utilisant les fichiers de sprites que j'ai trouvés.
 
-Objectif : Créer un composant Vue.js nommé **"CombatGrid.vue"** qui affiche une grille tactique et les jetons des unités.
+Contrats de Données Rappelés :
+- La prop `units` contient une liste d'objets UnitToken.
+- L'interface UnitToken est étendue :
+  interface UnitToken {
+    id: string;
+    x: number;
+    y: number;
+    isPlayer: boolean;
+    // NOUVELLE PROPRIÉTÉ POUR L'ASSET:
+    spriteUrl: string; // Le chemin local vers le fichier image (ex: '/assets/gobelin.png')
+  }
+
+- La grille est de 7x7, chaque case fait 60x60 pixels.
 ```
 
-### 2\. Contrats de Données (Input Props)
+### 2\. Logique Konva.js : Chargement Asynchrone des Images
 
-Il est crucial de définir la structure des données que le composant recevra du backend (NestJS).
+C'est l'étape technique cruciale. Konva.js doit gérer le chargement d'image.
 
 ```prompt
-Le composant recevra deux propriétés (props) principales :
+Implémente la logique de chargement d'images suivante :
 
-1.  **`mapData: number[][]`** : Une matrice de 7x7 (tableau de tableaux de nombres) représentant la grille de combat. Chaque nombre est le type de terrain.
-    * Exemple : `[[0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], ...]`
-2.  **`units: UnitToken[]`** : Une liste d'objets représentant les unités (joueur et ennemis).
+1.  **Réactivité :** Crée une carte réactive (`spritesMap: Ref<Map<string, HTMLImageElement>>`) pour stocker les objets `HTMLImageElement` chargés. La clé de la carte sera l'URL du sprite.
+2.  **Fonction de Chargement :** Écris une fonction asynchrone `loadSprite(url: string)` qui prend une URL, charge l'image, et la stocke dans `spritesMap`.
+3.  **Surveiller les Props :** Utilise un `watchEffect` pour itérer sur la prop `units`. Pour chaque unité, si son `spriteUrl` n'est pas encore dans `spritesMap`, appelle `loadSprite` pour charger l'image.
 
-Définition de l'interface TypeScript pour l'unité :
-interface UnitToken {
-  id: string;
-  x: number; // Coordonnée X sur la grille (0-6)
-  y: number; // Coordonnée Y sur la grille (0-6)
-  isPlayer: boolean;
-  color: string;
-}
+Cette approche garantit que les images sont chargées et mises à jour dès que la prop `units` change.
 ```
 
-### 3\. Tâches d'Implémentation Spécifiques (Le Rendu Konva)
+### 3\. Mise à Jour du Rendu
 
-Maintenant, détaillez ce que Konva doit dessiner.
-
-```prompt
-Implémente le composant **CombatGrid.vue** en utilisant la Composition API :
-
-1.  **Dimensions :** La grille doit être de 7x7. Chaque case (cellule) doit faire 60x60 pixels.
-2.  **Initialisation Konva :** Crée un `Konva.Stage` dans le `mounted` du composant, ancré à un `ref`. La taille totale du Stage doit être 420x420.
-3.  **Rendu de la Grille :** Utilise `Konva.Rect` pour dessiner toutes les 49 cases de la grille (7x7).
-    * Les cases doivent avoir une bordure (stroke) et une couleur de fond différente selon `mapData[y][x]` (par exemple, vert clair si 0, marron si 1).
-4.  **Rendu des Unités (Tokens) :** Utilise `Konva.Circle` pour représenter chaque unité dans la prop `units`.
-    * Chaque cercle doit être centré dans sa case correspondante (position basée sur x, y).
-    * La couleur du cercle doit venir de la propriété `color` de l'unité.
-5.  **Interactivité (Clic de Mouvement) :** Attache un écouteur de clic à **chaque case de la grille**.
-    * Lorsqu'une case est cliquée, émettre un événement nommé **`cell-clicked`** vers le parent Vue.js, en passant les coordonnées `(x, y)` de la case cliquée.
-```
-
-### 4\. Code Final (Pour l'Aide au Langage)
+Maintenant, demandez la mise à jour du template.
 
 ```prompt
-Fournis le code complet du composant **CombatGrid.vue** (avec <template>, <script setup> et <style>). N'oublie pas d'utiliser les types TypeScript et d'initialiser correctement Konva.
+Modifie la section <template> pour le rendu des unités :
+
+1.  Pour chaque unité dans `units`, remplace le composant `V-Circle` par un composant **`V-Image`** (de vue-konva).
+2.  Le `V-Image` doit utiliser l'objet `HTMLImageElement` correspondant stocké dans `spritesMap` (récupéré via `unit.spriteUrl`).
+3.  Le centre du sprite doit toujours être au centre de la case (par exemple, à `x*60 + 30`, `y*60 + 30`).
+4.  Le sprite doit être redimensionné (par exemple, à 60x60 ou 50x50 pixels) pour s'adapter à la case. Utilise `width` et `height` sur `V-Image` pour définir la taille finale du sprite.
 ```
