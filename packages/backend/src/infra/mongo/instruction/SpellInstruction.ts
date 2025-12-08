@@ -1,19 +1,13 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
+import { Prop, Schema } from '@nestjs/mongoose';
 
 @Schema({ _id: false })
-export class InventoryInstruction {
+export class SpellInstruction {
   @Prop({
     required: true,
     type: String,
-    enum: [
-      'add',
-      'remove',
-      'use',
-    ],
+    enum: ['learn', 'cast', 'forget'],
   })
-  action: 'add' | 'remove' | 'use';
+  action: 'learn' | 'cast' | 'forget';
 
   @Prop({
     required: true,
@@ -25,7 +19,13 @@ export class InventoryInstruction {
     required: false,
     type: Number,
   })
-  quantity?: number;
+  level?: number;
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  school?: string;
 
   @Prop({
     required: false,

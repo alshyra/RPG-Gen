@@ -1,7 +1,5 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
-import { GameInstruction } from './GameInstruction.js';
+import { Prop, Schema } from '@nestjs/mongoose';
+import { GameInstruction } from '../instruction/GameInstruction.js';
 
 @Schema({ _id: false })
 export class ChatMessage {

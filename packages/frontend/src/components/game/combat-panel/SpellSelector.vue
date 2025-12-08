@@ -79,11 +79,11 @@ const emit = defineEmits<{
   attack: [target: CombatantDto, spellName?: string];
 }>();
 
-// Filter to only offensive spells (cantrips and level 1 for MVP)
+// Filter to only damaging spells (require meta.damageDice). Keep cantrips/low-level for UI where appropriate.
 const availableSpells = computed(() => {
-  const char = currentCharacter?.value;
-  const spells = char?.spells ?? [];
-  return spells.filter(spell => typeof spell.level !== 'undefined' && spell.level <= 1);
+  if (!currentCharacter.value?.spells) return [];
+
+  return currentCharacter.value.spells.filter(spell => !!(spell.meta && spell.meta.damageDice));
 });
 
 const close = () => {

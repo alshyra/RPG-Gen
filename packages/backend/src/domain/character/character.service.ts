@@ -4,8 +4,9 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ItemDefinition } from '../../infra/mongo/item-definition.schema.js';
+import { ItemDefinition } from '../../infra/mongo/item/ItemDefinition.js';
 import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
+import { SpellDefinitionService } from '../spell-definition/spell-definition.service.js';
 import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
 import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
 import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
@@ -26,6 +27,7 @@ export class CharacterService {
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
     private itemDefinitionService: ItemDefinitionService,
+    private spellDefinitionService: SpellDefinitionService,
   ) {}
 
   generateCharacterId(): string {
@@ -93,7 +95,27 @@ export class CharacterService {
     if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
-    if (updates.spells !== undefined) updateDoc.spells = updates.spells;
+    if (updates.spells !== undefined) {
+      // Strict validation: spells must be an array of fully-formed spell objects
+      if (!Array.isArray(updates.spells)) throw new BadRequestException('spells must be an array');
+
+      // Validate all entries using functional style to comply with lint rules (avoid 'for')
+      const hasInvalid = updates.spells.some(s => (
+        !s
+        || typeof s.definitionId !== 'string'
+        || typeof s.name !== 'string'
+        || typeof s.level !== 'number'
+        || s.meta === undefined
+        || s.meta === null
+        || typeof s.meta !== 'object'
+      ));
+
+      if (hasInvalid) {
+        throw new BadRequestException('spells entries must include definitionId:string, name:string, level:number and meta:object');
+      }
+
+      updateDoc.spells = updates.spells;
+    }
 
     const character = await this.characterModel.findOneAndUpdate(
       {

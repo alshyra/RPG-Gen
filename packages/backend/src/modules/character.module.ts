@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   ItemDefinition, ItemDefinitionSchema,
-} from '../infra/mongo/item-definition.schema.js';
+} from '../infra/mongo/item/ItemDefinition.js';
 import {
   SpellDefinition, SpellDefinitionSchema,
-} from '../infra/mongo/spell-definition.schema.js';
+} from '../infra/mongo/spell/SpellDefinition.js';
 import { ItemDefinitionService } from '../domain/item-definition/item-definition.service.js';
 import { LevelUpService } from '../domain/character/levelup.service.js';
 import { SpellDefinitionService } from '../domain/spell-definition/spell-definition.service.js';

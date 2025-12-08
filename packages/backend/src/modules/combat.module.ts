@@ -10,7 +10,7 @@ import { ChatModule } from './chat.module.js';
 import { DiceModule } from './dice.module.js';
 import {
   CombatSession, CombatSessionSchema,
-} from '../infra/mongo/combat-session.schema.js';
+} from '../infra/mongo/combat/CombatSession.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 

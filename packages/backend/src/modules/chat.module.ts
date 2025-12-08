@@ -8,7 +8,7 @@ import { ChatController } from '../controllers/chat.controller.js';
 import { ConversationService } from '../domain/chat/conversation.service.js';
 import {
   ChatHistory, ChatHistorySchema,
-} from '../infra/mongo/ChatHistory.js';
+} from '../infra/mongo/chat/ChatHistory.js';
 
 @Module({
   imports: [

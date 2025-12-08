@@ -2,17 +2,7 @@ import {
   Prop, Schema, SchemaFactory,
 } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-export interface SpellMeta {
-  damageDice?: string;
-  damageType?: string;
-  saveType?: string;
-  attackType?: 'melee' | 'ranged' | 'spell';
-  school?: string;
-  areaOfEffect?: string;
-  scaling?: string;
-  [key: string]: any;
-}
+import { SpellMeta, SpellMetaSchema } from './SpellMeta.js';
 
 @Schema({ timestamps: true })
 export class SpellDefinition {
@@ -53,7 +43,7 @@ export class SpellDefinition {
   description: string;
 
   @Prop({
-    type: Object,
+    type: SpellMetaSchema,
     default: {},
   })
   meta: SpellMeta;

@@ -1,6 +1,8 @@
 import {
   Prop, Schema,
 } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { SpellMeta, SpellMetaSchema } from './SpellMeta.js';
 
 @Schema({ _id: false })
 export class Spell {
@@ -22,8 +24,11 @@ export class Spell {
   })
   description: string;
 
-  @Prop({ type: Object })
-  meta: Record<string, any>;
+  @Prop({
+    type: SpellMetaSchema,
+    default: {},
+  })
+  meta: SpellMeta;
 
   @Prop({
     required: true,
@@ -31,3 +36,5 @@ export class Spell {
   })
   definitionId: string;
 }
+
+export type SpellDocument = Spell & Document;

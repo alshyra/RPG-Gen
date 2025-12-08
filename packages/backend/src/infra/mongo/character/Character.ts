@@ -1,13 +1,13 @@
 import {
   Prop, Schema,
 } from '@nestjs/mongoose';
-import { Schema as MongooseSchema } from 'mongoose';
+import { Schema as MongooseSchema, Document } from 'mongoose';
 import { Race } from './Race.js';
 import { CharacterClass } from './CharacterClass.js';
 import { AbilityScores } from './AbilityScores.js';
 import { Skill } from './Skill.js';
-import { Item } from './Item.js';
-import { Spell } from './Spell.js';
+import { Item } from '../item/Item.js';
+import { Spell } from '../spell/Spell.js';
 
 @Schema({ timestamps: true })
 export class Character {
@@ -141,3 +141,5 @@ export class Character {
   })
   spells: Spell[];
 }
+
+export type CharacterDocument = Character & Document;

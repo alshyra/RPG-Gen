@@ -1,7 +1,9 @@
 import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { SpellMetaDto } from './SpellMetaDto.js';
 
 export class SpellResponseDto {
   @ApiProperty({ description: 'Canonical spell definition ID' })
@@ -22,7 +24,9 @@ export class SpellResponseDto {
 
   @ApiProperty({
     description: 'Spell metadata',
-    additionalProperties: true,
+    type: SpellMetaDto,
   })
-  meta: Record<string, unknown>;
+  @ValidateNested()
+  @Type(() => SpellMetaDto)
+  meta: SpellMetaDto;
 }

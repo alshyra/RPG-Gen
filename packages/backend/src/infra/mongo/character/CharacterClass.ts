@@ -1,6 +1,7 @@
 import {
   Prop, Schema,
 } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 @Schema({ _id: false })
 export class CharacterClass {
@@ -16,3 +17,5 @@ export class CharacterClass {
   })
   level: number;
 }
+
+export type CharacterClassDocument = CharacterClass & Document;

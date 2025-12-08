@@ -1,6 +1,8 @@
 import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
+import { ValidateNested, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 import { RaceResponseDto } from './RaceResponseDto.js';
 import { AbilityScoresResponseDto } from './AbilityScoresResponseDto.js';
 import { CharacterClassResponseDto } from './CharacterClassResponseDto.js';
@@ -97,5 +99,8 @@ export class BaseCharacterResponseDto {
     description: 'Character spells',
     type: [SpellResponseDto],
   })
+  @ValidateNested({ each: true })
+  @Type(() => SpellResponseDto)
+  @IsArray()
   spells?: SpellResponseDto[];
 }

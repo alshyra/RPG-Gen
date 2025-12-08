@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Combatant } from './combatant.schema.js';
+import { Combatant } from './Combatant.js';
 
 export type CombatSessionDocument = CombatSession & Document;
 
@@ -61,7 +61,6 @@ export class CombatSession {
   })
   roundNumber: number;
 
-  // D&D 5e Action Economy
   @Prop({
     required: false,
     type: Number,
@@ -93,22 +92,10 @@ export class CombatSession {
   @Prop({
     required: false,
     type: String,
-    enum: [
-      'PLAYER_TURN',
-      'AWAITING_DAMAGE_ROLL',
-      'ENEMY_TURN',
-      'COMBAT_ENDED',
-    ],
+    enum: ['PLAYER_TURN', 'AWAITING_DAMAGE_ROLL', 'ENEMY_TURN', 'COMBAT_ENDED'],
     default: 'PLAYER_TURN',
   })
   phase: string;
 }
 
 export const CombatSessionSchema = SchemaFactory.createForClass(CombatSession);
-
-// Index for efficient querying
-CombatSessionSchema.index({
-  userId: 1,
-  characterId: 1,
-});
-CombatSessionSchema.index({ characterId: 1 }, { unique: true });

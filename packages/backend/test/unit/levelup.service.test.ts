@@ -113,7 +113,7 @@ test('applyLevelUp increments class level and adds spells and ASI', async (t) =>
   });
 
   t.is(updated.classes?.[0].level, 2);
-  t.truthy(updated.spells && updated.spells.find(s => s.name === 'spell-2-healing-word'));
+  t.truthy(updated.spells && updated.spells.find(s => s.definitionId === 'spell-2-healing-word'));
   t.truthy(updated.scores);
   t.is(updated.scores!.Wis, 13);
 });

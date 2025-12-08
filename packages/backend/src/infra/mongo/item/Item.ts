@@ -1,7 +1,8 @@
 import {
   Prop, Schema,
 } from '@nestjs/mongoose';
-import type { InventoryItemMeta } from '../../domain/character/dto/InventoryItemMeta.js';
+import type { InventoryItemMeta } from '../../../domain/character/dto/InventoryItemMeta.js';
+import { Document } from 'mongoose';
 
 @Schema({ _id: false })
 export class Item {
@@ -46,3 +47,5 @@ export class Item {
   @Prop({ type: Object })
   meta: InventoryItemMeta;
 }
+
+export type ItemDocument = Item & Document;

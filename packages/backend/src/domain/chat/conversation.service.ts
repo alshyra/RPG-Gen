@@ -7,7 +7,7 @@ import { calculateArmorClass } from '../character/armor-class.util.js';
 import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
 import type { ChatMessageDto } from './dto/ChatMessageDto.js';
 import type { GameInstructionDto } from './dto/GameInstructionDto.js';
-import { ChatHistory, ChatHistoryDocument } from '../../infra/mongo/ChatHistory.js';
+import { ChatHistory, ChatHistoryDocument } from '../../infra/mongo/chat/ChatHistory.js';
 
 @Injectable()
 export class ConversationService {

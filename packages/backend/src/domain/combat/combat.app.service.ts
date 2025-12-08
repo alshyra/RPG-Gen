@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
-import { CombatSession } from '../../infra/mongo/combat-session.schema.js';
+import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
 import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
 import type {
   CharacterResponseDto,

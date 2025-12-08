@@ -1,9 +1,5 @@
-import {
-  Prop, Schema, SchemaFactory,
-} from '@nestjs/mongoose';
-import {
-  Document, Schema as MongooseSchema,
-} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ChatMessage } from './ChatMessage.js';
 
 export type ChatHistoryDocument = ChatHistory & Document;

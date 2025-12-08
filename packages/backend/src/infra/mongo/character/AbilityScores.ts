@@ -1,6 +1,7 @@
 import {
   Prop, Schema,
 } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 @Schema({ _id: false })
 export class AbilityScores {
@@ -40,3 +41,5 @@ export class AbilityScores {
   })
   Cha: number;
 }
+
+export type AbilityScoresDocument = AbilityScores & Document;

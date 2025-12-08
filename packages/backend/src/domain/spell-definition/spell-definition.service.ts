@@ -6,7 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   SpellDefinition, SpellDefinitionDocument,
-} from '../../infra/mongo/spell-definition.schema.js';
+} from '../../infra/mongo/spell/SpellDefinition.js';
 import { spellsArraySchema } from './validators.js';
 
 @Injectable()
