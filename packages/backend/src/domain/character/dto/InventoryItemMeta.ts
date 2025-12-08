@@ -10,5 +10,7 @@ export type InventoryItemMeta = WeaponMeta | ArmorMeta | ConsumableMeta | PackMe
 
 export { BaseMeta, WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta };
 
-export const isWeaponMeta = (m: unknown): m is WeaponMeta => !!m && (m as any).type === 'weapon';
-export const isArmorMeta = (m: unknown): m is ArmorMeta => !!m && (m as any).type === 'armor';
+const hasTypeProp = (v: unknown): v is { type?: unknown } => typeof v === 'object' && v !== null && 'type' in v;
+
+export const isArmorMeta = (m: unknown): m is ArmorMeta => hasTypeProp(m) && typeof m.type === 'string' && m.type === 'armor';
+export const isWeaponMeta = (m: unknown): m is WeaponMeta => hasTypeProp(m) && typeof m.type === 'string' && m.type === 'weapon';
