@@ -18,10 +18,10 @@
       </div>
     </div>
     <template #footer>
-      <div class="flex justify-end pt-4">
+      <div class="flex justify-end pt-4 gap-3">
         <UiButton
           v-if="state.type === 'confirm'"
-          variant="primary"
+          variant="ghost"
           data-cy="modal-cancel"
           @click="handleCancel"
         >
@@ -29,7 +29,7 @@
         </UiButton>
 
         <UiButton
-          variant="secondary"
+          variant="primary"
           data-cy="modal-ok"
           @click="handleOk"
         >

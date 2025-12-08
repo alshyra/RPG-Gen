@@ -53,14 +53,9 @@ import { DnDRulesService } from '@/services/dndRulesService';
 import UiXpBar from '../ui/UiXpBar.vue';
 import CharacterIllustration from './CharacterIllustration.vue';
 import { storeToRefs } from 'pinia';
+import type { InventoryItemForUi as InventoryItem } from '@/interfaces';
 
-interface InventoryItem {
-  meta?: {
-    class?: string;
-    type?: string;
-    ac?: string | number;
-  };
-}
+// InventoryItem type imported as alias from '@/interface'
 
 const characterStore = useCharacterStore();
 const combatStore = useCombatStore();

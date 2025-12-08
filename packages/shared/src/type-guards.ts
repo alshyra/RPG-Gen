@@ -74,9 +74,6 @@ export function isCombatStartInstruction(instruction: unknown): instruction is C
   return isObject(instruction) && instruction.type === 'combat_start' && Array.isArray(instruction.combat_start);
 }
 
-// Removed: isCombatRollRequest and isCombatRollResult - types no longer exist in schema
-// Use isRollInstruction for roll-related type guards
-
 /**
  * Type guard for any valid game instruction
  */

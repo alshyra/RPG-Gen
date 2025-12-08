@@ -68,9 +68,50 @@ describe('AbilityScorePicker', () => {
   it('prevents overspend in point-buy and allows cost reductions', () => {
     // no onUpdate prop used; component updates the store directly.
     // default values use 27 points, so decreasing one frees budget
-    cy.intercept('PUT', '**/characters/*', {
-      statusCode: 200,
-      body: {},
+    // Echo back the updated character so our store stays in sync (avoid overwriting with empty body)
+    cy.intercept('PUT', '**/characters/*', (req) => {
+      const body = req.body || {};
+      // Build a response that merges known test character fields with the incoming update
+      const response = {
+        characterId: 'test-char',
+        name: 'TestHero',
+        scores: body.scores || {
+          Str: 15,
+          Dex: 14,
+          Con: 13,
+          Int: 12,
+          Wis: 10,
+          Cha: 8,
+        },
+        physicalDescription: '',
+        race: {
+          id: 'human',
+          name: 'Humain',
+          mods: {},
+        },
+        hp: 10,
+        hpMax: 10,
+        totalXp: 0,
+        classes: [
+          {
+            name: 'Fighter',
+            level: 1,
+          },
+        ],
+        skills: [],
+        world: 'dnd',
+        portrait: '',
+        gender: 'male',
+        proficiency: 2,
+        isDeceased: false,
+        diedAt: new Date(),
+        deathLocation: '',
+        state: 'draft',
+      };
+      req.reply({
+        statusCode: 200,
+        body: response,
+      });
     })
       .as('saveCharacter');
     const pinia2 = createPinia();
@@ -153,9 +194,41 @@ describe('AbilityScorePicker', () => {
 
   it('enforces level-up budget in levelup mode', () => {
     // In levelup mode, we pass levelUpBudget prop and verify store updates are limited by budget
-    cy.intercept('PUT', '**/characters/*', {
-      statusCode: 200,
-      body: {},
+    cy.intercept('PUT', '**/characters/*', (req) => {
+      const body = req.body || {};
+      const response = {
+        characterId: 'test-char',
+        name: 'TestHero',
+        scores: body.scores || { ...initialScores },
+        physicalDescription: '',
+        race: {
+          id: 'human',
+          name: 'Humain',
+          mods: {},
+        },
+        hp: 10,
+        hpMax: 10,
+        totalXp: 0,
+        classes: [
+          {
+            name: 'Fighter',
+            level: 1,
+          },
+        ],
+        skills: [],
+        world: 'dnd',
+        portrait: '',
+        gender: 'male',
+        proficiency: 2,
+        isDeceased: false,
+        diedAt: new Date(),
+        deathLocation: '',
+        state: 'draft',
+      };
+      req.reply({
+        statusCode: 200,
+        body: response,
+      });
     })
       .as('saveCharacter');
     const initialScores = {

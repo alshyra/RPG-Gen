@@ -29,7 +29,6 @@ export class Combatant {
   })
   isPlayer: boolean;
 
-  // Enemy / player optional stats - align with CombatantDto
   @Prop({
     required: false,
     type: Number,

@@ -3,22 +3,7 @@
  * Handles HP gain, ASI, features, and spell slots
  */
 
-export interface LevelUpResult {
-  success: boolean;
-  newLevel: number;
-  hpGain: number;
-  hasASI: boolean;
-  newFeatures: string[];
-  proficiencyBonus: number;
-  message: string;
-}
-
-interface ClassLevelUpRules {
-  hpDie: number;
-  proficiencyProgression: number[];
-  asiLevels: number[];
-  features: Record<number, string[]>;
-}
+import type { LevelUpResult, ClassLevelUpRules } from '@/interfaces';
 
 // D&D 5e class definitions
 const classRules: Record<string, ClassLevelUpRules> = {

@@ -15,6 +15,7 @@ import type {
 } from '../../domain/chat/dto/index.js';
 import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
+import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.
@@ -34,6 +35,7 @@ export class ChatOrchestrator {
     private readonly combatService: CombatAppService,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
+    private readonly spellDefinitionService: SpellDefinitionService,
   ) {}
 
   public async getGMResponse(
@@ -137,12 +139,7 @@ export class ChatOrchestrator {
     try {
       if (instr.action === 'learn') {
         const existing = characterDto?.spells || [];
-        const newSpell = {
-          name: instr.name,
-          level: instr.level,
-          description: instr.description || '',
-          meta: {},
-        };
+        const newSpell = await this.spellDefinitionService.findByDefinitionId(instr.definitionId);
         const spells = [...existing, newSpell];
         await this.characterService.update(userId, characterId, { spells });
         this.logger.log(`Spell learned for ${characterId}: ${instr.name}`);

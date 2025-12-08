@@ -27,6 +27,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center justify-between gap-3"
           >
             <UiInputCheckbox
+              :name="`base-item-${item.definitionId}`"
               :model-value="true"
               disabled
               class="accent-indigo-500"
@@ -67,6 +68,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
+              :name="`weapon-${availableWeapon.definitionId}`"
               :model-value="weaponIsSelected(availableWeapon)"
               @update:model-value="() => toggleWeapon(availableWeapon)"
             >
@@ -98,6 +100,7 @@
             class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
           >
             <UiInputCheckbox
+              :name="`secondary-item-${secondaryItem.definitionId}`"
               :model-value="weaponIsSelected(secondaryItem)"
               @update:model-value="() => toggleSecondaryItem(secondaryItem)"
             >
@@ -130,6 +133,7 @@
           class="p-3 rounded border border-slate-700 bg-slate-900/50 flex items-center gap-3"
         >
           <UiInputCheckbox
+            :name="`armor-${armor.definitionId}`"
             :model-value="armorIsSelected(armor)"
             @update:model-value="() => toggleArmor(armor)"
           >
@@ -186,6 +190,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Contient divers petits outils et rations',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'generic-torch',
@@ -193,6 +198,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Éclairage temporaire',
     qty: 3,
     meta: { usable: true },
+    equipped: false,
   },
   {
     definitionId: 'food-rations',
@@ -200,6 +206,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Portion pour un repas',
     qty: 5,
     meta: { usable: true },
+    equipped: false,
   },
   {
     definitionId: 'tent-1-2',
@@ -207,6 +214,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Abri pour 1-2 personnes',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'rope-15m',
@@ -214,6 +222,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Utilitaire polyvalent',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'potion-health',
@@ -221,6 +230,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Soigne un peu de PV',
     qty: 3,
     meta: { usable: true },
+    equipped: false,
   },
 ];
 
@@ -244,6 +254,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       ],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-quarterstaff',
@@ -259,6 +270,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Versatile 1d8'],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-longsword',
@@ -274,6 +286,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Versatile 1d10'],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-rapier',
@@ -289,6 +302,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Finesse'],
       starter: true,
     },
+    equipped: false,
   },
 ];
 const chosenMainWeapon = ref(availableMainWeapons[0]);
@@ -312,6 +326,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
       ],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'armor-shield',
@@ -328,6 +343,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
       weight: '6 lb',
       starter: true,
     },
+    equipped: false,
   },
 ];
 
@@ -347,6 +363,7 @@ const availableArmors: LocalInventoryItem[] = [
       weight: '10 lb',
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'armor-hide',
@@ -362,6 +379,7 @@ const availableArmors: LocalInventoryItem[] = [
       weight: '12 lb',
       starter: true,
     },
+    equipped: false,
   },
 ];
 const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
@@ -380,7 +398,7 @@ const toggleArmor = (armor: LocalInventoryItem) => {
   chosenArmor.value = armor;
   console.log('Toggling armor:', armor);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => !availableArmorDefinitionIds.includes(i.definitionId || '') && !availableMainWeaponsDefinitionIds.includes(i.definitionId || '') && !availableSecondaryItemsDefinitionIds.includes(i.definitionId || ''));
+    .filter(i => !availableArmorDefinitionIds.includes(i.definitionId) && !availableMainWeaponsDefinitionIds.includes(i.definitionId) && !availableSecondaryItemsDefinitionIds.includes(i.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -398,7 +416,7 @@ const toggleWeapon = (weapon: LocalInventoryItem) => {
   chosenMainWeapon.value = weapon;
   console.log('Toggling weapon:', weapon);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId || ''));
+    .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -416,7 +434,7 @@ const toggleSecondaryItem = (item: LocalInventoryItem) => {
   chosenSecondaryItem.value = item;
   console.log('Toggling secondary item:', item);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId || ''));
+    .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId));
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [

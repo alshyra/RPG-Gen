@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserDocument } from '../../infra/mongo/user.schema.js';
+import { UserDocument } from '../../infra/mongo/User.js';
 
 @Injectable()
 export class AuthService {

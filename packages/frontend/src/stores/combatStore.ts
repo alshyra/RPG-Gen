@@ -7,11 +7,7 @@ import type {
 } from '@rpg-gen/shared';
 import type { CombatPhase } from '@rpg-gen/shared';
 import type { Ref } from 'vue';
-
-interface AttackQueueItem {
-  result: AttackResponseDto;
-  isPlayerAttack: boolean;
-}
+import type { AttackQueueItem, AttackView } from '@/interfaces';
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
@@ -33,6 +29,8 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
   const currentPlayerAttackLog = ref<AttackResponseDto | null>(null);
+
+  const currentAttackView = ref<AttackView | null>(null);
 
   const actionRemaining = ref(1);
   const actionMax = ref(1);
@@ -188,6 +186,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const resetModalState = (): void => {
     showAttackResultModal.value = false;
     currentAttackResult.value = undefined;
+    currentAttackView.value = null;
     isCurrentAttackPlayerAttack.value = true;
     attackResultQueue.value = [];
     isProcessingEnemyTurn.value = false;
@@ -252,6 +251,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     isProcessingEnemyTurn,
     currentEnemyAttackLog,
     currentPlayerAttackLog,
+    currentAttackView,
     PLAYER_ATTACK_DELAY_MS,
     initializeCombat,
     updateFromTurnResult,

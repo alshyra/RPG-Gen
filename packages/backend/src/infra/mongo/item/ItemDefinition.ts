@@ -2,7 +2,7 @@ import {
   Prop, Schema, SchemaFactory,
 } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import type { InventoryItemMeta } from '../../domain/character/dto/InventoryItemMeta.js';
+import type { InventoryItemMeta } from '../../../domain/character/dto/InventoryItemMeta.js';
 
 @Schema({ timestamps: true })
 export class ItemDefinition {

@@ -8,7 +8,7 @@ import { JwtStrategy } from '../domain/auth/jwt.strategy.js';
 import { GoogleStrategy } from '../domain/auth/google.strategy.js';
 import {
   User, UserSchema,
-} from '../infra/mongo/user.schema.js';
+} from '../infra/mongo/User.js';
 
 @Module({
   imports: [

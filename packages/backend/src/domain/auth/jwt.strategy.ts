@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   User, UserDocument,
-} from '../../infra/mongo/user.schema.js';
+} from '../../infra/mongo/User.js';
 
 export interface JwtPayload {
   sub: string; // User ID

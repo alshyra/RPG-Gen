@@ -3,12 +3,13 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { ItemDefinitionDto } from '../../domain/item-definition/item-definition.dto.js';
 import { CharacterService } from '../../domain/character/character.service.js';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
-import { DiceService } from '../../domain/dice/dice.service.js';
+import { CreateInventoryItemDto, type CharacterResponseDto } from '../../domain/character/dto/index.js';
 import type { InventoryInstructionMessageDto } from '../../domain/chat/dto/index.js';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import type { CombatStateDto } from '../../domain/combat/dto/CombatStateDto.js';
-import { CreateInventoryItemDto, type CharacterResponseDto, type InventoryItemDto } from '../../domain/character/dto/index.js';
+import { DiceService } from '../../domain/dice/dice.service.js';
 import { ItemDefinitionService } from '../../domain/item-definition/item-definition.service.js';
 
 interface ConsumableMetaWithHeal {
@@ -72,12 +73,13 @@ export class ItemOrchestrator {
   /**
    * Validate context for using a consumable item
    */
-  private validateContext(item: InventoryItemDto, meta: ConsumableMetaWithHeal, inCombat: boolean): void {
+  private validateContext(itemLike: ItemDefinitionDto, meta: ConsumableMetaWithHeal, inCombat: boolean): void {
+    const itemName = itemLike?.name || 'Item';
     if (inCombat && meta.combatUsable === false) {
-      throw new BadRequestException(`${item.name} cannot be used in combat`);
+      throw new BadRequestException(`${itemName} cannot be used in combat`);
     }
     if (!inCombat && meta.restUsable === false && meta.combatUsable === true) {
-      throw new BadRequestException(`${item.name} can only be used in combat`);
+      throw new BadRequestException(`${itemName} can only be used in combat`);
     }
   }
 

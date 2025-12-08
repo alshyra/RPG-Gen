@@ -28,13 +28,9 @@ import { computed } from 'vue';
 import { useCombatStore } from '@/stores/combatStore';
 
 const combatStore = useCombatStore();
-const { currentAttackResult } = storeToRefs(combatStore);
+const { currentAttackView } = storeToRefs(combatStore);
 
-const currentAttack = computed(() => {
-  const r = currentAttackResult?.value as any;
-  if (!r) return undefined;
-  return r.state?.playerAttacks?.[0] ?? r.playerAttacks?.[0] ?? r;
-});
+const currentAttack = computed(() => currentAttackView?.value ?? undefined);
 </script>
 
 <style scoped></style>

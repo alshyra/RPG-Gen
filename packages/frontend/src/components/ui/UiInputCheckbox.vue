@@ -4,6 +4,8 @@
     :aria-checked="effectiveChecked ? 'true' : 'false'"
     :aria-disabled="disabled ? 'true' : 'false'"
     data-testid="ui-checkbox"
+    :for="name"
+    :data-testvalue="`checkbox-${effectiveChecked ? 'checked' : 'unchecked'}`"
     :class="[
       'inline-flex items-center gap-2 select-none',
       disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
@@ -14,6 +16,7 @@
     <input
       ref="inputRef"
       type="checkbox"
+      :name="name"
       :checked="effectiveChecked"
       :disabled="disabled"
       class="sr-only"
@@ -61,6 +64,7 @@ import {
 
 const props = defineProps<{
   checked?: boolean;
+  name: string;
   modelValue?: boolean;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';

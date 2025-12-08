@@ -14,9 +14,7 @@ const abilityMap: Record<string, string> = {
 };
 
 type Scores = Record<string, number>;
-interface SkillEntry { name?: string;
-  proficient?: boolean;
-  modifier?: number; }
+import type { SkillEntry } from '@/interfaces';
 
 /**
  * Calculate ability modifier from score

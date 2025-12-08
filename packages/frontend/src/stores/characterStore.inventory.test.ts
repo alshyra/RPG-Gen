@@ -35,8 +35,11 @@ describe('characterStore inventory persistence', () => {
       inventory: [
         {
           _id: 'i1',
+          definitionId: 'weapon-sword',
           name: 'Sword',
+          description: '',
           qty: 2,
+          equipped: false,
         },
       ],
     } as any;
@@ -69,7 +72,9 @@ describe('characterStore inventory persistence', () => {
           _id: 'i1',
           definitionId: 'weapon-sword',
           name: 'Sword',
+          description: '',
           qty: 2,
+          equipped: false,
         },
       ],
     } as any;
@@ -101,18 +106,24 @@ describe('characterStore inventory persistence', () => {
       inventory: [
         {
           _id: 'i1',
+          definitionId: 'consumable-potion',
           name: 'Potion',
+          description: '',
           qty: 2,
           meta: {
             type: 'consumable',
             usable: true,
           },
+          equipped: false,
         },
         {
           _id: 'i2',
+          definitionId: 'tool-tent',
           name: 'Tent',
+          description: '',
           qty: 1,
           meta: { type: 'tool' },
+          equipped: false,
         },
       ],
     };
@@ -123,9 +134,12 @@ describe('characterStore inventory persistence', () => {
         inventory: [
           {
             _id: 'i2',
+            definitionId: 'tool-tent',
             name: 'Tent',
+            description: '',
             qty: 1,
             meta: { type: 'tool' },
+            equipped: false,
           },
         ],
       });
@@ -161,9 +175,11 @@ describe('characterStore inventory persistence', () => {
           inventory: [
             {
               _id: 'i1',
-              name: 'Épée',
-              qty: 1,
               definitionId: 'weapon-sword',
+              name: 'Épée',
+              description: '',
+              qty: 1,
+              equipped: false,
             },
           ],
         } as any;

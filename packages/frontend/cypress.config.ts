@@ -68,11 +68,27 @@ export default defineConfig({
           const base = process.env.CYPRESS_BASE_URL || 'http://localhost:80';
           const url = `${base}/api/combat/${characterId}/start`;
           try {
-            // use curl to POST to the backend start endpoint
+            // When starting combat from tests we provide a small default payload
+            // to ensure the server initializes a combat session for the character.
+            const defaultBody = JSON.stringify({
+              combat_start: [
+                {
+                  name: 'Training Dummy',
+                  hp: 10,
+                  ac: 10,
+                  attack_bonus: 1,
+                  damage_dice: '1d4',
+                },
+              ],
+            });
             await execFileAsync('curl', [
               '-s',
               '-X',
               'POST',
+              '-H',
+              'Content-Type: application/json',
+              '-d',
+              defaultBody,
               url,
             ]);
             return { ok: true };

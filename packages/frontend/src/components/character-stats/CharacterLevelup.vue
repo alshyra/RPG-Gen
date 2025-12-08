@@ -130,7 +130,7 @@
 
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
-import type { LevelUpResult } from '../../services/dndLevelUpService';
+import type { LevelUpResult } from '@/interfaces';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   computed, ref,
@@ -138,13 +138,10 @@ import {
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { conversationApi } from '../../apis/conversationApi';
+import { levelUpApi } from '@/apis/levelUpApi';
 
-interface Props {
-  world?: string;
-  initialCharacter?: CharacterResponseDto;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<{ world?: string;
+  initialCharacter?: CharacterResponseDto; }>(), {
   world: '',
   initialCharacter: undefined,
 });
@@ -208,7 +205,17 @@ const executeLevelUp = async (): Promise<void> => {
   // Save to backend using the character store
   const characterStore = useCharacterStore();
   if (updatedCharacter.characterId) {
-    await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+    // Prefer the dedicated LevelUp API for applying the level-up server-side when available
+    try {
+      await levelUpApi.applyLevelUp(updatedCharacter.characterId, className.value, {
+        // No explicit spells/asi chosen in this flow — we apply the bare level-up server-side.
+        newSpellIds: [],
+        abilityIncreases: [],
+      });
+    } catch {
+      // Fallback: save the computed character changes
+      await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+    }
   }
 
   // Send to backend

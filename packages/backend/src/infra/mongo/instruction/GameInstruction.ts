@@ -1,27 +1,16 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
-import { CombatStartEntry } from './CombatStartEntry.js';
-import { CombatEnd } from './CombatEnd.js';
+import { Prop, Schema } from '@nestjs/mongoose';
+import { CombatStartEntry } from '../combat/CombatStartEntry.js';
+import { CombatEnd } from '../combat/CombatEnd.js';
 
 @Schema({ _id: false })
 export class GameInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: [
-      'roll',
-      'xp',
-      'hp',
-      'spell',
-      'inventory',
-      'combat_start',
-      'combat_end',
-    ],
+    enum: ['roll', 'xp', 'hp', 'spell', 'inventory', 'combat_start', 'combat_end'],
   })
   type: 'roll' | 'xp' | 'hp' | 'spell' | 'inventory' | 'combat_start' | 'combat_end';
 
-  // Roll instruction fields (flattened to top-level for DTO compatibility)
   @Prop({
     required: false,
     type: String,
@@ -49,15 +38,10 @@ export class GameInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: [
-      'advantage',
-      'disadvantage',
-      'none',
-    ],
+    enum: ['advantage', 'disadvantage', 'none'],
   })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 
-  // Numeric instruction fields
   @Prop({
     required: false,
     type: Number,
@@ -70,21 +54,10 @@ export class GameInstruction {
   })
   xp?: number;
 
-  // Spell instruction fields
-  // used both in spell and inventory instructions
   @Prop({
     required: false,
     type: String,
-    enum: [
-    // spell actions
-      'learn',
-      'cast',
-      'forget',
-      // inventory actions
-      'add',
-      'remove',
-      'use',
-    ],
+    enum: ['learn', 'cast', 'forget', 'add', 'remove', 'use'],
   })
   action?: 'learn' | 'cast' | 'forget' | 'add' | 'remove' | 'use';
 
@@ -112,7 +85,6 @@ export class GameInstruction {
   })
   quantity?: number;
 
-  // Combat instructions
   @Prop({
     required: false,
     type: [CombatStartEntry],

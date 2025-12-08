@@ -483,6 +483,60 @@
         ]
       }
     },
+    "/api/characters/{characterId}/levelup/{className}": {
+      "post": {
+        "operationId": "CharacterController_applyLevelUp",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "className",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LevelUpApplyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated character after levelup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apply level-up choices for a character class",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
     "/api/characters/{characterId}/inventory/equip": {
       "post": {
         "operationId": "CharacterController_equipInventory",
@@ -970,6 +1024,47 @@
         ]
       }
     },
+    "/api/classes/{className}/levels/{level}": {
+      "get": {
+        "operationId": "ClassesController_getLevelOptions",
+        "parameters": [
+          {
+            "name": "className",
+            "required": true,
+            "in": "path",
+            "description": "Name of the class (e.g., Bard, Cleric)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "required": true,
+            "in": "path",
+            "description": "Level number (1-20)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Class-level options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelUpOptionsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get class-level options for a specific level",
+        "tags": [
+          "classes"
+        ]
+      }
+    },
     "/api/image": {
       "post": {
         "operationId": "ImageController_generate",
@@ -1096,55 +1191,6 @@
         "summary": "Use an item from inventory",
         "tags": [
           "inventory"
-        ]
-      }
-    },
-    "/api/rolls/{characterId}": {
-      "post": {
-        "operationId": "RollsController_submitRoll",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitRollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RollInstructionMessageDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Submit resolved roll(s) (non-chat) for processing",
-        "tags": [
-          "rolls"
         ]
       }
     }
@@ -1345,12 +1391,22 @@
           "description": {
             "type": "string",
             "description": "Spell description"
+          },
+          "definitionId": {
+            "type": "string",
+            "description": "Spell definition ID for deterministic persistence"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Spell metadata",
+            "additionalProperties": true
           }
         },
         "required": [
           "type",
           "action",
-          "name"
+          "name",
+          "definitionId"
         ]
       },
       "InventoryInstructionMessageDto": {
@@ -1704,11 +1760,60 @@
               }
             ]
           }
+        },
+        "required": [
+          "definitionId",
+          "name",
+          "description",
+          "equipped",
+          "meta"
+        ]
+      },
+      "SpellMetaDto": {
+        "type": "object",
+        "properties": {
+          "damageDice": {
+            "type": "string",
+            "description": "Damage dice notation (e.g., \"1d6\")"
+          },
+          "damageType": {
+            "type": "string",
+            "description": "Type of damage (fire, cold, etc.)"
+          },
+          "saveType": {
+            "type": "string",
+            "description": "Saving throw type (DEX, CON, etc.)"
+          },
+          "attackType": {
+            "type": "string",
+            "description": "Attack type",
+            "enum": [
+              "melee",
+              "ranged",
+              "spell"
+            ]
+          },
+          "school": {
+            "type": "string",
+            "description": "School of magic"
+          },
+          "areaOfEffect": {
+            "type": "string",
+            "description": "Area of effect description"
+          },
+          "scaling": {
+            "type": "string",
+            "description": "Scaling description"
+          }
         }
       },
       "SpellResponseDto": {
         "type": "object",
         "properties": {
+          "definitionId": {
+            "type": "string",
+            "description": "Canonical spell definition ID"
+          },
           "name": {
             "type": "string",
             "description": "Spell name"
@@ -1722,13 +1827,19 @@
             "description": "Spell description"
           },
           "meta": {
-            "type": "object",
             "description": "Spell metadata",
-            "additionalProperties": true
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpellMetaDto"
+              }
+            ]
           }
         },
         "required": [
-          "name"
+          "definitionId",
+          "name",
+          "level",
+          "meta"
         ]
       },
       "CharacterResponseDto": {
@@ -2320,6 +2431,25 @@
           "definitionId"
         ]
       },
+      "LevelUpApplyDto": {
+        "type": "object",
+        "properties": {
+          "newSpellIds": {
+            "description": "List of spell definitionIds to add to the character",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "abilityIncreases": {
+            "description": "Ability score increases, e.g. [{ ability: \"Str\", inc: 1 }] ",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "EquipInventoryDto": {
         "type": "object",
         "properties": {
@@ -2532,6 +2662,10 @@
           "targetId": {
             "type": "string",
             "description": "Target ID to attack"
+          },
+          "spellName": {
+            "type": "string",
+            "description": "Optional spell name to cast instead of weapon attack"
           }
         },
         "required": [
@@ -2796,6 +2930,56 @@
           "expr"
         ]
       },
+      "LevelUpOptionsDto": {
+        "type": "object",
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "Class name"
+          },
+          "currentLevel": {
+            "type": "number",
+            "description": "Current level in class"
+          },
+          "nextLevel": {
+            "type": "number",
+            "description": "Next level number (current + 1)"
+          },
+          "unlockedSpells": {
+            "description": "List of unlocked spells available at that level",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          },
+          "asiAvailable": {
+            "type": "boolean",
+            "description": "Whether an Ability Score Improvement (or feat) is available at this level"
+          },
+          "proficiencyIncrease": {
+            "type": "boolean",
+            "description": "Whether proficiency bonus increases at this level"
+          },
+          "cantripsKnown": {
+            "type": "number",
+            "description": "Number of cantrips (level 0 spells) the character can know at this level"
+          },
+          "spellsKnown": {
+            "type": "number",
+            "description": "Number of spells (level 1+) the character can know at this level"
+          }
+        },
+        "required": [
+          "className",
+          "currentLevel",
+          "nextLevel",
+          "unlockedSpells",
+          "asiAvailable",
+          "proficiencyIncrease",
+          "cantripsKnown",
+          "spellsKnown"
+        ]
+      },
       "ImageRequestDto": {
         "type": "object",
         "properties": {
@@ -2892,21 +3076,6 @@
         "required": [
           "success",
           "message"
-        ]
-      },
-      "SubmitRollDto": {
-        "type": "object",
-        "properties": {
-          "instructions": {
-            "description": "Resolved instructions array",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RollInstructionMessageDto"
-            }
-          }
-        },
-        "required": [
-          "instructions"
         ]
       }
     }

@@ -27,10 +27,7 @@ type RaceModifiers = Record<string, number>;
 
 type HitDieMap = Record<string, number>;
 
-interface Skill {
-  name: string;
-  ability: typeof ABILITIES[number];
-}
+import type { SkillRule as Skill } from '@/interfaces';
 
 type ClassProficiencies = Record<string, string[]>;
 
@@ -374,8 +371,8 @@ export class DnDRulesService {
   }
 
   /**
-   * Calculate HP for level 1 character
-   * HP = Hit Die + CON modifier (minimum 1)
+   * Calculate HP for level 1 character.
+   * Standard D&D: HP = Hit Die + CON modifier (minimum 1)
    */
   static calculateHpForLevel1(className: string, conScore: number): number {
     const hitDie = HIT_DIE_MAP[className] || 8;
@@ -423,94 +420,6 @@ export class DnDRulesService {
   }
 
   /**
-   * Return a small sample list of spells for a class. This is intentionally small
-   * and used for character creation UI only.
-   */
-  static getAvailableSpellsForClass(className: string) {
-    const base: {
-      name: string;
-      level: number;
-      description?: string;
-    }[] = [];
-    switch (className) {
-      case 'Wizard':
-        base.push({
-          name: 'Magic Missile',
-          level: 1,
-          description: 'Un missile magique qui touche automatiquement.',
-        });
-        base.push({
-          name: 'Fireball',
-          level: 3,
-          description: 'Une explosion de feu qui inflige des dégâts.',
-        });
-        base.push({
-          name: 'Mage Armor',
-          level: 1,
-          description: 'Une armure magique protectrice.',
-        });
-        break;
-      case 'Cleric':
-        base.push({
-          name: 'Cure Wounds',
-          level: 1,
-          description: 'Soigne une créature proche.',
-        });
-        base.push({
-          name: 'Bless',
-          level: 1,
-          description: 'Augmente l\'attaque et le jet de sauvegarde d\'alliés.',
-        });
-        base.push({
-          name: 'Spiritual Weapon',
-          level: 2,
-          description: 'Crée une arme spirituelle qui attaque.',
-        });
-        break;
-      case 'Druid':
-        base.push({
-          name: 'Entangle',
-          level: 1,
-          description: 'Enracine les ennemis au sol.',
-        });
-        base.push({
-          name: 'Produce Flame',
-          level: 0,
-          description: 'Une flamme facile qui attaque à distance.',
-        });
-        break;
-      case 'Bard':
-        base.push({
-          name: 'Vicious Mockery',
-          level: 0,
-          description: 'Une insulte magique qui inflige des dégâts psychiques.',
-        });
-        base.push({
-          name: 'Healing Word',
-          level: 1,
-          description: 'Un soin à distance.',
-        });
-        break;
-      case 'Sorcerer':
-        base.push({
-          name: 'Shield',
-          level: 1,
-          description: 'Bouclier magique instantané.',
-        });
-        base.push({
-          name: 'Magic Missile',
-          level: 1,
-          description: 'Un missile magique qui touche automatiquement.',
-        });
-        break;
-      default:
-        return [];
-    }
-
-    return base;
-  }
-
-  /**
    * Calculate skill modifier for a given skill and ability scores
    */
   static calculateSkillModifier(skillName: string, scores: AbilityScoresResponseDto, proficiency: number, isProficient: boolean): number {
@@ -521,65 +430,5 @@ export class DnDRulesService {
     const modifier = this.getAbilityModifier(abilityScore);
 
     return isProficient ? modifier + proficiency : modifier;
-  }
-
-  /**
-   * Prepare a new level 1 character with all calculated fields
-   */
-  static prepareNewCharacter(
-    name: string,
-    baseScores: Record<string, number>,
-    className: string,
-    raceModifiers: RaceModifiers,
-    raceInfo: { id?: string;
-      name?: string;
-      mods: Record<string, number>; },
-    selectedSkills?: string[],
-  ): {
-    name: string;
-    scores: Record<string, number>;
-    hp: number;
-    hpMax: number;
-    classes: { name: string;
-      level: number; }[];
-    race: typeof raceInfo;
-    totalXp: number;
-    proficiency: number;
-    skills: { name: string;
-      proficient: boolean;
-      modifier: number; }[];
-  } {
-    // Apply racial bonuses
-    const finalScores = this.applyRacialModifiers(baseScores, raceModifiers);
-
-    // Calculate HP
-    const hp = this.calculateHpForLevel1(className, finalScores.Con || 10);
-
-    // Proficiency bonus for level 1
-    const proficiency = this.getProficiencyBonus(1);
-
-    // Initialize skills with proper modifiers
-    const skills = SKILLS.map(skill => ({
-      name: skill.name,
-      proficient: (selectedSkills || []).includes(skill.name),
-      modifier: this.calculateSkillModifier(skill.name, finalScores, proficiency, (selectedSkills || []).includes(skill.name)),
-    }));
-
-    return {
-      name,
-      scores: finalScores,
-      hp,
-      hpMax: hp,
-      classes: [
-        {
-          name: className,
-          level: 1,
-        },
-      ],
-      race: raceInfo,
-      totalXp: 0,
-      proficiency,
-      skills,
-    };
   }
 }

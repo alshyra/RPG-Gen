@@ -1,0 +1,59 @@
+{
+  "domainId": "life",
+  "name": "Life",
+  "description": "Domaine de la vie — soins, protection et résurrection (squelettage minimal).",
+
+  "bonusSpellsByLevel": {
+    "1": [
+      { "name": "Bénédiction", "definitionId": "spell-1-benediction" },
+      { "name": "Mot de guérison", "definitionId": null }
+    ],
+    "3": [
+      { "name": "Restauration partielle", "definitionId": null },
+      { "name": "Arme spirituelle", "definitionId": null }
+    ],
+    "5": [
+      { "name": "Lueur d'espoir", "definitionId": "spell-3-lueur-d-espoir" },
+      { "name": "Rappel à la vie", "definitionId": null }
+    ],
+    "7": [
+      { "name": "Garde contre la mort", "definitionId": null },
+      { "name": "Gardien de la foi", "definitionId": null }
+    ],
+    "9": [
+      { "name": "Soins de groupe", "definitionId": null },
+      { "name": "Résurrection", "definitionId": null }
+    ]
+  },
+
+  "featuresByLevel": {
+    "1": [
+      {
+        "id": "disciple-of-life",
+        "name": "Disciple of Life",
+        "description": "Vos sorts de soins restaurent plus de points de vie (bonus simple)."
+      }
+    ],
+    "2": [
+      {
+        "id": "preserve-life-channel-divinity",
+        "name": "Channel Divinity: Preserve Life",
+        "description": "Dépensez Channel Divinity pour restaurer des points de vie répartis entre alliés proches."
+      }
+    ],
+    "6": [
+      {
+        "id": "blessed-healer",
+        "name": "Blessed Healer",
+        "description": "Quand vous lancez un sort de soin, vous gagnez aussi un petit soin personnel."
+      }
+    ],
+    "17": [
+      {
+        "id": "supreme-life-grace",
+        "name": "Supreme Life Grace",
+        "description": "Une puissance divine accrue (placeholder pour hauts niveaux)."
+      }
+    ]
+  }
+}

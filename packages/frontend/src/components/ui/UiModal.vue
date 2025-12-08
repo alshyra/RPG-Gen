@@ -14,13 +14,14 @@
           >
             {{ title }}
           </div>
+          <div />
         </slot>
         <button
           aria-label="close"
           class="ml-4 text-slate-400 hover:text-slate-200"
           @click="close"
         >
-          ✕
+          <X class="w-4 h-4" />
         </button>
       </header>
 
@@ -55,19 +56,11 @@
 </template>
 
 <script setup lang="ts">
-interface Props {
-  isOpen: boolean;
-  title?: string;
-}
+import { X } from 'lucide-vue-next';
+import type { UiModalProps, UiModalEmits } from '@/interfaces';
 
-interface Emits {
-  close: [];
-  confirm: [];
-  cancel: [];
-}
-
-defineProps<Props>();
-const emit = defineEmits<Emits>();
+defineProps<UiModalProps>();
+const emit = defineEmits<UiModalEmits>();
 
 const close = () => emit('close');
 const handleConfirm = () => {

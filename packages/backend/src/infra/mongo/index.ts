@@ -1,13 +1,26 @@
 import { SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Character } from './Character.js';
-export { AbilityScores } from './AbilityScores.js';
-export { CharacterClass } from './CharacterClass.js';
-export { Item } from './Item.js';
-export { Race } from './Race.js';
-export { Skill } from './Skill.js';
-export { Spell } from './Spell.js';
-export { Character } from './Character.js';
+import { Character } from './character/Character.js';
+export { AbilityScores } from './character/AbilityScores.js';
+export { CharacterClass } from './character/CharacterClass.js';
+export { Item } from './item/Item.js';
+export { ItemDefinition } from './item/ItemDefinition.js';
+export { Race } from './character/Race.js';
+export { Skill } from './character/Skill.js';
+export { Spell } from './spell/Spell.js';
+export { SpellDefinition } from './spell/SpellDefinition.js';
+export { SpellMeta } from './spell/SpellMeta.js';
+export { CombatEnd } from './combat/CombatEnd.js';
+export { CombatStartEntry } from './combat/CombatStartEntry.js';
+export { Combatant, CombatantSchema } from './combat/Combatant.js';
+export { CombatSession, CombatSessionSchema } from './combat/CombatSession.js';
+export { Character } from './character/Character.js';
+export { ChatHistory, ChatHistorySchema } from './chat/ChatHistory.js';
+export { ChatMessage } from './chat/ChatMessage.js';
+export { GameInstruction } from './instruction/GameInstruction.js';
+export { RollInstruction } from './instruction/RollInstruction.js';
+export { InventoryInstruction } from './instruction/InventoryInstruction.js';
+export { SpellInstruction } from './instruction/SpellInstruction.js';
 
 export type CharacterDocument = Character & Document;
 

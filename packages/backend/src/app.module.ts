@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth.module.js';
 import { CharacterModule } from './modules/character.module.js';
 import { ChatModule } from './modules/chat.module.js';
+import { ClassesModule } from './modules/classes.module.js';
 import { CombatModule } from './modules/combat.module.js';
 import { DiceModule } from './modules/dice.module.js';
 import { HealthModule } from './modules/health.module.js';
@@ -17,6 +18,7 @@ import { InventoryModule } from './modules/inventory.module.js';
     }),
     AuthModule,
     ChatModule,
+    ClassesModule,
     CombatModule,
     DiceModule,
     ImageModule,

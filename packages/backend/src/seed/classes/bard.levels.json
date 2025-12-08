@@ -1,0 +1,1012 @@
+{
+  "schemaVersion": 1,
+  "className": "Bard",
+  "hitDie": "1d8",
+  "primarySpellAbility": "Cha",
+  "description": "Class-level progression table and metadata for Bard (source: SRD / aidedd.org).\nNote: spell references are names by default — prefer listing definitionIds if you want strict linkage to the spell seed (packages/backend/src/seed/spells.json).",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 2,
+      "spellsKnown": 4,
+      "spellSlots": {
+        "1": 2
+      },
+      "features": [
+        {
+          "id": "bardic-inspiration",
+          "name": "Inspiration bardique",
+          "description": "d6: bonus action, uses = Charisma mod (min 1). Recharge: long rest.",
+          "meta": {
+            "die": "d6",
+            "usesAbility": "Cha",
+            "usesType": "modifier",
+            "usesMin": 1,
+            "recharge": "longRest"
+          }
+        },
+        {
+          "id": "spellcasting",
+          "name": "Incantation (Spellcasting)",
+          "description": "Vous connaissez des sorts mineurs et des sorts de niveau >=1 comme indiqué."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 2,
+      "spellsKnown": 5,
+      "spellSlots": {
+        "1": 3
+      },
+      "features": [
+        {
+          "id": "jack-of-all-trades",
+          "name": "Touche-à-tout"
+        },
+        {
+          "id": "song-of-rest",
+          "name": "Chant reposant",
+          "description": "Pendant les repos courts, les dés de guérison donnent +1d6 de soins (varie avec le niveau)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 2,
+      "spellsKnown": 6,
+      "spellSlots": {
+        "1": 4,
+        "2": 2
+      },
+      "features": [
+        {
+          "id": "bard-college",
+          "name": "Collège bardique",
+          "description": "Choisir un college (ex: savoir / vaillance) — débloque features au niveau 3, 6 et 14."
+        },
+        {
+          "id": "expertise",
+          "name": "Expertise",
+          "description": "Choisir deux compétences : maitrise doublée pour ces jets."
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseSubclass",
+          "options": [
+            "college-of-knowledge",
+            "college-of-valour"
+          ]
+        },
+        {
+          "type": "chooseSkills",
+          "count": 2,
+          "from": "characterSkills"
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 3,
+      "spellsKnown": 7,
+      "spellSlots": {
+        "1": 4,
+        "2": 3
+      },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Amélioration de caractéristiques",
+          "description": "+2 ou +1/+1 (ne peut dépasser 20)"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 3,
+      "spellsKnown": 8,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 2
+      },
+      "features": [
+        {
+          "id": "font-of-inspiration",
+          "name": "Source d'inspiration",
+          "description": "Récupère les dés d'Inspiration bardiques après un repos court."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 3,
+      "spellsKnown": 9,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3
+      },
+      "features": [
+        {
+          "id": "counter-charm",
+          "name": "Contre-charme"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 3,
+      "spellsKnown": 10,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3
+      },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 3,
+      "spellsKnown": 11,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3
+      },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Amélioration de caractéristiques"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 3,
+      "spellsKnown": 12,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3
+      },
+      "features": [
+        {
+          "id": "song-of-rest-d9",
+          "name": "Chant reposant (d9)",
+          "description": "Les dés de repos court donnent +1d8 puis +1d10 etc au rangs supérieurs — page: source"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 4,
+      "spellsKnown": 14,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3
+      },
+      "features": [
+        {
+          "id": "expertise-plus",
+          "name": "Expertise supplémentaire"
+        },
+        {
+          "id": "magical-secrets-1",
+          "name": "Secrets magiques"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 4,
+      "spellsKnown": 15,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3
+      },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 4,
+      "spellsKnown": 15,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3
+      },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Amélioration de caractéristiques"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 4,
+      "spellsKnown": 16,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 1
+      },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 4,
+      "spellsKnown": 18,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 1
+      },
+      "features": [
+        {
+          "id": "magical-secrets-2",
+          "name": "Secrets magiques (2)"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 4,
+      "spellsKnown": 19,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2
+      },
+      "features": [
+        {
+          "id": "inspiration-d12",
+          "name": "Inspiration (d12)"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 4,
+      "spellsKnown": 19,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2
+      },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Amélioration de caractéristiques"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 4,
+      "spellsKnown": 20,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2
+      },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 4,
+      "spellsKnown": 22,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+      },
+      "features": [
+        {
+          "id": "magical-secrets-3",
+          "name": "Secrets magiques (3)"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 4,
+      "spellsKnown": 22,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+      },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Amélioration de caractéristiques"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 4,
+      "spellsKnown": 22,
+      "spellSlots": {
+        "1": 4,
+        "2": 3,
+        "3": 3,
+        "4": 3,
+        "5": 3
+      },
+      "features": [
+        {
+          "id": "supreme-inspiration",
+          "name": "Inspiration supérieure"
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ],
+  "subclassPoints": {
+    "chooseAtLevel": 3
+  },
+  "allowedSpellsByLevel": {
+    "0": [
+      {
+        "name": "Amis",
+        "definitionId": "spell-0-amis"
+      },
+      {
+        "name": "Coup au but",
+        "definitionId": "spell-0-coup-au-but"
+      },
+      {
+        "name": "Coup de tonnerre",
+        "definitionId": "spell-0-coup-de-tonnerre"
+      },
+      {
+        "name": "Illusion mineure",
+        "definitionId": "spell-0-illusion-mineure"
+      },
+      {
+        "name": "Lumière",
+        "definitionId": "spell-0-lumiere"
+      },
+      {
+        "name": "Lumières dansantes",
+        "definitionId": "spell-0-lumieres-dansantes"
+      },
+      {
+        "name": "Main de mage",
+        "definitionId": "spell-0-main-de-mage"
+      },
+      {
+        "name": "Message",
+        "definitionId": "spell-0-message"
+      },
+      {
+        "name": "Moquerie cruelle",
+        "definitionId": "spell-0-moquerie-cruelle"
+      },
+      {
+        "name": "Prestidigitation",
+        "definitionId": "spell-0-prestidigitation"
+      },
+      {
+        "name": "Protection contre les armes",
+        "definitionId": "spell-0-protection-contre-les-armes"
+      },
+      {
+        "name": "Réparation",
+        "definitionId": "spell-0-reparation"
+      }
+    ],
+    "1": [
+      {
+        "name": "Amitié avec les animaux",
+        "definitionId": "spell-1-amitie-avec-les-animaux"
+      },
+      {
+        "name": "Charme-personne",
+        "definitionId": "spell-1-charme-personne"
+      },
+      {
+        "name": "Communication avec les animaux",
+        "definitionId": "spell-1-communication-avec-les-animaux"
+      },
+      {
+        "name": "Compréhension des langues",
+        "definitionId": "spell-1-comprehension-des-langues"
+      },
+      {
+        "name": "Déguisement",
+        "definitionId": "spell-1-deguisement"
+      },
+      {
+        "name": "Détection de la magie",
+        "definitionId": "spell-1-detection-de-la-magie"
+      },
+      {
+        "name": "Feuille morte",
+        "definitionId": "spell-1-feuille-morte"
+      },
+      {
+        "name": "Fléau",
+        "definitionId": "spell-1-fleau"
+      },
+      {
+        "name": "Fou rire de Tasha",
+        "definitionId": "spell-1-fou-rire-de-tasha"
+      },
+      {
+        "name": "Grande foulée",
+        "definitionId": "spell-1-grande-foulee"
+      },
+      {
+        "name": "Héroïsme",
+        "definitionId": "spell-1-heroisme"
+      },
+      {
+        "name": "Identification",
+        "definitionId": "spell-1-identification"
+      },
+      {
+        "name": "Image silencieuse",
+        "definitionId": "spell-1-image-silencieuse"
+      },
+      {
+        "name": "Lueurs féeriques",
+        "definitionId": "spell-1-lueurs-feeriques"
+      },
+      {
+        "name": "Mot de guérison",
+        "definitionId": "spell-1-mot-de-guerison"
+      },
+      {
+        "name": "Murmures dissonants",
+        "definitionId": "spell-1-murmures-dissonants"
+      },
+      {
+        "name": "Secousse sismique",
+        "definitionId": "spell-1-secousse-sismique"
+      },
+      {
+        "name": "Serviteur invisible",
+        "definitionId": "spell-1-serviteur-invisible"
+      },
+      {
+        "name": "Soins",
+        "definitionId": "spell-1-soins"
+      },
+      {
+        "name": "Sommeil",
+        "definitionId": "spell-1-sommeil"
+      },
+      {
+        "name": "Texte illusoire",
+        "definitionId": "spell-1-texte-illusoire"
+      },
+      {
+        "name": "Vague tonnante",
+        "definitionId": "spell-1-vague-tonnante"
+      }
+    ],
+    "2": [
+      {
+        "name": "Amélioration de caractéristique",
+        "definitionId": "spell-2-amelioration-de-caracteristique"
+      },
+      {
+        "name": "Apaisement des émotions",
+        "definitionId": "spell-2-apaisement-des-emotions"
+      },
+      {
+        "name": "Bouche magique",
+        "definitionId": "spell-2-bouche-magique"
+      },
+      {
+        "name": "Cécité/Surdité",
+        "definitionId": "spell-2-cecite-surdite"
+      },
+      {
+        "name": "Couronne du dément",
+        "definitionId": "spell-2-couronne-du-dement"
+      },
+      {
+        "name": "Déblocage",
+        "definitionId": "spell-2-deblocage"
+      },
+      {
+        "name": "Détection des pensées",
+        "definitionId": "spell-2-detection-des-pensees"
+      },
+      {
+        "name": "Discours captivant",
+        "definitionId": "spell-2-discours-captivant"
+      },
+      {
+        "name": "Force fantasmagorique",
+        "definitionId": "spell-2-force-fantasmagorique"
+      },
+      {
+        "name": "Fracassement",
+        "definitionId": "spell-2-fracassement"
+      },
+      {
+        "name": "Immobilisation de personne",
+        "definitionId": "spell-2-immobilisation-de-personne"
+      },
+      {
+        "name": "Invisibilité",
+        "definitionId": "spell-2-invisibilite"
+      },
+      {
+        "name": "Libellé aérien",
+        "definitionId": "spell-2-libelle-aerien"
+      },
+      {
+        "name": "Localisation d'animaux ou de plantes",
+        "definitionId": "spell-2-localisation-d-animaux-ou-de-plantes"
+      },
+      {
+        "name": "Localisation d'objet",
+        "definitionId": "spell-2-localisation-d-objet"
+      },
+      {
+        "name": "Messager animal",
+        "definitionId": "spell-2-messager-animal"
+      },
+      {
+        "name": "Métal brûlant",
+        "definitionId": "spell-2-metal-brulant"
+      },
+      {
+        "name": "Nuée de dagues",
+        "definitionId": "spell-2-nuee-de-dagues"
+      },
+      {
+        "name": "Pyrotechnie",
+        "definitionId": "spell-2-pyrotechnie"
+      },
+      {
+        "name": "Restauration partielle",
+        "definitionId": "spell-2-restauration-partielle"
+      },
+      {
+        "name": "Silence",
+        "definitionId": "spell-2-silence"
+      },
+      {
+        "name": "Suggestion",
+        "definitionId": "spell-2-suggestion"
+      },
+      {
+        "name": "Vent protecteur",
+        "definitionId": "spell-2-vent-protecteur"
+      },
+      {
+        "name": "Voir l'invisible",
+        "definitionId": "spell-2-voir-l-invisible"
+      },
+      {
+        "name": "Zone de vérité",
+        "definitionId": "spell-2-zone-de-verite"
+      }
+    ],
+    "3": [
+      {
+        "name": "Antidétection",
+        "definitionId": "spell-3-antidetection"
+      },
+      {
+        "name": "Clairvoyance",
+        "definitionId": "spell-3-clairvoyance"
+      },
+      {
+        "name": "Communication à distance",
+        "definitionId": "spell-3-communication-a-distance"
+      },
+      {
+        "name": "Communication avec les morts",
+        "definitionId": "spell-3-communication-avec-les-morts"
+      },
+      {
+        "name": "Communication avec les plantes",
+        "definitionId": "spell-3-communication-avec-les-plantes"
+      },
+      {
+        "name": "Croissance végétale",
+        "definitionId": "spell-3-croissance-vegetale"
+      },
+      {
+        "name": "Dissipation de la magie",
+        "definitionId": "spell-3-dissipation-de-la-magie"
+      },
+      {
+        "name": "Don des langues",
+        "definitionId": "spell-3-don-des-langues"
+      },
+      {
+        "name": "Ennemis à foison",
+        "definitionId": "spell-3-ennemis-a-foison"
+      },
+      {
+        "name": "Forteresse d'intellect",
+        "definitionId": "spell-3-forteresse-d-intellect"
+      },
+      {
+        "name": "Glyphe de protection",
+        "definitionId": "spell-3-glyphe-de-protection"
+      },
+      {
+        "name": "Image majeure",
+        "definitionId": "spell-3-image-majeure"
+      },
+      {
+        "name": "Malédiction",
+        "definitionId": "spell-3-malediction"
+      },
+      {
+        "name": "Mort simulée",
+        "definitionId": "spell-3-mort-simulee"
+      },
+      {
+        "name": "Motif hypnotique",
+        "definitionId": "spell-3-motif-hypnotique"
+      },
+      {
+        "name": "Nuage nauséabond",
+        "definitionId": "spell-3-nuage-nauseabond"
+      },
+      {
+        "name": "Petite hutte de Léomund",
+        "definitionId": "spell-3-petite-hutte-de-leomund"
+      },
+      {
+        "name": "Peur",
+        "definitionId": "spell-3-peur"
+      },
+      {
+        "name": "Sieste",
+        "definitionId": "spell-3-sieste"
+      }
+    ],
+    "4": [
+      {
+        "name": "Charme-monstre",
+        "definitionId": "spell-4-charme-monstre"
+      },
+      {
+        "name": "Compulsion",
+        "definitionId": "spell-4-compulsion"
+      },
+      {
+        "name": "Confusion",
+        "definitionId": "spell-4-confusion"
+      },
+      {
+        "name": "Invisibilité supérieure",
+        "definitionId": "spell-4-invisibilite-superieure"
+      },
+      {
+        "name": "Liberté de mouvement",
+        "definitionId": "spell-4-liberte-de-mouvement"
+      },
+      {
+        "name": "Localisation de créature",
+        "definitionId": "spell-4-localisation-de-creature"
+      },
+      {
+        "name": "Métamorphose",
+        "definitionId": "spell-4-metamorphose"
+      },
+      {
+        "name": "Porte dimensionnelle",
+        "definitionId": "spell-4-porte-dimensionnelle"
+      },
+      {
+        "name": "Terrain hallucinatoire",
+        "definitionId": "spell-4-terrain-hallucinatoire"
+      }
+    ],
+    "5": [
+      {
+        "name": "Amélioration de compétences",
+        "definitionId": "spell-5-amelioration-de-competences"
+      },
+      {
+        "name": "Animation d'objets",
+        "definitionId": "spell-5-animation-d-objets"
+      },
+      {
+        "name": "Apparence trompeuse",
+        "definitionId": "spell-5-apparence-trompeuse"
+      },
+      {
+        "name": "Cercle de téléportation",
+        "definitionId": "spell-5-cercle-de-teleportation"
+      },
+      {
+        "name": "Contrat",
+        "definitionId": "spell-5-contrat"
+      },
+      {
+        "name": "Domination de personne",
+        "definitionId": "spell-5-domination-de-personne"
+      },
+      {
+        "name": "Double illusoire",
+        "definitionId": "spell-5-double-illusoire"
+      },
+      {
+        "name": "Éveil",
+        "definitionId": "spell-5-eveil"
+      },
+      {
+        "name": "Immobilisation de monstre",
+        "definitionId": "spell-5-immobilisation-de-monstre"
+      },
+      {
+        "name": "Modification de mémoire",
+        "definitionId": "spell-5-modification-de-memoire"
+      },
+      {
+        "name": "Mythes et légendes",
+        "definitionId": "spell-5-mythes-et-legendes"
+      },
+      {
+        "name": "Perturbations synaptiques",
+        "definitionId": "spell-5-perturbations-synaptiques"
+      },
+      {
+        "name": "Quête",
+        "definitionId": "spell-5-quete"
+      },
+      {
+        "name": "Rappel à la vie",
+        "definitionId": "spell-5-rappel-a-la-vie"
+      },
+      {
+        "name": "Restauration supérieure",
+        "definitionId": "spell-5-restauration-superieure"
+      },
+      {
+        "name": "Scrutation",
+        "definitionId": "spell-5-scrutation"
+      },
+      {
+        "name": "Soins de groupe",
+        "definitionId": "spell-5-soins-de-groupe"
+      },
+      {
+        "name": "Songe",
+        "definitionId": "spell-5-songe"
+      }
+    ],
+    "6": [
+      {
+        "name": "Danse irrésistible d'Otto",
+        "definitionId": "spell-6-danse-irresistible-d-otto"
+      },
+      {
+        "name": "Illusion programmée",
+        "definitionId": "spell-6-illusion-programmee"
+      },
+      {
+        "name": "Mauvais oeil",
+        "definitionId": "spell-6-mauvais-oeil"
+      },
+      {
+        "name": "Protections et sceaux",
+        "definitionId": "spell-6-protections-et-sceaux"
+      },
+      {
+        "name": "Sens de l'orientation",
+        "definitionId": "spell-6-sens-de-l-orientation"
+      },
+      {
+        "name": "Suggestion de groupe",
+        "definitionId": "spell-6-suggestion-de-groupe"
+      },
+      {
+        "name": "Vision suprême",
+        "definitionId": "spell-6-vision-supreme"
+      }
+    ],
+    "7": [
+      {
+        "name": "Cage de force",
+        "definitionId": "spell-7-cage-de-force"
+      },
+      {
+        "name": "Épée de Mordenkainen",
+        "definitionId": "spell-7-epee-de-mordenkainen"
+      },
+      {
+        "name": "Forme éthérée",
+        "definitionId": "spell-7-forme-etheree"
+      },
+      {
+        "name": "Manoir somptueux de Mordenkainen",
+        "definitionId": "spell-7-manoir-somptueux-de-mordenkainen"
+      },
+      {
+        "name": "Mirage",
+        "definitionId": "spell-7-mirage"
+      },
+      {
+        "name": "Projection d'image",
+        "definitionId": "spell-7-projection-d-image"
+      },
+      {
+        "name": "Régénération",
+        "definitionId": "spell-7-regeneration"
+      },
+      {
+        "name": "Résurrection",
+        "definitionId": "spell-7-resurrection"
+      },
+      {
+        "name": "Songe du voile bleu",
+        "definitionId": "spell-7-songe-du-voile-bleu"
+      },
+      {
+        "name": "Symbole",
+        "definitionId": "spell-7-symbole"
+      },
+      {
+        "name": "Téléportation",
+        "definitionId": "spell-7-teleportation"
+      }
+    ],
+    "8": [
+      {
+        "name": "Bagou",
+        "definitionId": "spell-8-bagou"
+      },
+      {
+        "name": "Domination de monstre",
+        "definitionId": "spell-8-domination-de-monstre"
+      },
+      {
+        "name": "Esprit faible",
+        "definitionId": "spell-8-esprit-faible"
+      },
+      {
+        "name": "Esprit impénétrable",
+        "definitionId": "spell-8-esprit-impenetrable"
+      },
+      {
+        "name": "Mot de pouvoir étourdissant",
+        "definitionId": "spell-8-mot-de-pouvoir-etourdissant"
+      }
+    ],
+    "9": [
+      {
+        "name": "Hurlement psychique",
+        "definitionId": "spell-9-hurlement-psychique"
+      },
+      {
+        "name": "Métamorphose de groupe",
+        "definitionId": "spell-9-metamorphose-de-groupe"
+      },
+      {
+        "name": "Métamorphose suprême",
+        "definitionId": "spell-9-metamorphose-supreme"
+      },
+      {
+        "name": "Mot de pouvoir guérisseur",
+        "definitionId": "spell-9-mot-de-pouvoir-guerisseur"
+      },
+      {
+        "name": "Mot de pouvoir mortel",
+        "definitionId": "spell-9-mot-de-pouvoir-mortel"
+      },
+      {
+        "name": "Prémonition",
+        "definitionId": "spell-9-premonition"
+      }
+    ]
+  }
+}

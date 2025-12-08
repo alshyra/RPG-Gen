@@ -234,31 +234,38 @@ describe('chatCommands', () => {
   describe('getArgumentSuggestions', () => {
     const mockSpells = [
       {
+        definitionId: 'spell-fireball',
         name: 'Fireball',
         level: 3,
         description: 'A ball of fire',
         meta: {},
       },
       {
+        definitionId: 'spell-ice-storm',
         name: 'Ice Storm',
         level: 4,
         description: 'Freezing storm',
         meta: {},
       },
       {
+        definitionId: 'spell-fire-shield',
         name: 'Fire Shield',
         level: 4,
+        description: '',
         meta: {},
       },
       {
+        definitionId: 'spell-magic-missile',
         name: 'Magic Missile',
         level: 1,
+        description: '',
         meta: {},
       },
     ];
 
     const mockInventory = [
       {
+        definitionId: 'consumable-health-potion',
         name: 'Health Potion',
         qty: 3,
         description: 'Restores HP',
@@ -266,25 +273,34 @@ describe('chatCommands', () => {
           type: 'consumable' as const,
           usable: true,
         },
+        equipped: false,
       },
       {
+        definitionId: 'weapon-sword',
         name: 'Sword',
         qty: 1,
+        description: '',
         meta: { type: 'weapon' as const },
+        equipped: false,
       },
       {
+        definitionId: 'armor-shield',
         name: 'Shield',
         qty: 1,
         description: 'Blocks attacks',
         meta: { type: 'armor' as const },
+        equipped: false,
       },
       {
+        definitionId: 'consumable-scroll-fire',
         name: 'Scroll of Fire',
         qty: 1,
+        description: '',
         meta: {
           type: 'consumable' as const,
           usable: true,
         },
+        equipped: false,
       },
     ];
 
@@ -360,6 +376,7 @@ describe('chatCommands', () => {
   describe('getAllSuggestions', () => {
     const mockSpells = [
       {
+        definitionId: 'spell-fireball',
         name: 'Fireball',
         level: 3,
         meta: {},
@@ -368,12 +385,15 @@ describe('chatCommands', () => {
 
     const mockInventory = [
       {
+        definitionId: 'consumable-health-potion',
         name: 'Health Potion',
         qty: 1,
+        description: 'Restores HP',
         meta: {
           type: 'consumable' as const,
           usable: true,
         },
+        equipped: false,
       },
     ];
 
@@ -420,11 +440,13 @@ describe('chatCommands', () => {
     it('filters spells by character level in getAllSuggestions', () => {
       const spells = [
         {
+          definitionId: 'spell-fireball',
           name: 'Fireball',
           level: 3,
           meta: {},
         },
         {
+          definitionId: 'spell-meteor-swarm',
           name: 'Meteor Swarm',
           level: 9,
           meta: {},
@@ -440,17 +462,23 @@ describe('chatCommands', () => {
     it('filters items by usable/consumable in getAllSuggestions for /use', () => {
       const items = [
         {
+          definitionId: 'consumable-health-potion',
           name: 'Health Potion',
           qty: 1,
           meta: {
             type: 'consumable' as const,
             usable: true,
           },
+          description: '',
+          equipped: false,
         },
         {
+          definitionId: 'weapon-sword',
           name: 'Sword',
           qty: 1,
           meta: { type: 'weapon' as const },
+          description: '',
+          equipped: false,
         },
       ];
       const result = getAllSuggestions('/use ', mockSpells, items, 5);

@@ -19,18 +19,9 @@ import {
 import { conversationApi } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
+import type { HistoryMessage, ProcessedMessage } from '@/interfaces';
+
 type DisplayRole = 'user' | 'assistant' | 'system';
-
-interface HistoryMessage {
-  role: 'user' | 'assistant' | 'system';
-  narrative: string;
-  instructions?: GameInstructionDto | GameInstructionDto[];
-}
-
-interface ProcessedMessage {
-  role: DisplayRole;
-  narrative: string;
-}
 
 // Type for instructions that processInstructionInMessage can handle
 type ProcessableInstruction

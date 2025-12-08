@@ -1,0 +1,52 @@
+{
+  "domainId": "light",
+  "name": "Light",
+  "description": "Domaine de la lumière — sorts lumineux / offensifs et contrôle de zone.",
+
+  "bonusSpellsByLevel": {
+    "1": [
+      { "name": "Mains enflammées", "definitionId": null },
+      { "name": "Lueurs féeriques", "definitionId": "spell-1-lueurs-feeriques" }
+    ],
+    "3": [
+      { "name": "Sphère de feu", "definitionId": "spell-2-sphere-de-feu" },
+      { "name": "Scintillement incandescant", "definitionId": null }
+    ],
+    "5": [
+      { "name": "Boule de feu", "definitionId": "spell-3-boule-de-feu" },
+      { "name": "Colonne de flamme", "definitionId": null }
+    ],
+    "7": [
+      { "name": "Mur de feu", "definitionId": "spell-4-mur-de-feu" },
+      { "name": "Lumière du jour", "definitionId": null }
+    ],
+    "9": [
+      { "name": "Tempête de feu", "definitionId": null },
+      { "name": "Rayonnement sacré", "definitionId": null }
+    ]
+  },
+
+  "featuresByLevel": {
+    "1": [
+      {
+        "id": "warding-flare",
+        "name": "Warding Flare",
+        "description": "Interpose la lumière pour perturber une attaque ennemie proche (mécanique d'auto-protection)."
+      }
+    ],
+    "2": [
+      {
+        "id": "radiance-of-the-dawn",
+        "name": "Channel Divinity: Radiance of the Dawn",
+        "description": "Utilisez Channel Divinity pour infliger des dégâts lumineux et dissiper l'obscurité/les effets magiques sur une zone."
+      }
+    ],
+    "6": [
+      {
+        "id": "improved-lightcraft",
+        "name": "Improved Lightcraft",
+        "description": "Vos sorts de lumière gagnent un petit bonus de puissance (placeholder)."
+      }
+    ]
+  }
+}

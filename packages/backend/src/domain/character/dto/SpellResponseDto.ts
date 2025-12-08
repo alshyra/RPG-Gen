@@ -1,20 +1,32 @@
 import {
   ApiProperty, ApiPropertyOptional,
 } from '@nestjs/swagger';
+import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { SpellMetaDto } from './SpellMetaDto.js';
 
 export class SpellResponseDto {
+  @ApiProperty({ description: 'Canonical spell definition ID' })
+  @IsString()
+  definitionId: string;
+
   @ApiProperty({ description: 'Spell name' })
+  @IsString()
   name: string;
 
-  @ApiPropertyOptional({ description: 'Spell level' })
-  level?: number;
+  @ApiProperty({ description: 'Spell level' })
+  @IsNumber()
+  level: number;
 
   @ApiPropertyOptional({ description: 'Spell description' })
+  @IsString()
   description?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Spell metadata',
-    additionalProperties: true,
+    type: SpellMetaDto,
   })
-  meta?: Record<string, unknown>;
+  @ValidateNested()
+  @Type(() => SpellMetaDto)
+  meta: SpellMetaDto;
 }

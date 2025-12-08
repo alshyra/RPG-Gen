@@ -191,6 +191,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/characters/{characterId}/levelup/{className}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply level-up choices for a character class */
+        post: operations["CharacterController_applyLevelUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters/{characterId}/inventory/equip": {
         parameters: {
             query?: never;
@@ -362,6 +379,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/classes/{className}/levels/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get class-level options for a specific level */
+        get: operations["ClassesController_getLevelOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/image": {
         parameters: {
             query?: never;
@@ -423,23 +457,6 @@ export interface paths {
         put?: never;
         /** Use an item from inventory */
         post: operations["InventoryController_useItem"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rolls/{characterId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit resolved roll(s) (non-chat) for processing */
-        post: operations["RollsController_submitRoll"];
         delete?: never;
         options?: never;
         head?: never;
@@ -533,6 +550,12 @@ export interface components {
             school?: string;
             /** @description Spell description */
             description?: string;
+            /** @description Spell definition ID for deterministic persistence */
+            definitionId: string;
+            /** @description Spell metadata */
+            meta?: {
+                [key: string]: unknown;
+            };
         };
         InventoryInstructionMessageDto: {
             /**
@@ -657,29 +680,48 @@ export interface components {
             /** @description Item ID */
             _id?: string;
             /** @description Definition ID */
-            definitionId?: string;
+            definitionId: string;
             /** @description Item name */
-            name?: string;
+            name: string;
             /** @description Quantity */
             qty?: number;
             /** @description Item description */
-            description?: string;
+            description: string;
             /** @description Is equipped */
-            equipped?: boolean;
+            equipped: boolean;
             /** @description Arbitrary item meta */
-            meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
+            meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
+        };
+        SpellMetaDto: {
+            /** @description Damage dice notation (e.g., "1d6") */
+            damageDice?: string;
+            /** @description Type of damage (fire, cold, etc.) */
+            damageType?: string;
+            /** @description Saving throw type (DEX, CON, etc.) */
+            saveType?: string;
+            /**
+             * @description Attack type
+             * @enum {string}
+             */
+            attackType?: "melee" | "ranged" | "spell";
+            /** @description School of magic */
+            school?: string;
+            /** @description Area of effect description */
+            areaOfEffect?: string;
+            /** @description Scaling description */
+            scaling?: string;
         };
         SpellResponseDto: {
+            /** @description Canonical spell definition ID */
+            definitionId: string;
             /** @description Spell name */
             name: string;
             /** @description Spell level */
-            level?: number;
+            level: number;
             /** @description Spell description */
             description?: string;
             /** @description Spell metadata */
-            meta?: {
-                [key: string]: unknown;
-            };
+            meta: components["schemas"]["SpellMetaDto"];
         };
         CharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -931,6 +973,12 @@ export interface components {
             /** @description Arbitrary item meta */
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
+        LevelUpApplyDto: {
+            /** @description List of spell definitionIds to add to the character */
+            newSpellIds?: string[];
+            /** @description Ability score increases, e.g. [{ ability: "Str", inc: 1 }] */
+            abilityIncreases?: string[];
+        };
         EquipInventoryDto: {
             /**
              * @description Definition id of the item to equip
@@ -1017,6 +1065,8 @@ export interface components {
         AttackRequestDto: {
             /** @description Target ID to attack */
             targetId: string;
+            /** @description Optional spell name to cast instead of weapon attack */
+            spellName?: string;
         };
         DiceResultDto: {
             /** @description Individual dice roll results */
@@ -1125,6 +1175,24 @@ export interface components {
             expr: string;
             advantage?: string;
         };
+        LevelUpOptionsDto: {
+            /** @description Class name */
+            className: string;
+            /** @description Current level in class */
+            currentLevel: number;
+            /** @description Next level number (current + 1) */
+            nextLevel: number;
+            /** @description List of unlocked spells available at that level */
+            unlockedSpells: components["schemas"]["SpellResponseDto"][];
+            /** @description Whether an Ability Score Improvement (or feat) is available at this level */
+            asiAvailable: boolean;
+            /** @description Whether proficiency bonus increases at this level */
+            proficiencyIncrease: boolean;
+            /** @description Number of cantrips (level 0 spells) the character can know at this level */
+            cantripsKnown: number;
+            /** @description Number of spells (level 1+) the character can know at this level */
+            spellsKnown: number;
+        };
         ImageRequestDto: {
             /** @description API token (optional) */
             token?: string;
@@ -1160,10 +1228,6 @@ export interface components {
             character?: components["schemas"]["Function"];
             /** @description Human-readable result message */
             message: string;
-        };
-        SubmitRollDto: {
-            /** @description Resolved instructions array */
-            instructions: components["schemas"]["RollInstructionMessageDto"][];
         };
     };
     responses: never;
@@ -1544,6 +1608,33 @@ export interface operations {
             };
         };
     };
+    CharacterController_applyLevelUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+                className: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LevelUpApplyDto"];
+            };
+        };
+        responses: {
+            /** @description Updated character after levelup */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
+            };
+        };
+    };
     CharacterController_equipInventory: {
         parameters: {
             query?: never;
@@ -1859,6 +1950,31 @@ export interface operations {
             };
         };
     };
+    ClassesController_getLevelOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Name of the class (e.g., Bard, Cleric) */
+                className: string;
+                /** @description Level number (1-20) */
+                level: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Class-level options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LevelUpOptionsDto"];
+                };
+            };
+        };
+    };
     ImageController_generate: {
         parameters: {
             query?: never;
@@ -1960,31 +2076,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    RollsController_submitRoll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitRollDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RollInstructionMessageDto"][];
-                };
             };
         };
     };
