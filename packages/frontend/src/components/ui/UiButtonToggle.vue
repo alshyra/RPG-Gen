@@ -13,15 +13,11 @@
 
 <script setup lang="ts">
 import UiButton from './UiButton.vue';
-
-interface Option {
-  value: string | number;
-  label: string;
-}
+import type { UiButtonOption } from '@/interfaces';
 
 defineProps<{
   isSelected?: boolean; // For backward compatibility
-  options?: Option[]; // List of toggle options
+  options?: UiButtonOption[]; // List of toggle options
   modelValue?: string | number; // Currently selected value
 }>();
 

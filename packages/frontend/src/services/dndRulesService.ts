@@ -27,10 +27,7 @@ type RaceModifiers = Record<string, number>;
 
 type HitDieMap = Record<string, number>;
 
-interface Skill {
-  name: string;
-  ability: typeof ABILITIES[number];
-}
+import type { SkillRule as Skill } from '@/interfaces';
 
 type ClassProficiencies = Record<string, string[]>;
 

@@ -57,19 +57,10 @@
 
 <script setup lang="ts">
 import { X } from 'lucide-vue-next';
-interface Props {
-  isOpen: boolean;
-  title?: string;
-}
+import type { UiModalProps, UiModalEmits } from '@/interfaces';
 
-interface Emits {
-  close: [];
-  confirm: [];
-  cancel: [];
-}
-
-defineProps<Props>();
-const emit = defineEmits<Emits>();
+defineProps<UiModalProps>();
+const emit = defineEmits<UiModalEmits>();
 
 const close = () => emit('close');
 const handleConfirm = () => {

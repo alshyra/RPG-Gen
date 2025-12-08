@@ -130,7 +130,7 @@
 
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
-import type { LevelUpResult } from '../../services/dndLevelUpService';
+import type { LevelUpResult } from '@/interfaces';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import {
   computed, ref,
@@ -140,12 +140,8 @@ import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { conversationApi } from '../../apis/conversationApi';
 import { levelUpApi } from '@/apis/levelUpApi';
 
-interface Props {
-  world?: string;
-  initialCharacter?: CharacterResponseDto;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<{ world?: string;
+  initialCharacter?: CharacterResponseDto; }>(), {
   world: '',
   initialCharacter: undefined,
 });

@@ -8,21 +8,9 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 type DisplayRole = 'user' | 'assistant' | 'system';
-interface RollModalData {
-  diceNotation?: string;
-  rolls?: number[];
-  bonus?: number | null;
-  total?: number | null;
-  skillName?: string;
-  advantage?: 'advantage' | 'disadvantage' | 'none';
-  keptRoll?: number | null;
-  discardedRoll?: number | null;
-  // meta coming from pending instruction (attack/damage)
-  action?: string;
-  target?: string;
-  targetAc?: number | null;
-  show?: boolean;
-}
+import type { RollModalData } from '@/interfaces';
+
+// RollModalData is provided by /src/interface
 type StoredRole = 'user' | 'assistant' | 'system';
 
 // Map display roles to stored roles

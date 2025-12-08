@@ -1,34 +1,12 @@
 import {
   InventoryItemDto, SpellResponseDto,
 } from '@rpg-gen/shared';
-
-export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
-
-export interface ParsedCommand {
-  type: CommandType;
-  target: string;
-}
-
-export interface CommandDefinition {
-  command: CommandType;
-  description: string;
-  usage: string;
-}
-
-export interface ArgumentSuggestion {
-  name: string;
-  description?: string;
-  type: 'spell' | 'item' | 'target';
-}
+import type {
+  CommandType, ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionResult,
+} from '@/interfaces';
 
 export type SuggestionType = 'command' | 'argument';
-
-export interface SuggestionResult {
-  type: SuggestionType;
-  commandSuggestions: CommandDefinition[];
-  argumentSuggestions: ArgumentSuggestion[];
-  activeCommand?: CommandType;
-}
+export type { ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionResult, CommandType };
 
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 const COMMAND_WITH_SPACE_REGEX = /^\/(\w+)\s*(.*)$/;

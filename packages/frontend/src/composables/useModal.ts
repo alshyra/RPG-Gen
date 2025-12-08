@@ -1,15 +1,5 @@
 import { reactive } from 'vue';
-
-type ModalType = 'alert' | 'confirm';
-
-interface ModalState {
-  isOpen: boolean;
-  type: ModalType;
-  title?: string;
-  message: string;
-  // resolve/reject are set for the currently shown modal
-  _resolve?: (value?: unknown) => void;
-}
+import type { ModalState } from '@/interfaces';
 
 const state = reactive<ModalState>({
   isOpen: false,

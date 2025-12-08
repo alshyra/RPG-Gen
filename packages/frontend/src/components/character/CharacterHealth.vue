@@ -34,10 +34,9 @@ const props = defineProps<{
 const beating = ref(false);
 let timer: ReturnType<typeof setTimeout> | null = null;
 
-interface HpObject {
-  current?: number;
-  max?: number;
-}
+// HpObject imported from '@/interface'
+
+import type { HpObject } from '@/interfaces';
 
 const displayedHp = computed(() => {
   const v = props.hp;

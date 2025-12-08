@@ -56,15 +56,10 @@ import { storeToRefs } from 'pinia';
 import { useCharacterStore } from '@/stores/characterStore';
 import UiButton from '../ui/UiButton.vue';
 
-interface Props { isOpen: boolean }
+import type { DeathModalProps, DeathModalEmits } from '@/interfaces';
 
-interface Emits {
-  confirm: [];
-  close: [];
-}
-
-const { isOpen } = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const { isOpen } = defineProps<DeathModalProps>();
+const emit = defineEmits<DeathModalEmits>();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 

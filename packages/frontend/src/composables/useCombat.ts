@@ -22,6 +22,7 @@ export function useCombat() {
     currentTarget,
     currentAttackResult,
     currentPlayerAttackLog,
+    currentAttackView,
   } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
@@ -110,6 +111,31 @@ export function useCombat() {
   };
 
   const processAttackResult = async (result: AttackResponseDto, target: CombatantDto) => {
+    // snapshot previous state (before applying server-returned state)
+    const prevEnemies = combatStore.enemies.map(e => ({ ...e }));
+    const prevPlayer = combatStore.player ? { ...combatStore.player } : null;
+
+    // build client-friendly AttackView so components can display consistent values
+    const targetBefore = prevEnemies.find(e => e.id === target.id);
+    const targetAfter = result.combatState?.enemies?.find(e => e.id === target.id);
+
+    const attackView = {
+      attacker: prevPlayer?.name ?? 'Vous',
+      attackerId: prevPlayer?.id,
+      target: target.name,
+      targetId: target.id,
+      hit: (result.damageTotal !== undefined) || !!result.damageDiceResult,
+      damageRoll: result.damageDiceResult?.rolls ?? [],
+      damageBonus: 0,
+      totalDamage: result.damageTotal ?? 0,
+      critical: result.isCrit ?? false,
+      targetHpBefore: targetBefore?.hp ?? 0,
+      targetHpAfter: targetAfter?.hp ?? 0,
+      targetDefeated: (targetAfter?.hp ?? 0) <= 0,
+    };
+
+    currentAttackView.value = attackView;
+
     currentAttackResult.value = result;
     combatStore.initializeCombat(result.combatState);
     await showPlayerAttackAnimation(result);

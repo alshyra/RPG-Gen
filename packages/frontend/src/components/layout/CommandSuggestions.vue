@@ -54,16 +54,15 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import {
   getAllSuggestions,
-  type ArgumentSuggestion,
-  type CommandDefinition,
 } from '@/utils/chatCommands';
+import type { ArgumentSuggestion, CommandDefinition } from '@/interfaces';
 import {
   computed, ref, watch,
 } from 'vue';
 
-interface Props { inputText: string }
+import type { CommandSuggestionsProps } from '@/interfaces';
 
-const props = defineProps<Props>();
+const props = defineProps<CommandSuggestionsProps>();
 
 const emit = defineEmits<{
   (e: 'selectCommand', command: string): void;
