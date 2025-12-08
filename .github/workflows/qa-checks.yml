@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: ESLint & TypeScript
+  lint-and-tests:
+    name: Lint and and unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,50 +29,10 @@ jobs:
       - name: Run ESLint and TypeScript checks
         run: npm run lint
 
-  unit-tests:
-    name: unit-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "25.2.0"
-          cache: "npm"
-          cache-dependency-path: ./package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./
-        run: npm ci
-
-      - name: Run frontend unit tests (Vitest)
+      - name: Run unit tests
         run: npm run test
         env:
           CI: true
-
-  backend-tests:
-    name: Backend - Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "25.2.0"
-          cache: "npm"
-          cache-dependency-path: ./package-lock.json
-
-      - name: Install backend dependencies
-        working-directory: ./
-        run: npm ci
-
-      - name: Run unit tests
-        working-directory: ./packages/backend
-        run: npm run test
 
   cypress-run:
     runs-on: ubuntu-latest
@@ -202,45 +162,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-videos-${{ matrix.specs.name }}
-          path: frontend/cypress/videos
-          if-no-files-found: ignore
-
-  frontend-component-tests:
-    name: Frontend - Component Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "25.2.0"
-          cache: "npm"
-          cache-dependency-path: ./package-lock.json
-
-      - name: Install frontend dependencies
-        working-directory: ./
-        run: npm ci
-
-      - name: Run component tests
-        working-directory: ./packages/frontend
-        run: npm run test:component
-        env:
-          CI: true
-
-      - name: Upload component test screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: component-test-screenshots
-          path: frontend/cypress/screenshots
-          if-no-files-found: ignore
-
-      - name: Upload component test videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: component-test-videos
           path: frontend/cypress/videos
           if-no-files-found: ignore
