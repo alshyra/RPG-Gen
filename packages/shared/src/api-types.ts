@@ -692,6 +692,25 @@ export interface components {
             /** @description Arbitrary item meta */
             meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
+        SpellMetaDto: {
+            /** @description Damage dice notation (e.g., "1d6") */
+            damageDice?: string;
+            /** @description Type of damage (fire, cold, etc.) */
+            damageType?: string;
+            /** @description Saving throw type (DEX, CON, etc.) */
+            saveType?: string;
+            /**
+             * @description Attack type
+             * @enum {string}
+             */
+            attackType?: "melee" | "ranged" | "spell";
+            /** @description School of magic */
+            school?: string;
+            /** @description Area of effect description */
+            areaOfEffect?: string;
+            /** @description Scaling description */
+            scaling?: string;
+        };
         SpellResponseDto: {
             /** @description Canonical spell definition ID */
             definitionId: string;
@@ -702,9 +721,7 @@ export interface components {
             /** @description Spell description */
             description?: string;
             /** @description Spell metadata */
-            meta: {
-                [key: string]: unknown;
-            };
+            meta: components["schemas"]["SpellMetaDto"];
         };
         CharacterResponseDto: {
             /** @description Unique character ID (UUID) */

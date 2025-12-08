@@ -15,7 +15,7 @@ import type {
 } from '../../domain/chat/dto/index.js';
 import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
-import { SpellDefinitionService } from 'src/domain/spell-definition/spell-definition.service.js';
+import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.

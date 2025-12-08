@@ -50,6 +50,7 @@ export type RollInstructionMessageDto = import('./api-types').components['schema
 export type RollMetaDto = import('./api-types').components['schemas']['RollMetaDto'];
 export type SkillResponseDto = import('./api-types').components['schemas']['SkillResponseDto'];
 export type SpellInstructionMessageDto = import('./api-types').components['schemas']['SpellInstructionMessageDto'];
+export type SpellMetaDto = import('./api-types').components['schemas']['SpellMetaDto'];
 export type SpellResponseDto = import('./api-types').components['schemas']['SpellResponseDto'];
 export type ToolMeta = import('./api-types').components['schemas']['ToolMeta'];
 export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];

@@ -3,7 +3,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { ItemDefinitionDto } from 'src/domain/item-definition/item-definition.dto.js';
+import { ItemDefinitionDto } from '../../domain/item-definition/item-definition.dto.js';
 import { CharacterService } from '../../domain/character/character.service.js';
 import { CreateInventoryItemDto, type CharacterResponseDto } from '../../domain/character/dto/index.js';
 import type { InventoryInstructionMessageDto } from '../../domain/chat/dto/index.js';

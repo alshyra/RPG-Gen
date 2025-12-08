@@ -1769,6 +1769,44 @@
           "meta"
         ]
       },
+      "SpellMetaDto": {
+        "type": "object",
+        "properties": {
+          "damageDice": {
+            "type": "string",
+            "description": "Damage dice notation (e.g., \"1d6\")"
+          },
+          "damageType": {
+            "type": "string",
+            "description": "Type of damage (fire, cold, etc.)"
+          },
+          "saveType": {
+            "type": "string",
+            "description": "Saving throw type (DEX, CON, etc.)"
+          },
+          "attackType": {
+            "type": "string",
+            "description": "Attack type",
+            "enum": [
+              "melee",
+              "ranged",
+              "spell"
+            ]
+          },
+          "school": {
+            "type": "string",
+            "description": "School of magic"
+          },
+          "areaOfEffect": {
+            "type": "string",
+            "description": "Area of effect description"
+          },
+          "scaling": {
+            "type": "string",
+            "description": "Scaling description"
+          }
+        }
+      },
       "SpellResponseDto": {
         "type": "object",
         "properties": {
@@ -1789,9 +1827,12 @@
             "description": "Spell description"
           },
           "meta": {
-            "type": "object",
             "description": "Spell metadata",
-            "additionalProperties": true
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpellMetaDto"
+              }
+            ]
           }
         },
         "required": [

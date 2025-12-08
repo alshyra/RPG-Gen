@@ -212,7 +212,7 @@ test('CharacterService.update rejects spells missing definitionId', async (t) =>
     },
   ];
 
-  await t.throwsAsync(() => service.update(userId, characterId, { spells: invalidSpells }));
+  await t.throwsAsync(() => service.update(userId, characterId, { spells: invalidSpells as any }));
 });
 
 test('CharacterService.update rejects spells missing meta', async (t) => {
@@ -246,5 +246,5 @@ test('CharacterService.update rejects spells missing meta', async (t) => {
     },
   ];
 
-  await t.throwsAsync(() => service.update(userId, characterId, { spells: invalidSpells }));
+  await t.throwsAsync(() => service.update(userId, characterId, { spells: invalidSpells as any }));
 });
