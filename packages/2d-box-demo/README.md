@@ -1,6 +1,34 @@
 # 2d-box-demo
 
-This template should help get you started developing with Vue 3 in Vite.
+A Vue 3 + Vite demo for the **Combat Grid** component using [Konva.js](https://konvajs.org/) for 2D canvas rendering.
+
+## 🎮 Demo Features
+
+- **7×7 Tactical Grid** — Each cell is 60×60 pixels (420×420 total).
+- **Background Map** — Uses `public/map.png` as the battlefield backdrop.
+- **Tokens** — Player (green) and enemies (red/orange) are displayed as circles.
+- **Drag & Drop** — Only the player token is draggable. Drag it to move.
+- **Movement Range** — Configurable per-unit or global (default: 3 cells, Manhattan distance).
+- **Reachable Cells Highlight** — Blue overlay shows valid destination cells while dragging.
+- **Snap Animation** — Token snaps smoothly (lerp) to the nearest valid cell after drag.
+- **Bounds Clamping** — Tokens cannot leave the grid.
+- **Enemy Click Alert** — Clicking an enemy triggers a browser alert (placeholder for future actions).
+
+## 🚀 Quick Start
+
+```sh
+# From this directory (packages/2d-box-demo)
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 in your browser to see the demo.
+
+## 📁 Structure
+
+- `src/components/CombatGrid.vue` — The main Konva-based grid component.
+- `src/App.vue` — Demo harness with example map data and units.
+- `public/map.png` — Background image for the battlefield.
 
 ## Recommended IDE Setup
 
@@ -9,7 +37,7 @@ This template should help get you started developing with Vue 3 in Vite.
 ## Recommended Browser Setup
 
 - Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
   - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
 - Firefox:
   - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
