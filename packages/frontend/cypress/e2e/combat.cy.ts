@@ -22,29 +22,32 @@ describe('Combat flow', () => {
     cy.intercept('GET', '**/api/characters')
       .as('getCharacters');
     cy.visit('/home');
-    cy.wait('@getCharacters');
-    // Click on the character card (role="button" with aria-label containing "Reprendre")
-    cy.get('[role="button"][aria-label*="Reprendre"]')
-      .first()
-      .click();
 
-    // Ensure we are on either /game/:id or the character creation flow /character/:id/step/1
-    cy.url()
-      .should('match', /\/(game)\/[A-Za-z0-9-]+/);
-
-    // extract charId and continue test steps in separate then-block
-    cy.url()
-      .then((u: string) => {
-        // Try to extract characterId from either /game/:id or /character/:id/...
-        const m1 = u.match(/\/game\/([^/]+)$/);
-        const charId = m1 ? m1[1] : undefined;
+    // Extract the characterId from the initial GET /api/characters response to avoid
+    // parsing it from the URL — makes the test deterministic and less brittle.
+    cy.wait('@getCharacters')
+      .then((interception) => {
+        const chars = interception?.response?.body || [];
+        expect(chars.length).to.be.greaterThan(0);
+        const charId = chars[0].characterId || chars[0].id;
         expect(charId).to.be.a('string');
-        return charId as string;
+
+        // Click on the character card (role="button" with aria-label containing "Reprendre")
+        cy.get('[role="button"][aria-label*="Reprendre"]')
+          .first()
+          .click();
+
+        // Ensure the route points to /game/:charId
+        cy.url()
+          .should('match', new RegExp(`/game/${charId}$`));
+
+        // return a cy-wrapped value to avoid mixing synchronous return with cy commands
+        return cy.wrap(charId as string);
       })
       .then((charId: string) => {
       // If the UI landed on the character creation step, navigate directly to the game page
-        // Trigger a combat start on the backend for this character
-        // Wait for the combat status API call to complete
+      // Trigger a combat start on the backend for this character
+      // Wait for the combat status API call to complete
         cy.intercept('GET', '**/api/combat/*/status')
           .as('combatStatus');
         cy.wait('@combatStatus', { timeout: 10000 });
@@ -65,7 +68,7 @@ describe('Combat flow', () => {
         cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
           .should(($eles) => {
             if ($eles.length === 0) {
-              // Start combat explicitly for this character and wait for status update
+            // Start combat explicitly for this character and wait for status update
               cy.task('startCombatFor', { characterId: charId })
                 .then((res: any) => {
                   expect(res.ok).to.equal(true);
