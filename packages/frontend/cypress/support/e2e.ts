@@ -41,7 +41,9 @@ Cypress.Commands.add('ensureAuth', () => {
 
   // Stub the /api/auth/profile and avoid doing a real network request here — set localStorage directly.
   const profile = {
+    // older ops may rely on `name`, new UI expects `displayName` — provide both for compatibility
     name: 'Test User',
+    displayName: 'Test User',
     email: 'test@example.com',
     picture: 'http://localhost/avatar.png',
   };

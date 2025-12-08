@@ -212,6 +212,7 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
       level: s.level,
       description: s.description ?? '',
       definitionId: s.definitionId,
+      meta: s.meta,
     });
   } else {
     characterStore.forgetSpell(s.name);

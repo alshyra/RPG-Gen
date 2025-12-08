@@ -70,8 +70,8 @@ describe('Combat flow', () => {
                 .then((res: any) => {
                   expect(res.ok).to.equal(true);
                 });
-              // wait a short moment for the client to pick up the combat update
-              cy.wait(500);
+              // wait for the client to pick up the combat update (status GET should be called)
+              cy.wait('@combatStatus', { timeout: 10000 });
             }
           });
 
@@ -98,6 +98,12 @@ describe('Combat flow', () => {
           .should('exist')
           .find('[data-cy="attack-button"]')
           .should('exist')
+          .click();
+
+        // The current UI opens a modal to choose the action (weapon or spell).
+        // Click the weapon attack button inside the modal to actually trigger the POST request.
+        cy.contains('button', '⚔️ Attaque à l\'arme', { timeout: 2000 })
+          .should('be.visible')
           .click();
 
         // Wait for the backend attack call to complete (precedes roll modal)
