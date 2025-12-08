@@ -23,7 +23,7 @@ const createMockCharacterModel = () => {
       };
     }
 
-    static async findOneAndUpdate(filter: any, update: any, options: any) {
+    static async findOneAndUpdate(filter: any, update: any, _options: any) {
       const doc = mockDocs.find(
         d => d.userId === filter.userId && d.characterId === filter.characterId,
       );

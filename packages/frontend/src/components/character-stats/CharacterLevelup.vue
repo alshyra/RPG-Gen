@@ -213,10 +213,10 @@ const executeLevelUp = async (): Promise<void> => {
     try {
       await levelUpApi.applyLevelUp(updatedCharacter.characterId, className.value, {
         // No explicit spells/asi chosen in this flow — we apply the bare level-up server-side.
-        addSpells: [],
+        newSpellIds: [],
         abilityIncreases: [],
       });
-    } catch (e) {
+    } catch {
       // Fallback: save the computed character changes
       await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
     }

@@ -286,7 +286,7 @@ export function useGameCommands() {
     gameStore.appendMessage('system', 'Equipping...');
 
     await executeWithLoading(async () => {
-      const updated = await characterApi.equipInventoryItem(character.characterId, item.definitionId!);
+      const updated = await characterApi.equipInventoryItem(character.characterId, item.definitionId);
       characterStore.currentCharacter = updated;
       gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);

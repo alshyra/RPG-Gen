@@ -13,7 +13,7 @@ import { useCombatStore } from './combatStore';
 
 const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellResponseDto => ({
   name: spell.name,
-  level: spell.level,
+  level: spell.level ?? 0,
   description: spell.description,
   definitionId: spell.definitionId,
   meta: spell.meta || {},

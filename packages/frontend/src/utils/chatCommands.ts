@@ -190,7 +190,7 @@ export const getArgumentSuggestions = (
         })
         .filter(item => item.name !== undefined)
         .map(item => ({
-          name: item.name!,
+          name: item.name,
           description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
           type: 'item' as const,
         }));
@@ -202,7 +202,7 @@ export const getArgumentSuggestions = (
           .includes(partial))
         .filter(item => item.name !== undefined)
         .map(item => ({
-          name: item.name!,
+          name: item.name,
           description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
           type: 'item' as const,
         }));

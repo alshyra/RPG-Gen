@@ -190,6 +190,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Contient divers petits outils et rations',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'generic-torch',
@@ -197,6 +198,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Éclairage temporaire',
     qty: 3,
     meta: { usable: true },
+    equipped: false,
   },
   {
     definitionId: 'food-rations',
@@ -204,6 +206,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Portion pour un repas',
     qty: 5,
     meta: { usable: true },
+    equipped: false,
   },
   {
     definitionId: 'tent-1-2',
@@ -211,6 +214,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Abri pour 1-2 personnes',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'rope-15m',
@@ -218,6 +222,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Utilitaire polyvalent',
     qty: 1,
     meta: {},
+    equipped: false,
   },
   {
     definitionId: 'potion-health',
@@ -225,6 +230,7 @@ const basePack: LocalInventoryItem[] = [
     description: 'Soigne un peu de PV',
     qty: 3,
     meta: { usable: true },
+    equipped: false,
   },
 ];
 
@@ -248,6 +254,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       ],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-quarterstaff',
@@ -263,6 +270,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Versatile 1d8'],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-longsword',
@@ -278,6 +286,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Versatile 1d10'],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'weapon-rapier',
@@ -293,6 +302,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       properties: ['Finesse'],
       starter: true,
     },
+    equipped: false,
   },
 ];
 const chosenMainWeapon = ref(availableMainWeapons[0]);
@@ -316,6 +326,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
       ],
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'armor-shield',
@@ -332,6 +343,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
       weight: '6 lb',
       starter: true,
     },
+    equipped: false,
   },
 ];
 
@@ -351,6 +363,7 @@ const availableArmors: LocalInventoryItem[] = [
       weight: '10 lb',
       starter: true,
     },
+    equipped: false,
   },
   {
     definitionId: 'armor-hide',
@@ -366,6 +379,7 @@ const availableArmors: LocalInventoryItem[] = [
       weight: '12 lb',
       starter: true,
     },
+    equipped: false,
   },
 ];
 const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
