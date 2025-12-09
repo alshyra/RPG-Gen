@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<CombatArenaProps>(), {
 
 // Utiliser le composable
 const pixiCombat = usePixiCombat();
-const { init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid } = pixiCombat;
+const { init, createUnit, setupDragEvents, updateUnitHealth, setUnitHp, on, off, emit, moveUnitToGrid } = pixiCombat;
 
 // Références
 const pixiContainer = ref<HTMLDivElement | null>(null);
@@ -58,6 +58,7 @@ defineExpose({
   // Unit management
   createUnit,
   updateUnitHealth,
+  setUnitHp,
   moveUnitToGrid,
   setupDragEvents,
   

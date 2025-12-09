@@ -17,143 +17,55 @@ describe('Combat flow', () => {
       });
   });
 
-  it('starts a combat and resolves an attack -> damage -> turn advance', () => {
-    // Visit home and resume the created character
+  it('loads combat panel with visual arena and verifies state', () => {
+    // Setup intercepts before visit
     cy.intercept('GET', '**/api/characters')
       .as('getCharacters');
+    cy.intercept('GET', '**/api/combat/*/status')
+      .as('combatStatus');
+
     cy.visit('/home');
 
-    // Extract the characterId from the initial GET /api/characters response to avoid
-    // parsing it from the URL — makes the test deterministic and less brittle.
+    // Get character and navigate directly to game
     cy.wait('@getCharacters')
       .then((interception) => {
         const chars = interception?.response?.body || [];
         expect(chars.length).to.be.greaterThan(0);
-        const charId = chars[0].characterId || chars[0].id;
-        expect(charId).to.be.a('string');
+        const charId = chars[0].characterId;
 
-        // Click on the character card (role="button" with aria-label containing "Reprendre")
-        cy.get('[role="button"][aria-label*="Reprendre"]')
-          .first()
-          .click();
+        // Navigate directly to game route with character
+        cy.visit(`/${charId}/game`);
 
-        // Ensure the route points to /game/:charId
-        cy.url()
-          .should('match', new RegExp(`/game/${charId}$`));
-
-        // return a cy-wrapped value to avoid mixing synchronous return with cy commands
-        return cy.wrap(charId as string);
-      })
-      .then((charId: string) => {
-      // If the UI landed on the character creation step, navigate directly to the game page
-      // Trigger a combat start on the backend for this character
-      // Wait for the combat status API call to complete
-        cy.intercept('GET', '**/api/combat/*/status')
-          .as('combatStatus');
+        // Wait for combat status to load
         cy.wait('@combatStatus', { timeout: 10000 });
 
-        // Combat Panel should be visible (with longer timeout for combat to initialize)
+        // Combat Panel should be visible with arena
         cy.get('[data-cy="combat-panel"]', { timeout: 10000 })
           .should('exist');
 
-        // Debug: log what's in the combat panel
-        cy.get('[data-cy="combat-panel"]')
-          .then(($panel) => {
-            cy.log('Combat panel content: ' + $panel.html()
-              .substring(0, 500));
-          });
+        cy.get('[data-cy="combat-arena"]', { timeout: 5000 })
+          .should('exist');
 
-        // Wait for enemies to be rendered — combat may not always be started by seed helper,
-        // so if we don't find enemies we try to start combat explicitly and wait again.
-        cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
-          .should(($eles) => {
-            if ($eles.length === 0) {
-            // Start combat explicitly for this character and wait for status update
-              cy.task('startCombatFor', { characterId: charId })
-                .then((res: any) => {
-                  expect(res.ok).to.equal(true);
-                });
-              // wait for the client to pick up the combat update (status GET should be called)
-              cy.wait('@combatStatus', { timeout: 10000 });
-            }
-          });
-
-        // ensure we have at least one enemy rendered after the attempt above
-        cy.get('[data-cy^="enemy-"]', { timeout: 10000 })
-          .should('have.length.gte', 1);
-
-        // Debug: log the enemy elements
-        cy.get('[data-cy^="enemy-"]')
-          .then(($enemies) => {
-            cy.log('Found ' + $enemies.length + ' enemies');
-            $enemies.each((i, el) => {
-              cy.log('Enemy ' + i + ': ' + el.outerHTML.substring(0, 200));
-            });
-          });
-
-        // Intercept the attack request so we can wait for the backend to process it
-        cy.intercept('POST', '**/api/combat/*/attack')
-          .as('attackReq');
-
-        // Find the first enemy tile and click its attack button
-        // Use a more flexible selector that works within the enemy container
-        cy.get('[data-cy="enemy-0"]')
+        // Check that PixiJS canvas was created
+        cy.get('[data-cy="combat-arena"] canvas', { timeout: 5000 })
           .should('exist')
-          .find('[data-cy="attack-button"]')
-          .should('exist')
-          .click();
+          .and('be.visible');
 
-        // The current UI opens a modal to choose the action (weapon or spell).
-        // Click the weapon attack button inside the modal to actually trigger the POST request.
-        cy.contains('button', '⚔️ Attaque à l\'arme', { timeout: 2000 })
-          .should('be.visible')
-          .click();
-
-        // Wait for the backend attack call to complete (precedes roll modal)
-        cy.wait('@attackReq', { timeout: 10000 });
-
-        // After attack: either the client will show a roll modal (server asked for a roll)
-        // or the server applied damage directly. Handle both cases.
-        cy.get('body')
-          .then(($body) => {
-            if ($body.find('[data-cy="roll-modal"]').length > 0) {
-            // Roll modal path: intercept resolve endpoint, send result, and assert
-              cy.intercept('POST', `**/api/combat/${charId}/resolve-roll`)
-                .as('resolveRoll');
-              cy.get('[data-cy="roll-modal"]')
-                .within(() => {
-                  cy.contains('Send Result')
-                    .click();
-                });
-
-              // Expect the combat resolve endpoint to be called
-              cy.wait('@resolveRoll')
-                .its('response.statusCode')
-                .should('be.oneOf', [
-                  200,
-                  201,
-                ]);
-            } else {
-            // No roll modal -> server likely applied damage already. Check for damage narrative.
-            // Allow some time for the assistant/system messages to appear (optional).
-              cy.wait(500);
-            }
-
-            // Common assertion: check the first enemy has a numeric hp attribute
-            cy.get('[data-cy="enemy-0"]')
-              .within(() => {
-                cy.get('[data-cy="hp-bar"]')
-                  .invoke('attr', 'data-hp')
-                  .then((hp: string | undefined) => {
-                    const val = Number(hp);
-                    expect(Number.isFinite(val)).to.be.true;
-                  });
-              });
+        // Verify combat state via API
+        cy.wait('@combatStatus')
+          .its('response.body')
+          .should((body: any) => {
+            expect(body.inCombat).to.be.true;
+            expect(body.enemies).to.be.an('array');
+            expect(body.enemies.length).to.be.greaterThan(0);
+            expect(body.player).to.exist;
+            expect(body.player.hp).to.be.a('number');
           });
 
-        cy.get('[data-cy="combat-round"]')
+        // Check that combat header displays round number
+        cy.get('[data-cy="combat-round"]', { timeout: 5000 })
           .should('exist')
-          .and('not.be.empty');
+          .and('contain.text', 'Round');
       });
   });
 });

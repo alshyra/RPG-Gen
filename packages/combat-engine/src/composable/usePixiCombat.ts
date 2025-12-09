@@ -573,12 +573,34 @@ export function usePixiCombat() {
       console.error('Barre de vie non initialisée pour cette unité.');
     }
   };
+
+  const setUnitHp = (unitId: string, hp: number) => {
+    const unitData = units.value.get(unitId);
+    if (!unitData) {
+      console.error(`Unité ${unitId} non trouvée.`);
+      return;
+    }
+
+    // Set absolute HP value
+    const newHp = Math.max(0, Math.min(hp, unitData.maxHp));
+    unitData.hp = newHp;
+
+    // Update visual health bar
+    if (unitData.healthBar && unitData.healthBar.update) {
+      unitData.healthBar.update(newHp);
+      console.log(`Unité ${unitId} HP set to: ${newHp}/${unitData.maxHp}`);
+    } else {
+      console.error('Barre de vie non initialisée pour cette unité.');
+    }
+  };
+
   return {
     init,
     createUnit,
     moveUnitToGrid,
     setupDragEvents,
     updateUnitHealth,
+    setUnitHp,
     // Event API
     on,
     off,

@@ -1,5 +1,7 @@
 // packages/frontend/src/composables/useCombatEngine.ts
-import { ref, shallowRef, onUnmounted } from 'vue';
+import {
+  ref, shallowRef, onUnmounted, watch,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCombat as useBackendCombat } from '@/composables/useCombat';
 import { CombatAdapter } from '@/adapters/combatAdapters';
@@ -21,6 +23,7 @@ export interface CombatArenaApi {
     maxHp: number,
   ) => Promise<unknown>;
   updateUnitHealth: (unitId: string, damage: number) => void;
+  setUnitHp: (unitId: string, hp: number) => void;
   moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
   setupDragEvents: () => void;
   on: <T extends keyof CombatEngineEventPayload>(
@@ -204,6 +207,32 @@ export function useCombatEngine() {
 
     arenaApi.value.setupDragEvents();
   };
+
+  // Watch for enemy attack logs and update visual HP
+  watch(() => combatStore.currentEnemyAttackLog, (log) => {
+    if (!log || !arenaApi.value) return;
+
+    // Enemy attacks player - update player HP
+    if (log.hit && log.damageTotal && arenaApi.value.setUnitHp && player.value) {
+      arenaApi.value.setUnitHp(player.value.id, player.value.hp);
+      console.log('[useCombatEngine] Updated player HP after enemy attack:', player.value.hp);
+    }
+  });
+
+  // Watch for player attack logs and update enemy visual HP
+  watch(() => combatStore.currentPlayerAttackLog, (log) => {
+    if (!log || !arenaApi.value) return;
+
+    const targetId = log.targetId ?? log.target?.id;
+    if (!targetId) return;
+
+    // Find enemy to get current HP
+    const enemy = enemies.value.find(e => e.id === targetId);
+    if (enemy && arenaApi.value.setUnitHp) {
+      arenaApi.value.setUnitHp(targetId, enemy.hp);
+      console.log('[useCombatEngine] Updated enemy HP after player attack:', enemy.hp);
+    }
+  });
 
   // Cleanup on unmount
   onUnmounted(() => {

@@ -3,6 +3,7 @@
   <div
     v-if="inCombat"
     class="combat-wrapper"
+    data-cy="combat-panel"
   >
     <!-- Header avec infos turn/actions (gardé tel quel) -->
     <CombatHeader />
@@ -10,6 +11,7 @@
     <!-- NOUVEAU : Arène visuelle PixiJS -->
     <CombatArena
       ref="arenaRef"
+      data-cy="combat-arena"
     />
 
     <!-- Modal de sélection d'action (attaque arme / sort) -->
