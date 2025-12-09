@@ -1,8 +1,16 @@
 {
-  "name": "2d-box-demo-pixi",
+  "name": "@rpg-gen/combat-engine",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },

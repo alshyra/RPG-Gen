@@ -19,7 +19,7 @@ export const DIRECTIONS = [
   'bottom_left',
 ] as const;
 
-type Direction = typeof DIRECTIONS[number];
+export type Direction = typeof DIRECTIONS[number];
 
 const ANIM_TYPES: Record<string, { frames: number; speed: number }> = {
   idle: { frames: 2, speed: 0.05 },

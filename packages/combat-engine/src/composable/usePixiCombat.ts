@@ -34,11 +34,53 @@ const GRID_CONFIG = {
   reachableAlpha: 0.4,
 };
 
+// Event types for external subscribers
+export type CombatEngineEventType = 'unit:clicked' | 'unit:attacked' | 'unit:died' | 'turn:ended';
+
+export interface UnitClickedPayload {
+  unitId: string;
+  isPlayer: boolean;
+}
+
+export interface UnitAttackedPayload {
+  attackerId: string;
+  targetId: string;
+  damage: number;
+  isCrit?: boolean;
+}
+
+export interface CombatEngineEventPayload {
+  'unit:clicked': UnitClickedPayload;
+  'unit:attacked': UnitAttackedPayload;
+  'unit:died': { unitId: string };
+  'turn:ended': { roundNumber: number };
+}
+
+type EventHandler<T extends CombatEngineEventType> = (payload: CombatEngineEventPayload[T]) => void;
+
 export function usePixiCombat() {
   const app = ref<PIXI.Application | null>(null);
   const units = ref<Map<string, UnitData>>(new Map());
   const gridContainer = ref<PIXI.Container | null>(null);
   const rangeOverlay = ref<PIXI.Container | null>(null);
+
+  // Event emitter internals
+  const eventListeners = new Map<CombatEngineEventType, Set<EventHandler<CombatEngineEventType>>>();
+
+  const on = <T extends CombatEngineEventType>(event: T, handler: EventHandler<T>) => {
+    if (!eventListeners.has(event)) {
+      eventListeners.set(event, new Set());
+    }
+    eventListeners.get(event)!.add(handler as EventHandler<CombatEngineEventType>);
+  };
+
+  const off = <T extends CombatEngineEventType>(event: T, handler: EventHandler<T>) => {
+    eventListeners.get(event)?.delete(handler as EventHandler<CombatEngineEventType>);
+  };
+
+  const emit = <T extends CombatEngineEventType>(event: T, payload: CombatEngineEventPayload[T]) => {
+    eventListeners.get(event)?.forEach(handler => handler(payload));
+  };
 
   let isDragging = false;
   let dragTarget: string | null = null;
@@ -356,6 +398,10 @@ export function usePixiCombat() {
       if (unitData) {
         showReachableCells(unitData.gridX, unitData.gridY, unitData.maxMoveRange);
       }
+      // Emit unit:clicked event for external subscribers
+      // isPlayer is determined by the unitId prefix (convention: 'player' vs 'enemy')
+      const isPlayer = unitId.startsWith('player');
+      emit('unit:clicked', { unitId, isPlayer });
     });
 
     sprite.play();
@@ -533,5 +579,9 @@ export function usePixiCombat() {
     moveUnitToGrid,
     setupDragEvents,
     updateUnitHealth,
+    // Event API
+    on,
+    off,
+    emit,
   };
 }

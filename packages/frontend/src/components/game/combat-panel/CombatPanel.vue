@@ -10,34 +10,68 @@
     <!-- NOUVEAU : Arène visuelle PixiJS -->
     <CombatArena
       ref="arenaRef"
-      :combat-state="combatState"
-      @unit-moved="handleUnitMoved"
-      @unit-attacked="handleUnitAttacked"
+      :manual-init="false"
     />
 
-    <!-- Ancien ParticipantsGrid remplacé ou gardé comme fallback -->
+    <!-- Modal de sélection d'action (attaque arme / sort) -->
+    <SpellSelector
+      :is-open="isActionModalOpen"
+      :target="selectedTarget"
+      @close="closeActionModal"
+      @attack="handleAttack"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import {
+  ref, onMounted, onUnmounted, watch,
+} from 'vue';
+import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
+import CombatHeader from './CombatHeader.vue';
+import SpellSelector from './SpellSelector.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCombatStore } from '@/stores/combatStore';
+import type { CombatantDto } from '@rpg-gen/shared';
+import type { CombatArenaApi } from '@/composables/useCombatEngine';
+
+const combatStore = useCombatStore();
+const { inCombat } = storeToRefs(combatStore);
 
 const {
-  executeAttack, moveUnit,
+  registerArena,
+  unregisterArena,
+  isActionModalOpen,
+  selectedTarget,
+  executeAttack,
+  closeActionModal,
 } = useCombatEngine();
 
-const handleUnitMoved = async (payload: { unitId: string;
-  to: GridPosition; }) => {
-  // Le moteur visuel a déjà animé, on valide avec le backend si besoin
-  console.log('Unit moved visually:', payload);
+// Reference to arena component
+const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);
+
+// Handle attack from SpellSelector modal
+const handleAttack = async (target: CombatantDto, spellName?: string) => {
+  await executeAttack(target, spellName);
 };
 
-const handleUnitAttacked = async (payload: { attackerId: string;
-  targetId: string; }) => {
-  const target = combatStore.enemies.find(e => e.id === payload.targetId);
-  if (target) {
-    await executeAttack(target);
+// Register arena API when mounted
+onMounted(() => {
+  if (arenaRef.value) {
+    // The arena exposes its API via defineExpose
+    registerArena(arenaRef.value as unknown as CombatArenaApi);
   }
-};
+});
+
+// Also watch for arena ref changes (in case of dynamic mounting)
+watch(arenaRef, (newRef) => {
+  if (newRef) {
+    registerArena(newRef as unknown as CombatArenaApi);
+  }
+});
+
+onUnmounted(() => {
+  unregisterArena();
+});
 </script>

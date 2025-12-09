@@ -17,6 +17,7 @@ export interface UnitStats {
   maxHp: number;
   ac: number;
   attack: number;
+  defense: number;
   moveRange: number;
   attackRange: number;
 }

@@ -14,7 +14,6 @@
 
 <script setup lang="ts">
 import UiLoader from './UiLoader.vue';
-import { defineProps } from 'vue';
 
 const props = defineProps<{
   title?: string;

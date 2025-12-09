@@ -63,6 +63,7 @@ import UiButton from '@/components/ui/UiButton.vue';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useCombatEngine } from '@/composables/useCombatEngine';
 import {
   Activity,
   ChevronUp,
@@ -72,11 +73,13 @@ import {
 import { storeToRefs } from 'pinia';
 import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
+import { combatService } from '@/apis/combatApi';
 
 const combatStore = useCombatStore();
 const ui = useUiStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
+const { replayEnemyAttacks } = useCombatEngine();
 const {
   roundNumber,
   actionRemaining,
@@ -125,7 +128,17 @@ const onEndTurn = async () => {
 
   try {
     isEndingTurn.value = true;
-    await combatStore.endActivation(currentCharacter.value.characterId);
+
+    // Call the API directly to get the response with attackLogs
+    const response = await combatService.endActivation(currentCharacter.value.characterId);
+
+    // Replay enemy attacks on visual engine (if arena is registered)
+    if (response.attackLogs?.length) {
+      await replayEnemyAttacks(response.attackLogs);
+    }
+
+    // Update combat store with the result
+    combatStore.updateFromTurnResult(response);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     if (message.includes('Combat session not found') || message.includes('No active combat found')) {

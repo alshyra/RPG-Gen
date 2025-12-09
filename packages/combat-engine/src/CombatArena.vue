@@ -4,12 +4,12 @@
       ref="pixiContainer"
       class="pixi-container"
     />
-    <div class="instructions">
-      <p>🎮 Cliquez et glissez votre personnage (max 3 cases)</p>
+    <div
+      v-if="!manualInit"
+      class="instructions"
+    >
+      <p>🎮 Cliquez sur un ennemi pour ouvrir le menu d'action</p>
       <p>✨ Les cases vertes indiquent la portée de déplacement</p>
-      <button @click="damageEnemy">
-        Damage Enemy (-10 HP)
-      </button>
     </div>
   </div>
 </template>
@@ -18,29 +18,56 @@
 import { ref, onMounted } from 'vue';
 import { usePixiCombat } from './composable/usePixiCombat';
 
+// Props optionnelles pour configuration externe
+export interface CombatArenaProps {
+  /** Si true, n'initialise pas automatiquement (laisse le parent gérer) */
+  manualInit?: boolean;
+}
+
+const props = withDefaults(defineProps<CombatArenaProps>(), {
+  manualInit: false,
+});
+
 // Utiliser le composable
-const { init, createUnit, setupDragEvents, updateUnitHealth } = usePixiCombat();
+const pixiCombat = usePixiCombat();
+const { init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid } = pixiCombat;
 
 // Références
 const pixiContainer = ref<HTMLDivElement | null>(null);
-const playerUnitId = ref('player1');
-const enemyUnitId = ref('enemy1');
 
-// Fonction pour tester la mise à jour des HP
-const damageEnemy = () => {
-  updateUnitHealth(enemyUnitId.value, 10);
-  // enemyUnitId.value. ???
-};
-
-// Initialisation au montage
+// Initialisation au montage (demo mode si pas manualInit)
 onMounted(async () => {
-  if (!pixiContainer.value) return;
+  if (!pixiContainer.value || props.manualInit) return;
+  
+  // Demo initialization
   await init(pixiContainer.value);
-
-  await createUnit(playerUnitId.value, 6, 4, 3, 'Archer-Green', 100, 100);
-
-  await createUnit(enemyUnitId.value, 2, 4, 3, 'Warrior-Red', 80, 100);
+  await createUnit('player1', 6, 4, 3, 'Archer-Green', 100, 100);
+  await createUnit('enemy1', 2, 4, 3, 'Warrior-Red', 80, 100);
   setupDragEvents();
+});
+
+// Expose l'API complète pour le parent
+defineExpose({
+  // Lifecycle
+  init: async (container?: HTMLDivElement) => {
+    const target = container ?? pixiContainer.value;
+    if (!target) throw new Error('No container for CombatArena init');
+    return init(target);
+  },
+  
+  // Unit management
+  createUnit,
+  updateUnitHealth,
+  moveUnitToGrid,
+  setupDragEvents,
+  
+  // Event API
+  on,
+  off,
+  emit,
+  
+  // Access to container ref
+  getContainer: () => pixiContainer.value,
 });
 </script>
 

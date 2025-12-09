@@ -1,6 +1,6 @@
 // packages/frontend/src/adapters/combatAdapter.ts
-import type { CombatStateDto, CombatantDto } from '@rpg-gen/shared';
-import type { UnitConfig, CombatConfig } from '@rpg-gen/combat-engine';
+import type { CombatStateDto } from '@rpg-gen/shared';
+import type { UnitConfig, CombatConfig, GridPosition } from '@rpg-gen/combat-engine';
 
 export class CombatAdapter {
   /**
@@ -26,7 +26,7 @@ export class CombatAdapter {
         isPlayer: true,
       },
       // Enemies
-      ...state.enemies.map((enemy, idx) => ({
+      ...state.enemies.map((enemy, idx): UnitConfig => ({
         id: enemy.id,
         characterKey: this.mapEnemyToSprite(enemy.name),
         position: this.getInitialPosition('enemy', state, idx),
@@ -45,7 +45,11 @@ export class CombatAdapter {
     ];
 
     return {
-      gridSize: { cols: 12, rows: 9, cellSize: 64 },
+      gridSize: {
+        cols: 12,
+        rows: 9,
+        cellSize: 64,
+      },
       units,
       turnBased: true,
     };
@@ -56,16 +60,19 @@ export class CombatAdapter {
    */
   private static getInitialPosition(
     team: 'player' | 'enemy',
-    state: CombatStateDto,
-    index = 0
+    _state: CombatStateDto,
+    index = 0,
   ): GridPosition {
     if (team === 'player') {
-      return { gridX: 2, gridY: 4 }; // Gauche centre
+      return {
+        gridX: 2,
+        gridY: 4,
+      }; // Gauche centre
     }
     // Ennemis à droite, espacés verticalement
-    return { 
-      gridX: 9, 
-      gridY: 3 + index * 2 // 3, 5, 7...
+    return {
+      gridX: 9,
+      gridY: 3 + index * 2, // 3, 5, 7...
     };
   }
 
@@ -74,9 +81,9 @@ export class CombatAdapter {
    */
   private static mapEnemyToSprite(name: string): string {
     const mapping: Record<string, string> = {
-      'Goblin': 'goblin',
-      'Orc': 'orc',
-      'Skeleton': 'skeleton',
+      Goblin: 'goblin',
+      Orc: 'orc',
+      Skeleton: 'skeleton',
     };
     return mapping[name] ?? 'enemy-generic';
   }
