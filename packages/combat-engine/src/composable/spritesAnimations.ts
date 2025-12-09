@@ -23,7 +23,7 @@ type Direction = typeof DIRECTIONS[number];
 
 const ANIM_TYPES: Record<string, { frames: number; speed: number }> = {
   idle: { frames: 2, speed: 0.05 },
-  walk: { frames: 2, speed: 0.2 },
+  walk: { frames: 2, speed: 0.05 },
   attack: { frames: 4, speed: 0.25 },
   death: { frames: 4, speed: 0.1 },
 };
@@ -39,3 +39,5 @@ export const animations: Record<string, AnimConfig> = Object.entries(ANIM_TYPES)
     acc[key] = cfg;
     return acc;
   }, {});
+
+console.log('Loaded animations config:', animations);

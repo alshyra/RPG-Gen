@@ -3,14 +3,6 @@ import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
 import { animations as animationConfig, frameWidth, frameHeight, DIRECTIONS } from './spritesAnimations';
 
-// État de l'animation
-enum AnimationState {
-  IDLE = 'idle',
-  WALK = 'walk',
-  ATTACK = 'attack',
-  DEATH = 'death',
-}
-
 // Interface pour stocker les données d'unité
 interface UnitData {
   sprite: PIXI.AnimatedSprite;
@@ -194,9 +186,10 @@ export function usePixiCombat() {
   };
 
   // DONT FUCKING TOUCH THIS MOFO
-  const loadAssets = async (characterKey = 'archer-green') => {
+  const loadAssets = async (characterKey = 'Archer-Green') => {
     try {
-      const texture = await PIXI.Assets.load('/puny-characters/Archer-Green.png');
+      console.log('Loading texture for character:', characterKey);
+      const texture = await PIXI.Assets.load(`/puny-characters/${characterKey}.png`);
       console.log('Texture chargée:', texture.width, texture.height);
 
       const createFrameTexture = (baseTexture: PIXI.Texture, x: number, y: number, w: number, h: number) => {
@@ -261,7 +254,7 @@ export function usePixiCombat() {
     gridX = 6,
     gridY = 4,
     maxMoveRange = 3,
-    characterKey = 'archer-green',
+    characterKey = 'Archer-Green',
   ) => {
     if (!app.value) return null;
 
@@ -418,6 +411,8 @@ export function usePixiCombat() {
         const idleKey = `idle_${dir}`;
         sprite.textures = animations[idleKey];
         sprite.animationSpeed = animationConfig[idleKey].speed;
+        console.log(`Setting idle speed for ${idleKey}:`, sprite.animationSpeed);
+
         sprite.loop = true;
         sprite.play();
 
@@ -430,9 +425,8 @@ export function usePixiCombat() {
 
   // Nettoyage
   onUnmounted(() => {
-    if (app.value) {
-      app.value.destroy(true);
-    }
+    if (!app.value) return;
+    app.value.destroy(true);
   });
 
   return {

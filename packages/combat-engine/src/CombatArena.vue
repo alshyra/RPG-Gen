@@ -19,26 +19,19 @@ import { usePixiCombat } from './composable/usePixiCombat';
 const { init, createUnit, setupDragEvents } = usePixiCombat();
 
 // Références
-const pixiContainer = ref < HTMLElement | null > (null);
+const pixiContainer = ref <HTMLDivElement | null> (null);
 const playerUnitId = ref('player1');
+const enemyUnitId = ref('enemy1');
 
 // Initialisation au montage
 onMounted(async () => {
-  if (pixiContainer.value) {
-    await init(pixiContainer.value);
+  if (!pixiContainer.value) return;
+  await init(pixiContainer.value);
 
-    // Créer une unité de joueur au centre de la grille (colonne 6, ligne 4)
-    // avec une portée de déplacement de 3 cases
-    // Vous pouvez changer 'archer-green' par 'warrior-red' pour tester
-    const player = await createUnit(playerUnitId.value, 6, 4, 3, 'archer-green');
-
-    if (player) {
-      console.log('Unité créée avec succès !');
-
-      // Configurer les événements de drag & drop
-      setupDragEvents();
-    }
-  }
+  await createUnit(playerUnitId.value, 6, 4, 3, 'Archer-Green');
+  
+  await createUnit(enemyUnitId.value, 2, 4, 3, 'Warrior-Red');
+  setupDragEvents();
 });
 </script>
 
