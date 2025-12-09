@@ -25,7 +25,7 @@ export interface CombatArenaProps {
 }
 
 const props = withDefaults(defineProps<CombatArenaProps>(), {
-  manualInit: false,
+  manualInit: true,
 });
 
 // Utiliser le composable

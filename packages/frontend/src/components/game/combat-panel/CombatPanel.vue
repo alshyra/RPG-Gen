@@ -10,7 +10,6 @@
     <!-- NOUVEAU : Arène visuelle PixiJS -->
     <CombatArena
       ref="arenaRef"
-      :manual-init="false"
     />
 
     <!-- Modal de sélection d'action (attaque arme / sort) -->

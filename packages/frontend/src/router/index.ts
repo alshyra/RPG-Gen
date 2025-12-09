@@ -15,6 +15,7 @@ import NotFoundView from '../views/NotFoundView.vue';
 import LoginView from '../views/LoginView.vue';
 import AuthCallbackView from '../views/AuthCallbackView.vue';
 import { authService } from '../apis/authApi';
+import CombatPanel from '@/components/game/combat-panel/CombatPanel.vue';
 
 const routes = [
   {
@@ -68,6 +69,11 @@ const routes = [
         path: 'quest',
         name: 'game-quest',
         component: QuestView,
+      },
+      {
+        path: 'combat',
+        name: 'game-combat',
+        component: CombatPanel,
       },
     ],
   },

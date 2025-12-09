@@ -47,36 +47,25 @@
       <span v-if="isEndingTurn">En cours...</span>
       <span v-else>Fin de tour</span>
     </UiButton>
-    <button
-      class="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 border border-slate-700 shadow-md border-b-0 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
-      :aria-expanded="isCombatOpen"
-      :aria-label="isCombatOpen ? 'Masquer le panneau de combat' : 'Afficher le panneau de combat'"
-      @click="ui.toggleCombat()"
-    >
-      <ChevronUp :class="['w-4 h-4 text-slate-200 transform-gpu transition-transform duration-250', isCombatOpen ? 'rotate-180' : 'rotate-0']" />
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { combatService } from '@/apis/combatApi';
 import UiButton from '@/components/ui/UiButton.vue';
+import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
-import { useUiStore } from '@/stores/uiStore';
-import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useGameStore } from '@/stores/gameStore';
 import {
   Activity,
-  ChevronUp,
   Flag,
   Star,
 } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
-import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
-import { combatService } from '@/apis/combatApi';
 
 const combatStore = useCombatStore();
-const ui = useUiStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 const { replayEnemyAttacks } = useCombatEngine();
@@ -86,9 +75,6 @@ const {
   bonusActionRemaining,
   phase,
 } = storeToRefs(combatStore);
-const {
-  isCombatOpen,
-} = storeToRefs(ui);
 
 const phaseLabel = computed(() => {
   switch (phase.value) {

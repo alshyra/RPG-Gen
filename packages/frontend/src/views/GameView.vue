@@ -46,7 +46,6 @@
     </div>
 
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-50 pointer-events-none">
-      <CombatPanel v-if="inCombat" />
       <div class="pointer-events-auto">
         <ChatBar
           :connected-top="inCombat"
@@ -68,7 +67,6 @@ import {
   useRoute, useRouter,
 } from 'vue-router';
 import { characterApi } from '../apis/characterApi';
-import CombatPanel from '../components/game/combat-panel/CombatPanel.vue';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollModal from '../components/game/RollModal.vue';
 import ChatBar from '../components/layout/ChatBar.vue';
