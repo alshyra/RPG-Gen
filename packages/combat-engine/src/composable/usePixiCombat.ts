@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
-import spriteConfig from './spritesAnimations.json';
+import { animations as animationConfig, frameWidth, frameHeight, DIRECTIONS } from './spritesAnimations';
 
 // État de l'animation
 enum AnimationState {
@@ -9,20 +9,6 @@ enum AnimationState {
   WALK = 'walk',
   ATTACK = 'attack',
   DEATH = 'death',
-}
-
-// Interface pour la configuration d'animation
-interface AnimationConfig {
-  row: number;
-  frames: number;
-  speed: number;
-}
-
-interface SpriteConfig {
-  spriteSheet: string;
-  frameWidth: number;
-  frameHeight: number;
-  animations: Record<string, AnimationConfig>;
 }
 
 // Interface pour stocker les données d'unité
@@ -52,7 +38,7 @@ export function usePixiCombat() {
   const units = ref<Map<string, UnitData>>(new Map());
   const gridContainer = ref<PIXI.Container | null>(null);
   const rangeOverlay = ref<PIXI.Container | null>(null);
-  
+
   let isDragging = false;
   let dragTarget: string | null = null;
 
@@ -90,15 +76,15 @@ export function usePixiCombat() {
         const tile = new PIXI.Graphics();
         const isEven = (row + col) % 2 === 0;
         const color = isEven ? GRID_CONFIG.tileColor1 : GRID_CONFIG.tileColor2;
-        
+
         tile.rect(
           col * GRID_CONFIG.cellSize,
           row * GRID_CONFIG.cellSize,
           GRID_CONFIG.cellSize,
-          GRID_CONFIG.cellSize
+          GRID_CONFIG.cellSize,
         );
         tile.fill({ color });
-        
+
         gridContainer.value.addChild(tile);
       }
     }
@@ -146,14 +132,14 @@ export function usePixiCombat() {
     for (let x = 0; x < GRID_CONFIG.cols; x++) {
       for (let y = 0; y < GRID_CONFIG.rows; y++) {
         const distance = getManhattanDistance(originGridX, originGridY, x, y);
-        
+
         if (distance > 0 && distance <= range) {
           const cell = new PIXI.Graphics();
           cell.rect(
             x * GRID_CONFIG.cellSize,
             y * GRID_CONFIG.cellSize,
             GRID_CONFIG.cellSize,
-            GRID_CONFIG.cellSize
+            GRID_CONFIG.cellSize,
           );
           cell.fill({ color: GRID_CONFIG.reachableColor, alpha: GRID_CONFIG.reachableAlpha });
           rangeOverlay.value.addChild(cell);
@@ -183,7 +169,7 @@ export function usePixiCombat() {
     });
 
     container.appendChild(app.value.canvas as HTMLCanvasElement);
-    
+
     // Activer le tri par zIndex
     app.value.stage.sortableChildren = true;
 
@@ -194,16 +180,23 @@ export function usePixiCombat() {
     console.log('PixiJS initialisé avec grille damier.');
   };
 
-  // Charger les assets avec configuration JSON
-  const loadAssets = async (characterKey: string) => {
-    try {
-      const config: SpriteConfig = (spriteConfig as Record<string, SpriteConfig>)[characterKey];
-      
-      if (!config) {
-        throw new Error(`Configuration introuvable pour: ${characterKey}`);
-      }
+  // Helper to compute 8-direction string based on dx/dy
+  const getDirectionFromDelta = (dx: number, dy: number) => {
+    if (dx === 0 && dy > 0) return 'bottom';
+    if (dx === 0 && dy < 0) return 'top';
+    if (dx > 0 && dy === 0) return 'right';
+    if (dx < 0 && dy === 0) return 'left';
+    if (dx > 0 && dy > 0) return 'bottom_right';
+    if (dx > 0 && dy < 0) return 'top_right';
+    if (dx < 0 && dy > 0) return 'bottom_left';
+    if (dx < 0 && dy < 0) return 'top_left';
+    return 'bottom';
+  };
 
-      const texture = await PIXI.Assets.load(config.spriteSheet);
+  // DONT FUCKING TOUCH THIS MOFO
+  const loadAssets = async (characterKey = 'archer-green') => {
+    try {
+      const texture = await PIXI.Assets.load('/puny-characters/Archer-Green.png');
       console.log('Texture chargée:', texture.width, texture.height);
 
       const createFrameTexture = (baseTexture: PIXI.Texture, x: number, y: number, w: number, h: number) => {
@@ -213,70 +206,81 @@ export function usePixiCombat() {
         });
       };
 
-      // Créer les animations depuis la config
-      const animations: Record<string, PIXI.Texture[]> = {};
-      
-      for (const [animName, animConfig] of Object.entries(config.animations)) {
+      // Create textures map using computed animationConfig from TS module
+      const texturesMap: Record<string, PIXI.Texture[]> = {};
+      const w = frameWidth;
+      const h = frameHeight;
+
+      for (const [animName, animCfg] of Object.entries(animationConfig)) {
         const frames: PIXI.Texture[] = [];
-        for (let i = 0; i < animConfig.frames; i++) {
+        for (let i = 0; i < animCfg.frames; i++) {
           frames.push(
             createFrameTexture(
               texture,
-              i * config.frameWidth,
-              animConfig.row * config.frameHeight,
-              config.frameWidth,
-              config.frameHeight
-            )
+              i * w,
+              animCfg.row * h,
+              w,
+              h,
+            ),
           );
         }
-        animations[animName] = frames;
+        texturesMap[animName] = frames;
       }
 
-      console.log('Animations créées:', Object.keys(animations));
-      return animations;
+      console.log('Animations créées:', Object.keys(texturesMap));
+      return texturesMap;
     } catch (error) {
       console.error('Erreur de chargement des assets:', error);
 
-      // Fallback avec des rectangles de couleur
-      const createColorTexture = (color: number) => {
+      // Fallback with colored rectangles for all oriented keys
+      const createColorTexture = (color: number, w = frameWidth || 32, h = frameHeight || 32) => {
         const graphics = new PIXI.Graphics();
-        graphics.rect(0, 0, 32, 32);
-        graphics.fill({ color, alpha: 1 });
+        graphics.beginFill(color);
+        graphics.drawRect(0, 0, w, h);
+        graphics.endFill();
         return app.value!.renderer.generateTexture(graphics);
       };
 
-      return {
-        [AnimationState.IDLE]: Array(4).fill(0).map(() => createColorTexture(0x4CAF50)),
-        [AnimationState.WALK]: Array(6).fill(0).map(() => createColorTexture(0x2196F3)),
-      };
+      const directions = Array.from(DIRECTIONS);
+      const fallbackTextures: Record<string, PIXI.Texture[]> = {};
+
+      for (const dir of directions) {
+        fallbackTextures[`idle_${dir}`] = Array(2).fill(0).map(() => createColorTexture(0x4CAF50));
+        fallbackTextures[`walk_${dir}`] = Array(2).fill(0).map(() => createColorTexture(0x2196F3));
+        fallbackTextures[`attack_${dir}`] = Array(4).fill(0).map(() => createColorTexture(0xff5722));
+        fallbackTextures[`death_${dir}`] = Array(4).fill(0).map(() => createColorTexture(0x000000));
+      }
+
+      return fallbackTextures;
     }
   };
 
   // Créer une unité
   const createUnit = async (
-    unitId: string, 
-    gridX = 6, 
-    gridY = 4, 
+    unitId: string,
+    gridX = 6,
+    gridY = 4,
     maxMoveRange = 3,
-    characterKey = 'archer-green'
+    characterKey = 'archer-green',
   ) => {
     if (!app.value) return null;
 
-    const animations = await loadAssets(characterKey);
+    const textures = await loadAssets(characterKey);
 
-    if (!animations[AnimationState.IDLE] || animations[AnimationState.IDLE].length === 0) {
+    // Default to idle_bottom
+    const idleKey = 'idle_bottom';
+    if (!textures[idleKey] || textures[idleKey].length === 0) {
       console.error('Pas de textures IDLE disponibles');
       return null;
     }
 
-    const sprite = new PIXI.AnimatedSprite(animations[AnimationState.IDLE]);
+    const sprite = new PIXI.AnimatedSprite(textures[idleKey]);
 
     // Récupérer la vitesse depuis la config
-    const config: SpriteConfig = (spriteConfig as Record<string, SpriteConfig>)[characterKey];
-    const idleSpeed = config?.animations.idle.speed || 0.15;
+    const animConfig = animationConfig[idleKey];
 
     // Configuration
-    sprite.animationSpeed = idleSpeed;
+    sprite.animationSpeed = animConfig?.speed ?? 0.05;
     sprite.loop = true;
     sprite.anchor.set(0.5);
     sprite.scale.set(2);
@@ -303,10 +307,10 @@ export function usePixiCombat() {
     sprite.play();
     app.value.stage.addChild(sprite);
 
-    // Stocker l'unité
+    // Stocker l'unité (use the textures variable)
     units.value.set(unitId, {
       sprite,
-      animations,
+      animations: textures,
       gridX,
       gridY,
       maxMoveRange,
@@ -392,16 +396,16 @@ export function usePixiCombat() {
     const { sprite, animations } = unitData;
     const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
 
-    // Changer vers l'animation WALK
-    sprite.textures = animations[AnimationState.WALK];
-    sprite.play();
+    // Compute direction key based on delta
+    const dx = targetGridX - unitData.gridX;
+    const dy = targetGridY - unitData.gridY;
+    const dir = getDirectionFromDelta(dx, dy);
 
-    // Retourner le sprite si on va vers la gauche
-    if (targetGridX < unitData.gridX) {
-      sprite.scale.x = -Math.abs(sprite.scale.x);
-    } else {
-      sprite.scale.x = Math.abs(sprite.scale.x);
-    }
+    // Choose walk animation by direction (use fallback if missing)
+    const walkKey = `walk_${dir}`;
+    sprite.textures = animations[walkKey];
+    sprite.animationSpeed = animationConfig[walkKey].speed;
+    sprite.play();
 
     // Animation de mouvement
     gsap.to(sprite, {
@@ -410,8 +414,11 @@ export function usePixiCombat() {
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        // Revenir à l'animation IDLE
-        sprite.textures = animations[AnimationState.IDLE];
+        // Revenir à l'animation IDLE by direction (fallback)
+        const idleKey = `idle_${dir}`;
+        sprite.textures = animations[idleKey];
+        sprite.animationSpeed = animationConfig[idleKey].speed;
+        sprite.loop = true;
         sprite.play();
 
         // Mettre à jour la position sur la grille
