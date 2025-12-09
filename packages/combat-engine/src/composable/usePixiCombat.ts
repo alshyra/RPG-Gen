@@ -10,6 +10,15 @@ interface UnitData {
   gridX: number;
   gridY: number;
   maxMoveRange: number;
+  hp: number;
+  maxHp: number;
+  healthBar: {
+    container: PIXI.Container;
+    bg: PIXI.Graphics;
+    fill: PIXI.Graphics;
+    text: PIXI.BitmapText;
+    update: (newHp: number) => void;
+  };
 }
 
 // Configuration de la grille
@@ -102,7 +111,7 @@ export function usePixiCombat() {
     }
 
     gridContainer.value.addChild(lines);
-    app.value.stage.addChild(gridContainer.value);
+    app.value.stage.addChild(gridContainer.value as PIXI.Container);
   };
 
   // Créer l'overlay de portée
@@ -111,7 +120,7 @@ export function usePixiCombat() {
 
     rangeOverlay.value = new PIXI.Container();
     rangeOverlay.value.zIndex = 0.5;
-    app.value.stage.addChild(rangeOverlay.value);
+    app.value.stage.addChild(rangeOverlay.value as PIXI.Container);
   };
 
   // Afficher les cases accessibles
@@ -168,7 +177,10 @@ export function usePixiCombat() {
     // Créer la grille et l'overlay
     createGrid();
     createRangeOverlay();
-
+    await PIXI.Assets.load({
+      alias: 'HealthBarFont',
+      src: '/Literata-Medium.fnt',
+    });
     console.log('PixiJS initialisé avec grille damier.');
   };
 
@@ -228,9 +240,9 @@ export function usePixiCombat() {
       // Fallback with colored rectangles for all oriented keys
       const createColorTexture = (color: number, w = frameWidth || 32, h = frameHeight || 32) => {
         const graphics = new PIXI.Graphics();
-        graphics.beginFill(color);
-        graphics.drawRect(0, 0, w, h);
-        graphics.endFill();
+        graphics.fill(color);
+        graphics.rect(0, 0, w, h);
+        graphics.fill();
         return app.value!.renderer.generateTexture(graphics);
       };
 
@@ -248,6 +260,53 @@ export function usePixiCombat() {
     }
   };
 
+  // Créer une barre de vie
+  const createHealthBar = (hp: number, maxHp: number) => {
+    const container = new PIXI.Container();
+    container.zIndex = 2;
+
+    // Background bar
+    const bg = new PIXI.Graphics();
+    bg.rect(0, 0, 50, 8);
+    bg.fill({ color: 0x333333 });
+    container.addChild(bg);
+
+    // Fill bar
+    const fill = new PIXI.Graphics();
+    const ratio = hp / maxHp;
+    const color = ratio > 0.5 ? 0x00ff00 : ratio > 0.25 ? 0xffff00 : 0xff0000;
+    fill.rect(0, 0, 50 * ratio, 8);
+    fill.fill({ color });
+    container.addChild(fill);
+
+    // Text
+    const text = new PIXI.BitmapText({
+      text: `${hp}/${maxHp}`,
+      style: {
+        fontFamily: 'HealthBarFont', // <-- Utilisation de l'alias
+        fontSize: 10, // Cette taille doit correspondre à la taille exportée
+      },
+    });
+    text.anchor.set(0.5);
+    text.position.set(25, 4);
+    container.addChild(text);
+
+    // Mettre à jour la barre de vie
+    const update = (newHp: number) => {
+      // La logique de mise à jour interne (utilise les variables 'fill' et 'text' du scope)
+      const ratio = newHp / maxHp;
+      const color = ratio > 0.5 ? 0x00ff00 : ratio > 0.25 ? 0xffff00 : 0xff0000;
+
+      fill.clear();
+      fill.rect(0, 0, 50 * ratio, 8);
+      fill.fill({ color });
+
+      // text.text = `${newHp}/${maxHp}`;
+      // Pas besoin de mettre à jour maxHp ici si elle est constante pour cette barre
+    };
+    return { container, bg, fill, text, update };
+  };
+
   // Créer une unité
   const createUnit = async (
     unitId: string,
@@ -255,6 +314,8 @@ export function usePixiCombat() {
     gridY = 4,
     maxMoveRange = 3,
     characterKey = 'Archer-Green',
+    hp = 100,
+    maxHp = 100,
   ) => {
     if (!app.value) return null;
 
@@ -300,6 +361,10 @@ export function usePixiCombat() {
     sprite.play();
     app.value.stage.addChild(sprite);
 
+    const healthBar = createHealthBar(hp, maxHp);
+    healthBar.container.position.set(x, y - 40);
+    app.value.stage.addChild(healthBar.container);
+
     // Stocker l'unité (use the textures variable)
     units.value.set(unitId, {
       sprite,
@@ -307,6 +372,9 @@ export function usePixiCombat() {
       gridX,
       gridY,
       maxMoveRange,
+      hp,
+      maxHp,
+      healthBar,
     });
 
     return sprite;
@@ -327,6 +395,7 @@ export function usePixiCombat() {
 
       // Suivre la souris pendant le drag
       unitData.sprite.position.copyFrom(event.global);
+      unitData.healthBar.container.position.set(event.global.x, event.global.y - 40);
     });
 
     app.value.stage.on('pointerup', (event: PIXI.FederatedPointerEvent) => {
@@ -396,6 +465,10 @@ export function usePixiCombat() {
 
     // Choose walk animation by direction (use fallback if missing)
     const walkKey = `walk_${dir}`;
+    if (!animations[walkKey] || animations[walkKey].length === 0 || !animationConfig[walkKey]) {
+      console.error(`No walk animation or config for ${walkKey}`);
+      return;
+    }
     sprite.textures = animations[walkKey];
     sprite.animationSpeed = animationConfig[walkKey].speed;
     sprite.play();
@@ -409,6 +482,10 @@ export function usePixiCombat() {
       onComplete: () => {
         // Revenir à l'animation IDLE by direction (fallback)
         const idleKey = `idle_${dir}`;
+        if (!animations[idleKey] || animations[idleKey].length === 0 || !animationConfig[idleKey]) {
+          console.error(`No idle animation or config for ${idleKey}`);
+          return;
+        }
         sprite.textures = animations[idleKey];
         sprite.animationSpeed = animationConfig[idleKey].speed;
         console.log(`Setting idle speed for ${idleKey}:`, sprite.animationSpeed);
@@ -419,6 +496,7 @@ export function usePixiCombat() {
         // Mettre à jour la position sur la grille
         unitData.gridX = targetGridX;
         unitData.gridY = targetGridY;
+        unitData.healthBar.container.position.set(targetX, targetY - 40);
       },
     });
   };
@@ -429,10 +507,31 @@ export function usePixiCombat() {
     app.value.destroy(true);
   });
 
+  const updateUnitHealth = (unitId: string, damage: number) => {
+    const unitData = units.value.get(unitId);
+    if (!unitData) {
+      console.error(`Unité ${unitId} non trouvée.`);
+      return;
+    }
+
+    // 1. Logique métier : Calcul des nouveaux HP
+    const newHp = Math.max(0, unitData.hp - damage);
+    unitData.hp = newHp;
+
+    // 2. Logique de rendu : Appel de la méthode d'update de la HealthBar
+    // NOTE : On suppose que createHealthBar retourne { container, update }
+    if (unitData.healthBar && unitData.healthBar.update) {
+      unitData.healthBar.update(newHp);
+      console.log(`Unité ${unitId} PV: ${newHp}/${unitData.maxHp}`);
+    } else {
+      console.error('Barre de vie non initialisée pour cette unité.');
+    }
+  };
   return {
     init,
     createUnit,
     moveUnitToGrid,
     setupDragEvents,
+    updateUnitHealth,
   };
 }

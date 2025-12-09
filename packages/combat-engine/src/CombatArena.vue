@@ -7,6 +7,9 @@
     <div class="instructions">
       <p>🎮 Cliquez et glissez votre personnage (max 3 cases)</p>
       <p>✨ Les cases vertes indiquent la portée de déplacement</p>
+      <button @click="damageEnemy">
+        Damage Enemy (-10 HP)
+      </button>
     </div>
   </div>
 </template>
@@ -16,21 +19,27 @@ import { ref, onMounted } from 'vue';
 import { usePixiCombat } from './composable/usePixiCombat';
 
 // Utiliser le composable
-const { init, createUnit, setupDragEvents } = usePixiCombat();
+const { init, createUnit, setupDragEvents, updateUnitHealth } = usePixiCombat();
 
 // Références
-const pixiContainer = ref <HTMLDivElement | null> (null);
+const pixiContainer = ref<HTMLDivElement | null>(null);
 const playerUnitId = ref('player1');
 const enemyUnitId = ref('enemy1');
+
+// Fonction pour tester la mise à jour des HP
+const damageEnemy = () => {
+  updateUnitHealth(enemyUnitId.value, 10);
+  // enemyUnitId.value. ???
+};
 
 // Initialisation au montage
 onMounted(async () => {
   if (!pixiContainer.value) return;
   await init(pixiContainer.value);
 
-  await createUnit(playerUnitId.value, 6, 4, 3, 'Archer-Green');
-  
-  await createUnit(enemyUnitId.value, 2, 4, 3, 'Warrior-Red');
+  await createUnit(playerUnitId.value, 6, 4, 3, 'Archer-Green', 100, 100);
+
+  await createUnit(enemyUnitId.value, 2, 4, 3, 'Warrior-Red', 80, 100);
   setupDragEvents();
 });
 </script>
