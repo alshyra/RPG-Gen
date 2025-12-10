@@ -1,0 +1,7 @@
+dist
+node_modules
+packages/shared/src/openapi.json
+packages/shared/src/api-types.ts
+packages/shared/src/index.ts
+pnpm-lock.yaml
+*.min.js

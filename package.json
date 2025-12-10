@@ -19,15 +19,20 @@
     "test:e2e": "npm -w rpg-gemini-frontend run test:e2e",
     "test:e2e:open": "npm -w rpg-gemini-frontend run test:e2e:open",
     "generate:openapi": "npm --workspace rpg-gemini-backend run generate:openapi",
-    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint .",
-    "lint:fix": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint . --fix"
+    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && oxlint .",
+    "lint:fix": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && oxlint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,jsx,json,md}\""
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/express": "^5.0.6",
     "concurrently": "^8.2.0",
     "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
     "express": "^5.2.1",
+    "oxlint": "^1.32.0",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.0"
   },
