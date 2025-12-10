@@ -32,27 +32,27 @@ jobs:
         env:
           CI: true
 
-  cypress-run:
+  playwright-run:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         specs:
-          - path: "cypress/e2e/api-integration.cy.ts"
+          - path: "tests/api-integration.spec.ts"
             name: "api-integration"
-          - path: "cypress/e2e/authentication.cy.ts"
+          - path: "tests/authentication.spec.ts"
             name: "authentication"
-          - path: "cypress/e2e/character-creation.cy.ts"
+          - path: "tests/character-creation.spec.ts"
             name: "character-creation"
-          - path: "cypress/e2e/combat.cy.ts"
+          - path: "tests/combat.spec.ts"
             name: "combat"
-          - path: "cypress/e2e/game-pages.cy.ts"
+          - path: "tests/game-pages.spec.ts"
             name: "game-pages"
-          - path: "cypress/e2e/home.cy.ts"
+          - path: "tests/home.spec.ts"
             name: "home"
-          - path: "cypress/e2e/navigation.cy.ts"
+          - path: "tests/navigation.spec.ts"
             name: "navigation"
-          - path: "cypress/e2e/smoke.cy.ts"
+          - path: "tests/smoke.spec.ts"
             name: "smoke"
 
     steps:
@@ -89,9 +89,11 @@ jobs:
         run: |
           docker compose up --build -d mongodb backend frontend
 
-      - name: Install Cypress dependencies (parallel with container startup)
+      - name: Install dependencies and Playwright browsers
         working-directory: ./
-        run: npm ci
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
 
       - name: Wait for services to be ready
         run: |
@@ -125,11 +127,11 @@ jobs:
           npm run e2e:cleanup-db || true
           npm run e2e:prepare-db -- --count 2
 
-      - name: Run Cypress tests
-        working-directory: packages/frontend
-        run: npm run test:e2e -- --spec="${{ matrix.specs.path }}"
+      - name: Run Playwright tests
+        working-directory: packages/e2e
+        run: npx playwright test "${{ matrix.specs.path }}"
         env:
-          CYPRESS_BASE_URL: http://localhost
+          CI: true
 
       - name: Show container logs on failure
         if: failure()
@@ -147,18 +149,26 @@ jobs:
         if: always()
         run: docker compose down -v
 
-      - name: Upload Cypress screenshots
+      - name: Upload Playwright screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-screenshots-${{ matrix.specs.name }}
-          path: frontend/cypress/screenshots
+          path: packages/e2e/test-results/**/screenshots/
           if-no-files-found: ignore
 
-      - name: Upload Cypress videos
-        if: always()
+      - name: Upload Playwright videos
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-videos-${{ matrix.specs.name }}
-          path: frontend/cypress/videos
+          path: packages/e2e/test-results/**/video.*
+          if-no-files-found: ignore
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.specs.name }}
+          path: packages/e2e/playwright-report/
           if-no-files-found: ignore

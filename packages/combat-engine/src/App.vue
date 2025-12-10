@@ -15,11 +15,11 @@ const combatarena = ref<InstanceType<typeof CombatArena>>();
 
 onMounted(async () => {
   if (!combatarena.value) return;
-  
+
   // Get the internal container from CombatArena
   const container = combatarena.value.getContainer();
   if (!container) return;
-  
+
   await combatarena.value.init(container);
 
   await combatarena.value.createUnit('player', 1, 5, 3, 'Archer-Green', 100, 100);
