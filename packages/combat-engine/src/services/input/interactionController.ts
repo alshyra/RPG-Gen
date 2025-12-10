@@ -14,6 +14,8 @@ export const setupInteractionController = (
 ) => {
   let isDragging = false;
   let dragTarget: string | null = null;
+  let lastGridX = -1;
+  let lastGridY = -1;
 
   const onPointerMove = (ev: PIXI.FederatedPointerEvent) => {
     if (!isDragging || !dragTarget) return;
@@ -24,6 +26,12 @@ export const setupInteractionController = (
     }
     // Snap to grid: convert pixel to grid, then back to pixel (center of cell)
     const { gridX, gridY } = helpers.pixelToGrid(ev.global.x, ev.global.y);
+
+    // OPTIMIZATION: Only update position if grid cell changed
+    if (gridX === lastGridX && gridY === lastGridY) return;
+    lastGridX = gridX;
+    lastGridY = gridY;
+
     const snappedPixel = helpers.gridToPixel(gridX, gridY);
     unit.sprite.position.set(snappedPixel.x, snappedPixel.y);
     unit.healthBar.container.position.set(snappedPixel.x, snappedPixel.y - 40);
@@ -33,15 +41,16 @@ export const setupInteractionController = (
     if (!isDragging || !dragTarget) return;
     const unit = getUnits().get(dragTarget);
     if (!unit) return;
+
     const { gridX, gridY } = helpers.pixelToGrid(ev.global.x, ev.global.y);
-    const dist = Math.abs(gridX - unit.gridX) + Math.abs(gridY - unit.gridY);
-    if (dist <= unit.maxMoveRange) helpers.moveUnitToGrid(dragTarget, gridX, gridY);
-    else {
-      // caller can animate revert if desired
-    }
+    // Always call moveUnitToGrid - it handles validation and revert internally
+    helpers.moveUnitToGrid(dragTarget, gridX, gridY);
+
     helpers.hideReachableCells();
     isDragging = false;
     dragTarget = null;
+    lastGridX = -1;
+    lastGridY = -1;
   };
 
   app.stage.on('pointermove', onPointerMove);

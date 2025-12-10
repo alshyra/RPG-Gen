@@ -19,6 +19,7 @@ export interface CombatArenaApi {
     characterKey: string,
     hp: number,
     maxHp: number,
+    isPlayer: boolean,
   ) => Promise<unknown>;
   updateUnitHealth: (unitId: string, damage: number) => void;
   moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
@@ -120,7 +121,7 @@ export function useCombatEngine() {
     arenaApi.value.on('unit:clicked', handleUnitClicked);
     registeredHandlers.push({
       event: 'unit:clicked',
-      handler: handleUnitClicked,
+      handler: handleUnitClicked as (...args: unknown[]) => void,
     });
   };
 
@@ -205,6 +206,7 @@ export function useCombatEngine() {
         unit.characterKey,
         unit.stats.hp,
         unit.stats.maxHp,
+        !!unit.isPlayer,
       );
     }
 
@@ -255,26 +257,6 @@ export function useCombatEngine() {
     // Open the spell selector modal for spell selection
     isActionModalOpen.value = true;
   };
-
-  // Watch for enemy HP changes and update visual
-  watch(
-    () => enemies.value,
-    (newEnemies, oldEnemies) => {
-      if (!arenaApi.value || !newEnemies || !oldEnemies) return;
-
-      // Compare HP changes and update visuals
-      newEnemies.forEach((newEnemy, index) => {
-        const oldEnemy = oldEnemies[index];
-        if (oldEnemy && newEnemy.hp !== undefined && oldEnemy.hp !== undefined) {
-          const damage = oldEnemy.hp - newEnemy.hp;
-          if (damage > 0 && arenaApi.value?.updateUnitHealth) {
-            arenaApi.value.updateUnitHealth(newEnemy.id, damage);
-          }
-        }
-      });
-    },
-    { deep: true },
-  );
 
   // Cleanup on unmount
   onUnmounted(() => {

@@ -151,14 +151,15 @@ export const useCombatStore = defineStore('combatStore', () => {
   };
 
   const updateEnemiesOnly = (remainingEnemies: CombatantDto[], newRoundNumber: number): void => {
-    enemies.value = enemies.value.map(enemy => {
+    // PERFORMANCE FIX: Mutate in place instead of creating new array to avoid triggering all watchers
+    enemies.value.forEach((enemy, idx) => {
       const updated = remainingEnemies.find(e => e.id === enemy.id);
-      return updated
-        ? {
-            ...enemy,
-            hp: updated.hp,
-          }
-        : enemy;
+      if (updated && updated.hp !== enemy.hp) {
+        enemies.value[idx] = {
+          ...enemy,
+          hp: updated.hp,
+        };
+      }
     });
     roundNumber.value = newRoundNumber;
     currentTarget.value = selectNextAliveTarget(enemies);

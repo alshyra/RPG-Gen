@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useCombat } from './composable/useCombat';
 
 // Props optionnelles pour configuration externe
@@ -40,9 +40,16 @@ onMounted(async () => {
 
   // Demo initialization
   await init(pixiContainer.value);
-  await createUnit('player', 6, 4, 3, 'Archer-Green', 100, 100);
-  await createUnit('enemy-1', 2, 4, 3, 'Warrior-Red', 80, 100);
+  await createUnit('player', 6, 4, 3, 'Archer-Green', 100, 100, true);
+  await createUnit('enemy-1', 2, 4, 3, 'Warrior-Red', 80, 100, false);
   setupDragEvents();
+});
+
+// Cleanup on unmount to prevent memory leaks
+onBeforeUnmount(() => {
+  if (pixiCombat.app?.value) {
+    pixiCombat.app.value.destroy(true, { children: true, texture: false, textureSource: false });
+  }
 });
 
 // Expose l'API complète pour le parent
@@ -73,11 +80,12 @@ defineExpose({
     // Count units that have been created in the scene
     const stage = pixiCombat.app?.value?.stage;
     if (!stage) return 0;
-    
+
     // Filter for CombatUnit sprites (they have zIndex set)
     let unitCount = 0;
     stage.children.forEach(child => {
-      if ('zIndex' in child && typeof (child as any).zIndex === 'number') {
+      const obj = child as unknown as { zIndex?: unknown };
+      if ('zIndex' in child && typeof obj.zIndex === 'number') {
         unitCount++;
       }
     });

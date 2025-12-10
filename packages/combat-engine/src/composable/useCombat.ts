@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue';
+import { shallowRef, onUnmounted, markRaw } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
 import { GRID_CONFIG, type availableCharacterKeys } from '../types/combat-types';
@@ -21,9 +21,10 @@ import { storeToRefs } from 'pinia';
 import { useEventBus } from '../services/eventBus';
 
 export function useCombat() {
-  const app = ref<PIXI.Application | null>(null);
-  const gridContainer = ref<PIXI.Container | null>(null);
-  const rangeOverlay = ref<PIXI.Container | null>(null);
+  // PERFORMANCE: Use shallowRef for PIXI objects to avoid deep reactivity
+  const app = shallowRef<PIXI.Application | null>(null);
+  const gridContainer = shallowRef<PIXI.Container | null>(null);
+  const rangeOverlay = shallowRef<PIXI.Container | null>(null);
   const unitStore = useUnitsStore();
   const { units } = storeToRefs(unitStore);
   // delegate event API to central bus
@@ -36,18 +37,22 @@ export function useCombat() {
   const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
 
-    app.value = new PIXI.Application();
-    await app.value.init({
+    // PERFORMANCE: markRaw to prevent Vue from making PIXI app reactive
+    const pixiApp = markRaw(new PIXI.Application());
+    await pixiApp.init({
       width: GRID_CONFIG.cols * GRID_CONFIG.cellSize,
       height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
       backgroundColor: 0x1e1e1e,
-      resolution: window.devicePixelRatio || 1,
-      antialias: true,
+      resolution: Math.min(window.devicePixelRatio || 1, 2), // Cap at 2x for performance
+      antialias: false, // Disable antialiasing for better performance
+      preference: 'webgl', // Force WebGL if available
+      powerPreference: 'high-performance',
     });
 
-    container.appendChild(app.value.canvas);
+    container.appendChild(pixiApp.canvas);
 
-    app.value.stage.sortableChildren = true;
+    pixiApp.stage.sortableChildren = true;
+    app.value = pixiApp;
 
     gridContainer.value = createGrid(app.value);
     rangeOverlay.value = createRangeOverlay(app.value);
@@ -72,13 +77,14 @@ export function useCombat() {
 
   // createUnit now delegates texture loading + sprite creation
   const createUnit = async (
-    unitId: 'player' | `enemy-${number}`,
+    unitId: string,
     gridX = 6,
     gridY = 4,
     maxMoveRange = 3,
     characterKey: availableCharacterKeys = 'Archer-Green' as const,
     hp = 100,
     maxHp = 100,
+    isPlayerUnit = false,
   ) => {
     if (!app.value) return null;
     const animations = await loadTextures(characterKey);
@@ -89,7 +95,7 @@ export function useCombat() {
     }
     const sprite = new PIXI.AnimatedSprite(animations[idleKey]);
     const animCfg = animationConfig[idleKey];
-    sprite.animationSpeed = animCfg?.speed ?? 0.05;
+    sprite.animationSpeed = (animCfg?.speed ?? 0.05) * 0.7; // Slow down animations for better performance
     sprite.loop = true;
     sprite.anchor.set(0.5);
     sprite.scale.set(2);
@@ -119,14 +125,22 @@ export function useCombat() {
       app.value.stage.addChild(healthBar.container);
     }
 
+    // Register player unit in store if applicable
+    if (isPlayerUnit) {
+      unitStore.registerPlayerUnit(unitId);
+    }
+
     // Now attach pointer handler after unit is guaranteed in store
     sprite.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
-      if (interactionController?.startDrag) {
+      const isPlayer = unitStore.isPlayerUnit(unitId);
+
+      // Only allow player unit to be dragged
+      if (isPlayer && interactionController?.startDrag) {
         interactionController.startDrag(unitId);
-      } else {
-        console.warn('[useCombat] interactionController not initialized');
+      } else if (!isPlayer) {
+        console.debug('[useCombat] Enemy unit cannot be dragged:', unitId);
       }
-      const isPlayer = unitId.startsWith('player');
+
       emit('unit:clicked', {
         unitId,
         isPlayer,
@@ -154,6 +168,32 @@ export function useCombat() {
   const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
     const u = units.value.get(unitId);
     if (!u || !app.value) return;
+
+    // Validate that target is within movement range (Manhattan distance)
+    const distance = Math.abs(targetGridX - u.gridX) + Math.abs(targetGridY - u.gridY);
+    if (distance > u.maxMoveRange) {
+      console.warn(
+        `[useCombat] Move rejected: distance ${distance} exceeds max range ${u.maxMoveRange} for unit ${unitId}`,
+      );
+      // Revert sprite position to current grid location
+      const { x: currentX, y: currentY } = gridToPixel(u.gridX, u.gridY);
+      gsap.to(u.sprite, {
+        x: currentX,
+        y: currentY,
+        duration: 0.3,
+        ease: 'power2.out',
+      });
+      if (u.healthBar?.container) {
+        gsap.to(u.healthBar.container, {
+          x: currentX,
+          y: currentY - 40,
+          duration: 0.3,
+          ease: 'power2.out',
+        });
+      }
+      return;
+    }
+
     const { sprite, animations } = u;
     const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
     const dx = targetGridX - u.gridX;

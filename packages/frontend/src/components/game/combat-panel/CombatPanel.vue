@@ -1,21 +1,31 @@
 <!-- packages/frontend/src/components/game/combat-panel/CombatPanel.vue -->
 <template>
   <div
-    v-if="inCombat"
     class="combat-wrapper"
     data-cy="combat-panel"
   >
-    <!-- Header avec infos turn/actions (gardé tel quel) -->
-    <CombatHeader />
+    <!-- Header avec infos turn/actions (seulement si en combat) -->
+    <CombatHeader v-if="inCombat" />
 
-    <!-- NOUVEAU : Arène visuelle PixiJS -->
+    <!-- NOUVEAU : Arène visuelle PixiJS (toujours affiché) -->
+    <!-- key="combat-canvas" prevents re-renders from parent state changes -->
     <CombatArena
+      key="combat-canvas"
       ref="arenaRef"
       data-cy="combat-arena"
     />
 
+    <!-- Message si pas en combat -->
+    <div
+      v-if="!inCombat"
+      class="demo-message"
+    >
+      <p>Pas de combat actif. Démarrez un combat depuis le jeu pour voir l'arène en action !</p>
+    </div>
+
     <!-- Action Menu Overlay (au clic ennemi) -->
     <ActionMenuOverlay
+      v-if="inCombat"
       :is-open="isActionMenuOpen"
       :unit-id="actionMenuUnitId"
       :x="actionMenuX"
@@ -28,6 +38,7 @@
 
     <!-- Modal de sélection d'action (attaque arme / sort) -->
     <SpellSelector
+      v-if="inCombat"
       :is-open="isActionModalOpen"
       :target="selectedTarget"
       @close="closeActionModal"
@@ -87,7 +98,16 @@ onMounted(async () => {
     const container = arena.getContainer();
     if (container) {
       await arena.init(container);
-      await initializeVisual();
+
+      // Si en combat, initialiser avec les vraies données
+      if (inCombat.value) {
+        await initializeVisual();
+      } else {
+        // Sinon, créer une démo simple
+        await arena.createUnit('demo-player', 2, 4, 3, 'Archer-Green', 100, 100, true);
+        await arena.createUnit('demo-enemy', 8, 4, 2, 'Soldier-Red', 50, 50, false);
+        arena.setupDragEvents();
+      }
     }
   }
 });
@@ -96,3 +116,31 @@ onUnmounted(() => {
   unregisterArena();
 });
 </script>
+
+<style scoped>
+.combat-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.demo-message {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #e0e0e0;
+  margin-top: 20px;
+}
+
+.demo-message p {
+  margin: 0;
+  font-size: 16px;
+}
+</style>
