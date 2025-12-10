@@ -52,11 +52,17 @@ export function useCombatEngine() {
   const isActionModalOpen = ref(false);
   const selectedTarget = ref<CombatantDto | null>(null);
 
+  // State for the action menu overlay
+  const isActionMenuOpen = ref(false);
+  const actionMenuUnitId = ref<string | undefined>();
+  const actionMenuX = ref(0);
+  const actionMenuY = ref(0);
+
   // Handlers stored for cleanup - internal bookkeeping
 
   const registeredHandlers: {
     event: keyof CombatEngineEventPayload;
-    handler: (...args: any[]) => void;
+    handler: (...args: unknown[]) => void;
   }[] = [];
 
   /**
@@ -90,7 +96,7 @@ export function useCombatEngine() {
     const handleUnitClicked = (payload: UnitClickedPayload) => {
       console.log('[useCombatEngine] unit:clicked', payload);
 
-      // Only open modal for enemy units
+      // Only open menu for enemy units
       if (payload.isPlayer) {
         console.log('[useCombatEngine] Clicked player unit, ignoring');
         return;
@@ -103,9 +109,12 @@ export function useCombatEngine() {
         return;
       }
 
-      // Set target and open modal
+      // Set target and open action menu overlay
       selectedTarget.value = enemy;
-      isActionModalOpen.value = true;
+      actionMenuUnitId.value = payload.unitId;
+      actionMenuX.value = payload.stageX;
+      actionMenuY.value = payload.stageY;
+      isActionMenuOpen.value = true;
     };
 
     arenaApi.value.on('unit:clicked', handleUnitClicked);
@@ -219,6 +228,34 @@ export function useCombatEngine() {
     },
   );
 
+  /**
+   * Close the action menu overlay
+   */
+  const closeActionMenu = () => {
+    isActionMenuOpen.value = false;
+    actionMenuUnitId.value = undefined;
+    selectedTarget.value = null;
+  };
+
+  /**
+   * Handle attack selection from overlay
+   */
+  const handleAttackFromMenu = async () => {
+    if (!selectedTarget.value) return;
+    closeActionMenu();
+    await executeAttack(selectedTarget.value);
+  };
+
+  /**
+   * Handle spell selection from overlay
+   */
+  const handleSpellFromMenu = async () => {
+    if (!selectedTarget.value) return;
+    closeActionMenu();
+    // Open the spell selector modal for spell selection
+    isActionModalOpen.value = true;
+  };
+
   // Watch for enemy HP changes and update visual
   watch(
     () => enemies.value,
@@ -253,9 +290,18 @@ export function useCombatEngine() {
     isActionModalOpen,
     selectedTarget,
 
+    // Action menu overlay state
+    isActionMenuOpen,
+    actionMenuUnitId,
+    actionMenuX,
+    actionMenuY,
+
     // Actions
     executeAttack,
     closeActionModal,
+    closeActionMenu,
+    handleAttackFromMenu,
+    handleSpellFromMenu,
     replayEnemyAttacks,
     initializeVisual,
   };

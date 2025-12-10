@@ -33,6 +33,12 @@ export const preloadFont = async () =>
     src: '/Literata-Medium.fnt',
   });
 
+export const preloadHeartIcon = async () =>
+  Assets.load({
+    alias: 'heart',
+    src: '/heart.png',
+  });
+
 export const loadTextures = async (characterKey: string): Promise<Record<string, Texture[]>> => {
   const texture = await Assets.load(`/puny-characters/${characterKey}.png`);
   if (texture instanceof Texture) return buildFromAtlas(texture);

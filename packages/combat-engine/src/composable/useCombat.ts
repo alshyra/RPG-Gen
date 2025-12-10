@@ -5,7 +5,7 @@ import { GRID_CONFIG, type availableCharacterKeys } from '../types/combat-types'
 import { animations as animationConfig } from '../services/spritesAnimations';
 
 // New modules
-import { loadTextures, preloadFont } from '../services/assets/assetManager';
+import { loadTextures, preloadFont, preloadHeartIcon } from '../services/assets/assetManager';
 import {
   createGrid,
   createRangeOverlay,
@@ -56,6 +56,7 @@ export function useCombat() {
   const init = async (container: HTMLDivElement) => {
     await initApp(container);
     await preloadFont();
+    await preloadHeartIcon();
     // wire interaction controller
     if (app.value) {
       interactionController = setupInteractionController(app.value, () => units.value, {
@@ -119,7 +120,7 @@ export function useCombat() {
     }
 
     // Now attach pointer handler after unit is guaranteed in store
-    sprite.on('pointerdown', () => {
+    sprite.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
       if (interactionController?.startDrag) {
         interactionController.startDrag(unitId);
       } else {
@@ -129,6 +130,8 @@ export function useCombat() {
       emit('unit:clicked', {
         unitId,
         isPlayer,
+        stageX: event.global.x,
+        stageY: event.global.y,
       });
     });
 

@@ -48,6 +48,13 @@
           </UiButton>
           <UiButton
             variant="ghost"
+            :to="{ name: 'game-combat', params: { characterId: currentCharacter.characterId } }"
+            class="w-full text-left px-3 py-2"
+          >
+            Combat
+          </UiButton>
+          <UiButton
+            variant="ghost"
             :to="{ name: 'game-quest', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >

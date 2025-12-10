@@ -89,6 +89,8 @@ export type CombatEngineEventType = 'unit:clicked' | 'unit:attacked' | 'unit:die
 export interface UnitClickedPayload {
   unitId: string;
   isPlayer: boolean;
+  stageX: number;
+  stageY: number;
 }
 
 export interface UnitAttackedPayload {
