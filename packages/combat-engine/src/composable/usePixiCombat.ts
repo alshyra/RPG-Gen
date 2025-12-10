@@ -1,4 +1,4 @@
-import type { availableCharacterKeys } from '@/types/combat-types';
+import { GRID_CONFIG, type availableCharacterKeys, type CombatEngineEventPayload, type CombatEngineEventType, type EventHandler, type UnitData } from '@/types/combat-types';
 import { gsap } from 'gsap';
 import * as PIXI from 'pixi.js';
 import { onUnmounted, ref } from 'vue';
@@ -7,61 +7,6 @@ import {
   frameHeight,
   frameWidth,
 } from './spritesAnimations';
-
-// Interface pour stocker les données d'unité
-interface UnitData {
-  sprite: PIXI.AnimatedSprite;
-  animations: Record<string, PIXI.Texture[]>;
-  gridX: number;
-  gridY: number;
-  maxMoveRange: number;
-  hp: number;
-  maxHp: number;
-  healthBar: {
-    container: PIXI.Container;
-    bg: PIXI.Graphics;
-    fill: PIXI.Graphics;
-    text: PIXI.BitmapText;
-    update: (newHp: number) => void;
-  };
-}
-
-// Configuration de la grille
-const GRID_CONFIG = {
-  cellSize: 64,
-  cols: 12,
-  rows: 9,
-  lineColor: 0x2d5016,
-  lineAlpha: 0.6,
-  tileColor1: 0x5a9c3f,
-  tileColor2: 0x4a7c2f,
-  reachableColor: 0xffd700,
-  reachableAlpha: 0.4,
-};
-
-// Event types for external subscribers
-export type CombatEngineEventType = 'unit:clicked' | 'unit:attacked' | 'unit:died' | 'turn:ended';
-
-export interface UnitClickedPayload {
-  unitId: string;
-  isPlayer: boolean;
-}
-
-export interface UnitAttackedPayload {
-  attackerId: string;
-  targetId: string;
-  damage: number;
-  isCrit?: boolean;
-}
-
-export interface CombatEngineEventPayload {
-  'unit:clicked': UnitClickedPayload;
-  'unit:attacked': UnitAttackedPayload;
-  'unit:died': { unitId: string };
-  'turn:ended': { roundNumber: number };
-}
-
-type EventHandler<T extends CombatEngineEventType> = (payload: CombatEngineEventPayload[T]) => void;
 
 export function usePixiCombat() {
   const app = ref<PIXI.Application | null>(null);
