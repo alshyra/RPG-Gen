@@ -1,5 +1,13 @@
 <template>
-  <div class="combat-arena">
+  <div
+    class="combat-arena"
+    data-cy="combat-arena"
+  >
+    <div
+      ref="pixiContainer"
+      class="pixi-container"
+      data-cy="combat-canvas-container"
+    />
     <slot />
   </div>
 </template>

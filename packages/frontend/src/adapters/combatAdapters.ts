@@ -11,7 +11,7 @@ export class CombatAdapter {
       // Player
       {
         id: state.player.id,
-        characterKey: 'archer-green', // À mapper depuis le personnage
+        characterKey: 'Archer-Green', // Player default sprite
         position: this.getInitialPosition('player', state),
         stats: {
           hp: state.player.hp ?? 0,
@@ -83,10 +83,10 @@ export class CombatAdapter {
    */
   private static mapEnemyToSprite(name: string): string {
     const mapping: Record<string, string> = {
-      Goblin: 'goblin',
-      Orc: 'orc',
-      Skeleton: 'skeleton',
+      Goblin: 'Warrior-Red',
+      Orc: 'Warrior-Blue',
+      Skeleton: 'Mage-Cyan',
     };
-    return mapping[name] ?? 'enemy-generic';
+    return mapping[name] ?? 'Soldier-Red';
   }
 }

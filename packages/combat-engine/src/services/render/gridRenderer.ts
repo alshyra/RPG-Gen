@@ -60,6 +60,26 @@ const createGridLinesGraphics = (): PIXI.Graphics => {
   return lines;
 };
 
+/**
+ * Convert grid coordinates to pixel coordinates (center of cell)
+ */
+export const gridToPixel = (gridX: number, gridY: number): { x: number; y: number } => {
+  return {
+    x: gridX * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
+    y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
+  };
+};
+
+/**
+ * Convert pixel coordinates to grid coordinates
+ */
+export const pixelToGrid = (pixelX: number, pixelY: number): { gridX: number; gridY: number } => {
+  return {
+    gridX: Math.floor(pixelX / GRID_CONFIG.cellSize),
+    gridY: Math.floor(pixelY / GRID_CONFIG.cellSize),
+  };
+};
+
 export const createGrid = (app: HasStage): PIXI.Container | null => {
   if (!app) return null;
 

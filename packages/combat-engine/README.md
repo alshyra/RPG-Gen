@@ -1,6 +1,56 @@
-# 2d-box-demo-pixi
+# Combat Engine
 
-This template should help get you started developing with Vue 3 in Vite.
+A standalone 2D combat engine built with PixiJS, Vue 3, and Pinia. Provides grid-based tactical combat with animated sprites, drag-and-drop movement, and event-driven architecture.
+
+## Features
+
+- **Grid-based combat**: 12×9 tile grid with visual feedback
+- **Animated sprites**: Walk and idle animations for multiple character types
+- **Drag-and-drop movement**: Interactive unit movement with range validation
+- **Health bars**: Visual HP indicators for all units
+- **Event system**: Subscribe to combat events (unit clicked, attacked, died, turn ended)
+- **Reachable cells overlay**: Visual feedback showing valid movement range
+
+## Installation
+
+```bash
+npm install
+```
+
+## Development
+
+Start the dev server with a demo combat scene:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:5174` to see the combat engine in action.
+
+## Testing
+
+The combat engine has comprehensive E2E tests using Playwright:
+
+```bash
+# Run all tests
+npm run test:e2e
+
+# Run tests with UI
+npm run test:e2e:ui
+
+# Debug tests
+npm run test:e2e:debug
+```
+
+### Test Coverage
+
+- Canvas rendering with correct dimensions (768×576px)
+- Grid display with tiles and lines
+- Unit creation and display (player + enemies)
+- Drag-and-drop functionality
+- Reachable cells overlay on drag
+- Movement validation within range
+- Health bar rendering
 
 ## Recommended IDE Setup
 

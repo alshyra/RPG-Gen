@@ -11,54 +11,41 @@ import {
   createRangeOverlay,
   showReachableCells,
   hideReachableCells,
+  gridToPixel,
+  pixelToGrid,
 } from '../services/render/gridRenderer';
 import { useCombatUnit } from './useCombatUnit';
 import { setupInteractionController } from '../services/input/interactionController';
-import * as bus from '../services/eventBus';
 import { useUnitsStore } from '@/stores/units';
 import { storeToRefs } from 'pinia';
+import { useEventBus } from '../services/eventBus';
 
 export function useCombat() {
   const app = ref<PIXI.Application | null>(null);
   const gridContainer = ref<PIXI.Container | null>(null);
   const rangeOverlay = ref<PIXI.Container | null>(null);
-  const unitStore  = useUnitsStore();
+  const unitStore = useUnitsStore();
   const { units } = storeToRefs(unitStore);
   // delegate event API to central bus
-  const { on } = bus;
-  const { off } = bus;
-  const { emit } = bus;
-
+  const { on, off, emit } = useEventBus();
   const combatUnit = useCombatUnit();
 
-  // utility conversions (kept local)
-  const pixelToGrid = (x: number, y: number) => ({
-    gridX: Math.floor(x / GRID_CONFIG.cellSize),
-    gridY: Math.floor(y / GRID_CONFIG.cellSize),
-  });
-  const gridToPixel = (gridX: number, gridY: number) => ({
-    x: gridX * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-    y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-  });
-
+  // Interaction controller for drag-and-drop
   let interactionController: ReturnType<typeof setupInteractionController> | null = null;
 
   const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
 
     app.value = new PIXI.Application();
-    app.value.renderer = {
+    await app.value.init({
       width: GRID_CONFIG.cols * GRID_CONFIG.cellSize,
       height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
-      background: {
-        color: {
-          value: 0x1e1e1e,
-        }
-      },
+      backgroundColor: 0x1e1e1e,
       resolution: window.devicePixelRatio || 1,
-    };
-    // prefer the official Application.view property
-    container.appendChild(app.value.view);
+      antialias: true,
+    });
+
+    container.appendChild(app.value.canvas);
 
     app.value.stage.sortableChildren = true;
 
@@ -212,6 +199,7 @@ export function useCombat() {
   };
 
   onUnmounted(() => {
+    interactionController = null;
     if (!app.value) return;
     app.value.destroy(true);
   });

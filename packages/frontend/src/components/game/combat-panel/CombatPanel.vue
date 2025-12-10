@@ -45,6 +45,7 @@ const {
   selectedTarget,
   executeAttack,
   closeActionModal,
+  initializeVisual,
 } = useCombatEngine();
 
 // Reference to arena component
@@ -56,17 +57,17 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 };
 
 // Register arena API when mounted
-onMounted(() => {
+onMounted(async () => {
   if (arenaRef.value) {
     // The arena exposes its API via defineExpose
     registerArena(arenaRef.value as unknown as CombatArenaApi);
-  }
-});
 
-// Also watch for arena ref changes (in case of dynamic mounting)
-watch(arenaRef, newRef => {
-  if (newRef) {
-    registerArena(newRef as unknown as CombatArenaApi);
+    // Get container and initialize PIXI
+    const container = arenaRef.value.getContainer();
+    if (container) {
+      await arenaRef.value.init(container);
+      await initializeVisual();
+    }
   }
 });
 
