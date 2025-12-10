@@ -1,6 +1,4 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
+import { Prop, Schema } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { SpellMeta, SpellMetaSchema } from './SpellMeta.js';
 

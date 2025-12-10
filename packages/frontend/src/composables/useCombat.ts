@@ -18,12 +18,8 @@ export function useCombat() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
-  const {
-    currentTarget,
-    currentAttackResult,
-    currentPlayerAttackLog,
-    currentAttackView,
-  } = storeToRefs(combatStore);
+  const { currentTarget, currentAttackResult, currentPlayerAttackLog, currentAttackView } =
+    storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   const displayCombatStartSuccess = (combatState: {
@@ -34,7 +30,8 @@ export function useCombat() {
     }[];
   }): void => {
     if (combatState.narrative) gameStore.appendMessage('system', combatState.narrative);
-    const initiativeOrder = combatState.turnOrder.map(c => `${c.name} (${c.initiative})`)
+    const initiativeOrder = combatState.turnOrder
+      .map(c => `${c.name} (${c.initiative})`)
       .join(' → ');
     gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
     gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
@@ -47,13 +44,15 @@ export function useCombat() {
     console.log('[useCombat] initializeCombat instruction', instruction);
     if (!currentCharacter.value) return;
 
-    const enemyNames = instruction.combat_start.map(e => e.name)
-      .join(', ');
+    const enemyNames = instruction.combat_start.map(e => e.name).join(', ');
     gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
       const payload = { combat_start: instruction.combat_start };
-      const combatState = await combatStore.startCombat(currentCharacter.value.characterId, payload);
+      const combatState = await combatStore.startCombat(
+        currentCharacter.value.characterId,
+        payload,
+      );
       displayCombatStartSuccess(combatState);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
@@ -62,13 +61,13 @@ export function useCombat() {
   };
 
   const displayAttackResultMessage = (target: CombatantDto, result: AttackResponseDto): void => {
-    const {
-      damageTotal,
-      isCrit,
-    } = result;
+    const { damageTotal, isCrit } = result;
     if (damageTotal && damageTotal > 0) {
       const critMsg = isCrit ? ' (CRITIQUE!)' : '';
-      gameStore.appendMessage('system', `✅ Attaque réussie contre ${target.name}! Dégâts: ${damageTotal}${critMsg}`);
+      gameStore.appendMessage(
+        'system',
+        `✅ Attaque réussie contre ${target.name}! Dégâts: ${damageTotal}${critMsg}`,
+      );
     } else {
       gameStore.appendMessage('system', `❌ Attaque manquée contre ${target.name}.`);
     }
@@ -76,10 +75,15 @@ export function useCombat() {
 
   const handleAttackError = (err: unknown): void => {
     const message = err instanceof Error ? err.message : 'Failed to attack';
-    const sessionLost = message.includes('Combat session not found') || message.includes('Character is not in combat');
+    const sessionLost =
+      message.includes('Combat session not found') ||
+      message.includes('Character is not in combat');
     if (sessionLost) {
       combatStore.clearCombat();
-      gameStore.appendMessage('system', '⚠️ Combat terminé (session introuvable) — l\'état a été réinitialisé.');
+      gameStore.appendMessage(
+        'system',
+        "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
+      );
     } else {
       gameStore.appendMessage('system', `❌ Erreur: ${message}`);
     }
@@ -124,7 +128,7 @@ export function useCombat() {
       attackerId: prevPlayer?.id,
       target: target.name,
       targetId: target.id,
-      hit: (result.damageTotal !== undefined) || !!result.damageDiceResult,
+      hit: result.damageTotal !== undefined || !!result.damageDiceResult,
       damageRoll: result.damageDiceResult?.rolls ?? [],
       damageBonus: 0,
       totalDamage: result.damageTotal ?? 0,
@@ -151,7 +155,10 @@ export function useCombat() {
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
     if (!combatStore.canPlayerAct || !combatStore.isPlayerTurn) {
-      gameStore.appendMessage('system', 'Vous ne pouvez pas attaquer pour le moment — plus d\'actions ou ce n\'est pas votre tour.');
+      gameStore.appendMessage(
+        'system',
+        "Vous ne pouvez pas attaquer pour le moment — plus d'actions ou ce n'est pas votre tour.",
+      );
       return;
     }
 
@@ -161,7 +168,11 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatService.attack(currentCharacter.value.characterId, target, spellName);
+      const result = await combatService.attack(
+        currentCharacter.value.characterId,
+        target,
+        spellName,
+      );
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);
@@ -173,7 +184,11 @@ export function useCombat() {
   /**
    * Handle combat end instruction
    */
-  const handleCombatEnd = async (victory: boolean, xpGained: number, enemiesDefeated: string[]): Promise<void> => {
+  const handleCombatEnd = async (
+    victory: boolean,
+    xpGained: number,
+    enemiesDefeated: string[],
+  ): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
       combatStore.clearCombat();
@@ -190,7 +205,8 @@ export function useCombat() {
     const gmResponse = await conversationApi.sendStructuredMessage({
       role: 'system',
       instructions: [],
-      narrative: 'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
+      narrative:
+        'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
     });
     gameStore.appendMessage('assistant', gmResponse.narrative);
   };

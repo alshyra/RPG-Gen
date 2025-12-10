@@ -1,6 +1,4 @@
-import {
-  describe, it, expect,
-} from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { getSkillBonus } from './skillService';
 
 describe('getSkillBonus', () => {
@@ -18,8 +16,7 @@ describe('getSkillBonus', () => {
 
     const bonus = getSkillBonus(character, 'Perception');
     // Wis 14 => +2, proficiency 2 => total +4
-    expect(bonus)
-      .toBe(4);
+    expect(bonus).toBe(4);
   });
 
   it('falls back to looking up skill by name when ability cannot be resolved', () => {
@@ -36,7 +33,6 @@ describe('getSkillBonus', () => {
     };
 
     // Should return explicit skill modifier when present
-    expect(getSkillBonus(character, 'Something (Perception)'))
-      .toBe(1);
+    expect(getSkillBonus(character, 'Something (Perception)')).toBe(1);
   });
 });

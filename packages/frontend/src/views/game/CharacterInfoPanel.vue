@@ -6,7 +6,7 @@
       'fixed lg:relative top-0 bottom-24 lg:inset-y-0 left-0 w-80 lg:w-auto z-50',
       'bg-slate-900 lg:bg-transparent',
       'transition-transform duration-300 ease-in-out',
-      ui.isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      ui.isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
     <div
@@ -15,42 +15,40 @@
     >
       <CharacterPortrait class="shrink-0" />
       <div class="card flex-1 overflow-auto min-h-0">
-        <AbilityScores
-          class="mt-3"
-        />
+        <AbilityScores class="mt-3" />
         <div class="border-t border-slate-600 mt-3" />
         <nav class="p-3 space-y-2">
           <UiButton
             variant="ghost"
-            :to="{ name: 'game' , params: { characterId: currentCharacter.characterId }}"
+            :to="{ name: 'game', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Messages
           </UiButton>
           <UiButton
             variant="ghost"
-            :to="{ name: 'game-inventory', params: { characterId: currentCharacter.characterId }}"
+            :to="{ name: 'game-inventory', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Inventaire
           </UiButton>
           <UiButton
             variant="ghost"
-            :to="{ name: 'game-skills', params: { characterId: currentCharacter.characterId }}"
+            :to="{ name: 'game-skills', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Compétences
           </UiButton>
           <UiButton
             variant="ghost"
-            :to="{ name: 'game-spells', params: { characterId: currentCharacter.characterId }}"
+            :to="{ name: 'game-spells', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Sorts
           </UiButton>
           <UiButton
             variant="ghost"
-            :to="{ name: 'game-quest', params: { characterId: currentCharacter.characterId }}"
+            :to="{ name: 'game-quest', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Journal
@@ -72,5 +70,4 @@ const characterStore = useCharacterStore();
 const ui = useUiStore();
 
 const { currentCharacter } = storeToRefs(characterStore);
-
 </script>

@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <div
+    class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+  >
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-white mb-2">
-          RPG Gemini
-        </h1>
-        <p class="text-slate-300">
-          Connectez-vous pour commencer votre aventure
-        </p>
+        <h1 class="text-4xl font-extrabold text-white mb-2">RPG Gemini</h1>
+        <p class="text-slate-300">Connectez-vous pour commencer votre aventure</p>
       </div>
 
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-8 shadow-xl">
+      <div
+        class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-8 shadow-xl"
+      >
         <div class="mb-6 text-center">
           <svg
             class="w-20 h-20 mx-auto text-indigo-500"

@@ -4,13 +4,13 @@
 import type {
   AttackResponseDto,
   CombatEndResponseDto,
-  CombatStartRequestDto, CombatStateDto,
+  CombatStartRequestDto,
+  CombatStateDto,
   CombatantDto,
 } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
-function getData<T>(response: { data?: T;
-  error?: unknown; }): T {
+function getData<T>(response: { data?: T; error?: unknown }): T {
   if (response.error) throw response.error;
   if (!response.data) throw new Error('No data in response');
   return response.data;
@@ -35,7 +35,11 @@ class CombatService {
   /**
    * Execute an attack against a target using an action token for idempotency
    */
-  async attack(characterId: string, target: CombatantDto, spellName?: string): Promise<AttackResponseDto> {
+  async attack(
+    characterId: string,
+    target: CombatantDto,
+    spellName?: string,
+  ): Promise<AttackResponseDto> {
     const { data } = await api.POST('/api/combat/{characterId}/attack', {
       params: {
         path: {
@@ -55,7 +59,9 @@ class CombatService {
    * Get current combat status
    */
   async getStatus(characterId: string): Promise<CombatStateDto> {
-    const response = await api.GET('/api/combat/{characterId}/status', { params: { path: { characterId } } });
+    const response = await api.GET('/api/combat/{characterId}/status', {
+      params: { path: { characterId } },
+    });
     return getData<CombatStateDto>(response);
   }
 
@@ -63,7 +69,9 @@ class CombatService {
    * End combat (flee)
    */
   async endCombat(characterId: string): Promise<CombatEndResponseDto> {
-    const response = await api.POST('/api/combat/{characterId}/flee', { params: { path: { characterId } } });
+    const response = await api.POST('/api/combat/{characterId}/flee', {
+      params: { path: { characterId } },
+    });
     return getData(response);
   }
 

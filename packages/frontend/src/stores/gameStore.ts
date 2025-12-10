@@ -1,9 +1,5 @@
 import { diceApi } from '@/apis/diceApi';
-import type {
-  ChatMessageDto,
-  DiceResultDto,
-  GameInstructionDto,
-} from '@rpg-gen/shared';
+import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -43,16 +39,19 @@ export const useGameStore = defineStore('gameStore', () => {
 
   // Basic helpers expected by many composables / components
   // Accepts display roles (GM, Player, System, Error) and maps them to stored roles
-  const appendMessage = (role: DisplayRole, narrative: string) => messages.value.push({
-    role: toStoredRole(role),
-    narrative,
-    timestamp: Date.now(),
-  });
+  const appendMessage = (role: DisplayRole, narrative: string) =>
+    messages.value.push({
+      role: toStoredRole(role),
+      narrative,
+      timestamp: Date.now(),
+    });
 
-  const updateMessages = (list: {
-    role: DisplayRole;
-    narrative: string;
-  }[]) => {
+  const updateMessages = (
+    list: {
+      role: DisplayRole;
+      narrative: string;
+    }[],
+  ) => {
     messages.value = list.map(m => ({
       role: toStoredRole(m.role),
       narrative: m.narrative,

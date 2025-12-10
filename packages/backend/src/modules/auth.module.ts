@@ -6,9 +6,7 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../domain/auth/auth.service.js';
 import { JwtStrategy } from '../domain/auth/jwt.strategy.js';
 import { GoogleStrategy } from '../domain/auth/google.strategy.js';
-import {
-  User, UserSchema,
-} from '../infra/mongo/User.js';
+import { User, UserSchema } from '../infra/mongo/User.js';
 
 @Module({
   imports: [
@@ -25,15 +23,7 @@ import {
     ]),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    GoogleStrategy,
-  ],
-  exports: [
-    AuthService,
-    JwtModule,
-    PassportModule,
-  ],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
+  exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

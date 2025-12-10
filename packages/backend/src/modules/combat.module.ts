@@ -8,9 +8,7 @@ import { ActionEconomyService } from '../domain/combat/services/action-economy.s
 import { CharacterModule } from './character.module.js';
 import { ChatModule } from './chat.module.js';
 import { DiceModule } from './dice.module.js';
-import {
-  CombatSession, CombatSessionSchema,
-} from '../infra/mongo/combat/CombatSession.js';
+import { CombatSession, CombatSessionSchema } from '../infra/mongo/combat/CombatSession.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 
@@ -39,9 +37,6 @@ import { GeminiTextService } from '../infra/external/gemini-text.service.js';
     // Orchestrator
     CombatOrchestrator,
   ],
-  exports: [
-    CombatAppService,
-    CombatOrchestrator,
-  ],
+  exports: [CombatAppService, CombatOrchestrator],
 })
 export class CombatModule {}

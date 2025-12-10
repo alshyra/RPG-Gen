@@ -18,9 +18,7 @@
         <!-- New Level Preview -->
         <div class="rounded-md bg-slate-800 border-2 border-green-600 p-4 mb-4">
           <div class="text-center">
-            <div class="text-sm text-slate-400 mb-2">
-              Next Level
-            </div>
+            <div class="text-sm text-slate-400 mb-2">Next Level</div>
             <div class="text-4xl font-bold text-green-500">
               {{ nextLevel }}
             </div>
@@ -29,9 +27,7 @@
 
         <!-- HP Gain -->
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4">
-          <div class="text-sm text-slate-400 mb-2">
-            HP Gain
-          </div>
+          <div class="text-sm text-slate-400 mb-2">HP Gain</div>
           <div class="flex items-center gap-2">
             <span class="text-red-400 font-bold text-lg">+{{ levelUpReward.hpGain }}</span>
             <span class="text-xs text-slate-500">
@@ -55,9 +51,7 @@
           v-if="(levelUpReward.newFeatures ?? []).length > 0"
           class="rounded-md bg-slate-800 border border-slate-700 p-4"
         >
-          <div class="text-sm text-slate-400 mb-2">
-            New Features
-          </div>
+          <div class="text-sm text-slate-400 mb-2">New Features</div>
           <ul class="space-y-1">
             <li
               v-for="(feature, idx) in levelUpReward.newFeatures"
@@ -73,9 +67,7 @@
       <!-- Right: Confirm/Cancel -->
       <div class="md:w-2/3 flex flex-col gap-3">
         <div class="rounded-md bg-slate-900/50 border border-slate-700 p-6 text-center">
-          <div class="text-lg font-medium mb-4">
-            Ready to level up to {{ nextLevel }}?
-          </div>
+          <div class="text-lg font-medium mb-4">Ready to level up to {{ nextLevel }}?</div>
           <div class="text-sm text-slate-400 mb-6">
             {{ levelUpReward.message }}
           </div>
@@ -101,9 +93,7 @@
 
         <!-- Character Preview -->
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4">
-          <div class="text-sm text-slate-400 mb-3">
-            Character Summary
-          </div>
+          <div class="text-sm text-slate-400 mb-3">Character Summary</div>
           <div class="space-y-2 text-sm">
             <div>
               <span class="text-slate-400">Name:</span>
@@ -115,7 +105,9 @@
             </div>
             <div>
               <span class="text-slate-400">Current HP:</span>
-              <span class="ml-2 text-red-400">{{ character.hp || 0 }}/{{ character.hpMax || 0 }}</span>
+              <span class="ml-2 text-red-400"
+                >{{ character.hp || 0 }}/{{ character.hpMax || 0 }}</span
+              >
             </div>
             <div>
               <span class="text-slate-400">Proficiency Bonus:</span>
@@ -132,19 +124,19 @@
 import { useCharacterStore } from '@/stores/characterStore';
 import type { LevelUpResult } from '@/interfaces';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
-import {
-  computed, ref,
-} from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { conversationApi } from '../../apis/conversationApi';
 import { levelUpApi } from '@/apis/levelUpApi';
 
-const props = withDefaults(defineProps<{ world?: string;
-  initialCharacter?: CharacterResponseDto; }>(), {
-  world: '',
-  initialCharacter: undefined,
-});
+const props = withDefaults(
+  defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
+  {
+    world: '',
+    initialCharacter: undefined,
+  },
+);
 
 const router = useRouter();
 // const gameStore = useGameStore();
@@ -164,26 +156,29 @@ const conModifier = computed(() => {
   return Math.floor((conScore - 10) / 2);
 });
 
-const levelUpReward = computed<LevelUpResult>(() => dndLevelUpService.levelUp(
-  className.value,
-  currentLevel.value,
-  conModifier.value,
-));
+const levelUpReward = computed<LevelUpResult>(() =>
+  dndLevelUpService.levelUp(className.value, currentLevel.value, conModifier.value),
+);
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
 
 // Handlers
 
-const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): string => `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify({
-  name: updatedCharacter.name,
-  level: nextLevel.value,
-  class: className.value,
-  hp: updatedCharacter.hp,
-  hpMax: updatedCharacter.hpMax,
-  proficiency: proficiencyBonus.value,
-  newFeatures: levelUpReward.value.newFeatures,
-  hasASI: levelUpReward.value.hasASI,
-}, null, 2)}`;
+const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): string =>
+  `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify(
+    {
+      name: updatedCharacter.name,
+      level: nextLevel.value,
+      class: className.value,
+      hp: updatedCharacter.hp,
+      hpMax: updatedCharacter.hpMax,
+      proficiency: proficiencyBonus.value,
+      newFeatures: levelUpReward.value.newFeatures,
+      hasASI: levelUpReward.value.hasASI,
+    },
+    null,
+    2,
+  )}`;
 
 const executeLevelUp = async (): Promise<void> => {
   // Update character with new level and HP

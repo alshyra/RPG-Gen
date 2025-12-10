@@ -1,9 +1,12 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CombatantDto } from './CombatantDto.js';
 import {
-  IsString, IsBoolean, IsArray, IsNumber, IsOptional, ValidateNested,
+  IsString,
+  IsBoolean,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -59,12 +62,7 @@ export class CombatStateDto {
 
   @ApiPropertyOptional({
     description: 'Current combat phase',
-    enum: [
-      'PLAYER_TURN',
-      'AWAITING_DAMAGE_ROLL',
-      'ENEMY_TURN',
-      'COMBAT_ENDED',
-    ],
+    enum: ['PLAYER_TURN', 'AWAITING_DAMAGE_ROLL', 'ENEMY_TURN', 'COMBAT_ENDED'],
   })
   @IsOptional()
   @IsString()
@@ -98,11 +96,13 @@ export class CombatStateDto {
     }
     // defaults
     this.enemies = this.enemies ?? [];
-    this.player = this.player ?? new CombatantDto({
-      isPlayer: true,
-      id: '',
-      initiative: 0,
-    });
+    this.player =
+      this.player ??
+      new CombatantDto({
+        isPlayer: true,
+        id: '',
+        initiative: 0,
+      });
     this.turnOrder = this.turnOrder ?? [];
     this.characterId = this.characterId ?? '';
     this.inCombat = this.inCombat ?? false;

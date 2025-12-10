@@ -23,7 +23,6 @@ Strict rule: Do not use `as` casting in production code.
 
 - Rationale: `as` (and patterns like `as unknown as Type`) bypass the TypeScript type system and hides real type mismatches, which can lead to runtime errors. The project does not allow wholesale use of `as`.
 - Alternatives and preferred patterns:
-
   - Use non-null checks, inference, and immutable updates rather than casting. Example:
     ```ts
     if (!currentCharacter.value) return;

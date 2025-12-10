@@ -1,8 +1,6 @@
 <template>
   <div class="p-2 lg:p-4 max-h-[calc(100vh-220px)] lg:max-h-145 overflow-y-auto">
-    <h3 class="font-semibold mb-2">
-      Choisissez votre équipement
-    </h3>
+    <h3 class="font-semibold mb-2">Choisissez votre équipement</h3>
 
     <div
       v-if="!currentCharacter"
@@ -14,12 +12,8 @@
     <div v-else>
       <!-- Base pack (preselected and non-modifiable) -->
       <div class="mb-3">
-        <div class="font-medium text-sm">
-          Pack de départ
-        </div>
-        <div class="text-xs text-slate-400 mb-2">
-          Ce pack sera attribué automatiquement.
-        </div>
+        <div class="font-medium text-sm">Pack de départ</div>
+        <div class="text-xs text-slate-400 mb-2">Ce pack sera attribué automatiquement.</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div
             v-for="item in basePack"
@@ -55,9 +49,7 @@
 
       <!-- Weapon choice (pick exactly one) -->
       <div class="mb-2">
-        <div class="font-medium text-sm">
-          Choisissez votre arme de départ
-        </div>
+        <div class="font-medium text-sm">Choisissez votre arme de départ</div>
         <div class="text-xs text-slate-400 mb-2">
           Sélectionnez une seule arme parmi les options suivantes.
         </div>
@@ -87,12 +79,8 @@
 
       <!-- Secondary choice (shield or bow) -->
       <div class="mb-2">
-        <div class="font-medium text-sm">
-          Équipement secondaire (optionnel)
-        </div>
-        <div class="text-xs text-slate-400 mb-2">
-          Vous pouvez choisir un bouclier ou un arc.
-        </div>
+        <div class="font-medium text-sm">Équipement secondaire (optionnel)</div>
+        <div class="text-xs text-slate-400 mb-2">Vous pouvez choisir un bouclier ou un arc.</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div
             v-for="secondaryItem in availableSecondaryItems"
@@ -120,9 +108,7 @@
 
     <!-- Armor choice (pick one) -->
     <div class="mb-2">
-      <div class="font-medium text-sm">
-        Choisissez votre armure
-      </div>
+      <div class="font-medium text-sm">Choisissez votre armure</div>
       <div class="text-xs text-slate-400 mb-2">
         Sélectionnez une armure de départ parmi les options proposées.
       </div>
@@ -156,9 +142,7 @@
 import { useCharacterStore } from '@/stores/characterStore';
 import { InventoryItemDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
-import {
-  onBeforeUnmount, ref,
-} from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import UiInputCheckbox from '../../ui/UiInputCheckbox.vue';
 import UiInputNumber from '../../ui/UiInputNumber.vue';
 
@@ -247,11 +231,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
       cost: '2 gp',
       damage: '1d4 piercing',
       weight: '1 lb',
-      properties: [
-        'Finesse',
-        'Light',
-        'Thrown 20/60',
-      ],
+      properties: ['Finesse', 'Light', 'Thrown 20/60'],
       starter: true,
     },
     equipped: false,
@@ -291,7 +271,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
   {
     definitionId: 'weapon-rapier',
     name: 'Rapier',
-    description: 'Lame fine et précise; excellente pour l\'escrime.',
+    description: "Lame fine et précise; excellente pour l'escrime.",
     qty: 1,
     meta: {
       type: 'weapon',
@@ -320,10 +300,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
       cost: '25 gp',
       damage: '1d6 piercing',
       weight: '2 lb',
-      properties: [
-        'Ammunition 80/320',
-        'Two-handed',
-      ],
+      properties: ['Ammunition 80/320', 'Two-handed'],
       starter: true,
     },
     equipped: false,
@@ -387,18 +364,26 @@ const chosenArmor = ref<LocalInventoryItem | null>(availableArmors[0]);
 
 const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map(i => i.definitionId);
 const chosenSecondaryItem = ref<LocalInventoryItem>(availableSecondaryItems[0]);
-const weaponIsSelected = (weapon: LocalInventoryItem) => (currentCharacter.value?.inventory || [])
-  .some(i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name);
+const weaponIsSelected = (weapon: LocalInventoryItem) =>
+  (currentCharacter.value?.inventory || []).some(
+    i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name,
+  );
 
-const armorIsSelected = (armor: LocalInventoryItem) => (currentCharacter.value?.inventory || [])
-  .some(i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name);
+const armorIsSelected = (armor: LocalInventoryItem) =>
+  (currentCharacter.value?.inventory || []).some(
+    i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name,
+  );
 
 const toggleArmor = (armor: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenArmor.value = armor;
   console.log('Toggling armor:', armor);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => !availableArmorDefinitionIds.includes(i.definitionId) && !availableMainWeaponsDefinitionIds.includes(i.definitionId) && !availableSecondaryItemsDefinitionIds.includes(i.definitionId));
+  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
+    i =>
+      !availableArmorDefinitionIds.includes(i.definitionId) &&
+      !availableMainWeaponsDefinitionIds.includes(i.definitionId) &&
+      !availableSecondaryItemsDefinitionIds.includes(i.definitionId),
+  );
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -415,8 +400,11 @@ const toggleWeapon = (weapon: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenMainWeapon.value = weapon;
   console.log('Toggling weapon:', weapon);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(item => item.definitionId !== weapon.definitionId && !availableSecondaryItemsDefinitionIds.includes(item.definitionId));
+  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
+    item =>
+      item.definitionId !== weapon.definitionId &&
+      !availableSecondaryItemsDefinitionIds.includes(item.definitionId),
+  );
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -433,8 +421,11 @@ const toggleSecondaryItem = (item: LocalInventoryItem) => {
   if (!currentCharacter.value) return;
   chosenSecondaryItem.value = item;
   console.log('Toggling secondary item:', item);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || [])
-    .filter(i => i.definitionId !== item.definitionId && !availableMainWeaponsDefinitionIds.includes(i.definitionId));
+  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
+    i =>
+      i.definitionId !== item.definitionId &&
+      !availableMainWeaponsDefinitionIds.includes(i.definitionId),
+  );
 
   // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
@@ -466,5 +457,4 @@ onBeforeUnmount(async () => {
     console.error('Failed to save inventory on unmount:', error);
   }
 });
-
 </script>

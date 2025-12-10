@@ -26,22 +26,24 @@ export class CombatAdapter {
         isPlayer: true,
       },
       // Enemies
-      ...state.enemies.map((enemy, idx): UnitConfig => ({
-        id: enemy.id,
-        characterKey: this.mapEnemyToSprite(enemy.name),
-        position: this.getInitialPosition('enemy', state, idx),
-        stats: {
-          hp: enemy.hp ?? 0,
-          maxHp: enemy.hpMax ?? 0,
-          ac: enemy.ac ?? 10,
-          attack: enemy.attackBonus ?? 0,
-          defense: 0,
-          moveRange: 2,
-          attackRange: 1,
-        },
-        team: 'enemy',
-        isPlayer: false,
-      })),
+      ...state.enemies.map(
+        (enemy, idx): UnitConfig => ({
+          id: enemy.id,
+          characterKey: this.mapEnemyToSprite(enemy.name),
+          position: this.getInitialPosition('enemy', state, idx),
+          stats: {
+            hp: enemy.hp ?? 0,
+            maxHp: enemy.hpMax ?? 0,
+            ac: enemy.ac ?? 10,
+            attack: enemy.attackBonus ?? 0,
+            defense: 0,
+            moveRange: 2,
+            attackRange: 1,
+          },
+          team: 'enemy',
+          isPlayer: false,
+        }),
+      ),
     ];
 
     return {

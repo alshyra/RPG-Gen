@@ -56,7 +56,7 @@ export function useGameMessages() {
     gameStore.pendingInstruction = instr;
     const label = instr.modifierLabel ?? '';
     const value = instr.modifierValue ?? 0;
-    const modDisplay = label ? ` (${label})` : (value ? ` + ${value}` : '');
+    const modDisplay = label ? ` (${label})` : value ? ` + ${value}` : '';
     gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${modDisplay}`);
   };
 
@@ -82,14 +82,12 @@ export function useGameMessages() {
     if (instr.type !== 'spell') return;
     if (instr.action === 'learn') {
       gameStore.appendMessage('system', `📖 Learned spell: ${instr.name} (Level ${instr.level})`);
-      useCharacterStore()
-        .learnSpell(instr);
+      useCharacterStore().learnSpell(instr);
     } else if (instr.action === 'cast') {
       gameStore.appendMessage('system', `✨ Cast spell: ${instr.name}`);
     } else if (instr.action === 'forget') {
       gameStore.appendMessage('system', `🚫 Forgot spell: ${instr.name}`);
-      useCharacterStore()
-        .forgetSpell(instr.name || '');
+      useCharacterStore().forgetSpell(instr.name || '');
     }
   };
 
@@ -98,20 +96,17 @@ export function useGameMessages() {
     if (instr.action === 'add') {
       const qty = instr.quantity || 1;
       gameStore.appendMessage('system', `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      useCharacterStore()
-        .addInventoryItem({
-          name: instr.name,
-          qty,
-        });
+      useCharacterStore().addInventoryItem({
+        name: instr.name,
+        qty,
+      });
     } else if (instr.action === 'remove') {
       const qty = instr.quantity || 1;
       gameStore.appendMessage('system', `🗑️ Removed from inventory: ${instr.name} (x${qty})`);
-      useCharacterStore()
-        .removeInventoryItem(instr.name, qty);
+      useCharacterStore().removeInventoryItem(instr.name, qty);
     } else if (instr.action === 'use') {
       gameStore.appendMessage('system', `⚡ Used item: ${instr.name}`);
-      useCharacterStore()
-        .useInventoryItem(instr.name || '');
+      useCharacterStore().useInventoryItem(instr.name || '');
     }
   };
 
@@ -119,7 +114,7 @@ export function useGameMessages() {
     if (!instructions) return;
     const list = Array.isArray(instructions) ? instructions : [instructions];
 
-    list.forEach((item) => {
+    list.forEach(item => {
       const instr = item as Record<string, unknown>;
       const type = instr.type as string | undefined;
       if (type === 'roll') {

@@ -3,10 +3,7 @@ import util from 'util';
 import { DiceService } from '../../src/domain/dice/dice.service.js';
 import { CombatDiceResultDto } from '../../src/domain/dice/dto/CombatDiceResultDto.js';
 import { CombatModule } from '../../src/modules/combat.module.js';
-import {
-  closeTestApp,
-  createTestApp,
-} from '../helpers/test-app.js';
+import { closeTestApp, createTestApp } from '../helpers/test-app.js';
 
 // Helper to convert simple roll arrays into DiceResultDto objects (matching expected output)
 function makeDiceResult(rolls: number[]): any {
@@ -17,7 +14,7 @@ function makeDiceResult(rolls: number[]): any {
   };
 }
 
-test('rollDamage computes correct damageTotal for non-crit with damage bonus', async (t) => {
+test('rollDamage computes correct damageTotal for non-crit with damage bonus', async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);
@@ -49,7 +46,7 @@ test('rollDamage computes correct damageTotal for non-crit with damage bonus', a
   }
 });
 
-test('rollDamage computes correct damageTotal for critical (extra dice)', async (t) => {
+test('rollDamage computes correct damageTotal for critical (extra dice)', async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);
@@ -82,7 +79,7 @@ test('rollDamage computes correct damageTotal for critical (extra dice)', async 
   }
 });
 
-test('rollDamage computes correct damageTotal for multi-dice critical (multiple rolls)', async (t) => {
+test('rollDamage computes correct damageTotal for multi-dice critical (multiple rolls)', async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);

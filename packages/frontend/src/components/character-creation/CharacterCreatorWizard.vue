@@ -1,11 +1,11 @@
 <template>
-  <div class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full flex flex-col max-h-[calc(100vh-120px)] overflow-hidden">
+  <div
+    class="p-2 lg:p-4 rounded-md max-w-4xl mx-auto h-full flex flex-col max-h-[calc(100vh-120px)] overflow-hidden"
+  >
     <!-- Header with restore draft button -->
     <div class="flex justify-between mb-3 lg:mb-4">
       <div class="flex-1">
-        <h2 class="text-base lg:text-lg font-semibold">
-          Création de personnage
-        </h2>
+        <h2 class="text-base lg:text-lg font-semibold">Création de personnage</h2>
       </div>
     </div>
 
@@ -14,10 +14,20 @@
       <div
         v-for="(s, i) in steps"
         :key="i"
-        :class="['flex-1 text-center pb-2 px-1 lg:px-2', i <= currentStep ? 'border-b-2 border-indigo-600' : 'border-b border-slate-600']"
+        :class="[
+          'flex-1 text-center pb-2 px-1 lg:px-2',
+          i <= currentStep ? 'border-b-2 border-indigo-600' : 'border-b border-slate-600',
+        ]"
       >
         <div
-          :class="['text-xs lg:text-base font-medium', i === currentStep ? 'text-indigo-400' : i < currentStep ? 'text-green-400' : 'text-slate-500']"
+          :class="[
+            'text-xs lg:text-base font-medium',
+            i === currentStep
+              ? 'text-indigo-400'
+              : i < currentStep
+                ? 'text-green-400'
+                : 'text-slate-500',
+          ]"
         >
           <span class="hidden sm:inline">{{ s }}</span>
           <span class="sm:hidden">{{ i + 1 }}</span>
@@ -64,7 +74,9 @@
     </div>
 
     <!-- Navigation buttons -->
-    <div class="flex justify-end gap-2 mt-4 lg:mt-6 fixed bottom-0 left-0 right-0 bg-slate-900/95 py-3 px-2 lg:px-4 z-10">
+    <div
+      class="flex justify-end gap-2 mt-4 lg:mt-6 fixed bottom-0 left-0 right-0 bg-slate-900/95 py-3 px-2 lg:px-4 z-10"
+    >
       <div class="max-w-4xl w-full mx-auto flex justify-end gap-2">
         <UiButton
           variant="ghost"
@@ -102,12 +114,8 @@ import { conversationApi } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import {
-  computed, ref,
-} from 'vue';
-import {
-  useRoute, useRouter,
-} from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import UiButton from '../ui/UiButton.vue';
 import UiLoader from '../ui/UiLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
@@ -135,7 +143,9 @@ const steps = [
 const characterStore = useCharacterStore();
 const { updateCharacter } = characterStore;
 const { currentCharacter } = storeToRefs(characterStore);
-const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || ''));
+const skillsToChoose = computed(() =>
+  DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || ''),
+);
 
 // Get current step from route, or from draft if no route param
 const currentStep = computed({
@@ -157,8 +167,9 @@ const currentStep = computed({
   },
 });
 
-const chosenSkills = computed(() => (currentCharacter.value?.skills || [])
-  .filter(skill => !!skill.proficient).length || 0);
+const chosenSkills = computed(
+  () => (currentCharacter.value?.skills || []).filter(skill => !!skill.proficient).length || 0,
+);
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -192,11 +203,16 @@ const previousStep = () => {
 // --- helper functions extracted from finishCreation for readability ---
 const saveFinalCharacter = async () => {
   console.log('Finishing character creation for', currentCharacter.value);
-  if (!currentCharacter.value
-    || !currentCharacter.value.classes?.[0].name
-    || !currentCharacter.value.scores?.Con
-  ) return;
-  const hpMax = DnDRulesService.calculateHpForLevel1(currentCharacter.value.classes[0].name, currentCharacter.value.scores.Con);
+  if (
+    !currentCharacter.value ||
+    !currentCharacter.value.classes?.[0].name ||
+    !currentCharacter.value.scores?.Con
+  )
+    return;
+  const hpMax = DnDRulesService.calculateHpForLevel1(
+    currentCharacter.value.classes[0].name,
+    currentCharacter.value.scores.Con,
+  );
   await updateCharacter(currentCharacter.value.characterId, {
     ...currentCharacter.value,
     state: 'created',
@@ -225,7 +241,7 @@ const generateAndApplyAvatar = async () => {
 
 const initConversationForCharacter = async () => {
   try {
-    loadingTitle.value = 'Création de l\'univers...';
+    loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = 'Préparation du premier prompt du Maître de Jeu...';
     if (currentCharacter.value) await conversationApi.startGame(currentCharacter.value);
   } catch (e) {
@@ -241,14 +257,16 @@ const navigateToGame = async () => {
 };
 
 const finishCreation = async () => {
-  if (!currentCharacter.value
-    || !currentCharacter.value.classes?.[0].name
-    || !currentCharacter.value.scores?.Con
-  ) return;
+  if (
+    !currentCharacter.value ||
+    !currentCharacter.value.classes?.[0].name ||
+    !currentCharacter.value.scores?.Con
+  )
+    return;
 
   isLoading.value = true;
   loadingTitle.value = 'Invocation de votre avatar...';
-  loadingSubtitle.value = 'Génération de l\'image et préparation du monde de jeu...';
+  loadingSubtitle.value = "Génération de l'image et préparation du monde de jeu...";
 
   await saveFinalCharacter();
   await generateAndApplyAvatar();
@@ -257,5 +275,4 @@ const finishCreation = async () => {
 
   isLoading.value = false;
 };
-
 </script>

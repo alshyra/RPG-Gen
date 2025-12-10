@@ -1,10 +1,10 @@
 import './commands';
 
-Cypress.on('uncaught:exception', (err) => {
+Cypress.on('uncaught:exception', err => {
   if (
-    err.message.includes('Network')
-    || err.message.includes('fetch')
-    || err.message.includes('Failed to fetch')
+    err.message.includes('Network') ||
+    err.message.includes('fetch') ||
+    err.message.includes('Failed to fetch')
   ) {
     return false;
   }
@@ -12,32 +12,34 @@ Cypress.on('uncaught:exception', (err) => {
 });
 
 Cypress.Commands.add('clearAuth', () => {
-  cy.window()
-    .then((win) => {
-      win.localStorage.removeItem('rpg-auth-token');
-      win.localStorage.removeItem('rpg-user-data');
-    });
+  cy.window().then(win => {
+    win.localStorage.removeItem('rpg-auth-token');
+    win.localStorage.removeItem('rpg-user-data');
+  });
 });
 
 Cypress.Commands.add('ensureAuth', () => {
-  cy.window()
-    .then((win) => {
+  cy.window().then(win => {
     // Create a valid JWT-like token with a far-future expiration for E2E tests
     // This is a mock token that will pass client-side validation
     // Format: header.payload.signature (base64url encoded)
-      const header = btoa(JSON.stringify({
+    const header = btoa(
+      JSON.stringify({
         alg: 'HS256',
         typ: 'JWT',
-      }));
-      // Set expiration to year 2100 (4102444800 seconds since epoch)
-      const payload = btoa(JSON.stringify({
+      }),
+    );
+    // Set expiration to year 2100 (4102444800 seconds since epoch)
+    const payload = btoa(
+      JSON.stringify({
         sub: 'e2e-test-user',
         exp: 4102444800,
-      }));
-      const signature = 'e2e-bypass-signature';
-      const e2eToken = `${header}.${payload}.${signature}`;
-      win.localStorage.setItem('rpg-auth-token', e2eToken);
-    });
+      }),
+    );
+    const signature = 'e2e-bypass-signature';
+    const e2eToken = `${header}.${payload}.${signature}`;
+    win.localStorage.setItem('rpg-auth-token', e2eToken);
+  });
 
   // Stub the /api/auth/profile and avoid doing a real network request here — set localStorage directly.
   const profile = {
@@ -51,22 +53,21 @@ Cypress.Commands.add('ensureAuth', () => {
   cy.intercept('GET', '/api/auth/profile', {
     statusCode: 200,
     body: profile,
-  })
-    .as('getProfile');
+  }).as('getProfile');
 
   // Set user profile directly in localStorage so tests don't rely on an actual backend response
-  cy.window()
-    .then((win) => {
-      win.localStorage.setItem('rpg-user-data', JSON.stringify(profile));
-    });
+  cy.window().then(win => {
+    win.localStorage.setItem('rpg-user-data', JSON.stringify(profile));
+  });
 });
 
 // Helper wrappers exposing the node tasks for DB prep/cleanup
-Cypress.Commands.add('prepareE2EDb', (opts?: {
-  count?: number;
-  url?: string;
-  ready?: boolean;
-  withChat?: boolean;
-}) => cy.task('prepareE2EDb', opts || { count: 2 }));
+Cypress.Commands.add(
+  'prepareE2EDb',
+  (opts?: { count?: number; url?: string; ready?: boolean; withChat?: boolean }) =>
+    cy.task('prepareE2EDb', opts || { count: 2 }),
+);
 
-Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) => cy.task('cleanupE2EDb', opts || {}));
+Cypress.Commands.add('cleanupE2EDb', (opts?: { url?: string }) =>
+  cy.task('cleanupE2EDb', opts || {}),
+);

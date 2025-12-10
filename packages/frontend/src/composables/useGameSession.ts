@@ -13,9 +13,7 @@ import {
 } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { useCombat } from './useCombat';
-import {
-  useRoute, useRouter,
-} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { conversationApi } from '../apis/conversationApi';
 import { useGameStore } from '../stores/gameStore';
 
@@ -24,25 +22,24 @@ import type { HistoryMessage, ProcessedMessage } from '@/interfaces';
 type DisplayRole = 'user' | 'assistant' | 'system';
 
 // Type for instructions that processInstructionInMessage can handle
-type ProcessableInstruction
-  = | RollInstructionMessageDto
-    | HpInstructionMessageDto
-    | XpInstructionMessageDto
-    | CombatStartInstructionMessageDto;
+type ProcessableInstruction =
+  | RollInstructionMessageDto
+  | HpInstructionMessageDto
+  | XpInstructionMessageDto
+  | CombatStartInstructionMessageDto;
 
 // Type guard to check if an instruction is processable
-const isProcessableInstruction = (instr: GameInstructionDto): instr is ProcessableInstruction => isRollInstruction(instr)
-  || isHpInstruction(instr)
-  || isXpInstruction(instr)
-  || isCombatStartInstruction(instr);
+const isProcessableInstruction = (instr: GameInstructionDto): instr is ProcessableInstruction =>
+  isRollInstruction(instr) ||
+  isHpInstruction(instr) ||
+  isXpInstruction(instr) ||
+  isCombatStartInstruction(instr);
 
 export const useGameSession = () => {
   const router = useRouter();
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const {
-    currentCharacter, showDeathModal,
-  } = storeToRefs(characterStore);
+  const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
 
   const { isInitializing } = storeToRefs(gameStore);
 
@@ -74,11 +71,8 @@ export const useGameSession = () => {
       if (isLastMessage) gameStore.pendingInstruction = instr;
       const label = instr.modifierLabel ?? '';
       const value = instr.modifierValue ?? 0;
-      const modDisplay = label ? ` (${label})` : (value ? ` + ${value}` : '');
-      gameStore.appendMessage(
-        'system',
-        `🎲 Roll needed: ${instr.dices}${modDisplay}`,
-      );
+      const modDisplay = label ? ` (${label})` : value ? ` + ${value}` : '';
+      gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${modDisplay}`);
     } else if (isXpInstruction(instr)) {
       gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
       characterStore.updateXp(instr.xp);
@@ -95,22 +89,24 @@ export const useGameSession = () => {
     return 'system';
   };
 
-  const processHistoryMessages = (history: HistoryMessage[]): ProcessedMessage[] => history.map((msg, i) => {
-    const instrs: GameInstructionDto[] = Array.isArray(msg.instructions)
-      ? msg.instructions
-      : msg.instructions
-        ? [msg.instructions]
-        : [];
+  const processHistoryMessages = (history: HistoryMessage[]): ProcessedMessage[] =>
+    history.map((msg, i) => {
+      const instrs: GameInstructionDto[] = Array.isArray(msg.instructions)
+        ? msg.instructions
+        : msg.instructions
+          ? [msg.instructions]
+          : [];
 
-    // Filter to only processable instructions (skip spell instructions etc.)
-    instrs.filter(isProcessableInstruction)
-      .forEach(instr => processInstructionInMessage(instr, i === history.length - 1));
+      // Filter to only processable instructions (skip spell instructions etc.)
+      instrs
+        .filter(isProcessableInstruction)
+        .forEach(instr => processInstructionInMessage(instr, i === history.length - 1));
 
-    return {
-      role: mapRoleToDisplay(msg.role),
-      narrative: msg.narrative,
-    };
-  });
+      return {
+        role: mapRoleToDisplay(msg.role),
+        narrative: msg.narrative,
+      };
+    });
 
   const getCharIdFromRoute = (): string | undefined => {
     const route = useRoute();

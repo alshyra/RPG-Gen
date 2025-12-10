@@ -1,9 +1,5 @@
-import {
-  Injectable, Logger,
-} from '@nestjs/common';
-import {
-  GenerateContentResponse, GoogleGenAI,
-} from '@google/genai';
+import { Injectable, Logger } from '@nestjs/common';
+import { GenerateContentResponse, GoogleGenAI } from '@google/genai';
 
 @Injectable()
 export class GeminiImageService {

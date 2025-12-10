@@ -4,10 +4,10 @@
       v-if="currentPlayerAttackLog"
       class="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none"
     >
-      <div class="bg-slate-900/95 border border-blue-500 rounded-lg p-6 shadow-2xl text-center max-w-md">
-        <div class="text-blue-400 text-lg font-bold mb-2">
-          ⚔️ Votre attaque!
-        </div>
+      <div
+        class="bg-slate-900/95 border border-blue-500 rounded-lg p-6 shadow-2xl text-center max-w-md"
+      >
+        <div class="text-blue-400 text-lg font-bold mb-2">⚔️ Votre attaque!</div>
         <div
           v-if="playerAttackHit"
           class="text-white"
@@ -15,9 +15,7 @@
           <div class="text-2xl font-bold text-green-400 mb-1">
             {{ currentPlayerAttackLog.isCrit ? '💥 CRITIQUE!' : '✓ Touché!' }}
           </div>
-          <div class="text-xl">
-            {{ currentPlayerAttackLog.damageTotal }} dégâts
-          </div>
+          <div class="text-xl">{{ currentPlayerAttackLog.damageTotal }} dégâts</div>
           <div
             v-if="currentPlayerAttackLog.diceResult"
             class="text-sm text-slate-400 mt-2"
@@ -29,9 +27,7 @@
           v-else
           class="text-slate-300"
         >
-          <div class="text-2xl font-bold text-red-400 mb-1">
-            ✗ Raté!
-          </div>
+          <div class="text-2xl font-bold text-red-400 mb-1">✗ Raté!</div>
           <div
             v-if="currentPlayerAttackLog.diceResult"
             class="text-sm text-slate-400 mt-2"
@@ -62,7 +58,9 @@ const playerAttackHit = computed(() => {
 <style scoped>
 .attack-overlay-enter-active,
 .attack-overlay-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .attack-overlay-enter-from,

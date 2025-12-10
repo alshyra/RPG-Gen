@@ -1,6 +1,4 @@
-import {
-  Injectable, ExecutionContext,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 /**
@@ -22,7 +20,8 @@ export class GoogleAuthGuard extends AuthGuard('google') {
         _id: '000000000000000000000002',
         email: 'test@example.com',
         displayName: 'Test User',
-        picture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
+        picture:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
       };
       return true;
     }

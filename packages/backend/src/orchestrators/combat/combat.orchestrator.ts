@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CharacterService } from '../../domain/character/character.service.js';
 import { ConversationService } from '../../domain/chat/conversation.service.js';
 import { CombatAppService } from '../../domain/combat/combat.app.service.js';
@@ -55,11 +50,17 @@ export class CombatOrchestrator {
     combatStartRequest: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
-    let state = await this.combatAppService.initializeCombat(characterDto, combatStartRequest, userId);
+    let state = await this.combatAppService.initializeCombat(
+      characterDto,
+      combatStartRequest,
+      userId,
+    );
 
     // Early return when there are no enemy turns before the player activation
     if (state.turnOrder.length === 0 || state.turnOrder[0].isPlayer) {
-      this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
+      this.logger.log(
+        `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
+      );
       return {
         ...state,
         narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
@@ -69,12 +70,11 @@ export class CombatOrchestrator {
 
     // If turn order begins with an enemy, simulate initial turns here
     const playerIndex = state.turnOrder.findIndex(c => c.isPlayer);
-    const enemyTurnsBeforeFirstPlayer = playerIndex >= 0 ? state.turnOrder.slice(0, playerIndex) : state.turnOrder.slice();
+    const enemyTurnsBeforeFirstPlayer =
+      playerIndex >= 0 ? state.turnOrder.slice(0, playerIndex) : state.turnOrder.slice();
 
     // Process sequentially — stop if the player dies
-    const {
-      state: processedState, playerDefeated,
-    } = await this.processCombatantTurns(
+    const { state: processedState, playerDefeated } = await this.processCombatantTurns(
       userId,
       characterId,
       state,
@@ -87,7 +87,9 @@ export class CombatOrchestrator {
 
     if (playerDefeated) {
       await this.combatAppService.saveCombatState(state);
-      this.logger.log(`Combat initialized (and ended) for ${characterId} after initial enemy turns`);
+      this.logger.log(
+        `Combat initialized (and ended) for ${characterId} after initial enemy turns`,
+      );
       const narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
       return {
         ...state,
@@ -107,7 +109,9 @@ export class CombatOrchestrator {
     // Use freshest state for return
     state = finalState;
 
-    this.logger.log(`Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`);
+    this.logger.log(
+      `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
+    );
 
     return {
       ...state,
@@ -139,20 +143,33 @@ export class CombatOrchestrator {
     const targetEnemy = combatState.enemies.find(
       enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && (enemy.hp ?? 0) > 0,
     );
-    const validTargetIds = combatState.enemies.filter(e => (e.hp ?? 0) > 0)
+    const validTargetIds = combatState.enemies
+      .filter(e => (e.hp ?? 0) > 0)
       .map(e => e.id)
       .join(', ');
     if (!targetEnemy) {
-      throw new BadRequestException(`Invalid target: ${targetId}. Valid targets: ${validTargetIds}`);
+      throw new BadRequestException(
+        `Invalid target: ${targetId}. Valid targets: ${validTargetIds}`,
+      );
     }
 
     // If spell name provided, use spell attack/save mechanics
     if (spellName) {
-      return this.processSpellAttack(userId, characterId, targetId, targetEnemy, combatState, spellName);
+      return this.processSpellAttack(
+        userId,
+        characterId,
+        targetId,
+        targetEnemy,
+        combatState,
+        spellName,
+      );
     }
 
     // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
-    const attackRoll = this.diceService.rollAttack(combatState.player.attackBonus, targetEnemy.ac ?? 0);
+    const attackRoll = this.diceService.rollAttack(
+      combatState.player.attackBonus,
+      targetEnemy.ac ?? 0,
+    );
 
     if (!attackRoll.hit) {
       // Decrement action (via CombatService) and persist to avoid client exploit / state mismatch
@@ -166,10 +183,18 @@ export class CombatOrchestrator {
     }
 
     // Hit: roll damage via DiceService (handles crit doubling) and get the damage result DTO
-    const damageResult = this.diceService.rollDamage(combatState.player.damageDice, attackRoll.isCrit, combatState.player.damageBonus);
+    const damageResult = this.diceService.rollDamage(
+      combatState.player.damageDice,
+      attackRoll.isCrit,
+      combatState.player.damageBonus,
+    );
 
     // Apply damage and finalize via CombatService (persist, consume action, maybe end combat)
-    const applyResult = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal);
+    const applyResult = await this.combatAppService.applyPlayerDamage(
+      characterId,
+      targetId,
+      damageResult.damageTotal,
+    );
     const finalState = applyResult.state;
 
     // Build base response
@@ -196,7 +221,9 @@ export class CombatOrchestrator {
       // Apply XP to character
       if (applyResult.endResult.xp_gained > 0) {
         await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
-        this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
+        this.logger.log(
+          `Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`,
+        );
       }
 
       // Persist combat_end instruction to conversation history
@@ -212,7 +239,9 @@ export class CombatOrchestrator {
           ],
         });
       } catch (e) {
-        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+        this.logger.warn(
+          `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
+        );
       }
     }
 
@@ -250,15 +279,16 @@ export class CombatOrchestrator {
 
     let hit = false;
     let isCrit = false;
-    let attackRoll: { hit: boolean;
-      isCrit: boolean;
-      diceResult: { rolls: number[];
-        modifierValue: number;
-        total: number; }; } | undefined;
-    let saveRoll: { success: boolean;
-      diceResult: { rolls: number[];
-        modifierValue: number;
-        total: number; }; } | undefined;
+    let attackRoll:
+      | {
+          hit: boolean;
+          isCrit: boolean;
+          diceResult: { rolls: number[]; modifierValue: number; total: number };
+        }
+      | undefined;
+    let saveRoll:
+      | { success: boolean; diceResult: { rolls: number[]; modifierValue: number; total: number } }
+      | undefined;
 
     if (saveType) {
       // Saving throw spell
@@ -271,9 +301,7 @@ export class CombatOrchestrator {
       // Use player's spell attack bonus (proficiency + spellcasting mod)
       const spellAttackBonus = proficiency + chaMod;
       attackRoll = this.diceService.rollAttack(spellAttackBonus, targetEnemy.ac ?? 0);
-      ({
-        hit, isCrit,
-      } = attackRoll);
+      ({ hit, isCrit } = attackRoll);
     }
 
     if (!hit) {
@@ -291,7 +319,11 @@ export class CombatOrchestrator {
     const damageResult = this.diceService.rollDamage(damageDice, isCrit, 0);
 
     // Apply damage
-    const applyResult = await this.combatAppService.applyPlayerDamage(characterId, targetId, damageResult.damageTotal);
+    const applyResult = await this.combatAppService.applyPlayerDamage(
+      characterId,
+      targetId,
+      damageResult.damageTotal,
+    );
     const finalState = applyResult.state;
 
     // Build response
@@ -317,7 +349,9 @@ export class CombatOrchestrator {
 
       if (applyResult.endResult.xp_gained > 0) {
         await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
-        this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
+        this.logger.log(
+          `Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`,
+        );
       }
 
       try {
@@ -332,11 +366,15 @@ export class CombatOrchestrator {
           ],
         });
       } catch (e) {
-        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+        this.logger.warn(
+          `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
+        );
       }
     }
 
-    this.logger.log(`Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`);
+    this.logger.log(
+      `Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`,
+    );
     return response;
   }
 
@@ -345,7 +383,10 @@ export class CombatOrchestrator {
    * Returns attack logs for frontend to replay with animations.
    */
   // eslint-disable-next-line max-statements
-  public async endPlayerTurn(userId: string, characterId: string): Promise<EndPlayerTurnResponseDto> {
+  public async endPlayerTurn(
+    userId: string,
+    characterId: string,
+  ): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException('combat state not found');
 
@@ -422,11 +463,18 @@ export class CombatOrchestrator {
       };
     }
 
-    const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
+    const damageResult = this.diceService.rollDamage(
+      enemy.damageDice ?? '1d6',
+      attackRoll.isCrit,
+      enemy.damageBonus ?? 0,
+    );
     attackLog.damageRoll = damageResult;
     attackLog.damageTotal = damageResult.damageTotal;
 
-    const applyResult = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
+    const applyResult = await this.combatAppService.applyEnemyDamage(
+      characterId,
+      damageResult.damageTotal,
+    );
     const updatedState = applyResult.state;
 
     // If applyResult indicates combat ended (player dead), persist a chat message
@@ -450,7 +498,9 @@ export class CombatOrchestrator {
           ],
         });
       } catch (e) {
-        this.logger.warn(`Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`);
+        this.logger.warn(
+          `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
+        );
       }
     }
 
@@ -476,24 +526,27 @@ export class CombatOrchestrator {
     totalDamage: number;
     playerDefeated: boolean;
   }> {
-    const result = await enemies.reduce(async (accPromise, enemy) => {
-      const acc = await accPromise;
-      if (acc.playerDefeated || (enemy.hp ?? 0) <= 0) return acc;
+    const result = await enemies.reduce(
+      async (accPromise, enemy) => {
+        const acc = await accPromise;
+        if (acc.playerDefeated || (enemy.hp ?? 0) <= 0) return acc;
 
-      const attackResult = await this.processEnemyAttack(userId, characterId, enemy, acc.state);
+        const attackResult = await this.processEnemyAttack(userId, characterId, enemy, acc.state);
 
-      return {
-        state: attackResult.state,
-        attackLogs: [...acc.attackLogs, attackResult.log],
-        totalDamage: acc.totalDamage + attackResult.damage,
-        playerDefeated: attackResult.playerDefeated,
-      };
-    }, Promise.resolve({
-      state,
-      attackLogs: [] as EnemyAttackLogDto[],
-      totalDamage: 0,
-      playerDefeated: false,
-    }));
+        return {
+          state: attackResult.state,
+          attackLogs: [...acc.attackLogs, attackResult.log],
+          totalDamage: acc.totalDamage + attackResult.damage,
+          playerDefeated: attackResult.playerDefeated,
+        };
+      },
+      Promise.resolve({
+        state,
+        attackLogs: [] as EnemyAttackLogDto[],
+        totalDamage: 0,
+        playerDefeated: false,
+      }),
+    );
 
     return result;
   }
@@ -501,10 +554,7 @@ export class CombatOrchestrator {
   /**
    * Get current combat status with fresh action token.
    */
-  async getStatus(
-    userId: string,
-    characterId: string,
-  ): Promise<CombatStateDto> {
+  async getStatus(userId: string, characterId: string): Promise<CombatStateDto> {
     await this.characterService.findByCharacterId(userId, characterId);
 
     const inCombat = await this.combatAppService.isInCombat(characterId);
@@ -564,31 +614,40 @@ export class CombatOrchestrator {
     state: CombatStateDto,
     items: CombatantDto[],
     getEnemyId: (item: CombatantDto) => string | undefined,
-  ): Promise<{ state: CombatStateDto;
-    playerDefeated: boolean; }> {
-    const result = await items.reduce(async (prevPromise, item) => {
-      const acc = await prevPromise;
-      if (acc.playerDefeated) return acc;
+  ): Promise<{ state: CombatStateDto; playerDefeated: boolean }> {
+    const result = await items.reduce(
+      async (prevPromise, item) => {
+        const acc = await prevPromise;
+        if (acc.playerDefeated) return acc;
 
-      const enemyId = getEnemyId(item);
-      if (!enemyId) return acc;
+        const enemyId = getEnemyId(item);
+        if (!enemyId) return acc;
 
-      const enemy = acc.state.enemies.find(e => e.id === enemyId && (e.hp ?? 0) > 0);
-      if (!enemy) return acc;
+        const enemy = acc.state.enemies.find(e => e.id === enemyId && (e.hp ?? 0) > 0);
+        if (!enemy) return acc;
 
-      const attackRoll = this.diceService.rollAttack(enemy.attackBonus ?? 0, acc.state.player.ac);
-      if (!attackRoll.hit) return acc;
+        const attackRoll = this.diceService.rollAttack(enemy.attackBonus ?? 0, acc.state.player.ac);
+        if (!attackRoll.hit) return acc;
 
-      const damageResult = this.diceService.rollDamage(enemy.damageDice ?? '1d6', attackRoll.isCrit, enemy.damageBonus ?? 0);
-      // applyEnemyDamage returns a refreshed state
-      const updatedResult = await this.combatAppService.applyEnemyDamage(characterId, damageResult.damageTotal);
-      acc.state = updatedResult.state;
-      acc.playerDefeated = !!(updatedResult.state.player && updatedResult.state.player.hp <= 0);
-      return acc;
-    }, Promise.resolve({
-      state,
-      playerDefeated: false,
-    }));
+        const damageResult = this.diceService.rollDamage(
+          enemy.damageDice ?? '1d6',
+          attackRoll.isCrit,
+          enemy.damageBonus ?? 0,
+        );
+        // applyEnemyDamage returns a refreshed state
+        const updatedResult = await this.combatAppService.applyEnemyDamage(
+          characterId,
+          damageResult.damageTotal,
+        );
+        acc.state = updatedResult.state;
+        acc.playerDefeated = !!(updatedResult.state.player && updatedResult.state.player.hp <= 0);
+        return acc;
+      },
+      Promise.resolve({
+        state,
+        playerDefeated: false,
+      }),
+    );
     return result;
   }
 }

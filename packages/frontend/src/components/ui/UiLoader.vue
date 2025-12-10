@@ -48,5 +48,9 @@ const containerPadding = computed(() => (padding && !inline ? 'p-4' : 'p-0'));
 .animate-spin {
   animation: spin 1s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 </style>

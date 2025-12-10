@@ -6,9 +6,7 @@ class DiceApi {
     expr: string,
     advantage?: 'advantage' | 'disadvantage' | 'none',
   ): Promise<DiceResultDto> => {
-    const {
-      data, error,
-    } = await apiClient.POST('/api/dice', {
+    const { data, error } = await apiClient.POST('/api/dice', {
       body: {
         expr,
         advantage: advantage || 'none',

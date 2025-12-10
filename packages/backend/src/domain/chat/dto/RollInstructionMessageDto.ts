@@ -1,6 +1,4 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RollMetaDto } from './RolllMetaDto.js';
 
 /**
@@ -31,11 +29,7 @@ export class RollInstructionMessageDto {
 
   @ApiPropertyOptional({
     description: 'Advantage type',
-    enum: [
-      'advantage',
-      'disadvantage',
-      'none',
-    ],
+    enum: ['advantage', 'disadvantage', 'none'],
   })
   advantage?: 'advantage' | 'disadvantage' | 'none';
 

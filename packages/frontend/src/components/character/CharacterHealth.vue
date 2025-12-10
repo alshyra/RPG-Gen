@@ -23,9 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref, watch, onMounted, computed,
-} from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 const props = defineProps<{
   hp?: string | number;
   animate?: boolean;
@@ -49,24 +47,27 @@ const displayedHp = computed(() => {
   return String(v);
 });
 
-watch(() => props.hp, () => {
-  if (!props.animate) return;
-  if (timer) {
-    clearTimeout(timer);
-    timer = null;
-  }
-  // trigger a short beat animation when hp changes
-  beating.value = true;
-  timer = setTimeout(() => {
-    beating.value = false;
-    timer = null;
-  }, 700);
-});
+watch(
+  () => props.hp,
+  () => {
+    if (!props.animate) return;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    // trigger a short beat animation when hp changes
+    beating.value = true;
+    timer = setTimeout(() => {
+      beating.value = false;
+      timer = null;
+    }, 700);
+  },
+);
 
 onMounted(() => {
   if (!props.animate) return;
   beating.value = true;
-  setTimeout(() => beating.value = false, 400);
+  setTimeout(() => (beating.value = false), 400);
 });
 </script>
 

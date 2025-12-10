@@ -8,7 +8,7 @@
     :data-testvalue="`checkbox-${effectiveChecked ? 'checked' : 'unchecked'}`"
     :class="[
       'inline-flex items-center gap-2 select-none',
-      disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+      disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
     ]"
     @click.prevent="onClick"
   >
@@ -22,15 +22,17 @@
       class="sr-only"
       v-bind="$attrs"
       @change="emitChange"
-    >
+    />
 
     <!-- visual box -->
     <span
       :class="[
         'flex items-center justify-center rounded-md border transition-all duration-150 ease-in-out',
         sizeClass,
-        effectiveChecked ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-700 border-slate-600 text-transparent',
-        disabled ? 'opacity-60' : 'hover:ring-2 hover:ring-indigo-600/30'
+        effectiveChecked
+          ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+          : 'bg-slate-700 border-slate-600 text-transparent',
+        disabled ? 'opacity-60' : 'hover:ring-2 hover:ring-indigo-600/30',
       ]"
       :style="sizeStyle"
       aria-hidden="true"
@@ -58,9 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed, ref,
-} from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
   checked?: boolean;

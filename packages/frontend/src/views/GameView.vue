@@ -10,7 +10,7 @@
     <!-- Main content area (fills remaining space) -->
     <div
       class="grid lg:grid-cols-12 gap-2 flex-1 min-h-0"
-      style="grid-template-rows: 1fr auto;"
+      style="grid-template-rows: 1fr auto"
     >
       <div class="lg:col-span-3 max-w-[350px]">
         <!-- Desktop : fixed/sticky left panel so it doesn't scroll with the main content -->
@@ -41,7 +41,12 @@
 
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-30 pointer-events-none">
       <div class="pointer-events-none">
-        <div :class="[ 'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm', inCombat ? 'rounded-b-lg' : 'rounded-lg' ]" />
+        <div
+          :class="[
+            'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm',
+            inCombat ? 'rounded-b-lg' : 'rounded-lg',
+          ]"
+        />
       </div>
     </div>
 
@@ -60,12 +65,8 @@
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
-import {
-  computed, onMounted,
-} from 'vue';
-import {
-  useRoute, useRouter,
-} from 'vue-router';
+import { computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { characterApi } from '../apis/characterApi';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollModal from '../components/game/RollModal.vue';
@@ -94,9 +95,7 @@ const { startGame } = useGameSession();
 const { sendMessage } = useGameMessages();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
-const {
-  inCombat,
-} = storeToRefs(combatStore);
+const { inCombat } = storeToRefs(combatStore);
 const { pendingInstruction } = storeToRefs(gameStore);
 
 // Ensure rolls watcher / handlers are active for the whole view

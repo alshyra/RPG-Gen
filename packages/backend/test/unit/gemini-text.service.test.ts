@@ -2,7 +2,7 @@ import test from 'ava';
 import { InternalServerErrorException } from '@nestjs/common';
 import { GeminiTextService } from '../../src/infra/external/gemini-text.service.js';
 
-test('sendMessage parses valid structured JSON into ChatMessageDto', async (t) => {
+test('sendMessage parses valid structured JSON into ChatMessageDto', async t => {
   const svc = new GeminiTextService();
 
   // create a fake chat client with a stable sendMessage response
@@ -32,7 +32,7 @@ test('sendMessage parses valid structured JSON into ChatMessageDto', async (t) =
   t.is((result.instructions as any)[0].type, 'hp');
 });
 
-test('sendMessage throws if AI returns invalid JSON', async (t) => {
+test('sendMessage throws if AI returns invalid JSON', async t => {
   const svc = new GeminiTextService();
 
   const fakeChat = {
@@ -45,7 +45,7 @@ test('sendMessage throws if AI returns invalid JSON', async (t) => {
   t.true(err instanceof InternalServerErrorException);
 });
 
-test('sendMessage unwraps payload-wrapped instructions before validation', async (t) => {
+test('sendMessage unwraps payload-wrapped instructions before validation', async t => {
   const svc = new GeminiTextService();
 
   const fakeChat = {

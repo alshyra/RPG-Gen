@@ -1,7 +1,7 @@
 import test from 'ava';
 import { SpellDefinitionService } from '../../src/domain/spell-definition/spell-definition.service.js';
 
-test('seedFromJson rejects the entire seed if any entry is invalid', async (t) => {
+test('seedFromJson rejects the entire seed if any entry is invalid', async t => {
   const svc = new SpellDefinitionService({} as any);
 
   // replace insertSpell with a simple collector that should not be called because validation fails
@@ -28,7 +28,7 @@ test('seedFromJson rejects the entire seed if any entry is invalid', async (t) =
   t.is(called.length, 0, 'insertSpell should not be called when validation fails for any item');
 });
 
-test('seedFromJson coerces unknown attackType to undefined and still accepts the entry', async (t) => {
+test('seedFromJson coerces unknown attackType to undefined and still accepts the entry', async t => {
   const svc = new SpellDefinitionService({} as any);
   const captured: any[] = [];
   svc.insertSpell = async (s: any) => {

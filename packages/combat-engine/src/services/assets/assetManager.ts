@@ -14,10 +14,11 @@ const buildFromAtlas = (texture: Texture) => {
   const w = frameWidth;
   const h = frameHeight;
 
-  return Object
-    .entries(animationConfig)
+  return Object.entries(animationConfig)
     .map(([name, cfg]): [string, Texture[]] => {
-      const frames = Array.from({ length: cfg.frames }, (_, i) => createFrameTexture(texture, i * w, cfg.row * h, w, h));
+      const frames = Array.from({ length: cfg.frames }, (_, i) =>
+        createFrameTexture(texture, i * w, cfg.row * h, w, h),
+      );
       return [name, frames];
     })
     .reduce<Record<string, Texture[]>>((acc, entry) => {

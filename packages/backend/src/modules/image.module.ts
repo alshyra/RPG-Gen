@@ -7,10 +7,7 @@ import { CharacterModule } from './character.module.js';
 @Module({
   imports: [CharacterModule],
   controllers: [ImageController],
-  providers: [
-    GeminiImageService,
-    ImageService,
-  ],
+  providers: [GeminiImageService, ImageService],
   exports: [ImageService],
 })
 export class ImageModule {}

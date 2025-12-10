@@ -4,13 +4,12 @@
       v-if="currentAttackResult?.diceResult"
       class="text-white"
     >
-      <div class="text-lg font-semibold mb-2">
-        Jet d'attaque
-      </div>
+      <div class="text-lg font-semibold mb-2">Jet d'attaque</div>
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold">{{ currentAttackResult.diceResult.total }}</span>
         <span class="text-slate-400">
-          ({{ currentAttackResult.diceResult.rolls.join(' + ') }} + {{ currentAttackResult.diceResult.modifierValue }})
+          ({{ currentAttackResult.diceResult.rolls.join(' + ') }} +
+          {{ currentAttackResult.diceResult.modifierValue }})
         </span>
       </div>
       <div

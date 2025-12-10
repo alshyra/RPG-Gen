@@ -1,6 +1,4 @@
-import {
-  describe, it, expect, beforeEach, vi,
-} from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useCombatStore } from '@/stores/combatStore';
 import { useCharacterStore } from '@/stores/characterStore';
@@ -84,25 +82,18 @@ describe('useCombat processAttackResult => currentAttackView', () => {
       },
     } as any;
 
-    vi.spyOn(combatService, 'attack')
-      .mockResolvedValue(fakeResponse);
+    vi.spyOn(combatService, 'attack').mockResolvedValue(fakeResponse);
 
     const { executeAttack } = useCombat();
 
     // call executeAttack with the target
     await executeAttack(combatStore.enemies[0] as any);
 
-    expect(combatStore.currentAttackView)
-      .toBeTruthy();
-    expect(combatStore.currentAttackView?.target)
-      .toBe('Goblin');
-    expect(combatStore.currentAttackView?.totalDamage)
-      .toBe(5);
-    expect(combatStore.currentAttackView?.targetHpBefore)
-      .toBe(8);
-    expect(combatStore.currentAttackView?.targetHpAfter)
-      .toBe(3);
-    expect(combatStore.currentAttackView?.targetDefeated)
-      .toBe(false);
+    expect(combatStore.currentAttackView).toBeTruthy();
+    expect(combatStore.currentAttackView?.target).toBe('Goblin');
+    expect(combatStore.currentAttackView?.totalDamage).toBe(5);
+    expect(combatStore.currentAttackView?.targetHpBefore).toBe(8);
+    expect(combatStore.currentAttackView?.targetHpAfter).toBe(3);
+    expect(combatStore.currentAttackView?.targetDefeated).toBe(false);
   });
 });

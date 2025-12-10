@@ -7,7 +7,11 @@
     <template #default="{ href, navigate, isActive }">
       <a
         :href="href"
-        :class="['inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity', buttonClass, isActive ? activeClass : '']"
+        :class="[
+          'inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity',
+          buttonClass,
+          isActive ? activeClass : '',
+        ]"
         :aria-disabled="isDisabled"
         v-bind="$attrs"
         @click="handleNavigate(navigate, $event)"
@@ -24,7 +28,10 @@
   </RouterLink>
   <button
     v-else
-    :class="['inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity', buttonClass]"
+    :class="[
+      'inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity',
+      buttonClass,
+    ]"
     :disabled="isDisabled"
     v-bind="$attrs"
     @click="onClick($event)"
@@ -41,9 +48,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import {
-  RouteLocationAsPathGeneric, RouteLocationAsRelativeGeneric, RouterLink,
-} from 'vue-router';
+import { RouteLocationAsPathGeneric, RouteLocationAsRelativeGeneric, RouterLink } from 'vue-router';
 import UiLoader from './UiLoader.vue';
 
 const props = defineProps<{

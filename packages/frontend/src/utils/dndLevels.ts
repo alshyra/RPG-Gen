@@ -102,8 +102,8 @@ export const DND_LEVELS = [
 ] as const;
 
 export type DndLevel = (typeof DND_LEVELS)[number];
-export const getCurrentLevel = (totalXp: number): DndLevel => [...DND_LEVELS].reverse()
-  .find(l => totalXp >= l.totalXp) || DND_LEVELS[0];
+export const getCurrentLevel = (totalXp: number): DndLevel =>
+  [...DND_LEVELS].reverse().find(l => totalXp >= l.totalXp) || DND_LEVELS[0];
 
 export function getNextLevel(totalXp: number): DndLevel | null {
   const current = getCurrentLevel(totalXp);

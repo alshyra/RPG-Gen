@@ -43,10 +43,7 @@
 <script setup lang="ts">
 import { characterApi } from '@/apis/characterApi';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
-import {
-  onMounted,
-  ref,
-} from 'vue';
+import { onMounted, ref } from 'vue';
 import CharacterMenu from './CharacterMenu.vue';
 
 const characters = ref<CharacterResponseDto[]>([]);

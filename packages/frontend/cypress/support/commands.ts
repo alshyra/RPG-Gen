@@ -36,10 +36,7 @@ declare global {
        * @param opts.count number of characters to create
        * @param opts.url optional API url
        */
-      prepareE2EDb(opts?: {
-        count?: number;
-        url?: string;
-      }): Chainable<{
+      prepareE2EDb(opts?: { count?: number; url?: string }): Chainable<{
         ok: boolean;
         output?: string;
         error?: string;

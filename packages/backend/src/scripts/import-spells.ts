@@ -122,7 +122,10 @@ function extractScaling(description: string): string | undefined {
   return scalingMatch ? scalingMatch[1] : undefined;
 }
 
-function getAttackType(saveType: string | undefined, damageDice: string | undefined): 'melee' | 'ranged' | 'spell' | undefined {
+function getAttackType(
+  saveType: string | undefined,
+  damageDice: string | undefined,
+): 'melee' | 'ranged' | 'spell' | undefined {
   if (saveType) return 'spell';
   if (damageDice) return 'spell';
   return undefined;
@@ -146,7 +149,8 @@ function parseSpellLine(line: string): SpellDefinition | null {
 
   if (parts.length < 8) return null; // Not enough data
 
-  const [name, levelStr, school, castingTime, range, components, duration, ritual, description] = parts;
+  const [name, levelStr, school, castingTime, range, components, duration, ritual, description] =
+    parts;
 
   // Skip header lines or empty lines
   if (!name || name === 'Name' || !levelStr.match(/^\d+$/)) return null;
@@ -201,7 +205,7 @@ function main() {
 
   // Generate unique definitionId for each spell similar to item 'definitionId'
   const counters = new Map<string, number>();
-  spells.forEach((s) => {
+  spells.forEach(s => {
     const base = `spell-${s.level}-${slugify(s.name)}`;
     const count = counters.get(base) ?? 0;
     counters.set(base, count + 1);
@@ -219,10 +223,13 @@ function main() {
   writeFileSync(outputPath, JSON.stringify(spells, null, 2), 'utf-8');
   console.log(`✓ Spell data written to: ${outputPath}`);
 
-  const byLevel = spells.reduce((acc, spell) => {
-    acc[spell.level] = (acc[spell.level] || 0) + 1;
-    return acc;
-  }, {} as Record<number, number>);
+  const byLevel = spells.reduce(
+    (acc, spell) => {
+      acc[spell.level] = (acc[spell.level] || 0) + 1;
+      return acc;
+    },
+    {} as Record<number, number>,
+  );
 
   Object.entries(byLevel)
     .sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10))

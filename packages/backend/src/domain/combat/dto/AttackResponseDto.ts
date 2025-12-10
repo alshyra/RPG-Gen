@@ -12,13 +12,15 @@ export class AttackResponseDto {
   diceResult?: DiceResultDto;
 
   @ApiPropertyOptional({
-    description: 'Damage roll result (includes isCrit and damageTotal), present when an attack hits.',
+    description:
+      'Damage roll result (includes isCrit and damageTotal), present when an attack hits.',
     type: CombatDiceResultDto,
   })
   damageDiceResult?: CombatDiceResultDto;
 
   @ApiPropertyOptional({
-    description: 'Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable).',
+    description:
+      'Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable).',
     type: Number,
   })
   damageTotal?: number;

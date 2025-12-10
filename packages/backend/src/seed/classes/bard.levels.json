@@ -81,10 +81,7 @@
       "choices": [
         {
           "type": "chooseSubclass",
-          "options": [
-            "college-of-knowledge",
-            "college-of-valour"
-          ]
+          "options": ["college-of-knowledge", "college-of-valour"]
         },
         {
           "type": "chooseSkills",

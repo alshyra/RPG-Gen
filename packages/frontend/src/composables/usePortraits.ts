@@ -31,14 +31,12 @@ export const pickBestPortrait = async (nameOrId?: string) => {
   const files = await loadPortraitManifest();
   const slug = slugify(String(nameOrId || 'enemy'));
   if (!files || files.length === 0) return null;
-  const candidates = [
-    `${slug}.webp`,
-    `${slug}.png`,
-  ];
+  const candidates = [`${slug}.webp`, `${slug}.png`];
   const found = candidates.find(c => files.includes(c));
   if (found) return `/images/enemies/${found}`;
   const match = files.find(f => f.includes(slug));
   return match ? `/images/enemies/${match}` : null;
 };
 
-export const getFallbackPortrait = (nameOrId?: string) => `/images/enemies/${slugify(String(nameOrId || 'enemy'))}.png`;
+export const getFallbackPortrait = (nameOrId?: string) =>
+  `/images/enemies/${slugify(String(nameOrId || 'enemy'))}.png`;

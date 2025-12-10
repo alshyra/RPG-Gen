@@ -1,15 +1,9 @@
-import {
-  Injectable, Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Strategy, VerifyCallback, Profile,
-} from 'passport-google-oauth20';
+import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  User, UserDocument,
-} from '../../infra/mongo/User.js';
+import { User, UserDocument } from '../../infra/mongo/User.js';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -21,10 +15,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       callbackURL:
         process.env.GOOGLE_OAUTH_CALLBACK_URL || 'http://localhost/api/auth/google/callback',
-      scope: [
-        'email',
-        'profile',
-      ],
+      scope: ['email', 'profile'],
     });
 
     this.logger.log('GoogleStrategy initialized with:', {
@@ -50,9 +41,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   private async findOrCreateUser(profile: Profile): Promise<UserDocument> {
-    const {
-      id, name, emails, photos,
-    } = profile;
+    const { id, name, emails, photos } = profile;
     let user = await this.userModel.findOne({ googleId: id });
 
     if (!user) {

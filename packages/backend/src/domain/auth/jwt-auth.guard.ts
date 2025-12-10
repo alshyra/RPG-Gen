@@ -1,6 +1,4 @@
-import {
-  Injectable, ExecutionContext,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 /**
@@ -28,7 +26,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         email: 'test@example.com',
         displayName: 'Test User',
         // Small inline image so frontend renders an <img> element for tests
-        picture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
+        picture:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=',
       };
 
       return true;

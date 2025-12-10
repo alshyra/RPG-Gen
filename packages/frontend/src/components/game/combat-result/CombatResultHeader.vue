@@ -15,9 +15,7 @@ import { computed } from 'vue';
 import { useCombatStore } from '@/stores/combatStore';
 
 const combatStore = useCombatStore();
-const {
-  currentAttackView, isCurrentAttackPlayerAttack,
-} = storeToRefs(combatStore);
+const { currentAttackView, isCurrentAttackPlayerAttack } = storeToRefs(combatStore);
 
 const currentAttack = computed(() => currentAttackView?.value ?? undefined);
 </script>

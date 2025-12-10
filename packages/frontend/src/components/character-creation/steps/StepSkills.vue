@@ -1,8 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-bold">
-      Compétences
-    </h2>
+    <h2 class="text-xl font-bold">Compétences</h2>
 
     <p class="text-slate-400 text-sm">
       Sélectionnez {{ skillsToChoose }} compétences pour votre {{ primaryClass }}
@@ -44,10 +42,12 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const proficientSkills = computed(() => (currentCharacter.value?.skills || [])
-  .filter(s => s.proficient)
-  .map(s => s.name));
-const availableSkills = computed(() => DnDRulesService.getAvailableSkillsForClass(primaryClass.value));
+const proficientSkills = computed(() =>
+  (currentCharacter.value?.skills || []).filter(s => s.proficient).map(s => s.name),
+);
+const availableSkills = computed(() =>
+  DnDRulesService.getAvailableSkillsForClass(primaryClass.value),
+);
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
 const saveCurrent = async () => {
@@ -55,7 +55,9 @@ const saveCurrent = async () => {
 
   if (!currentCharacter.value.characterId) return;
 
-  await characterStore.updateCharacter(currentCharacter.value.characterId, { skills: currentCharacter.value.skills });
+  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    skills: currentCharacter.value.skills,
+  });
 };
 
 const setSkillProficiency = async (skill: string, isProficient: boolean) => {
@@ -66,12 +68,14 @@ const setSkillProficiency = async (skill: string, isProficient: boolean) => {
   const present = existingSkills.find(s => s.name === skill);
   let updated: SkillResponseDto[];
   if (present) {
-    updated = existingSkills.map(s => (s.name === skill
-      ? {
-          ...s,
-          proficient: isProficient,
-        }
-      : s));
+    updated = existingSkills.map(s =>
+      s.name === skill
+        ? {
+            ...s,
+            proficient: isProficient,
+          }
+        : s,
+    );
   } else if (isProficient) {
     updated = [
       ...existingSkills,

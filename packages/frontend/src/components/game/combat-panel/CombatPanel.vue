@@ -25,9 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref, onMounted, onUnmounted, watch,
-} from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
@@ -66,7 +64,7 @@ onMounted(() => {
 });
 
 // Also watch for arena ref changes (in case of dynamic mounting)
-watch(arenaRef, (newRef) => {
+watch(arenaRef, newRef => {
   if (newRef) {
     registerArena(newRef as unknown as CombatArenaApi);
   }

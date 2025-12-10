@@ -5,37 +5,29 @@
         v-if="loading"
         class="space-y-4"
       >
-        <div class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent" />
-        <p class="text-slate-300">
-          Authentification en cours...
-        </p>
+        <div
+          class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"
+        />
+        <p class="text-slate-300">Authentification en cours...</p>
       </div>
 
       <div
         v-else-if="error"
         class="space-y-4"
       >
-        <div class="text-red-500 text-5xl">
-          ⚠️
-        </div>
-        <h2 class="text-xl font-bold text-white">
-          Erreur d'authentification
-        </h2>
+        <div class="text-red-500 text-5xl">⚠️</div>
+        <h2 class="text-xl font-bold text-white">Erreur d'authentification</h2>
         <p class="text-slate-300">
           {{ error }}
         </p>
-        <UiButton @click="goToLogin">
-          Réessayer
-        </UiButton>
+        <UiButton @click="goToLogin"> Réessayer </UiButton>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  onMounted, ref,
-} from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '../apis/authApi';
 import UiButton from '../components/ui/UiButton.vue';
@@ -85,7 +77,7 @@ const saveTokenAndFetchProfile = async (token: string) => {
 
 const handleAuthError = (e: unknown) => {
   console.error('Auth callback error', e);
-  setError('Une erreur est survenue lors de l\'authentification');
+  setError("Une erreur est survenue lors de l'authentification");
 };
 
 const goToLogin = () => router.push('/login');

@@ -1,10 +1,5 @@
-import type {
-  DiceResultDto,
-  RollInstructionMessageDto,
-} from '@rpg-gen/shared';
-import {
-  isRollInstruction,
-} from '@rpg-gen/shared';
+import type { DiceResultDto, RollInstructionMessageDto } from '@rpg-gen/shared';
+import { isRollInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { watch } from 'vue';
 import { conversationApi } from '../apis/conversationApi';
@@ -15,9 +10,7 @@ import { useGameStore } from '../stores/gameStore';
 export function useGameRolls() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const {
-    rollData, pendingInstruction,
-  } = storeToRefs(gameStore);
+  const { rollData, pendingInstruction } = storeToRefs(gameStore);
 
   const buildRollData = (
     rollResult: DiceResultDto,
@@ -47,12 +40,15 @@ export function useGameRolls() {
     const skillName = pending.modifierLabel ?? 'Roll';
     const skillBonus = pending.modifierLabel
       ? getSkillBonus(characterStore.currentCharacter ?? null, skillName)
-      : pending.modifierValue ?? 0;
+      : (pending.modifierValue ?? 0);
     gameStore.rollData = buildRollData(rollResult, pending, skillName, skillBonus);
     gameStore.showRollModal = true;
   };
 
-  watch(() => gameStore.latestRoll, latest => latest && onDiceRolled(latest));
+  watch(
+    () => gameStore.latestRoll,
+    latest => latest && onDiceRolled(latest),
+  );
 
   const confirmRoll = async () => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
@@ -70,10 +66,16 @@ export function useGameRolls() {
   const rerollDice = async (): Promise<void> => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction)) return;
     try {
-      const payload = await gameStore.doRoll(pendingInstruction.dices, pendingInstruction.advantage ?? 'none');
+      const payload = await gameStore.doRoll(
+        pendingInstruction.dices,
+        pendingInstruction.advantage ?? 'none',
+      );
       await onDiceRolled(payload);
     } catch (e) {
-      gameStore.appendMessage('system', `Reroll failed: ${e instanceof Error ? e.message : String(e)}`);
+      gameStore.appendMessage(
+        'system',
+        `Reroll failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
   };
 

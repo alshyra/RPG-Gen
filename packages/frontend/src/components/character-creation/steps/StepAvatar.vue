@@ -1,8 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-bold">
-      Générer un Avatar
-    </h2>
+    <h2 class="text-xl font-bold">Générer un Avatar</h2>
     <p class="text-slate-400 text-sm">
       (Optionnel) Décrivez l'apparence physique de votre personnage pour générer un avatar avec l'IA
     </p>
@@ -31,6 +29,8 @@ const { currentCharacter } = storeToRefs(characterStore);
 const updateDescription = useDebounceFn(async (physicalDescription: string) => {
   if (!currentCharacter.value) return;
   currentCharacter.value.physicalDescription = physicalDescription;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, { physicalDescription });
+  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    physicalDescription,
+  });
 }, 1000);
 </script>

@@ -2,8 +2,12 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { combatService } from '../apis/combatApi';
 import type {
-  CombatantDto, CombatStartRequestDto, CombatStateDto,
-  AttackResponseDto, EndPlayerTurnResponseDto, EnemyAttackLogDto,
+  CombatantDto,
+  CombatStartRequestDto,
+  CombatStateDto,
+  AttackResponseDto,
+  EndPlayerTurnResponseDto,
+  EnemyAttackLogDto,
 } from '@rpg-gen/shared';
 import type { CombatPhase } from '@rpg-gen/shared';
 import type { Ref } from 'vue';
@@ -81,7 +85,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     setActionEconomy(response);
   };
 
-  const selectNextAliveTarget = (enemyList: Ref<CombatantDto[]>): CombatantDto | null => enemyList.value.find(e => (e.hp ?? 0) > 0) ?? null;
+  const selectNextAliveTarget = (enemyList: Ref<CombatantDto[]>): CombatantDto | null =>
+    enemyList.value.find(e => (e.hp ?? 0) > 0) ?? null;
 
   const applyDamageToPlayer = (damage: number): void => {
     if (!player.value) return;
@@ -104,13 +109,10 @@ export const useCombatStore = defineStore('combatStore', () => {
 
   const processAttackLogs = async (logs: EnemyAttackLogDto[]): Promise<void> => {
     isProcessingEnemyTurn.value = true;
-    await logs.reduce(
-      async (prev, log) => {
-        await prev;
-        await processOneAttackLog(log);
-      },
-      Promise.resolve(),
-    );
+    await logs.reduce(async (prev, log) => {
+      await prev;
+      await processOneAttackLog(log);
+    }, Promise.resolve());
     currentEnemyAttackLog.value = null;
     isProcessingEnemyTurn.value = false;
   };
@@ -131,7 +133,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   };
 
   const checkCombatEnd = (result: EndPlayerTurnResponseDto): void => {
-    if (result.playerDefeated || (result.combatState?.enemies?.length === 0)) {
+    if (result.playerDefeated || result.combatState?.enemies?.length === 0) {
       inCombat.value = false;
       phase.value = 'COMBAT_ENDED';
     }
@@ -149,7 +151,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   };
 
   const updateEnemiesOnly = (remainingEnemies: CombatantDto[], newRoundNumber: number): void => {
-    enemies.value = enemies.value.map((enemy) => {
+    enemies.value = enemies.value.map(enemy => {
       const updated = remainingEnemies.find(e => e.id === enemy.id);
       return updated
         ? {

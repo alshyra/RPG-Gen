@@ -1,16 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import {
   AttackRequestDto,
@@ -40,9 +29,7 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 export class CombatController {
   private readonly logger = new Logger(CombatController.name);
 
-  constructor(
-    private readonly combatOrchestrator: CombatOrchestrator,
-  ) {}
+  constructor(private readonly combatOrchestrator: CombatOrchestrator) {}
 
   @Post(':characterId/start')
   @ApiOperation({ summary: 'Initialize combat with enemies' })
@@ -74,7 +61,12 @@ export class CombatController {
     @Body() body: AttackRequestDto,
   ): Promise<AttackResponseDto> {
     const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(userId, characterId, body.targetId, body.spellName);
+    return this.combatOrchestrator.processAttack(
+      userId,
+      characterId,
+      body.targetId,
+      body.spellName,
+    );
   }
 
   @Get(':characterId/status')
@@ -83,16 +75,15 @@ export class CombatController {
     status: 200,
     type: CombatStateDto,
   })
-  async getStatus(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-  ) {
+  async getStatus(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
     const userId = req.user._id.toString();
     return this.combatOrchestrator.getStatus(userId, characterId);
   }
 
   @Post(':characterId/end-turn')
-  @ApiOperation({ summary: 'End current player activation and advance turn (triggers enemy actions)' })
+  @ApiOperation({
+    summary: 'End current player activation and advance turn (triggers enemy actions)',
+  })
   @ApiResponse({
     status: 200,
     type: EndPlayerTurnResponseDto,

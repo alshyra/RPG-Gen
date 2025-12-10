@@ -44,10 +44,11 @@ export default defineConfig({
             args.push('--with-chat');
           }
           try {
-            const { stdout } = await execFileAsync('node', [
-              '../../scripts/prepare-e2e-db.mjs',
-              ...args,
-            ], { cwd: config.projectRoot });
+            const { stdout } = await execFileAsync(
+              'node',
+              ['../../scripts/prepare-e2e-db.mjs', ...args],
+              { cwd: config.projectRoot },
+            );
             return {
               ok: true,
               output: stdout,
@@ -61,10 +62,11 @@ export default defineConfig({
         },
         async startCombatFor(opts) {
           const characterId = opts?.characterId;
-          if (!characterId) return {
-            ok: false,
-            error: 'missing characterId',
-          };
+          if (!characterId)
+            return {
+              ok: false,
+              error: 'missing characterId',
+            };
           const base = process.env.CYPRESS_BASE_URL || 'http://localhost:80';
           const url = `${base}/api/combat/${characterId}/start`;
           try {
@@ -106,10 +108,11 @@ export default defineConfig({
             args.push('--url', opts.url);
           }
           try {
-            const { stdout } = await execFileAsync('node', [
-              '../../scripts/prepare-e2e-db.mjs',
-              ...args,
-            ], { cwd: config.projectRoot });
+            const { stdout } = await execFileAsync(
+              'node',
+              ['../../scripts/prepare-e2e-db.mjs', ...args],
+              { cwd: config.projectRoot },
+            );
             return {
               ok: true,
               output: stdout,
@@ -131,10 +134,7 @@ export default defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
-        plugins: [
-          tailwindcss(),
-          vue(),
-        ],
+        plugins: [tailwindcss(), vue()],
         server: {
           port: 5173,
         },

@@ -15,11 +15,11 @@ import type { InventoryInstructionMessageDto } from './InventoryInstructionMessa
 import type { CombatEndInstructionMessageDto } from './CombatEndInstructionMessageDto.js';
 import type { CombatStartInstructionMessageDto } from './CombatStartInstructionMessageDto.js';
 
-export type GameInstructionDto
-  = | RollInstructionMessageDto
-    | HpInstructionMessageDto
-    | XpInstructionMessageDto
-    | SpellInstructionMessageDto
-    | InventoryInstructionMessageDto
-    | CombatStartInstructionMessageDto
-    | CombatEndInstructionMessageDto;
+export type GameInstructionDto =
+  | RollInstructionMessageDto
+  | HpInstructionMessageDto
+  | XpInstructionMessageDto
+  | SpellInstructionMessageDto
+  | InventoryInstructionMessageDto
+  | CombatStartInstructionMessageDto
+  | CombatEndInstructionMessageDto;

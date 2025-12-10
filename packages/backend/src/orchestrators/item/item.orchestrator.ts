@@ -1,11 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ItemDefinitionDto } from '../../domain/item-definition/item-definition.dto.js';
 import { CharacterService } from '../../domain/character/character.service.js';
-import { CreateInventoryItemDto, type CharacterResponseDto } from '../../domain/character/dto/index.js';
+import {
+  CreateInventoryItemDto,
+  type CharacterResponseDto,
+} from '../../domain/character/dto/index.js';
 import type { InventoryInstructionMessageDto } from '../../domain/chat/dto/index.js';
 import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import type { CombatStateDto } from '../../domain/combat/dto/CombatStateDto.js';
@@ -56,7 +55,8 @@ export class ItemOrchestrator {
     characterId: string,
     instr: InventoryInstructionMessageDto,
   ) {
-    if (!instr.itemId) throw new BadRequestException('itemId is required for inventory instructions');
+    if (!instr.itemId)
+      throw new BadRequestException('itemId is required for inventory instructions');
     if (instr.action === 'add') {
       const item = await this.itemDefinitionService.findByDefinitionId(instr.itemId);
       if (!item) throw new BadRequestException(`Item definition ${instr.itemId} not found`);
@@ -64,7 +64,12 @@ export class ItemOrchestrator {
       return this.characterService.addInventoryItem(userId, characterId, newInventoryItem);
     }
     if (instr.action === 'remove') {
-      return this.characterService.removeInventoryItem(userId, characterId, instr.itemId, instr.quantity ?? 1);
+      return this.characterService.removeInventoryItem(
+        userId,
+        characterId,
+        instr.itemId,
+        instr.quantity ?? 1,
+      );
     } else if (instr.action === 'use') {
       return this.useItem(userId, characterId, instr.itemId);
     }
@@ -73,7 +78,11 @@ export class ItemOrchestrator {
   /**
    * Validate context for using a consumable item
    */
-  private validateContext(itemLike: ItemDefinitionDto, meta: ConsumableMetaWithHeal, inCombat: boolean): void {
+  private validateContext(
+    itemLike: ItemDefinitionDto,
+    meta: ConsumableMetaWithHeal,
+    inCombat: boolean,
+  ): void {
     const itemName = itemLike?.name || 'Item';
     if (inCombat && meta.combatUsable === false) {
       throw new BadRequestException(`${itemName} cannot be used in combat`);
@@ -135,7 +144,8 @@ export class ItemOrchestrator {
     if (!itemDefinition) throw new BadRequestException(`Item definition ${itemId} not found`);
 
     const { meta } = itemDefinition;
-    if (!isConsumableWithHeal(meta)) throw new BadRequestException(`Item ${itemDefinition.name} is not a consumable`);
+    if (!isConsumableWithHeal(meta))
+      throw new BadRequestException(`Item ${itemDefinition.name} is not a consumable`);
 
     const inCombat = await this.combatService.isInCombat(characterId);
     this.validateContext(itemDefinition, meta, inCombat);
@@ -144,8 +154,16 @@ export class ItemOrchestrator {
     await this.characterService.removeInventoryItem(userId, characterId, itemId, 1);
     this.logger.log(`Item ${itemDefinition.name} consumed by character ${characterId}`);
 
-    if (healAmount > 0 && inCombat) return this.applyHealInCombat(characterId, healAmount, itemDefinition.name ?? 'Item');
-    if (healAmount > 0) return this.applyHealOutOfCombat(userId, characterId, character, healAmount, itemDefinition.name ?? 'Item');
+    if (healAmount > 0 && inCombat)
+      return this.applyHealInCombat(characterId, healAmount, itemDefinition.name ?? 'Item');
+    if (healAmount > 0)
+      return this.applyHealOutOfCombat(
+        userId,
+        characterId,
+        character,
+        healAmount,
+        itemDefinition.name ?? 'Item',
+      );
 
     const updatedCharacter = await this.characterService.findByCharacterId(userId, characterId);
     return {

@@ -34,23 +34,15 @@ export interface CombatConfig {
   turnBased: boolean;
 }
 
-export type CombatEvent
-  = | { type: 'unit:moved';
-    unitId: string;
-    from: GridPosition;
-    to: GridPosition; }
-    | { type: 'unit:attacked';
-      attackerId: string;
-      targetId: string;
-      damage: number; }
-      | { type: 'unit:died';
-        unitId: string; }
-        | { type: 'turn:changed';
-          currentTurn: 'player' | 'enemy'; }
-          | { type: 'combat:ended';
-            winner: 'player' | 'enemy'; };
+export type CombatEvent =
+  | { type: 'unit:moved'; unitId: string; from: GridPosition; to: GridPosition }
+  | { type: 'unit:attacked'; attackerId: string; targetId: string; damage: number }
+  | { type: 'unit:died'; unitId: string }
+  | { type: 'turn:changed'; currentTurn: 'player' | 'enemy' }
+  | { type: 'combat:ended'; winner: 'player' | 'enemy' };
 
-export type availableCharacterKeys = 'Archer-Green'
+export type availableCharacterKeys =
+  | 'Archer-Green'
   | 'Archer-Purple'
   | 'Mage-Cyan'
   | 'Mage-Red'
@@ -113,4 +105,6 @@ export interface CombatEngineEventPayload {
   'turn:ended': { roundNumber: number };
 }
 
-export type EventHandler<T extends CombatEngineEventType> = (payload: CombatEngineEventPayload[T]) => void;
+export type EventHandler<T extends CombatEngineEventType> = (
+  payload: CombatEngineEventPayload[T],
+) => void;

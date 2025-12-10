@@ -12,8 +12,11 @@ function makeMockCharacterService(initialCharacter) {
 function makeMockSpellDefService(spellsByLevel) {
   return {
     findByLevel: async level => spellsByLevel[level] || [],
-    findByDefinitionId: async (id) => {
-      const all: any[] = (Object.values(spellsByLevel) as any[]).reduce((acc: any[], cur) => acc.concat(cur || []), []);
+    findByDefinitionId: async id => {
+      const all: any[] = (Object.values(spellsByLevel) as any[]).reduce(
+        (acc: any[], cur) => acc.concat(cur || []),
+        [],
+      );
       const found = all.find(s => s.definitionId === id);
       return found ?? null;
     },
@@ -21,7 +24,7 @@ function makeMockSpellDefService(spellsByLevel) {
   };
 }
 
-test('getOptionsForClass returns next level and available spells', async (t) => {
+test('getOptionsForClass returns next level and available spells', async t => {
   const character = {
     characterId: 'c1',
     classes: [
@@ -66,7 +69,7 @@ test('getOptionsForClass returns next level and available spells', async (t) => 
   t.is(options.unlockedSpells[0].name, 'Magic Missile');
 });
 
-test('applyLevelUp increments class level and adds spells and ASI', async (t) => {
+test('applyLevelUp increments class level and adds spells and ASI', async t => {
   const character = {
     characterId: 'c2',
     classes: [

@@ -1,16 +1,14 @@
 <template>
   <div
-    v-if="(currentAttack?.hit ?? false)"
+    v-if="currentAttack?.hit ?? false"
     class="bg-slate-700/50 rounded-lg p-4 mb-4"
   >
     <div class="text-center">
-      <div class="text-sm text-slate-400 mb-2">
-        Dégâts infligés
-      </div>
+      <div class="text-sm text-slate-400 mb-2">Dégâts infligés</div>
 
       <div class="flex justify-center items-center gap-2 mb-2">
         <div
-          v-for="(roll, idx) in (currentAttack?.damageRoll ?? [])"
+          v-for="(roll, idx) in currentAttack?.damageRoll ?? []"
           :key="idx"
           class="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold bg-red-600/50 text-red-200 border border-red-500"
         >
@@ -20,7 +18,8 @@
         <span
           v-if="(currentAttack?.damageBonus ?? 0) !== 0"
           class="text-slate-400"
-        >+</span>
+          >+</span
+        >
         <div
           v-if="(currentAttack?.damageBonus ?? 0) !== 0"
           class="text-lg text-slate-300"

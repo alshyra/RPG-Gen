@@ -20,8 +20,7 @@ interface ClassLevelData {
     choices: any[];
     unlockedSpells: any[];
   }[];
-  allowedSpellsByLevel: Record<string, { name: string;
-    definitionId: string; }[]>;
+  allowedSpellsByLevel: Record<string, { name: string; definitionId: string }[]>;
 }
 
 @Injectable()
@@ -35,9 +34,7 @@ export class ClassesService {
   // Cache for class data
   private classDataCache = new Map<string, ClassLevelData>();
 
-  constructor(
-    private readonly spellDefService: SpellDefinitionService,
-  ) {}
+  constructor(private readonly spellDefService: SpellDefinitionService) {}
 
   /**
    * Load class level data from seed files
@@ -49,7 +46,13 @@ export class ClassesService {
 
     try {
       const classNameLower = className.toLowerCase();
-      const seedPath = join(process.cwd(), 'src', 'seed', 'classes', `${classNameLower}.levels.json`);
+      const seedPath = join(
+        process.cwd(),
+        'src',
+        'seed',
+        'classes',
+        `${classNameLower}.levels.json`,
+      );
       const content = await readFile(seedPath, 'utf-8');
       const data: ClassLevelData = JSON.parse(content);
       this.classDataCache.set(className, data);
@@ -76,19 +79,20 @@ export class ClassesService {
     const allowedDefinitionIds = new Set<string>();
 
     // Collect all allowed spells from level 0 up to the requested level
-    Array.from({ length: level + 1 }, (_, i) => i)
-      .forEach((lvl) => {
-        const spellsAtLevel = classData.allowedSpellsByLevel[lvl.toString()] || [];
-        spellsAtLevel.forEach((spell) => {
-          if (spell.definitionId) allowedDefinitionIds.add(spell.definitionId);
-        });
+    Array.from({ length: level + 1 }, (_, i) => i).forEach(lvl => {
+      const spellsAtLevel = classData.allowedSpellsByLevel[lvl.toString()] || [];
+      spellsAtLevel.forEach(spell => {
+        if (spell.definitionId) allowedDefinitionIds.add(spell.definitionId);
       });
+    });
 
     // Fetch all spells from level 0 up to requested level
     const levels = Array.from({ length: level + 1 }, (_, i) => i);
     const allSpells: SpellResponseDto[] = [];
-    const spellsPerLevel = await Promise.all(levels.map(lvl => this.spellDefService.findByLevel(lvl)));
-    spellsPerLevel.forEach((spellsAtLevel) => {
+    const spellsPerLevel = await Promise.all(
+      levels.map(lvl => this.spellDefService.findByLevel(lvl)),
+    );
+    spellsPerLevel.forEach(spellsAtLevel => {
       const mapped = spellsAtLevel.map(s => ({
         definitionId: s.definitionId,
         name: s.name,
@@ -100,7 +104,9 @@ export class ClassesService {
     });
 
     // Filter to only allowed spells for this class
-    const unlockedSpells = allSpells.filter(spell => spell.definitionId && allowedDefinitionIds.has(spell.definitionId));
+    const unlockedSpells = allSpells.filter(
+      spell => spell.definitionId && allowedDefinitionIds.has(spell.definitionId),
+    );
 
     const options: LevelUpOptionsDto = {
       className,
@@ -113,7 +119,9 @@ export class ClassesService {
       spellsKnown: levelData.spellsKnown ?? 0,
     };
 
-    this.logger.log(`Fetched class-level options for ${className} level ${level}: ${unlockedSpells.length} spells (filtered from ${allSpells.length} total), limits: ${levelData.cantripsKnown} cantrips, ${levelData.spellsKnown} spells`);
+    this.logger.log(
+      `Fetched class-level options for ${className} level ${level}: ${unlockedSpells.length} spells (filtered from ${allSpells.length} total), limits: ${levelData.cantripsKnown} cantrips, ${levelData.spellsKnown} spells`,
+    );
     return options;
   }
 }

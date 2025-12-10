@@ -1,9 +1,5 @@
-import {
-  Controller, Get, Logger, Param, ParseIntPipe,
-} from '@nestjs/common';
-import {
-  ApiOperation, ApiParam, ApiResponse, ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Logger, Param, ParseIntPipe } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClassesService } from '../domain/classes/classes.service.js';
 import { LevelUpOptionsDto } from '../domain/character/dto/LevelUpOptionsDto.js';
 

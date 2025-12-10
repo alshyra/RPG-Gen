@@ -17,13 +17,13 @@ type CombatStartInstructionMessageDto = components['schemas']['CombatStartInstru
 /**
  * Union type for all game instructions
  */
-export type GameInstructionDto
-  = | RollInstructionMessageDto
-    | HpInstructionMessageDto
-    | XpInstructionMessageDto
-    | SpellInstructionMessageDto
-    | InventoryInstructionMessageDto
-    | CombatStartInstructionMessageDto;
+export type GameInstructionDto =
+  | RollInstructionMessageDto
+  | HpInstructionMessageDto
+  | XpInstructionMessageDto
+  | SpellInstructionMessageDto
+  | InventoryInstructionMessageDto
+  | CombatStartInstructionMessageDto;
 
 /**
  * Type guard for unknown instruction objects
@@ -36,7 +36,9 @@ function isObject(value: unknown): value is Record<string, unknown> {
  * Type guard for roll instructions
  */
 export function isRollInstruction(instruction: unknown): instruction is RollInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'roll' && typeof instruction.dices === 'string';
+  return (
+    isObject(instruction) && instruction.type === 'roll' && typeof instruction.dices === 'string'
+  );
 }
 
 /**
@@ -56,22 +58,38 @@ export function isXpInstruction(instruction: unknown): instruction is XpInstruct
 /**
  * Type guard for spell instructions
  */
-export function isSpellInstruction(instruction: unknown): instruction is SpellInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'spell' && typeof instruction.name === 'string';
+export function isSpellInstruction(
+  instruction: unknown,
+): instruction is SpellInstructionMessageDto {
+  return (
+    isObject(instruction) && instruction.type === 'spell' && typeof instruction.name === 'string'
+  );
 }
 
 /**
  * Type guard for inventory instructions
  */
-export function isInventoryInstruction(instruction: unknown): instruction is InventoryInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'inventory' && typeof instruction.name === 'string';
+export function isInventoryInstruction(
+  instruction: unknown,
+): instruction is InventoryInstructionMessageDto {
+  return (
+    isObject(instruction) &&
+    instruction.type === 'inventory' &&
+    typeof instruction.name === 'string'
+  );
 }
 
 /**
  * Type guard for combat start instructions
  */
-export function isCombatStartInstruction(instruction: unknown): instruction is CombatStartInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'combat_start' && Array.isArray(instruction.combat_start);
+export function isCombatStartInstruction(
+  instruction: unknown,
+): instruction is CombatStartInstructionMessageDto {
+  return (
+    isObject(instruction) &&
+    instruction.type === 'combat_start' &&
+    Array.isArray(instruction.combat_start)
+  );
 }
 
 /**
@@ -79,12 +97,12 @@ export function isCombatStartInstruction(instruction: unknown): instruction is C
  */
 export function isGameInstruction(instruction: unknown): instruction is GameInstructionDto {
   return (
-    isRollInstruction(instruction)
-    || isHpInstruction(instruction)
-    || isXpInstruction(instruction)
-    || isSpellInstruction(instruction)
-    || isInventoryInstruction(instruction)
-    || isCombatStartInstruction(instruction)
+    isRollInstruction(instruction) ||
+    isHpInstruction(instruction) ||
+    isXpInstruction(instruction) ||
+    isSpellInstruction(instruction) ||
+    isInventoryInstruction(instruction) ||
+    isCombatStartInstruction(instruction)
   );
 }
 

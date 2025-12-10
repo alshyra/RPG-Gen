@@ -7,18 +7,18 @@
           src="/images/404-lost-adventurer.svg"
           alt="Lost Adventurer"
           class="w-64 h-64 mx-auto mb-6 opacity-80"
-        >
+        />
       </div>
 
       <!-- 404 Title -->
-      <h1 class="text-6xl font-extrabold mb-4 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+      <h1
+        class="text-6xl font-extrabold mb-4 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"
+      >
         404
       </h1>
 
       <!-- Main Message -->
-      <h2 class="text-3xl font-bold mb-4 text-slate-200">
-        Vous êtes perdu dans les ténèbres...
-      </h2>
+      <h2 class="text-3xl font-bold mb-4 text-slate-200">Vous êtes perdu dans les ténèbres...</h2>
 
       <!-- Description -->
       <p class="text-lg text-slate-300 mb-8">

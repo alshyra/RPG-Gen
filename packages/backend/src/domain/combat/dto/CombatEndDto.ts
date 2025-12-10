@@ -1,7 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray, IsBoolean, IsNumber, IsOptional, IsString,
-} from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CombatEndDto {
   @ApiProperty({ description: 'Victory state' })
@@ -12,7 +10,7 @@ export class CombatEndDto {
   @IsNumber()
   xp_gained: number;
 
-  @ApiProperty({ description: 'Player\'s HP at the end' })
+  @ApiProperty({ description: "Player's HP at the end" })
   @IsNumber()
   player_hp: number;
 

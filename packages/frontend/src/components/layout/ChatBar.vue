@@ -2,7 +2,7 @@
   <div
     :class="[
       'bg-linear-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
-      connectedTop ? 'rounded-b-lg' : 'rounded-lg'
+      connectedTop ? 'rounded-b-lg' : 'rounded-lg',
     ]"
   >
     <div class="relative flex items-center gap-2">
@@ -24,12 +24,14 @@
         :disabled="isRolling"
         @keydown="handleKeydown"
         @blur="handleBlur"
-      >
+      />
 
       <!-- Dice Roll / Send button -->
       <div class="flex gap-2 shrink-0">
         <DiceRoll
-          :pending-instruction="gameStore.pendingInstruction?.type === 'roll' ? gameStore.pendingInstruction : null"
+          :pending-instruction="
+            gameStore.pendingInstruction?.type === 'roll' ? gameStore.pendingInstruction : null
+          "
           :expr="pendingDiceExpr"
           @send="send"
         />
@@ -61,9 +63,7 @@
 <script setup lang="ts">
 const { connectedTop = false } = defineProps<{ connectedTop?: boolean }>();
 import { useGameStore } from '@/stores/gameStore';
-import {
-  computed, ref,
-} from 'vue';
+import { computed, ref } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
 import CommandSuggestions from './CommandSuggestions.vue';
 
@@ -81,7 +81,9 @@ const showSuggestions = ref(true);
 
 const playerText = computed({
   get: () => gameStore.playerText,
-  set: (value: string) => { gameStore.playerText = value; },
+  set: (value: string) => {
+    gameStore.playerText = value;
+  },
 });
 
 const isRolling = computed(() => gameStore.pendingInstruction?.type === 'roll');
@@ -100,7 +102,7 @@ const pendingRollText = computed(() => {
   if (!p || p.type !== 'roll') return '';
   const label = p.modifierLabel ?? '';
   const value = p.modifierValue ?? 0;
-  const modDisplay = label ? ` (${label})` : (value ? ` +${value}` : '');
+  const modDisplay = label ? ` (${label})` : value ? ` +${value}` : '';
   return `🎲 ${p.dices}${modDisplay}`;
 });
 
@@ -155,18 +157,17 @@ const send = () => emit('send');
 
 <style scoped>
 .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
 
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
+  50% {
+    opacity: 0.5;
+  }
 }
 </style>

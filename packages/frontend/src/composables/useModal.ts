@@ -13,7 +13,7 @@ export function useModalState() {
 }
 
 export function showAlert(message: string, title?: string): Promise<void> {
-  return new Promise<void>((resolve) => {
+  return new Promise<void>(resolve => {
     state.type = 'alert';
     state.title = title;
     state.message = message;
@@ -28,7 +28,7 @@ export function showAlert(message: string, title?: string): Promise<void> {
 }
 
 export function showConfirm(message: string, title?: string): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
+  return new Promise<boolean>(resolve => {
     state.type = 'confirm';
     state.title = title;
     state.message = message;

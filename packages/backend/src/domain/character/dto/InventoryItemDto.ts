@@ -1,11 +1,12 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsObject, IsString } from 'class-validator';
 import {
-  IsBoolean,
-  IsNumber, IsObject,
-  IsString,
-} from 'class-validator';
-import {
-  ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, WeaponMeta, type InventoryItemMeta,
+  ArmorMeta,
+  ConsumableMeta,
+  PackMeta,
+  ToolMeta,
+  WeaponMeta,
+  type InventoryItemMeta,
 } from './InventoryItemMeta.js';
 
 export class InventoryItemDto<MetaType = InventoryItemMeta> {

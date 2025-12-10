@@ -1,8 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import {
-  describe, it, beforeEach, expect, vi,
-} from 'vitest';
+import { describe, it, beforeEach, expect, vi } from 'vitest';
 import { useGameStore } from '@/stores/gameStore';
 
 // create spies for composable handlers
@@ -42,27 +40,16 @@ describe('RollModal', () => {
 
     const wrapper = mount(RollModal, { global: { plugins: [piniaInstance] } });
 
-    expect(wrapper.find('[data-cy="roll-modal"]')
-      .exists())
-      .toBe(true);
+    expect(wrapper.find('[data-cy="roll-modal"]').exists()).toBe(true);
     // d20 visual should show the computed total
-    expect(wrapper.find('[data-cy="d20"]')
-      .exists())
-      .toBe(true);
-    expect(wrapper.find('[data-cy="d20"]')
-      .text())
-      .toContain('14');
-    expect(wrapper.text())
-      .toContain('Perception');
+    expect(wrapper.find('[data-cy="d20"]').exists()).toBe(true);
+    expect(wrapper.find('[data-cy="d20"]').text()).toContain('14');
+    expect(wrapper.text()).toContain('Perception');
 
-    await wrapper.get('[data-cy="roll-reroll"]')
-      .trigger('click');
-    expect(rerollSpy)
-      .toHaveBeenCalled();
+    await wrapper.get('[data-cy="roll-reroll"]').trigger('click');
+    expect(rerollSpy).toHaveBeenCalled();
 
-    await wrapper.get('[data-cy="roll-send"]')
-      .trigger('click');
-    expect(confirmSpy)
-      .toHaveBeenCalled();
+    await wrapper.get('[data-cy="roll-send"]').trigger('click');
+    expect(confirmSpy).toHaveBeenCalled();
   });
 });

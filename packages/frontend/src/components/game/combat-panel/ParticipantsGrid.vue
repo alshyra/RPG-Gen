@@ -1,6 +1,8 @@
 <template>
   <div class="-mx-1 px-1">
-    <div class="flex flex-nowrap sm:flex-wrap gap-1 overflow-x-auto sm:overflow-visible overflow-y-hidden">
+    <div
+      class="flex flex-nowrap sm:flex-wrap gap-1 overflow-x-auto sm:overflow-visible overflow-y-hidden"
+    >
       <div
         v-for="(p, idx) in enemies"
         :key="p.id || idx"
@@ -42,5 +44,4 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 const combatStore = useCombatStore();
 const { enemies } = storeToRefs(combatStore);
-
 </script>

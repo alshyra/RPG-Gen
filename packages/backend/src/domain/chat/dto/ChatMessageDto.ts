@@ -1,6 +1,4 @@
-import {
-  ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,
@@ -25,11 +23,7 @@ import { IsArray, IsString } from 'class-validator';
 export class ChatMessageDto {
   @ApiProperty({
     description: 'Message role',
-    enum: [
-      'user',
-      'assistant',
-      'system',
-    ],
+    enum: ['user', 'assistant', 'system'],
   })
   @IsString()
   role: 'user' | 'assistant' | 'system';

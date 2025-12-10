@@ -1,6 +1,4 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
+import { Prop, Schema } from '@nestjs/mongoose';
 import { Schema as MongooseSchema, Document } from 'mongoose';
 import { Race } from './Race.js';
 import { CharacterClass } from './CharacterClass.js';

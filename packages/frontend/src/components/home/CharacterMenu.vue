@@ -14,7 +14,7 @@
         alt="portrait"
         class="w-full h-40 object-cover"
         loading="lazy"
-      >
+      />
       <div
         v-else
         class="text-slate-400"
@@ -32,7 +32,8 @@
           {{ getCharSummary(character) }}
         </div>
         <div class="text-xs text-slate-500 mt-1">
-          {{ character.world }} • HP: {{ character.hp }}/{{ character.hpMax }} • XP: {{ character.totalXp || 0 }}
+          {{ character.world }} • HP: {{ character.hp }}/{{ character.hpMax }} • XP:
+          {{ character.totalXp || 0 }}
         </div>
       </div>
 
@@ -59,9 +60,7 @@ import { characterApi } from '@/apis/characterApi';
 import UiButton from '@/components/ui/UiButton.vue';
 import { Trash2 } from 'lucide-vue-next';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
-import {
-  ref,
-} from 'vue';
+import { ref } from 'vue';
 import { showAlert, showConfirm } from '@/composables/useModal';
 import { useRouter } from 'vue-router';
 const emit = defineEmits<(e: 'deleted', id: string) => void>();
@@ -111,7 +110,6 @@ const getCharSummary = (character: Partial<CharacterResponseDto>): string => {
     .filter(Boolean)
     .join(', ');
 };
-
 </script>
 
 <style scoped></style>

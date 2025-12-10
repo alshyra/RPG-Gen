@@ -1,8 +1,6 @@
 <template>
   <div class="p-2 lg:p-4">
-    <h3 class="font-semibold mb-4">
-      Sorts
-    </h3>
+    <h3 class="font-semibold mb-4">Sorts</h3>
 
     <div
       v-if="!currentCharacter"
@@ -12,9 +10,7 @@
     </div>
 
     <div v-else-if="isLoadingSpells">
-      <div class="text-sm text-slate-400">
-        Chargement des sorts...
-      </div>
+      <div class="text-sm text-slate-400">Chargement des sorts...</div>
     </div>
 
     <div v-else>
@@ -32,13 +28,13 @@
         <!-- Cantrips Section -->
         <div v-if="cantrips.length > 0">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-medium text-sm">
-              Sorts mineurs (Cantrips)
-            </h4>
+            <h4 class="font-medium text-sm">Sorts mineurs (Cantrips)</h4>
             <span
               :class="[
                 'text-xs px-2 py-1 rounded',
-                selectedCantripsCount > cantripsKnown ? 'bg-red-900/50 text-red-300' : 'bg-slate-700 text-slate-300'
+                selectedCantripsCount > cantripsKnown
+                  ? 'bg-red-900/50 text-red-300'
+                  : 'bg-slate-700 text-slate-300',
               ]"
             >
               {{ selectedCantripsCount }} / {{ cantripsKnown }}
@@ -53,8 +49,10 @@
               <UiInputCheckbox
                 :name="`spell-${cantrip.name}`"
                 :model-value="spellIsSelected(cantrip.definitionId)"
-                :disabled="!spellIsSelected(cantrip.definitionId) && selectedCantripsCount >= cantripsKnown"
-                @update:model-value="(val) => toggleSpell(cantrip, val)"
+                :disabled="
+                  !spellIsSelected(cantrip.definitionId) && selectedCantripsCount >= cantripsKnown
+                "
+                @update:model-value="val => toggleSpell(cantrip, val)"
               >
                 <div class="flex-1">
                   <div class="font-medium">
@@ -72,13 +70,13 @@
         <!-- Spells Section -->
         <div v-if="spells.length > 0">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-medium text-sm">
-              Sorts (Niveau 1+)
-            </h4>
+            <h4 class="font-medium text-sm">Sorts (Niveau 1+)</h4>
             <span
               :class="[
                 'text-xs px-2 py-1 rounded',
-                selectedSpellsCount > spellsKnown ? 'bg-red-900/50 text-red-300' : 'bg-slate-700 text-slate-300'
+                selectedSpellsCount > spellsKnown
+                  ? 'bg-red-900/50 text-red-300'
+                  : 'bg-slate-700 text-slate-300',
               ]"
             >
               {{ selectedSpellsCount }} / {{ spellsKnown }}
@@ -93,12 +91,15 @@
               <UiInputCheckbox
                 :name="`spell-${spell.name}`"
                 :model-value="spellIsSelected(spell.definitionId)"
-                :disabled="!spellIsSelected(spell.definitionId) && selectedSpellsCount >= spellsKnown"
-                @update:model-value="(val) => toggleSpell(spell, val)"
+                :disabled="
+                  !spellIsSelected(spell.definitionId) && selectedSpellsCount >= spellsKnown
+                "
+                @update:model-value="val => toggleSpell(spell, val)"
               >
                 <div class="flex-1">
                   <div class="font-medium">
-                    {{ spell.name }} <span class="text-xs text-slate-400">Niv {{ spell.level }}</span>
+                    {{ spell.name }}
+                    <span class="text-xs text-slate-400">Niv {{ spell.level }}</span>
                   </div>
                   <div class="text-xs text-slate-400">
                     {{ spell.description }}
@@ -118,9 +119,7 @@ import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
 import { classesApi } from '@/apis/classesApi';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import {
-  computed, onBeforeUnmount, ref, watch,
-} from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { LevelUpOptionsDto, SpellResponseDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
@@ -178,16 +177,23 @@ const loadSpellsForClass = async (className: string | undefined) => {
   }
 };
 
-watch(primaryClass, (className) => {
-  void loadSpellsForClass(className);
-}, { immediate: true });
+watch(
+  primaryClass,
+  className => {
+    void loadSpellsForClass(className);
+  },
+  { immediate: true },
+);
 
-const spellIsSelected = (definitionId: string) => (currentCharacter.value?.spells || []).some(s => s.definitionId === definitionId);
+const spellIsSelected = (definitionId: string) =>
+  (currentCharacter.value?.spells || []).some(s => s.definitionId === definitionId);
 
 const persistSpells = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.updateCharacter(currentCharacter.value.characterId, { spells: currentCharacter.value.spells || [] });
+    await characterStore.updateCharacter(currentCharacter.value.characterId, {
+      spells: currentCharacter.value.spells || [],
+    });
   } catch (err) {
     console.error('Failed to persist spells:', err);
   }
@@ -195,7 +201,9 @@ const persistSpells = async () => {
 
 const canAddSpell = (s: SpellResponseDto) => {
   const isCantrip = s.level === 0;
-  return isCantrip ? selectedCantripsCount.value < cantripsKnown.value : selectedSpellsCount.value < spellsKnown.value;
+  return isCantrip
+    ? selectedCantripsCount.value < cantripsKnown.value
+    : selectedSpellsCount.value < spellsKnown.value;
 };
 
 const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {

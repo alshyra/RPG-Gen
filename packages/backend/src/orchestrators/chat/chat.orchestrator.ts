@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CharacterService } from '../../domain/character/character.service.js';
 import type { CharacterResponseDto } from '../../domain/character/dto/index.js';
 import { ConversationService } from '../../domain/chat/conversation.service.js';
@@ -38,11 +35,7 @@ export class ChatOrchestrator {
     private readonly spellDefinitionService: SpellDefinitionService,
   ) {}
 
-  public async getGMResponse(
-    userId: string,
-    characterId: string,
-    userText: string,
-  ) {
+  public async getGMResponse(userId: string, characterId: string, userText: string) {
     const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
     const assistantMsg = {
       role: 'assistant' as const,
@@ -64,7 +57,7 @@ export class ChatOrchestrator {
   /**
    * Process an array of GameInstructionDto and apply side-effects.
    * Returns pending roll instructions that require client action.
-  */
+   */
   async processInstructions(
     userId: string,
     characterId: string,
@@ -74,11 +67,20 @@ export class ChatOrchestrator {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     const handlerMap: Record<string, (instr: GameInstructionDto) => Promise<void>> = {
       roll: instr => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
-      hp: instr => this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
-      xp: instr => this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
+      hp: instr =>
+        this.handleHp(userId, characterId, characterDto, instr as HpInstructionMessageDto),
+      xp: instr =>
+        this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
       // inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
-      spell: instr => this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
-      combat_start: instr => this.handleCombatStart(userId, characterId, characterDto, instr as CombatStartInstructionMessageDto),
+      spell: instr =>
+        this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
+      combat_start: instr =>
+        this.handleCombatStart(
+          userId,
+          characterId,
+          characterDto,
+          instr as CombatStartInstructionMessageDto,
+        ),
     };
 
     await Promise.all(
@@ -144,7 +146,9 @@ export class ChatOrchestrator {
         await this.characterService.update(userId, characterId, { spells });
         this.logger.log(`Spell learned for ${characterId}: ${instr.name}`);
       } else if (instr.action === 'forget') {
-        const spells = (characterDto?.spells || []).filter((sp: { name: string }) => sp.name !== instr.name);
+        const spells = (characterDto?.spells || []).filter(
+          (sp: { name: string }) => sp.name !== instr.name,
+        );
         await this.characterService.update(userId, characterId, { spells });
         this.logger.log(`Spell forgotten for ${characterId}: ${instr.name}`);
       } else if (instr.action === 'cast') {
@@ -168,7 +172,11 @@ export class ChatOrchestrator {
         this.logger.log(`Combat already active for ${characterId}, skipping re-initialization`);
         return;
       }
-      await this.combatService.initializeCombat(characterDto, { combat_start: instr.combat_start }, userId);
+      await this.combatService.initializeCombat(
+        characterDto,
+        { combat_start: instr.combat_start },
+        userId,
+      );
       this.logger.log(`Combat initialized for ${characterId} from instruction`);
     } catch (e) {
       this.logger.warn(`Failed to initialize combat for ${characterId}: ${(e as Error)?.message}`);

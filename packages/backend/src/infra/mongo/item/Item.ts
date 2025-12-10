@@ -1,6 +1,4 @@
-import {
-  Prop, Schema,
-} from '@nestjs/mongoose';
+import { Prop, Schema } from '@nestjs/mongoose';
 import type { InventoryItemMeta } from '../../../domain/character/dto/InventoryItemMeta.js';
 import { Document } from 'mongoose';
 

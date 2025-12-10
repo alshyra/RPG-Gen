@@ -1,33 +1,34 @@
 import * as PIXI from 'pixi.js';
 import { GRID_CONFIG } from '@/types/combat-types';
 
-interface HasStage { stage: PIXI.Container }
+interface HasStage {
+  stage: PIXI.Container;
+}
 
 // Génère toutes les coordonnées de la grille en une seule fois
-const getGridCoordinates = () => Array.from({ length: GRID_CONFIG.cols }, (_, x) => Array.from({ length: GRID_CONFIG.rows }, (_, y) => ({
-  x,
-  y,
-})))
-  .flat();
+const getGridCoordinates = () =>
+  Array.from({ length: GRID_CONFIG.cols }, (_, x) =>
+    Array.from({ length: GRID_CONFIG.rows }, (_, y) => ({
+      x,
+      y,
+    })),
+  ).flat();
 
 // Crée tous les tiles en une seule passe avec un seul Graphics
 const createTilesGraphics = (): PIXI.Graphics => {
   const graphics = new PIXI.Graphics();
 
-  getGridCoordinates()
-    .forEach(({
-      x, y,
-    }) => {
-      const isEven = (x + y) % 2 === 0;
-      const color = isEven ? GRID_CONFIG.tileColor1 : GRID_CONFIG.tileColor2;
-      graphics.fill(color);
-      graphics.rect(
-        x * GRID_CONFIG.cellSize,
-        y * GRID_CONFIG.cellSize,
-        GRID_CONFIG.cellSize,
-        GRID_CONFIG.cellSize,
-      );
-    });
+  getGridCoordinates().forEach(({ x, y }) => {
+    const isEven = (x + y) % 2 === 0;
+    const color = isEven ? GRID_CONFIG.tileColor1 : GRID_CONFIG.tileColor2;
+    graphics.fill(color);
+    graphics.rect(
+      x * GRID_CONFIG.cellSize,
+      y * GRID_CONFIG.cellSize,
+      GRID_CONFIG.cellSize,
+      GRID_CONFIG.cellSize,
+    );
+  });
 
   return graphics;
 };
@@ -42,20 +43,18 @@ const createGridLinesGraphics = (): PIXI.Graphics => {
   });
 
   // Lignes verticales
-  Array.from({ length: GRID_CONFIG.cols + 1 })
-    .forEach((_, i) => {
-      const x = i * GRID_CONFIG.cellSize;
-      lines.moveTo(x, 0);
-      lines.lineTo(x, GRID_CONFIG.rows * GRID_CONFIG.cellSize);
-    });
+  Array.from({ length: GRID_CONFIG.cols + 1 }).forEach((_, i) => {
+    const x = i * GRID_CONFIG.cellSize;
+    lines.moveTo(x, 0);
+    lines.lineTo(x, GRID_CONFIG.rows * GRID_CONFIG.cellSize);
+  });
 
   // Lignes horizontales
-  Array.from({ length: GRID_CONFIG.rows + 1 })
-    .forEach((_, i) => {
-      const y = i * GRID_CONFIG.cellSize;
-      lines.moveTo(0, y);
-      lines.lineTo(GRID_CONFIG.cols * GRID_CONFIG.cellSize, y);
-    });
+  Array.from({ length: GRID_CONFIG.rows + 1 }).forEach((_, i) => {
+    const y = i * GRID_CONFIG.cellSize;
+    lines.moveTo(0, y);
+    lines.lineTo(GRID_CONFIG.cols * GRID_CONFIG.cellSize, y);
+  });
 
   lines.stroke();
   return lines;
@@ -103,15 +102,11 @@ export const showReachableCells = (
   });
 
   getGridCoordinates()
-    .filter(({
-      x, y,
-    }) => {
+    .filter(({ x, y }) => {
       const dist = Math.abs(x - originGridX) + Math.abs(y - originGridY);
       return dist > 0 && dist <= range;
     })
-    .forEach(({
-      x, y,
-    }) => {
+    .forEach(({ x, y }) => {
       graphics.rect(
         x * GRID_CONFIG.cellSize,
         y * GRID_CONFIG.cellSize,

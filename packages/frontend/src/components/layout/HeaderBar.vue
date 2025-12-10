@@ -1,5 +1,7 @@
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/70 backdrop-blur-sm border-b border-slate-800">
+  <header
+    class="fixed top-0 left-0 right-0 z-50 bg-slate-900/70 backdrop-blur-sm border-b border-slate-800"
+  >
     <div class="flex items-center justify-between p-3 max-w-7xl mx-auto">
       <div class="flex items-center gap-3">
         <!-- Mobile menu toggle -->
@@ -42,7 +44,9 @@
           :to="{ name: 'home' }"
           class="inline-block"
         >
-          <h1 class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500">
+          <h1
+            class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500"
+          >
             RPG Gemini
           </h1>
         </router-link>
@@ -58,5 +62,4 @@ import UiButton from '../ui/UiButton.vue';
 import UserProfile from './UserProfile.vue';
 
 const ui = useUiStore();
-
 </script>

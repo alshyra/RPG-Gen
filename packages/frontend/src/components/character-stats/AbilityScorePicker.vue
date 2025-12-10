@@ -26,7 +26,7 @@
               :max="15"
               :disabled="mode === 'edit'"
               class="justify-around"
-              @update:model-value="(val) => onUpdateAbilityValue(ability, val)"
+              @update:model-value="val => onUpdateAbilityValue(ability, val)"
             />
           </div>
         </div>
@@ -48,21 +48,18 @@ const props = defineProps<{
   proficiency?: number;
   initialScores?: Record<string, number>;
 }>();
-const {
-  mode = 'point-buy', proficiency = 1,
-} = props;
+const { mode = 'point-buy', proficiency = 1 } = props;
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const {
-  formatMod, applyPointBuyChange,
-} = useAbilityScores();
+const { formatMod, applyPointBuyChange } = useAbilityScores();
 
-const onUpdateAbilityValue = async (ability: typeof ABILITIES[number], val: number) => {
-  const value = (val ?? (currentCharacter?.value?.scores?.[ability] ?? 8));
+const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: number) => {
+  const value = val ?? currentCharacter?.value?.scores?.[ability] ?? 8;
   const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, { scores: currentCharacter.value.scores });
+  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    scores: currentCharacter.value.scores,
+  });
 };
-
 </script>

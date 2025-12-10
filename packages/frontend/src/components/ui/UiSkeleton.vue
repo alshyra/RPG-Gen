@@ -10,7 +10,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{ variant?: 'text' | 'avatar' | 'card' }>(), { variant: 'text' });
+const props = withDefaults(defineProps<{ variant?: 'text' | 'avatar' | 'card' }>(), {
+  variant: 'text',
+});
 
 const sizeClasses = computed(() => {
   switch (props.variant) {
@@ -31,7 +33,8 @@ const sizeClasses = computed(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

@@ -1,14 +1,14 @@
 <template>
   <div
     class="fighter-card relative bg-slate-800/40 rounded overflow-hidden flex items-stretch"
-    :data-cy="isPlayer ? 'player-portrait' : ('enemy-portrait-' + fighter?.id)"
+    :data-cy="isPlayer ? 'player-portrait' : 'enemy-portrait-' + fighter?.id"
   >
     <div class="relative w-full h-full">
       <img
         :src="resolvedPortrait"
         class="absolute inset-0 w-full h-full object-cover"
         alt="portrait"
-      >
+      />
 
       <div class="absolute top-1 left-1 bg-black/25 text-[10px] text-white px-1.5 py-0.5 rounded">
         <div
@@ -18,7 +18,7 @@
           {{ title }}
         </div>
         <div
-          v-if="ac!= '-'"
+          v-if="ac != '-'"
           class="text-[10px] text-slate-200"
         >
           AC: {{ ac ?? '-' }}
@@ -76,36 +76,30 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed, onMounted, ref,
-} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useCombat } from '@/composables/useCombat';
 import type { CombatantDto } from '@rpg-gen/shared';
 import { useCharacterStore } from '@/stores/characterStore';
-import {
-  pickBestPortrait, getFallbackPortrait,
-} from '@/composables/usePortraits';
+import { pickBestPortrait, getFallbackPortrait } from '@/composables/usePortraits';
 import { useCombatStore } from '@/stores/combatStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import SpellSelector from './combat-panel/SpellSelector.vue';
 
-const {
-  fighter, isPlayer,
-} = defineProps<{
+const { fighter, isPlayer } = defineProps<{
   fighter: CombatantDto | null;
   isPlayer?: boolean;
 }>();
 const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
-const {
-  player: combatPlayer, inCombat,
-} = storeToRefs(combatStore);
+const { player: combatPlayer, inCombat } = storeToRefs(combatStore);
 const combat = useCombat();
 const gameStore = useGameStore();
 
-const title = computed(() => (isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy')));
+const title = computed(() =>
+  isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy'),
+);
 // For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
 const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
 const fighterDisplayHp = computed(() => {
@@ -120,9 +114,10 @@ const fighterDisplayMaxHp = computed(() => {
 });
 const hpPct = computed(() => {
   const hp = Number(fighterDisplayHp.value || 0);
-  const max = typeof fighterDisplayMaxHp.value === 'number' ? Number(fighterDisplayMaxHp.value) : undefined;
+  const max =
+    typeof fighterDisplayMaxHp.value === 'number' ? Number(fighterDisplayMaxHp.value) : undefined;
   if (!max || max <= 0) return '0%';
-  return ((Math.max(0, hp) / max) * 100) + '%';
+  return (Math.max(0, hp) / max) * 100 + '%';
 });
 
 const resolvedPortrait = ref<string>(`/images/enemies/enemy.png`);
@@ -146,12 +141,15 @@ onMounted(async () => {
 // - it's currently the player's activation
 // - player has at least one action remaining
 // - no active sending in progress (to avoid duplicate clicks)
-const showAttackButton = computed(() => !isPlayer
-  && (fighter?.hp ?? 0) > 0
-  && combatStore.canPlayerAct
-  && combatStore.isPlayerTurn
-  && !gameStore.sending);
-const altLabel = computed(() => isPlayer ? 'Vous' : 'Mort');
+const showAttackButton = computed(
+  () =>
+    !isPlayer &&
+    (fighter?.hp ?? 0) > 0 &&
+    combatStore.canPlayerAct &&
+    combatStore.isPlayerTurn &&
+    !gameStore.sending,
+);
+const altLabel = computed(() => (isPlayer ? 'Vous' : 'Mort'));
 
 const showSpellSelector = ref(false);
 
@@ -166,8 +164,17 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 </script>
 
 <style scoped>
-.fighter-card { width: 120px; height: 120px; }
-.fighter-card img { object-position: center top; }
-.fighter-card .font-medium { font-size: 0.78rem; }
-.fighter-card .text-xs { font-size: 0.68rem; }
+.fighter-card {
+  width: 120px;
+  height: 120px;
+}
+.fighter-card img {
+  object-position: center top;
+}
+.fighter-card .font-medium {
+  font-size: 0.78rem;
+}
+.fighter-card .text-xs {
+  font-size: 0.68rem;
+}
 </style>

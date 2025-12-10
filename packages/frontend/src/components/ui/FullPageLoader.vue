@@ -1,6 +1,8 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 text-center p-4">
-    <div class="max-w-lg w-full bg-slate-900/95 border border-slate-700 rounded-md p-6 flex flex-col items-center gap-4">
+    <div
+      class="max-w-lg w-full bg-slate-900/95 border border-slate-700 rounded-md p-6 flex flex-col items-center gap-4"
+    >
       <UiLoader />
       <div class="text-lg font-semibold">
         {{ title }}

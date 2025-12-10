@@ -1,6 +1,4 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsString } from 'class-validator';
 
 export class SpellInstructionMessageDto {
@@ -13,11 +11,7 @@ export class SpellInstructionMessageDto {
 
   @ApiProperty({
     description: 'Spell action',
-    enum: [
-      'learn',
-      'cast',
-      'forget',
-    ],
+    enum: ['learn', 'cast', 'forget'],
   })
   @IsEnum(['learn', 'cast', 'forget'])
   action: 'learn' | 'cast' | 'forget';

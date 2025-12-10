@@ -37,9 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  onMounted, ref, watch,
-} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import UiMarkdown from '@/components/ui/UiMarkdown.vue';
 import UiSkeleton from '@/components/ui/UiSkeleton.vue';
 import { useGameStore } from '@/stores/gameStore';
@@ -48,7 +46,8 @@ import { ChatMessageDto } from '@rpg-gen/shared';
 const gameStore = useGameStore();
 const messagesPane = ref<HTMLElement | null>(null);
 
-const isLoadingMessage = (message: ChatMessageDto): boolean => message.role === 'system' && message.narrative === '...thinking...';
+const isLoadingMessage = (message: ChatMessageDto): boolean =>
+  message.role === 'system' && message.narrative === '...thinking...';
 
 // auto-scroll to bottom when messages change
 watch(

@@ -2,23 +2,19 @@
   <div class="p-6 flex flex-col justify-between min-h-[50vh] mt-28">
     <section class="text-center w-3/4 mx-auto mt-10">
       <p class="text-slate-300">
-        Un moteur d'aventure assisté par Gemini — génère scènes, PNJ, et images. Choisis ton
-        univers et commence immédiatement.
+        Un moteur d'aventure assisté par Gemini — génère scènes, PNJ, et images. Choisis ton univers
+        et commence immédiatement.
       </p>
 
       <!-- Characters list handled by CharactersMenu component -->
       <div class="mt-6">
-        <h3 class="text-lg font-semibold mb-4 text-slate-200">
-          Mes personnages
-        </h3>
+        <h3 class="text-lg font-semibold mb-4 text-slate-200">Mes personnages</h3>
         <CharactersMenu />
       </div>
     </section>
 
     <div class="max-w-2xl w-full mx-auto mt-8 text-center">
-      <p class="text-slate-300 mb-3">
-        Créer un nouveau personnage — uniquement pour D&D.
-      </p>
+      <p class="text-slate-300 mb-3">Créer un nouveau personnage — uniquement pour D&D.</p>
       <UiButton
         variant="primary"
         :is-loading="creating"
@@ -62,5 +58,4 @@ const createDndCharacter = async () => {
     creating.value = false;
   }
 };
-
 </script>

@@ -17,13 +17,17 @@ export class LevelUpOptionsDto {
   })
   unlockedSpells: SpellResponseDto[];
 
-  @ApiProperty({ description: 'Whether an Ability Score Improvement (or feat) is available at this level' })
+  @ApiProperty({
+    description: 'Whether an Ability Score Improvement (or feat) is available at this level',
+  })
   asiAvailable: boolean;
 
   @ApiProperty({ description: 'Whether proficiency bonus increases at this level' })
   proficiencyIncrease: boolean;
 
-  @ApiProperty({ description: 'Number of cantrips (level 0 spells) the character can know at this level' })
+  @ApiProperty({
+    description: 'Number of cantrips (level 0 spells) the character can know at this level',
+  })
   cantripsKnown: number;
 
   @ApiProperty({ description: 'Number of spells (level 1+) the character can know at this level' })

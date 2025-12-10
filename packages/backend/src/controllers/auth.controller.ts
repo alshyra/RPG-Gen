@@ -1,8 +1,4 @@
-import {
-  Controller, Get,
-  Logger,
-  Req, Res, UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Logger, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import type { RPGRequest } from '../global.types.js';

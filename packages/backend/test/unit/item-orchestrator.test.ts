@@ -6,10 +6,12 @@ import { ItemOrchestrator } from '../../src/orchestrators/item/item.orchestrator
 
 // ============= Mock Services =============
 
-function createMockCharacterService(character: {
-  hp?: number;
-  hpMax?: number;
-} = {}) {
+function createMockCharacterService(
+  character: {
+    hp?: number;
+    hpMax?: number;
+  } = {},
+) {
   return {
     findByCharacterId: async () => ({
       characterId: 'test-char',
@@ -56,11 +58,13 @@ function createMockDiceService(total = 5) {
   };
 }
 
-function createMockItemDefinitionService(item: {
-  definitionId?: string;
-  name?: string;
-  meta?: Record<string, unknown>;
-} | null = null) {
+function createMockItemDefinitionService(
+  item: {
+    definitionId?: string;
+    name?: string;
+    meta?: Record<string, unknown>;
+  } | null = null,
+) {
   return {
     findByDefinitionId: async () => item,
   };
@@ -68,7 +72,7 @@ function createMockItemDefinitionService(item: {
 
 // ============= Tests =============
 
-test('useItem throws if item definition not found', async (t) => {
+test('useItem throws if item definition not found', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService() as never,
@@ -76,13 +80,11 @@ test('useItem throws if item definition not found', async (t) => {
     createMockItemDefinitionService(null) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.useItem('user1', 'char1', 'nonexistent'),
-  );
+  const error = await t.throwsAsync(() => orchestrator.useItem('user1', 'char1', 'nonexistent'));
   t.regex(error?.message ?? '', /not found/i);
 });
 
-test('useItem throws if item is not consumable', async (t) => {
+test('useItem throws if item is not consumable', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService() as never,
@@ -94,13 +96,11 @@ test('useItem throws if item is not consumable', async (t) => {
     }) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.useItem('user1', 'char1', 'item1'),
-  );
+  const error = await t.throwsAsync(() => orchestrator.useItem('user1', 'char1', 'item1'));
   t.regex(error?.message ?? '', /not a consumable/i);
 });
 
-test('useItem throws if potion used outside combat when combatUsable=true and restUsable=false', async (t) => {
+test('useItem throws if potion used outside combat when combatUsable=true and restUsable=false', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService(false) as never,
@@ -116,13 +116,11 @@ test('useItem throws if potion used outside combat when combatUsable=true and re
     }) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.useItem('user1', 'char1', 'potion1'),
-  );
+  const error = await t.throwsAsync(() => orchestrator.useItem('user1', 'char1', 'potion1'));
   t.regex(error?.message ?? '', /only.*combat/i);
 });
 
-test('useItem throws if rations used in combat when combatUsable=false', async (t) => {
+test('useItem throws if rations used in combat when combatUsable=false', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService(true) as never,
@@ -138,17 +136,17 @@ test('useItem throws if rations used in combat when combatUsable=false', async (
     }) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.useItem('user1', 'char1', 'rations1'),
-  );
+  const error = await t.throwsAsync(() => orchestrator.useItem('user1', 'char1', 'rations1'));
   t.regex(error?.message ?? '', /cannot.*combat/i);
 });
 
-test('useItem heals in combat and returns combatState', async (t) => {
+test('useItem heals in combat and returns combatState', async t => {
   let removeCalled = false;
   const mockCharService = {
     ...createMockCharacterService(),
-    removeInventoryItem: async () => { removeCalled = true; },
+    removeInventoryItem: async () => {
+      removeCalled = true;
+    },
   };
 
   const orchestrator = new ItemOrchestrator(
@@ -174,7 +172,7 @@ test('useItem heals in combat and returns combatState', async (t) => {
   t.true(removeCalled);
 });
 
-test('useItem heals outside combat and returns character', async (t) => {
+test('useItem heals outside combat and returns character', async t => {
   let updateCalled = false;
   const mockCharService = {
     ...createMockCharacterService({
@@ -211,7 +209,7 @@ test('useItem heals outside combat and returns character', async (t) => {
   t.true(updateCalled);
 });
 
-test('handleInventoryInstruction with add action adds item to inventory', async (t) => {
+test('handleInventoryInstruction with add action adds item to inventory', async t => {
   let addCalled = false;
   const mockCharService = {
     ...createMockCharacterService(),
@@ -242,7 +240,7 @@ test('handleInventoryInstruction with add action adds item to inventory', async 
   t.true(addCalled);
 });
 
-test('handleInventoryInstruction with remove action removes item from inventory', async (t) => {
+test('handleInventoryInstruction with remove action removes item from inventory', async t => {
   let removeCalled = false;
   const mockCharService = {
     ...createMockCharacterService(),
@@ -269,7 +267,7 @@ test('handleInventoryInstruction with remove action removes item from inventory'
   t.true(removeCalled);
 });
 
-test('handleInventoryInstruction rejects missing itemId', async (t) => {
+test('handleInventoryInstruction rejects missing itemId', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService() as never,
@@ -277,8 +275,8 @@ test('handleInventoryInstruction rejects missing itemId', async (t) => {
     createMockItemDefinitionService(null) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.handleInventoryInstruction('user1', 'char1', {
+  const error = await t.throwsAsync(() =>
+    orchestrator.handleInventoryInstruction('user1', 'char1', {
       type: 'inventory',
       action: 'use',
       name: 'Health Potion',
@@ -287,7 +285,7 @@ test('handleInventoryInstruction rejects missing itemId', async (t) => {
   t.regex(error?.message ?? '', /itemId.*required/i);
 });
 
-test('handleInventoryInstruction with add action throws if item definition not found', async (t) => {
+test('handleInventoryInstruction with add action throws if item definition not found', async t => {
   const orchestrator = new ItemOrchestrator(
     createMockCharacterService() as never,
     createMockCombatService() as never,
@@ -295,8 +293,8 @@ test('handleInventoryInstruction with add action throws if item definition not f
     createMockItemDefinitionService(null) as never,
   );
 
-  const error = await t.throwsAsync(
-    () => orchestrator.handleInventoryInstruction('user1', 'char1', {
+  const error = await t.throwsAsync(() =>
+    orchestrator.handleInventoryInstruction('user1', 'char1', {
       type: 'inventory',
       action: 'add',
       name: 'Unknown Item',

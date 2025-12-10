@@ -4,9 +4,7 @@
     @close="closeModal"
   >
     <template #header>
-      <h3 class="text-lg font-semibold mb-2">
-        Roll result
-      </h3>
+      <h3 class="text-lg font-semibold mb-2">Roll result</h3>
     </template>
 
     <div data-cy="roll-modal">
@@ -70,14 +68,10 @@ import { useGameMessages } from '@/composables/useGameMessages';
 
 const gameStore = useGameStore();
 const gameMessages = useGameMessages();
-const {
-  rollData, showRollModal, pendingInstruction,
-} = storeToRefs(gameStore);
+const { rollData, showRollModal, pendingInstruction } = storeToRefs(gameStore);
 
 // instantiate composable to get handlers (confirmRoll, rerollDice)
-const {
-  confirmRoll, rerollDice,
-} = useGameRolls();
+const { confirmRoll, rerollDice } = useGameRolls();
 
 const closeModal = async () => {
   const message = await confirmRoll();
@@ -91,11 +85,28 @@ const closeModal = async () => {
 </script>
 
 <style scoped>
-.text-slate-300 strong { color: var(--tw-color-slate-200); }
+.text-slate-300 strong {
+  color: var(--tw-color-slate-200);
+}
 
-.die-wrapper { width: 88px; height: 88px; display: flex; align-items: center; justify-content: center; }
-.d20-svg { width: 88px; height: 88px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6)); border-radius: 12px; }
-.d20-svg polygon { transition: transform .18s ease; transform-origin: center; }
-.d20-svg:hover polygon { transform: scale(1.02) translateY(-2px); }
-
+.die-wrapper {
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.d20-svg {
+  width: 88px;
+  height: 88px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+  border-radius: 12px;
+}
+.d20-svg polygon {
+  transition: transform 0.18s ease;
+  transform-origin: center;
+}
+.d20-svg:hover polygon {
+  transform: scale(1.02) translateY(-2px);
+}
 </style>

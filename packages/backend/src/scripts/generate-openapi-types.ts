@@ -1,10 +1,6 @@
-import {
-  existsSync, mkdirSync, writeFileSync, readFileSync, renameSync,
-} from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync } from 'fs';
 import openapiTS, { astToString } from 'openapi-typescript';
-import {
-  dirname, join,
-} from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,17 +8,20 @@ const __dirname = dirname(__filename);
 
 const OPENAPI_URL = process.env.OPENAPI_URL || 'http://localhost:3001/docs-json';
 
-interface OpenApiDocument { components?: { schemas?: Record<string, unknown> } }
+interface OpenApiDocument {
+  components?: { schemas?: Record<string, unknown> };
+}
 
 const generateAliasesFile = (document: OpenApiDocument) => {
   const schemaNames = document.components?.schemas ? Object.keys(document.components.schemas) : [];
-  const aliasLines = schemaNames.sort()
+  const aliasLines = schemaNames
+    .sort()
     .map(name => `export type ${name} = import('./api-types').components['schemas']['${name}'];`);
 
   const indexLines = [
     '// GENERATED FROM OpenAPI spec - do not edit manually',
-    'export * from \'./api-types\'',
-    'export * from \'./type-guards\'',
+    "export * from './api-types'",
+    "export * from './type-guards'",
     '',
     '// Auto-generated type aliases from OpenAPI components.schemas',
     ...aliasLines,
@@ -111,13 +110,14 @@ const generateOpenApiTypes = async () => {
 
     console.log('🎉 Done!');
   } catch (error) {
-    const isConnectionError = error
-      && typeof error === 'object'
-      && 'code' in error
-      && error.code === 'ECONNREFUSED';
+    const isConnectionError =
+      error && typeof error === 'object' && 'code' in error && error.code === 'ECONNREFUSED';
     if (isConnectionError) {
       console.error('❌ Error: Could not connect to the backend server.');
-      console.error('   Make sure the backend is running at:', OPENAPI_URL.replace('/docs-json', ''));
+      console.error(
+        '   Make sure the backend is running at:',
+        OPENAPI_URL.replace('/docs-json', ''),
+      );
       console.error('   You can start it with: npm run start:backend');
     } else {
       console.error('❌ Error generating OpenAPI types:', error);

@@ -16,19 +16,14 @@
           {{ currentCharacter?.name }}
         </div>
         <div class="text-amber-300 text-xs">
-          {{ currentCharacter?.classes?.[0]?.name }} Lvl {{ currentCharacter?.classes?.[0]?.level || 1 }}
+          {{ currentCharacter?.classes?.[0]?.name }} Lvl
+          {{ currentCharacter?.classes?.[0]?.level || 1 }}
         </div>
       </div>
       <div class="absolute top-0 right-0 p-2">
-        <div class="text-red-400 font-bold text-sm mb-2">
-          ❤️ {{ hp }}
-        </div>
-        <div class="text-sky-300 font-bold text-sm mb-2">
-          🛡️ AC: {{ ac }}
-        </div>
-        <div class="text-purple-400 font-bold text-sm">
-          ✨ {{ inspirationPoints }}
-        </div>
+        <div class="text-red-400 font-bold text-sm mb-2">❤️ {{ hp }}</div>
+        <div class="text-sky-300 font-bold text-sm mb-2">🛡️ AC: {{ ac }}</div>
+        <div class="text-purple-400 font-bold text-sm">✨ {{ inspirationPoints }}</div>
       </div>
 
       <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2">
@@ -46,9 +41,7 @@
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { computed } from 'vue';
-import {
-  getCurrentLevel, getXpProgress,
-} from '../../utils/dndLevels';
+import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 import { DnDRulesService } from '@/services/dndRulesService';
 import UiXpBar from '../ui/UiXpBar.vue';
 import CharacterIllustration from './CharacterIllustration.vue';
@@ -60,9 +53,7 @@ import type { InventoryItemForUi as InventoryItem } from '@/interfaces';
 const characterStore = useCharacterStore();
 const combatStore = useCombatStore();
 const { currentCharacter } = storeToRefs(characterStore);
-const {
-  inCombat, player: combatPlayer,
-} = storeToRefs(combatStore);
+const { inCombat, player: combatPlayer } = storeToRefs(combatStore);
 
 const hp = computed(() => {
   if (inCombat.value && combatPlayer.value) {
@@ -86,13 +77,13 @@ const xpPercent = computed(() => {
 
 const parseShieldBonus = (item: InventoryItem): number => {
   if (!item.meta?.ac) return 0;
-  const m = String(item.meta.ac)
-    .match(/([+-]?\d+)/);
+  const m = String(item.meta.ac).match(/([+-]?\d+)/);
   return m ? parseInt(m[1], 10) : 0;
 };
 
-const isShield = (item: InventoryItem): boolean => item.meta?.class === 'Shield'
-  || (item.meta?.type === 'armor' && (item.meta?.class || '').toLowerCase() === 'shield');
+const isShield = (item: InventoryItem): boolean =>
+  item.meta?.class === 'Shield' ||
+  (item.meta?.type === 'armor' && (item.meta?.class || '').toLowerCase() === 'shield');
 
 const calculateDexBonus = (acRaw: string, dexMod: number): number => {
   const usesDex = /dex/i.test(acRaw);
@@ -107,14 +98,19 @@ const calculateDexBonus = (acRaw: string, dexMod: number): number => {
 
 const inspirationPoints = computed(() => currentCharacter.value?.inspirationPoints || 0);
 
-const getCharValue = () => currentCharacter.value as {
-  ac?: number;
-  armorClass?: number;
-  scores?: Record<string, number>;
-  inventory?: InventoryItem[];
-};
+const getCharValue = () =>
+  currentCharacter.value as {
+    ac?: number;
+    armorClass?: number;
+    scores?: Record<string, number>;
+    inventory?: InventoryItem[];
+  };
 
-const computeArmorAc = (armor: InventoryItem, dexMod: number, shieldBonus: number): number | null => {
+const computeArmorAc = (
+  armor: InventoryItem,
+  dexMod: number,
+  shieldBonus: number,
+): number | null => {
   if (!armor.meta?.ac) return null;
   const acRaw = String(armor.meta.ac);
   const baseMatch = acRaw.match(/(\d+)/);
@@ -151,6 +147,6 @@ const ac = computed(() => {
 
 <style scoped>
 .aspect-square {
-    aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1;
 }
 </style>

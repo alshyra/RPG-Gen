@@ -13,7 +13,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import type { RPGRequest } from '../global.types.js';
@@ -193,7 +198,7 @@ export class CharacterController {
   }
 
   @Post(':characterId/inventory')
-  @ApiOperation({ summary: 'Add an item to character\'s inventory' })
+  @ApiOperation({ summary: "Add an item to character's inventory" })
   @ApiResponse({
     status: 201,
     description: 'Item added to inventory',
@@ -249,12 +254,16 @@ export class CharacterController {
   ) {
     const { user } = req;
     const userId = user._id.toString();
-    const character = await this.characterService.equipInventoryItem(userId, characterId, body.definitionId);
+    const character = await this.characterService.equipInventoryItem(
+      userId,
+      characterId,
+      body.definitionId,
+    );
     return character;
   }
 
   @Patch(':characterId/inventory/:itemId')
-  @ApiOperation({ summary: 'Update an item in character\'s inventory' })
+  @ApiOperation({ summary: "Update an item in character's inventory" })
   @ApiResponse({
     status: 200,
     description: 'Inventory item updated',
@@ -274,12 +283,17 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.updateInventoryItem(userId, characterId, itemId, updates);
+    const character = await this.characterService.updateInventoryItem(
+      userId,
+      characterId,
+      itemId,
+      updates,
+    );
     return this.characterService.toCharacterDto(character);
   }
 
   @Delete(':characterId/inventory/:itemId')
-  @ApiOperation({ summary: 'Remove an item from character\'s inventory' })
+  @ApiOperation({ summary: "Remove an item from character's inventory" })
   @ApiBody({ type: RemoveInventoryBodyDto })
   @ApiResponse({
     status: 200,
@@ -299,7 +313,12 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.removeInventoryItem(userId, characterId, itemId, body.qty);
+    const character = await this.characterService.removeInventoryItem(
+      userId,
+      characterId,
+      itemId,
+      body.qty,
+    );
     return this.characterService.toCharacterDto(character);
   }
 
@@ -336,7 +355,9 @@ export class CharacterController {
     // Cap inspiration points at 5 (D&D 5e rule)
     const currentPoints = character.inspirationPoints || 0;
     const newPoints = Math.min(currentPoints + amount, 5);
-    const updated = await this.characterService.update(userId, characterId, { inspirationPoints: newPoints });
+    const updated = await this.characterService.update(userId, characterId, {
+      inspirationPoints: newPoints,
+    });
 
     return {
       ok: true,
@@ -360,10 +381,7 @@ export class CharacterController {
     status: 404,
     description: 'Character not found',
   })
-  async spendInspiration(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-  ) {
+  async spendInspiration(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
     const { user } = req;
     const userId = user._id.toString();
 
@@ -373,7 +391,9 @@ export class CharacterController {
       throw new BadRequestException('No inspiration points available');
     }
 
-    const updated = await this.characterService.update(userId, characterId, { inspirationPoints: currentPoints - 1 });
+    const updated = await this.characterService.update(userId, characterId, {
+      inspirationPoints: currentPoints - 1,
+    });
 
     return {
       ok: true,

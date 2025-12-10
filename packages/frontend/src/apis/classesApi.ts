@@ -1,8 +1,7 @@
 import type { LevelUpOptionsDto } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
-const getData = <T>(res: { data?: T;
-  error?: unknown; }): T => {
+const getData = <T>(res: { data?: T; error?: unknown }): T => {
   if (res.error) throw res.error;
   return res.data as T;
 };

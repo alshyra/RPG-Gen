@@ -12,8 +12,7 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select')
-      .should('exist');
+    cy.get('select').should('exist');
   });
 
   it('should display the selected value', () => {
@@ -28,15 +27,14 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select')
-      .should('have.value', 'option2');
+    cy.get('select').should('have.value', 'option2');
   });
 
   it('should emit update:modelValue when selection changes', () => {
     const onUpdate = cy.stub();
     cy.mount(UiSelect, {
       props: {
-        'modelValue': 'option1',
+        modelValue: 'option1',
         'onUpdate:modelValue': onUpdate,
       },
       slots: {
@@ -48,12 +46,10 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select')
-      .select('option2');
-    cy.wrap(null)
-      .then(() => {
-        expect(onUpdate).to.have.been.calledWith('option2');
-      });
+    cy.get('select').select('option2');
+    cy.wrap(null).then(() => {
+      expect(onUpdate).to.have.been.calledWith('option2');
+    });
   });
 
   it('should render multiple options', () => {
@@ -69,15 +65,14 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select option')
-      .should('have.length', 4);
+    cy.get('select option').should('have.length', 4);
   });
 
   it('should allow changing selection multiple times', () => {
     const onUpdate = cy.stub();
     cy.mount(UiSelect, {
       props: {
-        'modelValue': 'option1',
+        modelValue: 'option1',
         'onUpdate:modelValue': onUpdate,
       },
       slots: {
@@ -89,20 +84,16 @@ describe('UiSelect Component', () => {
       },
     });
 
-    cy.get('select')
-      .select('option2');
-    cy.get('select')
-      .select('option3');
-    cy.get('select')
-      .select('option1');
+    cy.get('select').select('option2');
+    cy.get('select').select('option3');
+    cy.get('select').select('option1');
 
-    cy.wrap(null)
-      .then(() => {
-        expect(onUpdate).to.have.been.calledThrice;
-        expect(onUpdate.firstCall).to.have.been.calledWith('option2');
-        expect(onUpdate.secondCall).to.have.been.calledWith('option3');
-        expect(onUpdate.thirdCall).to.have.been.calledWith('option1');
-      });
+    cy.wrap(null).then(() => {
+      expect(onUpdate).to.have.been.calledThrice;
+      expect(onUpdate.firstCall).to.have.been.calledWith('option2');
+      expect(onUpdate.secondCall).to.have.been.calledWith('option3');
+      expect(onUpdate.thirdCall).to.have.been.calledWith('option1');
+    });
   });
 
   it('should have correct styling classes', () => {

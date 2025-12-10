@@ -1,8 +1,10 @@
-import {
-  InventoryItemDto, SpellResponseDto,
-} from '@rpg-gen/shared';
+import { InventoryItemDto, SpellResponseDto } from '@rpg-gen/shared';
 import type {
-  CommandType, ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionResult,
+  CommandType,
+  ParsedCommand,
+  CommandDefinition,
+  ArgumentSuggestion,
+  SuggestionResult,
 } from '@/interfaces';
 
 export type SuggestionType = 'command' | 'argument';
@@ -11,12 +13,7 @@ export type { ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionRe
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 const COMMAND_WITH_SPACE_REGEX = /^\/(\w+)\s*(.*)$/;
 
-const VALID_COMMANDS: CommandType[] = [
-  'cast',
-  'equip',
-  'attack',
-  'use',
-];
+const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'attack', 'use'];
 
 /**
  * Available commands with their descriptions for autocompletion
@@ -51,8 +48,7 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
  * @returns Array of matching command definitions
  */
 export const getCommandSuggestions = (input: string): CommandDefinition[] => {
-  const trimmed = input.trim()
-    .toLowerCase();
+  const trimmed = input.trim().toLowerCase();
 
   // Only provide suggestions if input starts with /
   if (!trimmed.startsWith('/')) {
@@ -79,12 +75,13 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
 /**
  * Parse the current command from input to determine what type of argument is expected
  */
-export const parseActiveCommand = (input: string): {
+export const parseActiveCommand = (
+  input: string,
+): {
   command: CommandType | null;
   argumentPartial: string;
 } => {
-  const trimmed = input.trim()
-    .toLowerCase();
+  const trimmed = input.trim().toLowerCase();
 
   if (!trimmed.startsWith('/')) {
     return {
@@ -101,10 +98,7 @@ export const parseActiveCommand = (input: string): {
     };
   }
 
-  const [
-    , commandType,
-    arg,
-  ] = match;
+  const [, commandType, arg] = match;
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {
@@ -142,10 +136,9 @@ export const getArgumentSuggestions = (
     case 'cast':
       // Filter spells by character level (spell level must be <= character level)
       return spells
-        .filter((spell) => {
+        .filter(spell => {
           const spellLevel = spell.level || 0;
-          const matchesName = spell.name.toLowerCase()
-            .includes(partial);
+          const matchesName = spell.name.toLowerCase().includes(partial);
           const matchesLevel = spellLevel <= characterLevel;
           return matchesName && matchesLevel;
         })
@@ -158,12 +151,14 @@ export const getArgumentSuggestions = (
     case 'use':
       // Only show usable/consumable items for /use command
       return inventory
-        .filter((item) => {
+        .filter(item => {
           // Check if meta is consumable type with usable property
-          const isUsable = item.meta && 'type' in item.meta && item.meta.type === 'consumable'
-            && !!(item.meta as { usable?: boolean }).usable;
-          const matchesName = (item.name ?? '').toLowerCase()
-            .includes(partial);
+          const isUsable =
+            item.meta &&
+            'type' in item.meta &&
+            item.meta.type === 'consumable' &&
+            !!(item.meta as { usable?: boolean }).usable;
+          const matchesName = (item.name ?? '').toLowerCase().includes(partial);
           return isUsable && matchesName;
         })
         .filter(item => item.name !== undefined)
@@ -176,8 +171,7 @@ export const getArgumentSuggestions = (
     case 'equip':
       // Show all items for /equip command
       return inventory
-        .filter(item => (item.name ?? '').toLowerCase()
-          .includes(partial))
+        .filter(item => (item.name ?? '').toLowerCase().includes(partial))
         .filter(item => item.name !== undefined)
         .map(item => ({
           name: item.name,
@@ -188,8 +182,7 @@ export const getArgumentSuggestions = (
     case 'attack':
       // For attack, suggest valid targets (enemy names) if provided
       return validTargets
-        .filter(name => name.toLowerCase()
-          .includes(partial))
+        .filter(name => name.toLowerCase().includes(partial))
         .map(name => ({
           name,
           type: 'target' as const,
@@ -238,9 +231,7 @@ export const getAllSuggestions = (
   }
 
   // Command with space - check for argument suggestions
-  const {
-    command, argumentPartial,
-  } = parseActiveCommand(input);
+  const { command, argumentPartial } = parseActiveCommand(input);
 
   if (command) {
     const argumentSuggestions = getArgumentSuggestions(
@@ -287,10 +278,7 @@ export const parseCommand = (input: string): ParsedCommand | null => {
     return null;
   }
 
-  const [
-    , commandType,
-    target,
-  ] = match;
+  const [, commandType, target] = match;
   const type = commandType.toLowerCase();
 
   if (!VALID_COMMANDS.includes(type as CommandType)) {

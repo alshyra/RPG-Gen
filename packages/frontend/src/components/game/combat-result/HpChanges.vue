@@ -4,13 +4,16 @@
     class="bg-slate-700/50 rounded-lg p-4 mb-4"
   >
     <div class="flex justify-between items-center">
-      <div class="text-sm text-slate-400">
-        PV de {{ currentAttack?.target ?? '' }}
-      </div>
+      <div class="text-sm text-slate-400">PV de {{ currentAttack?.target ?? '' }}</div>
       <div class="flex items-center gap-2">
         <span class="text-slate-300">{{ currentAttack?.targetHpBefore ?? 0 }}</span>
         <span class="text-red-400">→</span>
-        <span :class="(currentAttack?.targetHpAfter ?? 0) <= 0 ? 'text-red-500 font-bold' : 'text-slate-300'">{{ currentAttack?.targetHpAfter ?? 0 }}</span>
+        <span
+          :class="
+            (currentAttack?.targetHpAfter ?? 0) <= 0 ? 'text-red-500 font-bold' : 'text-slate-300'
+          "
+          >{{ currentAttack?.targetHpAfter ?? 0 }}</span
+        >
       </div>
     </div>
     <div

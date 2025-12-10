@@ -7,7 +7,10 @@ import { animations as animationConfig } from '../services/spritesAnimations';
 // New modules
 import { loadTextures, preloadFont } from '../services/assets/assetManager';
 import {
-  createGrid, createRangeOverlay, showReachableCells, hideReachableCells,
+  createGrid,
+  createRangeOverlay,
+  showReachableCells,
+  hideReachableCells,
 } from '../services/render/gridRenderer';
 import { createUnitService } from '../services/units/unitService';
 import { setupInteractionController } from '../services/input/interactionController';
@@ -47,7 +50,7 @@ export function useCombat() {
       height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
       backgroundColor: 0x1a1a2e,
       resolution: window.devicePixelRatio || 1,
-    }
+    };
     // prefer the official Application.view property
     container.appendChild(app.value.view);
 
@@ -96,9 +99,7 @@ export function useCombat() {
     sprite.anchor.set(0.5);
     sprite.scale.set(2);
     sprite.zIndex = 1;
-    const {
-      x, y,
-    } = gridToPixel(gridX, gridY);
+    const { x, y } = gridToPixel(gridX, gridY);
     sprite.position.set(x, y);
     sprite.eventMode = 'static';
     sprite.cursor = 'pointer';
@@ -117,7 +118,16 @@ export function useCombat() {
     app.value.stage.addChild(sprite);
 
     // delegate creation of the healthbar to unitService and attach it to the stage
-    const healthBar = unitService.createUnitEntry(unitId, sprite, animations, gridX, gridY, maxMoveRange, hp, maxHp);
+    const healthBar = unitService.createUnitEntry(
+      unitId,
+      sprite,
+      animations,
+      gridX,
+      gridY,
+      maxMoveRange,
+      hp,
+      maxHp,
+    );
     if (healthBar?.container) {
       healthBar.container.position.set(x, y - 40);
       app.value.stage.addChild(healthBar.container);
@@ -141,12 +151,8 @@ export function useCombat() {
   const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
     const u = units.value.get(unitId);
     if (!u || !app.value) return;
-    const {
-      sprite, animations,
-    } = u;
-    const {
-      x: targetX, y: targetY,
-    } = gridToPixel(targetGridX, targetGridY);
+    const { sprite, animations } = u;
+    const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
     const dx = targetGridX - u.gridX;
     const dy = targetGridY - u.gridY;
     const dir = getDirectionFromDelta(dx, dy);

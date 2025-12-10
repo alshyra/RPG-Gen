@@ -3,15 +3,15 @@
  * Type-safe API calls for character management
  */
 import type {
-  CharacterResponseDto, CreateInventoryItemDto, InventoryItemDto, UpdateCharacterRequestDto,
+  CharacterResponseDto,
+  CreateInventoryItemDto,
+  InventoryItemDto,
+  UpdateCharacterRequestDto,
 } from '@rpg-gen/shared';
 import { api } from './apiClient';
 
 // Helper to extract data from openapi-fetch response
-const getData = <T>(response: {
-  data?: T;
-  error?: unknown;
-}): T => {
+const getData = <T>(response: { data?: T; error?: unknown }): T => {
   if (response.error) {
     throw response.error;
   }
@@ -53,7 +53,9 @@ export const characterApi = {
    */
   getCharacterById: async (characterId: string): Promise<CharacterResponseDto | null> => {
     try {
-      const response = await api.GET('/api/characters/{characterId}', { params: { path: { characterId } } });
+      const response = await api.GET('/api/characters/{characterId}', {
+        params: { path: { characterId } },
+      });
       return getData(response);
     } catch {
       return null;
@@ -81,7 +83,10 @@ export const characterApi = {
   /**
    * Mark a character as deceased
    */
-  killCharacter: async (characterId: string, deathLocation?: string): Promise<CharacterResponseDto> => {
+  killCharacter: async (
+    characterId: string,
+    deathLocation?: string,
+  ): Promise<CharacterResponseDto> => {
     const response = await api.POST('/api/characters/{characterId}/kill', {
       params: { path: { characterId } },
       body: { deathLocation },
@@ -100,7 +105,10 @@ export const characterApi = {
   /**
    * Add an item to character's inventory
    */
-  addInventoryItem: async (characterId: string, item: Partial<InventoryItemDto>): Promise<CharacterResponseDto> => {
+  addInventoryItem: async (
+    characterId: string,
+    item: Partial<InventoryItemDto>,
+  ): Promise<CharacterResponseDto> => {
     const response = await api.POST('/api/characters/{characterId}/inventory', {
       params: { path: { characterId } },
       body: toOpenApiInventoryItem(item),
@@ -111,7 +119,10 @@ export const characterApi = {
   /**
    * Equip an item by its definitionId using the dedicated backend endpoint.
    */
-  equipInventoryItem: async (characterId: string, definitionId: string): Promise<CharacterResponseDto> => {
+  equipInventoryItem: async (
+    characterId: string,
+    definitionId: string,
+  ): Promise<CharacterResponseDto> => {
     const response = await api.POST('/api/characters/{characterId}/inventory/equip', {
       params: { path: { characterId } },
       body: { definitionId },
@@ -122,7 +133,11 @@ export const characterApi = {
   /**
    * Update an item in character's inventory
    */
-  updateInventoryItem: async (characterId: string, itemId: string, updates: CreateInventoryItemDto): Promise<CharacterResponseDto> => {
+  updateInventoryItem: async (
+    characterId: string,
+    itemId: string,
+    updates: CreateInventoryItemDto,
+  ): Promise<CharacterResponseDto> => {
     const response = await api.PATCH('/api/characters/{characterId}/inventory/{itemId}', {
       params: {
         path: {
@@ -138,7 +153,11 @@ export const characterApi = {
   /**
    * Remove an item from character's inventory
    */
-  removeInventoryItem: async (characterId: string, itemId: string, qty?: number): Promise<CharacterResponseDto> => {
+  removeInventoryItem: async (
+    characterId: string,
+    itemId: string,
+    qty?: number,
+  ): Promise<CharacterResponseDto> => {
     const response = await api.DELETE('/api/characters/{characterId}/inventory/{itemId}', {
       params: {
         path: {
@@ -167,7 +186,9 @@ export const characterApi = {
    * Spend an inspiration point
    */
   spendInspiration: async (characterId: string): Promise<CharacterResponseDto> => {
-    const response = await api.POST('/api/characters/{characterId}/inspiration/spend', { params: { path: { characterId } } });
+    const response = await api.POST('/api/characters/{characterId}/inspiration/spend', {
+      params: { path: { characterId } },
+    });
     const result = getData(response);
     return result.character;
   },

@@ -7,13 +7,20 @@ export class TurnOrderService {
    * Build sorted turn order from player and enemies.
    * Player and enemies are represented by CombatantDto; player entries have isPlayer=true.
    */
-  buildTurnOrder(characterId: string, player: CombatantDto, enemies: CombatantDto[]): CombatantDto[] {
-    const enemyEntries: CombatantDto[] = enemies.map(e => new CombatantDto({
-      id: e.id,
-      name: e.name,
-      initiative: e.initiative,
-      isPlayer: false,
-    }));
+  buildTurnOrder(
+    characterId: string,
+    player: CombatantDto,
+    enemies: CombatantDto[],
+  ): CombatantDto[] {
+    const enemyEntries: CombatantDto[] = enemies.map(
+      e =>
+        new CombatantDto({
+          id: e.id,
+          name: e.name,
+          initiative: e.initiative,
+          isPlayer: false,
+        }),
+    );
 
     const allCombatants: CombatantDto[] = [
       ...enemyEntries,

@@ -1,6 +1,4 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidateNested, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RaceResponseDto } from './RaceResponseDto.js';
@@ -82,10 +80,7 @@ export class BaseCharacterResponseDto {
 
   @ApiProperty({
     description: 'Character state',
-    enum: [
-      'draft',
-      'created',
-    ],
+    enum: ['draft', 'created'],
   })
   state: CharacterState;
 

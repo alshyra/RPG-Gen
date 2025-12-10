@@ -1,11 +1,5 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CombatantDto {
   @ApiProperty({ description: 'ID of the combatant (player character or enemy)' })

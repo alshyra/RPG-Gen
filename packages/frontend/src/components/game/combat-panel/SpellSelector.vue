@@ -5,9 +5,7 @@
     @click.self="close"
   >
     <div class="bg-slate-800 border border-slate-600 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-      <h3 class="text-lg font-semibold text-slate-100 mb-4">
-        Choisir une action
-      </h3>
+      <h3 class="text-lg font-semibold text-slate-100 mb-4">Choisir une action</h3>
 
       <div class="space-y-2 mb-4">
         <button
@@ -21,9 +19,7 @@
           v-if="availableSpells.length > 0"
           class="space-y-2"
         >
-          <p class="text-sm text-slate-400 mt-3 mb-2">
-            Sorts disponibles:
-          </p>
+          <p class="text-sm text-slate-400 mt-3 mb-2">Sorts disponibles:</p>
           <button
             v-for="spell in availableSpells"
             :key="spell.name"
@@ -38,7 +34,8 @@
               v-if="spell.description"
               class="text-xs text-purple-200 mt-1"
             >
-              {{ spell.description.substring(0, 60) }}{{ spell.description.length > 60 ? '...' : '' }}
+              {{ spell.description.substring(0, 60)
+              }}{{ spell.description.length > 60 ? '...' : '' }}
             </div>
           </button>
         </div>

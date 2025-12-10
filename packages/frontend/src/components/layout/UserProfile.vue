@@ -22,7 +22,7 @@
           :src="user.picture"
           :alt="user.displayName"
           class="w-full h-full object-cover"
-        >
+        />
         <div
           v-else
           class="w-full h-full bg-slate-700 flex items-center justify-center text-white font-bold"
@@ -48,13 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref, onMounted,
-} from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  authService, type User,
-} from '../../apis/authApi';
+import { authService, type User } from '../../apis/authApi';
 
 const router = useRouter();
 const user = ref<User | null>(null);

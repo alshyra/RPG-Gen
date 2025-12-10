@@ -57,11 +57,7 @@ import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useGameStore } from '@/stores/gameStore';
-import {
-  Activity,
-  Flag,
-  Star,
-} from 'lucide-vue-next';
+import { Activity, Flag, Star } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 
@@ -69,30 +65,35 @@ const combatStore = useCombatStore();
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 const { replayEnemyAttacks } = useCombatEngine();
-const {
-  roundNumber,
-  actionRemaining,
-  bonusActionRemaining,
-  phase,
-} = storeToRefs(combatStore);
+const { roundNumber, actionRemaining, bonusActionRemaining, phase } = storeToRefs(combatStore);
 
 const phaseLabel = computed(() => {
   switch (phase.value) {
-    case 'PLAYER_TURN': return 'Your Turn';
-    case 'AWAITING_DAMAGE_ROLL': return 'Roll Damage';
-    case 'ENEMY_TURN': return 'Enemy Turn';
-    case 'COMBAT_ENDED': return 'Combat Over';
-    default: return 'Your Turn';
+    case 'PLAYER_TURN':
+      return 'Your Turn';
+    case 'AWAITING_DAMAGE_ROLL':
+      return 'Roll Damage';
+    case 'ENEMY_TURN':
+      return 'Enemy Turn';
+    case 'COMBAT_ENDED':
+      return 'Combat Over';
+    default:
+      return 'Your Turn';
   }
 });
 
 const phaseClass = computed(() => {
   switch (phase.value) {
-    case 'PLAYER_TURN': return 'bg-green-600 text-white';
-    case 'AWAITING_DAMAGE_ROLL': return 'bg-amber-600 text-white';
-    case 'ENEMY_TURN': return 'bg-red-600 text-white';
-    case 'COMBAT_ENDED': return 'bg-slate-600 text-white';
-    default: return 'bg-green-600 text-white';
+    case 'PLAYER_TURN':
+      return 'bg-green-600 text-white';
+    case 'AWAITING_DAMAGE_ROLL':
+      return 'bg-amber-600 text-white';
+    case 'ENEMY_TURN':
+      return 'bg-red-600 text-white';
+    case 'COMBAT_ENDED':
+      return 'bg-slate-600 text-white';
+    default:
+      return 'bg-green-600 text-white';
   }
 });
 
@@ -127,9 +128,15 @@ const onEndTurn = async () => {
     combatStore.updateFromTurnResult(response);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    if (message.includes('Combat session not found') || message.includes('No active combat found')) {
+    if (
+      message.includes('Combat session not found') ||
+      message.includes('No active combat found')
+    ) {
       combatStore.clearCombat();
-      gameStore.appendMessage('system', '⚠️ Combat terminé (session introuvable) — l\'état a été réinitialisé.');
+      gameStore.appendMessage(
+        'system',
+        "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
+      );
     } else {
       console.error('Failed to end turn', e);
     }
@@ -137,7 +144,6 @@ const onEndTurn = async () => {
     isEndingTurn.value = false;
   }
 };
-
 </script>
 
 <style scoped></style>

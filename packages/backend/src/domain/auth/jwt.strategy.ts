@@ -1,15 +1,9 @@
-import {
-  Injectable, UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Strategy, ExtractJwt,
-} from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  User, UserDocument,
-} from '../../infra/mongo/User.js';
+import { User, UserDocument } from '../../infra/mongo/User.js';
 
 export interface JwtPayload {
   sub: string; // User ID
@@ -18,9 +12,7 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

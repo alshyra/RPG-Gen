@@ -1,10 +1,6 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CombatEndResultDto } from './CombatEndResultDto.js';
-import {
-  IsBoolean, IsString, IsOptional, IsArray, ValidateNested,
-} from 'class-validator';
+import { IsBoolean, IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CombatEndResponseDto {

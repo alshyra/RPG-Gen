@@ -6,14 +6,7 @@
 import { AbilityScoresResponseDto } from '@rpg-gen/shared';
 import { getCurrentLevel } from '../utils/dndLevels';
 
-export const ABILITIES = [
-  'Str',
-  'Dex',
-  'Con',
-  'Int',
-  'Wis',
-  'Cha',
-] as const;
+export const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'] as const;
 export const DEFAULT_BASE_SCORES = {
   Str: 15,
   Dex: 14,
@@ -185,22 +178,12 @@ export const CLASSES_LIST = [
   'Warlock',
   'Wizard',
 ] as const;
-export const GENDERS = [
-  'male',
-  'female',
-] as const;
+export const GENDERS = ['male', 'female'] as const;
 export const [DEFAULT_RACE] = ALLOWED_RACES;
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
-  Barbarian: [
-    'Animal Handling',
-    'Athletics',
-    'Intimidation',
-    'Nature',
-    'Perception',
-    'Survival',
-  ],
+  Barbarian: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
   Bard: [
     'Acrobatics',
     'Animal Handling',
@@ -221,12 +204,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
     'Stealth',
     'Survival',
   ],
-  Cleric: [
-    'Insight',
-    'Medicine',
-    'Persuasion',
-    'Religion',
-  ],
+  Cleric: ['Insight', 'Medicine', 'Persuasion', 'Religion'],
   Druid: [
     'Arcana',
     'Animal Handling',
@@ -246,22 +224,8 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
     'Intimidation',
     'Perception',
   ],
-  Monk: [
-    'Acrobatics',
-    'Athletics',
-    'History',
-    'Insight',
-    'Religion',
-    'Stealth',
-  ],
-  Paladin: [
-    'Athletics',
-    'Insight',
-    'Intimidation',
-    'Medicine',
-    'Persuasion',
-    'Religion',
-  ],
+  Monk: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
+  Paladin: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
   Ranger: [
     'Animal Handling',
     'Athletics',
@@ -285,14 +249,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
     'Sleight of Hand',
     'Stealth',
   ],
-  Sorcerer: [
-    'Arcana',
-    'Deception',
-    'Insight',
-    'Intimidation',
-    'Persuasion',
-    'Religion',
-  ],
+  Sorcerer: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
   Warlock: [
     'Arcana',
     'Deception',
@@ -303,14 +260,7 @@ const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
     'Nature',
     'Religion',
   ],
-  Wizard: [
-    'Arcana',
-    'History',
-    'Insight',
-    'Investigation',
-    'Medicine',
-    'Religion',
-  ],
+  Wizard: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
 };
 
 // How many skills can be chosen per class
@@ -361,12 +311,11 @@ export class DnDRulesService {
     raceModifiers: RaceModifiers,
   ): Record<string, number> {
     const result = { ...baseScores };
-    Object.keys(raceModifiers)
-      .forEach((key) => {
-        if (result[key] !== undefined) {
-          result[key] += raceModifiers[key];
-        }
-      });
+    Object.keys(raceModifiers).forEach(key => {
+      if (result[key] !== undefined) {
+        result[key] += raceModifiers[key];
+      }
+    });
     return result;
   }
 
@@ -422,7 +371,12 @@ export class DnDRulesService {
   /**
    * Calculate skill modifier for a given skill and ability scores
    */
-  static calculateSkillModifier(skillName: string, scores: AbilityScoresResponseDto, proficiency: number, isProficient: boolean): number {
+  static calculateSkillModifier(
+    skillName: string,
+    scores: AbilityScoresResponseDto,
+    proficiency: number,
+    isProficient: boolean,
+  ): number {
     const skill = SKILLS.find(s => s.name === skillName);
     if (!skill) return 0;
 

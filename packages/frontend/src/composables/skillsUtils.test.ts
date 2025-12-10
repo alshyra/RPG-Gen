@@ -1,6 +1,4 @@
-import {
-  describe, it, expect,
-} from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { computeUpdatedSkills } from './skillsUtils';
 
 describe('computeUpdatedSkills', () => {
@@ -17,17 +15,16 @@ describe('computeUpdatedSkills', () => {
     ];
 
     const result = computeUpdatedSkills('Athletics', existing);
-    expect(result)
-      .toEqual([
-        {
-          name: 'Athletics',
-          proficient: false,
-        },
-        {
-          name: 'Perception',
-          proficient: false,
-        },
-      ]);
+    expect(result).toEqual([
+      {
+        name: 'Athletics',
+        proficient: false,
+      },
+      {
+        name: 'Perception',
+        proficient: false,
+      },
+    ]);
   });
 
   it('selecting an existing but non-proficient skill should mark it proficient', () => {
@@ -38,13 +35,12 @@ describe('computeUpdatedSkills', () => {
       },
     ];
     const result = computeUpdatedSkills('Stealth', existing);
-    expect(result)
-      .toEqual([
-        {
-          name: 'Stealth',
-          proficient: true,
-        },
-      ]);
+    expect(result).toEqual([
+      {
+        name: 'Stealth',
+        proficient: true,
+      },
+    ]);
   });
 
   it('selecting a skill that is not present should add it as proficient and leave others untouched', () => {
@@ -55,17 +51,16 @@ describe('computeUpdatedSkills', () => {
       },
     ];
     const result = computeUpdatedSkills('Acrobatics', existing);
-    expect(result)
-      .toEqual([
-        {
-          name: 'Athletics',
-          proficient: false,
-        },
-        {
-          name: 'Acrobatics',
-          proficient: true,
-          modifier: 0,
-        },
-      ]);
+    expect(result).toEqual([
+      {
+        name: 'Athletics',
+        proficient: false,
+      },
+      {
+        name: 'Acrobatics',
+        proficient: true,
+        modifier: 0,
+      },
+    ]);
   });
 });

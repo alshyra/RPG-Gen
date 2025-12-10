@@ -1,11 +1,13 @@
 import { characterApi } from '@/apis/characterApi';
 import {
-  CharacterResponseDto, InventoryItemDto, SpellInstructionMessageDto, SpellResponseDto, UpdateCharacterRequestDto,
+  CharacterResponseDto,
+  InventoryItemDto,
+  SpellInstructionMessageDto,
+  SpellResponseDto,
+  UpdateCharacterRequestDto,
 } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
-import {
-  computed, Ref, ref, watch,
-} from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCombatStore } from './combatStore';
 
@@ -39,22 +41,24 @@ const updateInventoryQuantity = (
   inventory: InventoryItemDto[] | undefined,
   definitionId: string,
   quantity: number,
-): InventoryItemDto[] => (inventory ?? [])
-  .map((item) => {
-    if (item.definitionId !== definitionId) return item;
-    return {
-      ...item,
-      qty: (item.qty ?? 1) - quantity,
-    };
-  })
-  .filter(i => (i.qty ?? 0) > 0);
+): InventoryItemDto[] =>
+  (inventory ?? [])
+    .map(item => {
+      if (item.definitionId !== definitionId) return item;
+      return {
+        ...item,
+        qty: (item.qty ?? 1) - quantity,
+      };
+    })
+    .filter(i => (i.qty ?? 0) > 0);
 
 const findItemByIdentifier = (
   inventory: InventoryItemDto[],
   identifier: string,
-): InventoryItemDto | undefined => inventory.find(
-  i => i._id === identifier || i.definitionId === identifier || i.name === identifier,
-);
+): InventoryItemDto | undefined =>
+  inventory.find(
+    i => i._id === identifier || i.definitionId === identifier || i.name === identifier,
+  );
 
 const isItemUsable = (item: InventoryItemDto): boolean => {
   // Check if meta is consumable type with usable property
@@ -70,7 +74,11 @@ const createHpUpdater = (charRef: Ref<CharacterResponseDto | undefined>) => (del
   if (charRef.value.hp === 0) charRef.value.isDeceased = true;
   // Also update combat state player hp if in combat
   const combatStore = useCombatStore();
-  if (combatStore.inCombat && combatStore.player && combatStore.player.id === charRef.value.characterId) {
+  if (
+    combatStore.inCombat &&
+    combatStore.player &&
+    combatStore.player.id === charRef.value.characterId
+  ) {
     combatStore.player = {
       ...combatStore.player,
       hp: Math.max(0, (combatStore.player.hp ?? 0) + delta),
@@ -87,7 +95,11 @@ const createSpellManager = (charRef: Ref<CharacterResponseDto | undefined>) => (
   learn: (spell: SpellInstructionMessageDto) => {
     if (!charRef.value) return;
 
-    if (charRef.value.spells && charRef.value.spells.some(s => s.definitionId === spell.definitionId)) return;
+    if (
+      charRef.value.spells &&
+      charRef.value.spells.some(s => s.definitionId === spell.definitionId)
+    )
+      return;
     charRef.value = {
       ...charRef.value,
       spells: [...(charRef.value.spells || []), convertSpellInstructionToDto(spell)],
@@ -105,7 +117,9 @@ const createSpellManager = (charRef: Ref<CharacterResponseDto | undefined>) => (
 // eslint-disable-next-line max-statements
 export const useCharacterStore = defineStore('character', () => {
   const route = useRoute();
-  const currentCharacterId = computed(() => (typeof route.params.characterId === 'string' ? route.params.characterId : undefined));
+  const currentCharacterId = computed(() =>
+    typeof route.params.characterId === 'string' ? route.params.characterId : undefined,
+  );
 
   const currentCharacter = ref<CharacterResponseDto>();
   const showDeathModal = ref(false);
@@ -119,10 +133,21 @@ export const useCharacterStore = defineStore('character', () => {
   const learnSpell = spellManager.learn;
   const forgetSpell = spellManager.forget;
 
-  const removeInventoryItem = async (definitionId: InventoryItemDto['definitionId'], quantity = 1) => {
+  const removeInventoryItem = async (
+    definitionId: InventoryItemDto['definitionId'],
+    quantity = 1,
+  ) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;
-    currentCharacter.value.inventory = updateInventoryQuantity(currentCharacter.value.inventory, definitionId, quantity);
-    const updated = await characterApi.removeInventoryItem(currentCharacter.value.characterId, definitionId, quantity);
+    currentCharacter.value.inventory = updateInventoryQuantity(
+      currentCharacter.value.inventory,
+      definitionId,
+      quantity,
+    );
+    const updated = await characterApi.removeInventoryItem(
+      currentCharacter.value.characterId,
+      definitionId,
+      quantity,
+    );
     currentCharacter.value = updated;
   };
 
@@ -164,11 +189,15 @@ export const useCharacterStore = defineStore('character', () => {
     return updated;
   };
 
-  watch(currentCharacterId, async (id) => {
-    if (!id) return;
-    const res = await characterApi.getCharacterById(id);
-    currentCharacter.value = res || undefined;
-  }, { immediate: true });
+  watch(
+    currentCharacterId,
+    async id => {
+      if (!id) return;
+      const res = await characterApi.getCharacterById(id);
+      currentCharacter.value = res || undefined;
+    },
+    { immediate: true },
+  );
 
   return {
     currentCharacter,

@@ -4,17 +4,14 @@ describe('UiCard Component', () => {
   it('should render with default styling', () => {
     cy.mount(UiCard, { slots: { default: 'Card content' } });
 
-    cy.contains('Card content')
-      .should('be.visible');
+    cy.contains('Card content').should('be.visible');
   });
 
   it('should render slot content', () => {
     cy.mount(UiCard, { slots: { default: '<div>Test content <strong>with HTML</strong></div>' } });
 
-    cy.contains('Test content')
-      .should('be.visible');
-    cy.get('strong')
-      .should('contain', 'with HTML');
+    cy.contains('Test content').should('be.visible');
+    cy.get('strong').should('contain', 'with HTML');
   });
 
   it('should have correct styling classes', () => {
@@ -41,19 +38,14 @@ describe('UiCard Component', () => {
       },
     });
 
-    cy.contains('Title')
-      .should('be.visible');
-    cy.contains('Paragraph 1')
-      .should('be.visible');
-    cy.contains('Paragraph 2')
-      .should('be.visible');
+    cy.contains('Title').should('be.visible');
+    cy.contains('Paragraph 1').should('be.visible');
+    cy.contains('Paragraph 2').should('be.visible');
   });
 
   it('should render nested components', () => {
     cy.mount(UiCard, { slots: { default: '<button>Click me</button>' } });
 
-    cy.get('button')
-      .should('contain', 'Click me')
-      .and('be.visible');
+    cy.get('button').should('contain', 'Click me').and('be.visible');
   });
 });

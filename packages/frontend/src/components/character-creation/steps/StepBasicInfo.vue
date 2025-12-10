@@ -1,8 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-bold">
-      Informations de base
-    </h2>
+    <h2 class="text-xl font-bold">Informations de base</h2>
 
     <div>
       <label class="block font-medium mb-2">Nom du personnage</label>
@@ -19,7 +17,7 @@
         <UiButtonToggle
           :options="genderOptions"
           :model-value="currentCharacter?.gender"
-          @update:model-value="onUpdateGender($event as typeof GENDERS[number])"
+          @update:model-value="onUpdateGender($event as (typeof GENDERS)[number])"
         />
       </div>
     </div>
@@ -42,10 +40,12 @@ import RacePicker from '../RacePicker.vue';
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
-const genderOptions = computed(() => GENDERS.map(g => ({
-  value: g,
-  label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
-})));
+const genderOptions = computed(() =>
+  GENDERS.map(g => ({
+    value: g,
+    label: g === 'male' ? '♂️ Homme' : '♀️ Femme',
+  })),
+);
 
 const onUpdateName = useDebounceFn(async (name: string) => {
   if (!currentCharacter.value) return;
@@ -57,7 +57,7 @@ const onUpdateName = useDebounceFn(async (name: string) => {
   await characterStore.updateCharacter(charId, { name: name });
 }, 300);
 
-const onUpdateGender = async (gender: typeof GENDERS[number]) => {
+const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
   if (!currentCharacter.value) return;
 
   currentCharacter.value.gender = gender;
@@ -66,5 +66,4 @@ const onUpdateGender = async (gender: typeof GENDERS[number]) => {
 
   await characterStore.updateCharacter(charId, { gender: String(gender) });
 };
-
 </script>

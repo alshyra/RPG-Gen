@@ -24,7 +24,7 @@ const getAbilityModifier = (score: number) => Math.floor((score - 10) / 2);
 /**
  * Get ability score from character scores
  */
-const getAbilityScore = (scores: Scores | undefined, key: string): number => (scores?.[key] ?? 10);
+const getAbilityScore = (scores: Scores | undefined, key: string): number => scores?.[key] ?? 10;
 
 /**
  * Find a skill in the character's skills array (case-insensitive)
@@ -32,13 +32,14 @@ const getAbilityScore = (scores: Scores | undefined, key: string): number => (sc
 const findCharacterSkill = (
   skills: SkillEntry[] | undefined,
   skillName: string,
-): SkillEntry | undefined => skills?.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+): SkillEntry | undefined =>
+  skills?.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
 
 /**
  * Find a skill in DnD rules (case-insensitive)
  */
-const findRulesSkill = (skillName: string) => DnDRulesService.getAllSkills()
-  .find(s => s.name.toLowerCase() === skillName.toLowerCase());
+const findRulesSkill = (skillName: string) =>
+  DnDRulesService.getAllSkills().find(s => s.name.toLowerCase() === skillName.toLowerCase());
 
 /**
  * Calculate modifier for a skill using rules mapping
@@ -89,7 +90,10 @@ const handleAbilitySkillFormat = (
 /**
  * Handle pure ability check (e.g., "Strength")
  */
-const handleAbilityCheck = (character: CharacterResponseDto, abilityName: string): number | undefined => {
+const handleAbilityCheck = (
+  character: CharacterResponseDto,
+  abilityName: string,
+): number | undefined => {
   const abilityKey = abilityMap[abilityName.toLowerCase()];
   if (!abilityKey || !character.scores) return undefined;
   return getAbilityModifier(getAbilityScore(character.scores as Scores, abilityKey));
@@ -98,7 +102,10 @@ const handleAbilityCheck = (character: CharacterResponseDto, abilityName: string
 /**
  * Handle skill lookup in character's skills array
  */
-const handleSkillLookup = (character: CharacterResponseDto, skillName: string): number | undefined => {
+const handleSkillLookup = (
+  character: CharacterResponseDto,
+  skillName: string,
+): number | undefined => {
   const charSkill = findCharacterSkill(character.skills as SkillEntry[], skillName);
   if (!charSkill) return undefined;
 
@@ -119,12 +126,15 @@ export const getSkillBonus = (
 ): number => {
   if (!character) return 0;
 
-  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '')
-    .trim();
+  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '').trim();
   const abilitySkillMatch = nameWithoutCheck.match(/^(.+?)\s*\((.+?)\)$/u);
 
   if (abilitySkillMatch) {
-    return handleAbilitySkillFormat(character, abilitySkillMatch[1].trim(), abilitySkillMatch[2].trim());
+    return handleAbilitySkillFormat(
+      character,
+      abilitySkillMatch[1].trim(),
+      abilitySkillMatch[2].trim(),
+    );
   }
 
   const abilityResult = handleAbilityCheck(character, nameWithoutCheck);

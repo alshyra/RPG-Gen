@@ -1,8 +1,7 @@
+import { Injectable, Logger } from '@nestjs/common';
 import {
-  Injectable, Logger,
-} from '@nestjs/common';
-import {
-  compressImage as compressImageUtil, validateImage as validateImageUtil,
+  compressImage as compressImageUtil,
+  validateImage as validateImageUtil,
 } from './image.util.js';
 
 @Injectable()
@@ -26,10 +25,11 @@ export class ImageService {
         originalSize = imageData.length;
       }
 
-      const compressedSize = Buffer.from(result.replace(/^data:image\/\w+;base64,/, ''), 'base64').length;
-      this.logger.debug(
-        `Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`,
-      );
+      const compressedSize = Buffer.from(
+        result.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      ).length;
+      this.logger.debug(`Image compressed: ${originalSize} bytes -> ${compressedSize} bytes`);
 
       return result;
     } catch (error) {

@@ -1,7 +1,5 @@
 import { mount } from '@vue/test-utils';
-import {
-  describe, it, expect, beforeEach,
-} from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import FighterPortrait from './FighterPortrait.vue';
 import { useCombatStore } from '@/stores/combatStore';
@@ -43,10 +41,8 @@ describe('FighterPortrait attack button behaviour', () => {
     });
 
     const btn = wrapper.find('[data-cy="attack-button"]');
-    expect(btn.exists())
-      .toBe(true);
-    expect(btn.attributes('disabled'))
-      .toBeDefined();
+    expect(btn.exists()).toBe(true);
+    expect(btn.attributes('disabled')).toBeDefined();
   });
 
   it('enables attack button when player has at least one action', () => {
@@ -78,9 +74,7 @@ describe('FighterPortrait attack button behaviour', () => {
     });
 
     const btn = wrapper.find('[data-cy="attack-button"]');
-    expect(btn.exists())
-      .toBe(true);
-    expect(btn.attributes('disabled'))
-      .toBeUndefined();
+    expect(btn.exists()).toBe(true);
+    expect(btn.attributes('disabled')).toBeUndefined();
   });
 });

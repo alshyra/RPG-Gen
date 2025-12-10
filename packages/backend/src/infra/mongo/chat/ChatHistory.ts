@@ -35,7 +35,10 @@ export class ChatHistory {
 export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);
 
 // Index for efficient querying
-ChatHistorySchema.index({
-  userId: 1,
-  characterId: 1,
-}, { unique: true });
+ChatHistorySchema.index(
+  {
+    userId: 1,
+    characterId: 1,
+  },
+  { unique: true },
+);

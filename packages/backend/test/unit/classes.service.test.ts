@@ -3,7 +3,7 @@ import test from 'ava';
 // Unit tests for ClassesService - These tests verify the core business logic
 // For full integration tests with real seed data, see integration tests
 
-test('ClassesService ASI levels include 4, 8, 12, 16, 19', (t) => {
+test('ClassesService ASI levels include 4, 8, 12, 16, 19', t => {
   const ASI_LEVELS = [4, 8, 12, 16, 19];
 
   // Verify level 4 is ASI
@@ -15,7 +15,7 @@ test('ClassesService ASI levels include 4, 8, 12, 16, 19', (t) => {
   t.pass();
 });
 
-test('ClassesService proficiency increase levels include 5, 9, 13, 17', (t) => {
+test('ClassesService proficiency increase levels include 5, 9, 13, 17', t => {
   const PROFICIENCY_INCREASE_LEVELS = [5, 9, 13, 17];
 
   // Verify level 5 has proficiency increase

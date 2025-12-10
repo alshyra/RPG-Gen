@@ -19,9 +19,14 @@ export class DiceService {
       modifierValue: mod,
       total: keptRoll + mod,
     };
-  };
+  }
 
-  private rollNormal(diceCount: number, sides: number, modifierValue: number, rand: () => number): DiceResultDto {
+  private rollNormal(
+    diceCount: number,
+    sides: number,
+    modifierValue: number,
+    rand: () => number,
+  ): DiceResultDto {
     const rolls = Array.from({ length: diceCount }, () => 1 + Math.floor(rand() * sides));
     const total = rolls.reduce((s, v) => s + v, 0) + modifierValue;
     return {
@@ -29,7 +34,7 @@ export class DiceService {
       modifierValue: modifierValue,
       total,
     };
-  };
+  }
 
   private parseDiceExpression(expr: string) {
     const normalizedExpression = expr.replace(/\s+/g, '');
@@ -54,9 +59,7 @@ export class DiceService {
     rand: () => number = Math.random,
     advantage: AdvantageType = 'none',
   ): DiceResultDto {
-    const {
-      diceCount, diceSides, modifierValue,
-    } = this.parseDiceExpression(expr);
+    const { diceCount, diceSides, modifierValue } = this.parseDiceExpression(expr);
 
     // advantage rolls are only available for narrative and for d20 checks
     if (advantage !== 'none' && diceSides === 20 && diceCount === 1) {
@@ -66,9 +69,10 @@ export class DiceService {
     return this.rollNormal(diceCount, diceSides, modifierValue, rand);
   }
 
-  rollAttack(attackBonus: number, targetAc: number): { hit: boolean;
-    isCrit: boolean;
-    diceResult: DiceResultDto; } {
+  rollAttack(
+    attackBonus: number,
+    targetAc: number,
+  ): { hit: boolean; isCrit: boolean; diceResult: DiceResultDto } {
     const diceResult = this.rollDiceExpr('1d20');
     const [die] = diceResult.rolls;
     const totalAttack = die + attackBonus;
@@ -85,9 +89,10 @@ export class DiceService {
   private computeTotal(diceResult?: DiceResultDto): number {
     if (!diceResult) return 0;
     if (typeof diceResult.total === 'number') return diceResult.total;
-    if (Array.isArray(diceResult.rolls) && diceResult.rolls.length) return diceResult.rolls.reduce((s, v) => s + v, 0);
+    if (Array.isArray(diceResult.rolls) && diceResult.rolls.length)
+      return diceResult.rolls.reduce((s, v) => s + v, 0);
     return 0;
-  };
+  }
 
   rollDamage(expression: string, isCrit: boolean, damageBonus = 0): CombatDiceResultDto {
     const base = this.rollDiceExpr(expression);
@@ -110,8 +115,10 @@ export class DiceService {
    * @param spellDC - The spell save DC (typically 8 + proficiency + casting ability modifier)
    * @returns Whether the save succeeded and the dice result
    */
-  rollSave(savingThrowBonus: number, spellDC: number): { success: boolean;
-    diceResult: DiceResultDto; } {
+  rollSave(
+    savingThrowBonus: number,
+    spellDC: number,
+  ): { success: boolean; diceResult: DiceResultDto } {
     const diceResult = this.rollDiceExpr('1d20');
     const [die] = diceResult.rolls;
     const totalSave = die + savingThrowBonus;

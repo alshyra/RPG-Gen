@@ -43,17 +43,13 @@ export async function createTestApp(
 
   // Build testing module
   let moduleBuilder = Test.createTestingModule({
-    imports: [
-      MongooseModule.forRoot(mongoUri),
-      ...(imports ?? []),
-    ],
+    imports: [MongooseModule.forRoot(mongoUri), ...(imports ?? [])],
   });
 
   // Apply provider overrides (e.g., mock DiceService)
   if (overrides) {
-    overrides.forEach((override) => {
-      moduleBuilder = moduleBuilder.overrideProvider(override.provide)
-        .useValue(override.useValue);
+    overrides.forEach(override => {
+      moduleBuilder = moduleBuilder.overrideProvider(override.provide).useValue(override.useValue);
     });
   }
 
@@ -87,7 +83,5 @@ export async function closeTestApp(ctx: TestAppContext): Promise<void> {
 export async function clearDatabase(ctx: TestAppContext): Promise<void> {
   const { collections } = ctx.mongoConnection;
   const keys = Object.keys(collections);
-  await Promise.all(
-    keys.map(key => collections[key].deleteMany({})),
-  );
+  await Promise.all(keys.map(key => collections[key].deleteMany({})));
 }

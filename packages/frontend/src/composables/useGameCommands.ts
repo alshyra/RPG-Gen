@@ -5,7 +5,8 @@ import {
   type CombatantDto,
   type GameInstructionDto,
   type InventoryItemDto,
-  type RollInstructionMessageDto, type SpellInstructionMessageDto,
+  type RollInstructionMessageDto,
+  type SpellInstructionMessageDto,
   type UseItemResponseDto,
 } from '@rpg-gen/shared';
 import { characterApi } from '../apis/characterApi';
@@ -25,26 +26,32 @@ const processRollInstruction = (instr: RollInstructionMessageDto, gameStore: Gam
   gameStore.pendingInstruction = instr;
   const label = instr.modifierLabel ?? '';
   const value = instr.modifierValue ?? 0;
-  const mod = label ? ` (${label})` : (value ? ` + ${value}` : '');
+  const mod = label ? ` (${label})` : value ? ` + ${value}` : '';
   gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${mod}`);
 };
 
-const processXpInstruction = (xp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
+const processXpInstruction = (
+  xp: number,
+  gameStore: GameStore,
+  characterStore: CharacterStore,
+): void => {
   gameStore.appendMessage('system', `✨ Gained ${xp} XP`);
   characterStore.updateXp(xp);
 };
 
 // Keep combat HP in sync when an HP instruction arrives while in combat
 
-const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+const processSpellInstruction = (
+  instr: InstructionItem,
+  gameStore: GameStore,
+  characterStore: CharacterStore,
+): void => {
   const spell = instr as {
     action?: string;
     name?: string;
     level?: number;
   };
-  const {
-    action, name, level,
-  } = spell;
+  const { action, name, level } = spell;
   if (action === 'learn') {
     gameStore.appendMessage('system', `📖 Learned spell: ${name} (Level ${level})`);
     characterStore.learnSpell(instr as SpellInstructionMessageDto);
@@ -56,15 +63,17 @@ const processSpellInstruction = (instr: InstructionItem, gameStore: GameStore, c
   }
 };
 
-const processInventoryInstruction = (instr: InstructionItem, gameStore: GameStore, characterStore: CharacterStore): void => {
+const processInventoryInstruction = (
+  instr: InstructionItem,
+  gameStore: GameStore,
+  characterStore: CharacterStore,
+): void => {
   const inventory = instr as {
     action?: string;
     name?: string;
     quantity?: number;
   };
-  const {
-    action, name, quantity = 1,
-  } = inventory;
+  const { action, name, quantity = 1 } = inventory;
   if (action === 'add') {
     gameStore.appendMessage('system', `🎒 Added to inventory: ${name} (x${quantity})`);
     characterStore.addInventoryItem({
@@ -81,15 +90,19 @@ const processInventoryInstruction = (instr: InstructionItem, gameStore: GameStor
 };
 
 // ----- Command Helpers -----
-const findSpell = (character: CharacterResponseDto, spellName: string) => character.spells?.find((s: { name: string }) => s.name.toLowerCase() === spellName.toLowerCase());
+const findSpell = (character: CharacterResponseDto, spellName: string) =>
+  character.spells?.find((s: { name: string }) => s.name.toLowerCase() === spellName.toLowerCase());
 
-const matchesName = (value: string | undefined, search: string): boolean => (value ?? '').toLowerCase() === search.toLowerCase();
+const matchesName = (value: string | undefined, search: string): boolean =>
+  (value ?? '').toLowerCase() === search.toLowerCase();
 
-const findItem = (character: CharacterResponseDto, itemName: string) => character.inventory?.find((i: {
-  name?: string;
-  definitionId?: string;
-  _id?: string;
-}) => matchesName(i.name, itemName) || matchesName(i.definitionId, itemName) || matchesName(i._id, itemName));
+const findItem = (character: CharacterResponseDto, itemName: string) =>
+  character.inventory?.find(
+    (i: { name?: string; definitionId?: string; _id?: string }) =>
+      matchesName(i.name, itemName) ||
+      matchesName(i.definitionId, itemName) ||
+      matchesName(i._id, itemName),
+  );
 
 // eslint-disable-next-line max-statements
 export function useGameCommands() {
@@ -106,10 +119,13 @@ export function useGameCommands() {
   };
 
   // Execute the API call and handle the response
-  const executeUseItemRequest = async (characterId: string, item: {
-    name?: string;
-    definitionId?: string;
-  }) => {
+  const executeUseItemRequest = async (
+    characterId: string,
+    item: {
+      name?: string;
+      definitionId?: string;
+    },
+  ) => {
     const defId = item.definitionId;
     if (!defId) {
       gameStore.messages.pop();
@@ -150,7 +166,11 @@ export function useGameCommands() {
     };
   };
 
-  const processHpInstruction = (hp: number, gameStore: GameStore, characterStore: CharacterStore): void => {
+  const processHpInstruction = (
+    hp: number,
+    gameStore: GameStore,
+    characterStore: CharacterStore,
+  ): void => {
     const hpChange = hp > 0 ? `+${hp}` : hp;
     gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
     characterStore.updateHp(hp);
@@ -167,12 +187,18 @@ export function useGameCommands() {
     processInstructions(response.instructions ?? []);
   };
 
-  const executeWithLoading = async (action: () => Promise<void>, errorPrefix: string): Promise<void> => {
+  const executeWithLoading = async (
+    action: () => Promise<void>,
+    errorPrefix: string,
+  ): Promise<void> => {
     gameStore.sending = true;
     try {
       await action();
     } catch (e) {
-      gameStore.appendMessage('system', `❌ ${errorPrefix} (${e instanceof Error ? e.message : String(e)})`);
+      gameStore.appendMessage(
+        'system',
+        `❌ ${errorPrefix} (${e instanceof Error ? e.message : String(e)})`,
+      );
     } finally {
       gameStore.sending = false;
     }
@@ -192,7 +218,9 @@ export function useGameCommands() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    const target = combatStore.aliveEnemies.find(e => e.id.toLocaleLowerCase() === command.target.toLowerCase());
+    const target = combatStore.aliveEnemies.find(
+      e => e.id.toLocaleLowerCase() === command.target.toLowerCase(),
+    );
     switch (command.type) {
       case 'cast':
         await executeCastCommand(command.target);
@@ -204,7 +232,8 @@ export function useGameCommands() {
         await executeEquipCommand(command.target);
         break;
       case 'attack':
-        if (!target) throw new Error(`Enemy not found: ${command.target} maybe name is used instead of id`);
+        if (!target)
+          throw new Error(`Enemy not found: ${command.target} maybe name is used instead of id`);
         await executeAttackCommand(target);
         break;
     }
@@ -266,9 +295,12 @@ export function useGameCommands() {
    * Execute an equip item command
    */
   const findEquippableItem = (character: CharacterResponseDto, itemName: string) => {
-    const item = character.inventory?.find(i => (i.name ?? '').toLowerCase() === itemName.toLowerCase());
+    const item = character.inventory?.find(
+      i => (i.name ?? '').toLowerCase() === itemName.toLowerCase(),
+    );
     if (!item) return { error: `❌ Item not found: ${itemName}` };
-    if (!item.definitionId) return { error: `❌ Cannot equip ${item.name}: no definitionId available` };
+    if (!item.definitionId)
+      return { error: `❌ Cannot equip ${item.name}: no definitionId available` };
     return { item };
   };
 
@@ -286,7 +318,10 @@ export function useGameCommands() {
     gameStore.appendMessage('system', 'Equipping...');
 
     await executeWithLoading(async () => {
-      const updated = await characterApi.equipInventoryItem(character.characterId, item.definitionId);
+      const updated = await characterApi.equipInventoryItem(
+        character.characterId,
+        item.definitionId,
+      );
       characterStore.currentCharacter = updated;
       gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);
@@ -299,7 +334,7 @@ export function useGameCommands() {
     const character = characterStore.currentCharacter;
     if (!character) return;
 
-    const isInCombat = combatStore.inCombat || await combat.checkCombatStatus();
+    const isInCombat = combatStore.inCombat || (await combat.checkCombatStatus());
     if (isInCombat) {
       await combat.executeAttack(target);
       return;

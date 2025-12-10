@@ -1,11 +1,9 @@
-import {
-  Injectable, Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
-  SpellDefinition, SpellDefinitionDocument,
+  SpellDefinition,
+  SpellDefinitionDocument,
 } from '../../infra/mongo/spell/SpellDefinition.js';
 import { spellsArraySchema } from './validators.js';
 
@@ -16,7 +14,8 @@ export class SpellDefinitionService {
   constructor(@InjectModel(SpellDefinition.name) private model: Model<SpellDefinitionDocument>) {}
 
   async findAll(): Promise<SpellDefinition[]> {
-    return this.model.find()
+    return this.model
+      .find()
       .sort({
         level: 1,
         name: 1,
@@ -25,28 +24,23 @@ export class SpellDefinitionService {
   }
 
   async findByName(name: string): Promise<SpellDefinition | null> {
-    return this.model.findOne({ name })
-      .exec();
+    return this.model.findOne({ name }).exec();
   }
 
   async findByDefinitionId(definitionId: string): Promise<SpellDefinition> {
-    const result = await this.model.findOne({ definitionId })
-      .exec();
+    const result = await this.model.findOne({ definitionId }).exec();
     if (!result) throw new NotFoundException(`SpellDefinition not found: ${definitionId}`);
     return result;
   }
 
   async findByLevel(level: number): Promise<SpellDefinition[]> {
-    return this.model.find({ level })
-      .sort({ name: 1 })
-      .exec();
+    return this.model.find({ level }).sort({ name: 1 }).exec();
   }
 
   async upsert(def: Partial<SpellDefinition>) {
     // Require a definitionId so we can reliably upsert seeded definitions
     if (!def.definitionId) throw new Error('definitionId required');
-    const existing = await this.model.findOne({ definitionId: def.definitionId })
-      .exec();
+    const existing = await this.model.findOne({ definitionId: def.definitionId }).exec();
     if (existing) {
       Object.assign(existing, def);
       return existing.save();
@@ -59,15 +53,11 @@ export class SpellDefinitionService {
     try {
       // Prefer matching by definitionId when available, otherwise fallback to name
       let existing = spell.definitionId
-        ? await this.model
-            .findOne({ definitionId: spell.definitionId })
-            .exec()
+        ? await this.model.findOne({ definitionId: spell.definitionId }).exec()
         : null;
 
       if (!existing && spell.name) {
-        existing = await this.model
-          .findOne({ name: spell.name })
-          .exec();
+        existing = await this.model.findOne({ name: spell.name }).exec();
       }
 
       if (existing) return 'skipped';

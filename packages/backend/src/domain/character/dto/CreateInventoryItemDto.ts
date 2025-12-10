@@ -1,8 +1,12 @@
+import { ApiPropertyOptional, ApiProperty, getSchemaPath, ApiExtraModels } from '@nestjs/swagger';
 import {
-  ApiPropertyOptional, ApiProperty, getSchemaPath, ApiExtraModels,
-} from '@nestjs/swagger';
-import {
-  IsOptional, IsString, IsBoolean, IsNumber, IsObject, Min, IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsNumber,
+  IsObject,
+  Min,
+  IsNotEmpty,
 } from 'class-validator';
 import {
   WeaponMeta,
@@ -17,7 +21,9 @@ import { ItemDefinition } from '../../../infra/mongo/item/ItemDefinition.js';
 
 @ApiExtraModels(WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta)
 export class CreateInventoryItemDto {
-  @ApiPropertyOptional({ description: 'Inventory item id (UUID). If provided, attempt to merge with existing item' })
+  @ApiPropertyOptional({
+    description: 'Inventory item id (UUID). If provided, attempt to merge with existing item',
+  })
   @IsOptional()
   @IsString()
   _id?: string;

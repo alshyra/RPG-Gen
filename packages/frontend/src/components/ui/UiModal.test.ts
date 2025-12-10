@@ -11,20 +11,16 @@ describe('UiModal', () => {
       },
     });
 
-    expect(wrapper.text())
-      .toContain('Hello Title');
+    expect(wrapper.text()).toContain('Hello Title');
 
     const confirm = wrapper.get('[data-cy="modal-confirm"]');
     await confirm.trigger('click');
-    expect(wrapper.emitted())
-      .toHaveProperty('confirm');
-    expect(wrapper.emitted())
-      .toHaveProperty('close');
+    expect(wrapper.emitted()).toHaveProperty('confirm');
+    expect(wrapper.emitted()).toHaveProperty('close');
 
     const cancel = wrapper.get('[data-cy="modal-cancel"]');
     await cancel.trigger('click');
-    expect(wrapper.emitted())
-      .toHaveProperty('cancel');
+    expect(wrapper.emitted()).toHaveProperty('cancel');
   });
 
   it('header slot overrides title', () => {
@@ -36,9 +32,7 @@ describe('UiModal', () => {
       slots: { header: '<div data-test="hdr">Slot header</div>' },
     });
 
-    expect(wrapper.find('[data-test="hdr"]')
-      .exists())
-      .toBe(true);
+    expect(wrapper.find('[data-test="hdr"]').exists()).toBe(true);
     expect(wrapper.text()).not.toContain('ignored');
   });
 
@@ -48,15 +42,9 @@ describe('UiModal', () => {
       slots: { footer: '<div data-test="custom-foot">My footer</div>' },
     });
 
-    expect(wrapper.find('[data-test="custom-foot"]')
-      .exists())
-      .toBe(true);
+    expect(wrapper.find('[data-test="custom-foot"]').exists()).toBe(true);
     // default confirm/cancel should not be present when footer slot is used
-    expect(wrapper.find('[data-cy="modal-confirm"]')
-      .exists())
-      .toBe(false);
-    expect(wrapper.find('[data-cy="modal-cancel"]')
-      .exists())
-      .toBe(false);
+    expect(wrapper.find('[data-cy="modal-confirm"]').exists()).toBe(false);
+    expect(wrapper.find('[data-cy="modal-cancel"]').exists()).toBe(false);
   });
 });

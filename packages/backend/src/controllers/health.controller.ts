@@ -1,6 +1,4 @@
-import {
-  Controller, Get,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 /**
  * Health controller exposes a minimal public endpoint for healthchecks.

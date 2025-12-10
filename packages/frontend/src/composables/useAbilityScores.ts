@@ -1,6 +1,4 @@
-import {
-  ABILITIES, DEFAULT_BASE_SCORES,
-} from '@/services/dndRulesService';
+import { ABILITIES, DEFAULT_BASE_SCORES } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { CharacterResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
@@ -25,9 +23,12 @@ const useAbilityScores = () => {
   const { currentCharacter } = storeToRefs(characterStore);
   const characterScores = computed(() => currentCharacter.value?.scores || DEFAULT_BASE_SCORES);
 
-  const pointsUsed = computed(() => ABILITIES
-    .map(score => (characterScores.value[score] ?? 8))
-    .reduce((sum, value) => sum + COST[value as keyof typeof COST], 0));
+  const pointsUsed = computed(() =>
+    ABILITIES.map(score => characterScores.value[score] ?? 8).reduce(
+      (sum, value) => sum + COST[value as keyof typeof COST],
+      0,
+    ),
+  );
 
   const formatMod = (score: number): string => {
     const m = Math.floor((Number(score) - 10) / 2);
@@ -35,7 +36,7 @@ const useAbilityScores = () => {
   };
 
   const applyPointBuyChange = (
-    ability: typeof ABILITIES[number],
+    ability: (typeof ABILITIES)[number],
     newValue: number,
     maxBudget = 27,
     initialScores?: CharacterResponseDto['scores'],
@@ -46,7 +47,7 @@ const useAbilityScores = () => {
     let newUsed = 0;
     if (initialScores) {
       // Level-up mode: budget is the number of direct +1 increases available above initial scores
-      const currentIncrease = (current - (initialScores?.[ability] ?? 8)) || 0;
+      const currentIncrease = current - (initialScores?.[ability] ?? 8) || 0;
       const currentUsed = (Object.keys(initialScores) as (keyof typeof initialScores)[])
         .map(k => Math.max(0, (characterScores.value[k] ?? 8) - (initialScores[k] ?? 8)))
         .reduce((s, v) => s + v, 0);

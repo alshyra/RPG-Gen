@@ -19,9 +19,7 @@
           <div class="text-2xl font-bold text-red-500 mb-1">
             {{ currentEnemyAttackLog.isCrit ? '💥 CRITIQUE!' : '✓ Touché!' }}
           </div>
-          <div class="text-xl">
-            -{{ currentEnemyAttackLog.damageTotal }} PV
-          </div>
+          <div class="text-xl">-{{ currentEnemyAttackLog.damageTotal }} PV</div>
           <div
             v-if="currentEnemyAttackLog.attackRoll"
             class="text-sm text-slate-400 mt-2"
@@ -33,9 +31,7 @@
           v-else
           class="text-slate-300"
         >
-          <div class="text-2xl font-bold text-green-400 mb-1">
-            ✗ Raté!
-          </div>
+          <div class="text-2xl font-bold text-green-400 mb-1">✗ Raté!</div>
           <div
             v-if="currentEnemyAttackLog.attackRoll"
             class="text-sm text-slate-400 mt-2"
@@ -63,7 +59,9 @@ const isEnemyAttack = computed(() => currentEnemyAttackLog.value !== null);
 <style scoped>
 .attack-overlay-enter-active,
 .attack-overlay-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .attack-overlay-enter-from,

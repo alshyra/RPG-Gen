@@ -17,9 +17,10 @@ const createMockCharacterModel = () => {
 
     static async findOne(filter: any) {
       return {
-        exec: async () => mockDocs.find(
-          doc => doc.userId === filter.userId && doc.characterId === filter.characterId,
-        ),
+        exec: async () =>
+          mockDocs.find(
+            doc => doc.userId === filter.userId && doc.characterId === filter.characterId,
+          ),
       };
     }
 
@@ -58,7 +59,7 @@ const createMockSpellDefinitionService = () => ({
   findAll: async () => [],
 });
 
-test('CharacterService.update should persist spells field', async (t) => {
+test('CharacterService.update should persist spells field', async t => {
   const MockCharacterModel = createMockCharacterModel();
   const mockItemDefService = createMockItemDefinitionService();
 
@@ -87,7 +88,7 @@ test('CharacterService.update should persist spells field', async (t) => {
       definitionId: 'spell-0-moquerie-cruelle',
       name: 'Moquerie cruelle',
       level: 0,
-      description: 'Sort d\'attaque',
+      description: "Sort d'attaque",
       meta: {},
     },
     {
@@ -107,7 +108,7 @@ test('CharacterService.update should persist spells field', async (t) => {
   t.is(updated.spells[0].name, 'Moquerie cruelle');
 });
 
-test('CharacterService.update should allow empty spells array', async (t) => {
+test('CharacterService.update should allow empty spells array', async t => {
   const MockCharacterModel = createMockCharacterModel();
   const mockItemDefService = createMockItemDefinitionService();
 
@@ -144,7 +145,7 @@ test('CharacterService.update should allow empty spells array', async (t) => {
   t.deepEqual(updated.spells, []);
 });
 
-test('toCharacterDto includes spells field in returned DTO', async (t) => {
+test('toCharacterDto includes spells field in returned DTO', async t => {
   const MockCharacterModel = createMockCharacterModel();
   const mockItemDefService = createMockItemDefinitionService();
 
@@ -181,7 +182,7 @@ test('toCharacterDto includes spells field in returned DTO', async (t) => {
   t.is(dto.spells?.[0].name, 'Test Spell');
 });
 
-test('CharacterService.update rejects spells missing definitionId', async (t) => {
+test('CharacterService.update rejects spells missing definitionId', async t => {
   const MockCharacterModel = createMockCharacterModel();
   const mockItemDefService = createMockItemDefinitionService();
   const mockSpellDefService = createMockSpellDefinitionService();
@@ -215,7 +216,7 @@ test('CharacterService.update rejects spells missing definitionId', async (t) =>
   await t.throwsAsync(() => service.update(userId, characterId, { spells: invalidSpells as any }));
 });
 
-test('CharacterService.update rejects spells missing meta', async (t) => {
+test('CharacterService.update rejects spells missing meta', async t => {
   const MockCharacterModel = createMockCharacterModel();
   const mockItemDefService = createMockItemDefinitionService();
   const mockSpellDefService = createMockSpellDefinitionService();

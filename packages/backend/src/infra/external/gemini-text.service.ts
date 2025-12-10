@@ -1,9 +1,5 @@
-import {
-  Chat, Content, GoogleGenAI,
-} from '@google/genai';
-import {
-  Injectable, InternalServerErrorException, Logger,
-} from '@nestjs/common';
+import { Chat, Content, GoogleGenAI } from '@google/genai';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 import { GameInstructionDto } from '../../domain/chat/dto/GameInstructionDto.js';
 import { aiResponseSchema } from './gemini-schemas.js';
@@ -35,10 +31,13 @@ export class GeminiTextService {
 
     const chat = this.client.chats.create({
       model: this.model,
-      history: initialHistory.map(message => ({
-        role: 'assistant' == message.role ? 'model' : 'user',
-        content: message.narrative,
-      } as Content)),
+      history: initialHistory.map(
+        message =>
+          ({
+            role: 'assistant' == message.role ? 'model' : 'user',
+            content: message.narrative,
+          }) as Content,
+      ),
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -57,7 +56,8 @@ export class GeminiTextService {
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
     const { text } = await chat.sendMessage({ message });
     this.logger.debug(`Received structured response for session ${sessionId}`, text);
-    if (!text) throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
+    if (!text)
+      throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
 
     try {
       const parsed = JSON.parse(text);
@@ -66,8 +66,13 @@ export class GeminiTextService {
       if (Array.isArray(parsed?.instructions)) {
         normalized = {
           ...parsed,
-          instructions: parsed.instructions.map((inst) => {
-            if (inst && typeof inst === 'object' && 'payload' in inst && typeof inst.payload === 'object') {
+          instructions: parsed.instructions.map(inst => {
+            if (
+              inst &&
+              typeof inst === 'object' &&
+              'payload' in inst &&
+              typeof inst.payload === 'object'
+            ) {
               // Merge payload fields into the instruction, prefer payload fields but keep type from wrapper
               return {
                 type: inst.type,

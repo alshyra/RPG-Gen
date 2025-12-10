@@ -1,9 +1,5 @@
-import {
-  beforeEach, describe, expect, it, vi,
-} from 'vitest';
-import {
-  createPinia, setActivePinia,
-} from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 import { useCharacterStore } from './characterStore';
 import { characterServiceApi } from '@/apis/characterApi';
 
@@ -43,20 +39,16 @@ describe('characterStore inventory persistence', () => {
         },
       ],
     } as any;
-    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem')
-      .mockResolvedValue(mockUpdated);
+    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem').mockResolvedValue(mockUpdated);
 
     await store.addInventoryItem({
       name: 'Sword',
       quantity: 2,
     } as any);
 
-    expect(spy)
-      .toHaveBeenCalledOnce();
-    expect(store.currentCharacter?.inventory?.[0].name)
-      .toBe('Sword');
-    expect(store.currentCharacter?.inventory?.[0].qty)
-      .toBe(2);
+    expect(spy).toHaveBeenCalledOnce();
+    expect(store.currentCharacter?.inventory?.[0].name).toBe('Sword');
+    expect(store.currentCharacter?.inventory?.[0].qty).toBe(2);
   });
 
   it('calls API and updates store on removeInventoryItem', async () => {
@@ -83,15 +75,12 @@ describe('characterStore inventory persistence', () => {
       ...store.currentCharacter,
       inventory: [],
     } as any;
-    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem')
-      .mockResolvedValue(mockUpdated);
+    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue(mockUpdated);
 
     await store.removeInventoryItem('weapon-sword', 2);
 
-    expect(spy)
-      .toHaveBeenCalledOnce();
-    expect(store.currentCharacter?.inventory?.length)
-      .toBe(0);
+    expect(spy).toHaveBeenCalledOnce();
+    expect(store.currentCharacter?.inventory?.length).toBe(0);
   });
 
   it('uses inventory item only if it is usable (consumable)', async () => {
@@ -128,26 +117,24 @@ describe('characterStore inventory persistence', () => {
       ],
     };
 
-    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem')
-      .mockResolvedValue({
-        ...store.currentCharacter,
-        inventory: [
-          {
-            _id: 'i2',
-            definitionId: 'tool-tent',
-            name: 'Tent',
-            description: '',
-            qty: 1,
-            meta: { type: 'tool' },
-            equipped: false,
-          },
-        ],
-      });
+    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue({
+      ...store.currentCharacter,
+      inventory: [
+        {
+          _id: 'i2',
+          definitionId: 'tool-tent',
+          name: 'Tent',
+          description: '',
+          qty: 1,
+          meta: { type: 'tool' },
+          equipped: false,
+        },
+      ],
+    });
 
     // Using Potion (consumable) should call remove
     await store.useInventoryItem('Potion');
-    expect(spy)
-      .toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
 
     spy.mockClear();
 
@@ -166,10 +153,10 @@ describe('characterStore inventory persistence', () => {
       isDeceased: false,
     } as any;
 
-    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem')
+    const spy = vi
+      .spyOn(characterServiceApi, 'addInventoryItem')
       .mockImplementation(async (_cid: string, payload: any) => {
-        expect(payload.definitionId)
-          .toBe('weapon-sword');
+        expect(payload.definitionId).toBe('weapon-sword');
         return {
           ...store.currentCharacter,
           inventory: [
@@ -190,7 +177,6 @@ describe('characterStore inventory persistence', () => {
       definitionId: 'weapon-sword',
       qty: 1,
     } as any);
-    expect(spy)
-      .toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
   });
 });

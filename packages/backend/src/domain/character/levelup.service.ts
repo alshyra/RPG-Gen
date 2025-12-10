@@ -21,10 +21,13 @@ export class LevelUpService {
     private readonly spellDefService: SpellDefinitionService,
   ) {}
 
-  async getOptionsForClass(character: CharacterResponseDto, className: string): Promise<LevelUpOptionsDto> {
-    const classRecord = (character.classes || []).find(c => String(c.name)
-      .toLowerCase() === String(className)
-      .toLowerCase());
+  async getOptionsForClass(
+    character: CharacterResponseDto,
+    className: string,
+  ): Promise<LevelUpOptionsDto> {
+    const classRecord = (character.classes || []).find(
+      c => String(c.name).toLowerCase() === String(className).toLowerCase(),
+    );
     const currentLevel = classRecord?.level ?? 0;
     const nextLevel = currentLevel + 1;
 
@@ -54,14 +57,18 @@ export class LevelUpService {
     return options;
   }
 
-  private async saveCharacterUpdates(userId: string, characterId: string, updates: UpdateCharacterRequestDto) {
+  private async saveCharacterUpdates(
+    userId: string,
+    characterId: string,
+    updates: UpdateCharacterRequestDto,
+  ) {
     return this.characterService.update(userId, characterId, updates);
   }
 
   private getClassLevelInfo(character: CharacterResponseDto, className: string) {
-    const idx = (character.classes || []).findIndex(c => String(c.name)
-      .toLowerCase() === String(className)
-      .toLowerCase());
+    const idx = (character.classes || []).findIndex(
+      c => String(c.name).toLowerCase() === String(className).toLowerCase(),
+    );
     const classRecord = idx >= 0 ? character.classes![idx] : undefined;
     const currentLevel = classRecord?.level ?? 0;
     const nextLevel = currentLevel + 1;
@@ -72,7 +79,12 @@ export class LevelUpService {
     };
   }
 
-  private ensureClassLevel(character: CharacterResponseDto, idx: number, className: string, nextLevel: number) {
+  private ensureClassLevel(
+    character: CharacterResponseDto,
+    idx: number,
+    className: string,
+    nextLevel: number,
+  ) {
     if (idx >= 0) character.classes![idx].level = nextLevel;
     else {
       const newClass: CharacterClassResponseDto = {
@@ -83,20 +95,25 @@ export class LevelUpService {
     }
   }
 
-  async applyLevelUp(userId: string, characterId: string, className: string, payload: LevelUpApplyDto) {
+  async applyLevelUp(
+    userId: string,
+    characterId: string,
+    className: string,
+    payload: LevelUpApplyDto,
+  ) {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character) throw new BadRequestException('character not found');
 
-    const {
-      idx,
-      nextLevel,
-    } = this.getClassLevelInfo(character, className);
+    const { idx, nextLevel } = this.getClassLevelInfo(character, className);
 
     // Validate selected spells levels
     const addSpells = payload.newSpellIds ?? [];
     if (addSpells.length > 0) {
       const invalid = await this.validateSelectedSpells(addSpells, nextLevel);
-      if (invalid.length > 0) throw new BadRequestException(`Invalid spells for level ${nextLevel}: ${invalid.join(', ')}`);
+      if (invalid.length > 0)
+        throw new BadRequestException(
+          `Invalid spells for level ${nextLevel}: ${invalid.join(', ')}`,
+        );
     }
 
     // Apply changes: increment class level
@@ -107,7 +124,10 @@ export class LevelUpService {
     const updatedSpells = [...(character.spells || []), ...newSpells];
 
     // Apply ability increases if any
-    const updatedScores = this.applyAbilityIncreases(character.scores as Record<string, unknown> | undefined, payload.abilityIncreases ?? []);
+    const updatedScores = this.applyAbilityIncreases(
+      character.scores as Record<string, unknown> | undefined,
+      payload.abilityIncreases ?? [],
+    );
 
     // persist
     const updates = {
@@ -121,36 +141,47 @@ export class LevelUpService {
     return this.characterService.toCharacterDto(saved);
   }
 
-  private async validateSelectedSpells(newSpellIds: string[], nextLevel: number): Promise<string[]> {
+  private async validateSelectedSpells(
+    newSpellIds: string[],
+    nextLevel: number,
+  ): Promise<string[]> {
     // Perform validation in parallel to avoid banned loop constructs.
-    const checks = await Promise.all(newSpellIds.map(async (defId) => {
-      const def = await this.spellDefService.findByDefinitionId(defId);
-      return {
-        defId,
-        def,
-      };
-    }));
+    const checks = await Promise.all(
+      newSpellIds.map(async defId => {
+        const def = await this.spellDefService.findByDefinitionId(defId);
+        return {
+          defId,
+          def,
+        };
+      }),
+    );
 
-    return checks.reduce((acc, {
-      defId, def,
-    }) => {
-      if (!def || ((def.level ?? 0) > nextLevel)) acc.push(defId);
+    return checks.reduce((acc, { defId, def }) => {
+      if (!def || (def.level ?? 0) > nextLevel) acc.push(defId);
       return acc;
     }, [] as string[]);
   }
 
-  private async buildSpellResponses(newSpellIds: string[], existingSpells: SpellResponseDto[] = []): Promise<SpellResponseDto[]> {
+  private async buildSpellResponses(
+    newSpellIds: string[],
+    existingSpells: SpellResponseDto[] = [],
+  ): Promise<SpellResponseDto[]> {
     const existingSpellIds = new Set(existingSpells.map(s => s.definitionId));
-    const results = await Promise.all(newSpellIds
-      .filter(id => !existingSpellIds.has(id))
-      .map(id => this.spellDefService.findByDefinitionId(id)));
-    return results.map(r => ({
-      definitionId: r.definitionId,
-      name: r.name,
-      level: r.level,
-      description: r.description,
-      meta: r.meta ?? {},
-    } as SpellResponseDto));
+    const results = await Promise.all(
+      newSpellIds
+        .filter(id => !existingSpellIds.has(id))
+        .map(id => this.spellDefService.findByDefinitionId(id)),
+    );
+    return results.map(
+      r =>
+        ({
+          definitionId: r.definitionId,
+          name: r.name,
+          level: r.level,
+          description: r.description,
+          meta: r.meta ?? {},
+        }) as SpellResponseDto,
+    );
   }
 
   private applyAbilityIncreases(
@@ -160,8 +191,11 @@ export class LevelUpService {
       inc: number;
     }[],
   ): Record<string, number> {
-    const updatedScores = { ...(scores as Record<string, number> || {}) } as Record<string, number>;
-    (abilityIncreases || []).forEach((asi) => {
+    const updatedScores = { ...((scores as Record<string, number>) || {}) } as Record<
+      string,
+      number
+    >;
+    (abilityIncreases || []).forEach(asi => {
       if (!asi || !asi.ability) return;
       const key = asi.ability;
       const old = updatedScores[key] ?? 10;

@@ -5,14 +5,12 @@
       :alt="alt"
       class="object-contain max-w-full max-h-full"
       @error="onError"
-    >
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  ref, computed, watch,
-} from 'vue';
+import { ref, computed, watch } from 'vue';
 const props = defineProps<{
   clazz?: string;
   raceId?: string;
@@ -22,26 +20,21 @@ const props = defineProps<{
 
 const errored = ref(false);
 const attemptIndex = ref(0);
-const exts = [
-  'png',
-  'svg',
-];
+const exts = ['png', 'svg'];
 
-const normalize = (v: string | { id?: string;
-  name?: string; } | null | undefined, fallback: string): string => {
+const normalize = (
+  v: string | { id?: string; name?: string } | null | undefined,
+  fallback: string,
+): string => {
   if (v == null) return fallback;
   if (typeof v === 'string') return v.toLowerCase();
   if (typeof v === 'object') {
     // prefer id, then name
-    if (v.id) return String(v.id)
-      .toLowerCase();
-    if (v.name) return String(v.name)
-      .toLowerCase()
-      .replace(/\s+/g, '-');
+    if (v.id) return String(v.id).toLowerCase();
+    if (v.name) return String(v.name).toLowerCase().replace(/\s+/g, '-');
     return fallback;
   }
-  return String(v)
-    .toLowerCase();
+  return String(v).toLowerCase();
 };
 
 const buildName = () => {
@@ -73,22 +66,23 @@ function onError() {
 }
 
 // If props change (new class/race/gender), reset attempts so we try fresh images
-watch(() => [
-  props.clazz,
-  props.raceId,
-  props.gender,
-], () => {
-  attemptIndex.value = 0;
-  errored.value = false;
-});
+watch(
+  () => [props.clazz, props.raceId, props.gender],
+  () => {
+    attemptIndex.value = 0;
+    errored.value = false;
+  },
+);
 
-const alt = computed(() => `Illustration ${props.clazz || ''} ${props.raceId || ''} ${props.gender || ''}`);
+const alt = computed(
+  () => `Illustration ${props.clazz || ''} ${props.raceId || ''} ${props.gender || ''}`,
+);
 </script>
 
 <style scoped>
 .illustration img {
-    width: 100%;
-    height: 100%;
-    display: block
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 </style>

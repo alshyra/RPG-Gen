@@ -6,9 +6,7 @@ import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 import { ChatOrchestrator } from '../orchestrators/chat/index.js';
 import { ChatController } from '../controllers/chat.controller.js';
 import { ConversationService } from '../domain/chat/conversation.service.js';
-import {
-  ChatHistory, ChatHistorySchema,
-} from '../infra/mongo/chat/ChatHistory.js';
+import { ChatHistory, ChatHistorySchema } from '../infra/mongo/chat/ChatHistory.js';
 
 @Module({
   imports: [
@@ -22,11 +20,7 @@ import {
     forwardRef(() => CombatModule),
   ],
   controllers: [ChatController],
-  providers: [
-    GeminiTextService,
-    ConversationService,
-    ChatOrchestrator,
-  ],
+  providers: [GeminiTextService, ConversationService, ChatOrchestrator],
   exports: [ChatOrchestrator, ConversationService],
 })
 export class ChatModule {}

@@ -1,16 +1,15 @@
 import {
   BadRequestException,
-  Injectable, InternalServerErrorException, Logger,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
 import { calculateArmorClass, getDexModifier } from '../character/armor-class.util.js';
-import type {
-  CharacterResponseDto,
-  InventoryItemDto, WeaponMeta,
-} from '../character/dto/index.js';
+import type { CharacterResponseDto, InventoryItemDto, WeaponMeta } from '../character/dto/index.js';
 import { isWeaponMeta } from '../character/dto/InventoryItemMeta.js';
 import { CombatantDto } from './dto/CombatantDto.js';
 import { CombatEndDto } from './dto/CombatEndDto.js';
@@ -97,10 +96,15 @@ export class CombatAppService {
    * Find equipped weapon from inventory
    */
   private findEquippedWeapon(inventory: InventoryItemDto[]) {
-    const equipped = inventory.find(i => i?.equipped && i.meta && (i.meta as { type?: string }).type === 'weapon');
+    const equipped = inventory.find(
+      i => i?.equipped && i.meta && (i.meta as { type?: string }).type === 'weapon',
+    );
     if (equipped) return equipped;
 
-    return inventory.find(i => i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-'));
+    return inventory.find(
+      i =>
+        i?.equipped && typeof i.definitionId === 'string' && i.definitionId.startsWith('weapon-'),
+    );
   }
 
   /**
@@ -109,8 +113,7 @@ export class CombatAppService {
   private weaponUsesDex(meta: WeaponMeta): boolean {
     const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
     const lowerProps = properties.map(p => (p || '').toLowerCase());
-    const classStr = (meta.class || '').toString()
-      .toLowerCase();
+    const classStr = (meta.class || '').toString().toLowerCase();
     const hasAmmunition = lowerProps.some(p => p.includes('ammunition'));
     const hasFinesse = lowerProps.includes('finesse');
     const isRangedClass = classStr.includes('ranged');
@@ -122,8 +125,7 @@ export class CombatAppService {
    */
   private extractDamageDice(meta: WeaponMeta): string | undefined {
     if (meta.damage && typeof meta.damage === 'string') {
-      const parts = meta.damage.trim()
-        .split(/\s+/);
+      const parts = meta.damage.trim().split(/\s+/);
       if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
         return parts[0];
       }
@@ -186,7 +188,10 @@ export class CombatAppService {
   /**
    * Build initial combat state.
    */
-  private buildInitialState(character: CharacterResponseDto, combatStart: CombatStartRequestDto): CombatStateDto {
+  private buildInitialState(
+    character: CharacterResponseDto,
+    combatStart: CombatStartRequestDto,
+  ): CombatStateDto {
     const { characterId } = character;
     const player = this.buildBasePlayerStats(character);
 
@@ -244,8 +249,13 @@ export class CombatAppService {
    * Apply damage from an enemy to the player and persist state.
    * This method deliberately does not roll dice and does not handle attack logic.
    */
-  async applyEnemyDamage(characterId: string, damageTotal: number): Promise<{ state: CombatStateDto;
-    endResult?: Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>; }> {
+  async applyEnemyDamage(
+    characterId: string,
+    damageTotal: number,
+  ): Promise<{
+    state: CombatStateDto;
+    endResult?: Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>;
+  }> {
     const state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException('No active combat found for character.');
 
@@ -314,9 +324,7 @@ export class CombatAppService {
    * Retrieve the current combat state from the database
    */
   async getCombatState(characterId: string): Promise<CombatStateDto> {
-    const doc = await this.combatSessionModel.findOne({ characterId })
-      .lean()
-      .exec();
+    const doc = await this.combatSessionModel.findOne({ characterId }).lean().exec();
     if (!doc) throw new NotFoundException('Combat session not found');
     if (!doc.player) throw new NotFoundException('Combat session malformed: missing player');
     // Convert raw DB objects into class instances for consistent runtime behavior
@@ -327,7 +335,9 @@ export class CombatAppService {
           id: characterId,
           isPlayer: true,
         });
-    const turnOrder = Array.isArray(doc.turnOrder) ? doc.turnOrder.map(t => new CombatantDto(t)) : [];
+    const turnOrder = Array.isArray(doc.turnOrder)
+      ? doc.turnOrder.map(t => new CombatantDto(t))
+      : [];
 
     return new CombatStateDto({
       characterId: doc.characterId,
@@ -411,13 +421,14 @@ export class CombatAppService {
     }
 
     const aliveEnemies = state.enemies.filter(e => e.hp > 0);
-    const enemyList = aliveEnemies.map(e => `${e.name} (PV: ${e.hp}/${e.hpMax})`)
-      .join(', ');
+    const enemyList = aliveEnemies.map(e => `${e.name} (PV: ${e.hp}/${e.hpMax})`).join(', ');
 
-    return `Combat en cours - Round ${state.roundNumber}\n`
-      + `Vos PV: ${state.player.hp}/${state.player.hpMax}\n`
-      + `Ennemis: ${enemyList}\n`
-      + `Utilisez /attack [nom_ennemi] pour attaquer.`;
+    return (
+      `Combat en cours - Round ${state.roundNumber}\n` +
+      `Vos PV: ${state.player.hp}/${state.player.hpMax}\n` +
+      `Ennemis: ${enemyList}\n` +
+      `Utilisez /attack [nom_ennemi] pour attaquer.`
+    );
   }
 
   /**
@@ -430,7 +441,9 @@ export class CombatAppService {
   /**
    * End combat and generate final result (cleanup)
    */
-  async endCombat(characterId: string): Promise<Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>> {
+  async endCombat(
+    characterId: string,
+  ): Promise<Pick<CombatEndDto, 'xp_gained' | 'enemies_defeated'>> {
     const state = await this.getCombatState(characterId);
     if (!state) throw new InternalServerErrorException('Combat session not found during cleanup');
 

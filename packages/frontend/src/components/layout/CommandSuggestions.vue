@@ -42,7 +42,8 @@
           <span
             v-if="suggestion.description"
             class="text-slate-400 text-sm"
-          >{{ suggestion.description }}</span>
+            >{{ suggestion.description }}</span
+          >
         </div>
       </li>
     </ul>
@@ -52,13 +53,9 @@
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
-import {
-  getAllSuggestions,
-} from '@/utils/chatCommands';
+import { getAllSuggestions } from '@/utils/chatCommands';
 import type { ArgumentSuggestion, CommandDefinition } from '@/interfaces';
-import {
-  computed, ref, watch,
-} from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import type { CommandSuggestionsProps } from '@/interfaces';
 
@@ -80,20 +77,25 @@ const characterLevel = computed(() => {
   return classes.reduce((total, cls) => total + (cls.level || 0), 0) || 1;
 });
 
-const suggestionResult = computed(() => getAllSuggestions(
-  props.inputText,
-  characterStore.currentCharacter?.spells || [],
-  characterStore.currentCharacter?.inventory || [],
-  characterLevel.value,
-  // pass current valid targets (enemy names) for /attack suggestions
-  combatStore.validTargets || [],
-));
+const suggestionResult = computed(() =>
+  getAllSuggestions(
+    props.inputText,
+    characterStore.currentCharacter?.spells || [],
+    characterStore.currentCharacter?.inventory || [],
+    characterLevel.value,
+    // pass current valid targets (enemy names) for /attack suggestions
+    combatStore.validTargets || [],
+  ),
+);
 
-const totalSuggestions = computed(() => suggestionResult.value.commandSuggestions.length
-  + suggestionResult.value.argumentSuggestions.length);
+const totalSuggestions = computed(
+  () =>
+    suggestionResult.value.commandSuggestions.length +
+    suggestionResult.value.argumentSuggestions.length,
+);
 
 // Reset selection when suggestions change
-watch(totalSuggestions, (newTotal) => {
+watch(totalSuggestions, newTotal => {
   if (selectedIndex.value >= newTotal) {
     selectedIndex.value = 0;
   }
@@ -115,9 +117,7 @@ const selectArgument = (suggestion: ArgumentSuggestion) => {
 // Helper methods to keep template clean
 const getItemClass = (index: number): string[] => [
   'px-3 py-2 cursor-pointer transition-colors',
-  index === selectedIndex.value
-    ? 'bg-purple-600 text-white'
-    : 'hover:bg-slate-700 text-slate-200',
+  index === selectedIndex.value ? 'bg-purple-600 text-white' : 'hover:bg-slate-700 text-slate-200',
 ];
 
 const getArgumentIcon = (type: 'spell' | 'item' | 'target'): string => {
@@ -129,7 +129,8 @@ const getArgumentIcon = (type: 'spell' | 'item' | 'target'): string => {
 // Expose methods for keyboard navigation from parent
 const navigateUp = () => {
   if (totalSuggestions.value > 0) {
-    selectedIndex.value = (selectedIndex.value - 1 + totalSuggestions.value) % totalSuggestions.value;
+    selectedIndex.value =
+      (selectedIndex.value - 1 + totalSuggestions.value) % totalSuggestions.value;
   }
 };
 
@@ -140,9 +141,7 @@ const navigateDown = () => {
 };
 
 const selectCurrent = () => {
-  const {
-    commandSuggestions, argumentSuggestions,
-  } = suggestionResult.value;
+  const { commandSuggestions, argumentSuggestions } = suggestionResult.value;
   if (commandSuggestions.length > 0) {
     selectCommand(commandSuggestions[selectedIndex.value]);
   } else if (argumentSuggestions.length > 0) {

@@ -66,21 +66,25 @@ const parseMediumArmorAc = (trimmed: string): ParsedAc | null => {
 
 export const parseArmorAc = (acString: string): ParsedAc => {
   const trimmed = acString.trim();
-  return parseShieldAc(trimmed)
-    ?? parseHeavyArmorAc(trimmed)
-    ?? parseLightArmorAc(trimmed)
-    ?? parseMediumArmorAc(trimmed)
-    ?? {
+  return (
+    parseShieldAc(trimmed) ??
+    parseHeavyArmorAc(trimmed) ??
+    parseLightArmorAc(trimmed) ??
+    parseMediumArmorAc(trimmed) ?? {
       baseAc: 0,
       addDex: false,
       maxDex: null,
-    };
+    }
+  );
 };
 
-const isItemArmor = (item: InventoryItemDto): item is InventoryItemDto<ArmorMeta> => item.meta?.type === 'armor';
+const isItemArmor = (item: InventoryItemDto): item is InventoryItemDto<ArmorMeta> =>
+  item.meta?.type === 'armor';
 
 const findEquippedGear = (inventory: InventoryItemDto[]): EquippedGear => {
-  const equippedItems = inventory.filter(item => item.equipped && isItemArmor(item)) as InventoryItemDto<ArmorMeta>[];
+  const equippedItems = inventory.filter(
+    item => item.equipped && isItemArmor(item),
+  ) as InventoryItemDto<ArmorMeta>[];
   const shield = equippedItems.find(item => item.meta?.class === 'Shield');
   const armor = equippedItems.find(item => item.meta?.class !== 'Shield');
   return {
@@ -89,7 +93,10 @@ const findEquippedGear = (inventory: InventoryItemDto[]): EquippedGear => {
   };
 };
 
-const computeArmorBonus = (armor: InventoryItemDto<ArmorMeta> | undefined, dexMod: number): {
+const computeArmorBonus = (
+  armor: InventoryItemDto<ArmorMeta> | undefined,
+  dexMod: number,
+): {
   baseAc: number;
   dexBonus: number;
 } => {
@@ -120,11 +127,7 @@ const computeShieldBonus = (shield: InventoryItemDto<ArmorMeta> | undefined): nu
 
 export const calculateArmorClass = (character: CharacterResponseDto): number => {
   const dexMod = getDexModifier(character);
-  const {
-    armor, shield,
-  } = findEquippedGear(character.inventory ?? []);
-  const {
-    baseAc, dexBonus,
-  } = computeArmorBonus(armor, dexMod);
+  const { armor, shield } = findEquippedGear(character.inventory ?? []);
+  const { baseAc, dexBonus } = computeArmorBonus(armor, dexMod);
   return baseAc + dexBonus + computeShieldBonus(shield);
 };

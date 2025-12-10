@@ -1,6 +1,4 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useCombatEngine, type CombatArenaApi } from '@/composables/useCombatEngine';
 import type { CombatEngineEventPayload } from '@rpg-gen/combat-engine';
 import { setActivePinia, createPinia } from 'pinia';
@@ -9,8 +7,7 @@ import { ref } from 'vue';
 // Mock the backend combat composable
 vi.mock('@/composables/useCombat', () => ({
   useCombat: () => ({
-    executeAttack: vi.fn()
-      .mockResolvedValue({}),
+    executeAttack: vi.fn().mockResolvedValue({}),
   }),
 }));
 
@@ -74,15 +71,12 @@ describe('useCombatEngine', () => {
 
     return {
       handlers,
-      init: vi.fn()
-        .mockResolvedValue(undefined),
-      createUnit: vi.fn()
-        .mockResolvedValue({}),
+      init: vi.fn().mockResolvedValue(undefined),
+      createUnit: vi.fn().mockResolvedValue({}),
       updateUnitHealth: vi.fn(),
       moveUnitToGrid: vi.fn(),
       setupDragEvents: vi.fn(),
-      getContainer: vi.fn()
-        .mockReturnValue(null),
+      getContainer: vi.fn().mockReturnValue(null),
       on: vi.fn((event, handler) => {
         if (!handlers.has(event)) {
           handlers.set(event, []);
@@ -97,8 +91,7 @@ describe('useCombatEngine', () => {
         }
       }),
       emit: vi.fn((event, payload) => {
-        handlers.get(event)
-          ?.forEach(h => h(payload));
+        handlers.get(event)?.forEach(h => h(payload));
       }),
     };
   };
@@ -109,14 +102,11 @@ describe('useCombatEngine', () => {
 
     registerArena(mockApi);
 
-    expect(mockApi.on)
-      .toHaveBeenCalledWith('unit:clicked', expect.any(Function));
+    expect(mockApi.on).toHaveBeenCalledWith('unit:clicked', expect.any(Function));
   });
 
   it('should open modal when enemy is clicked', () => {
-    const {
-      registerArena, isActionModalOpen, selectedTarget,
-    } = useCombatEngine();
+    const { registerArena, isActionModalOpen, selectedTarget } = useCombatEngine();
     const mockApi = createMockArenaApi();
 
     registerArena(mockApi);
@@ -127,21 +117,17 @@ describe('useCombatEngine', () => {
       isPlayer: false,
     });
 
-    expect(isActionModalOpen.value)
-      .toBe(true);
-    expect(selectedTarget.value)
-      .toEqual({
-        id: 'enemy-1',
-        name: 'Goblin',
-        hp: 20,
-        hpMax: 20,
-      });
+    expect(isActionModalOpen.value).toBe(true);
+    expect(selectedTarget.value).toEqual({
+      id: 'enemy-1',
+      name: 'Goblin',
+      hp: 20,
+      hpMax: 20,
+    });
   });
 
   it('should NOT open modal when player unit is clicked', () => {
-    const {
-      registerArena, isActionModalOpen, selectedTarget,
-    } = useCombatEngine();
+    const { registerArena, isActionModalOpen, selectedTarget } = useCombatEngine();
     const mockApi = createMockArenaApi();
 
     registerArena(mockApi);
@@ -152,16 +138,12 @@ describe('useCombatEngine', () => {
       isPlayer: true,
     });
 
-    expect(isActionModalOpen.value)
-      .toBe(false);
-    expect(selectedTarget.value)
-      .toBeNull();
+    expect(isActionModalOpen.value).toBe(false);
+    expect(selectedTarget.value).toBeNull();
   });
 
   it('should close modal on closeActionModal', () => {
-    const {
-      registerArena, isActionModalOpen, closeActionModal,
-    } = useCombatEngine();
+    const { registerArena, isActionModalOpen, closeActionModal } = useCombatEngine();
     const mockApi = createMockArenaApi();
 
     registerArena(mockApi);
@@ -170,27 +152,21 @@ describe('useCombatEngine', () => {
       isPlayer: false,
     });
 
-    expect(isActionModalOpen.value)
-      .toBe(true);
+    expect(isActionModalOpen.value).toBe(true);
 
     closeActionModal();
 
-    expect(isActionModalOpen.value)
-      .toBe(false);
+    expect(isActionModalOpen.value).toBe(false);
   });
 
   it('should unregister handlers on unregisterArena', () => {
-    const {
-      registerArena, unregisterArena,
-    } = useCombatEngine();
+    const { registerArena, unregisterArena } = useCombatEngine();
     const mockApi = createMockArenaApi();
 
     registerArena(mockApi);
-    expect(mockApi.on)
-      .toHaveBeenCalled();
+    expect(mockApi.on).toHaveBeenCalled();
 
     unregisterArena();
-    expect(mockApi.off)
-      .toHaveBeenCalled();
+    expect(mockApi.off).toHaveBeenCalled();
   });
 });

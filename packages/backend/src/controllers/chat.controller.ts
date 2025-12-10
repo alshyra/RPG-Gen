@@ -1,16 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
@@ -23,7 +12,8 @@ import { ChatMessageDto } from '../domain/chat/dto/index.js';
 import { ChatOrchestrator } from '../orchestrators/index.js';
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
-const SCENARIO_PATH = process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
+const SCENARIO_PATH =
+  process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
 
 @ApiTags('chat')
 @Controller('chat')
@@ -38,17 +28,12 @@ export class ChatController {
     private readonly characterService: CharacterService,
     private readonly chatOrchestrator: ChatOrchestrator,
   ) {
-    Promise.all([
-      this.loadSystemPrompt(),
-      this.loadScenarii(),
-    ])
-      .then(([
-        systemPrompt,
-        scenarioPrompt,
-      ]) => {
+    Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
+      ([systemPrompt, scenarioPrompt]) => {
         this.systemPrompt = systemPrompt + '\n\n' + scenarioPrompt;
         this.logger.log('System prompt and scenario loaded successfully !');
-      });
+      },
+    );
   }
 
   private async loadSystemPrompt(): Promise<string> {
@@ -84,7 +69,9 @@ export class ChatController {
   ) {
     const { user } = req;
     const userId = user._id.toString();
-    this.logger.log(`Received chat request for characterId ${characterId} with message: ${chatMessageDto}...`);
+    this.logger.log(
+      `Received chat request for characterId ${characterId} with message: ${chatMessageDto}...`,
+    );
 
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
     const character = await this.characterService.findByCharacterId(userId, characterId);
@@ -112,10 +99,7 @@ export class ChatController {
     status: 500,
     description: 'History retrieval failed',
   })
-  async getHistory(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-  ) {
+  async getHistory(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
     this.logger.log(`Fetching chat history for characterId ${characterId}...`);
     const { user } = req;
     const userId = user._id.toString();
@@ -146,9 +130,17 @@ export class ChatController {
     previousChatMessages: ChatMessageDto[] | undefined,
   ): Promise<void> {
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    this.geminiTexteService.initializeChatSession(characterId, this.initPrompt(character), previousChatMessages ?? []);
+    this.geminiTexteService.initializeChatSession(
+      characterId,
+      this.initPrompt(character),
+      previousChatMessages ?? [],
+    );
     if (!previousChatMessages) {
-      await this.chatOrchestrator.getGMResponse(userId, characterId, 'Tu peux commencer l\'aventure');
+      await this.chatOrchestrator.getGMResponse(
+        userId,
+        characterId,
+        "Tu peux commencer l'aventure",
+      );
     }
   }
 

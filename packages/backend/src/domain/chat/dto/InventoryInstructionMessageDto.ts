@@ -1,6 +1,4 @@
-import {
-  ApiProperty, ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class InventoryInstructionMessageDto {
   @ApiProperty({
@@ -11,11 +9,7 @@ export class InventoryInstructionMessageDto {
 
   @ApiProperty({
     description: 'Inventory action',
-    enum: [
-      'add',
-      'remove',
-      'use',
-    ],
+    enum: ['add', 'remove', 'use'],
   })
   action: 'add' | 'remove' | 'use';
 

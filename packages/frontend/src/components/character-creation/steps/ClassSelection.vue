@@ -15,9 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  CLASSES_LIST, DnDRulesService,
-} from '@/services/dndRulesService';
+import { CLASSES_LIST, DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import UiSelect from '../../ui/UiSelect.vue';
@@ -33,11 +31,12 @@ const updateClass = async (newClass: string) => {
     level: 1,
   };
 
-  currentCharacter.value.skills = DnDRulesService.getAvailableSkillsForClass(newClass)
-    .map(skill => ({
+  currentCharacter.value.skills = DnDRulesService.getAvailableSkillsForClass(newClass).map(
+    skill => ({
       name: skill,
       proficient: false,
-    }));
+    }),
+  );
 
   await characterStore.updateCharacter(currentCharacter.value.characterId, {
     classes: currentCharacter.value.classes,

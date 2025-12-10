@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable, Logger, NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ItemDefinition } from '../../infra/mongo/item/ItemDefinition.js';
@@ -53,22 +50,23 @@ export class CharacterService {
   }
 
   async findByUserId(userId: string, includeDeceased = false): Promise<CharacterDocument[]> {
-    const filter: { userId: string;
+    const filter: {
+      userId: string;
 
-      isDeceased?: boolean; } = { userId };
+      isDeceased?: boolean;
+    } = { userId };
     if (!includeDeceased) {
       filter.isDeceased = false;
     }
-    return this.characterModel.find(filter)
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.characterModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
   async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
-    const doc = await this.characterModel.findOne({
-      userId,
-      characterId,
-    })
+    const doc = await this.characterModel
+      .findOne({
+        userId,
+        characterId,
+      })
       .exec();
     if (!doc) {
       throw new NotFoundException(`Character ${characterId} not found`);
@@ -77,8 +75,13 @@ export class CharacterService {
   }
 
   // eslint-disable-next-line max-statements
-  async update(userId: string, characterId: string, updates: UpdateCharacterRequestDto): Promise<CharacterDocument> {
-    const updateDoc: { [key in keyof UpdateCharacterRequestDto]?: UpdateCharacterRequestDto[key] } = {};
+  async update(
+    userId: string,
+    characterId: string,
+    updates: UpdateCharacterRequestDto,
+  ): Promise<CharacterDocument> {
+    const updateDoc: { [key in keyof UpdateCharacterRequestDto]?: UpdateCharacterRequestDto[key] } =
+      {};
     // Build update document
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
@@ -91,8 +94,10 @@ export class CharacterService {
     if (updates.race !== undefined) updateDoc.race = updates.race;
     if (updates.gender !== undefined) updateDoc.gender = updates.gender;
     if (updates.proficiency !== undefined) updateDoc.proficiency = updates.proficiency;
-    if (updates.inspirationPoints !== undefined) updateDoc.inspirationPoints = updates.inspirationPoints;
-    if (updates.physicalDescription !== undefined) updateDoc.physicalDescription = updates.physicalDescription;
+    if (updates.inspirationPoints !== undefined)
+      updateDoc.inspirationPoints = updates.inspirationPoints;
+    if (updates.physicalDescription !== undefined)
+      updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
     if (updates.spells !== undefined) {
@@ -100,18 +105,21 @@ export class CharacterService {
       if (!Array.isArray(updates.spells)) throw new BadRequestException('spells must be an array');
 
       // Validate all entries using functional style to comply with lint rules (avoid 'for')
-      const hasInvalid = updates.spells.some(s => (
-        !s
-        || typeof s.definitionId !== 'string'
-        || typeof s.name !== 'string'
-        || typeof s.level !== 'number'
-        || s.meta === undefined
-        || s.meta === null
-        || typeof s.meta !== 'object'
-      ));
+      const hasInvalid = updates.spells.some(
+        s =>
+          !s ||
+          typeof s.definitionId !== 'string' ||
+          typeof s.name !== 'string' ||
+          typeof s.level !== 'number' ||
+          s.meta === undefined ||
+          s.meta === null ||
+          typeof s.meta !== 'object',
+      );
 
       if (hasInvalid) {
-        throw new BadRequestException('spells entries must include definitionId:string, name:string, level:number and meta:object');
+        throw new BadRequestException(
+          'spells entries must include definitionId:string, name:string, level:number and meta:object',
+        );
       }
 
       updateDoc.spells = updates.spells;
@@ -192,12 +200,18 @@ export class CharacterService {
       characterId,
     });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
-    if (!createItem.definitionId) throw new NotFoundException(`Item definitionId is required to add item`);
+    if (!createItem.definitionId)
+      throw new NotFoundException(`Item definitionId is required to add item`);
 
-    const foundItem = (character.inventory || []).find(item => item.definitionId && item.definitionId === createItem.definitionId);
+    const foundItem = (character.inventory || []).find(
+      item => item.definitionId && item.definitionId === createItem.definitionId,
+    );
     if (foundItem) return this.mergeIntoExistingItem(character, foundItem, createItem);
-    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(createItem.definitionId);
-    if (!itemDefinition) throw new NotFoundException(`Item definition ${createItem.definitionId} not found`);
+    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(
+      createItem.definitionId,
+    );
+    if (!itemDefinition)
+      throw new NotFoundException(`Item definition ${createItem.definitionId} not found`);
     return this.addNewItemToCharacter(character, createItem, itemDefinition, characterId);
   }
 
@@ -216,12 +230,10 @@ export class CharacterService {
     if (!definitionId) throw new BadRequestException('definitionId is required');
 
     // Resolve definition and ensure it's a weapon
-    const def = await this.itemDefinitionService.findByDefinitionId(definitionId)
-      .catch(() => null);
+    const def = await this.itemDefinitionService.findByDefinitionId(definitionId).catch(() => null);
     if (!def) throw new NotFoundException(`Item definition ${definitionId} not found`);
     const meta = def.meta || {};
-    if ((meta.type || '').toString()
-      .toLowerCase() !== 'weapon') {
+    if ((meta.type || '').toString().toLowerCase() !== 'weapon') {
       throw new BadRequestException('Only weapon items can be equipped via this endpoint');
     }
 
@@ -245,10 +257,9 @@ export class CharacterService {
     }
 
     // Ensure only the targeted weapon is equipped (no for loop)
-    character.inventory = (character.inventory || []).map((it) => {
+    character.inventory = (character.inventory || []).map(it => {
       try {
-        const type = (it?.meta?.type || '').toString()
-          .toLowerCase();
+        const type = (it?.meta?.type || '').toString().toLowerCase();
         if (type === 'weapon') {
           return {
             ...it,
@@ -272,7 +283,11 @@ export class CharacterService {
     return this.toCharacterDto(saved);
   }
 
-  private async mergeIntoExistingItem(character: CharacterDocument, foundItem: Item, item: CreateInventoryItemDto) {
+  private async mergeIntoExistingItem(
+    character: CharacterDocument,
+    foundItem: Item,
+    item: CreateInventoryItemDto,
+  ) {
     foundItem.qty = foundItem.qty + (item.qty || 1);
     character.inventory = [
       ...character.inventory.filter(i => i.definitionId !== foundItem.definitionId),
@@ -308,7 +323,12 @@ export class CharacterService {
     return saved;
   }
 
-  async updateInventoryItem(userId: string, characterId: string, itemId: string, updates: CreateInventoryItemDto) {
+  async updateInventoryItem(
+    userId: string,
+    characterId: string,
+    itemId: string,
+    updates: CreateInventoryItemDto,
+  ) {
     const character = await this.characterModel.findOne({
       userId,
       characterId,
@@ -329,7 +349,12 @@ export class CharacterService {
     return saved;
   }
 
-  async removeInventoryItem(userId: string, characterId: string, itemId: string, qtyToRemove: number) {
+  async removeInventoryItem(
+    userId: string,
+    characterId: string,
+    itemId: string,
+    qtyToRemove: number,
+  ) {
     const character = await this.characterModel.findOne({
       userId,
       characterId,
@@ -337,7 +362,8 @@ export class CharacterService {
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
 
     const idx = (character.inventory || []).findIndex(it => it.definitionId === itemId);
-    if (idx === -1) throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
+    if (idx === -1)
+      throw new NotFoundException(`Item ${itemId} not found on character ${characterId}`);
 
     if (qtyToRemove > 0) {
       const current = character.inventory[idx].qty || 0;
@@ -356,10 +382,11 @@ export class CharacterService {
   }
 
   async getDeceasedCharacters(userId: string): Promise<CharacterDocument[]> {
-    return this.characterModel.find({
-      userId,
-      isDeceased: true,
-    })
+    return this.characterModel
+      .find({
+        userId,
+        isDeceased: true,
+      })
       .sort({ diedAt: -1 })
       .exec();
   }

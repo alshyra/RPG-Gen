@@ -59,9 +59,10 @@ export function createMockDiceService(config: MockDiceRollConfig = {}) {
     /**
      * Mock rollAttack - returns a fixed attack result
      */
-    rollAttack: (_attackBonus: number, _targetAc: number): { hit: boolean;
-      isCrit: boolean;
-      diceResult: DiceResultDto; } => {
+    rollAttack: (
+      _attackBonus: number,
+      _targetAc: number,
+    ): { hit: boolean; isCrit: boolean; diceResult: DiceResultDto } => {
       const rollValue = defaultRolls[callIndex % defaultRolls.length];
       callIndex++;
       return {
@@ -78,11 +79,17 @@ export function createMockDiceService(config: MockDiceRollConfig = {}) {
     /**
      * Mock rollDamage - returns a fixed damage result
      */
-    rollDamage: (_expression: string, isCrit: boolean, damageBonus = 0): { rolls: number[];
+    rollDamage: (
+      _expression: string,
+      isCrit: boolean,
+      damageBonus = 0,
+    ): {
+      rolls: number[];
       modifierValue: number;
       total: number;
       isCrit: boolean;
-      damageTotal: number; } => {
+      damageTotal: number;
+    } => {
       const rollValue = defaultRolls[callIndex % defaultRolls.length];
       callIndex++;
       const total = config.total ?? rollValue;
@@ -117,20 +124,23 @@ export function createMockDiceService(config: MockDiceRollConfig = {}) {
 /**
  * Preset: Always hit (high roll for attack)
  */
-export const mockDiceAlwaysHit = () => createMockDiceService({
-  rolls: [20],
-  total: 20,
-});
+export const mockDiceAlwaysHit = () =>
+  createMockDiceService({
+    rolls: [20],
+    total: 20,
+  });
 
 /**
  * Preset: Always miss (low roll for attack)
  */
-export const mockDiceAlwaysMiss = () => createMockDiceService({
-  rolls: [1],
-  total: 1,
-});
+export const mockDiceAlwaysMiss = () =>
+  createMockDiceService({
+    rolls: [1],
+    total: 1,
+  });
 
 /**
  * Preset: Fixed initiative values for predictable turn order
  */
-export const mockDiceFixedInitiative = (initiatives: number[]) => createMockDiceService({ rolls: initiatives });
+export const mockDiceFixedInitiative = (initiatives: number[]) =>
+  createMockDiceService({ rolls: initiatives });

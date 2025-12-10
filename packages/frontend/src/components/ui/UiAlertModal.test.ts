@@ -12,16 +12,13 @@ describe('UiAlertModal', () => {
     await wrapper.vm.$nextTick();
 
     // modal should be visible
-    expect(useModalState().isOpen)
-      .toBe(true);
+    expect(useModalState().isOpen).toBe(true);
 
     // click OK
-    await wrapper.get('[data-cy="modal-ok"]')
-      .trigger('click');
+    await wrapper.get('[data-cy="modal-ok"]').trigger('click');
 
     await expect(p).resolves.toBeUndefined();
-    expect(useModalState().isOpen)
-      .toBe(false);
+    expect(useModalState().isOpen).toBe(false);
   });
 
   it('resolves showConfirm with true/false based on buttons', async () => {
@@ -30,23 +27,17 @@ describe('UiAlertModal', () => {
     // Cancel path
     const p1 = showConfirm('Are you sure?');
     await wrapper.vm.$nextTick();
-    expect(useModalState().isOpen)
-      .toBe(true);
-    await wrapper.get('[data-cy="modal-cancel"]')
-      .trigger('click');
+    expect(useModalState().isOpen).toBe(true);
+    await wrapper.get('[data-cy="modal-cancel"]').trigger('click');
     await expect(p1).resolves.toBe(false);
-    expect(useModalState().isOpen)
-      .toBe(false);
+    expect(useModalState().isOpen).toBe(false);
 
     // OK path
     const p2 = showConfirm('Go?');
     await wrapper.vm.$nextTick();
-    expect(useModalState().isOpen)
-      .toBe(true);
-    await wrapper.get('[data-cy="modal-ok"]')
-      .trigger('click');
+    expect(useModalState().isOpen).toBe(true);
+    await wrapper.get('[data-cy="modal-ok"]').trigger('click');
     await expect(p2).resolves.toBe(true);
-    expect(useModalState().isOpen)
-      .toBe(false);
+    expect(useModalState().isOpen).toBe(false);
   });
 });

@@ -19,12 +19,9 @@ describe('UiButtonToggle Component', () => {
 
     cy.mount(UiButtonToggle, { props: { options } });
 
-    cy.contains('Option 1')
-      .should('be.visible');
-    cy.contains('Option 2')
-      .should('be.visible');
-    cy.contains('Option 3')
-      .should('be.visible');
+    cy.contains('Option 1').should('be.visible');
+    cy.contains('Option 2').should('be.visible');
+    cy.contains('Option 3').should('be.visible');
   });
 
   it('should highlight the selected option with primary variant', () => {
@@ -51,8 +48,7 @@ describe('UiButtonToggle Component', () => {
       .and('have.class', 'from-purple-500')
       .and('have.class', 'to-pink-500');
 
-    cy.contains('Option 2')
-      .should('have.class', 'bg-white/10');
+    cy.contains('Option 2').should('have.class', 'bg-white/10');
   });
 
   it('should emit update:modelValue when an option is clicked', () => {
@@ -71,17 +67,15 @@ describe('UiButtonToggle Component', () => {
     cy.mount(UiButtonToggle, {
       props: {
         options,
-        'modelValue': 'option1',
+        modelValue: 'option1',
         'onUpdate:modelValue': onUpdate,
       },
     });
 
-    cy.contains('Option 2')
-      .click();
-    cy.wrap(null)
-      .then(() => {
-        expect(onUpdate).to.have.been.calledWith('option2');
-      });
+    cy.contains('Option 2').click();
+    cy.wrap(null).then(() => {
+      expect(onUpdate).to.have.been.calledWith('option2');
+    });
   });
 
   it('should work with numeric values', () => {
@@ -104,17 +98,15 @@ describe('UiButtonToggle Component', () => {
     cy.mount(UiButtonToggle, {
       props: {
         options,
-        'modelValue': 1,
+        modelValue: 1,
         'onUpdate:modelValue': onUpdate,
       },
     });
 
-    cy.contains('Two')
-      .click();
-    cy.wrap(null)
-      .then(() => {
-        expect(onUpdate).to.have.been.calledWith(2);
-      });
+    cy.contains('Two').click();
+    cy.wrap(null).then(() => {
+      expect(onUpdate).to.have.been.calledWith(2);
+    });
   });
 
   it('should allow switching between options multiple times', () => {
@@ -137,32 +129,27 @@ describe('UiButtonToggle Component', () => {
     cy.mount(UiButtonToggle, {
       props: {
         options,
-        'modelValue': 'a',
+        modelValue: 'a',
         'onUpdate:modelValue': onUpdate,
       },
     });
 
-    cy.contains('B')
-      .click();
-    cy.contains('C')
-      .click();
-    cy.contains('A')
-      .click();
+    cy.contains('B').click();
+    cy.contains('C').click();
+    cy.contains('A').click();
 
-    cy.wrap(null)
-      .then(() => {
-        expect(onUpdate).to.have.been.calledThrice;
-        expect(onUpdate.firstCall).to.have.been.calledWith('b');
-        expect(onUpdate.secondCall).to.have.been.calledWith('c');
-        expect(onUpdate.thirdCall).to.have.been.calledWith('a');
-      });
+    cy.wrap(null).then(() => {
+      expect(onUpdate).to.have.been.calledThrice;
+      expect(onUpdate.firstCall).to.have.been.calledWith('b');
+      expect(onUpdate.secondCall).to.have.been.calledWith('c');
+      expect(onUpdate.thirdCall).to.have.been.calledWith('a');
+    });
   });
 
   it('should render with empty options array', () => {
     cy.mount(UiButtonToggle, { props: { options: [] } });
 
     // Component should render without errors but with no buttons
-    cy.get('button')
-      .should('not.exist');
+    cy.get('button').should('not.exist');
   });
 });

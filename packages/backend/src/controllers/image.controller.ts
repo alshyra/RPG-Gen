@@ -1,28 +1,30 @@
 import {
-  BadRequestException, Body, Controller, Logger, Post, Req, UseGuards,
+  BadRequestException,
+  Body,
+  Controller,
+  Logger,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import Joi from 'joi';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import { CharacterService } from '../domain/character/character.service.js';
 import type { CharacterResponseDto } from '../domain/character/dto/CharacterResponseDto.js';
 import { GeminiImageService } from '../infra/external/gemini-image.service.js';
 import {
-  AvatarResponseDto, CharacterIdBodyDto, ImageRequestDto,
+  AvatarResponseDto,
+  CharacterIdBodyDto,
+  ImageRequestDto,
 } from '../domain/image/dto/image-response.dto.js';
 import { ImageService } from '../domain/image/image.service.js';
 import type { RPGRequest } from '../global.types.js';
 
 const schema = Joi.object({
-  token: Joi.string()
-    .allow('')
-    .optional(),
-  prompt: Joi.string()
-    .required(),
-  model: Joi.string()
-    .optional(),
+  token: Joi.string().allow('').optional(),
+  prompt: Joi.string().required(),
+  model: Joi.string().optional(),
 });
 
 @ApiTags('image')
@@ -67,7 +69,8 @@ export class ImageController {
   async generateAvatar(@Req() req: RPGRequest, @Body('characterId') characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 
-    if (!characterId || typeof characterId !== 'string') throw new BadRequestException('characterId is required');
+    if (!characterId || typeof characterId !== 'string')
+      throw new BadRequestException('characterId is required');
 
     const { user } = req;
     const userId = user._id.toString();
@@ -97,7 +100,11 @@ export class ImageController {
     }
   }
 
-  private async saveAvatarToCharacter(userId: string, characterId: string, compressedImage: string) {
+  private async saveAvatarToCharacter(
+    userId: string,
+    characterId: string,
+    compressedImage: string,
+  ) {
     await this.characterService.update(userId, characterId, { portrait: compressedImage });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
