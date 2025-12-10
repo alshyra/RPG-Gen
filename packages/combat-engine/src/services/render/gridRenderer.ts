@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { GRID_CONFIG } from '@/types/combat-types';
+import { GRID_CONFIG } from '../../types/combat-types';
 
 interface HasStage {
   stage: PIXI.Container;

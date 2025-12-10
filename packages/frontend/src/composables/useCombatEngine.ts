@@ -21,7 +21,6 @@ export interface CombatArenaApi {
     maxHp: number,
   ) => Promise<unknown>;
   updateUnitHealth: (unitId: string, damage: number) => void;
-  setUnitHp: (unitId: string, hp: number) => void;
   moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
   setupDragEvents: () => void;
   on: <T extends keyof CombatEngineEventPayload>(
@@ -209,30 +208,35 @@ export function useCombatEngine() {
     log => {
       if (!log || !arenaApi.value || !player.value?.hp) return;
 
-      // Enemy attacks player - update player HP
-      if (log.hit && log.damageTotal && arenaApi.value.setUnitHp && player.value) {
-        arenaApi.value.setUnitHp(player.value.id, player.value.hp);
-        console.log('[useCombatEngine] Updated player HP after enemy attack:', player.value.hp);
+      // Enemy attacks player - update player HP (use damage from log)
+      if (log.hit && log.damageTotal && arenaApi.value.updateUnitHealth && player.value) {
+        arenaApi.value.updateUnitHealth(player.value.id, log.damageTotal);
+        console.log(
+          '[useCombatEngine] Updated player HP after enemy attack, damage:',
+          log.damageTotal,
+        );
       }
     },
   );
 
-  // Watch for player attack logs and update enemy visual HP
+  // Watch for enemy HP changes and update visual
   watch(
-    () => combatStore.currentPlayerAttackLog,
-    log => {
-      if (!log || !arenaApi.value) return;
+    () => enemies.value,
+    (newEnemies, oldEnemies) => {
+      if (!arenaApi.value || !newEnemies || !oldEnemies) return;
 
-      const targetId = log.targetId ?? log.target?.id;
-      if (!targetId) return;
-
-      // Find enemy to get current HP
-      const enemy = enemies.value.find(e => e.id === targetId);
-      if (enemy && arenaApi.value.setUnitHp) {
-        arenaApi.value.setUnitHp(targetId, enemy.hp);
-        console.log('[useCombatEngine] Updated enemy HP after player attack:', enemy.hp);
-      }
+      // Compare HP changes and update visuals
+      newEnemies.forEach((newEnemy, index) => {
+        const oldEnemy = oldEnemies[index];
+        if (oldEnemy && newEnemy.hp !== undefined && oldEnemy.hp !== undefined) {
+          const damage = oldEnemy.hp - newEnemy.hp;
+          if (damage > 0 && arenaApi.value?.updateUnitHealth) {
+            arenaApi.value.updateUnitHealth(newEnemy.id, damage);
+          }
+        }
+      });
     },
+    { deep: true },
   );
 
   // Cleanup on unmount

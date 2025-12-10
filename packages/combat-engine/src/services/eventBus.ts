@@ -2,7 +2,7 @@ import type {
   CombatEngineEventType,
   CombatEngineEventPayload,
   EventHandler,
-} from '@/types/combat-types';
+} from '../types/combat-types';
 
 export const useEventBus = () => {
   // Simple singleton event bus (lightweight)
@@ -25,5 +25,4 @@ export const useEventBus = () => {
   };
 
   return { on, off, emit };
-}
-
+};

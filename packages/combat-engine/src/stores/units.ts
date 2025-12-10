@@ -1,4 +1,4 @@
-import type { UnitData } from '@/types/combat-types';
+import type { UnitData } from '../types/combat-types';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 

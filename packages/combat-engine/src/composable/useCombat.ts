@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
-import { GRID_CONFIG, type availableCharacterKeys } from '@/types/combat-types';
+import { GRID_CONFIG, type availableCharacterKeys } from '../types/combat-types';
 import { animations as animationConfig } from '../services/spritesAnimations';
 
 // New modules
@@ -16,7 +16,7 @@ import {
 } from '../services/render/gridRenderer';
 import { useCombatUnit } from './useCombatUnit';
 import { setupInteractionController } from '../services/input/interactionController';
-import { useUnitsStore } from '@/stores/units';
+import { useUnitsStore } from '../stores/units';
 import { storeToRefs } from 'pinia';
 import { useEventBus } from '../services/eventBus';
 

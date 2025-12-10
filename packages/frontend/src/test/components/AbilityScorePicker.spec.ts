@@ -133,17 +133,13 @@ describe('AbilityScorePicker', () => {
     } as any;
 
     // Decrease Str from 15 to 14 => should free up points
-    const strMinus = wrapper
-      .find('[data-test-id="ability-score-Str"]')
-      .find('button')
-      .find(btn => btn.text() === '-');
+    const strButtons = wrapper.find('[data-test-id="ability-score-Str"]').findAll('button');
+    const strMinus = strButtons.find(btn => btn.text() === '-');
     await strMinus?.trigger('click');
 
     // After freeing points, try to increase Wis (10 -> 11)
-    const wisPlus = wrapper
-      .find('[data-test-id="ability-score-Wis"]')
-      .find('button')
-      .filter(btn => btn.text() === '+')[0];
+    const wisButtons = wrapper.find('[data-test-id="ability-score-Wis"]').findAll('button');
+    const wisPlus = wisButtons.filter(btn => btn.text() === '+')[0];
     await wisPlus?.trigger('click');
 
     expect(wrapper.find('[data-test-id="ability-score-Wis"]').text()).toContain('11');

@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
@@ -58,14 +58,15 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 
 // Register arena API when mounted
 onMounted(async () => {
-  if (arenaRef.value) {
-    // The arena exposes its API via defineExpose
-    registerArena(arenaRef.value as unknown as CombatArenaApi);
+  const arena = arenaRef.value;
+  if (arena && 'getContainer' in arena && 'init' in arena) {
+    // Type guard ensures arena has the required API methods
+    registerArena(arena as CombatArenaApi);
 
     // Get container and initialize PIXI
-    const container = arenaRef.value.getContainer();
+    const container = arena.getContainer();
     if (container) {
-      await arenaRef.value.init(container);
+      await arena.init(container);
       await initializeVisual();
     }
   }

@@ -97,39 +97,16 @@ test.describe('Character creation single flow', () => {
     await page.getByRole('button', { name: 'Suivant' }).click();
 
     // Spells - Step 4
+    // Click on spell labels to select them (Vue custom checkbox behavior)
     // Cantrips (choose 2): Main de mage, Message
-    await page
-      .locator('text=Main de mage')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
-    await page
-      .locator('text=Message')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
+    await page.locator('label:has-text("Main de mage")').click();
+    await page.locator('label:has-text("Message")').click();
 
     // Level-1 spells (choose 4): Mot de guérison, Soins, Murmures dissonants, Sommeil
-    await page
-      .locator('text=Mot de guérison')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
-    await page
-      .locator('text=Soins')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
-    await page
-      .locator('text=Murmures dissonants')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
-    await page
-      .locator('text=Sommeil')
-      .locator('xpath=../..')
-      .locator('input[type="checkbox"]')
-      .check({ force: true });
+    await page.locator('label:has-text("Mot de guérison")').click();
+    await page.locator('label:has-text("Soins")').click();
+    await page.locator('label:has-text("Murmures dissonants")').click();
+    await page.locator('label:has-text("Sommeil")').click();
 
     await page.getByRole('button', { name: 'Suivant' }).click();
 

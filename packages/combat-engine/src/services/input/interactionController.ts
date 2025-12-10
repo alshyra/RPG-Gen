@@ -1,5 +1,5 @@
 import type * as PIXI from 'pixi.js';
-import type { UnitData } from '@/types/combat-types';
+import type { UnitData } from '../../types/combat-types';
 
 export const setupInteractionController = (
   app: PIXI.Application,

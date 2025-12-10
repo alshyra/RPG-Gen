@@ -55,8 +55,11 @@ export async function verifyAuthenticated(page: Page) {
 
 /**
  * Clear authentication
+ * Navigates to the base URL first to ensure localStorage is accessible
  */
-export async function clearAuthentication(page: Page) {
+export async function clearAuthentication(page: Page, baseURL: string = 'http://localhost') {
+  // Navigate to base URL first to ensure we have access to localStorage
+  await page.goto(baseURL);
   await page.evaluate(() => {
     localStorage.removeItem('rpg-auth-token');
     localStorage.removeItem('rpg-user-data');

@@ -43,14 +43,12 @@ test.describe('Home Page', () => {
       await expect(page.getByText(/Aucun personnage trouvé/)).toBeVisible();
     } else {
       await expect(page.getByText('Mes personnages')).toBeVisible();
-      // Character cards with resume button
-      await expect(page.getByRole('button', { name: /Reprendre/i })).toHaveCount(
-        expect.any(Number),
-      );
-      // Delete buttons
-      await expect(page.getByRole('button', { name: /Supprimer/i })).toHaveCount(
-        expect.any(Number),
-      );
+      // Character cards with resume button - check at least one exists
+      const resumeButtons = page.getByRole('button', { name: /Reprendre/i });
+      await expect(resumeButtons.first()).toBeVisible();
+      // Delete buttons - check at least one exists
+      const deleteButtons = page.getByRole('button', { name: /Supprimer/i });
+      await expect(deleteButtons.first()).toBeVisible();
     }
   });
 

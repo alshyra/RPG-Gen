@@ -15,22 +15,109 @@ export interface PrepareDbOptions {
 
 /**
  * Prepare E2E database with test characters
- * Uses the backend's E2E endpoint (requires DISABLE_AUTH_FOR_E2E or test mode)
+ * Directly calls backend endpoints like the prepare-e2e-db script
  */
 export async function prepareE2EDb(options: PrepareDbOptions = {}): Promise<{ ok: boolean }> {
   const { count = 2, ready = false, withChat = false } = options;
 
   try {
-    // Call the prepare-e2e-db script endpoint
-    // This assumes you have a backend endpoint or we call the script directly
-    // For now, we'll make a direct HTTP request to the backend API
-    const response = await fetch(`${API_BASE}/api/test/prepare-db`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ count, ready, withChat }),
-    });
+    const created = [];
+    for (let i = 1; i <= count; i++) {
+      // Create character
+      const createRes = await fetch(`${API_BASE}/api/characters`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ world: 'dnd' }),
+      });
 
-    return { ok: response.ok };
+      if (!createRes.ok) {
+        console.error(`Failed to create character ${i}:`, createRes.status);
+        continue;
+      }
+
+      const createData = await createRes.json();
+      const characterId = createData?.characterId || createData?.id;
+      if (!characterId) {
+        console.error('Created response missing characterId:', createData);
+        continue;
+      }
+
+      // Update character with name and optional ready state
+      const name = `e2e-${new Date().toISOString().replace(/[:.]/g, '')}-${i}`;
+      const updateBody = { name } as Record<string, unknown>;
+
+      if (ready) {
+        Object.assign(updateBody, {
+          hp: 12,
+          hpMax: 12,
+          proficiency: 2,
+          scores: { Str: 14, Dex: 14, Con: 12, Int: 10, Wis: 10, Cha: 10 },
+          portrait: '/images/portraits/default.png',
+          world: 'dnd',
+          state: 'created',
+        });
+      }
+
+      await fetch(`${API_BASE}/api/characters/${characterId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateBody),
+      });
+
+      created.push(characterId);
+
+      // Add starter weapon if ready
+      if (ready) {
+        try {
+          await fetch(`${API_BASE}/api/characters/${characterId}/inventory`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              definitionId: 'weapon-rapier',
+              name: 'Rapier',
+              qty: 1,
+              equipped: true,
+              meta: { type: 'weapon' },
+            }),
+          });
+
+          await fetch(`${API_BASE}/api/characters/${characterId}/inventory/equip`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ definitionId: 'weapon-rapier' }),
+          });
+        } catch (e) {
+          console.error(`Failed to add weapon for character ${characterId}:`, e);
+        }
+      }
+
+      // Start combat if withChat
+      if (withChat) {
+        try {
+          await fetch(`${API_BASE}/api/combat/${characterId}/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              combat_start: [
+                {
+                  name: 'Goblin',
+                  hp: 7,
+                  ac: 13,
+                  attack_bonus: 4,
+                  damage_dice: '1d6',
+                  damage_bonus: 2,
+                },
+              ],
+            }),
+          });
+        } catch (e) {
+          console.error(`Failed to start combat for character ${characterId}:`, e);
+        }
+      }
+    }
+
+    console.log(`[prepareE2EDb] Created ${created.length}/${count} characters`);
+    return { ok: created.length > 0 };
   } catch (error) {
     console.error('Failed to prepare E2E DB:', error);
     return { ok: false };
@@ -39,14 +126,36 @@ export async function prepareE2EDb(options: PrepareDbOptions = {}): Promise<{ ok
 
 /**
  * Cleanup E2E database test data
+ * Deletes all characters by fetching list and deleting each one
  */
 export async function cleanupE2EDb(): Promise<{ ok: boolean }> {
   try {
-    const response = await fetch(`${API_BASE}/api/test/cleanup-db`, {
-      method: 'POST',
+    // Fetch all characters
+    const listRes = await fetch(`${API_BASE}/api/characters`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    return { ok: response.ok };
+    if (!listRes.ok) {
+      console.error('Failed to list characters:', listRes.status);
+      return { ok: false };
+    }
+
+    const characters = await listRes.json();
+    console.log(`[cleanupE2EDb] Found ${characters.length} characters to delete`);
+
+    // Delete each character
+    for (const char of characters) {
+      try {
+        await fetch(`${API_BASE}/api/characters/${char.characterId}`, {
+          method: 'DELETE',
+        });
+      } catch (e) {
+        console.error(`Failed to delete character ${char.characterId}:`, e);
+      }
+    }
+
+    return { ok: true };
   } catch (error) {
     console.error('Failed to cleanup E2E DB:', error);
     return { ok: false };

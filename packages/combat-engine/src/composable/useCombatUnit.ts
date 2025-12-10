@@ -1,4 +1,4 @@
-import { useUnitsStore } from '@/stores/units';
+import { useUnitsStore } from '../stores/units';
 import { storeToRefs } from 'pinia';
 import { AnimatedSprite, BitmapText, Container, Graphics, Texture } from 'pixi.js';
 
