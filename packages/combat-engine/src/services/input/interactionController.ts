@@ -6,6 +6,7 @@ export const setupInteractionController = (
   getUnits: () => Map<string, UnitData>,
   helpers: {
     pixelToGrid: (x: number, y: number) => { gridX: number; gridY: number };
+    gridToPixel: (gridX: number, gridY: number) => { x: number; y: number };
     showReachableCells: (gx: number, gy: number, r: number) => void;
     hideReachableCells: () => void;
     moveUnitToGrid: (id: string, x: number, y: number) => void;
@@ -16,19 +17,25 @@ export const setupInteractionController = (
 
   const onPointerMove = (ev: PIXI.FederatedPointerEvent) => {
     if (!isDragging || !dragTarget) return;
-    const u = getUnits().get(dragTarget);
-    if (!u) return;
-    u.sprite.position.copyFrom(ev.global);
-    u.healthBar.container.position.set(ev.global.x, ev.global.y - 40);
+    const unit = getUnits().get(dragTarget);
+    if (!unit) {
+      console.warn(`[interactionController] Unit ${dragTarget} not found during drag`);
+      return;
+    }
+    // Snap to grid: convert pixel to grid, then back to pixel (center of cell)
+    const { gridX, gridY } = helpers.pixelToGrid(ev.global.x, ev.global.y);
+    const snappedPixel = helpers.gridToPixel(gridX, gridY);
+    unit.sprite.position.set(snappedPixel.x, snappedPixel.y);
+    unit.healthBar.container.position.set(snappedPixel.x, snappedPixel.y - 40);
   };
 
   const onPointerUp = (ev: PIXI.FederatedPointerEvent) => {
     if (!isDragging || !dragTarget) return;
-    const u = getUnits().get(dragTarget);
-    if (!u) return;
+    const unit = getUnits().get(dragTarget);
+    if (!unit) return;
     const { gridX, gridY } = helpers.pixelToGrid(ev.global.x, ev.global.y);
-    const dist = Math.abs(gridX - u.gridX) + Math.abs(gridY - u.gridY);
-    if (dist <= u.maxMoveRange) helpers.moveUnitToGrid(dragTarget, gridX, gridY);
+    const dist = Math.abs(gridX - unit.gridX) + Math.abs(gridY - unit.gridY);
+    if (dist <= unit.maxMoveRange) helpers.moveUnitToGrid(dragTarget, gridX, gridY);
     else {
       // caller can animate revert if desired
     }
@@ -43,10 +50,17 @@ export const setupInteractionController = (
 
   return {
     startDrag: (id: string) => {
+      const unit = getUnits().get(id);
+      if (!unit) {
+        console.error(`[interactionController] startDrag called but unit ${id} not found in store`);
+        return;
+      }
       isDragging = true;
       dragTarget = id;
-      const u = getUnits().get(id);
-      if (u) helpers.showReachableCells(u.gridX, u.gridY, u.maxMoveRange);
+      console.info(
+        `[interactionController] drag started for ${id} at grid (${unit.gridX}, ${unit.gridY})`,
+      );
+      helpers.showReachableCells(unit.gridX, unit.gridY, unit.maxMoveRange);
     },
     stop: () => {
       isDragging = false;

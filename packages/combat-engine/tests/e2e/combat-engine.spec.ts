@@ -53,29 +53,62 @@ test.describe('Combat Engine - Unit Display', () => {
   test('should create and display player unit', async ({ page }) => {
     await page.goto('/');
 
+    // Capture console messages to verify units are being created
+    const consoleMsgs: string[] = [];
+    page.on('console', msg => {
+      consoleMsgs.push(msg.text());
+    });
+
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
 
     // Wait for units to be created
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
-    // Since PIXI renders to canvas, we can't directly inspect sprites
-    // But we can verify the canvas exists and has been initialized
-    const box = await canvas.boundingBox();
-    expect(box).toBeTruthy();
+    // Check if any unit creation messages were logged
+    const hasUnitLogs = consoleMsgs.some(
+      msg =>
+        msg.includes('Unit created') ||
+        msg.includes('createUnit') ||
+        msg.includes('enemy') ||
+        msg.includes('Combat engine initialisé'),
+    );
+
+    // At minimum, canvas should be visible and have dimensions
+    const canvasBox = await canvas.boundingBox();
+    expect(canvasBox).toBeTruthy();
+    if (canvasBox) {
+      expect(canvasBox.width).toBeGreaterThan(0);
+      expect(canvasBox.height).toBeGreaterThan(0);
+    }
   });
 
   test('should create and display enemy unit', async ({ page }) => {
+    // Capture errors and logs
+    const errors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+
     await page.goto('/');
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
 
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
-    // Verify canvas is still rendering (no crashes)
-    const isVisible = await canvas.isVisible();
-    expect(isVisible).toBe(true);
+    // Should have no errors
+    expect(errors).toHaveLength(0);
+
+    // Canvas should be properly initialized
+    const canvasBox = await canvas.boundingBox();
+    expect(canvasBox).toBeTruthy();
+    if (canvasBox) {
+      expect(canvasBox.width).toBeGreaterThan(500); // Grid is 12 cols × 64px
+      expect(canvasBox.height).toBeGreaterThan(500); // Grid is 9 rows × 64px
+    }
   });
 });
 

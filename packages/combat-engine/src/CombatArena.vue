@@ -67,6 +67,22 @@ defineExpose({
 
   // Access to container ref
   getContainer: () => pixiContainer.value,
+
+  // Get unit count for testing
+  getUnitCount: () => {
+    // Count units that have been created in the scene
+    const stage = pixiCombat.app?.value?.stage;
+    if (!stage) return 0;
+    
+    // Filter for CombatUnit sprites (they have zIndex set)
+    let unitCount = 0;
+    stage.children.forEach(child => {
+      if ('zIndex' in child && typeof (child as any).zIndex === 'number') {
+        unitCount++;
+      }
+    });
+    return unitCount;
+  },
 });
 </script>
 

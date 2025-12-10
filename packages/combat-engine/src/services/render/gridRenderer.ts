@@ -21,13 +21,13 @@ const createTilesGraphics = (): PIXI.Graphics => {
   getGridCoordinates().forEach(({ x, y }) => {
     const isEven = (x + y) % 2 === 0;
     const color = isEven ? GRID_CONFIG.tileColor1 : GRID_CONFIG.tileColor2;
-    graphics.fill(color);
     graphics.rect(
       x * GRID_CONFIG.cellSize,
       y * GRID_CONFIG.cellSize,
       GRID_CONFIG.cellSize,
       GRID_CONFIG.cellSize,
     );
+    graphics.fill({ color });
   });
 
   return graphics;
@@ -71,13 +71,18 @@ export const gridToPixel = (gridX: number, gridY: number): { x: number; y: numbe
 };
 
 /**
- * Convert pixel coordinates to grid coordinates
+ * Convert pixel coordinates to grid coordinates (clamped to valid grid bounds)
  */
 export const pixelToGrid = (pixelX: number, pixelY: number): { gridX: number; gridY: number } => {
-  return {
-    gridX: Math.floor(pixelX / GRID_CONFIG.cellSize),
-    gridY: Math.floor(pixelY / GRID_CONFIG.cellSize),
-  };
+  const gridX = Math.max(
+    0,
+    Math.min(GRID_CONFIG.cols - 1, Math.floor(pixelX / GRID_CONFIG.cellSize)),
+  );
+  const gridY = Math.max(
+    0,
+    Math.min(GRID_CONFIG.rows - 1, Math.floor(pixelY / GRID_CONFIG.cellSize)),
+  );
+  return { gridX, gridY };
 };
 
 export const createGrid = (app: HasStage): PIXI.Container | null => {
@@ -116,10 +121,6 @@ export const showReachableCells = (
 
   // Crée un seul Graphics pour toutes les cellules accessibles
   const graphics = new PIXI.Graphics();
-  graphics.fill({
-    color: GRID_CONFIG.reachableColor,
-    alpha: GRID_CONFIG.reachableAlpha,
-  });
 
   getGridCoordinates()
     .filter(({ x, y }) => {
@@ -134,6 +135,12 @@ export const showReachableCells = (
         GRID_CONFIG.cellSize,
       );
     });
+
+  // Fill AFTER drawing all rects to apply color to all cells
+  graphics.fill({
+    color: GRID_CONFIG.reachableColor,
+    alpha: GRID_CONFIG.reachableAlpha,
+  });
 
   overlay.addChild(graphics);
 };

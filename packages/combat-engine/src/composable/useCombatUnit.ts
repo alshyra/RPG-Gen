@@ -42,17 +42,15 @@ export const useCombatUnit = () => {
     container.zIndex = 2;
 
     const bg = new Graphics();
-    bg.beginFill(0x333333);
-    bg.drawRect(0, 0, 50, 8);
-    bg.endFill();
+    bg.rect(0, 0, 50, 8);
+    bg.fill({ color: 0x333333 });
     container.addChild(bg);
 
     const fill = new Graphics();
     const ratio = Math.max(0, Math.min(1, hp / maxHp));
     const color = ratio > 0.5 ? 0x00ff00 : ratio > 0.25 ? 0xffff00 : 0xff0000;
-    fill.beginFill(color);
-    fill.drawRect(0, 0, 50 * ratio, 8);
-    fill.endFill();
+    fill.rect(0, 0, 50 * ratio, 8);
+    fill.fill({ color });
     container.addChild(fill);
 
     const text = new BitmapText({
@@ -70,9 +68,8 @@ export const useCombatUnit = () => {
       const r = Math.max(0, Math.min(1, newHp / maxHp));
       const c = r > 0.5 ? 0x00ff00 : r > 0.25 ? 0xffff00 : 0xff0000;
       fill.clear();
-      fill.beginFill(c);
-      fill.drawRect(0, 0, 50 * r, 8);
-      fill.endFill();
+      fill.rect(0, 0, 50 * r, 8);
+      fill.fill({ color: c });
       // text.text = `${newHp}/${maxHp}`; // BitmapText update depending on font atlas
     };
 

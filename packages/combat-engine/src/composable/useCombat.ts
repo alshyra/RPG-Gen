@@ -60,6 +60,7 @@ export function useCombat() {
     if (app.value) {
       interactionController = setupInteractionController(app.value, () => units.value, {
         pixelToGrid,
+        gridToPixel,
         showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
         hideReachableCells: () => hideReachableCells(rangeOverlay.value),
         moveUnitToGrid: (id, x, y) => moveUnitToGrid(id, x, y),
@@ -97,20 +98,11 @@ export function useCombat() {
     sprite.eventMode = 'static';
     sprite.cursor = 'pointer';
 
-    // pointerdown uses interactionController to start drag
-    sprite.on('pointerdown', () => {
-      if (interactionController?.startDrag) interactionController.startDrag(unitId);
-      const isPlayer = unitId.startsWith('player');
-      emit('unit:clicked', {
-        unitId,
-        isPlayer,
-      });
-    });
-
     sprite.play();
     app.value.stage.addChild(sprite);
 
-    // delegate creation of the healthbar to unitService and attach it to the stage
+    // IMPORTANT: Store unit in Pinia BEFORE attaching pointer handlers,
+    // so that interactionController can find it when startDrag is called
     const healthBar = combatUnit.createUnitEntry(
       unitId,
       sprite,
@@ -125,6 +117,21 @@ export function useCombat() {
       healthBar.container.position.set(x, y - 40);
       app.value.stage.addChild(healthBar.container);
     }
+
+    // Now attach pointer handler after unit is guaranteed in store
+    sprite.on('pointerdown', () => {
+      if (interactionController?.startDrag) {
+        interactionController.startDrag(unitId);
+      } else {
+        console.warn('[useCombat] interactionController not initialized');
+      }
+      const isPlayer = unitId.startsWith('player');
+      emit('unit:clicked', {
+        unitId,
+        isPlayer,
+      });
+    });
+
     return sprite;
   };
 

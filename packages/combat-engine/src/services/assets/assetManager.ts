@@ -3,10 +3,9 @@ import { animations as animationConfig, frameWidth, frameHeight } from '../sprit
 import { Texture, Assets } from 'pixi.js';
 
 const createFrameTexture = (base: Texture, x: number, y: number, w: number, h: number): Texture => {
-  const frame = new PIXI.Rectangle(x, y, w, h);
   return new Texture({
-    ...base,
-    frame,
+    source: base.source,
+    frame: new PIXI.Rectangle(x, y, w, h),
   });
 };
 
@@ -28,12 +27,11 @@ const buildFromAtlas = (texture: Texture) => {
     }, {});
 };
 
-export const preloadFont = async () => {
-  await Assets.load({
+export const preloadFont = async () =>
+  Assets.load({
     alias: 'HealthBarFont',
     src: '/Literata-Medium.fnt',
   });
-};
 
 export const loadTextures = async (characterKey: string): Promise<Record<string, Texture[]>> => {
   const texture = await Assets.load(`/puny-characters/${characterKey}.png`);
