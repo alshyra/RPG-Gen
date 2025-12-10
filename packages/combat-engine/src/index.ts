@@ -4,13 +4,13 @@
 export { default as CombatArena } from './CombatArena.vue';
 
 // Composable
-export { usePixiCombat } from './composable/usePixiCombat';
+export { usePixiCombat } from './composable/useCombat';
 export type {
   CombatEngineEventType,
   CombatEngineEventPayload,
   UnitClickedPayload,
   UnitAttackedPayload,
-} from './composable/usePixiCombat';
+} from './composable/useCombat';
 
 // Types
 export type {

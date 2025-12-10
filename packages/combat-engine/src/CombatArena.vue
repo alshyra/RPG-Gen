@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { usePixiCombat } from './composable/usePixiCombat';
+import { usePixiCombat } from './composable/useCombat';
 
 // Props optionnelles pour configuration externe
 export interface CombatArenaProps {
