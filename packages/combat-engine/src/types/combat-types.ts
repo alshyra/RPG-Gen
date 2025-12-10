@@ -73,7 +73,7 @@ export interface UnitData {
     container: PIXI.Container;
     bg: PIXI.Graphics;
     fill: PIXI.Graphics;
-    text: PIXI.BitmapText;
+    text: PIXI.Text;
     update: (newHp: number) => void;
   };
 }

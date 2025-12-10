@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { usePixiCombat } from './composable/useCombat';
+import { useCombat } from './composable/useCombat';
 
 // Props optionnelles pour configuration externe
 export interface CombatArenaProps {
@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<CombatArenaProps>(), {
 });
 
 // Utiliser le composable
-const pixiCombat = usePixiCombat();
+const pixiCombat = useCombat();
 const {
   init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid,
 } = pixiCombat;

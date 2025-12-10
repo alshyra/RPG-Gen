@@ -15,7 +15,7 @@ import * as bus from '../services/eventBus';
 
 export function useCombat() {
   const app = ref<PIXI.Application | null>(null);
-  const units = ref<Map<string, UnitData>>(new Map());
+  const units = ref<Map<string, UnitData>>(new Map<string, UnitData>());
   const gridContainer = ref<PIXI.Container | null>(null);
   const rangeOverlay = ref<PIXI.Container | null>(null);
 
@@ -36,18 +36,18 @@ export function useCombat() {
     y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
   });
 
-  type InteractionController = ReturnType<typeof setupInteractionController>;
-  let interactionController: InteractionController | null = null;
+  let interactionController: ReturnType<typeof setupInteractionController> | null = null;
 
   const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
-    app.value = new PIXI.Application({
+
+    app.value = new PIXI.Application();
+    app.value.renderer = {
       width: GRID_CONFIG.cols * GRID_CONFIG.cellSize,
       height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
       backgroundColor: 0x1a1a2e,
       resolution: window.devicePixelRatio || 1,
-      antialias: true,
-    });
+    }
     // prefer the official Application.view property
     container.appendChild(app.value.view);
 
@@ -83,7 +83,7 @@ export function useCombat() {
     maxHp = 100,
   ) => {
     if (!app.value) return null;
-    const animations = await loadTextures(characterKey, app.value);
+    const animations = await loadTextures(characterKey);
     const idleKey = 'idle_bottom';
     if (!animations[idleKey] || animations[idleKey].length === 0) {
       console.error('No idle textures');
