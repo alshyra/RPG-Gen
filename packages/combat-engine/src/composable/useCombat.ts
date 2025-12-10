@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
-import { GRID_CONFIG, type availableCharacterKeys, type UnitData } from '@/types/combat-types';
+import { GRID_CONFIG, type availableCharacterKeys } from '@/types/combat-types';
 import { animations as animationConfig } from '../services/spritesAnimations';
 
 // New modules
@@ -12,22 +12,24 @@ import {
   showReachableCells,
   hideReachableCells,
 } from '../services/render/gridRenderer';
-import { createUnitService } from '../services/units/unitService';
+import { useCombatUnit } from './useCombatUnit';
 import { setupInteractionController } from '../services/input/interactionController';
 import * as bus from '../services/eventBus';
+import { useUnitsStore } from '@/stores/units';
+import { storeToRefs } from 'pinia';
 
 export function useCombat() {
   const app = ref<PIXI.Application | null>(null);
-  const units = ref<Map<string, UnitData>>(new Map<string, UnitData>());
   const gridContainer = ref<PIXI.Container | null>(null);
   const rangeOverlay = ref<PIXI.Container | null>(null);
-
+  const unitStore  = useUnitsStore();
+  const { units } = storeToRefs(unitStore);
   // delegate event API to central bus
   const { on } = bus;
   const { off } = bus;
   const { emit } = bus;
 
-  const unitService = createUnitService(units.value);
+  const combatUnit = useCombatUnit();
 
   // utility conversions (kept local)
   const pixelToGrid = (x: number, y: number) => ({
@@ -48,7 +50,11 @@ export function useCombat() {
     app.value.renderer = {
       width: GRID_CONFIG.cols * GRID_CONFIG.cellSize,
       height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
-      backgroundColor: 0x1a1a2e,
+      background: {
+        color: {
+          value: 0x1e1e1e,
+        }
+      },
       resolution: window.devicePixelRatio || 1,
     };
     // prefer the official Application.view property
@@ -118,7 +124,7 @@ export function useCombat() {
     app.value.stage.addChild(sprite);
 
     // delegate creation of the healthbar to unitService and attach it to the stage
-    const healthBar = unitService.createUnitEntry(
+    const healthBar = combatUnit.createUnitEntry(
       unitId,
       sprite,
       animations,
@@ -177,7 +183,7 @@ export function useCombat() {
           sprite.loop = true;
           sprite.play();
         }
-        unitService.moveUnitState(unitId, targetGridX, targetGridY);
+        combatUnit.moveUnitState(unitId, targetGridX, targetGridY);
         if (u.healthBar?.container) u.healthBar.container.position.set(targetX, targetY - 40);
         emit('turn:ended', { roundNumber: 0 }); // placeholder emit, adapt if needed
       },
@@ -188,7 +194,7 @@ export function useCombat() {
     const u = units.value.get(unitId);
     if (!u) return;
     const newHp = Math.max(0, u.hp - damage);
-    unitService.updateHp(unitId, newHp);
+    combatUnit.updateHp(unitId, newHp);
     emit('unit:attacked', {
       attackerId: 'unknown',
       targetId: unitId,

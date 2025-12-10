@@ -1,0 +1,109 @@
+import { useUnitsStore } from '@/stores/units';
+import { storeToRefs } from 'pinia';
+import { AnimatedSprite, BitmapText, Container, Graphics, Texture } from 'pixi.js';
+
+/**
+ * Unit service returns a tiny API working on an injected Map<string, UnitData>.
+ * Migration plan: move existing createUnit/moveUnitToGrid/updateUnitHealth here.
+ */
+export const useCombatUnit = () => {
+  const unitsStore = useUnitsStore();
+  const { units } = storeToRefs(unitsStore);
+
+  const createUnitEntry = (
+    unitId: string,
+    sprite: AnimatedSprite,
+    animations: Record<string, Texture[]>,
+    gridX: number,
+    gridY: number,
+    maxMoveRange: number,
+    hp: number,
+    maxHp: number,
+  ) => {
+    const healthBar = createHealthBar(hp, maxHp);
+
+    units.value.set(unitId, {
+      sprite,
+      animations,
+      gridX,
+      gridY,
+      maxMoveRange,
+      hp,
+      maxHp,
+      healthBar,
+    });
+
+    // Return healthBar so caller can add it to the stage and position it
+    return healthBar;
+  };
+  // HealthBar factory now lives with the unit service
+  const createHealthBar = (hp: number, maxHp: number) => {
+    const container = new Container();
+    container.zIndex = 2;
+
+    const bg = new Graphics();
+    bg.beginFill(0x333333);
+    bg.drawRect(0, 0, 50, 8);
+    bg.endFill();
+    container.addChild(bg);
+
+    const fill = new Graphics();
+    const ratio = Math.max(0, Math.min(1, hp / maxHp));
+    const color = ratio > 0.5 ? 0x00ff00 : ratio > 0.25 ? 0xffff00 : 0xff0000;
+    fill.beginFill(color);
+    fill.drawRect(0, 0, 50 * ratio, 8);
+    fill.endFill();
+    container.addChild(fill);
+
+    const text = new BitmapText({
+      text: `${hp}/${maxHp}`,
+      style: {
+        fontFamily: 'HealthBarFont',
+        fontSize: 10,
+      },
+    });
+    text.anchor.set(0.5);
+    text.position.set(25, 4);
+    container.addChild(text);
+
+    const update = (newHp: number) => {
+      const r = Math.max(0, Math.min(1, newHp / maxHp));
+      const c = r > 0.5 ? 0x00ff00 : r > 0.25 ? 0xffff00 : 0xff0000;
+      fill.clear();
+      fill.beginFill(c);
+      fill.drawRect(0, 0, 50 * r, 8);
+      fill.endFill();
+      // text.text = `${newHp}/${maxHp}`; // BitmapText update depending on font atlas
+    };
+
+    return {
+      container,
+      bg,
+      fill,
+      text,
+      update,
+    };
+  };
+
+  const moveUnitState = (unitId: string, toGridX: number, toGridY: number) => {
+    const unit = units.value.get(unitId);
+    if (!unit) throw new Error(`moveUnitState: unit ${unitId} not found`);
+    unit.gridX = toGridX;
+    unit.gridY = toGridY;
+    return true;
+  };
+
+  const updateHp = (unitId: string, newHp: number) => {
+    const unit = units.value.get(unitId);
+    if (!unit) throw new Error(`updateHp: unit ${unitId} not found`);
+    unit.hp = Math.max(0, Math.min(newHp, unit.maxHp));
+    if (unit.healthBar?.update) unit.healthBar.update(unit.hp);
+    return true;
+  };
+
+  return {
+    createUnitEntry,
+    moveUnitState,
+    updateHp,
+  };
+};

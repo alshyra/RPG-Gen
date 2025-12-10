@@ -53,7 +53,7 @@ async function request(path, options = {}) {
   let json;
   try {
     json = JSON.parse(text);
-  } catch (e) {
+  } catch {
     json = text;
   }
   return { status: res.status, body: json, raw: text };

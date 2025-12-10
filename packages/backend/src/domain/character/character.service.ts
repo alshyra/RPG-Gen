@@ -312,8 +312,8 @@ export class CharacterService {
       description: item.description ?? itemDefinition?.description,
       equipped: item.equipped || false,
       meta: {
-        ...(itemDefinition?.meta || {}),
-        ...(item.meta || {}),
+        ...itemDefinition?.meta,
+        ...item.meta,
       },
     };
     character.inventory = character.inventory || [];

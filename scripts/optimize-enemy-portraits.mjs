@@ -31,7 +31,7 @@ try {
   await sharp(src).resize(256, 256, { fit: 'cover' }).webp({ quality: 75 }).toFile(outWebp);
 
   console.log('Wrote:', outPng, outWebp);
-} catch (e) {
+} catch {
   // fallback: just copy file to out dir
   const parsed = path.parse(src);
   const outPng = path.join(outDir, parsed.base);

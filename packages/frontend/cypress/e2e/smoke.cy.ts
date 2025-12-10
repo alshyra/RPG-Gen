@@ -22,7 +22,7 @@ describe('Application Smoke Tests', () => {
     cy.document().should(doc => {
       expect(doc.charset).to.eq('UTF-8');
 
-      expect(doc.querySelector('meta[name="viewport"]')).to.exist;
+      expect(doc.querySelector('meta[name="viewport"]')).to.exist
     });
 
     // Check title

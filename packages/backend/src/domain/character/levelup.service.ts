@@ -191,10 +191,7 @@ export class LevelUpService {
       inc: number;
     }[],
   ): Record<string, number> {
-    const updatedScores = { ...((scores as Record<string, number>) || {}) } as Record<
-      string,
-      number
-    >;
+    const updatedScores = { ...(scores as Record<string, number>) } as Record<string, number>;
     (abilityIncreases || []).forEach(asi => {
       if (!asi || !asi.ability) return;
       const key = asi.ability;

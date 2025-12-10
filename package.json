@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.12",
+    "@typescript/native-preview": "^7.0.0-dev.20251210.1",
     "jsonc-simple-parser": "^3.0.0",
     "tsconfig-paths": "^4.2.0"
   }
