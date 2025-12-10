@@ -33,8 +33,27 @@ export interface CombatConfig {
 }
 
 export type CombatEvent
-  = | { type: 'unit:moved'; unitId: string; from: GridPosition; to: GridPosition }
-    | { type: 'unit:attacked'; attackerId: string; targetId: string; damage: number }
-    | { type: 'unit:died'; unitId: string }
-    | { type: 'turn:changed'; currentTurn: 'player' | 'enemy' }
-    | { type: 'combat:ended'; winner: 'player' | 'enemy' };
+  = | { type: 'unit:moved';
+    unitId: string;
+    from: GridPosition;
+    to: GridPosition; }
+    | { type: 'unit:attacked';
+      attackerId: string;
+      targetId: string;
+      damage: number; }
+      | { type: 'unit:died';
+        unitId: string; }
+        | { type: 'turn:changed';
+          currentTurn: 'player' | 'enemy'; }
+          | { type: 'combat:ended';
+            winner: 'player' | 'enemy'; };
+
+export type availableCharacterKeys = 'Archer-Green'
+  | 'Archer-Purple'
+  | 'Mage-Cyan'
+  | 'Mage-Red'
+  | 'Soldier-Blue'
+  | 'Soldier-Red'
+  | 'Soldier-Yellow'
+  | 'Warrior-Blue'
+  | 'Warrior-Red';

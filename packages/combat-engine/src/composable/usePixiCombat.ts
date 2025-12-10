@@ -1,7 +1,12 @@
-import { ref, onUnmounted } from 'vue';
-import * as PIXI from 'pixi.js';
+import type { availableCharacterKeys } from '@/types/combat-types';
 import { gsap } from 'gsap';
-import { animations as animationConfig, frameWidth, frameHeight, DIRECTIONS } from './spritesAnimations';
+import * as PIXI from 'pixi.js';
+import { onUnmounted, ref } from 'vue';
+import {
+  animations as animationConfig,
+  frameHeight,
+  frameWidth,
+} from './spritesAnimations';
 
 // Interface pour stocker les données d'unité
 interface UnitData {
@@ -75,36 +80,32 @@ export function usePixiCombat() {
   };
 
   const off = <T extends CombatEngineEventType>(event: T, handler: EventHandler<T>) => {
-    eventListeners.get(event)?.delete(handler as EventHandler<CombatEngineEventType>);
+    eventListeners.get(event)
+      ?.delete(handler as EventHandler<CombatEngineEventType>);
   };
 
   const emit = <T extends CombatEngineEventType>(event: T, payload: CombatEngineEventPayload[T]) => {
-    eventListeners.get(event)?.forEach(handler => handler(payload));
+    eventListeners.get(event)
+      ?.forEach(handler => handler(payload));
   };
 
   let isDragging = false;
   let dragTarget: string | null = null;
 
   // Convertir position pixel -> grille
-  const pixelToGrid = (x: number, y: number) => {
-    return {
-      gridX: Math.floor(x / GRID_CONFIG.cellSize),
-      gridY: Math.floor(y / GRID_CONFIG.cellSize),
-    };
-  };
+  const pixelToGrid = (x: number, y: number) => ({
+    gridX: Math.floor(x / GRID_CONFIG.cellSize),
+    gridY: Math.floor(y / GRID_CONFIG.cellSize),
+  });
 
   // Convertir position grille -> pixel (centre de la case)
-  const gridToPixel = (gridX: number, gridY: number) => {
-    return {
-      x: gridX * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-      y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-    };
-  };
+  const gridToPixel = (gridX: number, gridY: number) => ({
+    x: gridX * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
+    y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
+  });
 
   // Calculer la distance Manhattan entre deux cases
-  const getManhattanDistance = (x1: number, y1: number, x2: number, y2: number) => {
-    return Math.abs(x2 - x1) + Math.abs(y2 - y1);
-  };
+  const getManhattanDistance = (x1: number, y1: number, x2: number, y2: number) => Math.abs(x2 - x1) + Math.abs(y2 - y1);
 
   // Créer la grille visuelle avec damier
   const createGrid = () => {
@@ -134,7 +135,11 @@ export function usePixiCombat() {
 
     // Ajouter les lignes de grille
     const lines = new PIXI.Graphics();
-    lines.setStrokeStyle({ width: 1, color: GRID_CONFIG.lineColor, alpha: GRID_CONFIG.lineAlpha });
+    lines.setStrokeStyle({
+      width: 1,
+      color: GRID_CONFIG.lineColor,
+      alpha: GRID_CONFIG.lineAlpha,
+    });
 
     // Lignes verticales
     for (let i = 0; i <= GRID_CONFIG.cols; i++) {
@@ -184,7 +189,10 @@ export function usePixiCombat() {
             GRID_CONFIG.cellSize,
             GRID_CONFIG.cellSize,
           );
-          cell.fill({ color: GRID_CONFIG.reachableColor, alpha: GRID_CONFIG.reachableAlpha });
+          cell.fill({
+            color: GRID_CONFIG.reachableColor,
+            alpha: GRID_CONFIG.reachableAlpha,
+          });
           rangeOverlay.value.addChild(cell);
         }
       }
@@ -197,10 +205,10 @@ export function usePixiCombat() {
     rangeOverlay.value.removeChildren();
   };
 
-  // Initialisation de l'application Pixi
-  const init = async (container: HTMLDivElement) => {
+  // Helpers extraits pour init
+  const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
-
+    console.log('Entering init app');
     app.value = new PIXI.Application();
 
     await app.value.init({
@@ -211,95 +219,62 @@ export function usePixiCombat() {
       antialias: true,
     });
 
-    container.appendChild(app.value.canvas as HTMLCanvasElement);
+    container.appendChild(app.value.canvas);
 
-    // Activer le tri par zIndex
     app.value.stage.sortableChildren = true;
 
-    // Créer la grille et l'overlay
     createGrid();
     createRangeOverlay();
+  };
+
+  const loadFont = async () => {
+    if (!app.value) return;
     await PIXI.Assets.load({
       alias: 'HealthBarFont',
       src: '/Literata-Medium.fnt',
     });
-    console.log('PixiJS initialisé avec grille damier.');
   };
 
-  // Helper to compute 8-direction string based on dx/dy
-  const getDirectionFromDelta = (dx: number, dy: number) => {
-    if (dx === 0 && dy > 0) return 'bottom';
-    if (dx === 0 && dy < 0) return 'top';
-    if (dx > 0 && dy === 0) return 'right';
-    if (dx < 0 && dy === 0) return 'left';
-    if (dx > 0 && dy > 0) return 'bottom_right';
-    if (dx > 0 && dy < 0) return 'top_right';
-    if (dx < 0 && dy > 0) return 'bottom_left';
-    if (dx < 0 && dy < 0) return 'top_left';
-    return 'bottom';
-  };
+  // Helper functions for loadAssets
+  const createFrameTexture = (baseTexture: PIXI.Texture, x: number, y: number, w: number, h: number) => new PIXI.Texture({
+    source: baseTexture.source,
+    frame: new PIXI.Rectangle(x, y, w, h),
+  });
 
-  // DONT FUCKING TOUCH THIS MOFO
-  const loadAssets = async (characterKey = 'Archer-Green') => {
-    try {
-      console.log('Loading texture for character:', characterKey);
-      const texture = await PIXI.Assets.load(`/puny-characters/${characterKey}.png`);
-      console.log('Texture chargée:', texture.width, texture.height);
+  const buildTexturesFromAtlas = (texture: PIXI.Texture) => {
+    const texturesMap: Record<string, PIXI.Texture[]> = {};
+    const w = frameWidth;
+    const h = frameHeight;
 
-      const createFrameTexture = (baseTexture: PIXI.Texture, x: number, y: number, w: number, h: number) => {
-        return new PIXI.Texture({
-          source: baseTexture.source,
-          frame: new PIXI.Rectangle(x, y, w, h),
-        });
-      };
-
-      // Create textures map using computed animationConfig from TS module
-      const texturesMap: Record<string, PIXI.Texture[]> = {};
-      const w = frameWidth;
-      const h = frameHeight;
-
-      for (const [animName, animCfg] of Object.entries(animationConfig)) {
-        const frames: PIXI.Texture[] = [];
-        for (let i = 0; i < animCfg.frames; i++) {
-          frames.push(
-            createFrameTexture(
-              texture,
-              i * w,
-              animCfg.row * h,
-              w,
-              h,
-            ),
-          );
-        }
-        texturesMap[animName] = frames;
+    for (const [animName, animCfg] of Object.entries(animationConfig)) {
+      const frames: PIXI.Texture[] = [];
+      for (let i = 0; i < animCfg.frames; i++) {
+        frames.push(
+          createFrameTexture(
+            texture,
+            i * w,
+            animCfg.row * h,
+            w,
+            h,
+          ),
+        );
       }
-
-      console.log('Animations créées:', Object.keys(texturesMap));
-      return texturesMap;
-    } catch (error) {
-      console.error('Erreur de chargement des assets:', error);
-
-      // Fallback with colored rectangles for all oriented keys
-      const createColorTexture = (color: number, w = frameWidth || 32, h = frameHeight || 32) => {
-        const graphics = new PIXI.Graphics();
-        graphics.fill(color);
-        graphics.rect(0, 0, w, h);
-        graphics.fill();
-        return app.value!.renderer.generateTexture(graphics);
-      };
-
-      const directions = Array.from(DIRECTIONS);
-      const fallbackTextures: Record<string, PIXI.Texture[]> = {};
-
-      for (const dir of directions) {
-        fallbackTextures[`idle_${dir}`] = Array(2).fill(0).map(() => createColorTexture(0x4CAF50));
-        fallbackTextures[`walk_${dir}`] = Array(2).fill(0).map(() => createColorTexture(0x2196F3));
-        fallbackTextures[`attack_${dir}`] = Array(4).fill(0).map(() => createColorTexture(0xff5722));
-        fallbackTextures[`death_${dir}`] = Array(4).fill(0).map(() => createColorTexture(0x000000));
-      }
-
-      return fallbackTextures;
+      texturesMap[animName] = frames;
     }
+    return texturesMap;
+  };
+
+  // Réécriture de loadAssets en orchestrateur léger
+  const loadAssets = async (characterKey: availableCharacterKeys = 'Archer-Green' as const) => {
+    if (!app.value) {
+      console.warn('App non initialisé lors du chargement des assets.');
+      // still attempt to load atlas (PIXI can load without renderer)
+    }
+    const texture = await PIXI.Assets.load(`/puny-characters/${characterKey}.png`);
+    // Some PIXI Asset loaders return baseTexture or Texture; normalize to Texture
+    const tex = (texture as PIXI.Texture) || new PIXI.Texture((texture).baseTexture);
+
+    return buildTexturesFromAtlas(tex);
   };
 
   // Créer une barre de vie
@@ -346,51 +321,44 @@ export function usePixiCombat() {
       // text.text = `${newHp}/${maxHp}`;
       // Pas besoin de mettre à jour maxHp ici si elle est constante pour cette barre
     };
-    return { container, bg, fill, text, update };
+    return {
+      container,
+      bg,
+      fill,
+      text,
+      update,
+    };
   };
 
-  // Créer une unité
-  const createUnit = async (
-    unitId: string,
-    gridX = 6,
-    gridY = 4,
-    maxMoveRange = 3,
-    characterKey = 'Archer-Green',
-    hp = 100,
-    maxHp = 100,
-  ) => {
-    if (!app.value) return null;
-
-    const textures = await loadAssets(characterKey);
-
-    // Default to idle_bottom
+  // Helper pour créer le sprite et configurer ses propriétés
+  const createSpriteForUnit = (textures: Record<string, PIXI.Texture[]>, startGridX: number, startGridY: number) => {
     const idleKey = 'idle_bottom';
     if (!textures[idleKey] || textures[idleKey].length === 0) {
-      console.error('Pas de textures IDLE disponibles');
-      return null;
+      throw new Error('Pas de textures IDLE disponibles');
     }
 
     const sprite = new PIXI.AnimatedSprite(textures[idleKey]);
-
-    // Récupérer la vitesse depuis la config
     const animConfig = animationConfig[idleKey];
 
-    // Configuration
     sprite.animationSpeed = animConfig?.speed ?? 0.05;
     sprite.loop = true;
     sprite.anchor.set(0.5);
     sprite.scale.set(2);
     sprite.zIndex = 1;
 
-    // Position initiale sur la grille
-    const { x, y } = gridToPixel(gridX, gridY);
+    const {
+      x, y,
+    } = gridToPixel(startGridX, startGridY);
     sprite.position.set(x, y);
 
-    // Rendre le sprite interactif
     sprite.eventMode = 'static';
     sprite.cursor = 'pointer';
 
-    // Événements de drag & drop
+    return sprite;
+  };
+
+  // Helper pour attacher les events au sprite (séparé pour lisibilité)
+  const attachSpriteEvents = (sprite: PIXI.AnimatedSprite, unitId: string) => {
     sprite.on('pointerdown', () => {
       isDragging = true;
       dragTarget = unitId;
@@ -398,23 +366,30 @@ export function usePixiCombat() {
       if (unitData) {
         showReachableCells(unitData.gridX, unitData.gridY, unitData.maxMoveRange);
       }
-      // Emit unit:clicked event for external subscribers
-      // isPlayer is determined by the unitId prefix (convention: 'player' vs 'enemy')
       const isPlayer = unitId.startsWith('player');
-      emit('unit:clicked', { unitId, isPlayer });
+      emit('unit:clicked', {
+        unitId,
+        isPlayer,
+      });
     });
+  };
 
+  // Finaliser la création de l'unité (ajout au stage, healthbar, stockage)
+  const finalizeUnitCreation = (unitId: string, sprite: PIXI.AnimatedSprite, animations: Record<string, PIXI.Texture[]>, gridX: number, gridY: number, maxMoveRange: number, hp: number, maxHp: number) => {
+    if (!app.value) return;
     sprite.play();
     app.value.stage.addChild(sprite);
 
     const healthBar = createHealthBar(hp, maxHp);
+    const {
+      x, y,
+    } = gridToPixel(gridX, gridY);
     healthBar.container.position.set(x, y - 40);
     app.value.stage.addChild(healthBar.container);
 
-    // Stocker l'unité (use the textures variable)
     units.value.set(unitId, {
       sprite,
-      animations: textures,
+      animations,
       gridX,
       gridY,
       maxMoveRange,
@@ -422,127 +397,173 @@ export function usePixiCombat() {
       maxHp,
       healthBar,
     });
-
-    return sprite;
   };
 
-  // Gérer les événements globaux de drag
-  const setupDragEvents = () => {
-    if (!app.value) return;
+  // Créer une unité (orchestration utilisant les helpers)
+  const createUnit = async (
+    unitId: 'player' | `enemy-${number}`,
+    gridX = 6,
+    gridY = 4,
+    maxMoveRange = 3,
+    characterKey: availableCharacterKeys = 'Archer-Green' as const,
+    hp = 100,
+    maxHp = 100,
+  ) => {
+    if (!app.value) return null;
 
-    app.value.stage.eventMode = 'static';
-    app.value.stage.hitArea = app.value.screen;
+    const textures = await loadAssets(characterKey);
 
-    app.value.stage.on('pointermove', (event: PIXI.FederatedPointerEvent) => {
-      if (!isDragging || !dragTarget) return;
+    try {
+      const sprite = createSpriteForUnit(textures, gridX, gridY);
+      attachSpriteEvents(sprite, unitId);
+      finalizeUnitCreation(unitId, sprite, textures, gridX, gridY, maxMoveRange, hp, maxHp);
+      return sprite;
+    } catch (e) {
+      console.error('Erreur création unité:', e);
+      return null;
+    }
+  };
 
-      const unitData = units.value.get(dragTarget);
-      if (!unitData) return;
+  // Handlers séparés pour setupDragEvents
+  const handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
+    if (!isDragging || !dragTarget) return;
+    const unitData = units.value.get(dragTarget);
+    if (!unitData) return;
+    unitData.sprite.position.copyFrom(event.global);
+    unitData.healthBar.container.position.set(event.global.x, event.global.y - 40);
+  };
 
-      // Suivre la souris pendant le drag
-      unitData.sprite.position.copyFrom(event.global);
-      unitData.healthBar.container.position.set(event.global.x, event.global.y - 40);
-    });
+  const handlePointerUp = (event: PIXI.FederatedPointerEvent) => {
+    if (!isDragging || !dragTarget) return;
+    const unitData = units.value.get(dragTarget);
+    if (!unitData) return;
 
-    app.value.stage.on('pointerup', (event: PIXI.FederatedPointerEvent) => {
-      if (!isDragging || !dragTarget) return;
+    const {
+      gridX: newGridX, gridY: newGridY,
+    } = pixelToGrid(event.global.x, event.global.y);
+    const distance = getManhattanDistance(unitData.gridX, unitData.gridY, newGridX, newGridY);
 
-      const unitData = units.value.get(dragTarget);
-      if (!unitData) return;
-
-      // Calculer la case la plus proche
-      const { gridX: newGridX, gridY: newGridY } = pixelToGrid(event.global.x, event.global.y);
-
-      // Vérifier si la case est dans la portée
-      const distance = getManhattanDistance(unitData.gridX, unitData.gridY, newGridX, newGridY);
-
-      if (distance <= unitData.maxMoveRange && newGridX >= 0 && newGridX < GRID_CONFIG.cols && newGridY >= 0 && newGridY < GRID_CONFIG.rows) {
-        // Déplacement valide
-        moveUnitToGrid(dragTarget, newGridX, newGridY);
-      } else {
-        // Retour à la position d'origine
-        const { x, y } = gridToPixel(unitData.gridX, unitData.gridY);
-        gsap.to(unitData.sprite, {
-          x,
-          y,
-          duration: 0.3,
-          ease: 'back.out',
-        });
-      }
-
-      hideReachableCells();
-      isDragging = false;
-      dragTarget = null;
-    });
-
-    app.value.stage.on('pointerupoutside', () => {
-      if (!isDragging || !dragTarget) return;
-
-      const unitData = units.value.get(dragTarget);
-      if (!unitData) return;
-
-      // Retour à la position d'origine
-      const { x, y } = gridToPixel(unitData.gridX, unitData.gridY);
+    if (distance <= unitData.maxMoveRange && newGridX >= 0 && newGridX < GRID_CONFIG.cols && newGridY >= 0 && newGridY < GRID_CONFIG.rows) {
+      moveUnitToGrid(dragTarget, newGridX, newGridY);
+    } else {
+      const {
+        x, y,
+      } = gridToPixel(unitData.gridX, unitData.gridY);
       gsap.to(unitData.sprite, {
         x,
         y,
         duration: 0.3,
         ease: 'back.out',
       });
+    }
 
-      hideReachableCells();
-      isDragging = false;
-      dragTarget = null;
-    });
+    hideReachableCells();
+    isDragging = false;
+    dragTarget = null;
   };
 
-  // Déplacer une unité vers une case de la grille
-  const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
-    const unitData = units.value.get(unitId);
-    if (!unitData || !app.value) return;
+  const handlePointerUpOutside = () => {
+    if (!isDragging || !dragTarget) return;
+    const unitData = units.value.get(dragTarget);
+    if (!unitData) return;
+    const {
+      x, y,
+    } = gridToPixel(unitData.gridX, unitData.gridY);
+    gsap.to(unitData.sprite, {
+      x,
+      y,
+      duration: 0.3,
+      ease: 'back.out',
+    });
 
-    const { sprite, animations } = unitData;
-    const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
+    hideReachableCells();
+    isDragging = false;
+    dragTarget = null;
+  };
 
-    // Compute direction key based on delta
-    const dx = targetGridX - unitData.gridX;
-    const dy = targetGridY - unitData.gridY;
-    const dir = getDirectionFromDelta(dx, dy);
+  // Gérer les événements globaux de drag (orchestrateur)
+  const setupDragEvents = () => {
+    if (!app.value) return;
 
-    // Choose walk animation by direction (use fallback if missing)
+    app.value.stage.eventMode = 'static';
+    app.value.stage.hitArea = app.value.screen;
+
+    app.value.stage.on('pointermove', handlePointerMove);
+    app.value.stage.on('pointerup', handlePointerUp);
+    app.value.stage.on('pointerupoutside', handlePointerUpOutside);
+  };
+
+  // Helpers pour moveUnitToGrid
+  const getDirectionFromDelta = (dx: number, dy: number) => {
+    if (dx === 0 && dy > 0) return 'bottom';
+    if (dx === 0 && dy < 0) return 'top';
+    if (dx > 0 && dy === 0) return 'right';
+    if (dx < 0 && dy === 0) return 'left';
+    if (dx > 0 && dy > 0) return 'bottom_right';
+    if (dx > 0 && dy < 0) return 'top_right';
+    if (dx < 0 && dy > 0) return 'bottom_left';
+    if (dx < 0 && dy < 0) return 'top_left';
+    return 'bottom';
+  };
+
+  const getDirectionKey = (dx: number, dy: number) => getDirectionFromDelta(dx, dy);
+
+  const playWalkAnimation = (sprite: PIXI.AnimatedSprite, animations: Record<string, PIXI.Texture[]>, dir: string) => {
     const walkKey = `walk_${dir}`;
     if (!animations[walkKey] || animations[walkKey].length === 0 || !animationConfig[walkKey]) {
-      console.error(`No walk animation or config for ${walkKey}`);
-      return;
+      throw new Error(`No walk animation or config for ${walkKey}`);
     }
     sprite.textures = animations[walkKey];
     sprite.animationSpeed = animationConfig[walkKey].speed;
     sprite.play();
+  };
 
-    // Animation de mouvement
+  const completeMove = (sprite: PIXI.AnimatedSprite, animations: Record<string, PIXI.Texture[]>, dir: string, unitData: UnitData, targetGridX: number, targetGridY: number, targetX: number, targetY: number) => {
+    const idleKey = `idle_${dir}`;
+    if (!animations[idleKey] || animations[idleKey].length === 0 || !animationConfig[idleKey]) {
+      console.error(`No idle animation or config for ${idleKey}`);
+      return;
+    }
+    sprite.textures = animations[idleKey];
+    sprite.animationSpeed = animationConfig[idleKey].speed;
+    sprite.loop = true;
+    sprite.play();
+
+    unitData.gridX = targetGridX;
+    unitData.gridY = targetGridY;
+    unitData.healthBar.container.position.set(targetX, targetY - 40);
+  };
+
+  // Déplacer une unité vers une case de la grille (utilise helpers)
+  const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
+    const unitData = units.value.get(unitId);
+    if (!unitData || !app.value) return;
+
+    const {
+      sprite, animations,
+    } = unitData;
+    const {
+      x: targetX, y: targetY,
+    } = gridToPixel(targetGridX, targetGridY);
+
+    const dx = targetGridX - unitData.gridX;
+    const dy = targetGridY - unitData.gridY;
+    const dir = getDirectionKey(dx, dy);
+
+    try {
+      playWalkAnimation(sprite, animations, dir);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+
     gsap.to(sprite, {
       x: targetX,
       y: targetY,
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        // Revenir à l'animation IDLE by direction (fallback)
-        const idleKey = `idle_${dir}`;
-        if (!animations[idleKey] || animations[idleKey].length === 0 || !animationConfig[idleKey]) {
-          console.error(`No idle animation or config for ${idleKey}`);
-          return;
-        }
-        sprite.textures = animations[idleKey];
-        sprite.animationSpeed = animationConfig[idleKey].speed;
-        console.log(`Setting idle speed for ${idleKey}:`, sprite.animationSpeed);
-
-        sprite.loop = true;
-        sprite.play();
-
-        // Mettre à jour la position sur la grille
-        unitData.gridX = targetGridX;
-        unitData.gridY = targetGridY;
-        unitData.healthBar.container.position.set(targetX, targetY - 40);
+        completeMove(sprite, animations, dir, unitData, targetGridX, targetGridY, targetX, targetY);
       },
     });
   };
@@ -559,13 +580,8 @@ export function usePixiCombat() {
       console.error(`Unité ${unitId} non trouvée.`);
       return;
     }
-
-    // 1. Logique métier : Calcul des nouveaux HP
     const newHp = Math.max(0, unitData.hp - damage);
     unitData.hp = newHp;
-
-    // 2. Logique de rendu : Appel de la méthode d'update de la HealthBar
-    // NOTE : On suppose que createHealthBar retourne { container, update }
     if (unitData.healthBar && unitData.healthBar.update) {
       unitData.healthBar.update(newHp);
       console.log(`Unité ${unitId} PV: ${newHp}/${unitData.maxHp}`);
@@ -574,24 +590,11 @@ export function usePixiCombat() {
     }
   };
 
-  const setUnitHp = (unitId: string, hp: number) => {
-    const unitData = units.value.get(unitId);
-    if (!unitData) {
-      console.error(`Unité ${unitId} non trouvée.`);
-      return;
-    }
-
-    // Set absolute HP value
-    const newHp = Math.max(0, Math.min(hp, unitData.maxHp));
-    unitData.hp = newHp;
-
-    // Update visual health bar
-    if (unitData.healthBar && unitData.healthBar.update) {
-      unitData.healthBar.update(newHp);
-      console.log(`Unité ${unitId} HP set to: ${newHp}/${unitData.maxHp}`);
-    } else {
-      console.error('Barre de vie non initialisée pour cette unité.');
-    }
+  // Expose API (init now uses initApp + loadFont)
+  const init = async (container: HTMLDivElement) => {
+    await initApp(container);
+    await loadFont();
+    console.log('PixiJS initialisé avec grille damier.');
   };
 
   return {
@@ -600,7 +603,6 @@ export function usePixiCombat() {
     moveUnitToGrid,
     setupDragEvents,
     updateUnitHealth,
-    setUnitHp,
     // Event API
     on,
     off,

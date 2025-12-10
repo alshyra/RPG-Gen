@@ -88,7 +88,7 @@ export default defineConfig([
   ...pluginVue.configs['flat/recommended'],
   // Frontend TypeScript + Vue files
   {
-    files: ['packages/frontend/**/*.{ts,tsx,vue}'],
+    files: ['packages/frontend/**/*.{ts,tsx,vue}', 'packages/combat-engine/**/*.{ts,tsx,vue}'],
     ignores: [
       'packages/frontend/*.config.ts',
       'packages/frontend/test/setup.ts',

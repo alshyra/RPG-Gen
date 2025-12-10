@@ -136,14 +136,13 @@ export function useCombatEngine() {
     await backendCombat.executeAttack(target, spellName);
 
     // Update visual with new HP from store
-    if (arenaApi.value) {
-      const updatedEnemy = enemies.value.find(e => e.id === target.id);
-      if (updatedEnemy && updatedEnemy.hp !== undefined && target.hp !== undefined) {
-        const damage = target.hp - updatedEnemy.hp;
-        if (damage > 0) {
-          arenaApi.value.updateUnitHealth(target.id, damage);
-        }
-      }
+    if (!arenaApi.value) return;
+
+    const updatedEnemy = enemies.value.find(e => e.id === target.id);
+    if (!updatedEnemy || updatedEnemy.hp == undefined || target.hp == undefined) return;
+    const damage = target.hp - updatedEnemy.hp;
+    if (damage > 0) {
+      arenaApi.value.updateUnitHealth(target.id, damage);
     }
   };
 
@@ -210,7 +209,7 @@ export function useCombatEngine() {
 
   // Watch for enemy attack logs and update visual HP
   watch(() => combatStore.currentEnemyAttackLog, (log) => {
-    if (!log || !arenaApi.value) return;
+    if (!log || !arenaApi.value || !player.value?.hp) return;
 
     // Enemy attacks player - update player HP
     if (log.hit && log.damageTotal && arenaApi.value.setUnitHp && player.value) {

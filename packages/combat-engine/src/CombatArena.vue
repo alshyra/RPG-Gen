@@ -1,16 +1,6 @@
 <template>
   <div class="combat-arena">
-    <div
-      ref="pixiContainer"
-      class="pixi-container"
-    />
-    <div
-      v-if="!manualInit"
-      class="instructions"
-    >
-      <p>🎮 Cliquez sur un ennemi pour ouvrir le menu d'action</p>
-      <p>✨ Les cases vertes indiquent la portée de déplacement</p>
-    </div>
+    <slot />
   </div>
 </template>
 
@@ -30,7 +20,9 @@ const props = withDefaults(defineProps<CombatArenaProps>(), {
 
 // Utiliser le composable
 const pixiCombat = usePixiCombat();
-const { init, createUnit, setupDragEvents, updateUnitHealth, setUnitHp, on, off, emit, moveUnitToGrid } = pixiCombat;
+const {
+  init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid,
+} = pixiCombat;
 
 // Références
 const pixiContainer = ref<HTMLDivElement | null>(null);
@@ -38,11 +30,11 @@ const pixiContainer = ref<HTMLDivElement | null>(null);
 // Initialisation au montage (demo mode si pas manualInit)
 onMounted(async () => {
   if (!pixiContainer.value || props.manualInit) return;
-  
+
   // Demo initialization
   await init(pixiContainer.value);
-  await createUnit('player1', 6, 4, 3, 'Archer-Green', 100, 100);
-  await createUnit('enemy1', 2, 4, 3, 'Warrior-Red', 80, 100);
+  await createUnit('player', 6, 4, 3, 'Archer-Green', 100, 100);
+  await createUnit('enemy-1', 2, 4, 3, 'Warrior-Red', 80, 100);
   setupDragEvents();
 });
 
@@ -54,19 +46,18 @@ defineExpose({
     if (!target) throw new Error('No container for CombatArena init');
     return init(target);
   },
-  
+
   // Unit management
   createUnit,
   updateUnitHealth,
-  setUnitHp,
   moveUnitToGrid,
   setupDragEvents,
-  
+
   // Event API
   on,
   off,
   emit,
-  
+
   // Access to container ref
   getContainer: () => pixiContainer.value,
 });
