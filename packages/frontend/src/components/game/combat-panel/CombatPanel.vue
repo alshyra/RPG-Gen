@@ -23,19 +23,6 @@
       <p>Pas de combat actif. Démarrez un combat depuis le jeu pour voir l'arène en action !</p>
     </div>
 
-    <!-- Action Menu Overlay (au clic ennemi) -->
-    <ActionMenuOverlay
-      v-if="inCombat"
-      :is-open="isActionMenuOpen"
-      :unit-id="actionMenuUnitId"
-      :x="actionMenuX"
-      :y="actionMenuY"
-      :selected-target="selectedTarget"
-      @close="closeActionMenu"
-      @attack="handleAttackFromMenu"
-      @spell="handleSpellFromMenu"
-    />
-
     <!-- Modal de sélection d'action (attaque arme / sort) -->
     <SpellSelector
       v-if="inCombat"
@@ -52,7 +39,6 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
-import ActionMenuOverlay from '../ActionMenuOverlay.vue';
 import SpellSelector from './SpellSelector.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombatStore } from '@/stores/combatStore';
@@ -67,13 +53,8 @@ const {
   unregisterArena,
   isActionModalOpen,
   selectedTarget,
-  isActionMenuOpen,
-  actionMenuUnitId,
-  actionMenuX,
-  actionMenuY,
   executeAttack,
   closeActionModal,
-  closeActionMenu,
   handleAttackFromMenu,
   handleSpellFromMenu,
   initializeVisual,

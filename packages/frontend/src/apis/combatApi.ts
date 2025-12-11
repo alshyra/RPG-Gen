@@ -40,19 +40,52 @@ class CombatService {
     target: CombatantDto,
     spellName?: string,
   ): Promise<AttackResponseDto> {
-    const { data } = await api.POST('/api/combat/{characterId}/attack', {
-      params: {
-        path: {
-          characterId,
+    // Validate inputs
+    if (!characterId) {
+      throw new Error('combatApi.attack: characterId is required');
+    }
+    if (!target?.id) {
+      throw new Error('combatApi.attack: target and target.id are required');
+    }
+
+    try {
+      const response = await api.POST('/api/combat/{characterId}/attack', {
+        params: {
+          path: {
+            characterId,
+          },
         },
-      },
-      body: {
-        targetId: target.id,
-        ...(spellName && { spellName }),
-      },
-    });
-    if (!data) throw Error('Attack With Token didnt respond');
-    return data;
+        body: {
+          targetId: target.id,
+          ...(spellName && { spellName }),
+        },
+      });
+
+      if (response.error) {
+        const errorMsg =
+          response.error instanceof Error ? response.error.message : String(response.error);
+        throw new Error(
+          `combatApi.attack failed (characterId=${characterId}, targetId=${target.id}): ${errorMsg}`,
+        );
+      }
+
+      if (!response.data) {
+        throw new Error(
+          `combatApi.attack: no data in response (characterId=${characterId}, targetId=${target.id})`,
+        );
+      }
+
+      return response.data;
+    } catch (err) {
+      // Re-throw with context if not already a contextualized error
+      if (err instanceof Error && err.message.includes('combatApi.attack')) {
+        throw err;
+      }
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `combatApi.attack: unexpected error (characterId=${characterId}, targetId=${target.id}): ${errorMsg}`,
+      );
+    }
   }
 
   /**

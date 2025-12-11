@@ -43,7 +43,7 @@ export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
   const characterStore = useCharacterStore();
-  const { enemies, player } = storeToRefs(combatStore);
+  const { enemies, player,  } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   // Reference to the CombatArena component API (set via registerArena)
@@ -52,14 +52,6 @@ export function useCombatEngine() {
   // State for the action modal
   const isActionModalOpen = ref(false);
   const selectedTarget = ref<CombatantDto | null>(null);
-
-  // State for the action menu overlay
-  const isActionMenuOpen = ref(false);
-  const actionMenuUnitId = ref<string | undefined>();
-  const actionMenuX = ref(0);
-  const actionMenuY = ref(0);
-
-  // Handlers stored for cleanup - internal bookkeeping
 
   const registeredHandlers: {
     event: keyof CombatEngineEventPayload;
@@ -112,10 +104,7 @@ export function useCombatEngine() {
 
       // Set target and open action menu overlay
       selectedTarget.value = enemy;
-      actionMenuUnitId.value = payload.unitId;
-      actionMenuX.value = payload.stageX;
-      actionMenuY.value = payload.stageY;
-      isActionMenuOpen.value = true;
+      isActionModalOpen.value = true;
     };
 
     arenaApi.value.on('unit:clicked', handleUnitClicked);
@@ -130,6 +119,11 @@ export function useCombatEngine() {
    * Called from the modal when user chooses action
    */
   const executeAttack = async (target: CombatantDto, spellName?: string) => {
+    if (!target?.id) {
+      console.error('[useCombatEngine] Invalid target:', target);
+      return;
+    }
+
     if (!arenaApi.value) {
       console.warn('[useCombatEngine] No arena registered, skipping visual');
     }
@@ -137,17 +131,22 @@ export function useCombatEngine() {
     // Close modal
     isActionModalOpen.value = false;
 
-    // Call backend
-    await backendCombat.executeAttack(target, spellName);
+    try {
+      // Call backend
+      await backendCombat.executeAttack(target, spellName);
 
-    // Update visual with new HP from store
-    if (!arenaApi.value) return;
+      // Update visual with new HP from store
+      if (!arenaApi.value) return;
 
-    const updatedEnemy = enemies.value.find(e => e.id === target.id);
-    if (!updatedEnemy || updatedEnemy.hp == undefined || target.hp == undefined) return;
-    const damage = target.hp - updatedEnemy.hp;
-    if (damage > 0) {
-      arenaApi.value.updateUnitHealth(target.id, damage);
+      const updatedEnemy = enemies.value.find(e => e.id === target.id);
+      if (!updatedEnemy || updatedEnemy.hp == undefined || target.hp == undefined) return;
+      const damage = target.hp - updatedEnemy.hp;
+      if (damage > 0) {
+        arenaApi.value.updateUnitHealth(target.id, damage);
+      }
+    } catch (err) {
+      console.error('[useCombatEngine] Attack failed:', err);
+      // Error is already handled by useCombat.executeAttack
     }
   };
 
@@ -231,20 +230,11 @@ export function useCombatEngine() {
   );
 
   /**
-   * Close the action menu overlay
-   */
-  const closeActionMenu = () => {
-    isActionMenuOpen.value = false;
-    actionMenuUnitId.value = undefined;
-    selectedTarget.value = null;
-  };
-
-  /**
    * Handle attack selection from overlay
    */
   const handleAttackFromMenu = async () => {
     if (!selectedTarget.value) return;
-    closeActionMenu();
+    closeActionModal();
     await executeAttack(selectedTarget.value);
   };
 
@@ -253,7 +243,7 @@ export function useCombatEngine() {
    */
   const handleSpellFromMenu = async () => {
     if (!selectedTarget.value) return;
-    closeActionMenu();
+    closeActionModal();
     // Open the spell selector modal for spell selection
     isActionModalOpen.value = true;
   };
@@ -272,16 +262,9 @@ export function useCombatEngine() {
     isActionModalOpen,
     selectedTarget,
 
-    // Action menu overlay state
-    isActionMenuOpen,
-    actionMenuUnitId,
-    actionMenuX,
-    actionMenuY,
-
     // Actions
     executeAttack,
     closeActionModal,
-    closeActionMenu,
     handleAttackFromMenu,
     handleSpellFromMenu,
     replayEnemyAttacks,

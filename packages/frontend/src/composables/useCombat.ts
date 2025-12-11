@@ -61,15 +61,16 @@ export function useCombat() {
   };
 
   const displayAttackResultMessage = (target: CombatantDto, result: AttackResponseDto): void => {
+    const targetName = target?.name || 'cible inconnue';
     const { damageTotal, isCrit } = result;
     if (damageTotal && damageTotal > 0) {
       const critMsg = isCrit ? ' (CRITIQUE!)' : '';
       gameStore.appendMessage(
         'system',
-        `✅ Attaque réussie contre ${target.name}! Dégâts: ${damageTotal}${critMsg}`,
+        `✅ Attaque réussie contre ${targetName}! Dégâts: ${damageTotal}${critMsg}`,
       );
     } else {
-      gameStore.appendMessage('system', `❌ Attaque manquée contre ${target.name}.`);
+      gameStore.appendMessage('system', `❌ Attaque manquée contre ${targetName}.`);
     }
   };
 
@@ -109,12 +110,18 @@ export function useCombat() {
 
   /* Helpers to keep executeAttack small (reduce statement count) */
   const beginAttack = (target: CombatantDto) => {
-    gameStore.appendMessage('user', `J'attaque ${target.name}!`);
+    const targetName = target?.name || 'cible inconnue';
+    gameStore.appendMessage('user', `J'attaque ${targetName}!`);
     gameStore.sending = true;
     currentTarget.value = target;
   };
 
   const processAttackResult = async (result: AttackResponseDto, target: CombatantDto) => {
+    if (!target?.id) {
+      console.error('[useCombat] processAttackResult: invalid target', target);
+      return;
+    }
+
     // snapshot previous state (before applying server-returned state)
     const prevEnemies = combatStore.enemies.map(e => ({ ...e }));
     const prevPlayer = combatStore.player ? { ...combatStore.player } : null;
@@ -126,7 +133,7 @@ export function useCombat() {
     const attackView = {
       attacker: prevPlayer?.name ?? 'Vous',
       attackerId: prevPlayer?.id,
-      target: target.name,
+      target: target.name ?? 'cible inconnue',
       targetId: target.id,
       hit: result.damageTotal !== undefined || !!result.damageDiceResult,
       damageRoll: result.damageDiceResult?.rolls ?? [],
