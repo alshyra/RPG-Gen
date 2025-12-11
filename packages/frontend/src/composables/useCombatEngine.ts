@@ -43,7 +43,7 @@ export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
   const characterStore = useCharacterStore();
-  const { enemies, player,  } = storeToRefs(combatStore);
+  const { enemies, player } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   // Reference to the CombatArena component API (set via registerArena)
