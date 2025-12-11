@@ -16,15 +16,15 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useCombat } from './composable/useCombat';
 
-// Props optionnelles pour configuration externe
-export interface CombatArenaProps {
-  /** Si true, n'initialise pas automatiquement (laisse le parent gérer) */
-  manualInit?: boolean;
-}
-
-const props = withDefaults(defineProps<CombatArenaProps>(), {
-  manualInit: true,
-});
+const props = withDefaults(
+  defineProps<{
+    /** Si true, n'initialise pas automatiquement (laisse le parent gérer) */
+    manualInit?: boolean;
+  }>(),
+  {
+    manualInit: true,
+  },
+);
 
 // Utiliser le composable
 const pixiCombat = useCombat();
@@ -95,19 +95,6 @@ defineExpose({
 </script>
 
 <style scoped>
-.combat-arena {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin: 20px auto;
-  padding: 20px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
 .pixi-container {
   border: 3px solid #0f3460;
   border-radius: 8px;

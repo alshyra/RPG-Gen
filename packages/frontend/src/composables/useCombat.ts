@@ -56,6 +56,11 @@ export function useCombat() {
         payload,
       );
       displayCombatStartSuccess(combatState);
+      // Navigate to combat arena when combat starts
+      await router.push({
+        name: 'game-combat',
+        params: { characterId: currentCharacter.value.characterId },
+      });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
       gameStore.appendMessage('system', `❌ Erreur de combat: ${errorMsg}`);
@@ -258,6 +263,13 @@ export function useCombat() {
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter.value) return false;
     const { inCombat } = await combatStore.fetchStatus(currentCharacter.value?.characterId);
+    // If player is in combat after refresh, navigate to combat arena
+    if (inCombat) {
+      await router.push({
+        name: 'game-combat',
+        params: { characterId: currentCharacter.value.characterId },
+      });
+    }
     return inCombat;
   };
 
