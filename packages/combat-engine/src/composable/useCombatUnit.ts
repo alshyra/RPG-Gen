@@ -88,7 +88,8 @@ export const useCombatUnit = () => {
       fill.clear();
       fill.rect(0, 0, 50 * r, 8);
       fill.fill({ color: c });
-      // text.text = `${newHp}/${maxHp}`; // BitmapText update depending on font atlas
+      // BitmapText update depending on font atlas
+      text.text = `${newHp}/${maxHp}`;
     };
 
     return {

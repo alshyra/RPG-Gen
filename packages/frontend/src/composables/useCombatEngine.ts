@@ -7,6 +7,8 @@ import { useCombatStore } from '@/stores/combatStore';
 import { useCharacterStore } from '@/stores/characterStore';
 import type { CombatantDto, EnemyAttackLogDto } from '@rpg-gen/shared';
 import type { UnitClickedPayload, CombatEngineEventPayload } from '@rpg-gen/combat-engine';
+import { useGameStore } from '@/stores/gameStore';
+import { combatService } from '@/apis/combatApi';
 
 // Type for the exposed arena API from CombatArena.vue
 export interface CombatArenaApi {
@@ -42,8 +44,9 @@ export interface CombatArenaApi {
 export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
+  const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const { enemies, player } = storeToRefs(combatStore);
+  const { enemies, player, isEndingTurn } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   // Reference to the CombatArena component API (set via registerArena)
@@ -80,6 +83,40 @@ export function useCombatEngine() {
     arenaApi.value = null;
   };
 
+  const endTurn = async () => {
+    if (!currentCharacter.value || isEndingTurn.value) return;
+
+    try {
+      isEndingTurn.value = true;
+
+      // Call the API directly to get the response with attackLogs
+      const response = await combatService.endActivation(currentCharacter.value.characterId);
+
+      // Replay enemy attacks on visual engine (if arena is registered)
+      if (response.attackLogs?.length) {
+        await replayEnemyAttacks(response.attackLogs);
+      }
+
+      // Update combat store with the result
+      combatStore.updateFromTurnResult(response);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (
+        message.includes('Combat session not found') ||
+        message.includes('No active combat found')
+      ) {
+        combatStore.clearCombat();
+        gameStore.appendMessage(
+          'system',
+          "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
+        );
+      } else {
+        console.error('Failed to end turn', e);
+      }
+    } finally {
+      isEndingTurn.value = false;
+    }
+  };
   /**
    * Subscribe to visual engine events
    */
@@ -257,6 +294,7 @@ export function useCombatEngine() {
     // Arena registration
     registerArena,
     unregisterArena,
+    endTurn,
 
     // Modal state
     isActionModalOpen,

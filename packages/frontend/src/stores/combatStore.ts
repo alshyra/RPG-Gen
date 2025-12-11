@@ -33,6 +33,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
   const currentPlayerAttackLog = ref<AttackResponseDto | null>(null);
+  const isEndingTurn = ref(false);
 
   const currentAttackView = ref<AttackView | null>(null);
 
@@ -227,6 +228,7 @@ export const useCombatStore = defineStore('combatStore', () => {
 
   return {
     inCombat,
+    isEndingTurn,
     enemies,
     player,
     currentTarget,

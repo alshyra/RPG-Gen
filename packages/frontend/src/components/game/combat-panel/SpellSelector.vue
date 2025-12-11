@@ -7,37 +7,45 @@
     <div class="bg-slate-800 border border-slate-600 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
       <h3 class="text-lg font-semibold text-slate-100 mb-4">Choisir une action</h3>
 
+      <div class="text-xs text-slate-400 mb-4">
+        Actions: {{ actionRemaining }} / {{ actionMax }}
+      </div>
+
       <div class="space-y-2 mb-4">
-        <button
-          class="w-full px-4 py-3 bg-amber-500 hover:bg-amber-400 text-amber-900 rounded-lg font-medium transition-colors"
+        <UiButton
+          class="w-full"
+          :disabled="!canAct"
+          :variant="canAct ? 'secondary' : 'ghost'"
           @click="attackWithWeapon"
         >
           ⚔️ Attaque à l'arme
-        </button>
+        </UiButton>
 
         <div
           v-if="availableSpells.length > 0"
           class="space-y-2"
         >
           <p class="text-sm text-slate-400 mt-3 mb-2">Sorts disponibles:</p>
-          <button
+          <UiButton
             v-for="spell in availableSpells"
             :key="spell.name"
-            class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-colors text-left"
+            :disabled="!canAct"
+            :variant="canAct ? 'secondary' : 'ghost'"
             @click="castSpell(spell.name)"
           >
             <div class="flex items-center justify-between">
               <span>✨ {{ spell.name }}</span>
-              <span class="text-xs text-purple-200">Niv. {{ spell.level }}</span>
+              <span class="text-xs" :class="canAct ? 'text-purple-200' : 'text-slate-500'">Niv. {{ spell.level }}</span>
             </div>
             <div
               v-if="spell.description"
-              class="text-xs text-purple-200 mt-1"
+              class="text-xs mt-1"
+              :class="canAct ? 'text-purple-200' : 'text-slate-500'"
             >
               {{ spell.description.substring(0, 60)
               }}{{ spell.description.length > 60 ? '...' : '' }}
             </div>
-          </button>
+          </UiButton>
         </div>
 
         <p
@@ -47,19 +55,29 @@
           Aucun sort disponible
         </p>
       </div>
-
-      <button
-        class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+      <UiButton
+        class="w-full px-4 py-2 mb-2"
+        variant="primary"
+        @click="onEndTurn"
+      >
+        Fin de tour
+      </UiButton>
+      <UiButton
+        class="w-full px-4 py-2"
+        :variant="'ghost'"
         @click="close"
       >
         Annuler
-      </button>
+      </UiButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
+import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
@@ -69,7 +87,10 @@ const props = defineProps<{
   target: CombatantDto | null;
 }>();
 const characterStore = useCharacterStore();
+const combatStore = useCombatStore();
+const { endTurn } = useCombatEngine();
 const { currentCharacter } = storeToRefs(characterStore);
+const { actionRemaining, actionMax } = storeToRefs(combatStore);
 
 const emit = defineEmits<{
   close: [];
@@ -83,21 +104,30 @@ const availableSpells = computed(() => {
   return currentCharacter.value.spells.filter(spell => !!(spell.meta && spell.meta.damageDice));
 });
 
+// Check if player can still act
+const canAct = computed(() => (actionRemaining.value ?? 0) > 0);
+
 const close = () => {
   emit('close');
 };
 
 const attackWithWeapon = () => {
-  if (props.target) {
+  if (props.target && canAct.value) {
     emit('attack', props.target);
   }
   close();
 };
 
 const castSpell = (spellName: string) => {
-  if (props.target) {
+  if (props.target && canAct.value) {
     emit('attack', props.target, spellName);
   }
   close();
+};
+
+const onEndTurn = () => {
+  if (!canAct.value) return;
+  emit('close');
+  endTurn();
 };
 </script>
