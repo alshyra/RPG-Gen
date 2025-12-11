@@ -293,7 +293,7 @@ export class CombatOrchestrator {
     if (saveType) {
       // Saving throw spell
       // Get target's save bonus (for MVP, use a default or estimate from enemy stats)
-      const savingThrowBonus = 0; // MVP: default, could be enhanced with enemy stat tracking
+      const savingThrowBonus = -1; // MVP: default, could be enhanced with enemy stat tracking
       saveRoll = this.diceService.rollSave(savingThrowBonus, spellDC);
       hit = !saveRoll.success; // Damage on failed save
     } else {
@@ -336,41 +336,14 @@ export class CombatOrchestrator {
     };
 
     // Handle combat end if applicable
+    // In processAttack, replace the duplicated block with:
     if (applyResult.endResult) {
-      const combatEnd = new CombatEndDto({
-        victory: true,
-        xp_gained: applyResult.endResult.xp_gained,
-        player_hp: finalState.player.hp,
-        enemies_defeated: applyResult.endResult.enemies_defeated,
-        narrative: `Victoire! Vous avez vaincu ${applyResult.endResult.enemies_defeated.join(', ')}.`,
-      });
-
-      response.combatEnd = combatEnd;
-
-      if (applyResult.endResult.xp_gained > 0) {
-        await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
-        this.logger.log(
-          `Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`,
-        );
-      }
-
-      try {
-        await this.conversationService.append(userId, characterId, {
-          role: 'assistant',
-          narrative: combatEnd.narrative,
-          instructions: [
-            {
-              type: 'combat_end',
-              combat_end: combatEnd,
-            },
-          ],
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
-        );
-      }
+      await this.handleCombatEnd(userId, characterId, applyResult, finalState, response);
     }
+
+    // In processSpellAttack, replace the selection with:
+    await this.handleCombatEnd(userId, characterId, applyResult, finalState, response);
+
 
     this.logger.log(
       `Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`,
@@ -378,6 +351,48 @@ export class CombatOrchestrator {
     return response;
   }
 
+  private async handleCombatEnd(
+    userId: string,
+    characterId: string,
+    applyResult: { endResult?: { xp_gained?: number; enemies_defeated?: string[] } | undefined },
+    finalState: CombatStateDto,
+    response: AttackResponseDto,
+  ): Promise<void> {
+    if (!applyResult.endResult) return;
+
+    const end = applyResult.endResult;
+    const combatEnd = new CombatEndDto({
+      victory: true,
+      xp_gained: end.xp_gained ?? 0,
+      player_hp: finalState.player.hp,
+      enemies_defeated: end.enemies_defeated ?? [],
+      narrative: `Victoire! Vous avez vaincu ${(end.enemies_defeated ?? []).join(', ')}.`,
+    });
+
+    response.combatEnd = combatEnd;
+
+    if ((end.xp_gained ?? 0) > 0) {
+      await this.characterService.addXp(characterId, end.xp_gained!);
+      this.logger.log(`Applied ${end.xp_gained} XP to character ${characterId}`);
+    }
+
+    try {
+      await this.conversationService.append(userId, characterId, {
+        role: 'assistant',
+        narrative: combatEnd.narrative,
+        instructions: [
+          {
+            type: 'combat_end',
+            combat_end: combatEnd,
+          },
+        ],
+      });
+    } catch (e) {
+      this.logger.warn(
+        `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
+      );
+    }
+  }
   /**
    * End player turn and process all enemy attacks.
    * Returns attack logs for frontend to replay with animations.

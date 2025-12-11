@@ -28,16 +28,20 @@ export class GeminiTextService {
     if (this.chatClients.has(sessionId)) return;
 
     this.logger.debug(`Creating new chat client for session ${sessionId}`);
-
+    this.logger.debug(
+      `System instruction: ${initialHistory.map(message => message.narrative).join(', ')}...`,
+    );
+    const history = initialHistory.map(
+      message =>
+        ({
+          role: 'assistant' == message.role ? 'model' : 'user',
+          parts: [{ text: message.narrative }],
+        }) as Content,
+    );
+    this.logger.debug(history);
     const chat = this.client.chats.create({
       model: this.model,
-      history: initialHistory.map(
-        message =>
-          ({
-            role: 'assistant' == message.role ? 'model' : 'user',
-            content: message.narrative,
-          }) as Content,
-      ),
+      history,
       config: {
         systemInstruction,
         temperature: 0.7,

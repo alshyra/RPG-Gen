@@ -70,7 +70,8 @@ export class ChatController {
     const { user } = req;
     const userId = user._id.toString();
     this.logger.log(
-      `Received chat request for characterId ${characterId} with message: ${chatMessageDto}...`,
+      `Received chat request for characterId ${characterId} with message: `,
+      chatMessageDto
     );
 
     const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
