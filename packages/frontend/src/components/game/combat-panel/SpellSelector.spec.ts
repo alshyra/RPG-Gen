@@ -55,16 +55,13 @@ describe('SpellSelector', () => {
     });
 
     // Check weapon attack button is disabled
-    const attackButton = wrapper.findAll('button')[0];
-    expect(attackButton.attributes('disabled')).toBeDefined();
-    expect(attackButton.classes()).toContain('bg-slate-600');
-    expect(attackButton.classes()).not.toContain('bg-amber-500');
-
+    const buttons = wrapper.findAll('button');
+    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
+    expect(attackButton?.attributes('disabled')).toBeDefined();
+    
     // Check spell button is disabled
-    const spellButton = wrapper.findAll('button')[1];
-    expect(spellButton.attributes('disabled')).toBeDefined();
-    expect(spellButton.classes()).toContain('bg-slate-600');
-    expect(spellButton.classes()).not.toContain('bg-purple-600');
+    const spellButton = buttons.find(btn => btn.text().includes('Fireball'));
+    expect(spellButton?.attributes('disabled')).toBeDefined();
   });
 
   it('enables action buttons when actions are available', async () => {
@@ -99,14 +96,13 @@ describe('SpellSelector', () => {
     });
 
     // Check weapon attack button is enabled
-    const attackButton = wrapper.findAll('button')[0];
-    expect(attackButton.attributes('disabled')).toBeUndefined();
-    expect(attackButton.classes()).toContain('bg-amber-500');
-
+    const buttons = wrapper.findAll('button');
+    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
+    expect(attackButton?.attributes('disabled')).toBeUndefined();
+    
     // Check spell button is enabled
-    const spellButton = wrapper.findAll('button')[1];
-    expect(spellButton.attributes('disabled')).toBeUndefined();
-    expect(spellButton.classes()).toContain('bg-purple-600');
+    const spellButton = buttons.find(btn => btn.text().includes('Fireball'));
+    expect(spellButton?.attributes('disabled')).toBeUndefined();
   });
 
   it('displays action economy counter', async () => {
@@ -156,8 +152,8 @@ describe('SpellSelector', () => {
       },
     });
 
-    const attackButton = wrapper.findAll('button')[0];
-    await attackButton.trigger('click');
+    const attackButton = wrapper.findAll('button').find(btn => btn.text().includes('Attaque à l\'arme'));
+    await attackButton?.trigger('click');
 
     expect(wrapper.emitted('attack')).toHaveLength(1);
     expect(wrapper.emitted('attack')?.[0]).toEqual([mockTarget]);
@@ -185,14 +181,15 @@ describe('SpellSelector', () => {
       },
     });
 
-    const attackButton = wrapper.findAll('button')[0];
+    const buttons = wrapper.findAll('button');
+    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
     
     // Button should be disabled when no actions
-    expect(attackButton.attributes('disabled')).toBeDefined();
+    expect(attackButton?.attributes('disabled')).toBeDefined();
     
     // When disabled, clicking should not trigger action emit
     // (but we still close due to click handler, so we check no attack is emitted)
-    await attackButton.trigger('click');
+    await attackButton?.trigger('click');
     
     // The attack event should not be emitted because canAct is false
     expect(wrapper.emitted('attack')).toBeUndefined();

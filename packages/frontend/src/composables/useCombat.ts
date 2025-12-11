@@ -4,6 +4,7 @@ import type {
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
@@ -15,6 +16,7 @@ import { conversationApi } from '@/apis/conversationApi';
  */
 
 export function useCombat() {
+  const router = useRouter();
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
@@ -199,6 +201,11 @@ export function useCombat() {
     if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
       combatStore.clearCombat();
+      // Navigate back to messages view
+      await router.push({
+        name: 'game',
+        params: { characterId: currentCharacter.value?.characterId },
+      });
       return;
     }
     gameStore.appendMessage('system', '🏆 Victoire!');
@@ -216,6 +223,11 @@ export function useCombat() {
         'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
     });
     gameStore.appendMessage('assistant', gmResponse.narrative);
+    // Navigate back to messages view after narration
+    await router.push({
+      name: 'game',
+      params: { characterId: currentCharacter.value?.characterId },
+    });
   };
 
   /**
@@ -229,6 +241,11 @@ export function useCombat() {
       await combatService.endCombat(character.characterId);
       gameStore.appendMessage('system', '🏃 Vous avez fui le combat.');
       combatStore.clearCombat();
+      // Navigate back to messages view
+      await router.push({
+        name: 'game',
+        params: { characterId: character.characterId },
+      });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to flee';
       gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);

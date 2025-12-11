@@ -14,6 +14,7 @@ import LoginView from '../views/LoginView.vue';
 import AuthCallbackView from '../views/AuthCallbackView.vue';
 import { authService } from '../apis/authApi';
 import CombatPanel from '@/components/game/combat-panel/CombatPanel.vue';
+import { useCombatStore } from '@/stores/combatStore';
 
 const routes = [
   {
@@ -97,7 +98,7 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard to check authentication
+// Navigation guard to check authentication and combat status
 router.beforeEach((to, _from, next) => {
   const isPublic = to.meta.public === true;
   const isAuthenticated = authService.isAuthenticated();
@@ -108,6 +109,17 @@ router.beforeEach((to, _from, next) => {
   } else if (to.name === 'login' && isAuthenticated) {
     // Redirect to home if already authenticated and trying to access login
     next({ name: 'home' });
+  } else if (to.name === 'game-combat') {
+    // Protect combat route: redirect to game messages if not in combat
+    const combatStore = useCombatStore();
+    if (!combatStore.inCombat) {
+      next({
+        name: 'game',
+        params: { characterId: to.params.characterId },
+      });
+    } else {
+      next();
+    }
   } else {
     next();
   }

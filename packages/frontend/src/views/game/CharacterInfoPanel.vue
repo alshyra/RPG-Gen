@@ -47,9 +47,11 @@
             Sorts
           </UiButton>
           <UiButton
+            :disabled="!inCombat"
             variant="ghost"
-            :to="{ name: 'game-combat', params: { characterId: currentCharacter.characterId } }"
+            :to="inCombat ? { name: 'game-combat', params: { characterId: currentCharacter.characterId } } : undefined"
             class="w-full text-left px-3 py-2"
+            :class="!inCombat && 'opacity-50 cursor-not-allowed'"
           >
             Combat
           </UiButton>
@@ -70,11 +72,14 @@ import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();
+const combatStore = useCombatStore();
 const ui = useUiStore();
 
 const { currentCharacter } = storeToRefs(characterStore);
+const { inCombat } = storeToRefs(combatStore);
 </script>
