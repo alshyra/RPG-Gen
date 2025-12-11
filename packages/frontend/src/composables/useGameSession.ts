@@ -53,9 +53,8 @@ export const useGameSession = () => {
       } else {
         gameStore.appendMessage('system', '⚔️ Combat terminé.');
       }
-    } catch (e) {
+    } catch {
       gameStore.appendMessage('system', '⚠️ Impossible de vérifier le statut du combat.');
-      console.error('[useGameSession] failed to fetch combat status after combat_start', e);
     }
   };
 

@@ -18,14 +18,16 @@ describe('UiInputCheckbox Component', () => {
 
     // aria-checked should reflect the checked state
     expect(wrapper.find('[data-testid="ui-checkbox"]').attributes('aria-checked')).toBe('true');
-    expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(true);
+    const input = wrapper.find('input[type="checkbox"]').element as HTMLInputElement;
+    expect(input.checked).toBe(true);
   });
 
   it('should not be checked when checked prop is false', () => {
     const wrapper = mount(UiInputCheckbox, {
       props: { checked: false, name: 'test-checkbox' },
     });
-    expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(false);
+    const input = wrapper.find('input[type="checkbox"]').element as HTMLInputElement;
+    expect(input.checked).toBe(false);
   });
 
   it('should emit change event when checkbox is toggled', async () => {
@@ -41,14 +43,16 @@ describe('UiInputCheckbox Component', () => {
     const wrapper = mount(UiInputCheckbox, {
       props: { disabled: true, name: 'test-checkbox' },
     });
-    expect(wrapper.find('input[type="checkbox"]').element.disabled).toBe(true);
+    const input = wrapper.find('input[type="checkbox"]').element as HTMLInputElement;
+    expect(input.disabled).toBe(true);
   });
 
   it('should not be disabled when disabled prop is false', () => {
     const wrapper = mount(UiInputCheckbox, {
       props: { disabled: false, name: 'test-checkbox' },
     });
-    expect(wrapper.find('input[type="checkbox"]').element.disabled).toBe(false);
+    const input = wrapper.find('input[type="checkbox"]').element as HTMLInputElement;
+    expect(input.disabled).toBe(false);
   });
 
   it('should render different sizes from props', () => {
@@ -69,7 +73,8 @@ describe('UiInputCheckbox Component', () => {
     });
 
     // checkbox starts unchecked
-    expect(wrapper.find('input[type="checkbox"]').element.checked).toBe(false);
+    const input = wrapper.find('input[type="checkbox"]').element as HTMLInputElement;
+    expect(input.checked).toBe(false);
     await wrapper.find('label').trigger('click');
 
     // After click, should emit update

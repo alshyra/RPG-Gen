@@ -76,6 +76,7 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCombat } from '@/composables/useCombat';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
@@ -89,6 +90,7 @@ const props = defineProps<{
 const characterStore = useCharacterStore();
 const combatStore = useCombatStore();
 const { endTurn } = useCombatEngine();
+const {executeAttack} = useCombat();
 const { currentCharacter } = storeToRefs(characterStore);
 const { actionRemaining, actionMax } = storeToRefs(combatStore);
 
@@ -118,15 +120,13 @@ const attackWithWeapon = () => {
   close();
 };
 
-const castSpell = (spellName: string) => {
-  if (props.target && canAct.value) {
-    emit('attack', props.target, spellName);
-  }
+const castSpell = async (spellName: string) => {
+  if (!props.target || !canAct.value) throw new Error('No target or cannot act');
+  await executeAttack(props.target, spellName);
   close();
 };
 
 const onEndTurn = () => {
-  if (!canAct.value) return;
   emit('close');
   endTurn();
 };

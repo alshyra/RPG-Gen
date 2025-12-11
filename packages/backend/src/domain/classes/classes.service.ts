@@ -16,9 +16,9 @@ interface ClassLevelData {
     cantripsKnown?: number;
     spellsKnown?: number;
     spellSlots?: Record<string, number>;
-    features: any[];
-    choices: any[];
-    unlockedSpells: any[];
+    features: unknown[];
+    choices: unknown[];
+    unlockedSpells: unknown[];
   }[];
   allowedSpellsByLevel: Record<string, { name: string; definitionId: string }[]>;
 }

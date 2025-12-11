@@ -33,6 +33,7 @@ export function useCombat() {
 
   // Interaction controller for drag-and-drop
   let interactionController: ReturnType<typeof setupInteractionController> | null = null;
+  let handleUnitAttackedRef: ((payload: { attackerId: string; targetId: string; damage: number; isCrit?: boolean }) => void) | null = null;
 
   const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
@@ -54,6 +55,55 @@ export function useCombat() {
     pixiApp.stage.sortableChildren = true;
     app.value = pixiApp;
 
+    // Listen to attack events from external callers to show floating indicators
+    handleUnitAttackedRef = (payload: { attackerId: string; targetId: string; damage: number; isCrit?: boolean }) => {
+      if (!app.value?.stage) return;
+      const u = units.value.get(payload.targetId);
+      if (!u || !u.sprite) return;
+
+      const x = u.sprite.x;
+      const y = (u.healthBar?.container?.y ?? u.sprite.y) - 20;
+
+      const isMiss = !payload.damage || payload.damage <= 0;
+      const label = isMiss ? 'Miss' : payload.isCrit ? `CRIT! -${payload.damage}` : `-${payload.damage}`;
+
+      const textStyle = new PIXI.TextStyle({
+        fontFamily: 'Arial',
+        fontSize: payload.isCrit ? 28 : 20,
+        fill: isMiss ? '#9ca3af' : payload.isCrit ? '#ffdd57' : '#ffffff',
+        stroke: {
+          color: '#000000',
+          width: 4,
+        },
+        dropShadow: {
+          color: '#000000',
+          blur: 6,
+        },
+      });
+
+      const text = new PIXI.Text({ text: label, style: textStyle });
+      text.anchor.set(0.5);
+      text.x = x;
+      text.y = y;
+      text.zIndex = 1000;
+      app.value.stage.addChild(text);
+
+      // Animate: float up and fade out
+      gsap.to(text, {
+        y: y - 40,
+        alpha: 0,
+        duration: 1.0,
+        ease: 'power2.out',
+        onComplete: () => {
+          if (text && text.parent) text.parent.removeChild(text);
+          // @ts-ignore
+          text.destroy({ children: true, texture: false, baseTexture: false });
+        },
+      });
+    };
+
+    on('unit:attacked', handleUnitAttackedRef);
+
     gridContainer.value = createGrid(app.value);
     rangeOverlay.value = createRangeOverlay(app.value);
   };
@@ -64,7 +114,10 @@ export function useCombat() {
     await preloadHeartIcon();
     // wire interaction controller
     if (app.value) {
-      interactionController = setupInteractionController(app.value, () => units.value, {
+      // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
+    // The type system needs help here due to Vue's Ref wrapping
+      const unitsRef = units as unknown as typeof units;
+      interactionController = setupInteractionController(app.value, () => unitsRef.value, {
         pixelToGrid,
         gridToPixel,
         showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
@@ -252,8 +305,11 @@ export function useCombat() {
     interactionController = null;
     if (!app.value) return;
     app.value.destroy(true);
+    // remove global listeners to avoid leaks
+    if (handleUnitAttackedRef) {
+      off('unit:attacked', handleUnitAttackedRef);
+    }
   });
-
   return {
     init,
     createUnit,
@@ -263,5 +319,6 @@ export function useCombat() {
     on,
     off,
     emit,
+    getApp: () => app.value,
   };
-}
+};

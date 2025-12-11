@@ -41,3 +41,5 @@ export const animations: Record<string, AnimConfig> = Object.entries(ANIM_TYPES)
   }, {});
 
 console.log('Loaded animations config:', animations);
+
+export const getAnimationConfig = () => animations;

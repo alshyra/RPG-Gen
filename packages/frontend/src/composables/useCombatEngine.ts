@@ -23,6 +23,7 @@ export interface CombatArenaApi {
     maxHp: number,
     isPlayer: boolean,
   ) => Promise<unknown>;
+  clearAllUnits: () => Promise<void>;
   updateUnitHealth: (unitId: string, damage: number) => void;
   moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
   setupDragEvents: () => void;
@@ -46,7 +47,7 @@ export function useCombatEngine() {
   const combatStore = useCombatStore();
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
-  const { enemies, player, isEndingTurn } = storeToRefs(combatStore);
+  const { enemies, player, isEndingTurn, currentAttackView } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
 
   // Reference to the CombatArena component API (set via registerArena)
@@ -110,8 +111,6 @@ export function useCombatEngine() {
           'system',
           "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
         );
-      } else {
-        console.error('Failed to end turn', e);
       }
     } finally {
       isEndingTurn.value = false;
@@ -150,6 +149,26 @@ export function useCombatEngine() {
       handler: handleUnitClicked as (...args: unknown[]) => void,
     });
   };
+
+  // Watch for player's attack results coming from the combat store and trigger visual indicators
+  // The store sets `currentAttackView` when an attack is processed (see useCombat.processAttackResult)
+  watch(
+    () => (typeof currentAttackView === 'undefined' ? null : currentAttackView.value),
+    attackView => {
+      if (!attackView || !arenaApi.value || !attackView.targetId) return;
+      // Emit engine event so the visual engine can display hit/miss/crit and damage
+      try {
+        arenaApi.value.emit('unit:attacked', {
+          attackerId: attackView.attackerId ?? 'player',
+          targetId: attackView.targetId,
+          damage: attackView.totalDamage ?? 0,
+          isCrit: !!attackView.critical,
+        });
+      } catch (e) {
+        console.warn('[useCombatEngine] Failed to emit unit:attacked', e);
+      }
+    },
+  );
 
   /**
    * Execute an attack (weapon or spell)
@@ -218,6 +237,9 @@ export function useCombatEngine() {
    */
   const initializeVisual = async () => {
     if (!arenaApi.value || !combatStore.inCombat) return;
+
+    // Clear old units before re-initializing
+    await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter.value?.characterId ?? '',

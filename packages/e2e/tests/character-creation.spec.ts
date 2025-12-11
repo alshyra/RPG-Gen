@@ -99,14 +99,14 @@ test.describe('Character creation single flow', () => {
     // Spells - Step 4
     // Click on spell labels to select them (Vue custom checkbox behavior)
     // Cantrips (choose 2): Main de mage, Message
-    await page.locator('label:has-text("Main de mage")').click();
-    await page.locator('label:has-text("Message")').click();
+    await page.locator('label:has-text("Main de mage")').first().click();
+    await page.locator('[for="spell-Message"]').click();
 
     // Level-1 spells (choose 4): Mot de guérison, Soins, Murmures dissonants, Sommeil
-    await page.locator('label:has-text("Mot de guérison")').click();
-    await page.locator('label:has-text("Soins")').click();
-    await page.locator('label:has-text("Murmures dissonants")').click();
-    await page.locator('label:has-text("Sommeil")').click();
+    await page.locator('[for="spell-Mot de guérison"]').click();
+    await page.locator('[for="spell-Soins"]').click();
+    await page.locator('[for="spell-Murmures dissonants"]').click();
+    await page.locator('[for="spell-Sommeil"]').click();
 
     await page.getByRole('button', { name: 'Suivant' }).click();
 

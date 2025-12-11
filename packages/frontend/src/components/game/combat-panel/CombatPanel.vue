@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
@@ -55,8 +55,6 @@ const {
   selectedTarget,
   executeAttack,
   closeActionModal,
-  handleAttackFromMenu,
-  handleSpellFromMenu,
   initializeVisual,
 } = useCombatEngine();
 
@@ -92,6 +90,19 @@ onMounted(async () => {
     }
   }
 });
+
+// Re-initialize visual when combat state changes significantly
+watch(
+  () => [combatStore.inCombat, combatStore.enemies.length, combatStore.player?.hp],
+  async ([inCombatNow]) => {
+    if (inCombatNow && arenaRef.value) {
+      // Small delay to ensure store updates propagate
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await initializeVisual();
+    }
+  },
+  { deep: false },
+);
 
 onUnmounted(() => {
   unregisterArena();

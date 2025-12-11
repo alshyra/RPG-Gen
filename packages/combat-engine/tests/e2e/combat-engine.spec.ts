@@ -66,13 +66,13 @@ test.describe('Combat Engine - Unit Display', () => {
     await page.waitForTimeout(2000);
 
     // Check if any unit creation messages were logged
-    const hasUnitLogs = consoleMsgs.some(
-      msg =>
-        msg.includes('Unit created') ||
-        msg.includes('createUnit') ||
-        msg.includes('enemy') ||
-        msg.includes('Combat engine initialisé'),
-    );
+    // const hasUnitLogs = consoleMsgs.some(
+    //   msg =>
+    //     msg.includes('Unit created') ||
+    //     msg.includes('createUnit') ||
+    //     msg.includes('enemy') ||
+    //     msg.includes('Combat engine initialisé'),
+    // );
 
     // At minimum, canvas should be visible and have dimensions
     const canvasBox = await canvas.boundingBox();

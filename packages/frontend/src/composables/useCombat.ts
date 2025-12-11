@@ -51,10 +51,29 @@ export function useCombat() {
 
     try {
       const payload = { combat_start: instruction.combat_start };
+      const currentHp = currentCharacter.value.hp ?? 0;
       const combatState = await combatStore.startCombat(
         currentCharacter.value.characterId,
         payload,
       );
+      
+      // Check if player took damage during initiative (enemy attacked first)
+      const newHp = combatState.player?.hp ?? currentHp;
+      const initialDamage = currentHp - newHp;
+      if (initialDamage > 0) {
+        gameStore.appendMessage(
+          'system',
+          `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
+        );
+        // Sync HP to character store
+        characterStore.updateHp(-initialDamage);
+      }
+      currentCharacter.value.hp = combatState.player?.hp ?? currentCharacter.value.hp;
+      if ((currentCharacter.value.hp ?? 1) <= 0) {
+        characterStore.showDeathModal = true;
+      }
+
+      
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
       await router.push({
@@ -168,11 +187,8 @@ export function useCombat() {
     if (!currentCharacter.value) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
-    if (!combatStore.canPlayerAct || !combatStore.isPlayerTurn) {
-      gameStore.appendMessage(
-        'system',
-        "Vous ne pouvez pas attaquer pour le moment — plus d'actions ou ce n'est pas votre tour.",
-      );
+    if (!combatStore.canPlayerAct) {
+      gameStore.appendMessage('system', `⚠️ Vous n'avez plus de points d'action disponibles.`);
       return;
     }
 

@@ -53,7 +53,15 @@ export const useCombatStore = defineStore('combatStore', () => {
     return turnOrder.value[currentTurnIndex.value] ?? null;
   });
 
-  const isPlayerTurn = computed(() => currentCombatant.value?.isPlayer ?? false);
+  const isPlayerTurn = computed(() => {
+    const cc = currentCombatant.value;
+    if (!cc) return false;
+    if (typeof cc.isPlayer === 'boolean') return cc.isPlayer;
+    if (player.value && cc.id) return cc.id === player.value.id;
+    if (player.value && cc.name && player.value.name) return cc.name === player.value.name;
+    return false;
+  });
+
   const canPlayerAct = computed(() => !isProcessingEnemyTurn.value && canAct.value);
 
   const setCombatParticipants = (response: CombatStateDto): void => {
@@ -251,8 +259,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     canAct,
     canBonusAct,
     canPlayerAct,
-    currentCombatant,
     isPlayerTurn,
+    currentCombatant,
     isProcessingEnemyTurn,
     currentEnemyAttackLog,
     currentPlayerAttackLog,

@@ -12,7 +12,8 @@ describe('UiInputText Component', () => {
     const wrapper = mount(UiInputText, {
       props: { modelValue: 'Test Value' },
     });
-    expect(wrapper.find('input[type="text"]').element.value).toBe('Test Value');
+    const input = wrapper.find('input[type="text"]').element as HTMLInputElement;
+    expect(input.value).toBe('Test Value');
   });
 
   it('should emit update:modelValue when text is entered', async () => {
@@ -40,13 +41,15 @@ describe('UiInputText Component', () => {
     const wrapper = mount(UiInputText, {
       props: { disabled: true },
     });
-    expect(wrapper.find('input[type="text"]').element.disabled).toBe(true);
+    const input = wrapper.find('input[type="text"]').element as HTMLInputElement;
+    expect(input.disabled).toBe(true);
   });
 
   it('should not be disabled when disabled prop is false', () => {
     const wrapper = mount(UiInputText, {
       props: { disabled: false },
     });
-    expect(wrapper.find('input[type="text"]').element.disabled).toBe(false);
+    const input = wrapper.find('input[type="text"]').element as HTMLInputElement;
+    expect(input.disabled).toBe(false);
   });
 });

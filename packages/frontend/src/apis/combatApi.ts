@@ -61,21 +61,9 @@ class CombatService {
         },
       });
 
-      if (response.error) {
-        const errorMsg =
-          response.error instanceof Error ? response.error.message : String(response.error);
-        throw new Error(
-          `combatApi.attack failed (characterId=${characterId}, targetId=${target.id}): ${errorMsg}`,
-        );
-      }
-
-      if (!response.data) {
-        throw new Error(
-          `combatApi.attack: no data in response (characterId=${characterId}, targetId=${target.id})`,
-        );
-      }
-
-      return response.data;
+      // Use the getData helper which properly handles response errors
+      const result = getData<AttackResponseDto>(response);
+      return result;
     } catch (err) {
       // Re-throw with context if not already a contextualized error
       if (err instanceof Error && err.message.includes('combatApi.attack')) {

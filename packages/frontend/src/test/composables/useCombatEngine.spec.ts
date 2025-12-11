@@ -73,6 +73,7 @@ describe('useCombatEngine', () => {
       handlers,
       init: vi.fn().mockResolvedValue(undefined),
       createUnit: vi.fn().mockResolvedValue({}),
+      clearAllUnits: vi.fn().mockResolvedValue(undefined),
       updateUnitHealth: vi.fn(),
       moveUnitToGrid: vi.fn(),
       setupDragEvents: vi.fn(),
@@ -115,6 +116,8 @@ describe('useCombatEngine', () => {
     mockApi.emit('unit:clicked', {
       unitId: 'enemy-1',
       isPlayer: false,
+      stageX: 100,
+      stageY: 100,
     });
 
     expect(isActionModalOpen.value).toBe(true);
@@ -136,6 +139,8 @@ describe('useCombatEngine', () => {
     mockApi.emit('unit:clicked', {
       unitId: 'player-1',
       isPlayer: true,
+      stageX: 50,
+      stageY: 50,
     });
 
     expect(isActionModalOpen.value).toBe(false);
@@ -150,6 +155,8 @@ describe('useCombatEngine', () => {
     mockApi.emit('unit:clicked', {
       unitId: 'enemy-1',
       isPlayer: false,
+      stageX: 100,
+      stageY: 100,
     });
 
     expect(isActionModalOpen.value).toBe(true);

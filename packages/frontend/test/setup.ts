@@ -32,7 +32,7 @@ if (shouldMockLocalStorage) {
 
 // Basic matchMedia stub
 if (typeof window !== 'undefined' && !window.matchMedia) {
-  (window as any).matchMedia = function matchMedia() {
+  (window as unknown).matchMedia = function matchMedia() {
     return {
       matches: false,
       addEventListener: () => {},

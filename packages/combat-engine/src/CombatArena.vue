@@ -14,7 +14,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import type * as PIXI from 'pixi.js';
 import { useCombat } from './composable/useCombat';
+import { useUnitsStore } from './stores/units';
 
 const props = withDefaults(
   defineProps<{
@@ -30,6 +32,7 @@ const props = withDefaults(
 const pixiCombat = useCombat();
 const { init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid } =
   pixiCombat;
+const appRef = ref<PIXI.Application | null>(null);
 
 // Références
 const pixiContainer = ref<HTMLDivElement | null>(null);
@@ -40,6 +43,7 @@ onMounted(async () => {
 
   // Demo initialization
   await init(pixiContainer.value);
+  appRef.value = pixiCombat.getApp();
   await createUnit('player', 6, 4, 3, 'Archer-Green', 100, 100, true);
   await createUnit('enemy-1', 2, 4, 3, 'Warrior-Red', 80, 100, false);
   setupDragEvents();
@@ -47,8 +51,12 @@ onMounted(async () => {
 
 // Cleanup on unmount to prevent memory leaks
 onBeforeUnmount(() => {
-  if (pixiCombat.app?.value) {
-    pixiCombat.app.value.destroy(true, { children: true, texture: false, textureSource: false });
+  if (appRef.value) {
+    try {
+      appRef.value.destroy(true, { children: true, texture: false, textureSource: false });
+    } catch {
+      // Already destroyed
+    }
   }
 });
 
@@ -58,11 +66,17 @@ defineExpose({
   init: async (container?: HTMLDivElement) => {
     const target = container ?? pixiContainer.value;
     if (!target) throw new Error('No container for CombatArena init');
-    return init(target);
+    await init(target);
+    appRef.value = pixiCombat.getApp();
+    return;
   },
 
   // Unit management
   createUnit,
+  clearAllUnits: async () => {
+    // Clear units from store (visual units will be recreated)
+    useUnitsStore().clearAllUnits();
+  },
   updateUnitHealth,
   moveUnitToGrid,
   setupDragEvents,
@@ -78,14 +92,15 @@ defineExpose({
   // Get unit count for testing
   getUnitCount: () => {
     // Count units that have been created in the scene
-    const stage = pixiCombat.app?.value?.stage;
-    if (!stage) return 0;
+    const app = pixiCombat.getApp();
+    if (!app) return 0;
+    const stage = app.stage;
 
     // Filter for CombatUnit sprites (they have zIndex set)
     let unitCount = 0;
-    stage.children.forEach(child => {
+    stage.children.forEach((child: unknown) => {
       const obj = child as unknown as { zIndex?: unknown };
-      if ('zIndex' in child && typeof obj.zIndex === 'number') {
+      if ('zIndex' in (child as object) && typeof obj.zIndex === 'number') {
         unitCount++;
       }
     });

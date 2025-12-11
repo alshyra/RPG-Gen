@@ -14,10 +14,16 @@ export const useUnitsStore = defineStore('units', () => {
     return playerUnitIds.value.has(unitId);
   };
 
+  const clearAllUnits = () => {
+    units.value.clear();
+    playerUnitIds.value.clear();
+  };
+
   return {
     units,
     playerUnitIds,
     registerPlayerUnit,
     isPlayerUnit,
+    clearAllUnits,
   };
 });
