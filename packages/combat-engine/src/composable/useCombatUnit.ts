@@ -1,5 +1,6 @@
 import { useUnitsStore } from '../stores/units';
 import { storeToRefs } from 'pinia';
+import { markRaw } from 'vue';
 import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from 'pixi.js';
 
 /**
@@ -22,7 +23,7 @@ export const useCombatUnit = () => {
   ) => {
     const healthBar = createHealthBar(hp, maxHp);
 
-    units.value.set(unitId, {
+    const entry = markRaw({
       sprite,
       animations,
       gridX,
@@ -32,6 +33,8 @@ export const useCombatUnit = () => {
       maxHp,
       healthBar,
     });
+
+    units.value.set(unitId, entry);
 
     // Return healthBar so caller can add it to the stage and position it
     return healthBar;
