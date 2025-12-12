@@ -2,6 +2,7 @@ import { useUnitsStore } from '../stores/units';
 import { storeToRefs } from 'pinia';
 import { markRaw } from 'vue';
 import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from 'pixi.js';
+import { animations } from '../services/spritesAnimations';
 
 /**
  * Unit service returns a tiny API working on an injected Map<string, UnitData>.
@@ -10,6 +11,9 @@ import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Asset
 export const useCombatUnit = () => {
   const unitsStore = useUnitsStore();
   const { units } = storeToRefs(unitsStore);
+  const greenColor = 0x00ff00;
+  const yellowColor = 0xffff00;
+  const redColor = 0xff0000;
 
   const createUnitEntry = (
     unitId: string,
@@ -40,7 +44,7 @@ export const useCombatUnit = () => {
     // Return healthBar so caller can add it to the stage and position it
     return healthBar;
   };
-  // HealthBar factory now lives with the unit service
+
   const createHealthBar = (hp: number, maxHp: number) => {
     const container = new Container();
     container.zIndex = 2;
@@ -53,7 +57,7 @@ export const useCombatUnit = () => {
 
     const fill = new Graphics();
     const ratio = Math.max(0, Math.min(1, hp / maxHp));
-    const color = ratio > 0.5 ? 0x00ff00 : ratio > 0.25 ? 0xffff00 : 0xff0000;
+    const color = ratio > 0.5 ? greenColor : ratio > 0.25 ? yellowColor : redColor;
     fill.rect(xBarOffset, 0, 50 * ratio, 8);
     fill.fill({ color });
     container.addChild(fill);
@@ -84,11 +88,13 @@ export const useCombatUnit = () => {
     }
 
     const update = (newHp: number) => {
-      const r = Math.max(0, Math.min(1, newHp / maxHp));
-      const c = r > 0.5 ? 0x00ff00 : r > 0.25 ? 0xffff00 : 0xff0000;
+      const hpPercentage = Math.max(0, Math.min(1, newHp / maxHp));
+
+      const healthStatusColor =
+        hpPercentage > 0.5 ? greenColor : hpPercentage > 0.25 ? yellowColor : redColor;
       fill.clear();
-      fill.rect(0, 0, 50 * r, 8);
-      fill.fill({ color: c });
+      fill.rect(0, 0, 50 * hpPercentage, 8);
+      fill.fill({ color: healthStatusColor });
       // BitmapText update depending on font atlas
       text.text = `${newHp}/${maxHp}`;
 
@@ -122,8 +128,29 @@ export const useCombatUnit = () => {
   const updateHp = (unitId: string, newHp: number) => {
     const unit = units.value.get(unitId);
     if (!unit) throw new Error(`updateHp: unit ${unitId} not found`);
-    unit.hp = Math.max(0, Math.min(newHp, unit.maxHp));
-    if (unit.healthBar?.update) unit.healthBar.update(unit.hp);
+    if (unit.healthBar?.update) unit.healthBar.update(newHp);
+
+    const deathKey = 'death_bottom' as const;
+    const deathTextures = unit.animations[deathKey];
+    const deathConfig = animations[deathKey];
+
+    if (deathTextures && deathConfig) {
+      unit.sprite.textures = deathTextures;
+      unit.sprite.animationSpeed = deathConfig.speed;
+      unit.sprite.loop = false; // Play death animation only once
+      unit.sprite.play();
+
+      // After death animation completes, fade out
+      const deathDurationMs = (deathTextures.length / deathConfig.speed) * 1000;
+
+      gsap.to(unit.sprite, {
+        alpha: 0,
+        scale: 0.9,
+        duration: 0.8,
+        delay: deathDurationMs / 1000, // Wait for death animation to finish
+        ease: 'power2.in',
+      });
+    }
     return true;
   };
 

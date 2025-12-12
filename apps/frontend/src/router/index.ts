@@ -45,8 +45,13 @@ const routes = [
     component: GameView,
     children: [
       {
-        path: '',
+        path: 'game',
         name: 'game',
+        redirect: { name: 'game-message' },
+      },
+      {
+        path: 'messages',
+        name: 'game-message',
         component: MessagesView,
       },
       {

@@ -34,7 +34,7 @@ const ANIM_TYPES = {
 
 export type AnimType = keyof typeof ANIM_TYPES;
 
-export const animations: Record<string, AnimConfig> = Object.entries(ANIM_TYPES)
+export const animations: Record<`${AnimType}_${Direction}`, AnimConfig> = Object.entries(ANIM_TYPES)
   .flatMap(([animType, animCfg]) =>
     DIRECTIONS.map((dir, idx): [string, AnimConfig] => [
       `${animType}_${dir}`,

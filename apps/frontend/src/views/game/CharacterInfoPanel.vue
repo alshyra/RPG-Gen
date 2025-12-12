@@ -18,35 +18,35 @@
         <AbilityScores class="mt-3" />
         <div class="border-t border-slate-600 mt-3" />
         <nav class="p-3 space-y-2">
-          <UiButton
+          <AppRouterButton
             variant="ghost"
-            :to="{ name: 'game', params: { characterId: currentCharacter.characterId } }"
+            :to="{ name: 'game-message', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Messages
-          </UiButton>
-          <UiButton
+          </AppRouterButton>
+          <AppRouterButton
             variant="ghost"
             :to="{ name: 'game-inventory', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Inventaire
-          </UiButton>
-          <UiButton
+          </AppRouterButton>
+          <AppRouterButton
             variant="ghost"
             :to="{ name: 'game-skills', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Compétences
-          </UiButton>
-          <UiButton
+          </AppRouterButton>
+          <AppRouterButton
             variant="ghost"
             :to="{ name: 'game-spells', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Sorts
-          </UiButton>
-          <UiButton
+          </AppRouterButton>
+          <AppRouterButton
             :disabled="!inCombat"
             variant="ghost"
             :to="
@@ -58,23 +58,23 @@
             :class="!inCombat && 'opacity-50 cursor-not-allowed'"
           >
             Combat
-          </UiButton>
-          <UiButton
+          </AppRouterButton>
+          <AppRouterButton
             variant="ghost"
             :to="{ name: 'game-quest', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
             Journal
-          </UiButton>
+          </AppRouterButton>
         </nav>
       </div>
     </div>
   </aside>
 </template>
 <script setup lang="ts">
+import AppRouterButton from '@/components/AppRouterButton.vue';
 import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
-import { UiButton } from '@rpg-gen/ui';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';

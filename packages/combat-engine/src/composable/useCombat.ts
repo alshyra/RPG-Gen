@@ -2,7 +2,7 @@ import { shallowRef, onUnmounted, markRaw } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
 import { GRID_CONFIG, type availableCharacterKeys } from '../types/combat-types';
-import { animations as animationConfig } from '../services/spritesAnimations';
+import { animations as animationConfig, animations } from '../services/spritesAnimations';
 
 // New modules
 import { loadTextures, preloadFont, preloadHeartIcon } from '../services/assets/assetManager';
@@ -22,7 +22,7 @@ import { useEventBus } from '../services/eventBus';
 
 export function useCombat() {
   // PERFORMANCE: Use shallowRef for PIXI objects to avoid deep reactivity
-  const app = shallowRef<PIXI.Application | null>(null);
+  const combatPixiInstance = shallowRef<PIXI.Application | null>(null);
   const gridContainer = shallowRef<PIXI.Container | null>(null);
   const rangeOverlay = shallowRef<PIXI.Container | null>(null);
   const unitStore = useUnitsStore();
@@ -43,7 +43,7 @@ export function useCombat() {
     | null = null;
 
   const initApp = async (container: HTMLDivElement) => {
-    if (app.value) return;
+    if (combatPixiInstance.value) return;
 
     // PERFORMANCE: markRaw to prevent Vue from making PIXI app reactive
     const pixiApp = markRaw(new PIXI.Application());
@@ -60,7 +60,7 @@ export function useCombat() {
     container.appendChild(pixiApp.canvas);
 
     pixiApp.stage.sortableChildren = true;
-    app.value = pixiApp;
+    combatPixiInstance.value = pixiApp;
 
     // Listen to attack events from external callers to show floating indicators
     handleUnitAttackedRef = (payload: {
@@ -69,7 +69,7 @@ export function useCombat() {
       damage: number;
       isCrit?: boolean;
     }) => {
-      if (!app.value?.stage) return;
+      if (!combatPixiInstance.value?.stage) return;
       const u = units.value.get(payload.targetId);
       if (!u || !u.sprite) return;
 
@@ -102,7 +102,7 @@ export function useCombat() {
       text.x = x;
       text.y = y;
       text.zIndex = 1000;
-      app.value.stage.addChild(text);
+      combatPixiInstance.value.stage.addChild(text);
 
       // Animate: float up and fade out
       gsap.to(text, {
@@ -120,8 +120,8 @@ export function useCombat() {
 
     on('unit:attacked', handleUnitAttackedRef);
 
-    gridContainer.value = createGrid(app.value);
-    rangeOverlay.value = createRangeOverlay(app.value);
+    gridContainer.value = createGrid(combatPixiInstance.value);
+    rangeOverlay.value = createRangeOverlay(combatPixiInstance.value);
   };
 
   const init = async (container: HTMLDivElement) => {
@@ -129,10 +129,10 @@ export function useCombat() {
     await preloadFont();
     await preloadHeartIcon();
     // wire interaction controller
-    if (app.value) {
+    if (combatPixiInstance.value) {
       // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      interactionController = setupInteractionController(app.value, () => units.value as any, {
+      interactionController = setupInteractionController(combatPixiInstance.value, () => units.value as any, {
         pixelToGrid,
         gridToPixel,
         showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
@@ -154,7 +154,7 @@ export function useCombat() {
     maxHp = 100,
     isPlayerUnit = false,
   ) => {
-    if (!app.value) return null;
+    if (!combatPixiInstance.value) return null;
     const animations = await loadTextures(characterKey);
     const idleKey = 'idle_bottom';
     if (!animations[idleKey] || animations[idleKey].length === 0) {
@@ -174,7 +174,7 @@ export function useCombat() {
     sprite.cursor = 'pointer';
 
     sprite.play();
-    app.value.stage.addChild(sprite);
+    combatPixiInstance.value.stage.addChild(sprite);
 
     // IMPORTANT: Store unit in Pinia BEFORE attaching pointer handlers,
     // so that interactionController can find it when startDrag is called
@@ -190,7 +190,7 @@ export function useCombat() {
     );
     if (healthBar?.container) {
       healthBar.container.position.set(x, y - 40);
-      app.value.stage.addChild(healthBar.container);
+      combatPixiInstance.value.stage.addChild(healthBar.container);
     }
 
     // Register player unit in store if applicable
@@ -234,25 +234,25 @@ export function useCombat() {
   };
 
   const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
-    const u = units.value.get(unitId);
-    if (!u || !app.value) return;
+    const unit = units.value.get(unitId);
+    if (!unit || !combatPixiInstance.value) return;
 
     // Validate that target is within movement range (Manhattan distance)
-    const distance = Math.abs(targetGridX - u.gridX) + Math.abs(targetGridY - u.gridY);
-    if (distance > u.maxMoveRange) {
+    const distance = Math.abs(targetGridX - unit.gridX) + Math.abs(targetGridY - unit.gridY);
+    if (distance > unit.maxMoveRange) {
       console.warn(
-        `[useCombat] Move rejected: distance ${distance} exceeds max range ${u.maxMoveRange} for unit ${unitId}`,
+        `[useCombat] Move rejected: distance ${distance} exceeds max range ${unit.maxMoveRange} for unit ${unitId}`,
       );
       // Revert sprite position to current grid location
-      const { x: currentX, y: currentY } = gridToPixel(u.gridX, u.gridY);
-      gsap.to(u.sprite, {
+      const { x: currentX, y: currentY } = gridToPixel(unit.gridX, unit.gridY);
+      gsap.to(unit.sprite, {
         x: currentX,
         y: currentY,
         duration: 0.3,
         ease: 'power2.out',
       });
-      if (u.healthBar?.container) {
-        gsap.to(u.healthBar.container, {
+      if (unit.healthBar?.container) {
+        gsap.to(unit.healthBar.container, {
           x: currentX,
           y: currentY - 40,
           duration: 0.3,
@@ -262,49 +262,48 @@ export function useCombat() {
       return;
     }
 
-    const { sprite, animations } = u;
     const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
-    const dx = targetGridX - u.gridX;
-    const dy = targetGridY - u.gridY;
+    const dx = targetGridX - unit.gridX;
+    const dy = targetGridY - unit.gridY;
     const dir = getDirectionFromDelta(dx, dy);
 
-    const walkKey = `walk_${dir}`;
-    const walkTextures = animations[walkKey];
-    const walkConfig = animationConfig[walkKey];
+    const walkKey = `walk_${dir}` as const;
+    const walkTextures = unit.animations[walkKey];
+    const walkConfig = animations[walkKey];
 
     if (walkTextures && walkTextures.length > 0 && walkConfig) {
-      sprite.textures = walkTextures;
-      sprite.animationSpeed = walkConfig.speed;
-      sprite.play();
+      unit.sprite.textures = walkTextures;
+      unit.sprite.animationSpeed = walkConfig.speed;
+      unit.sprite.play();
     }
 
-    gsap.to(sprite, {
+    gsap.to(unit.sprite, {
       x: targetX,
       y: targetY,
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        const idleKey = `idle_${dir}`;
-        const idleTextures = animations[idleKey];
-        const idleConfig = animationConfig[idleKey];
+        const idleKey = `idle_${dir}` as const;
+        const idleTextures = unit.animations[idleKey];
+        const idleConfig = animations[idleKey];
 
         if (idleTextures && idleTextures.length > 0 && idleConfig) {
-          sprite.textures = idleTextures;
-          sprite.animationSpeed = idleConfig.speed;
-          sprite.loop = true;
-          sprite.play();
+          unit.sprite.textures = idleTextures;
+          unit.sprite.animationSpeed = idleConfig.speed;
+          unit.sprite.loop = true;
+          unit.sprite.play();
         }
         combatUnit.moveUnitState(unitId, targetGridX, targetGridY);
-        if (u.healthBar?.container) u.healthBar.container.position.set(targetX, targetY - 40);
+        if (unit.healthBar?.container) unit.healthBar.container.position.set(targetX, targetY - 40);
         emit('turn:ended', { roundNumber: 0 }); // placeholder emit, adapt if needed
       },
     });
   };
 
   const updateUnitHealth = (unitId: string, damage: number) => {
-    const u = units.value.get(unitId);
-    if (!u) return;
-    const newHp = Math.max(0, u.hp - damage);
+    const unit = units.value.get(unitId);
+    if (!unit) return;
+    const newHp = Math.max(0, unit.hp - damage);
     const wasDefeated = newHp === 0;
 
     combatUnit.updateHp(unitId, newHp);
@@ -313,44 +312,13 @@ export function useCombat() {
       targetId: unitId,
       damage,
     });
-
-    // Add visual impact when unit is defeated
-    if (wasDefeated && u.sprite && app.value) {
-      const { sprite, animations: unitAnimations } = u;
-
-      // Try to play death animation if available
-      const deathKey = 'death_bottom'; // Default to bottom, could be enhanced to use last direction
-      const deathTextures = unitAnimations[deathKey];
-      const deathConfig = animationConfig[deathKey];
-
-      if (deathTextures && deathConfig) {
-        sprite.textures = deathTextures;
-        sprite.animationSpeed = deathConfig.speed;
-        sprite.loop = false; // Play death animation only once
-        sprite.play();
-
-        // After death animation completes, fade out
-        const deathDurationMs = (deathTextures.length / deathConfig.speed) * 1000;
-
-        gsap.to(sprite, {
-          alpha: 0,
-          scale: 0.9,
-          duration: 0.8,
-          delay: deathDurationMs / 1000, // Wait for death animation to finish
-          ease: 'power2.in',
-        });
-      }
-    }
-
     if (wasDefeated) emit('unit:died', { unitId });
   };
 
-  // wire setupDragEvents to stage-level handlers if needed (keeps compatibility)
   const setupDragEvents = () => {
-    if (!app.value) return;
-    app.value.stage.eventMode = 'static';
-    app.value.stage.hitArea = app.value.screen;
-    // event handlers are installed by interactionController during init
+    if (!combatPixiInstance.value) return;
+    combatPixiInstance.value.stage.eventMode = 'static';
+    combatPixiInstance.value.stage.hitArea = combatPixiInstance.value.screen;
   };
 
   /**
@@ -359,7 +327,7 @@ export function useCombat() {
    * doesn't leave orphaned sprites on the stage and avoids visual duplicates.
    */
   const clearAllUnits = () => {
-    if (!app.value) {
+    if (!combatPixiInstance.value) {
       unitStore.clearAllUnits();
       return;
     }
@@ -383,13 +351,16 @@ export function useCombat() {
 
   onUnmounted(() => {
     interactionController = null;
-    if (!app.value) return;
-    app.value.destroy(true);
+    if (!combatPixiInstance.value) return;
+    try {
+      combatPixiInstance.value.destroy(true);
+    } catch {}
     // remove global listeners to avoid leaks
     if (handleUnitAttackedRef) {
       off('unit:attacked', handleUnitAttackedRef);
     }
   });
+
   return {
     init,
     createUnit,
@@ -400,6 +371,6 @@ export function useCombat() {
     on,
     off,
     emit,
-    getApp: () => app.value,
+    getApp: () => combatPixiInstance.value,
   };
 }

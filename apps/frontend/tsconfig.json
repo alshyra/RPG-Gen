@@ -27,15 +27,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@ui/*": [
-        "../../packages/ui/src/*"
-      ],
-      "@rpg-gen/ui": [
-        "../../packages/ui/dist/index.d.ts"
-      ],
-      "@rpg-gen/ui/*": [
-        "../../packages/ui/dist/*"
       ]
     }
   },
