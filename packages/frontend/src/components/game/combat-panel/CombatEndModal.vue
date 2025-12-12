@@ -20,18 +20,19 @@
     </template>
 
     <template #footer>
-      <button
+      <UiButton
         @click="handleClose"
-        class="continue-button"
+        variant="primary"
       >
         Continuer
-      </button>
+      </UiButton>
     </template>
   </UiModal>
 </template>
 
 <script setup lang="ts">
 import UiModal from '@/components/ui/UiModal.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 
 withDefaults(
   defineProps<{
@@ -96,31 +97,5 @@ const handleClose = () => {
   color: #e0e0e0;
   font-style: italic;
   text-align: justify;
-}
-
-.continue-button {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  color: #000;
-  border: none;
-  padding: 12px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-}
-
-.continue-button:hover {
-  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
-}
-
-.continue-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
 }
 </style>
