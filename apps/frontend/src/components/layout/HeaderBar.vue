@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { useUiStore } from '@/stores/uiStore';
-import UiButton from '../ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 import UserProfile from './UserProfile.vue';
 
 const ui = useUiStore();

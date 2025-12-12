@@ -46,11 +46,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import UiModal from '../ui/UiModal.vue';
+import { UiModal, UiButton } from '@rpg-gen/ui';
 import { getCurrentLevel } from '../../utils/dndLevels';
 import { storeToRefs } from 'pinia';
 import { useCharacterStore } from '@/stores/characterStore';
-import UiButton from '../ui/UiButton.vue';
 
 import type { DeathModalProps, DeathModalEmits } from '@/interfaces';
 

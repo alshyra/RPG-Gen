@@ -43,7 +43,7 @@ import { useCombatStore } from '@/stores/combatStore';
 import { computed } from 'vue';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 import { DnDRulesService } from '@/services/dndRulesService';
-import UiXpBar from '../ui/UiXpBar.vue';
+import { UiXpBar } from '@rpg-gen/ui';
 import CharacterIllustration from './CharacterIllustration.vue';
 import { storeToRefs } from 'pinia';
 import type { InventoryItemForUi as InventoryItem } from '@/interfaces';

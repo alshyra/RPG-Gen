@@ -14,7 +14,7 @@
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import UiButton from '../ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 
 const emit = defineEmits<(e: 'send') => void>();
 

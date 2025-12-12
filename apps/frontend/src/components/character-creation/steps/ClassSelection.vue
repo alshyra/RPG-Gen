@@ -18,7 +18,7 @@
 import { CLASSES_LIST, DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import UiSelect from '../../ui/UiSelect.vue';
+import { UiSelect } from '@rpg-gen/ui';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);

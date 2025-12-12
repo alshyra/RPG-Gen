@@ -31,8 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import UiModal from '@/components/ui/UiModal.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiModal, UiButton } from '@rpg-gen/ui';
 
 withDefaults(
   defineProps<{

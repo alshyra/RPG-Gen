@@ -40,7 +40,7 @@ import useAbilityScores from '@/composables/useAbilityScores';
 import { ABILITIES } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import UiInputNumber from '../ui/UiInputNumber.vue';
+import { UiInputNumber } from '@rpg-gen/ui';
 
 const props = defineProps<{
   mode?: 'edit' | 'levelup' | 'point-buy';

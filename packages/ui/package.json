@@ -17,7 +17,8 @@
     "src"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vue-tsc --emitDeclarationOnly --declaration --declarationDir dist && vite build",
+    "postbuild": "node ./scripts/postbuild.mjs || true",
     "test": "vitest --run",
     "type-check": "vue-tsc --noEmit"
   },

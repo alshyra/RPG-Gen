@@ -143,8 +143,7 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { InventoryItemDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { onBeforeUnmount, ref } from 'vue';
-import UiInputCheckbox from '../../ui/UiInputCheckbox.vue';
-import UiInputNumber from '../../ui/UiInputNumber.vue';
+import { UiInputCheckbox, UiInputNumber } from '@rpg-gen/ui';
 
 // Local type to allow string values for cost/weight which the schema incorrectly defines as Record<string, never>
 type LocalInventoryItem = Omit<InventoryItemDto, 'meta'> & {
