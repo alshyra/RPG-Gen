@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import UiButton from './UiButton.vue';
 import UiModal from './UiModal.vue';
-import { useModalState, _resolveModal } from '@/composables/useModal';
+import { useModalState, _resolveModal } from './useModal';
 
 const state = useModalState();
 

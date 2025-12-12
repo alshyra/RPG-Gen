@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiButtonToggle from '../../components/ui/UiButtonToggle.vue';
+import { UiButtonToggle } from '@rpg-gen/ui';
 
 describe('UiButtonToggle Component', () => {
   it('should render all options', () => {

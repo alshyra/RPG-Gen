@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiInputNumber from '../../components/ui/UiInputNumber.vue';
+import { UiInputNumber } from '@rpg-gen/ui';
 
 describe('UiInputNumber Component', () => {
   describe('Basic Rendering', () => {

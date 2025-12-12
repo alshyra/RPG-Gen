@@ -11,5 +11,5 @@
 
 <script setup lang="ts">
 import HeaderBar from './components/layout/HeaderBar.vue';
-import UiAlertModal from './components/ui/UiAlertModal.vue';
+import { UiAlertModal } from '@rpg-gen/ui';
 </script>

@@ -30,7 +30,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '../apis/authApi';
-import UiButton from '../components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 
 const router = useRouter();
 const loading = ref(true);

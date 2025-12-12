@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { X } from 'lucide-vue-next';
-import type { UiModalProps, UiModalEmits } from '@/interfaces';
+import type { UiModalProps, UiModalEmits } from './interfaces';
 
 defineProps<UiModalProps>();
 const emit = defineEmits<UiModalEmits>();

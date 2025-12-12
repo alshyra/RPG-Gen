@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombatStore } from '@/stores/combatStore';
 import { Activity, Flag, Star } from 'lucide-vue-next';
@@ -92,7 +92,6 @@ const phaseClass = computed(() => {
       return 'bg-green-600 text-white';
   }
 });
-
 
 // Can end turn only during player turn
 const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);

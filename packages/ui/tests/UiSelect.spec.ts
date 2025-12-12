@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiSelect from '../../components/ui/UiSelect.vue';
+import { UiSelect } from '../src/';
 
 describe('UiSelect Component', () => {
   it('should render a select element', () => {

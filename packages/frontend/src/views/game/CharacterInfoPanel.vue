@@ -49,7 +49,11 @@
           <UiButton
             :disabled="!inCombat"
             variant="ghost"
-            :to="inCombat ? { name: 'game-combat', params: { characterId: currentCharacter.characterId } } : undefined"
+            :to="
+              inCombat
+                ? { name: 'game-combat', params: { characterId: currentCharacter.characterId } }
+                : undefined
+            "
             class="w-full text-left px-3 py-2"
             :class="!inCombat && 'opacity-50 cursor-not-allowed'"
           >
@@ -70,7 +74,7 @@
 <script setup lang="ts">
 import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';

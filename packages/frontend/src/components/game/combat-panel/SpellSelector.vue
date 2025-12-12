@@ -35,7 +35,11 @@
           >
             <div class="flex items-center justify-between">
               <span>✨ {{ spell.name }}</span>
-              <span class="text-xs" :class="canAct ? 'text-purple-200' : 'text-slate-500'">Niv. {{ spell.level }}</span>
+              <span
+                class="text-xs"
+                :class="canAct ? 'text-purple-200' : 'text-slate-500'"
+                >Niv. {{ spell.level }}</span
+              >
             </div>
             <div
               v-if="spell.description"
@@ -74,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@/composables/useCombat';
 import { useCharacterStore } from '@/stores/characterStore';
@@ -90,7 +94,7 @@ const props = defineProps<{
 const characterStore = useCharacterStore();
 const combatStore = useCombatStore();
 const { endTurn } = useCombatEngine();
-const {executeAttack} = useCombat();
+const { executeAttack } = useCombat();
 const { currentCharacter } = storeToRefs(characterStore);
 const { actionRemaining, actionMax } = storeToRefs(combatStore);
 

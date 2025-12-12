@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiCard from '../../components/ui/UiCard.vue';
+import { UiCard } from '@rpg-gen/ui';
 
 describe('UiCard Component', () => {
   it('should render with default styling', () => {

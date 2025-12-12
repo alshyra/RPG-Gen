@@ -29,8 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import UiButtonToggle from '@/components/ui/UiButtonToggle.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
+import { UiButtonToggle, UiInputText } from '@rpg-gen/ui';
 import { GENDERS } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useDebounceFn } from '@vueuse/core';

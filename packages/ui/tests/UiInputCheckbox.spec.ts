@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import UiInputCheckbox from '../components/ui/UiInputCheckbox.vue';
+import { UiInputCheckbox } from '@rpg-gen/ui';
 import { describe, expect, it } from 'vitest';
 
 describe('UiInputCheckbox unit tests', () => {

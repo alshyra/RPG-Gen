@@ -52,7 +52,7 @@
                 :disabled="
                   !spellIsSelected(cantrip.definitionId) && selectedCantripsCount >= cantripsKnown
                 "
-                @update:model-value="val => toggleSpell(cantrip, val)"
+                @update:model-value="(val: boolean) => toggleSpell(cantrip, val)"
               >
                 <div class="flex-1">
                   <div class="font-medium">
@@ -94,7 +94,7 @@
                 :disabled="
                   !spellIsSelected(spell.definitionId) && selectedSpellsCount >= spellsKnown
                 "
-                @update:model-value="val => toggleSpell(spell, val)"
+                @update:model-value="(val: boolean) => toggleSpell(spell, val)"
               >
                 <div class="flex-1">
                   <div class="font-medium">
@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
+import { UiInputCheckbox } from '@rpg-gen/ui';
 import { classesApi } from '@/apis/classesApi';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';

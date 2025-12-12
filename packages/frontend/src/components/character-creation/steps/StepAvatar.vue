@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import UiInputTextarea from '@/components/ui/UiInputTextarea.vue';
+import { UiInputTextarea } from '@rpg-gen/ui';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';

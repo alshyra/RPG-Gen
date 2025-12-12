@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { characterApi } from '@/apis/characterApi';
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 import { Trash2 } from 'lucide-vue-next';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import { ref } from 'vue';

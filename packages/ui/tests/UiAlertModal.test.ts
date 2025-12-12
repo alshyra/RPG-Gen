@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect } from 'vitest';
-import UiAlertModal from './UiAlertModal.vue';
-import { showAlert, showConfirm, useModalState } from '@/composables/useModal';
+import UiAlertModal from '../src/UiAlertModal.vue';
+import { showAlert, showConfirm, useModalState } from '../src/useModal';
 
 describe('UiAlertModal', () => {
   it('resolves showAlert when OK clicked', async () => {

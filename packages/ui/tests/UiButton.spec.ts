@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiButton from '../../components/ui/UiButton.vue';
+import { UiButton } from '@rpg-gen/ui';
 
 describe('UiButton Component', () => {
   it('should render with default variant (primary)', () => {

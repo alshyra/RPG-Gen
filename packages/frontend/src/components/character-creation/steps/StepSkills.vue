@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import UiInputCheckbox from '@/components/ui/UiInputCheckbox.vue';
+import { UiInputCheckbox } from '@rpg-gen/ui';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import type { SkillResponseDto } from '@rpg-gen/shared';

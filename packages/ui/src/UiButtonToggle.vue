@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import UiButton from './UiButton.vue';
-import type { UiButtonOption } from '@/interfaces';
+import type { UiButtonOption } from './interfaces';
 
 defineProps<{
   isSelected?: boolean; // For backward compatibility

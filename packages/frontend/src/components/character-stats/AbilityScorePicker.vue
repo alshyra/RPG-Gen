@@ -26,7 +26,7 @@
               :max="15"
               :disabled="mode === 'edit'"
               class="justify-around"
-              @update:model-value="val => onUpdateAbilityValue(ability, val)"
+              @update:model-value="(val: number) => onUpdateAbilityValue(ability, val)"
             />
           </div>
         </div>

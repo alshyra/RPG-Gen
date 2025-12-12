@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiInputTextarea from '../../components/ui/UiInputTextarea.vue';
+import { UiInputTextarea } from '@rpg-gen/ui';
 
 describe('UiInputTextarea Component', () => {
   it('should render a textarea element', () => {

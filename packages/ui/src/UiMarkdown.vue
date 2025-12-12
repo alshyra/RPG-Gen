@@ -6,7 +6,7 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { marked } from 'marked';
 import { computed } from 'vue';
 

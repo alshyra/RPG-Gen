@@ -38,8 +38,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import UiMarkdown from '@/components/ui/UiMarkdown.vue';
-import UiSkeleton from '@/components/ui/UiSkeleton.vue';
+import { UiMarkdown, UiSkeleton } from '@rpg-gen/ui';
 import { useGameStore } from '@/stores/gameStore';
 import { ChatMessageDto } from '@rpg-gen/shared';
 

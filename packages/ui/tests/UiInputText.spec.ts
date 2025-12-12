@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import UiInputText from '../../components/ui/UiInputText.vue';
+import { UiInputText } from '@rpg-gen/ui';
 
 describe('UiInputText Component', () => {
   it('should render an input element', () => {

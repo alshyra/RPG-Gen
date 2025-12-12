@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import FullPageLoader from '@/components/ui/FullPageLoader.vue';
+import { FullPageLoader, UiButton, UiLoader } from '@rpg-gen/ui';
 import { characterApi } from '@/apis/characterApi';
 import { conversationApi } from '@/apis/conversationApi';
 import { DnDRulesService } from '@/services/dndRulesService';
@@ -116,8 +116,6 @@ import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import UiButton from '../ui/UiButton.vue';
-import UiLoader from '../ui/UiLoader.vue';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';

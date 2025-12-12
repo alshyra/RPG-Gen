@@ -58,8 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import UiModal from '@/components/ui/UiModal.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { UiModal, UiButton } from '@rpg-gen/ui';
 import DieD20 from './DieD20.vue';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
