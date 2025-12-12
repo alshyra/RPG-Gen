@@ -28,10 +28,17 @@ export function useGameMessages() {
     processInstructions(instrs);
   };
 
-  const handleMessageError = (e: unknown): void => {
+  const handleMessageError = (e: unknown, failedMessageText: string): void => {
     gameStore.messages.pop();
     const message = e instanceof Error ? e.message : 'Failed to send message';
     gameStore.appendMessage('system', message);
+
+    // Track retryable errors (503 Temporarily Unavailable)
+    const isRetryable =
+      message.includes('temporarily unavailable') || message.includes('Gemini API');
+    if (isRetryable) {
+      gameStore.setLastFailedMessage(failedMessageText, message);
+    }
   };
 
   const sendMessage = async (): Promise<void> => {
@@ -43,12 +50,22 @@ export function useGameMessages() {
     gameStore.sending = true;
     try {
       const response = await conversationApi.sendMessage(messageText);
+      gameStore.clearLastFailedMessage();
       handleMessageResponse(response);
     } catch (e: unknown) {
-      handleMessageError(e);
+      handleMessageError(e, messageText);
     } finally {
       gameStore.sending = false;
     }
+  };
+
+  const retryLastMessage = async (): Promise<void> => {
+    const failed = gameStore.lastFailedMessage;
+    if (!failed) return;
+
+    gameStore.clearLastFailedMessage();
+    gameStore.playerText = failed.text;
+    await sendMessage();
   };
 
   const handleRollInstruction = (instr: RollInstructionMessageDto): void => {
@@ -136,6 +153,7 @@ export function useGameMessages() {
 
   return {
     sendMessage,
+    retryLastMessage,
     processInstructions,
   };
 }

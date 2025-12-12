@@ -21,14 +21,20 @@ export const DIRECTIONS = [
 
 export type Direction = (typeof DIRECTIONS)[number];
 
-const ANIM_TYPES: Record<string, { frames: number; speed: number }> = {
+const ANIM_TYPES = {
   idle: { frames: 2, speed: 0.05 },
   walk: { frames: 2, speed: 0.05 },
   attack: { frames: 4, speed: 0.25 },
-  death: { frames: 4, speed: 0.1 },
-};
+  bow: { frames: 4, speed: 0.25 },
+  wand: { frames: 3, speed: 0.25 },
+  run : { frames: 3, speed: 0.1 },
+  hurt: { frames: 2, speed: 0.1 },
+  death: { frames: 4, speed: 0.05 },
+} as const;
 
-export const animations: Record<string, AnimConfig> = Object.entries(ANIM_TYPES)
+export type AnimType = keyof typeof ANIM_TYPES;
+
+export const animations: Record<AnimType, AnimConfig> = Object.entries(ANIM_TYPES)
   .flatMap(([animType, animCfg]) =>
     DIRECTIONS.map((dir, idx): [string, AnimConfig] => [
       `${animType}_${dir}`,

@@ -31,6 +31,13 @@
       @close="closeActionModal"
       @attack="handleAttack"
     />
+
+    <!-- Modal de fin de combat avec narrative -->
+    <CombatEndModal
+      :is-open="isCombatEndModalOpen"
+      :narrative="combatEndNarrative"
+      @close="closeCombatEndModal"
+    />
   </div>
 </template>
 
@@ -40,7 +47,9 @@ import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
 import SpellSelector from './SpellSelector.vue';
+import CombatEndModal from './CombatEndModal.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCombat } from '@/composables/useCombat';
 import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
@@ -57,6 +66,8 @@ const {
   closeActionModal,
   initializeVisual,
 } = useCombatEngine();
+
+const { isCombatEndModalOpen, combatEndNarrative, closeCombatEndModal } = useCombat();
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);

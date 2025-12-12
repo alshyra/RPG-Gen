@@ -54,7 +54,9 @@
       <div class="pointer-events-auto">
         <ChatBar
           :connected-top="inCombat"
+          :has-failed-message="!!gameStore.lastFailedMessage"
           @send="handleSendMessage"
+          @retry="handleRetryMessage"
         />
       </div>
     </div>
@@ -92,7 +94,7 @@ const characterId = computed(() => route.params.characterId as string);
 
 // Composables
 const { startGame } = useGameSession();
-const { sendMessage } = useGameMessages();
+const { sendMessage, retryLastMessage } = useGameMessages();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
 const { inCombat } = storeToRefs(combatStore);
@@ -128,6 +130,13 @@ const handleSendMessage = async () => {
   } else {
     await sendMessage();
   }
+};
+
+/**
+ * Handle retry of the last failed message
+ */
+const handleRetryMessage = async () => {
+  await retryLastMessage();
 };
 
 // Load on mount

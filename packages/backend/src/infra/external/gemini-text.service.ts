@@ -1,5 +1,10 @@
 import { Chat, Content, GoogleGenAI } from '@google/genai';
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 import { GameInstructionDto } from '../../domain/chat/dto/GameInstructionDto.js';
 import { aiResponseSchema } from './gemini-schemas.js';
@@ -58,7 +63,29 @@ export class GeminiTextService {
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
 
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
-    const { text } = await chat.sendMessage({ message });
+    let text: string | undefined;
+    try {
+      const response = await chat.sendMessage({ message });
+      text = response.text;
+    } catch (error) {
+      // Handle Gemini API errors (e.g., model overloaded with 503 status)
+      const geminiError = this.extractGeminiError(error);
+      if (geminiError?.status === 'UNAVAILABLE' || geminiError?.code === 503) {
+        this.logger.warn('Gemini API overloaded or unavailable (503)', {
+          code: geminiError.code,
+          status: geminiError.status,
+        });
+        throw new ServiceUnavailableException(
+          'Gemini API is temporarily unavailable. Please try again in a moment.',
+        );
+      }
+      // Re-throw any other unexpected error
+      this.logger.error('Unexpected error while calling Gemini API', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+
     this.logger.debug(`Received structured response for session ${sessionId}`, text);
     if (!text)
       throw new InternalServerErrorException(`No response from AI service for message: ${message}`);
@@ -111,5 +138,43 @@ export class GeminiTextService {
   clearChat(sessionId: string) {
     this.chatClients.delete(sessionId);
     this.logger.debug(`Cleared chat session ${sessionId}`);
+  }
+
+  /**
+   * Extract error details from a Gemini API error
+   * Handles nested ApiError structure: { ApiError: { error: { code, message, status } } }
+   */
+  private extractGeminiError(
+    error: unknown,
+  ): { code?: number; status?: string; message?: string } | null {
+    if (!error || typeof error !== 'object') return null;
+
+    // Check if it's the outer ApiError wrapper
+    const errorObj = error as Record<string, unknown>;
+    if ('ApiError' in errorObj && errorObj.ApiError && typeof errorObj.ApiError === 'object') {
+      const apiError = errorObj.ApiError as Record<string, unknown>;
+      if ('error' in apiError && apiError.error && typeof apiError.error === 'object') {
+        const innerError = apiError.error as Record<string, unknown>;
+        return {
+          code: typeof innerError.code === 'number' ? innerError.code : undefined,
+          status: typeof innerError.status === 'string' ? innerError.status : undefined,
+          message: typeof innerError.message === 'string' ? innerError.message : undefined,
+        };
+      }
+    }
+
+    // Also check direct error structure in case format changes
+    if ('error' in errorObj && typeof errorObj.error === 'object') {
+      const innerError = errorObj.error as Record<string, unknown>;
+      if ('code' in innerError || 'status' in innerError) {
+        return {
+          code: typeof innerError.code === 'number' ? innerError.code : undefined,
+          status: typeof innerError.status === 'string' ? innerError.status : undefined,
+          message: typeof innerError.message === 'string' ? innerError.message : undefined,
+        };
+      }
+    }
+
+    return null;
   }
 }

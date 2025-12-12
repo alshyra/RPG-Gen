@@ -5,6 +5,21 @@
       connectedTop ? 'rounded-b-lg' : 'rounded-lg',
     ]"
   >
+    <!-- Error message with retry button (if available) -->
+    <div
+      v-if="hasFailedMessage"
+      class="mb-3 p-2 bg-red-900/30 border border-red-700/50 rounded text-sm text-red-200 flex items-center justify-between"
+    >
+      <span>{{ gameStore.lastFailedMessage?.error }}</span>
+      <button
+        @click="handleRetry"
+        class="ml-2 px-2 py-1 bg-red-700 hover:bg-red-600 text-white rounded text-xs whitespace-nowrap transition-colors"
+        :disabled="gameStore.sending"
+      >
+        {{ gameStore.sending ? '⏳' : '🔄 Renvoyer' }}
+      </button>
+    </div>
+
     <div class="relative flex items-center gap-2">
       <!-- Command and argument suggestions dropdown -->
       <CommandSuggestions
@@ -21,7 +36,7 @@
         type="text"
         placeholder="Parle à l'IA..."
         class="input flex-1 min-h-10"
-        :disabled="isRolling"
+        :disabled="isRolling || gameStore.sending"
         @keydown="handleKeydown"
         @blur="handleBlur"
       />
@@ -61,7 +76,10 @@
 </template>
 
 <script setup lang="ts">
-const { connectedTop = false } = defineProps<{ connectedTop?: boolean }>();
+const { connectedTop = false, hasFailedMessage = false } = defineProps<{
+  connectedTop?: boolean;
+  hasFailedMessage?: boolean;
+}>();
 import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
@@ -70,7 +88,10 @@ import CommandSuggestions from './CommandSuggestions.vue';
 /** Delay in ms before hiding suggestions on blur to allow click events to process */
 const SUGGESTION_BLUR_DELAY_MS = 150;
 
-type Emits = (e: 'send') => void;
+type Emits = {
+  send: [];
+  retry: [];
+};
 
 const emit = defineEmits<Emits>();
 const gameStore = useGameStore();
@@ -152,6 +173,9 @@ const handleBlur = () => {
 };
 
 const send = () => emit('send');
+
+const handleRetry = () => emit('retry');
+
 // rolled events are handled centrally via store.latestRoll — no local rebroadcast
 </script>
 

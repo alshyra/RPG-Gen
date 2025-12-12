@@ -90,6 +90,15 @@ export const useCombatUnit = () => {
       fill.fill({ color: c });
       // BitmapText update depending on font atlas
       text.text = `${newHp}/${maxHp}`;
+
+      // Enhanced visual when HP reaches 0
+      if (newHp <= 0) {
+        // Pulse effect: flash the health bar red
+        fill.clear();
+        fill.rect(0, 0, 50, 8);
+        fill.fill({ color: 0xff0000 });
+        container.alpha = 0.6; // Dim the health bar to show unit is defeated
+      }
     };
 
     return {

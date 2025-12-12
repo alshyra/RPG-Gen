@@ -3,6 +3,7 @@ import type {
   CombatantDto,
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { combatService } from '../apis/combatApi';
@@ -23,6 +24,10 @@ export function useCombat() {
   const { currentTarget, currentAttackResult, currentPlayerAttackLog, currentAttackView } =
     storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
+
+  // Modal for combat victory narrative
+  const isCombatEndModalOpen = ref(false);
+  const combatEndNarrative = ref<string>('');
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -56,7 +61,7 @@ export function useCombat() {
         currentCharacter.value.characterId,
         payload,
       );
-      
+
       // Check if player took damage during initiative (enemy attacked first)
       const newHp = combatState.player?.hp ?? currentHp;
       const initialDamage = currentHp - newHp;
@@ -73,7 +78,6 @@ export function useCombat() {
         characterStore.showDeathModal = true;
       }
 
-      
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
       await router.push({
@@ -123,6 +127,7 @@ export function useCombat() {
       result.combatEnd.victory,
       result.combatEnd.xp_gained,
       result.combatEnd.enemies_defeated,
+      result.combatEnd.narrative,
     );
   };
 
@@ -218,6 +223,7 @@ export function useCombat() {
     victory: boolean,
     xpGained: number,
     enemiesDefeated: string[],
+    narrative?: string,
   ): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
@@ -229,6 +235,8 @@ export function useCombat() {
       });
       return;
     }
+
+    // Victory path: show modal with narrative first
     gameStore.appendMessage('system', '🏆 Victoire!');
     if (enemiesDefeated.length > 0) {
       gameStore.appendMessage('system', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
@@ -237,14 +245,37 @@ export function useCombat() {
       gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
       characterStore.updateXp(xpGained);
     }
-    const gmResponse = await conversationApi.sendStructuredMessage({
-      role: 'system',
-      instructions: [],
-      narrative:
-        'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
-    });
-    gameStore.appendMessage('assistant', gmResponse.narrative);
-    // Navigate back to messages view after narration
+
+    // Use provided narrative from backend or fetch new one
+    if (narrative) {
+      // Backend provided a narrative (from CombatEndDto)
+      combatEndNarrative.value = narrative;
+    } else {
+      // Fallback: request a new narrative from GM (shouldn't happen but safe)
+      try {
+        const gmResponse = await conversationApi.sendStructuredMessage({
+          role: 'system',
+          instructions: [],
+          narrative:
+            'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
+        });
+        combatEndNarrative.value = gmResponse.narrative;
+      } catch (err) {
+        console.error('Failed to fetch victory narrative:', err);
+        combatEndNarrative.value = 'Vous avez remporté la victoire !';
+      }
+    }
+
+    // Open modal to display victory narrative
+    isCombatEndModalOpen.value = true;
+  };
+
+  /**
+   * Close combat end modal and navigate home
+   */
+  const closeCombatEndModal = async () => {
+    isCombatEndModalOpen.value = false;
+    combatStore.clearCombat();
     await router.push({
       name: 'game',
       params: { characterId: currentCharacter.value?.characterId },
@@ -296,5 +327,10 @@ export function useCombat() {
     handleCombatEnd,
     fleeCombat,
     checkCombatStatus,
+
+    // Modal state
+    isCombatEndModalOpen,
+    combatEndNarrative,
+    closeCombatEndModal,
   };
 }

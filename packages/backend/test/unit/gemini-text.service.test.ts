@@ -1,5 +1,5 @@
 import test from 'ava';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { GeminiTextService } from '../../src/infra/external/gemini-text.service.js';
 
 test('initializeChatSession creates history with parts (not content)', async t => {
@@ -130,4 +130,73 @@ test('sendMessage unwraps payload-wrapped instructions before validation', async
   t.is((result.instructions as any)[0].type, 'combat_start');
   t.true(Array.isArray((result.instructions as any)[0].combat_start));
   t.is((result.instructions as any)[0].combat_start[0].name, 'Goblin-1');
+});
+test('sendMessage throws ServiceUnavailableException when Gemini API returns 503 (overloaded)', async t => {
+  const svc = new GeminiTextService();
+
+  // Simulate the Gemini API error structure for 503 UNAVAILABLE
+  const geminiError = {
+    ApiError: {
+      error: {
+        code: 503,
+        message: 'The model is overloaded. Please try again later.',
+        status: 'UNAVAILABLE',
+      },
+    },
+  };
+
+  const fakeChat = {
+    sendMessage: async () => {
+      throw geminiError;
+    },
+  } as const;
+
+  (svc as any).chatClients.set('overloaded-session', fakeChat);
+
+  const err = await t.throwsAsync(() => svc.sendMessage('overloaded-session', 'test'));
+  t.true(err instanceof ServiceUnavailableException);
+  t.match(err.message, /temporarily unavailable/i);
+});
+
+test('sendMessage throws ServiceUnavailableException when Gemini API status is UNAVAILABLE', async t => {
+  const svc = new GeminiTextService();
+
+  // Simulate different error structure
+  const geminiError = {
+    ApiError: {
+      error: {
+        code: 429,
+        message: 'Too many requests',
+        status: 'UNAVAILABLE',
+      },
+    },
+  };
+
+  const fakeChat = {
+    sendMessage: async () => {
+      throw geminiError;
+    },
+  } as const;
+
+  (svc as any).chatClients.set('unavailable-session', fakeChat);
+
+  const err = await t.throwsAsync(() => svc.sendMessage('unavailable-session', 'test'));
+  t.true(err instanceof ServiceUnavailableException);
+});
+
+test('sendMessage re-throws non-503 errors', async t => {
+  const svc = new GeminiTextService();
+
+  const regularError = new Error('Some unexpected error');
+
+  const fakeChat = {
+    sendMessage: async () => {
+      throw regularError;
+    },
+  } as const;
+
+  (svc as any).chatClients.set('error-session', fakeChat);
+
+  const err = await t.throwsAsync(() => svc.sendMessage('error-session', 'test'));
+  t.is(err, regularError);
 });

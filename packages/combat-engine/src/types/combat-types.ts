@@ -1,4 +1,7 @@
 import * as PIXI from 'pixi.js';
+import type { AnimConfig,
+AnimType, 
+Direction} from '@/services/spritesAnimations';
 
 export interface GridPosition {
   gridX: number;
@@ -55,7 +58,7 @@ export type availableCharacterKeys =
 // Interface pour stocker les données d'unité
 export interface UnitData {
   sprite: PIXI.AnimatedSprite;
-  animations: Record<string, PIXI.Texture[]>;
+  animations: Record<`${AnimType}_${Direction}`, AnimConfig>;
   gridX: number;
   gridY: number;
   maxMoveRange: number;

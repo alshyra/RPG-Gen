@@ -29,6 +29,12 @@ export const useGameStore = defineStore('gameStore', () => {
   const sending = ref(false);
   const showRollModal = ref(false);
 
+  // Track the last failed message for retry (e.g., when API is temporarily unavailable)
+  const lastFailedMessage = ref<{
+    text: string;
+    error: string;
+  } | null>(null);
+
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
     const diceResultDto = await diceApi.roll(expr, advantage);
@@ -59,6 +65,14 @@ export const useGameStore = defineStore('gameStore', () => {
     }));
   };
 
+  const setLastFailedMessage = (text: string, error: string) => {
+    lastFailedMessage.value = { text, error };
+  };
+
+  const clearLastFailedMessage = () => {
+    lastFailedMessage.value = null;
+  };
+
   return {
     // roll API
     rolls,
@@ -72,9 +86,12 @@ export const useGameStore = defineStore('gameStore', () => {
     playerText,
     isInitializing,
     showRollModal,
+    lastFailedMessage,
 
     // helpers
     appendMessage,
+    setLastFailedMessage,
+    clearLastFailedMessage,
     // status
     sending,
     updateMessages,

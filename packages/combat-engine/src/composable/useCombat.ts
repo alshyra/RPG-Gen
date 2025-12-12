@@ -300,13 +300,40 @@ export function useCombat() {
     const u = units.value.get(unitId);
     if (!u) return;
     const newHp = Math.max(0, u.hp - damage);
+    const wasDefeated = newHp === 0;
+
     combatUnit.updateHp(unitId, newHp);
     emit('unit:attacked', {
       attackerId: 'unknown',
       targetId: unitId,
       damage,
     });
-    if (newHp === 0) emit('unit:died', { unitId });
+
+    // Add visual impact when unit is defeated
+    if (wasDefeated && u.sprite && app.value) {
+      const { sprite, animations: unitAnimations } = u;
+
+      // Try to play death animation if available
+      const deathKey = 'death_bottom'; // Default to bottom, could be enhanced to use last direction
+      sprite.textures = unitAnimations[deathKey];
+      sprite.animationSpeed = animationConfig[deathKey].speed;
+      sprite.loop = false; // Play death animation only once
+      sprite.play();
+
+      // After death animation completes, fade out
+      const deathDurationMs =
+        (unitAnimations[deathKey].length / animationConfig[deathKey].speed) * 1000;
+
+      gsap.to(sprite, {
+        alpha: 0,
+        scale: 0.9,
+        duration: 0.8,
+        delay: deathDurationMs / 1000, // Wait for death animation to finish
+        ease: 'power2.in',
+      });
+    }
+
+    if (wasDefeated) emit('unit:died', { unitId });
   };
 
   // wire setupDragEvents to stage-level handlers if needed (keeps compatibility)
@@ -329,7 +356,7 @@ export function useCombat() {
     }
 
     try {
-      Array.from(units.value.entries()).forEach(([id, unit]) => {
+      Array.from(units.value.entries()).forEach(([_id, unit]) => {
         unit.sprite.parent!.removeChild(unit.sprite);
         unit.sprite.destroy({ children: true, texture: false, baseTexture: false });
         unit.healthBar.container.parent!.removeChild(unit.healthBar.container);
