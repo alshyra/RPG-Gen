@@ -29,9 +29,9 @@ const props = withDefaults(
 );
 
 // Utiliser le composable
-const pixiCombat = useCombat();
+const combat = useCombat();
 const { init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid } =
-  pixiCombat;
+  combat;
 const appRef = ref<PIXI.Application | null>(null);
 
 // Références
@@ -43,7 +43,7 @@ onMounted(async () => {
 
   // Demo initialization
   await init(pixiContainer.value);
-  appRef.value = pixiCombat.getApp();
+  appRef.value = combat.getApp();
   await createUnit('player', 6, 4, 3, 'Archer-Green', 100, 100, true);
   await createUnit('enemy-1', 2, 4, 3, 'Warrior-Red', 80, 100, false);
   setupDragEvents();
@@ -67,15 +67,14 @@ defineExpose({
     const target = container ?? pixiContainer.value;
     if (!target) throw new Error('No container for CombatArena init');
     await init(target);
-    appRef.value = pixiCombat.getApp();
+    appRef.value = combat.getApp();
     return;
   },
 
   // Unit management
   createUnit,
   clearAllUnits: async () => {
-    // Clear units from store (visual units will be recreated)
-    useUnitsStore().clearAllUnits();
+    if (combat && combat.clearAllUnits) await combat.clearAllUnits();
   },
   updateUnitHealth,
   moveUnitToGrid,
@@ -92,7 +91,7 @@ defineExpose({
   // Get unit count for testing
   getUnitCount: () => {
     // Count units that have been created in the scene
-    const app = pixiCombat.getApp();
+    const app = combat.getApp();
     if (!app) return 0;
     const stage = app.stage;
 

@@ -33,7 +33,14 @@ export function useCombat() {
 
   // Interaction controller for drag-and-drop
   let interactionController: ReturnType<typeof setupInteractionController> | null = null;
-  let handleUnitAttackedRef: ((payload: { attackerId: string; targetId: string; damage: number; isCrit?: boolean }) => void) | null = null;
+  let handleUnitAttackedRef:
+    | ((payload: {
+        attackerId: string;
+        targetId: string;
+        damage: number;
+        isCrit?: boolean;
+      }) => void)
+    | null = null;
 
   const initApp = async (container: HTMLDivElement) => {
     if (app.value) return;
@@ -56,7 +63,12 @@ export function useCombat() {
     app.value = pixiApp;
 
     // Listen to attack events from external callers to show floating indicators
-    handleUnitAttackedRef = (payload: { attackerId: string; targetId: string; damage: number; isCrit?: boolean }) => {
+    handleUnitAttackedRef = (payload: {
+      attackerId: string;
+      targetId: string;
+      damage: number;
+      isCrit?: boolean;
+    }) => {
       if (!app.value?.stage) return;
       const u = units.value.get(payload.targetId);
       if (!u || !u.sprite) return;
@@ -65,7 +77,11 @@ export function useCombat() {
       const y = (u.healthBar?.container?.y ?? u.sprite.y) - 20;
 
       const isMiss = !payload.damage || payload.damage <= 0;
-      const label = isMiss ? 'Miss' : payload.isCrit ? `CRIT! -${payload.damage}` : `-${payload.damage}`;
+      const label = isMiss
+        ? 'Miss'
+        : payload.isCrit
+          ? `CRIT! -${payload.damage}`
+          : `-${payload.damage}`;
 
       const textStyle = new PIXI.TextStyle({
         fontFamily: 'Arial',
@@ -115,7 +131,7 @@ export function useCombat() {
     // wire interaction controller
     if (app.value) {
       // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
-    // The type system needs help here due to Vue's Ref wrapping
+      // The type system needs help here due to Vue's Ref wrapping
       const unitsRef = units as unknown as typeof units;
       interactionController = setupInteractionController(app.value, () => unitsRef.value, {
         pixelToGrid,
@@ -301,6 +317,30 @@ export function useCombat() {
     // event handlers are installed by interactionController during init
   };
 
+  /**
+   * Remove all units from the PIXI stage and clear the units store.
+   * This ensures switching from demo → real combat (or re-initializing)
+   * doesn't leave orphaned sprites on the stage and avoids visual duplicates.
+   */
+  const clearAllUnits = () => {
+    if (!app.value) {
+      unitStore.clearAllUnits();
+      return;
+    }
+
+    try {
+      Array.from(units.value.entries()).forEach(([id, unit]) => {
+        unit.sprite.parent!.removeChild(unit.sprite);
+        unit.sprite.destroy({ children: true, texture: false, baseTexture: false });
+        unit.healthBar.container.parent!.removeChild(unit.healthBar.container);
+        unit.healthBar.container.destroy({ children: true });
+      });
+    } finally {
+      // Clear the pinia store maps/sets
+      unitStore.clearAllUnits();
+    }
+  };
+
   onUnmounted(() => {
     interactionController = null;
     if (!app.value) return;
@@ -313,6 +353,7 @@ export function useCombat() {
   return {
     init,
     createUnit,
+    clearAllUnits,
     moveUnitToGrid,
     setupDragEvents,
     updateUnitHealth,
@@ -321,4 +362,4 @@ export function useCombat() {
     emit,
     getApp: () => app.value,
   };
-};
+}

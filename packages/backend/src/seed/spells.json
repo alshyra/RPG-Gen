@@ -1921,7 +1921,7 @@
     "ritual": false,
     "description": "Le lanceur gagne 1d4+4 pv temporaires (+5 pv/niv).",
     "meta": {
-      "damageDice": "1d4",
+      "healDice": "1d4",
       "attackType": "spell",
       "school": "nécromancie",
       "scaling": "+5 pv/niv"
@@ -1939,7 +1939,7 @@
     "ritual": false,
     "description": "1 créature récupère 1d8+Mod.Carac pv (+1d8 pv/niv).",
     "meta": {
-      "damageDice": "1d8",
+      "healDice": "1d8",
       "attackType": "spell",
       "school": "evocation",
       "scaling": "+1d8 pv/niv"
@@ -6126,7 +6126,7 @@
     "ritual": false,
     "description": "Jusqu'à 6 créatures récupèrent 3d8+Mod.Carac.Inc pv (+1d8 pv/niv).",
     "meta": {
-      "damageDice": "3d8",
+      "healDice": "3d8",
       "attackType": "spell",
       "school": "evocation",
       "scaling": "+1d8 pv/niv"

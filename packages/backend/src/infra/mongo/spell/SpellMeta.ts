@@ -7,6 +7,9 @@ export class SpellMeta {
   damageDice?: string;
 
   @Prop({ required: false })
+  healDice?: string;
+
+  @Prop({ required: false })
   damageType?: string;
 
   @Prop({ required: false })
