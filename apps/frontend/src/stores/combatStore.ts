@@ -1,17 +1,17 @@
-import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
-import { combatService } from '../apis/combatApi';
+import type { AttackQueueItem, AttackView } from '@/interfaces';
 import type {
+  AttackResponseDto,
   CombatantDto,
+  CombatPhase,
   CombatStartRequestDto,
   CombatStateDto,
-  AttackResponseDto,
   EndPlayerTurnResponseDto,
   EnemyAttackLogDto,
 } from '@rpg-gen/shared';
-import type { CombatPhase } from '@rpg-gen/shared';
+import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
-import type { AttackQueueItem, AttackView } from '@/interfaces';
+import { computed, ref } from 'vue';
+import { combatService } from '../apis/combatApi';
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
@@ -34,6 +34,8 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
   const currentPlayerAttackLog = ref<AttackResponseDto | null>(null);
   const isEndingTurn = ref(false);
+  const isCombatEndModalOpen = ref(false);
+  const combatEndNarrative = ref<string>('');
 
   const currentAttackView = ref<AttackView | null>(null);
 
@@ -265,6 +267,8 @@ export const useCombatStore = defineStore('combatStore', () => {
     currentEnemyAttackLog,
     currentPlayerAttackLog,
     currentAttackView,
+    combatEndNarrative,
+    isCombatEndModalOpen,
     PLAYER_ATTACK_DELAY_MS,
     initializeCombat,
     updateFromTurnResult,

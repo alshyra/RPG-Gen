@@ -85,15 +85,15 @@ onMounted(async () => {
   }
 });
 
-// Re-initialize visual when combat state changes significantly
+// Watch only for combat starting (inCombat changing from false to true)
 watch(
-  () => [combatStore.inCombat, combatStore.enemies.length, combatStore.player?.hp],
-  async ([inCombatNow]) => {
-    if (!inCombatNow || !arenaRef.value) return;
+  () => combatStore.inCombat,
+  async (inCombatNow, wasInCombat) => {
+    if (!inCombatNow || wasInCombat || !arenaRef.value) return;
+    // Only initialize when combat STARTS, not on every state change
     await new Promise(resolve => setTimeout(resolve, 100));
     await initializeVisual();
   },
-  { deep: false },
 );
 
 onUnmounted(() => {

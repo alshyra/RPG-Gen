@@ -21,13 +21,15 @@ export function useCombat() {
   const gameStore = useGameStore();
   const characterStore = useCharacterStore();
   const combatStore = useCombatStore();
-  const { currentTarget, currentAttackResult, currentPlayerAttackLog, currentAttackView } =
-    storeToRefs(combatStore);
+  const {
+    currentTarget,
+    currentAttackResult,
+    currentPlayerAttackLog,
+    currentAttackView,
+    combatEndNarrative,
+    isCombatEndModalOpen,
+  } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
-
-  // Modal for combat victory narrative
-  const isCombatEndModalOpen = ref(false);
-  const combatEndNarrative = ref<string>('');
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -223,7 +225,7 @@ export function useCombat() {
     victory: boolean,
     xpGained: number,
     enemiesDefeated: string[],
-    narrative?: string,
+    narrative: string,
   ): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage('system', '💀 Combat terminé.');
@@ -246,27 +248,7 @@ export function useCombat() {
       characterStore.updateXp(xpGained);
     }
 
-    // Use provided narrative from backend or fetch new one
-    if (narrative) {
-      // Backend provided a narrative (from CombatEndDto)
-      combatEndNarrative.value = narrative;
-    } else {
-      // Fallback: request a new narrative from GM (shouldn't happen but safe)
-      try {
-        const gmResponse = await conversationApi.sendStructuredMessage({
-          role: 'system',
-          instructions: [],
-          narrative:
-            'Combat terminé le joueur a vaincu ses ennemis. Fournis une brève description narrative de la victoire et de ses conséquences dans le jeu.',
-        });
-        combatEndNarrative.value = gmResponse.narrative;
-      } catch (err) {
-        console.error('Failed to fetch victory narrative:', err);
-        combatEndNarrative.value = 'Vous avez remporté la victoire !';
-      }
-    }
-
-    // Open modal to display victory narrative
+    combatEndNarrative.value = narrative;
     isCombatEndModalOpen.value = true;
   };
 
