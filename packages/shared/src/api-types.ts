@@ -1158,6 +1158,8 @@ export interface components {
             playerDefeated?: boolean;
             /** @description Updated combat state after all enemy actions */
             combatState: components["schemas"]["CombatStateDto"];
+            /** @description Combat end information (present when all enemies are defeated) */
+            combatEnd?: components["schemas"]["CombatEndDto"];
         };
         CombatEndResultDto: {
             /** @description Combat end information */

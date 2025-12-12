@@ -3,6 +3,8 @@ import { storeToRefs } from 'pinia';
 import { markRaw } from 'vue';
 import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from 'pixi.js';
 import { animations } from '../services/spritesAnimations';
+import type { UnitData } from '@/types/combat-types';
+import gsap from 'gsap';
 
 /**
  * Unit service returns a tiny API working on an injected Map<string, UnitData>.
@@ -14,6 +16,13 @@ export const useCombatUnit = () => {
   const greenColor = 0x00ff00;
   const yellowColor = 0xffff00;
   const redColor = 0xff0000;
+
+  const getUnit = (unitId: string): UnitData => {
+    const unit = units.value.get(unitId);
+    if (!unit) throw new Error(`getUnit: unit ${unitId} not found`);
+
+    return unit as UnitData;
+  };
 
   const createUnitEntry = (
     unitId: string,
@@ -27,7 +36,7 @@ export const useCombatUnit = () => {
   ) => {
     const healthBar = createHealthBar(hp, maxHp);
 
-    const entry = markRaw({
+    const unitData = markRaw({
       sprite,
       animations,
       gridX,
@@ -38,8 +47,12 @@ export const useCombatUnit = () => {
       healthBar,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    units.value.set(unitId, entry as any);
+    units.value.set(unitId, unitData as UnitData);
+    if (unitData.hp == 0) {
+      // Update health bar visual first, then animate death
+      healthBar.update(0);
+      animateDeath(unitData);
+    }
 
     // Return healthBar so caller can add it to the stage and position it
     return healthBar;
@@ -102,8 +115,8 @@ export const useCombatUnit = () => {
       if (newHp <= 0) {
         // Pulse effect: flash the health bar red
         fill.clear();
-        fill.rect(0, 0, 50, 8);
-        fill.fill({ color: 0xff0000 });
+        fill.rect(xBarOffset, 0, 50, 8);
+        fill.fill({ color: redColor });
         container.alpha = 0.6; // Dim the health bar to show unit is defeated
       }
     };
@@ -118,40 +131,50 @@ export const useCombatUnit = () => {
   };
 
   const moveUnitState = (unitId: string, toGridX: number, toGridY: number) => {
-    const unit = units.value.get(unitId);
-    if (!unit) throw new Error(`moveUnitState: unit ${unitId} not found`);
+    const unit = getUnit(unitId);
     unit.gridX = toGridX;
     unit.gridY = toGridY;
     return true;
   };
 
-  const updateHp = (unitId: string, newHp: number) => {
-    const unit = units.value.get(unitId);
-    if (!unit) throw new Error(`updateHp: unit ${unitId} not found`);
-    if (unit.healthBar?.update) unit.healthBar.update(newHp);
-
+  const animateDeath = (unit: UnitData) => {
     const deathKey = 'death_bottom' as const;
     const deathTextures = unit.animations[deathKey];
     const deathConfig = animations[deathKey];
 
-    if (deathTextures && deathConfig) {
-      unit.sprite.textures = deathTextures;
-      unit.sprite.animationSpeed = deathConfig.speed;
-      unit.sprite.loop = false; // Play death animation only once
-      unit.sprite.play();
-
-      // After death animation completes, fade out
-      const deathDurationMs = (deathTextures.length / deathConfig.speed) * 1000;
-
-      gsap.to(unit.sprite, {
-        alpha: 0,
-        scale: 0.9,
-        duration: 0.8,
-        delay: deathDurationMs / 1000, // Wait for death animation to finish
-        ease: 'power2.in',
-      });
+    if (!deathTextures || !deathConfig) {
+      console.error(`Death animation not found for key: ${deathKey}`);
+      return;
     }
-    return true;
+
+    // Stop current animation, reset frame, then swap textures
+    unit.sprite.stop();
+    unit.sprite.currentFrame = 0;
+    unit.sprite.textures = deathTextures;
+    unit.sprite.animationSpeed = deathConfig.speed;
+    unit.sprite.loop = false; // Play death animation only once
+    unit.sprite.play();
+
+    // After death animation completes, fade out
+    const deathDurationMs = (deathTextures.length / deathConfig.speed) * 1000;
+
+    gsap.to(unit.sprite, {
+      alpha: 0,
+      scale: 0.9,
+      duration: 0.8,
+      delay: deathDurationMs / 1000, // Wait for death animation to finish
+      ease: 'power2.in',
+    });
+  };
+
+  const updateHp = (unitId: string, newHp: number) => {
+    const unit: UnitData = getUnit(unitId);
+    if (!units.value.get(unitId)) throw new Error(`updateHp: unit ${unitId} not found`);
+    if (unit.healthBar?.update) unit.healthBar.update(newHp);
+
+    if (newHp > 0) return true;
+
+    animateDeath(unit);
   };
 
   return {

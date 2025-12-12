@@ -31,6 +31,7 @@
             :key="spell.name"
             :disabled="!canAct"
             :variant="canAct ? 'secondary' : 'ghost'"
+            class="w-full"
             @click="castSpell(spell.name)"
           >
             <div class="flex items-center justify-between">

@@ -1,14 +1,14 @@
 // packages/frontend/src/composables/useCombatEngine.ts
-import { ref, shallowRef, onUnmounted, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useCombat as useBackendCombat } from '@/composables/useCombat';
 import { CombatAdapter } from '@/adapters/combatAdapters';
-import { useCombatStore } from '@/stores/combatStore';
-import { useCharacterStore } from '@/stores/characterStore';
-import type { CombatantDto, EnemyAttackLogDto } from '@rpg-gen/shared';
-import type { UnitClickedPayload, CombatEngineEventPayload } from '@rpg-gen/combat-engine';
-import { useGameStore } from '@/stores/gameStore';
 import { combatService } from '@/apis/combatApi';
+import { useCombat as useBackendCombat } from '@/composables/useCombat';
+import { useCharacterStore } from '@/stores/characterStore';
+import { useCombatStore } from '@/stores/combatStore';
+import { useGameStore } from '@/stores/gameStore';
+import type { CombatEngineEventPayload, UnitClickedPayload } from '@rpg-gen/combat-engine';
+import type { CombatantDto, EnemyAttackLogDto } from '@rpg-gen/shared';
+import { storeToRefs } from 'pinia';
+import { onUnmounted, ref, shallowRef, watch } from 'vue';
 
 // Type for the exposed arena API from CombatArena.vue
 export interface CombatArenaApi {

@@ -327,6 +327,7 @@ export function useCombat() {
     handleCombatEnd,
     fleeCombat,
     checkCombatStatus,
+    checkCombatVictory,
 
     // Modal state
     isCombatEndModalOpen,

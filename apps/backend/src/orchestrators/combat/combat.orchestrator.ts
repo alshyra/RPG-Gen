@@ -335,15 +335,7 @@ export class CombatOrchestrator {
       isCrit: damageResult.isCrit,
     };
 
-    // Handle combat end if applicable
-    // In processAttack, replace the duplicated block with:
-    if (applyResult.endResult) {
-      await this.handleCombatEnd(userId, characterId, applyResult, finalState, response);
-    }
-
-    // In processSpellAttack, replace the selection with:
     await this.handleCombatEnd(userId, characterId, applyResult, finalState, response);
-
 
     this.logger.log(
       `Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`,
@@ -376,22 +368,16 @@ export class CombatOrchestrator {
       this.logger.log(`Applied ${end.xp_gained} XP to character ${characterId}`);
     }
 
-    try {
-      await this.conversationService.append(userId, characterId, {
-        role: 'assistant',
-        narrative: combatEnd.narrative,
-        instructions: [
-          {
-            type: 'combat_end',
-            combat_end: combatEnd,
-          },
-        ],
-      });
-    } catch (e) {
-      this.logger.warn(
-        `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
-      );
-    }
+    await this.conversationService.append(userId, characterId, {
+      role: 'assistant',
+      narrative: combatEnd.narrative,
+      instructions: [
+        {
+          type: 'combat_end',
+          combat_end: combatEnd,
+        },
+      ],
+    });
   }
   /**
    * End player turn and process all enemy attacks.

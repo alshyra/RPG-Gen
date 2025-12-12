@@ -10,13 +10,17 @@ const createFrameTexture = (base: Texture, x: number, y: number, w: number, h: n
 };
 
 const buildFromAtlas = (texture: Texture) => {
-  const w = frameWidth;
-  const h = frameHeight;
-
   return Object.entries(animationConfig)
     .map(([name, cfg]): [string, Texture[]] => {
+      const baseX = (cfg.xOffset || 0) * frameWidth;
       const frames = Array.from({ length: cfg.frames }, (_, i) =>
-        createFrameTexture(texture, i * w, cfg.row * h, w, h),
+        createFrameTexture(
+          texture,
+          baseX + i * frameWidth,
+          cfg.row * frameHeight,
+          frameWidth,
+          frameHeight,
+        ),
       );
       return [name, frames];
     })
