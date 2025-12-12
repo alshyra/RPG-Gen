@@ -1,6 +1,7 @@
 import test from 'ava';
 import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { GeminiTextService } from '../../src/infra/external/gemini-text.service.js';
+import type { ChatMessageDto } from '@rpg-gen/shared';
 
 test('initializeChatSession creates history with parts (not content)', async t => {
   const svc = new GeminiTextService();
@@ -155,7 +156,7 @@ test('sendMessage throws ServiceUnavailableException when Gemini API returns 503
 
   const err = await t.throwsAsync(() => svc.sendMessage('overloaded-session', 'test'));
   t.true(err instanceof ServiceUnavailableException);
-  t.match(err.message, /temporarily unavailable/i);
+  t.regex(err.message, /temporarily unavailable/i);
 });
 
 test('sendMessage throws ServiceUnavailableException when Gemini API status is UNAVAILABLE', async t => {

@@ -8,7 +8,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@rpg-gen/ui': fileURLToPath(new URL('../ui/src', import.meta.url)),
+      '@rpg-gen/ui': process.env.DEV_UI_SRC
+        ? fileURLToPath(new URL('../../packages/ui/src', import.meta.url))
+        : fileURLToPath(new URL('../../packages/ui/dist', import.meta.url)),
     },
   },
   server: {

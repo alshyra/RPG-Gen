@@ -29,15 +29,13 @@
         "./src/*"
       ],
       "@ui/*": [
-        "../ui/src/*"
+        "../../packages/ui/src/*"
       ],
       "@rpg-gen/ui": [
-        "../ui/dist/index.d.ts",
-        "../ui/src/index.ts"
+        "../../packages/ui/dist/index.d.ts"
       ],
       "@rpg-gen/ui/*": [
-        "../ui/dist/*",
-        "../ui/src/*"
+        "../../packages/ui/dist/*"
       ]
     }
   },

@@ -1,7 +1,5 @@
 import * as PIXI from 'pixi.js';
-import type { AnimConfig,
-AnimType, 
-Direction} from '@/services/spritesAnimations';
+import type { AnimConfig, AnimType, Direction } from '../services/spritesAnimations';
 
 export interface GridPosition {
   gridX: number;
