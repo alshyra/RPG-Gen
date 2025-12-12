@@ -4,26 +4,18 @@
     class="combat-wrapper"
     data-cy="combat-panel"
   >
-    <!-- Header avec infos turn/actions (seulement si en combat) -->
     <CombatHeader v-if="inCombat" />
-
-    <!-- NOUVEAU : Arène visuelle PixiJS (toujours affiché) -->
-    <!-- key="combat-canvas" prevents re-renders from parent state changes -->
     <CombatArena
       key="combat-canvas"
       ref="arenaRef"
       data-cy="combat-arena"
     />
-
-    <!-- Message si pas en combat -->
     <div
       v-if="!inCombat"
       class="demo-message"
     >
       <p>Pas de combat actif. Démarrez un combat depuis le jeu pour voir l'arène en action !</p>
     </div>
-
-    <!-- Modal de sélection d'action (attaque arme / sort) -->
     <SpellSelector
       v-if="inCombat"
       :is-open="isActionModalOpen"
@@ -31,8 +23,6 @@
       @close="closeActionModal"
       @attack="handleAttack"
     />
-
-    <!-- Modal de fin de combat avec narrative -->
     <CombatEndModal
       :is-open="isCombatEndModalOpen"
       :narrative="combatEndNarrative"
@@ -80,25 +70,18 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 // Register arena API when mounted
 onMounted(async () => {
   const arena = arenaRef.value;
-  if (arena && 'getContainer' in arena && 'init' in arena) {
-    // Type guard ensures arena has the required API methods
-    registerArena(arena as CombatArenaApi);
+  if (!arena || !('getContainer' in arena) || !('init' in arena)) return;
+  registerArena(arena as CombatArenaApi);
+  const container = arena.getContainer();
+  if (!container) return;
+  await arena.init(container);
 
-    // Get container and initialize PIXI
-    const container = arena.getContainer();
-    if (container) {
-      await arena.init(container);
-
-      // Si en combat, initialiser avec les vraies données
-      if (inCombat.value) {
-        await initializeVisual();
-      } else {
-        // Sinon, créer une démo simple
-        await arena.createUnit('demo-player', 2, 4, 3, 'Archer-Green', 100, 100, true);
-        await arena.createUnit('demo-enemy', 8, 4, 2, 'Soldier-Red', 50, 50, false);
-        arena.setupDragEvents();
-      }
-    }
+  if (inCombat.value) {
+    await initializeVisual();
+  } else {
+    await arena.createUnit('demo-player', 2, 4, 3, 'Archer-Green', 100, 100, true);
+    await arena.createUnit('demo-enemy', 8, 4, 2, 'Soldier-Red', 50, 50, false);
+    arena.setupDragEvents();
   }
 });
 
@@ -106,11 +89,9 @@ onMounted(async () => {
 watch(
   () => [combatStore.inCombat, combatStore.enemies.length, combatStore.player?.hp],
   async ([inCombatNow]) => {
-    if (inCombatNow && arenaRef.value) {
-      // Small delay to ensure store updates propagate
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await initializeVisual();
-    }
+    if (!inCombatNow || !arenaRef.value) return;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await initializeVisual();
   },
   { deep: false },
 );

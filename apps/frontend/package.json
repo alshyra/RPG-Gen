@@ -1,5 +1,5 @@
 {
-  "name": "rpg-gemini-frontend",
+  "name": "@rpg-gen/frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,9 +9,7 @@
     "preview": "vite preview",
     "test": "vitest --run",
     "test:unit": "vitest --run",
-    "type-check": "vue-tsc --noEmit",
-    "lint": "npm run type-check && eslint .",
-    "lint:fix": "eslint . --fix"
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@rpg-gen/combat-engine": "*",

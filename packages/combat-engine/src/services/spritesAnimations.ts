@@ -27,14 +27,14 @@ const ANIM_TYPES = {
   attack: { frames: 4, speed: 0.25 },
   bow: { frames: 4, speed: 0.25 },
   wand: { frames: 3, speed: 0.25 },
-  run : { frames: 3, speed: 0.1 },
+  run: { frames: 3, speed: 0.1 },
   hurt: { frames: 2, speed: 0.1 },
   death: { frames: 4, speed: 0.05 },
 } as const;
 
 export type AnimType = keyof typeof ANIM_TYPES;
 
-export const animations: Record<AnimType, AnimConfig> = Object.entries(ANIM_TYPES)
+export const animations: Record<string, AnimConfig> = Object.entries(ANIM_TYPES)
   .flatMap(([animType, animCfg]) =>
     DIRECTIONS.map((dir, idx): [string, AnimConfig] => [
       `${animType}_${dir}`,

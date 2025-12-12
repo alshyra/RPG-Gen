@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci
-RUN npm --workspace rpg-gemini-backend run build
+RUN npm --workspace @rpg-gen/backend run build
 
 FROM base_node
 

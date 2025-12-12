@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: fix PixiJS types incompatibility with strict checks
 import { useUnitsStore } from '../stores/units';
 import { storeToRefs } from 'pinia';
 import { markRaw } from 'vue';
@@ -35,7 +34,8 @@ export const useCombatUnit = () => {
       healthBar,
     });
 
-    units.value.set(unitId, entry);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    units.value.set(unitId, entry as any);
 
     // Return healthBar so caller can add it to the stage and position it
     return healthBar;

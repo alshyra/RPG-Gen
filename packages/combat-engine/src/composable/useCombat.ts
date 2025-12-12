@@ -1,4 +1,3 @@
-// @ts-nocheck - TODO: fix PixiJS types incompatibility with strict checks
 import { shallowRef, onUnmounted, markRaw } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
@@ -132,9 +131,8 @@ export function useCombat() {
     // wire interaction controller
     if (app.value) {
       // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
-      // The type system needs help here due to Vue's Ref wrapping
-      const unitsRef = units as unknown as typeof units;
-      interactionController = setupInteractionController(app.value, () => unitsRef.value, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      interactionController = setupInteractionController(app.value, () => units.value as any, {
         pixelToGrid,
         gridToPixel,
         showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
@@ -271,9 +269,12 @@ export function useCombat() {
     const dir = getDirectionFromDelta(dx, dy);
 
     const walkKey = `walk_${dir}`;
-    if (animations[walkKey] && animations[walkKey].length > 0 && animationConfig[walkKey]) {
-      sprite.textures = animations[walkKey];
-      sprite.animationSpeed = animationConfig[walkKey].speed;
+    const walkTextures = animations[walkKey];
+    const walkConfig = animationConfig[walkKey];
+
+    if (walkTextures && walkTextures.length > 0 && walkConfig) {
+      sprite.textures = walkTextures;
+      sprite.animationSpeed = walkConfig.speed;
       sprite.play();
     }
 
@@ -284,9 +285,12 @@ export function useCombat() {
       ease: 'power2.inOut',
       onComplete: () => {
         const idleKey = `idle_${dir}`;
-        if (animations[idleKey] && animations[idleKey].length > 0 && animationConfig[idleKey]) {
-          sprite.textures = animations[idleKey];
-          sprite.animationSpeed = animationConfig[idleKey].speed;
+        const idleTextures = animations[idleKey];
+        const idleConfig = animationConfig[idleKey];
+
+        if (idleTextures && idleTextures.length > 0 && idleConfig) {
+          sprite.textures = idleTextures;
+          sprite.animationSpeed = idleConfig.speed;
           sprite.loop = true;
           sprite.play();
         }
@@ -316,22 +320,26 @@ export function useCombat() {
 
       // Try to play death animation if available
       const deathKey = 'death_bottom'; // Default to bottom, could be enhanced to use last direction
-      sprite.textures = unitAnimations[deathKey];
-      sprite.animationSpeed = animationConfig[deathKey].speed;
-      sprite.loop = false; // Play death animation only once
-      sprite.play();
+      const deathTextures = unitAnimations[deathKey];
+      const deathConfig = animationConfig[deathKey];
 
-      // After death animation completes, fade out
-      const deathDurationMs =
-        (unitAnimations[deathKey].length / animationConfig[deathKey].speed) * 1000;
+      if (deathTextures && deathConfig) {
+        sprite.textures = deathTextures;
+        sprite.animationSpeed = deathConfig.speed;
+        sprite.loop = false; // Play death animation only once
+        sprite.play();
 
-      gsap.to(sprite, {
-        alpha: 0,
-        scale: 0.9,
-        duration: 0.8,
-        delay: deathDurationMs / 1000, // Wait for death animation to finish
-        ease: 'power2.in',
-      });
+        // After death animation completes, fade out
+        const deathDurationMs = (deathTextures.length / deathConfig.speed) * 1000;
+
+        gsap.to(sprite, {
+          alpha: 0,
+          scale: 0.9,
+          duration: 0.8,
+          delay: deathDurationMs / 1000, // Wait for death animation to finish
+          ease: 'power2.in',
+        });
+      }
     }
 
     if (wasDefeated) emit('unit:died', { unitId });
@@ -358,9 +366,13 @@ export function useCombat() {
 
     try {
       Array.from(units.value.entries()).forEach(([_id, unit]) => {
-        unit.sprite.parent!.removeChild(unit.sprite);
-        unit.sprite.destroy({ children: true, texture: false, baseTexture: false });
-        unit.healthBar.container.parent!.removeChild(unit.healthBar.container);
+        if (unit.sprite.parent) {
+          unit.sprite.parent.removeChild(unit.sprite as never);
+        }
+        unit.sprite.destroy({ children: true, texture: false });
+        if (unit.healthBar.container.parent) {
+          unit.healthBar.container.parent.removeChild(unit.healthBar.container as never);
+        }
         unit.healthBar.container.destroy({ children: true });
       });
     } finally {

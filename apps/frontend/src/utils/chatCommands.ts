@@ -13,7 +13,7 @@ export type { ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionRe
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 const COMMAND_WITH_SPACE_REGEX = /^\/(\w+)\s*(.*)$/;
 
-const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'attack', 'use'];
+const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'use'];
 
 /**
  * Available commands with their descriptions for autocompletion

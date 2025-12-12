@@ -1,40 +1,13 @@
 <template>
-  <RouterLink
-    v-if="to"
-    custom
-    :to="to"
-  >
-    <template #default="{ href, navigate, isActive }">
-      <a
-        :href="href"
-        :class="[
-          'inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity',
-          buttonClass,
-          isActive ? activeClass : '',
-        ]"
-        :aria-disabled="isDisabled"
-        v-bind="$attrs"
-        @click="handleNavigate(navigate, $event)"
-      >
-        <UiLoader
-          v-if="isLoading"
-          inline
-          size="sm"
-          class="-ml-1 mr-2"
-        />
-        <slot />
-      </a>
-    </template>
-  </RouterLink>
-  <button
-    v-else
+  <component
+    :is="tag"
     :class="[
       'inline-flex items-center px-3 py-1 rounded-md font-semibold shadow-sm transition-opacity',
       buttonClass,
     ]"
-    :disabled="isDisabled"
+    :disabled="tag === 'button' ? isDisabled : undefined"
+    :aria-disabled="isDisabled"
     v-bind="$attrs"
-    @click="onClick($event)"
   >
     <UiLoader
       v-if="isLoading"
@@ -43,26 +16,25 @@
       class="-ml-1 mr-2"
     />
     <slot />
-  </button>
+  </component>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import {
-  type RouteLocationAsPathGeneric,
-  type RouteLocationAsRelativeGeneric,
-  RouterLink,
-} from 'vue-router';
 import UiLoader from './UiLoader.vue';
 
-const props = defineProps<{
-  variant?: 'primary' | 'ghost' | 'secondary';
-  isLoading?: boolean;
-  disabled?: boolean;
-  to?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
-}>();
-
-const emit = defineEmits(['click']);
+const props = withDefaults(
+  defineProps<{
+    variant?: 'primary' | 'ghost' | 'secondary';
+    isLoading?: boolean;
+    disabled?: boolean;
+    tag?: 'button' | 'a';
+  }>(),
+  {
+    variant: 'primary',
+    tag: 'button',
+  }
+);
 
 const variantClass = computed(() => {
   if (props.variant === 'ghost') return 'bg-white/10 text-white';
@@ -71,8 +43,6 @@ const variantClass = computed(() => {
 });
 
 const isDisabled = computed(() => props.isLoading || props.disabled);
-
-const activeClass = 'bg-slate-700 text-white';
 
 const buttonClass = computed(() => {
   const classes = [variantClass.value];
@@ -83,22 +53,4 @@ const buttonClass = computed(() => {
   }
   return classes.join(' ');
 });
-
-const handleNavigate = (navigate: ((e?: MouseEvent) => void) | undefined, e: MouseEvent) => {
-  if (isDisabled.value) {
-    e.preventDefault();
-    return;
-  }
-  if (navigate) {
-    navigate(e);
-  }
-};
-
-const onClick = (e: MouseEvent) => {
-  if (isDisabled.value) {
-    e.preventDefault();
-    return;
-  }
-  emit('click', e);
-};
 </script>

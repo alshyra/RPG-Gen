@@ -140,12 +140,12 @@ export const useGameSession = () => {
   };
 
   const startGame = async () => {
-    const char = await ensureCharacterLoaded();
-    if (!char) return;
+    const character = await ensureCharacterLoaded();
+    if (!character) return;
     isInitializing.value = true;
     try {
-      if (char.isDeceased) showDeathModal.value = true;
-      const messages = await conversationApi.startGame(char);
+      if (character.isDeceased) showDeathModal.value = true;
+      const messages = await conversationApi.startGame(character);
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);

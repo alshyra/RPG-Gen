@@ -31,9 +31,9 @@
     </div>
     <!-- Death modal -->
     <DeathModal
-      :is-open="characterStore.showDeathModal"
+      :is-open="showDeathModal"
       @confirm="onDeathConfirm"
-      @close="() => (characterStore.showDeathModal = false)"
+      @close="() => (showDeathModal = false)"
     />
 
     <!-- Roll confirmation modal (shows when store.showRollModal is true) -->
@@ -64,11 +64,12 @@
 </template>
 
 <script setup lang="ts">
+import { useGameRolls } from '@/composables/useGameRolls';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { characterApi } from '../apis/characterApi';
 import DeathModal from '../components/game/DeathModal.vue';
 import RollModal from '../components/game/RollModal.vue';
@@ -84,29 +85,21 @@ import CharacterInfoPanel from './game/CharacterInfoPanel.vue';
 
 // State
 const router = useRouter();
-const route = useRoute();
 const gameStore = useGameStore();
 const characterStore = useCharacterStore();
 const combatStore = useCombatStore();
 
 const ui = useUiStore();
-const characterId = computed(() => route.params.characterId as string);
-
-// Composables
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
 const { inCombat } = storeToRefs(combatStore);
 const { pendingInstruction } = storeToRefs(gameStore);
+const { currentCharacter, showDeathModal, isDead } = storeToRefs(characterStore);
 
-// Ensure rolls watcher / handlers are active for the whole view
-// (useGameRolls registers a watch on latestRoll and exposes confirm/reroll)
-import { useGameRolls } from '@/composables/useGameRolls';
 useGameRolls();
 
-// Replace bottom padding with a max-height so content never scrolls under the fixed bars.
-// Keep different values for combat/non-combat states.
 const contentMaxHeight = computed(() => {
   if (pendingInstruction.value?.type === 'roll') {
     return 'calc(100vh - 200px)';
@@ -139,14 +132,13 @@ const handleRetryMessage = async () => {
   await retryLastMessage();
 };
 
-// Load on mount
 onMounted(async () => {
   try {
+    console.log('stargame')
     await startGame();
     // After session started, check backend combat status and initialize the combat store
     try {
       const wasInCombat = await combat.checkCombatStatus();
-      // Use console.log so messages appear even when DevTools filters out debug/verbose level
       console.log('[GameView] combat status at startup', { wasInCombat });
     } catch (err) {
       console.warn('Failed to load combat status at startup', err);
@@ -156,13 +148,10 @@ onMounted(async () => {
   }
 });
 
-// messages auto-scroll moved to MessagesView
-
-// Handle character death
 const onDeathConfirm = async () => {
-  if (!characterStore.currentCharacter?.characterId) return;
-  await characterApi.killCharacter(characterId.value, characterStore.currentCharacter.world);
-  characterStore.showDeathModal = false;
+  if (!currentCharacter.value?.characterId) return;
+  await characterApi.killCharacter(currentCharacter.value.characterId, currentCharacter.value.world);
+  showDeathModal.value = false;
   router.push('/');
 };
 </script>
