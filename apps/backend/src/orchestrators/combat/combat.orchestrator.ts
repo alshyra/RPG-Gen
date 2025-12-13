@@ -15,6 +15,7 @@ import type {
 import { DiceService } from '../../domain/dice/dice.service.js';
 import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
 import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
+import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -164,7 +165,16 @@ export class CombatOrchestrator {
         spellName,
       );
     }
+    return this.processMeleeAttack(userId, characterId, targetId, targetEnemy, combatState);
+  }
 
+  private async processMeleeAttack(
+    userId: string,
+    characterId: string,
+    targetId: string,
+    targetEnemy: CombatantDto,
+    combatState: CombatStateDto,
+  ) {
     // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
     const attackRoll = this.diceService.rollAttack(
       combatState.player.attackBonus,
@@ -179,7 +189,8 @@ export class CombatOrchestrator {
       return {
         combatState,
         diceResult: attackRoll.diceResult,
-      };
+        damageTotal: 0,
+      } as AttackResponseDto;
     }
 
     // Hit: roll damage via DiceService (handles crit doubling) and get the damage result DTO
@@ -195,11 +206,10 @@ export class CombatOrchestrator {
       targetId,
       damageResult.damageTotal,
     );
-    const finalState = applyResult.state;
 
     // Build base response
     const response: AttackResponseDto = {
-      combatState: finalState,
+      combatState: applyResult.state,
       diceResult: attackRoll.diceResult,
       damageDiceResult: damageResult,
       damageTotal: damageResult.damageTotal,
@@ -208,41 +218,13 @@ export class CombatOrchestrator {
 
     // If combat ended, attach combatEnd and apply XP to character
     if (applyResult.endResult) {
-      const combatEnd = new CombatEndDto({
-        victory: true,
-        xp_gained: applyResult.endResult.xp_gained,
-        player_hp: finalState.player.hp,
-        enemies_defeated: applyResult.endResult.enemies_defeated,
-        narrative: `Victoire! Vous avez vaincu ${applyResult.endResult.enemies_defeated.join(', ')}.`,
-      });
-
-      response.combatEnd = combatEnd;
-
-      // Apply XP to character
-      if (applyResult.endResult.xp_gained > 0) {
-        await this.characterService.addXp(characterId, applyResult.endResult.xp_gained);
-        this.logger.log(
-          `Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`,
-        );
-      }
-
-      // Persist combat_end instruction to conversation history
-      try {
-        await this.conversationService.append(userId, characterId, {
-          role: 'assistant',
-          narrative: combatEnd.narrative,
-          instructions: [
-            {
-              type: 'combat_end',
-              combat_end: combatEnd,
-            },
-          ],
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Failed to persist combat_end message for ${characterId}: ${(e as Error)?.message}`,
-        );
-      }
+      return await this.handleCombatEnd(
+        userId,
+        characterId,
+        applyResult,
+        applyResult.state,
+        response,
+      );
     }
 
     return response;
@@ -324,23 +306,23 @@ export class CombatOrchestrator {
       targetId,
       damageResult.damageTotal,
     );
-    const finalState = applyResult.state;
 
     // Build response
     const response: AttackResponseDto = {
-      combatState: finalState,
+      combatState: applyResult.state,
       diceResult: attackRoll?.diceResult || saveRoll?.diceResult,
       damageDiceResult: damageResult,
       damageTotal: damageResult.damageTotal,
       isCrit: damageResult.isCrit,
     };
 
-    await this.handleCombatEnd(userId, characterId, applyResult, finalState, response);
-
-    this.logger.log(
-      `Spell ${spellName} cast by ${characterId} against ${targetId}: ${hit ? 'hit' : 'miss'}, damage: ${damageResult.damageTotal}`,
+    return await this.handleCombatEnd(
+      userId,
+      characterId,
+      applyResult,
+      applyResult.state,
+      response,
     );
-    return response;
   }
 
   private async handleCombatEnd(
@@ -349,36 +331,69 @@ export class CombatOrchestrator {
     applyResult: { endResult?: { xp_gained?: number; enemies_defeated?: string[] } | undefined },
     finalState: CombatStateDto,
     response: AttackResponseDto,
-  ): Promise<void> {
-    if (!applyResult.endResult) return;
+  ): Promise<AttackResponseDto> {
+    if (!applyResult.endResult) return response;
 
-    const end = applyResult.endResult;
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const victoryMessageForChat = `Message system: le personnage ${character.name} à triomphé de ${(applyResult.endResult?.enemies_defeated ?? []).join(', ')} en ${finalState.roundNumber}. Renvoie une brève description narrative de cette victoire.`;
+    const history = await this.conversationService.getHistoryMessages(userId, characterId);
+    this.geminiTexteService.initializeChatSession(
+      characterId,
+      this.geminiTexteService.initPrompt(
+        character,
+        this.conversationService.buildCharacterSummary(character),
+      ),
+      history ?? [],
+    );
+
     const combatEnd = new CombatEndDto({
       victory: true,
-      xp_gained: end.xp_gained ?? 0,
+      xp_gained: applyResult.endResult?.xp_gained ?? 0,
       player_hp: finalState.player.hp,
-      enemies_defeated: end.enemies_defeated ?? [],
-      narrative: `Victoire! Vous avez vaincu ${(end.enemies_defeated ?? []).join(', ')}.`,
+      enemies_defeated: applyResult.endResult?.enemies_defeated ?? [],
+      narrative: '',
     });
 
-    response.combatEnd = combatEnd;
+    const messageResponse = await this.geminiTexteService.sendMessage(
+      characterId,
+      JSON.stringify({
+        narrative: victoryMessageForChat,
+        combatEnd: {
+          victory: combatEnd.victory,
+          xp_gained: combatEnd.xp_gained,
+          player_hp: combatEnd.player_hp,
+          enemies_defeated: combatEnd.enemies_defeated,
+        },
+      }),
+    );
 
-    if ((end.xp_gained ?? 0) > 0) {
-      await this.characterService.addXp(characterId, end.xp_gained!);
-      this.logger.log(`Applied ${end.xp_gained} XP to character ${characterId}`);
+    if ((applyResult.endResult?.xp_gained ?? 0) > 0) {
+      await this.characterService.addXp(characterId, applyResult.endResult.xp_gained!);
+      this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
     }
 
-    await this.conversationService.append(userId, characterId, {
-      role: 'assistant',
-      narrative: combatEnd.narrative,
-      instructions: [
-        {
-          type: 'combat_end',
-          combat_end: combatEnd,
-        },
-      ],
-    });
+    await this.conversationService.append(
+      userId,
+      characterId,
+      new ChatMessageDto({
+        role: 'assistant',
+        narrative: messageResponse.narrative,
+        instructions: [
+          {
+            type: 'combat_end',
+            combat_end: combatEnd,
+          },
+        ],
+      }),
+    );
+
+    return {
+      ...response,
+      combatEnd,
+      combatState: finalState,
+    };
   }
+
   /**
    * End player turn and process all enemy attacks.
    * Returns attack logs for frontend to replay with animations.

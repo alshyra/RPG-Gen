@@ -49,4 +49,8 @@ export class ChatMessageDto {
   })
   @IsArray()
   instructions?: GameInstructionDto[];
+
+  constructor(partial: Partial<ChatMessageDto>) {
+    Object.assign(this, partial);
+  }
 }

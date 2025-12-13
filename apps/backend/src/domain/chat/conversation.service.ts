@@ -1,7 +1,7 @@
 import { Content } from '@google/genai';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Schema, Types } from 'mongoose';
 import { AbilityScoresResponseDto } from '../character/dto/AbilityScoresResponseDto.js';
 import { calculateArmorClass } from '../character/armor-class.util.js';
 import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
@@ -18,7 +18,10 @@ export class ConversationService {
     @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>,
   ) {}
 
-  async getHistory(userId: string, characterId: string): Promise<ChatMessageDto[] | undefined> {
+  async getHistoryMessages(
+    userId: string,
+    characterId: string,
+  ): Promise<ChatMessageDto[] | undefined> {
     const history = await this.chatHistoryModel
       .findOne({
         userId,
@@ -92,61 +95,39 @@ export class ConversationService {
   }
 
   async append(userId: string, characterId: string, msg: ChatMessageDto) {
-    // Defensive normalization: ensure incoming message has required fields
-    const normalized: ChatMessageDto = ((): ChatMessageDto => {
-      if (!msg || typeof msg !== 'object') {
-        this.logger.warn('Appending malformed message (not an object), coercing to system message');
-        return {
-          role: 'system',
-          narrative: String(msg || ''),
-          instructions: [],
-        };
-      }
-      const { role } = msg;
-      const { narrative } = msg;
-      const instructions = msg.instructions ?? [];
-      if (!role || typeof role !== 'string' || !['user', 'assistant', 'system'].includes(role)) {
-        this.logger.warn(
-          `Appending message with invalid or missing role; coercing to 'system' - ${JSON.stringify(msg)}`,
-        );
-      }
-      if (!narrative || typeof narrative !== 'string') {
-        this.logger.warn(
-          `Appending message with invalid or missing narrative; coercing to empty string - ${JSON.stringify(msg)}`,
-        );
-      }
-      return {
-        role:
-          typeof role === 'string' && ['user', 'assistant', 'system'].includes(role)
-            ? role
-            : 'system',
-        narrative: typeof narrative === 'string' ? narrative : '',
-        instructions: Array.isArray(instructions) ? instructions : [],
-      } as ChatMessageDto;
-    })();
-
-    let history = await this.chatHistoryModel.findOne({
-      userId,
-      characterId,
-    });
-    if (!history) {
-      history = new this.chatHistoryModel({
+    if (!msg.narrative) throw new InternalServerErrorException('Message narrative is required');
+    const history = await this.chatHistoryModel
+      .findOne({
         userId,
         characterId,
-        messages: [normalized],
+      })
+    if (!history) {
+      const chatHistory = new ChatHistory({
+        userId: userId as unknown as Schema.Types.ObjectId,
+        characterId,
+        messages: [
+          {
+            role: msg.role ?? 'user',
+            narrative: msg.narrative || 'Something went wrong.',
+            instructions: msg.instructions || [],
+          },
+        ],
         lastUpdated: new Date(),
       });
-      await history.save();
+      const newHistory = new this.chatHistoryModel(chatHistory);
+      await newHistory.save();
       this.logger.log(`💬 Saved new history to character ${characterId})`);
       return;
     }
-
-    history.messages.push(normalized);
-    if (history.messages.length > this.MAX_MESSAGES) {
-      history.messages = history.messages.slice(-this.MAX_MESSAGES);
-    }
+    this.logger.log(`💬 Saved new history to character ${characterId})`, msg);
+    history.messages.push({
+      role: msg.role ?? 'user',
+      narrative: msg.narrative || 'Something went wrong.',
+      instructions: msg.instructions || [],
+    });
     history.lastUpdated = new Date();
 
+    this.logger.log(`💬 Saved new history to character ${characterId})`, history);
     await history.save();
     this.logger.log(
       `💬 Saved message to character ${characterId} (${history.messages.length} messages)`,

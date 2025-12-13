@@ -5,10 +5,17 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { readFile } from 'fs/promises';
+import path from 'path';
 import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 import { GameInstructionDto } from '../../domain/chat/dto/GameInstructionDto.js';
-import { aiResponseSchema } from './gemini-schemas.js';
 import { geminiResponseJsonSchema } from './gemini-json-schema.js';
+import { aiResponseSchema } from './gemini-schemas.js';
+import { CharacterResponseDto } from '../../domain/character/dto/index.js';
+
+const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
+const SCENARIO_PATH =
+  process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
 
 @Injectable()
 export class GeminiTextService {
@@ -16,6 +23,7 @@ export class GeminiTextService {
   private client: GoogleGenAI;
   private model = 'gemini-2.5-flash';
   private chatClients = new Map<string, Chat>();
+  private systemPrompt: string;
 
   constructor() {
     this.logger.debug(
@@ -23,8 +31,23 @@ export class GeminiTextService {
       process.env.GOOGLE_API_KEY ? '***' : 'no API key',
     );
     this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+    Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
+      ([systemPrompt, scenarioPrompt]) => {
+        this.systemPrompt = systemPrompt + '\n\n' + scenarioPrompt;
+        this.logger.log('System prompt and scenario loaded successfully !');
+      },
+    );
   }
 
+  private async loadSystemPrompt(): Promise<string> {
+    this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
+    return await readFile(TEMPLATE_PATH, 'utf8');
+  }
+
+  private async loadScenarii(): Promise<string> {
+    this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
+    return await readFile(SCENARIO_PATH, 'utf8');
+  }
   initializeChatSession(
     sessionId: string,
     systemInstruction: string,
@@ -57,7 +80,6 @@ export class GeminiTextService {
     this.chatClients.set(sessionId, chat);
   }
 
-  // eslint-disable-next-line max-statements
   async sendMessage(sessionId: string, message: string): Promise<ChatMessageDto> {
     const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
@@ -176,5 +198,9 @@ export class GeminiTextService {
     }
 
     return null;
+  }
+
+  public initPrompt(character: CharacterResponseDto, characterSummary: string) {
+    return `${this.systemPrompt}\n\n${characterSummary}`;
   }
 }

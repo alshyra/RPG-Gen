@@ -632,7 +632,7 @@ test('processAttack returns combatEnd when killing last enemy', async t => {
       const convService = testCtx.ctx.module.get(
         (await import('../../src/domain/chat/conversation.service.js')).ConversationService,
       );
-      const hist = await convService.getHistory(TEST_USER_ID, character.characterId);
+      const hist = await convService.getHistoryMessages(TEST_USER_ID, character.characterId);
       t.truthy(hist && hist.length > 0, 'Conversation history should exist');
       const hasCombatEndInstr = hist?.some(m =>
         (m.instructions || []).some(i => (i as any).type === 'combat_end'),

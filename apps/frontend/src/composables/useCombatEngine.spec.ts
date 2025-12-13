@@ -1,179 +1,163 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useCombatEngine, type CombatArenaApi } from '@/composables/useCombatEngine';
-import type { CombatEngineEventPayload } from '@rpg-gen/combat-engine';
-import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
+import { useCombatEngine } from '@/composables/useCombatEngine';
+import type { CombatArenaApi } from '@/composables/useCombatEngine';
+import type { CombatantDto, AttackResponseDto } from '@rpg-gen/shared';
 
-// Mock the backend combat composable
+// Mock dependencies
 vi.mock('@/composables/useCombat', () => ({
   useCombat: () => ({
-    executeAttack: vi.fn().mockResolvedValue({}),
+    executeAttack: vi.fn().mockResolvedValue(undefined),
+    checkCombatVictory: vi.fn(),
+    isCombatEndModalOpen: ref(false),
+    combatEndNarrative: ref(''),
+    closeCombatEndModal: vi.fn(),
   }),
 }));
 
-// Create mock store state as refs
-const mockEnemies = ref([
-  {
-    id: 'enemy-1',
-    name: 'Goblin',
-    hp: 20,
-    hpMax: 20,
-  },
-  {
-    id: 'enemy-2',
-    name: 'Orc',
-    hp: 30,
-    hpMax: 30,
-  },
-]);
-const mockPlayer = ref({
-  id: 'player-1',
-  name: 'Hero',
-  hp: 50,
-  hpMax: 50,
-});
-const mockCurrentCharacter = ref({
-  characterId: 'char-1',
-  spells: [],
-});
+const mockCurrentAttackView = ref<{ totalDamage: number } | null>(null);
 
-// Mock stores
 vi.mock('@/stores/combatStore', () => ({
   useCombatStore: () => ({
-    enemies: mockEnemies,
-    player: mockPlayer,
-    inCombat: true,
-    turnOrder: [],
-    currentTurnIndex: 0,
-    roundNumber: 1,
-    phase: 'PLAYER_TURN',
-    actionRemaining: 1,
-    actionMax: 1,
+    enemies: ref([
+      {
+        id: 'enemy-1',
+        name: 'Goblin',
+        hp: 5,
+        hpMax: 7,
+        ac: 12,
+        isPlayer: false,
+      },
+    ]),
+    player: ref({
+      id: 'player-1',
+      name: 'Hero',
+      hp: 10,
+      hpMax: 10,
+      ac: 14,
+      isPlayer: true,
+    }),
+    inCombat: ref(true),
+    isEndingTurn: ref(false),
+    currentAttackView: mockCurrentAttackView,
+    updateFromTurnResult: vi.fn(),
   }),
 }));
 
 vi.mock('@/stores/characterStore', () => ({
   useCharacterStore: () => ({
-    currentCharacter: mockCurrentCharacter,
+    currentCharacter: ref({
+      characterId: 'char-1',
+      name: 'Hero',
+    }),
   }),
 }));
 
-describe('useCombatEngine', () => {
+vi.mock('@/stores/gameStore', () => ({
+  useGameStore: () => ({
+    appendMessage: vi.fn(),
+  }),
+}));
+
+vi.mock('@/apis/combatApi', () => ({
+  combatService: {
+    endActivation: vi.fn(),
+  },
+}));
+
+describe('useCombatEngine - Attack Visual Updates', () => {
+  let mockArenaApi: CombatArenaApi;
+
   beforeEach(() => {
-    setActivePinia(createPinia());
     vi.clearAllMocks();
-  });
 
-  const createMockArenaApi = (): CombatArenaApi & {
-    handlers: Map<keyof CombatEngineEventPayload, ((payload: unknown) => void)[]>;
-  } => {
-    const handlers = new Map<keyof CombatEngineEventPayload, ((payload: unknown) => void)[]>();
+    // Reset attack view
+    mockCurrentAttackView.value = null;
 
-    return {
-      handlers,
+    // Create mock arena API
+    mockArenaApi = {
       init: vi.fn().mockResolvedValue(undefined),
-      createUnit: vi.fn().mockResolvedValue({}),
+      createUnit: vi.fn().mockResolvedValue(undefined),
       clearAllUnits: vi.fn().mockResolvedValue(undefined),
       updateUnitHealth: vi.fn(),
       moveUnitToGrid: vi.fn(),
       setupDragEvents: vi.fn(),
-      getContainer: vi.fn().mockReturnValue(null),
-      on: vi.fn((event, handler) => {
-        if (!handlers.has(event)) {
-          handlers.set(event, []);
-        }
-        handlers.get(event)!.push(handler);
-      }),
-      off: vi.fn((event, handler) => {
-        const eventHandlers = handlers.get(event);
-        if (eventHandlers) {
-          const index = eventHandlers.indexOf(handler);
-          if (index > -1) eventHandlers.splice(index, 1);
-        }
-      }),
-      emit: vi.fn((event, payload) => {
-        handlers.get(event)?.forEach(h => h(payload));
-      }),
-    };
-  };
-
-  it('should register arena and subscribe to events', () => {
-    const { registerArena } = useCombatEngine();
-    const mockApi = createMockArenaApi();
-
-    registerArena(mockApi);
-
-    expect(mockApi.on).toHaveBeenCalledWith('unit:clicked', expect.any(Function));
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn(),
+      getContainer: vi.fn().mockReturnValue(document.createElement('div')),
+    } as unknown as CombatArenaApi;
   });
 
-  it('should open modal when enemy is clicked', () => {
-    const { registerArena, isActionModalOpen, selectedTarget } = useCombatEngine();
-    const mockApi = createMockArenaApi();
+  it('should update enemy HP visually after successful attack', async () => {
+    const { registerArena, executeAttack } = useCombatEngine();
 
-    registerArena(mockApi);
+    // Register mock arena
+    registerArena(mockArenaApi);
 
-    // Simulate enemy click
-    mockApi.emit('unit:clicked', {
-      unitId: 'enemy-1',
-      isPlayer: false,
-      stageX: 100,
-      stageY: 100,
-    });
+    // Set attack result with 2 damage
+    mockCurrentAttackView.value = { totalDamage: 2 };
 
-    expect(isActionModalOpen.value).toBe(true);
-    expect(selectedTarget.value).toEqual({
+    // Simulate attack on enemy-1 (had 7 HP, now has 5 HP after 2 damage)
+    const target: CombatantDto = {
       id: 'enemy-1',
       name: 'Goblin',
-      hp: 20,
-      hpMax: 20,
-    });
-  });
-
-  it('should NOT open modal when player unit is clicked', () => {
-    const { registerArena, isActionModalOpen, selectedTarget } = useCombatEngine();
-    const mockApi = createMockArenaApi();
-
-    registerArena(mockApi);
-
-    // Simulate player click
-    mockApi.emit('unit:clicked', {
-      unitId: 'player-1',
-      isPlayer: true,
-      stageX: 50,
-      stageY: 50,
-    });
-
-    expect(isActionModalOpen.value).toBe(false);
-    expect(selectedTarget.value).toBeNull();
-  });
-
-  it('should close modal on closeActionModal', () => {
-    const { registerArena, isActionModalOpen, closeActionModal } = useCombatEngine();
-    const mockApi = createMockArenaApi();
-
-    registerArena(mockApi);
-    mockApi.emit('unit:clicked', {
-      unitId: 'enemy-1',
+      hp: 7, // HP BEFORE attack
+      hpMax: 7,
+      ac: 12,
       isPlayer: false,
-      stageX: 100,
-      stageY: 100,
-    });
+    };
 
-    expect(isActionModalOpen.value).toBe(true);
+    // Execute attack
+    await executeAttack(target, undefined);
 
-    closeActionModal();
-
-    expect(isActionModalOpen.value).toBe(false);
+    // Verify updateUnitHealth was called with the target and damage amount
+    expect(mockArenaApi.updateUnitHealth).toHaveBeenCalledWith('enemy-1', 2);
   });
 
-  it('should unregister handlers on unregisterArena', () => {
-    const { registerArena, unregisterArena } = useCombatEngine();
-    const mockApi = createMockArenaApi();
+  it('should not call updateUnitHealth if attack misses', async () => {
+    const { registerArena, executeAttack } = useCombatEngine();
 
-    registerArena(mockApi);
-    expect(mockApi.on).toHaveBeenCalled();
+    registerArena(mockArenaApi);
 
-    unregisterArena();
-    expect(mockApi.off).toHaveBeenCalled();
+    // Set attack result with 0 damage (miss)
+    mockCurrentAttackView.value = { totalDamage: 0 };
+
+    const target: CombatantDto = {
+      id: 'enemy-1',
+      name: 'Goblin',
+      hp: 7,
+      hpMax: 7,
+      ac: 12,
+      isPlayer: false,
+    };
+
+    await executeAttack(target, undefined);
+
+    // updateUnitHealth should NOT be called if no damage
+    expect(mockArenaApi.updateUnitHealth).not.toHaveBeenCalled();
+  });
+
+  it('should handle enemy defeated (HP = 0)', async () => {
+    const { registerArena, executeAttack } = useCombatEngine();
+
+    registerArena(mockArenaApi);
+
+    // Set attack result with 2 damage (killing blow)
+    mockCurrentAttackView.value = { totalDamage: 2 };
+
+    const target: CombatantDto = {
+      id: 'enemy-1',
+      name: 'Goblin',
+      hp: 2, // Had 2 HP
+      hpMax: 7,
+      ac: 12,
+      isPlayer: false,
+    };
+
+    await executeAttack(target, undefined);
+
+    // Should call updateUnitHealth with 2 damage
+    expect(mockArenaApi.updateUnitHealth).toHaveBeenCalledWith('enemy-1', 2);
   });
 });

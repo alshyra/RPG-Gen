@@ -1,19 +1,13 @@
 import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { readFile } from 'fs/promises';
-import path from 'path';
+
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import { CharacterService } from '../domain/character/character.service.js';
-import { CharacterResponseDto } from '../domain/character/dto/index.js';
-import { GeminiTextService } from '../infra/external/gemini-text.service.js';
-import type { RPGRequest } from '../global.types.js';
 import { ConversationService } from '../domain/chat/conversation.service.js';
 import { ChatMessageDto } from '../domain/chat/dto/index.js';
+import type { RPGRequest } from '../global.types.js';
+import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 import { ChatOrchestrator } from '../orchestrators/index.js';
-
-const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), 'chat.prompt.txt');
-const SCENARIO_PATH =
-  process.env.SCENARIO_PATH ?? path.join(process.cwd(), 'assets/scenarii', 'arene.txt');
 
 @ApiTags('chat')
 @Controller('chat')
@@ -21,30 +15,12 @@ const SCENARIO_PATH =
 @ApiBearerAuth()
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
-  private systemPrompt: string;
   constructor(
     private readonly geminiTexteService: GeminiTextService,
     private readonly conversationService: ConversationService,
     private readonly characterService: CharacterService,
     private readonly chatOrchestrator: ChatOrchestrator,
-  ) {
-    Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
-      ([systemPrompt, scenarioPrompt]) => {
-        this.systemPrompt = systemPrompt + '\n\n' + scenarioPrompt;
-        this.logger.log('System prompt and scenario loaded successfully !');
-      },
-    );
-  }
-
-  private async loadSystemPrompt(): Promise<string> {
-    this.logger.log(`Loading system prompt from ${TEMPLATE_PATH}`);
-    return await readFile(TEMPLATE_PATH, 'utf8');
-  }
-
-  private async loadScenarii(): Promise<string> {
-    this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
-    return await readFile(SCENARIO_PATH, 'utf8');
-  }
+  ) {}
 
   @Post(':characterId')
   @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
@@ -71,14 +47,20 @@ export class ChatController {
     const userId = user._id.toString();
     this.logger.log(
       `Received chat request for characterId ${characterId} with message: `,
-      chatMessageDto
+      chatMessageDto,
     );
 
-    const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
+    const previousChatMessages = await this.conversationService.getHistoryMessages(
+      userId,
+      characterId,
+    );
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
-      this.initPrompt(character),
+      this.geminiTexteService.initPrompt(
+        character,
+        this.conversationService.buildCharacterSummary(character),
+      ),
       previousChatMessages,
     );
     await this.conversationService.append(userId, characterId, chatMessageDto);
@@ -104,12 +86,15 @@ export class ChatController {
     this.logger.log(`Fetching chat history for characterId ${characterId}...`);
     const { user } = req;
     const userId = user._id.toString();
-    const previousChatMessages = await this.conversationService.getHistory(userId, characterId);
+    const previousChatMessages = await this.conversationService.getHistoryMessages(
+      userId,
+      characterId,
+    );
 
     await this.processHistoricalCombat(previousChatMessages, userId, characterId);
     await this.initSessionAndStartIfNeeded(userId, characterId, previousChatMessages);
 
-    return this.conversationService.getHistory(userId, characterId);
+    return this.conversationService.getHistoryMessages(userId, characterId);
   }
 
   private async processHistoricalCombat(
@@ -133,7 +118,10 @@ export class ChatController {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     this.geminiTexteService.initializeChatSession(
       characterId,
-      this.initPrompt(character),
+      this.geminiTexteService.initPrompt(
+        character,
+        this.conversationService.buildCharacterSummary(character),
+      ),
       previousChatMessages ?? [],
     );
     if (!previousChatMessages) {
@@ -143,9 +131,5 @@ export class ChatController {
         "Tu peux commencer l'aventure",
       );
     }
-  }
-
-  private initPrompt(character: CharacterResponseDto) {
-    return `${this.systemPrompt}\n\n${this.conversationService.buildCharacterSummary(character)}`;
   }
 }

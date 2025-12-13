@@ -30,6 +30,10 @@ export class ChatHistory {
     type: Date,
   })
   lastUpdated: Date;
+
+  constructor(partial: Partial<ChatHistory>) {
+    Object.assign(this, partial);
+  }
 }
 
 export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);

@@ -191,12 +191,10 @@ export function useCombatEngine() {
       // Call backend
       await backendCombat.executeAttack(target, spellName);
 
-      // Update visual with new HP from store
+      // Update visual with damage from attack result
       if (!arenaApi.value) return;
 
-      const updatedEnemy = enemies.value.find(e => e.id === target.id);
-      if (!updatedEnemy || updatedEnemy.hp == undefined || target.hp == undefined) return;
-      const damage = target.hp - updatedEnemy.hp;
+      const damage = currentAttackView.value?.totalDamage ?? 0;
       if (damage > 0) {
         arenaApi.value.updateUnitHealth(target.id, damage);
       }
