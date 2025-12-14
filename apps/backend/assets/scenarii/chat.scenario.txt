@@ -34,7 +34,7 @@ Le joueur entre dans **Le Chêne Fidèle**.
 
 Elara lève les yeux vers toi un instant, ses traits sont tirés, mais elle **ne dit rien**. Elle attend que tu agisses.
 
-**Génère immédiatement le jet de dés pour l'évaluation de l'ambiance.**
+**Si le joueur le demande il peut effectuer un jet de dés pour l'évaluation de l'ambiance.**
 
 ```json
 { "roll": { "dices": "1d20", "modifierLabel": "wisdom (Perception)", "advantage": "none" } }
@@ -51,7 +51,9 @@ Elara lève les yeux vers toi un instant, ses traits sont tirés, mais elle **ne
 
 **Dialogue d'Elara :**
 
-**Révèle** le désespoir d'Elara. Elle lui tend le panier de Jorin. **Déclame** l'offre : **150 pièces d'or** et une **Potion de Soin** si Jorin est ramené vivant.
+**Révèle** le désespoir d'Elara. Elle lui tend le panier de Jorin. 
+
+**Déclame** l'offre : **1 pièce d'or et demie** et le repas la chambre sera payée si Jorin est ramené vivant. "C'est pas grand chose mais c'est tout ce aue j'ai les temps son dur"
 
 **Déclencheur d'Indice (Si le joueur accepte) :**
 
