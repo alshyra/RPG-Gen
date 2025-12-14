@@ -98,16 +98,27 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to start..."
+          sleep 5
 
           # Wait for MongoDB (faster check)
           timeout 30 bash -c 'until docker compose exec -T mongodb mongosh --eval "db.adminCommand({ping: 1})" --quiet > /dev/null 2>&1; do sleep 1; done' || echo "MongoDB check timeout, continuing..."
 
-          # Wait for backend to be healthy
-          echo "Waiting for backend..."
-          timeout 60 bash -c 'until curl -sf http://localhost:3001 > /dev/null 2>&1 || curl -sf http://localhost:3001/api > /dev/null 2>&1; do sleep 2; done' || {
-            echo "Backend not responding, checking status..."
+          # Wait for backend to be healthy - try multiple endpoints with longer timeout
+          echo "Waiting for backend to be ready..."
+          timeout 90 bash -c '
+            until {
+              curl -sf http://localhost:3001/api/characters > /dev/null 2>&1 ||
+              curl -sf http://localhost:3001/api > /dev/null 2>&1 ||
+              curl -sf http://localhost:3001 > /dev/null 2>&1
+            }; do
+              sleep 2
+              echo "Backend not ready yet, retrying..."
+            done
+          ' || {
+            echo "Backend failed to start in time"
             docker compose ps backend
-            docker compose logs --tail=30 backend
+            docker compose logs --tail=50 backend
+            exit 1
           }
 
           # Wait for frontend to be accessible
@@ -123,6 +134,8 @@ jobs:
 
       - name: Prepare test DB (cleanup + seed)
         working-directory: .
+        env:
+          E2E_API_URL: "http://localhost:3001"
         run: |
           npm run e2e:cleanup-db || true
           npm run e2e:prepare-db -- --count 2
@@ -132,6 +145,7 @@ jobs:
         run: npx playwright test "${{ matrix.specs.path }}"
         env:
           CI: true
+          E2E_API_URL: "http://localhost:3001"
 
       - name: Show container logs on failure
         if: failure()
