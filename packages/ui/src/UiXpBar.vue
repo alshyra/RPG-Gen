@@ -9,7 +9,7 @@
       </span>
       <div class="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden border border-slate-600">
         <div
-          class="bg-linear-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-300"
+          class="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-300"
           :style="{ width: `${percentage}%` }"
         />
       </div>

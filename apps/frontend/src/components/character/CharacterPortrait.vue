@@ -11,7 +11,7 @@
         :src="currentCharacter?.portrait"
       />
 
-      <div class="absolute top-0 left-0 right-0 bg-linear-to-b from-black/80 to-transparent p-2">
+      <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-2">
         <div class="text-white font-bold text-sm truncate">
           {{ currentCharacter?.name }}
         </div>
@@ -26,7 +26,7 @@
         <div class="text-purple-400 font-bold text-sm">✨ {{ inspirationPoints }}</div>
       </div>
 
-      <div class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2">
+      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
         <!-- XP Bar -->
         <UiXpBar
           :percentage="xpPercent"

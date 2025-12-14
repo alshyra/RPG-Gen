@@ -2,16 +2,17 @@
   <!-- Left: character info panel - floating on mobile -->
   <aside
     :class="[
-      'lg:col-span-3 lg:row-span-2 flex flex-col gap-2 min-h-0 overflow-hidden',
-      'fixed lg:relative top-0 bottom-24 lg:inset-y-0 left-0 w-80 lg:w-auto z-50',
-      'bg-slate-900 lg:bg-transparent',
+      'lg:col-span-3 max-w-[350px]',
+      'min-h-0 overflow-hidden',
+      'max-lg:fixed lg:relative top-0 bottom-24 lg:inset-y-0 left-0 z-50',
+      'bg-slate-900 rounded-lg lg:bg-transparent',
       'transition-transform duration-300 ease-in-out',
       ui.isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
     <div
       v-if="currentCharacter"
-      class="p-2 lg:p-0 h-full flex flex-col gap-2 overflow-hidden"
+      class="p-2 lg:p-0 max-w-[350px] h-full flex flex-col gap-2 overflow-hidden"
     >
       <CharacterPortrait class="shrink-0" />
       <div class="card flex-1 overflow-auto min-h-0">

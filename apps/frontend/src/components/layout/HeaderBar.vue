@@ -45,7 +45,7 @@
           class="inline-block"
         >
           <h1
-            class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-pink-500"
+            class="text-xl lg:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500"
           >
             RPG Gemini
           </h1>

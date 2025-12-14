@@ -12,12 +12,8 @@
       class="grid lg:grid-cols-12 gap-2 flex-1 min-h-0"
       style="grid-template-rows: 1fr auto"
     >
-      <div class="lg:col-span-3 max-w-[350px]">
-        <!-- Desktop : fixed/sticky left panel so it doesn't scroll with the main content -->
-        <div class="lg:sticky lg:top-4 lg:self-start lg:h-[calc(100vh-250px)] lg:z-10">
-          <CharacterInfoPanel />
-        </div>
-      </div>
+      <!-- Desktop : fixed/sticky left panel so it doesn't scroll with the main content -->
+      <CharacterInfoPanel />
       <!-- Center: messages (or detail views via child routes) -->
       <main class="lg:col-span-9 flex flex-col min-h-0 overflow-hidden">
         <!-- Only this inner area scrolls; header/other siblings stay fixed -->
@@ -96,7 +92,7 @@ const { handleInput } = useGameCommands();
 const combat = useCombat();
 const { inCombat } = storeToRefs(combatStore);
 const { pendingInstruction } = storeToRefs(gameStore);
-const { currentCharacter, showDeathModal, isDead } = storeToRefs(characterStore);
+const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
 
 useGameRolls();
 

@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'bg-linear-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
+      'bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
       connectedTop ? 'rounded-b-lg' : 'rounded-lg',
     ]"
   >

@@ -12,7 +12,7 @@
 
       <!-- 404 Title -->
       <h1
-        class="text-6xl font-extrabold mb-4 bg-linear-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"
+        class="text-6xl font-extrabold mb-4 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"
       >
         404
       </h1>

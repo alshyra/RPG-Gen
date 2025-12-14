@@ -53,7 +53,7 @@
           :data-hp="String(fighterDisplayHp)"
         >
           <div
-            class="absolute left-0 right-0 bottom-0 bg-linear-to-t from-red-600 to-red-400"
+            class="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-red-600 to-red-400"
             :style="{ height: hpPct }"
           />
           <div class="absolute inset-0 flex items-center justify-center">
