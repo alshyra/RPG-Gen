@@ -5,15 +5,15 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci
-RUN npm --workspace rpg-gemini-backend run build
+RUN npm --workspace @rpg-gen/backend run build
 
 FROM base_node
 
-WORKDIR /app/packages/backend
+WORKDIR /app/apps/backend
 
 COPY --from=builder /app/ /app
-ENV SCENARIO_PATH=/app/packages/backend/assets/scenarii/chat.scenario.txt
-ENV TEMPLATE_PATH=/app/packages/backend/chat.prompt.txt
+ENV SCENARIO_PATH=/app/apps/backend/assets/scenarii/chat.scenario.txt
+ENV TEMPLATE_PATH=/app/apps/backend/chat.prompt.txt
 ENV NODE_ENV=production
 
 EXPOSE 3001

@@ -1,0 +1,105 @@
+<template>
+  <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 text-slate-200 font-semibold">
+      <Flag class="w-4 h-4 text-amber-300" />
+      <span>Combat</span>
+    </div>
+    <div
+      class="ml-2 text-sm text-slate-400"
+      data-cy="combat-round"
+    >
+      Round {{ roundNumber }}
+    </div>
+
+    <div class="ml-auto flex items-center gap-3 text-sm">
+      <div
+        class="flex items-center gap-1"
+        data-cy="action-counter"
+        :class="actionRemaining > 0 ? 'text-green-400' : 'text-slate-500'"
+      >
+        <Activity class="w-4 h-4" />
+        <span>{{ actionRemaining }}</span>
+      </div>
+
+      <div
+        class="flex items-center gap-1"
+        data-cy="bonus-action-counter"
+        :class="bonusActionRemaining > 0 ? 'text-amber-400' : 'text-slate-500'"
+      >
+        <Star class="w-4 h-4" />
+        <span>{{ bonusActionRemaining }}</span>
+      </div>
+
+      <div
+        class="px-2 py-0.5 rounded text-xs font-medium"
+        data-cy="combat-phase"
+        :class="phaseClass"
+      >
+        {{ phaseLabel }}
+      </div>
+    </div>
+    <UiButton
+      data-cy="end-turn-button"
+      :class="endTurnButtonClass"
+      :disabled="!canEndTurn || isEndingTurn"
+      @click="endTurn"
+    >
+      <span v-if="isEndingTurn">En cours...</span>
+      <span v-else>Fin de tour</span>
+    </UiButton>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { UiButton } from '@rpg-gen/ui';
+import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCombatStore } from '@/stores/combatStore';
+import { Activity, Flag, Star } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+
+const combatStore = useCombatStore();
+const { endTurn } = useCombatEngine();
+const { roundNumber, actionRemaining, bonusActionRemaining, phase } = storeToRefs(combatStore);
+const { isEndingTurn } = storeToRefs(combatStore);
+
+const phaseLabel = computed(() => {
+  switch (phase.value) {
+    case 'PLAYER_TURN':
+      return 'Your Turn';
+    case 'AWAITING_DAMAGE_ROLL':
+      return 'Roll Damage';
+    case 'ENEMY_TURN':
+      return 'Enemy Turn';
+    case 'COMBAT_ENDED':
+      return 'Combat Over';
+    default:
+      return 'Your Turn';
+  }
+});
+
+const phaseClass = computed(() => {
+  switch (phase.value) {
+    case 'PLAYER_TURN':
+      return 'bg-green-600 text-white';
+    case 'AWAITING_DAMAGE_ROLL':
+      return 'bg-amber-600 text-white';
+    case 'ENEMY_TURN':
+      return 'bg-red-600 text-white';
+    case 'COMBAT_ENDED':
+      return 'bg-slate-600 text-white';
+    default:
+      return 'bg-green-600 text-white';
+  }
+});
+
+// Can end turn only during player turn
+const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !isEndingTurn.value);
+
+const endTurnButtonClass = computed(() => {
+  if (!canEndTurn.value) {
+    return 'bg-slate-600 text-slate-400 cursor-not-allowed';
+  }
+  return 'bg-purple-600 hover:bg-purple-700 text-white';
+});
+</script>

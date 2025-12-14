@@ -1,0 +1,79 @@
+{
+  "name": "@rpg-gen/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "nest start --watch",
+    "start:prod": "node dist/main",
+    "build": "nest build",
+    "type-check": "tsc -p tsconfig.json",
+    "lint": "npm run type-check && eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "ava",
+    "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts",
+    "import:spells": "ts-node ./src/scripts/import-spells.ts"
+  },
+  "dependencies": {
+    "@google/genai": "~1.29.1",
+    "@nestjs/common": "^11.1.8",
+    "@nestjs/core": "^11.1.8",
+    "@nestjs/jwt": "^11.0.1",
+    "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.1.8",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/swagger": "^11.2.1",
+    "@rpg-gen/shared": "*",
+    "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "express": "^5.1.0",
+    "joi": "^18.0.1",
+    "jsonc-simple-parser": "^3.0.0",
+    "mongoose": "^8.19.3",
+    "openapi-typescript": "^7.10.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rimraf": "^6.1.0",
+    "sharp": "^0.34.5",
+    "ts-morph": "^27.0.2",
+    "tsconfig-paths": "^4.1.0",
+    "zod": "^4.1.13",
+    "zod-to-json-schema": "^3.25.0"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^6.0.0",
+    "@nestjs/testing": "^11.1.8",
+    "@stylistic/eslint-plugin": "^5.5.0",
+    "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.2",
+    "ava": "^6.4.1",
+    "mongodb-memory-server": "^10.3.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.1.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.ts"
+    ],
+    "extensions": [
+      "ts"
+    ],
+    "nodeArguments": [
+      "--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node",
+      "--enable-source-maps",
+      "--no-warnings"
+    ],
+    "failFast": true
+  }
+}

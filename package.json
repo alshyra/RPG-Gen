@@ -4,35 +4,49 @@
   "version": "1.0.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "bootstrap": "npm install",
-    "start:backend": "npm --workspace rpg-gemini-backend run start:dev",
-    "start:frontend": "npm --workspace rpg-gemini-frontend run dev",
-    "start:dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "test:backend": "npm --workspace rpg-gemini-backend run test",
-    "test:frontend": "npm --workspace rpg-gemini-frontend run test",
+    "start": "concurrently \"npm --workspace @rpg-gen/backend run start\" \"npm --workspace @rpg-gen/frontend run dev\"",
+    "build:ui": "npm --workspace @rpg-gen/ui run build",
+    "build:backend": "npm --workspace @rpg-gen/backend run build",
+    "build:frontend": "npm --workspace @rpg-gen/frontend run build",
+    "build": "npm run build:ui && npm run build:backend && npm run build:frontend",
+    "type-check:backend": "npm --workspace @rpg-gen/backend run type-check",
+    "type-check:frontend": "npm --workspace @rpg-gen/frontend run type-check",
+    "type-check:ui": "npm --workspace @rpg-gen/ui run type-check",
+    "type-check": "npm run type-check:backend && npm run type-check:frontend && npm run type-check:ui",
+    "test:backend": "npm --workspace @rpg-gen/backend run test",
+    "test:frontend": "npm --workspace @rpg-gen/frontend run test",
+    "test:ui": "npm --workspace @rpg-gen/ui run test",
+    "test": "npm run test:backend && npm run test:frontend && npm run test:ui",
+    "test:e2e": "npm --workspace @rpg-gen/e2e run test",
+    "test:e2e:ui": "npm --workspace @rpg-gen/e2e run test:ui",
+    "test:e2e:debug": "npm --workspace @rpg-gen/e2e run test:debug",
+    "lint": "npm run type-check && oxlint .",
+    "lint:fix": "npm run type-check && oxlint . --fix",
     "e2e:prepare-db": "node scripts/prepare-e2e-db.mjs",
     "e2e:cleanup-db": "node scripts/prepare-e2e-db.mjs -- --cleanup",
-    "test": "npm run test:backend && npm run test:frontend",
-    "test:e2e": "npm -w rpg-gemini-frontend run test:e2e",
-    "test:e2e:open": "npm -w rpg-gemini-frontend run test:e2e:open",
-    "generate:openapi": "npm --workspace rpg-gemini-backend run generate:openapi",
-    "lint": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint .",
-    "lint:fix": "npm -w rpg-gemini-backend run type-check && npm -w rpg-gemini-frontend run type-check && eslint . --fix"
+    "generate:openapi": "npm --workspace @rpg-gen/backend run generate:openapi",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,jsx,json,md}\""
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/express": "^5.0.6",
-    "concurrently": "^8.2.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
     "express": "^5.2.1",
+    "oxlint": "^1.32.0",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.49.0"
   },
   "dependencies": {
-    "@nestjs/cli": "^11.0.12",
+    "@nestjs/cli": "^11.0.14",
+    "@typescript/native-preview": "^7.0.0-dev.20251212.1",
     "jsonc-simple-parser": "^3.0.0",
     "tsconfig-paths": "^4.2.0"
   }

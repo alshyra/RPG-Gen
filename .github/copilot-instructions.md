@@ -23,7 +23,6 @@ Strict rule: Do not use `as` casting in production code.
 
 - Rationale: `as` (and patterns like `as unknown as Type`) bypass the TypeScript type system and hides real type mismatches, which can lead to runtime errors. The project does not allow wholesale use of `as`.
 - Alternatives and preferred patterns:
-
   - Use non-null checks, inference, and immutable updates rather than casting. Example:
     ```ts
     if (!currentCharacter.value) return;
@@ -62,7 +61,7 @@ Tests & CI
 
 Patterns & conventions to respect
 
-- DTO generation: backend schemas ➜ generator script at `packages/backend/src/scripts/generate-dtos.ts`. Do not hand-edit generated files in `packages/shared/src/generated`. If schema changes are needed run `npm --workspace rpg-gemini-backend run generate:dtos` and commit the result.
+- DTO generation: backend schemas ➜ generator script at `packages/backend/src/scripts/generate-dtos.ts`. Do not hand-edit generated files in `packages/shared/src/generated`. If schema changes are needed run `npm --workspace @rpg-gen/backend run generate:dtos` and commit the result.
 - Chat / Gemini integration: `packages/backend/src/external/text/gemini-text.service.ts` — robust extraction/parsing of Gemini responses is central. Tests often mock or avoid non-deterministic AI outputs — prefer making Gemini interactions injectable/mocked in tests.
 - Narrative parsing conventions: game instructions are embedded as JSON in narrative text and parsed by `packages/backend/src/external/game-parser.util.ts`. Tests expect specific JSON extraction and cleaning behavior.
 

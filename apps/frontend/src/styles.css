@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+@import '@rpg-gen/ui/index.css';
+
+@layer base {
+  body {
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    color: #f1f5f9;
+  }
+}

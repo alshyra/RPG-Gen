@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-unused-vars": "warn",
+    "unicorn/no-for-loop": "error",
+    "unicorn/prefer-array-flat-map": "error",
+    "unicorn/prefer-array-some": "error",
+    "no-unused-expressions": "off"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly",
+    "Buffer": "readonly"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.{spec,test}.{ts,tsx,js,jsx}",
+        "**/*.cy.{ts,tsx,js,jsx}",
+        "**/__tests__/**",
+        "packages/**/tests/**"
+      ],
+      "rules": {
+        "typescript/no-explicit-any": "off"
+      }
+    }
+  ]
+}

@@ -588,8 +588,6 @@ export interface components {
             enemies_defeated: string[];
             /** @description Flee indicator */
             fled?: boolean;
-            /** @description Narrative summary */
-            narrative: string;
         };
         CombatEndInstructionMessageDto: {
             /** @description Combat end information */
@@ -1101,6 +1099,8 @@ export interface components {
             combatState: components["schemas"]["CombatStateDto"];
             /** @description Combat end information (present when combat ends due to this attack) */
             combatEnd?: components["schemas"]["CombatEndDto"];
+            /** @description Narrative description of the attack outcome if combat ends, for frontend display purposes. */
+            narrative?: string;
         };
         EnemyAttackLogDto: {
             /**
