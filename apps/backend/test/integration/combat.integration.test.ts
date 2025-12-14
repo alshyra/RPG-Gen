@@ -574,13 +574,47 @@ test('endPlayerTurn returns final snapshot when player dies (not 404)', async t 
 
 test('processAttack returns combatEnd when killing last enemy', async t => {
   // Use mocked dice that always hit (roll 20) and deal high damage
-  const testCtx = await setupCombatTest([15, 10, 20, 20]); // init rolls + attack roll + damage roll
+  const mockDice = createMockDiceService({ rolls: [15, 10, 20, 20] }); // init rolls + attack roll + damage roll
+
+  // Mock Gemini service to avoid API calls
+  const mockGemini = {
+    initPrompt: async () => {
+      // No-op for test
+    },
+    initializeChatSession: () => {
+      // No-op for test
+    },
+    sendMessage: async () => ({
+      narrative: 'You struck down the enemy!',
+      instructions: [],
+    }),
+  };
+
+  // Import the GeminiTextService class to use as provider token
+  const { GeminiTextService } = await import('../../src/infra/external/gemini-text.service.js');
+
+  const ctx = await createTestApp(
+    [CombatModule],
+    [
+      {
+        provide: DiceService,
+        useValue: mockDice,
+      },
+      {
+        provide: GeminiTextService,
+        useValue: mockGemini,
+      },
+    ],
+  );
+
+  const combatService = ctx.module.get(CombatAppService);
+  const characterService = ctx.module.get(CharacterService);
 
   try {
     // Create a real character in the database
-    const charDoc = await testCtx.characterService.create(TEST_USER_ID, 'test-world');
+    const charDoc = await characterService.create(TEST_USER_ID, 'test-world');
     // Update the character with combat-ready stats
-    await testCtx.characterService.update(TEST_USER_ID, charDoc.characterId, {
+    await characterService.update(TEST_USER_ID, charDoc.characterId, {
       hp: 20,
       hpMax: 20,
       scores: {
@@ -593,22 +627,19 @@ test('processAttack returns combatEnd when killing last enemy', async t => {
       },
     });
 
-    const character = await testCtx.characterService.findByCharacterId(
-      TEST_USER_ID,
-      charDoc.characterId,
-    );
+    const character = await characterService.findByCharacterId(TEST_USER_ID, charDoc.characterId);
 
     // Create a single enemy with low HP
     const combatStart = createCombatStartRequest(1);
     combatStart.combat_start[0].hp = 1;
 
-    await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+    await combatService.initializeCombat(character, combatStart, TEST_USER_ID);
 
     // Get orchestrator
     const { CombatOrchestrator } = await import('../../src/orchestrators/combat/index.js');
-    const orchestrator = testCtx.ctx.module.get(CombatOrchestrator);
+    const orchestrator = ctx.module.get(CombatOrchestrator);
 
-    const state = await testCtx.combatService.getCombatState(character.characterId);
+    const state = await combatService.getCombatState(character.characterId);
     const [enemy] = state.enemies;
     t.truthy(enemy, 'There should be one enemy');
 
@@ -629,7 +660,7 @@ test('processAttack returns combatEnd when killing last enemy', async t => {
       );
 
       // Ensure we saved the assistant 'combat_end' instruction to conversation history
-      const convService = testCtx.ctx.module.get(
+      const convService = ctx.module.get(
         (await import('../../src/domain/chat/conversation.service.js')).ConversationService,
       );
       const hist = await convService.getHistoryMessages(TEST_USER_ID, character.characterId);
@@ -640,6 +671,6 @@ test('processAttack returns combatEnd when killing last enemy', async t => {
       t.true(hasCombatEndInstr, 'Conversation history should contain a combat_end instruction');
     }
   } finally {
-    await closeTestApp(testCtx.ctx);
+    await closeTestApp(ctx);
   }
 });

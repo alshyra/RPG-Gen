@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { markRaw } from 'vue';
 import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from 'pixi.js';
 import { animations } from '../services/spritesAnimations';
-import type { UnitData } from '@/types/combat-types';
+import type { UnitData } from '../types/combat-types';
 import gsap from 'gsap';
 
 /**

@@ -1,7 +1,7 @@
 import { shallowRef, onUnmounted, markRaw } from 'vue';
 import * as PIXI from 'pixi.js';
 import { gsap } from 'gsap';
-import { GRID_CONFIG, type availableCharacterKeys } from '../types/combat-types';
+import type { availableCharacterKeys } from '../types/combat-types';
 import { animations as animationConfig, animations } from '../services/spritesAnimations';
 
 // New modules

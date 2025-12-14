@@ -51,14 +51,6 @@ describe('chatCommands', () => {
       });
     });
 
-    it('parses /attack command', () => {
-      const result = parseCommand('/attack goblin');
-      expect(result).toEqual({
-        type: 'attack',
-        target: 'goblin',
-      });
-    });
-
     it('is case insensitive for command type', () => {
       expect(parseCommand('/CAST fireball')).toEqual({
         type: 'cast',

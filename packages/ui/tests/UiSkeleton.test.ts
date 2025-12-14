@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import UiSkeleton from './UiSkeleton.vue';
+import UiSkeleton from '../src/UiSkeleton.vue';
 
 describe('UiSkeleton', () => {
   it('renders with default text variant', () => {

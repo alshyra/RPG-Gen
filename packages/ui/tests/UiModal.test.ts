@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect } from 'vitest';
-import UiModal from './UiModal.vue';
+import UiModal from '../src/UiModal.vue';
 
 describe('UiModal', () => {
   it('renders title in header when provided and emits confirm/cancel', async () => {

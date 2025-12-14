@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref } from 'vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
-import type { CombatantDto, AttackResponseDto } from '@rpg-gen/shared';
+import type { CombatantDto } from '@rpg-gen/shared';
 
 // Mock dependencies
 vi.mock('@/composables/useCombat', () => ({
@@ -106,6 +106,7 @@ describe('useCombatEngine - Attack Visual Updates', () => {
       hpMax: 7,
       ac: 12,
       isPlayer: false,
+      initiative: 5,
     };
 
     // Execute attack
@@ -130,6 +131,7 @@ describe('useCombatEngine - Attack Visual Updates', () => {
       hpMax: 7,
       ac: 12,
       isPlayer: false,
+      initiative: 5,
     };
 
     await executeAttack(target, undefined);
@@ -153,6 +155,7 @@ describe('useCombatEngine - Attack Visual Updates', () => {
       hpMax: 7,
       ac: 12,
       isPlayer: false,
+      initiative: 5,
     };
 
     await executeAttack(target, undefined);
