@@ -25,7 +25,7 @@ const normalize = s => s.toString().normalize('NFKD').replace(/\p{Diacritic}/gu,
 const base = path.resolve(new URL(import.meta.url).pathname, '..', '..');
 const spellsPath = path.join(base, 'src', 'seed', 'spells.json');
 const className = process.argv[2] || 'bard';
-const fullPath = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.full.json`);
+const fullPath = path.join(base, 'src', 'seed', 'classes',className ,'allowed-spells.full.json');
 
 if (!fs.existsSync(fullPath)) {
   console.error('Missing file', fullPath);
@@ -66,14 +66,14 @@ for (const [lvl, arr] of Object.entries(full.allowedSpellsByLevel || {})) {
   }
 }
 
-const outPath = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.candidates.json`);
+const outPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.candidates.json');
 fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
 console.log('wrote', outPath);
 
 // optionally auto-apply high-confidence matches (score >= 0.82)
 const autoApply = process.argv.includes('--apply');
 if (autoApply) {
-  const levelsPath = path.join(base, 'src', 'seed', 'classes', `${className}.levels.json`);
+  const levelsPath = path.join(base, 'src', 'seed', 'classes', className, 'levels.json');
   if (!fs.existsSync(levelsPath)) {
     console.error('Missing class levels file', levelsPath);
     process.exit(2);
@@ -116,7 +116,7 @@ if (emitReview) {
     }
     if (review[lvl].length === 0) delete review[lvl];
   }
-  const reviewPath = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.review.json`);
+  const reviewPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.review.json');
   fs.writeFileSync(reviewPath, JSON.stringify(review, null, 2));
   console.log('wrote review file', reviewPath, ' (minScore=' + minScore + ')');
 }

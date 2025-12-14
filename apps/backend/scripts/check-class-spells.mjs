@@ -6,7 +6,7 @@ import path from 'path';
 const className = process.argv[2] || 'bard';
 const base = path.resolve(new URL(import.meta.url).pathname, '..', '..');
 const spellsPath = path.join(base, 'src', 'seed', 'spells.json');
-const classPath = path.join(base, 'src', 'seed', 'classes', `${className}.levels.json`);
+const classPath = path.join(base, 'src', 'seed', 'classes', className, 'levels.json');
 
 if (!fs.existsSync(classPath)) {
   console.error(`Class file not found: ${classPath}`);

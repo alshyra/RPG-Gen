@@ -6,10 +6,10 @@ Usage (from repository root):
   node packages/backend/scripts/map-allowed-spells.mjs <class>
 
   Optional flags:
-  --emit-mapped -> also write the compact `*.allowed-spells.mapped.json` (arrays of ids)
-  --emit-resolved -> also write the resolved `*.allowed-spells.resolved.json` (name+id fallback)
+  --emit-mapped -> also write the compact `*/allowed-spells.mapped.json` (arrays of ids)
+  --emit-resolved -> also write the resolved `*/allowed-spells.resolved.json` (name+id fallback)
 
-- Find fuzzy candidates for unresolved names (create `*.allowed-spells.candidates.json`):
+- Find fuzzy candidates for unresolved names (create `*/allowed-spells.candidates.json`):
   node packages/backend/scripts/find-spell-candidates.mjs <class>
 
   Optional flags:

@@ -6,7 +6,7 @@ import path from 'path';
 const base = path.resolve(new URL(import.meta.url).pathname, '..', '..');
 const seedPath = path.join(base, 'src', 'seed', 'spells.json');
 const className = process.argv[2] || 'bard';
-const mdPath = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.md`);
+const mdPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.md');
 
 const spells = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
 if (!fs.existsSync(mdPath)) {
@@ -64,7 +64,7 @@ const emitResolved = process.argv.includes('--emit-resolved');
 
 if (emitMapped) {
   const out = { allowedSpellsByLevel: mapping };
-  const outPath = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.mapped.json`);
+  const outPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.mapped.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
   console.log('\nwrote ' + outPath);
 }
@@ -80,7 +80,7 @@ if (emitResolved) {
       return { name: parts, definitionId: null };
     });
   }
-  const resolvedOut = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.resolved.json`);
+  const resolvedOut = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.resolved.json');
   fs.writeFileSync(resolvedOut, JSON.stringify({ allowedSpellsByLevel: resolved }, null, 2));
   console.log('\nwrote ' + resolvedOut);
 }
@@ -110,6 +110,6 @@ for (const rawLine of lines) {
   const found = spells.find(s => normalize(s.name) === norm) || null;
   full[lvl].push({ name, definitionId: found ? found.definitionId : null });
 }
-const fullOut = path.join(base, 'src', 'seed', 'classes', `${className}.allowed-spells.full.json`);
+const fullOut = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.full.json');
 fs.writeFileSync(fullOut, JSON.stringify({ allowedSpellsByLevel: full }, null, 2));
 console.log('\nwrote ' + fullOut);
