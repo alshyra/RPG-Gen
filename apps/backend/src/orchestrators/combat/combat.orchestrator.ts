@@ -351,7 +351,6 @@ export class CombatOrchestrator {
       xp_gained: applyResult.endResult?.xp_gained ?? 0,
       player_hp: finalState.player.hp,
       enemies_defeated: applyResult.endResult?.enemies_defeated ?? [],
-      narrative: '',
     });
 
     const messageResponse = await this.geminiTexteService.sendMessage(
@@ -496,20 +495,25 @@ export class CombatOrchestrator {
     // If applyResult indicates combat ended (player dead), persist a chat message
     if (applyResult.endResult) {
       try {
+        const defeatNarrative = `Vous avez été vaincu...`;
         const combatEnd = new CombatEndDto({
           victory: false,
           xp_gained: applyResult.endResult.xp_gained ?? 0,
           player_hp: updatedState.player.hp,
           enemies_defeated: applyResult.endResult.enemies_defeated ?? [],
-          narrative: `Vous avez été vaincu...`,
         });
         await this.conversationService.append(userId, characterId, {
           role: 'assistant',
-          narrative: combatEnd.narrative,
+          narrative: defeatNarrative,
           instructions: [
             {
               type: 'combat_end',
-              combat_end: combatEnd,
+              combat_end: {
+                victory: combatEnd.victory,
+                xp_gained: combatEnd.xp_gained,
+                player_hp: combatEnd.player_hp,
+                enemies_defeated: combatEnd.enemies_defeated,
+              },
             },
           ],
         });

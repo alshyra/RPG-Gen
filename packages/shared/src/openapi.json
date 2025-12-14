@@ -1476,18 +1476,13 @@
           "fled": {
             "type": "boolean",
             "description": "Flee indicator"
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative summary"
           }
         },
         "required": [
           "victory",
           "xp_gained",
           "player_hp",
-          "enemies_defeated",
-          "narrative"
+          "enemies_defeated"
         ]
       },
       "CombatEndInstructionMessageDto": {
@@ -2865,14 +2860,6 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/CombatStateDto"
-              }
-            ]
-          },
-          "combatEnd": {
-            "description": "Combat end information (present when all enemies are defeated)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatEndDto"
               }
             ]
           }

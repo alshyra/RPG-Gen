@@ -31,10 +31,4 @@ export class CombatEnd {
     type: Boolean,
   })
   fled?: boolean;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  narrative: string;
 }
