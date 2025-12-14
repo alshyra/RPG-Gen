@@ -57,7 +57,7 @@ const seedSpellDefinitions = async (app: INestApplication, logger: Logger) => {
 const seedClassDefinitions = async (app: INestApplication, logger: Logger) => {
   try {
     const classDefService = app.get(ClassDefinitionService);
-    
+
     // Map class definitions with their allowed spells
     const classSpellMap = [
       { def: barbarianDefinitions, spells: barbarianSpells },
@@ -73,13 +73,13 @@ const seedClassDefinitions = async (app: INestApplication, logger: Logger) => {
       { def: warlockDefinitions, spells: warlockSpells },
       { def: wizardDefinitions, spells: wizardSpells },
     ];
-    
+
     // Merge spell data with class definitions
     const classDataArray = classSpellMap.map(({ def, spells }) => ({
       ...def,
       allowedSpellsByLevel: spells.allowedSpellsByLevel || {},
     }));
-    
+
     await classDefService.seedFromJson(classDataArray);
     logger.log('Seeded class definitions at startup');
   } catch (e) {

@@ -82,9 +82,7 @@ test.before(async () => {
           { name: 'Assistance', definitionId: 'spell-0-assistance' },
           { name: 'Résistance', definitionId: 'spell-0-resistance' },
         ],
-        '1': [
-          { name: 'Bénédiction', definitionId: 'spell-1-benediction' },
-        ],
+        '1': [{ name: 'Bénédiction', definitionId: 'spell-1-benediction' }],
       },
     },
   ]);
@@ -104,7 +102,11 @@ test('getOptionsForLevel should return unlockedSpells for Cleric level 1', async
   t.is(options.spellsKnown, 2);
 
   // Should have spells from level 0 and 1
-  t.is(options.unlockedSpells.length, 3, 'Should have 3 unlocked spells (2 from level 0, 1 from level 1)');
+  t.is(
+    options.unlockedSpells.length,
+    3,
+    'Should have 3 unlocked spells (2 from level 0, 1 from level 1)',
+  );
 
   // Verify spell structure
   const assistanceSpell = options.unlockedSpells.find(s => s.definitionId === 'spell-0-assistance');

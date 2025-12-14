@@ -77,14 +77,7 @@ test('All 12 D&D 5e class files exist and are valid JSON', async t => {
 test('All subclass definition files exist for each class', async t => {
   const classSubclassMap: Record<string, string[]> = {
     barbarian: ['berserker', 'wild-heart', 'world-tree', 'zealot'],
-    bard: [
-      'lore',
-      'swords',
-      'glamour',
-      'eloquence',
-      'spirits',
-      'whispers',
-    ],
+    bard: ['lore', 'swords', 'glamour', 'eloquence', 'spirits', 'whispers'],
     cleric: [
       'life',
       'light',
@@ -98,44 +91,11 @@ test('All subclass definition files exist for each class', async t => {
       'peace',
     ],
     druid: ['land', 'moon', 'shepherd', 'spores', 'dreams', 'wildfire', 'peace'],
-    fighter: [
-      'champion',
-      'battle-master',
-      'eldritch-knight',
-      'psi-knight',
-      'rune-knight',
-    ],
-    monk: [
-      'open-hand',
-      'shadow',
-      'four-elements',
-      'mercy',
-      'long-death',
-    ],
-    paladin: [
-      'devotion',
-      'conquest',
-      'ancients',
-      'vengeance',
-      'glory',
-      'redemption',
-    ],
-    ranger: [
-      'beast-master',
-      'fey-wanderer',
-      'gloom-stalker',
-      'hunter',
-      'phantom',
-      'swarmkeeper',
-    ],
-    rogue: [
-      'thief',
-      'assassin',
-      'arcane-trickster',
-      'phantom',
-      'soul-knife',
-      'inquisitive',
-    ],
+    fighter: ['champion', 'battle-master', 'eldritch-knight', 'psi-knight', 'rune-knight'],
+    monk: ['open-hand', 'shadow', 'four-elements', 'mercy', 'long-death'],
+    paladin: ['devotion', 'conquest', 'ancients', 'vengeance', 'glory', 'redemption'],
+    ranger: ['beast-master', 'fey-wanderer', 'gloom-stalker', 'hunter', 'phantom', 'swarmkeeper'],
+    rogue: ['thief', 'assassin', 'arcane-trickster', 'phantom', 'soul-knife', 'inquisitive'],
     sorcerer: [
       'draconic',
       'wild-magic',
@@ -144,14 +104,7 @@ test('All subclass definition files exist for each class', async t => {
       'clockwork-soul',
       'lunar-sorcery',
     ],
-    warlock: [
-      'fiend',
-      'great-old-one',
-      'archfey',
-      'celestial',
-      'genie',
-      'hexblade',
-    ],
+    warlock: ['fiend', 'great-old-one', 'archfey', 'celestial', 'genie', 'hexblade'],
     wizard: [
       'abjurer',
       'conjurer',
@@ -220,7 +173,7 @@ test('className values match expected English capitalization', async t => {
     const filePath = join(baseDir, 'src', 'seed', 'classes', dir, 'levels.json');
     const content = readFileSync(filePath, 'utf-8');
     const data = JSON.parse(content);
-    
+
     t.is(
       data.className,
       expectedName,
@@ -232,19 +185,25 @@ test('className values match expected English capitalization', async t => {
 // Test that each class has exactly 20 levels
 test('Each class has exactly 20 levels', async t => {
   const classes = [
-    'barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk',
-    'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard',
+    'barbarian',
+    'bard',
+    'cleric',
+    'druid',
+    'fighter',
+    'monk',
+    'paladin',
+    'ranger',
+    'rogue',
+    'sorcerer',
+    'warlock',
+    'wizard',
   ];
 
   for (const className of classes) {
     const filePath = join(baseDir, 'src', 'seed', 'classes', className, 'levels.json');
     const content = readFileSync(filePath, 'utf-8');
     const data = JSON.parse(content);
-    
-    t.is(
-      data.levels.length,
-      20,
-      `${className} should have 20 levels, got ${data.levels.length}`,
-    );
+
+    t.is(data.levels.length, 20, `${className} should have 20 levels, got ${data.levels.length}`);
   }
 });
