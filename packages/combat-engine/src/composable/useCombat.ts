@@ -169,9 +169,9 @@ export function useCombat() {
     // wire interaction controller
     if (combatPixiInstance.value) {
       // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       interactionController = setupInteractionController(
         combatPixiInstance.value,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         () => units.value as any,
         {
           pixelToGrid,

@@ -11,14 +11,21 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./index.css": {
+      "import": "./index.css"
+    },
     "./dist": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./dist/index.css": {
+      "import": "./dist/index.css"
     }
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "index.css"
   ],
   "scripts": {
     "build": "vite build",
