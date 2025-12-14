@@ -42,4 +42,11 @@ export class AttackResponseDto {
     type: CombatEndDto,
   })
   combatEnd?: CombatEndDto;
+
+
+  @ApiPropertyOptional({
+    description: 'Narrative description of the attack outcome if combat ends, for frontend display purposes.',
+    type: String,
+  })
+  narrative?: string;
 }

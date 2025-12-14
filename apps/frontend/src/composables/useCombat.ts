@@ -3,14 +3,12 @@ import type {
   CombatantDto,
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
-import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { combatService } from '../apis/combatApi';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
-import { conversationApi } from '@/apis/conversationApi';
 
 /**
  * Composable for combat-specific actions and state management
@@ -129,7 +127,7 @@ export function useCombat() {
       result.combatEnd.victory,
       result.combatEnd.xp_gained,
       result.combatEnd.enemies_defeated,
-      result.combatEnd.narrative,
+      result.narrative!,
     );
   };
 

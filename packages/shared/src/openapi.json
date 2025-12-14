@@ -2767,6 +2767,10 @@
                 "$ref": "#/components/schemas/CombatEndDto"
               }
             ]
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative description of the attack outcome if combat ends, for frontend display purposes."
           }
         },
         "required": [

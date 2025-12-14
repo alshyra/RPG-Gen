@@ -390,6 +390,7 @@ export class CombatOrchestrator {
       ...response,
       combatEnd,
       combatState: finalState,
+      narrative: messageResponse.narrative,
     };
   }
 
@@ -616,7 +617,6 @@ export class CombatOrchestrator {
             player_hp: character.hp!,
             enemies_defeated: [],
             fled: true,
-            narrative: 'Vous avez fui le combat.',
           },
         },
       ],

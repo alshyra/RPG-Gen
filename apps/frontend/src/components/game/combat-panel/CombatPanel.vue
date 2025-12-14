@@ -25,7 +25,6 @@
     />
     <CombatEndModal
       :is-open="isCombatEndModalOpen"
-      :narrative="combatEndNarrative"
       @close="closeCombatEndModal"
     />
   </div>
@@ -57,7 +56,7 @@ const {
   initializeVisual,
 } = useCombatEngine();
 
-const { isCombatEndModalOpen, combatEndNarrative, closeCombatEndModal } = useCombat();
+const { isCombatEndModalOpen, closeCombatEndModal } = useCombat();
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);

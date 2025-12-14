@@ -5,7 +5,7 @@
     class="combat-end-modal"
   >
     <template #header>
-      <div class="modal-header">
+      <div class="grow modal-header">
         <h2>🏆 Victoire!</h2>
       </div>
     </template>
@@ -14,7 +14,7 @@
       <div class="modal-content">
         <!-- Narrative text -->
         <div class="narrative-box">
-          <p class="narrative-text">{{ narrative }}</p>
+          <p class="narrative-text">{{ combatEndNarrative }}</p>
         </div>
       </div>
     </template>
@@ -31,16 +31,19 @@
 </template>
 
 <script setup lang="ts">
-import { UiModal, UiButton } from '@rpg-gen/ui';
+import { useCombatStore } from '@/stores/combatStore';
+import { UiButton, UiModal } from '@rpg-gen/ui';
+import { storeToRefs } from 'pinia';
+
+const combatStore = useCombatStore();
+const { combatEndNarrative } = storeToRefs(combatStore);
 
 withDefaults(
   defineProps<{
     isOpen: boolean;
-    narrative: string;
   }>(),
   {
     isOpen: false,
-    narrative: '',
   },
 );
 
