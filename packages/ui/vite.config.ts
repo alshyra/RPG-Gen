@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueDevTools from 'vite-plugin-vue-devtools';
+import tailwindcss from '@tailwindcss/vite';
 import dts from 'vite-plugin-dts';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     vue(),
     vueDevTools(),
     dts({

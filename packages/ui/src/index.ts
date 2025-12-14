@@ -1,3 +1,5 @@
+import '../index.css';
+
 export { default as FullPageLoader } from './FullPageLoader.vue';
 export { default as UiAlertModal } from './UiAlertModal.vue';
 export { default as UiBackground } from './UiBackground.vue';
