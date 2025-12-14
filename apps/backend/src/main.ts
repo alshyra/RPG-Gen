@@ -3,13 +3,8 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, INestApplication, ConsoleLogger, Logger } from '@nestjs/common';
 import { AppModule } from './app.module.js';
-import { ItemDefinitionService } from './domain/item-definition/item-definition.service.js';
-import { SpellDefinitionService } from './domain/spell-definition/spell-definition.service.js';
-import weaponsDefinitions from './seed/weapons-definitions.json' with { type: 'json' };
-import itemsDefinitions from './seed/item-definitions.json' with { type: 'json' };
-import armorDefinitions from './seed/armor-definitions.json' with { type: 'json' };
-import spellsDefinitions from './seed/spells.json' with { type: 'json' };
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { seedAllData } from './seed-manager.js';
 
 const validateEnv = () => {
   const required = ['GOOGLE_API_KEY', 'GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET'];
@@ -41,30 +36,6 @@ const setupSwagger = (app: INestApplication) => {
   SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, config));
 };
 
-const seedItemDefinitions = async (app: INestApplication, logger: Logger) => {
-  try {
-    const itemDefService = app.get(ItemDefinitionService);
-    const allDefs = [...weaponsDefinitions, ...itemsDefinitions, ...armorDefinitions];
-    await Promise.all(allDefs.map(def => itemDefService.upsert(def)));
-    logger.log('Seeded item definitions at startup');
-  } catch (e) {
-    logger.warn('Seeding item definitions failed', e);
-  }
-};
-
-const seedSpellDefinitions = async (app: INestApplication, logger: Logger) => {
-  try {
-    const spellDefService = app.get(SpellDefinitionService);
-    await spellDefService.seedFromJson(spellsDefinitions);
-    logger.log('Seeded spell definitions at startup');
-  } catch (e) {
-    logger.warn('Seeding spell definitions failed', e);
-  }
-};
-
-const seedData = async (app: INestApplication, logger: Logger) =>
-  Promise.all([seedItemDefinitions(app, logger), seedSpellDefinitions(app, logger)]);
-
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
@@ -87,7 +58,7 @@ const bootstrap = async () => {
   const logger = new Logger('Bootstrap');
   const port = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT, 10) : 3001;
   await app.listen(port, '0.0.0.0');
-  await seedData(app, logger);
+  await seedAllData(app, logger);
   const url = await app.getUrl();
   logger.log(`Backend started and listen at ${url}`);
   logger.log(`📚 Swagger docs available at: ${url}/docs`);

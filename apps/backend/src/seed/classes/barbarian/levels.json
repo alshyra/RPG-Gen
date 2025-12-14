@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "className": "Barbarian",
+  "hitDie": "1d12",
+  "description": "Class-level progression table and metadata for Barbarian (source: SRD / aidedd.org).",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "rage",
+          "name": "Rage",
+          "description": "Enter a rage as a bonus action. While raging you gain advantage on Strength checks and Strength saves, resistance to bludgeoning/piercing/slashing, and a damage bonus to melee weapon attacks using Strength.",
+          "meta": {
+            "uses": 2,
+            "rageDamageBonus": 2,
+            "usesRecharge": "longRest"
+          }
+        },
+        {
+          "id": "unarmored-defense",
+          "name": "Unarmored Defense",
+          "description": "While not wearing heavy armor, AC = 10 + Dex modifier + Con modifier. A shield can be used and still gain this benefit."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "reckless-attack",
+          "name": "Reckless Attack",
+          "description": "When you make your first attack on your turn, you can attack recklessly to gain advantage on melee weapon attack rolls using Strength for that turn. Attack rolls against you have advantage until your next turn."
+        },
+        {
+          "id": "danger-sense",
+          "name": "Danger Sense",
+          "description": "Advantage on Dexterity saving throws against effects you can see (traps, spells), provided you are not blinded, deafened, or incapacitated."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "primal-path",
+          "name": "Primal Path",
+          "description": "Choose a Primal Path (e.g., Path of the Berserker, Path of the Totem Warrior). Grants features at 3rd, 6th, 10th and 14th levels."
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseSubclass",
+          "options": ["berserker", "totem-warrior"]
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement",
+          "description": "Increase one ability score by 2, or two scores by 1. Cannot raise a score above 20 by this feature."
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "extra-attack",
+          "name": "Extra Attack",
+          "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+        },
+        {
+          "id": "fast-movement",
+          "name": "Fast Movement",
+          "description": "Your speed increases by 10 feet while you aren't wearing heavy armor."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "path-feature-6",
+          "name": "Path Feature (6th)",
+          "description": "Feature granted by your chosen Primal Path at 6th level."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "feral-instinct",
+          "name": "Feral Instinct",
+          "description": "You have advantage on initiative rolls. If surprised, you can act normally on the first turn if you enter your rage before doing anything else."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "brutal-critical-1",
+          "name": "Brutal Critical (1 die)",
+          "description": "Roll one additional weapon damage die when determining extra damage for a critical hit."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "path-feature-10",
+          "name": "Path Feature (10th)",
+          "description": "Feature granted by your chosen Primal Path at 10th level."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "relentless-rage",
+          "name": "Relentless Rage",
+          "description": "If you drop to 0 HP while raging and don't die outright, make a DC 10 Con save to drop to 1 HP instead. DC increases by 5 each subsequent use until a rest."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "brutal-critical-2",
+          "name": "Brutal Critical (2 dice)",
+          "description": "Roll two additional weapon damage dice when determining extra damage for a critical hit."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "path-feature-14",
+          "name": "Path Feature (14th)",
+          "description": "Feature granted by your chosen Primal Path at 14th level."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "persistent-rage",
+          "name": "Persistent Rage",
+          "description": "Your rage ends early only if you fall unconscious or choose to end it."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "brutal-critical-3",
+          "name": "Brutal Critical (3 dice)",
+          "description": "Roll three additional weapon damage dice when determining extra damage for a critical hit."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "indomitable-might",
+          "name": "Indomitable Might",
+          "description": "If your total for a Strength check is less than your Strength score, you can use your Strength score in place of the total."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement"
+        }
+      ],
+      "choices": [
+        {
+          "type": "chooseAbilityIncrease",
+          "points": 2
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "primal-champion",
+          "name": "Primal Champion",
+          "description": "Your Strength and Constitution scores each increase by 4. Your maximum for those scores is now 24.",
+          "meta": {
+            "strengthIncrease": 4,
+            "constitutionIncrease": 4,
+            "newMax": 24,
+            "rages": "unlimited",
+            "rageDamageBonus": 4
+          }
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ]
+}

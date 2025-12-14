@@ -10,6 +10,16 @@ export { Skill } from './character/Skill.js';
 export { Spell } from './spell/Spell.js';
 export { SpellDefinition } from './spell/SpellDefinition.js';
 export { SpellMeta } from './spell/SpellMeta.js';
+export {
+  ClassDefinition,
+  ClassDefinitionSchema,
+  ClassLevel,
+  ClassLevelSchema,
+  ClassLevelFeature,
+  ClassLevelFeatureSchema,
+  ClassLevelChoice,
+  ClassLevelChoiceSchema,
+} from './class/index.js';
 export { CombatEnd } from './combat/CombatEnd.js';
 export { CombatStartEntry } from './combat/CombatStartEntry.js';
 export { Combatant, CombatantSchema } from './combat/Combatant.js';

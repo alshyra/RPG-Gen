@@ -1,27 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { SpellDefinitionService } from '../spell-definition/spell-definition.service.js';
+import { ClassDefinitionService } from '../class-definition/class-definition.service.js';
 import type { LevelUpOptionsDto } from '../character/dto/LevelUpOptionsDto.js';
 import type { SpellResponseDto } from '../character/dto/SpellResponseDto.js';
-
-interface ClassLevelData {
-  schemaVersion: number;
-  className: string;
-  hitDie: string;
-  primarySpellAbility: string;
-  levels: {
-    level: number;
-    proficiencyBonus: number;
-    cantripsKnown?: number;
-    spellsKnown?: number;
-    spellSlots?: Record<string, number>;
-    features: unknown[];
-    choices: unknown[];
-    unlockedSpells: unknown[];
-  }[];
-  allowedSpellsByLevel: Record<string, { name: string; definitionId: string }[]>;
-}
 
 @Injectable()
 export class ClassesService {
@@ -31,43 +12,16 @@ export class ClassesService {
   private ASI_LEVELS = [4, 8, 12, 16, 19];
   private PROFICIENCY_INCREASE_LEVELS = [5, 9, 13, 17];
 
-  // Cache for class data
-  private classDataCache = new Map<string, ClassLevelData>();
-
-  constructor(private readonly spellDefService: SpellDefinitionService) {}
-
-  /**
-   * Load class level data from seed files
-   */
-  private async loadClassData(className: string): Promise<ClassLevelData> {
-    if (this.classDataCache.has(className)) {
-      return this.classDataCache.get(className)!;
-    }
-
-    try {
-      const classNameLower = className.toLowerCase();
-      const seedPath = join(
-        process.cwd(),
-        'src',
-        'seed',
-        'classes',
-        `${classNameLower}.levels.json`,
-      );
-      const content = await readFile(seedPath, 'utf-8');
-      const data: ClassLevelData = JSON.parse(content);
-      this.classDataCache.set(className, data);
-      return data;
-    } catch (error) {
-      this.logger.error(`Failed to load class data for ${className}:`, error);
-      throw new NotFoundException(`Class data not found for ${className}`);
-    }
-  }
+  constructor(
+    private readonly spellDefService: SpellDefinitionService,
+    private readonly classDefService: ClassDefinitionService,
+  ) {}
 
   /**
    * Get class-level options for a given class and level (no character required)
    */
   async getOptionsForLevel(className: string, level: number): Promise<LevelUpOptionsDto> {
-    const classData = await this.loadClassData(className);
+    const classData = await this.classDefService.findByNameOrThrow(className);
 
     // Find the level data for this specific level
     const levelData = classData.levels.find(l => l.level === level);
@@ -79,9 +33,10 @@ export class ClassesService {
     const allowedDefinitionIds = new Set<string>();
 
     // Collect all allowed spells from level 0 up to the requested level
+    const allowedSpellsByLevel = classData.allowedSpellsByLevel || {};
     Array.from({ length: level + 1 }, (_, i) => i).forEach(lvl => {
-      const spellsAtLevel = classData.allowedSpellsByLevel[lvl.toString()] || [];
-      spellsAtLevel.forEach(spell => {
+      const spellsAtLevel = allowedSpellsByLevel[lvl.toString()] || [];
+      spellsAtLevel.forEach((spell: any) => {
         if (spell.definitionId) allowedDefinitionIds.add(spell.definitionId);
       });
     });
