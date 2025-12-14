@@ -12,7 +12,7 @@ import { InventoryModule } from './modules/inventory.module.js';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/rpggen', {
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://rpgadmin:rpgpass123@localhost:27017/rpggen?authSource=admin', {
       retryAttempts: 5,
       retryDelay: 3000,
     }),

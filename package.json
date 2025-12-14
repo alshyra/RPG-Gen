@@ -8,6 +8,7 @@
     "apps/*"
   ],
   "scripts": {
+    "start": "concurrently \"npm --workspace @rpg-gen/backend run start\" \"npm --workspace @rpg-gen/frontend run dev\"",
     "build:ui": "npm --workspace @rpg-gen/ui run build",
     "build:backend": "npm --workspace @rpg-gen/backend run build",
     "build:frontend": "npm --workspace @rpg-gen/frontend run build",
