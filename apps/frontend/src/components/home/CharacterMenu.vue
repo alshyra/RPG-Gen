@@ -60,7 +60,7 @@ import { characterApi } from '@/apis/characterApi';
 import { UiButton } from '@rpg-gen/ui';
 import { Trash2 } from 'lucide-vue-next';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
 import { showAlert, showConfirm } from '@/composables/useModal';
 import { useRouter } from 'vue-router';
 const emit = defineEmits<(e: 'deleted', id: string) => void>();
@@ -89,7 +89,7 @@ const onResume = (character: CharacterResponseDto) => {
 };
 
 const onDelete = async (character: CharacterResponseDto) => {
-  if (!character.characterId) return;
+  if (!character.characterId) throw new Error('Character ID is missing');
   if (!(await showConfirm('Êtes-vous sûr de vouloir supprimer ce personnage ?'))) return;
   deletingCharacterId.value = character.characterId;
   try {

@@ -1,0 +1,524 @@
+{
+  "allowedSpellsByLevel": {
+    "0": [
+      {
+        "name": "Amis",
+        "definitionId": "spell-0-amis"
+      },
+      {
+        "name": "Bouffée de poison",
+        "definitionId": "spell-0-bouffee-de-poison"
+      },
+      {
+        "name": "Contact glacial",
+        "definitionId": "spell-0-contact-glacial"
+      },
+      {
+        "name": "Coup au but",
+        "definitionId": "spell-0-coup-au-but"
+      },
+      {
+        "name": "Coup de tonnerre",
+        "definitionId": "spell-0-coup-de-tonnerre"
+      },
+      {
+        "name": "Décharge occulte",
+        "definitionId": "spell-0-decharge-occulte"
+      },
+      {
+        "name": "Embrasement",
+        "definitionId": "spell-0-embrasement"
+      },
+      {
+        "name": "Éruption de lames",
+        "definitionId": "spell-0-eruption-de-lames"
+      },
+      {
+        "name": "Ferrage foudroyant",
+        "definitionId": "spell-0-ferrage-foudroyant"
+      },
+      {
+        "name": "Gelure",
+        "definitionId": "spell-0-gelure"
+      },
+      {
+        "name": "Glas",
+        "definitionId": "spell-0-glas"
+      },
+      {
+        "name": "Illusion mineure",
+        "definitionId": "spell-0-illusion-mineure"
+      },
+      {
+        "name": "Infestation",
+        "definitionId": "spell-0-infestation"
+      },
+      {
+        "name": "Lame aux flammes vertes",
+        "definitionId": "spell-0-lame-aux-flammes-vertes"
+      },
+      {
+        "name": "Lame retentissante",
+        "definitionId": "spell-0-lame-retentissante"
+      },
+      {
+        "name": "Main de mage",
+        "definitionId": "spell-0-main-de-mage"
+      },
+      {
+        "name": "Pierre magique",
+        "definitionId": "spell-0-pierre-magique"
+      },
+      {
+        "name": "Piqûre mentale",
+        "definitionId": "spell-0-piqure-mentale"
+      },
+      {
+        "name": "Prestidigitation",
+        "definitionId": "spell-0-prestidigitation"
+      },
+      {
+        "name": "Protection contre les armes",
+        "definitionId": "spell-0-protection-contre-les-armes"
+      }
+    ],
+    "1": [
+      {
+        "name": "Armure d'Agathys",
+        "definitionId": "spell-1-armure-d-agathys"
+      },
+      {
+        "name": "Charme-personne",
+        "definitionId": "spell-1-charme-personne"
+      },
+      {
+        "name": "Compréhension des langues",
+        "definitionId": "spell-1-comprehension-des-langues"
+      },
+      {
+        "name": "Frayeur",
+        "definitionId": "spell-1-frayeur"
+      },
+      {
+        "name": "Maléfice",
+        "definitionId": "spell-1-malefice"
+      },
+      {
+        "name": "Protection contre le mal et le bien",
+        "definitionId": "spell-1-protection-contre-le-mal-et-le-bien"
+      },
+      {
+        "name": "Repli expéditif",
+        "definitionId": "spell-1-repli-expeditif"
+      },
+      {
+        "name": "Représailles infernales",
+        "definitionId": "spell-1-represailles-infernales"
+      },
+      {
+        "name": "Serviteur invisible",
+        "definitionId": "spell-1-serviteur-invisible"
+      },
+      {
+        "name": "Tentacules de Hadar",
+        "definitionId": "spell-1-tentacules-de-hadar"
+      },
+      {
+        "name": "Texte illusoire",
+        "definitionId": "spell-1-texte-illusoire"
+      },
+      {
+        "name": "Trait ensorcelé",
+        "definitionId": "spell-1-trait-ensorcele"
+      }
+    ],
+    "2": [
+      {
+        "name": "Attraction terrestre",
+        "definitionId": "spell-2-attraction-terrestre"
+      },
+      {
+        "name": "Couronne du dément",
+        "definitionId": "spell-2-couronne-du-dement"
+      },
+      {
+        "name": "Discours captivant",
+        "definitionId": "spell-2-discours-captivant"
+      },
+      {
+        "name": "Épine mentale",
+        "definitionId": "spell-2-epine-mentale"
+      },
+      {
+        "name": "Foulée brumeuse",
+        "definitionId": "spell-2-foulee-brumeuse"
+      },
+      {
+        "name": "Fracassement",
+        "definitionId": "spell-2-fracassement"
+      },
+      {
+        "name": "Image miroir",
+        "definitionId": "spell-2-image-miroir"
+      },
+      {
+        "name": "Immobilisation de personne",
+        "definitionId": "spell-2-immobilisation-de-personne"
+      },
+      {
+        "name": "Invisibilité",
+        "definitionId": "spell-2-invisibilite"
+      },
+      {
+        "name": "Lame d'ombres",
+        "definitionId": "spell-2-lame-d-ombres"
+      },
+      {
+        "name": "Nuée de dagues",
+        "definitionId": "spell-2-nuee-de-dagues"
+      },
+      {
+        "name": "Pattes d'araignée",
+        "definitionId": "spell-2-pattes-d-araignee"
+      },
+      {
+        "name": "Rayon affaiblissant",
+        "definitionId": "spell-2-rayon-affaiblissant"
+      },
+      {
+        "name": "Suggestion",
+        "definitionId": "spell-2-suggestion"
+      },
+      {
+        "name": "Ténèbres",
+        "definitionId": "spell-2-tenebres"
+      }
+    ],
+    "3": [
+      {
+        "name": "Cercle magique",
+        "definitionId": "spell-3-cercle-magique"
+      },
+      {
+        "name": "Contresort",
+        "definitionId": "spell-3-contresort"
+      },
+      {
+        "name": "Convocation de démons mineurs",
+        "definitionId": "spell-3-convocation-de-demons-mineurs"
+      },
+      {
+        "name": "Convocation de fée",
+        "definitionId": "spell-3-convocation-de-fee"
+      },
+      {
+        "name": "Convocation de mort-vivant",
+        "definitionId": "spell-3-convocation-de-mort-vivant"
+      },
+      {
+        "name": "Convocation de rejeton d'ombre",
+        "definitionId": "spell-3-convocation-de-rejeton-d-ombre"
+      },
+      {
+        "name": "Délivrance des malédictions",
+        "definitionId": "spell-3-delivrance-des-maledictions"
+      },
+      {
+        "name": "Dissipation de la magie",
+        "definitionId": "spell-3-dissipation-de-la-magie"
+      },
+      {
+        "name": "Don des langues",
+        "definitionId": "spell-3-don-des-langues"
+      },
+      {
+        "name": "Ennemis à foison",
+        "definitionId": "spell-3-ennemis-a-foison"
+      },
+      {
+        "name": "Forme gazeuse",
+        "definitionId": "spell-3-forme-gazeuse"
+      },
+      {
+        "name": "Forteresse d'intellect",
+        "definitionId": "spell-3-forteresse-d-intellect"
+      },
+      {
+        "name": "Foulée tonitruante",
+        "definitionId": "spell-3-foulee-tonitruante"
+      },
+      {
+        "name": "Image majeure",
+        "definitionId": "spell-3-image-majeure"
+      },
+      {
+        "name": "Motif hypnotique",
+        "definitionId": "spell-3-motif-hypnotique"
+      },
+      {
+        "name": "Peur",
+        "definitionId": "spell-3-peur"
+      },
+      {
+        "name": "Toucher du vampire",
+        "definitionId": "spell-3-toucher-du-vampire"
+      },
+      {
+        "name": "Voile spirituel",
+        "definitionId": "spell-3-voile-spirituel"
+      },
+      {
+        "name": "Vol",
+        "definitionId": "spell-3-vol"
+      },
+      {
+        "name": "Voracité de Hadar",
+        "definitionId": "spell-3-voracite-de-hadar"
+      }
+    ],
+    "4": [
+      {
+        "name": "Bannissement",
+        "definitionId": "spell-4-bannissement"
+      },
+      {
+        "name": "Charme-monstre",
+        "definitionId": "spell-4-charme-monstre"
+      },
+      {
+        "name": "Convocation d'aberration",
+        "definitionId": "spell-4-convocation-d-aberration"
+      },
+      {
+        "name": "Convocation de démon majeur",
+        "definitionId": "spell-4-convocation-de-demon-majeur"
+      },
+      {
+        "name": "Fléau élémentaire",
+        "definitionId": "spell-4-fleau-elementaire"
+      },
+      {
+        "name": "Flétrissement",
+        "definitionId": "spell-4-fletrissement"
+      },
+      {
+        "name": "Ombre d'égarement",
+        "definitionId": "spell-4-ombre-d-egarement"
+      },
+      {
+        "name": "Porte dimensionnelle",
+        "definitionId": "spell-4-porte-dimensionnelle"
+      },
+      {
+        "name": "Rayonnement écoeurant",
+        "definitionId": "spell-4-rayonnement-ecoeurant"
+      },
+      {
+        "name": "Terrain hallucinatoire",
+        "definitionId": "spell-4-terrain-hallucinatoire"
+      }
+    ],
+    "5": [
+      {
+        "name": "Assignation infernale",
+        "definitionId": "spell-5-assignation-infernale"
+      },
+      {
+        "name": "Contact avec un autre plan",
+        "definitionId": "spell-5-contact-avec-un-autre-plan"
+      },
+      {
+        "name": "Danse macabre",
+        "definitionId": "spell-5-danse-macabre"
+      },
+      {
+        "name": "Déluge d'énergie négative",
+        "definitionId": "spell-5-deluge-d-energie-negative"
+      },
+      {
+        "name": "Énervation",
+        "definitionId": "spell-5-enervation"
+      },
+      {
+        "name": "Foulée dimensionnelle",
+        "definitionId": "spell-5-foulee-dimensionnelle"
+      },
+      {
+        "name": "Immobilisation de monstre",
+        "definitionId": "spell-5-immobilisation-de-monstre"
+      },
+      {
+        "name": "Mur de lumière",
+        "definitionId": "spell-5-mur-de-lumiere"
+      },
+      {
+        "name": "Perturbations synaptiques",
+        "definitionId": "spell-5-perturbations-synaptiques"
+      },
+      {
+        "name": "Scrutation",
+        "definitionId": "spell-5-scrutation"
+      },
+      {
+        "name": "Songe",
+        "definitionId": "spell-5-songe"
+      }
+    ],
+    "6": [
+      {
+        "name": "Cage des âmes",
+        "definitionId": "spell-6-cage-des-ames"
+      },
+      {
+        "name": "Cercle de mort",
+        "definitionId": "spell-6-cercle-de-mort"
+      },
+      {
+        "name": "Convocation de fiélon",
+        "definitionId": "spell-6-convocation-de-fielon"
+      },
+      {
+        "name": "Costume d'Outremonde de Tasha",
+        "definitionId": "spell-6-costume-d-outremonde-de-tasha"
+      },
+      {
+        "name": "Création de mort-vivant",
+        "definitionId": "spell-6-creation-de-mort-vivant"
+      },
+      {
+        "name": "Dispersion",
+        "definitionId": "spell-6-dispersion"
+      },
+      {
+        "name": "Invocation de fée",
+        "definitionId": "spell-6-invocation-de-fee"
+      },
+      {
+        "name": "Mauvais oeil",
+        "definitionId": "spell-6-mauvais-oeil"
+      },
+      {
+        "name": "Pétrification",
+        "definitionId": "spell-6-petrification"
+      },
+      {
+        "name": "Portail magique",
+        "definitionId": "spell-6-portail-magique"
+      },
+      {
+        "name": "Prison mentale",
+        "definitionId": "spell-6-prison-mentale"
+      },
+      {
+        "name": "Sacre de la glace",
+        "definitionId": "spell-6-sacre-de-la-glace"
+      },
+      {
+        "name": "Sacre de la pierre",
+        "definitionId": "spell-6-sacre-de-la-pierre"
+      },
+      {
+        "name": "Sacre des flammes",
+        "definitionId": "spell-6-sacre-des-flammes"
+      },
+      {
+        "name": "Sacre du vent",
+        "definitionId": "spell-6-sacre-du-vent"
+      },
+      {
+        "name": "Suggestion de groupe",
+        "definitionId": "spell-6-suggestion-de-groupe"
+      },
+      {
+        "name": "Vision suprême",
+        "definitionId": "spell-6-vision-supreme"
+      }
+    ],
+    "7": [
+      {
+        "name": "Cage de force",
+        "definitionId": "spell-7-cage-de-force"
+      },
+      {
+        "name": "Changement de plan",
+        "definitionId": "spell-7-changement-de-plan"
+      },
+      {
+        "name": "Couronne d'étoiles",
+        "definitionId": "spell-7-couronne-d-etoiles"
+      },
+      {
+        "name": "Doigt de mort",
+        "definitionId": "spell-7-doigt-de-mort"
+      },
+      {
+        "name": "Forme éthérée",
+        "definitionId": "spell-7-forme-etheree"
+      },
+      {
+        "name": "Mot de pouvoir douloureux",
+        "definitionId": "spell-7-mot-de-pouvoir-douloureux"
+      },
+      {
+        "name": "Songe du voile bleu",
+        "definitionId": "spell-7-songe-du-voile-bleu"
+      }
+    ],
+    "8": [
+      {
+        "name": "Bagou",
+        "definitionId": "spell-8-bagou"
+      },
+      {
+        "name": "Demi-plan",
+        "definitionId": "spell-8-demi-plan"
+      },
+      {
+        "name": "Domination de monstre",
+        "definitionId": "spell-8-domination-de-monstre"
+      },
+      {
+        "name": "Esprit faible",
+        "definitionId": "spell-8-esprit-faible"
+      },
+      {
+        "name": "Mot de pouvoir étourdissant",
+        "definitionId": "spell-8-mot-de-pouvoir-etourdissant"
+      },
+      {
+        "name": "Ténèbres oppressantes",
+        "definitionId": "spell-8-tenebres-oppressantes"
+      }
+    ],
+    "9": [
+      {
+        "name": "Emprisonnement",
+        "definitionId": "spell-9-emprisonnement"
+      },
+      {
+        "name": "Hurlement psychique",
+        "definitionId": "spell-9-hurlement-psychique"
+      },
+      {
+        "name": "Lame du désastre",
+        "definitionId": "spell-9-lame-du-desastre"
+      },
+      {
+        "name": "Métamorphose suprême",
+        "definitionId": "spell-9-metamorphose-supreme"
+      },
+      {
+        "name": "Mot de pouvoir mortel",
+        "definitionId": "spell-9-mot-de-pouvoir-mortel"
+      },
+      {
+        "name": "Prémonition",
+        "definitionId": "spell-9-premonition"
+      },
+      {
+        "name": "Projection astrale",
+        "definitionId": "spell-9-projection-astrale"
+      }
+    ]
+  }
+}

@@ -1,0 +1,636 @@
+{
+  "allowedSpellsByLevel": {
+    "0": [
+      {
+        "name": "Assistance",
+        "definitionId": "spell-0-assistance"
+      },
+      {
+        "name": "Bouffée de poison",
+        "definitionId": "spell-0-bouffee-de-poison"
+      },
+      {
+        "name": "Contrôle des flammes",
+        "definitionId": "spell-0-controle-des-flammes"
+      },
+      {
+        "name": "Coup de tonnerre",
+        "definitionId": "spell-0-coup-de-tonnerre"
+      },
+      {
+        "name": "Druidisme",
+        "definitionId": "spell-0-druidisme"
+      },
+      {
+        "name": "Embrasement",
+        "definitionId": "spell-0-embrasement"
+      },
+      {
+        "name": "Façonnage de l'eau",
+        "definitionId": "spell-0-faconnage-de-l-eau"
+      },
+      {
+        "name": "Façonnage de la terre",
+        "definitionId": "spell-0-faconnage-de-la-terre"
+      },
+      {
+        "name": "Flammes",
+        "definitionId": "spell-0-flammes"
+      },
+      {
+        "name": "Fouet épineux",
+        "definitionId": "spell-0-fouet-epineux"
+      },
+      {
+        "name": "Gelure",
+        "definitionId": "spell-0-gelure"
+      },
+      {
+        "name": "Gourdin magique",
+        "definitionId": "spell-0-gourdin-magique"
+      },
+      {
+        "name": "Infestation",
+        "definitionId": "spell-0-infestation"
+      },
+      {
+        "name": "Pierre magique",
+        "definitionId": "spell-0-pierre-magique"
+      },
+      {
+        "name": "Réparation",
+        "definitionId": "spell-0-reparation"
+      },
+      {
+        "name": "Résistance",
+        "definitionId": "spell-0-resistance"
+      },
+      {
+        "name": "Saute de vent",
+        "definitionId": "spell-0-saute-de-vent"
+      },
+      {
+        "name": "Sauvagerie primitive",
+        "definitionId": "spell-0-sauvagerie-primitive"
+      }
+    ],
+    "1": [
+      {
+        "name": "Absorption des éléments",
+        "definitionId": "spell-1-absorption-des-elements"
+      },
+      {
+        "name": "Amitié avec les animaux",
+        "definitionId": "spell-1-amitie-avec-les-animaux"
+      },
+      {
+        "name": "Baies nourricières",
+        "definitionId": "spell-1-baies-nourricieres"
+      },
+      {
+        "name": "Charme-personne",
+        "definitionId": "spell-1-charme-personne"
+      },
+      {
+        "name": "Collet",
+        "definitionId": "spell-1-collet"
+      },
+      {
+        "name": "Communication avec les animaux",
+        "definitionId": "spell-1-communication-avec-les-animaux"
+      },
+      {
+        "name": "Couteau de glace",
+        "definitionId": "spell-1-couteau-de-glace"
+      },
+      {
+        "name": "Création ou destruction d'eau",
+        "definitionId": "spell-1-creation-ou-destruction-d-eau"
+      },
+      {
+        "name": "Détection de la magie",
+        "definitionId": "spell-1-detection-de-la-magie"
+      },
+      {
+        "name": "Détection du poison et des maladies",
+        "definitionId": "spell-1-detection-du-poison-et-des-maladies"
+      },
+      {
+        "name": "Enchevêtrement",
+        "definitionId": "spell-1-enchevetrement"
+      },
+      {
+        "name": "Grande foulée",
+        "definitionId": "spell-1-grande-foulee"
+      },
+      {
+        "name": "Lien avec une bête",
+        "definitionId": "spell-1-lien-avec-une-bete"
+      },
+      {
+        "name": "Lueurs féeriques",
+        "definitionId": "spell-1-lueurs-feeriques"
+      },
+      {
+        "name": "Mot de guérison",
+        "definitionId": "spell-1-mot-de-guerison"
+      },
+      {
+        "name": "Nappe de brouillard",
+        "definitionId": "spell-1-nappe-de-brouillard"
+      },
+      {
+        "name": "Purification de nourriture et d'eau",
+        "definitionId": "spell-1-purification-de-nourriture-et-d-eau"
+      },
+      {
+        "name": "Saut",
+        "definitionId": "spell-1-saut"
+      },
+      {
+        "name": "Secousse sismique",
+        "definitionId": "spell-1-secousse-sismique"
+      },
+      {
+        "name": "Soins",
+        "definitionId": "spell-1-soins"
+      },
+      {
+        "name": "Vague tonnante",
+        "definitionId": "spell-1-vague-tonnante"
+      }
+    ],
+    "2": [
+      {
+        "name": "Amélioration de caractéristique",
+        "definitionId": "spell-2-amelioration-de-caracteristique"
+      },
+      {
+        "name": "Attraction terrestre",
+        "definitionId": "spell-2-attraction-terrestre"
+      },
+      {
+        "name": "Bourrasque",
+        "definitionId": "spell-2-bourrasque"
+      },
+      {
+        "name": "Convocation de bête",
+        "definitionId": "spell-2-convocation-de-bete"
+      },
+      {
+        "name": "Croissance d'épines",
+        "definitionId": "spell-2-croissance-d-epines"
+      },
+      {
+        "name": "Esprit guérisseur",
+        "definitionId": "spell-2-esprit-guerisseur"
+      },
+      {
+        "name": "Immobilisation de personne",
+        "definitionId": "spell-2-immobilisation-de-personne"
+      },
+      {
+        "name": "Lame de feu",
+        "definitionId": "spell-2-lame-de-feu"
+      },
+      {
+        "name": "Libellé aérien",
+        "definitionId": "spell-2-libelle-aerien"
+      },
+      {
+        "name": "Localisation d'animaux ou de plantes",
+        "definitionId": "spell-2-localisation-d-animaux-ou-de-plantes"
+      },
+      {
+        "name": "Localisation d'objet",
+        "definitionId": "spell-2-localisation-d-objet"
+      },
+      {
+        "name": "Messager animal",
+        "definitionId": "spell-2-messager-animal"
+      },
+      {
+        "name": "Métal brûlant",
+        "definitionId": "spell-2-metal-brulant"
+      },
+      {
+        "name": "Passage sans trace",
+        "definitionId": "spell-2-passage-sans-trace"
+      },
+      {
+        "name": "Peau d'écorce",
+        "definitionId": "spell-2-peau-d-ecorce"
+      },
+      {
+        "name": "Protection contre le poison",
+        "definitionId": "spell-2-protection-contre-le-poison"
+      },
+      {
+        "name": "Rayon de lune",
+        "definitionId": "spell-2-rayon-de-lune"
+      },
+      {
+        "name": "Restauration partielle",
+        "definitionId": "spell-2-restauration-partielle"
+      },
+      {
+        "name": "Sens animal",
+        "definitionId": "spell-2-sens-animal"
+      },
+      {
+        "name": "Sens des pièges",
+        "definitionId": "spell-2-sens-des-pieges"
+      },
+      {
+        "name": "Sphère de feu",
+        "definitionId": "spell-2-sphere-de-feu"
+      },
+      {
+        "name": "Tourbillon de poussière",
+        "definitionId": "spell-2-tourbillon-de-poussiere"
+      },
+      {
+        "name": "Vent protecteur",
+        "definitionId": "spell-2-vent-protecteur"
+      },
+      {
+        "name": "Vision dans le noir",
+        "definitionId": "spell-2-vision-dans-le-noir"
+      }
+    ],
+    "3": [
+      {
+        "name": "Appel de la foudre",
+        "definitionId": "spell-3-appel-de-la-foudre"
+      },
+      {
+        "name": "Communication avec les plantes",
+        "definitionId": "spell-3-communication-avec-les-plantes"
+      },
+      {
+        "name": "Convocation de fée",
+        "definitionId": "spell-3-convocation-de-fee"
+      },
+      {
+        "name": "Croissance végétale",
+        "definitionId": "spell-3-croissance-vegetale"
+      },
+      {
+        "name": "Dissipation de la magie",
+        "definitionId": "spell-3-dissipation-de-la-magie"
+      },
+      {
+        "name": "Éruption de terre",
+        "definitionId": "spell-3-eruption-de-terre"
+      },
+      {
+        "name": "Flèches enflammées",
+        "definitionId": "spell-3-fleches-enflammees"
+      },
+      {
+        "name": "Fusion dans la pierre",
+        "definitionId": "spell-3-fusion-dans-la-pierre"
+      },
+      {
+        "name": "Invocation d'animaux",
+        "definitionId": "spell-3-invocation-d-animaux"
+      },
+      {
+        "name": "Lumière du jour",
+        "definitionId": "spell-3-lumiere-du-jour"
+      },
+      {
+        "name": "Marche sur l'eau",
+        "definitionId": "spell-3-marche-sur-l-eau"
+      },
+      {
+        "name": "Mort simulée",
+        "definitionId": "spell-3-mort-simulee"
+      },
+      {
+        "name": "Mur d'eau",
+        "definitionId": "spell-3-mur-d-eau"
+      },
+      {
+        "name": "Mur de vent",
+        "definitionId": "spell-3-mur-de-vent"
+      },
+      {
+        "name": "Protection contre une énergie",
+        "definitionId": "spell-3-protection-contre-une-energie"
+      },
+      {
+        "name": "Raz-de-marée",
+        "definitionId": "spell-3-raz-de-maree"
+      },
+      {
+        "name": "Respiration aquatique",
+        "definitionId": "spell-3-respiration-aquatique"
+      },
+      {
+        "name": "Tempête de neige",
+        "definitionId": "spell-3-tempete-de-neige"
+      }
+    ],
+    "4": [
+      {
+        "name": "Charme-monstre",
+        "definitionId": "spell-4-charme-monstre"
+      },
+      {
+        "name": "Confusion",
+        "definitionId": "spell-4-confusion"
+      },
+      {
+        "name": "Contrôle de l'eau",
+        "definitionId": "spell-4-controle-de-l-eau"
+      },
+      {
+        "name": "Convocation d'élémentaire",
+        "definitionId": "spell-4-convocation-d-elementaire"
+      },
+      {
+        "name": "Domination de bête",
+        "definitionId": "spell-4-domination-de-bete"
+      },
+      {
+        "name": "Façonnage de la pierre",
+        "definitionId": "spell-4-faconnage-de-la-pierre"
+      },
+      {
+        "name": "Fléau élémentaire",
+        "definitionId": "spell-4-fleau-elementaire"
+      },
+      {
+        "name": "Flétrissement",
+        "definitionId": "spell-4-fletrissement"
+      },
+      {
+        "name": "Gardien de la nature",
+        "definitionId": "spell-4-gardien-de-la-nature"
+      },
+      {
+        "name": "Insecte géant",
+        "definitionId": "spell-4-insecte-geant"
+      },
+      {
+        "name": "Invocation d'élémentaires mineurs",
+        "definitionId": "spell-4-invocation-d-elementaires-mineurs"
+      },
+      {
+        "name": "Invocation d'êtres sylvestres",
+        "definitionId": "spell-4-invocation-d-etres-sylvestres"
+      },
+      {
+        "name": "Liane avide",
+        "definitionId": "spell-4-liane-avide"
+      },
+      {
+        "name": "Liberté de mouvement",
+        "definitionId": "spell-4-liberte-de-mouvement"
+      },
+      {
+        "name": "Localisation de créature",
+        "definitionId": "spell-4-localisation-de-creature"
+      },
+      {
+        "name": "Métamorphose",
+        "definitionId": "spell-4-metamorphose"
+      },
+      {
+        "name": "Mur de feu",
+        "definitionId": "spell-4-mur-de-feu"
+      },
+      {
+        "name": "Peau de pierre",
+        "definitionId": "spell-4-peau-de-pierre"
+      },
+      {
+        "name": "Sphère aqueuse",
+        "definitionId": "spell-4-sphere-aqueuse"
+      },
+      {
+        "name": "Tempête de grêle",
+        "definitionId": "spell-4-tempete-de-grele"
+      },
+      {
+        "name": "Terrain hallucinatoire",
+        "definitionId": "spell-4-terrain-hallucinatoire"
+      }
+    ],
+    "5": [
+      {
+        "name": "Communion avec la nature",
+        "definitionId": "spell-5-communion-avec-la-nature"
+      },
+      {
+        "name": "Contagion",
+        "definitionId": "spell-5-contagion"
+      },
+      {
+        "name": "Contrat",
+        "definitionId": "spell-5-contrat"
+      },
+      {
+        "name": "Contrôle des vents",
+        "definitionId": "spell-5-controle-des-vents"
+      },
+      {
+        "name": "Coquille antivie",
+        "definitionId": "spell-5-coquille-antivie"
+      },
+      {
+        "name": "Éveil",
+        "definitionId": "spell-5-eveil"
+      },
+      {
+        "name": "Fléau d'insectes",
+        "definitionId": "spell-5-fleau-d-insectes"
+      },
+      {
+        "name": "Fureur de la nature",
+        "definitionId": "spell-5-fureur-de-la-nature"
+      },
+      {
+        "name": "Invocation d'élémentaire",
+        "definitionId": "spell-5-invocation-d-elementaire"
+      },
+      {
+        "name": "Maelström",
+        "definitionId": "spell-5-maelstrom"
+      },
+      {
+        "name": "Mur de pierre",
+        "definitionId": "spell-5-mur-de-pierre"
+      },
+      {
+        "name": "Passage par les arbres",
+        "definitionId": "spell-5-passage-par-les-arbres"
+      },
+      {
+        "name": "Quête",
+        "definitionId": "spell-5-quete"
+      },
+      {
+        "name": "Réincarnation",
+        "definitionId": "spell-5-reincarnation"
+      },
+      {
+        "name": "Restauration supérieure",
+        "definitionId": "spell-5-restauration-superieure"
+      },
+      {
+        "name": "Scrutation",
+        "definitionId": "spell-5-scrutation"
+      },
+      {
+        "name": "Soins de groupe",
+        "definitionId": "spell-5-soins-de-groupe"
+      },
+      {
+        "name": "Transmutation de la pierre",
+        "definitionId": "spell-5-transmutation-de-la-pierre"
+      }
+    ],
+    "6": [
+      {
+        "name": "Bosquet des druides",
+        "definitionId": "spell-6-bosquet-des-druides"
+      },
+      {
+        "name": "Festin des héros",
+        "definitionId": "spell-6-festin-des-heros"
+      },
+      {
+        "name": "Guérison",
+        "definitionId": "spell-6-guerison"
+      },
+      {
+        "name": "Invocation de fée",
+        "definitionId": "spell-6-invocation-de-fee"
+      },
+      {
+        "name": "Marche sur le vent",
+        "definitionId": "spell-6-marche-sur-le-vent"
+      },
+      {
+        "name": "Mur d'épines",
+        "definitionId": "spell-6-mur-d-epines"
+      },
+      {
+        "name": "Ossements de la Terre",
+        "definitionId": "spell-6-ossements-de-la-terre"
+      },
+      {
+        "name": "Protection primordiale",
+        "definitionId": "spell-6-protection-primordiale"
+      },
+      {
+        "name": "Rayon de soleil",
+        "definitionId": "spell-6-rayon-de-soleil"
+      },
+      {
+        "name": "Sacre de la glace",
+        "definitionId": "spell-6-sacre-de-la-glace"
+      },
+      {
+        "name": "Sacre de la pierre",
+        "definitionId": "spell-6-sacre-de-la-pierre"
+      },
+      {
+        "name": "Sacre des flammes",
+        "definitionId": "spell-6-sacre-des-flammes"
+      },
+      {
+        "name": "Sacre du vent",
+        "definitionId": "spell-6-sacre-du-vent"
+      },
+      {
+        "name": "Sens de l'orientation",
+        "definitionId": "spell-6-sens-de-l-orientation"
+      },
+      {
+        "name": "Terraformage",
+        "definitionId": "spell-6-terraformage"
+      },
+      {
+        "name": "Voie végétale",
+        "definitionId": "spell-6-voie-vegetale"
+      }
+    ],
+    "7": [
+      {
+        "name": "Changement de plan",
+        "definitionId": "spell-7-changement-de-plan"
+      },
+      {
+        "name": "Inversion de la gravité",
+        "definitionId": "spell-7-inversion-de-la-gravite"
+      },
+      {
+        "name": "Mirage",
+        "definitionId": "spell-7-mirage"
+      },
+      {
+        "name": "Régénération",
+        "definitionId": "spell-7-regeneration"
+      },
+      {
+        "name": "Tempête de feu",
+        "definitionId": "spell-7-tempete-de-feu"
+      },
+      {
+        "name": "Tourbillon",
+        "definitionId": "spell-7-tourbillon"
+      }
+    ],
+    "8": [
+      {
+        "name": "Aversion/Attirance",
+        "definitionId": "spell-8-aversion-attirance"
+      },
+      {
+        "name": "Contrôle du climat",
+        "definitionId": "spell-8-controle-du-climat"
+      },
+      {
+        "name": "Éclat du soleil",
+        "definitionId": "spell-8-eclat-du-soleil"
+      },
+      {
+        "name": "Esprit faible",
+        "definitionId": "spell-8-esprit-faible"
+      },
+      {
+        "name": "Formes animales",
+        "definitionId": "spell-8-formes-animales"
+      },
+      {
+        "name": "Tremblement de terre",
+        "definitionId": "spell-8-tremblement-de-terre"
+      },
+      {
+        "name": "Tsunami",
+        "definitionId": "spell-8-tsunami"
+      }
+    ],
+    "9": [
+      {
+        "name": "Changement de forme",
+        "definitionId": "spell-9-changement-de-forme"
+      },
+      {
+        "name": "Prémonition",
+        "definitionId": "spell-9-premonition"
+      },
+      {
+        "name": "Résurrection suprême",
+        "definitionId": "spell-9-resurrection-supreme"
+      },
+      {
+        "name": "Tempête vengeresse",
+        "definitionId": "spell-9-tempete-vengeresse"
+      }
+    ]
+  }
+}

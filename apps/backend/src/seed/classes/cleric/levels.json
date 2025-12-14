@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "className": "Clerc",
+  "className": "Cleric",
   "hitDie": "1d8",
-  "primarySpellAbility": "Sag",
-  "description": "Class-level progression table and metadata for Clerc (source: aidedd.org). Allowed spells are provided below — names preserved plus resolved 'definitionId' when available.",
+  "primarySpellAbility": "Wisdom",
+  "description": "Class-level progression table and metadata for Cleric 2024 (source: WotC / SRD). Allowed spells are provided below — names preserved plus resolved 'definitionId' when available.",
   "levels": [
     {
       "level": 1,

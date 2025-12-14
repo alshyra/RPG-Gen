@@ -74,19 +74,6 @@
       "unlockedSpells": []
     },
     {
-      "level": 3,
-      "proficiencyBonus": 2,
-      "features": [
-        {
-          "id": "steady-aim",
-          "name": "Steady Aim",
-          "description": "Bonus action to give yourself advantage on next attack (must not move)."
-        }
-      ],
-      "choices": [],
-      "unlockedSpells": []
-    },
-    {
       "level": 4,
       "proficiencyBonus": 2,
       "features": [
