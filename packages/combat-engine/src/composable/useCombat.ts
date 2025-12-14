@@ -13,6 +13,8 @@ import {
   hideReachableCells,
   gridToPixel,
   pixelToGrid,
+  findManhattanPath,
+  showPathPreview,
 } from '../services/render/gridRenderer';
 import { useCombatUnit } from './useCombatUnit';
 import { setupInteractionController } from '../services/input/interactionController';
@@ -48,8 +50,8 @@ export function useCombat() {
     // PERFORMANCE: markRaw to prevent Vue from making PIXI app reactive
     const pixiApp = markRaw(new PIXI.Application());
     await pixiApp.init({
-      width: GRID_CONFIG.cols * GRID_CONFIG.cellSize,
-      height: GRID_CONFIG.rows * GRID_CONFIG.cellSize,
+      width: 800,
+      height: 600,
       backgroundColor: 0x1e1e1e,
       resolution: Math.min(window.devicePixelRatio || 1, 2), // Cap at 2x for performance
       antialias: false, // Disable antialiasing for better performance
@@ -58,6 +60,9 @@ export function useCombat() {
     });
 
     container.appendChild(pixiApp.canvas);
+    // Center the canvas
+    pixiApp.canvas.style.display = 'block';
+    pixiApp.canvas.style.margin = '0 auto';
 
     pixiApp.stage.sortableChildren = true;
     combatPixiInstance.value = pixiApp;
@@ -122,6 +127,39 @@ export function useCombat() {
 
     gridContainer.value = createGrid(combatPixiInstance.value);
     rangeOverlay.value = createRangeOverlay(combatPixiInstance.value);
+
+    // Apply clipping mask to constrain all content to visible canvas area
+    const clipMask = new PIXI.Graphics();
+    clipMask.rect(0, 0, 800, 600);
+    clipMask.fill({ color: 0xffffff });
+    combatPixiInstance.value.stage.mask = clipMask;
+    combatPixiInstance.value.stage.addChild(clipMask);
+  };
+
+  // Track currently highlighted unit for visual feedback
+  let highlightedUnitId: string | null = null;
+
+  /**
+   * Highlight a unit visually (tint effect) or remove highlight
+   */
+  const highlightUnit = (unitId: string | null) => {
+    // Remove previous highlight
+    if (highlightedUnitId) {
+      const prevUnit = units.value.get(highlightedUnitId);
+      if (prevUnit?.sprite) {
+        prevUnit.sprite.tint = 0xffffff; // Reset to normal
+      }
+    }
+
+    highlightedUnitId = unitId;
+
+    // Apply new highlight
+    if (unitId) {
+      const unit = units.value.get(unitId);
+      if (unit?.sprite) {
+        unit.sprite.tint = 0xffff88; // Yellow tint for selection
+      }
+    }
   };
 
   const init = async (container: HTMLDivElement) => {
@@ -132,13 +170,19 @@ export function useCombat() {
     if (combatPixiInstance.value) {
       // storeToRefs wraps the ref, we need to pass a callback that returns the unwrapped value
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      interactionController = setupInteractionController(combatPixiInstance.value, () => units.value as any, {
-        pixelToGrid,
-        gridToPixel,
-        showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
-        hideReachableCells: () => hideReachableCells(rangeOverlay.value),
-        moveUnitToGrid: (id, x, y) => moveUnitToGrid(id, x, y),
-      });
+      interactionController = setupInteractionController(
+        combatPixiInstance.value,
+        () => units.value as any,
+        {
+          pixelToGrid,
+          gridToPixel,
+          showReachableCells: (gx, gy, r) => showReachableCells(rangeOverlay.value, gx, gy, r),
+          hideReachableCells: () => hideReachableCells(rangeOverlay.value),
+          showPathPreview: (sx, sy, ex, ey) => showPathPreview(rangeOverlay.value, sx, sy, ex, ey),
+          moveUnitToGrid: (id, x, y) => moveUnitToGrid(id, x, y),
+          highlightUnit,
+        },
+      );
     }
     console.log('Combat engine initialisé.');
   };
@@ -200,13 +244,16 @@ export function useCombat() {
 
     // Now attach pointer handler after unit is guaranteed in store
     sprite.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
+      // Stop event propagation to prevent stage click handler from firing
+      event.stopPropagation();
+
       const isPlayer = unitStore.isPlayerUnit(unitId);
 
-      // Only allow player unit to be dragged
-      if (isPlayer && interactionController?.startDrag) {
-        interactionController.startDrag(unitId);
+      // Only allow player units to be selected for movement
+      if (isPlayer && interactionController?.selectUnit) {
+        interactionController.selectUnit(unitId);
       } else if (!isPlayer) {
-        console.debug('[useCombat] Enemy unit cannot be dragged:', unitId);
+        console.debug('[useCombat] Enemy unit cannot be selected:', unitId);
       }
 
       emit('unit:clicked', {
@@ -233,7 +280,15 @@ export function useCombat() {
     return 'bottom';
   };
 
-  const moveUnitToGrid = (unitId: string, targetGridX: number, targetGridY: number) => {
+  /**
+   * Animate unit movement along a path, one segment at a time.
+   * Returns a Promise that resolves when movement is complete.
+   */
+  const moveUnitToGrid = async (
+    unitId: string,
+    targetGridX: number,
+    targetGridY: number,
+  ): Promise<void> => {
     const unit = units.value.get(unitId);
     if (!unit || !combatPixiInstance.value) return;
 
@@ -243,60 +298,102 @@ export function useCombat() {
       console.warn(
         `[useCombat] Move rejected: distance ${distance} exceeds max range ${unit.maxMoveRange} for unit ${unitId}`,
       );
-      // Revert sprite position to current grid location
-      const { x: currentX, y: currentY } = gridToPixel(unit.gridX, unit.gridY);
-      gsap.to(unit.sprite, {
-        x: currentX,
-        y: currentY,
-        duration: 0.3,
-        ease: 'power2.out',
-      });
-      if (unit.healthBar?.container) {
-        gsap.to(unit.healthBar.container, {
-          x: currentX,
-          y: currentY - 40,
-          duration: 0.3,
-          ease: 'power2.out',
-        });
-      }
       return;
     }
 
-    const { x: targetX, y: targetY } = gridToPixel(targetGridX, targetGridY);
-    const dx = targetGridX - unit.gridX;
-    const dy = targetGridY - unit.gridY;
-    const dir = getDirectionFromDelta(dx, dy);
+    // Get the path as waypoints (no diagonals)
+    const path = findManhattanPath(unit.gridX, unit.gridY, targetGridX, targetGridY);
 
-    const walkKey = `walk_${dir}` as const;
-    const walkTextures = unit.animations[walkKey];
-    const walkConfig = animations[walkKey];
+    if (path.length === 0) return;
 
-    if (walkTextures && walkTextures.length > 0 && walkConfig) {
-      unit.sprite.textures = walkTextures;
-      unit.sprite.animationSpeed = walkConfig.speed;
+    // Store starting position for direction calculation
+    const startGridX = unit.gridX;
+    const startGridY = unit.gridY;
+
+    // Animate each segment sequentially
+    for (const waypoint of path) {
+      await animateOneStep(unit, waypoint.gridX, waypoint.gridY);
+      // Update unit state after each step
+      combatUnit.moveUnitState(unitId, waypoint.gridX, waypoint.gridY);
+    }
+
+    // Final idle animation facing last direction
+    const lastStep = path[path.length - 1];
+    const prevStep =
+      path.length > 1 ? path[path.length - 2] : { gridX: startGridX, gridY: startGridY };
+    const finalDx = (lastStep?.gridX ?? targetGridX) - (prevStep?.gridX ?? startGridX);
+    const finalDy = (lastStep?.gridY ?? targetGridY) - (prevStep?.gridY ?? startGridY);
+    const finalDir = getDirectionFromDelta(finalDx, finalDy);
+
+    const idleKey = `idle_${finalDir}` as const;
+    const idleTextures = unit.animations[idleKey];
+    const idleConfig = animations[idleKey];
+
+    if (idleTextures && idleTextures.length > 0 && idleConfig) {
+      unit.sprite.textures = idleTextures;
+      unit.sprite.animationSpeed = idleConfig.speed;
+      unit.sprite.loop = true;
       unit.sprite.play();
     }
 
-    gsap.to(unit.sprite, {
-      x: targetX,
-      y: targetY,
-      duration: 0.5,
-      ease: 'power2.inOut',
-      onComplete: () => {
-        const idleKey = `idle_${dir}` as const;
-        const idleTextures = unit.animations[idleKey];
-        const idleConfig = animations[idleKey];
+    emit('turn:ended', { roundNumber: 0 });
+  };
 
-        if (idleTextures && idleTextures.length > 0 && idleConfig) {
-          unit.sprite.textures = idleTextures;
-          unit.sprite.animationSpeed = idleConfig.speed;
-          unit.sprite.loop = true;
-          unit.sprite.play();
-        }
-        combatUnit.moveUnitState(unitId, targetGridX, targetGridY);
-        if (unit.healthBar?.container) unit.healthBar.container.position.set(targetX, targetY - 40);
-        emit('turn:ended', { roundNumber: 0 }); // placeholder emit, adapt if needed
-      },
+  /**
+   * Animate a single step (one tile) of movement
+   */
+  const animateOneStep = (
+    unit: ReturnType<typeof units.value.get>,
+    toGridX: number,
+    toGridY: number,
+  ): Promise<void> => {
+    return new Promise(resolve => {
+      if (!unit) {
+        resolve();
+        return;
+      }
+
+      const dx = toGridX - unit.gridX;
+      const dy = toGridY - unit.gridY;
+      const dir = getDirectionFromDelta(dx, dy);
+
+      const walkKey = `walk_${dir}` as const;
+      const walkTextures = unit.animations[walkKey];
+      const walkConfig = animations[walkKey];
+
+      if (walkTextures && walkTextures.length > 0 && walkConfig) {
+        unit.sprite.textures = walkTextures;
+        unit.sprite.animationSpeed = walkConfig.speed;
+        unit.sprite.play();
+      }
+
+      const { x: targetX, y: targetY } = gridToPixel(toGridX, toGridY);
+
+      gsap.to(unit.sprite, {
+        x: targetX,
+        y: targetY,
+        duration: 0.2, // Fast per-tile animation
+        ease: 'linear',
+        onComplete: () => {
+          if (unit.healthBar?.container) {
+            unit.healthBar.container.position.set(targetX, targetY - 40);
+          }
+          // Update internal position for next step calculation
+          unit.gridX = toGridX;
+          unit.gridY = toGridY;
+          resolve();
+        },
+      });
+
+      // Also animate health bar
+      if (unit.healthBar?.container) {
+        gsap.to(unit.healthBar.container, {
+          x: targetX,
+          y: targetY - 40,
+          duration: 0.2,
+          ease: 'linear',
+        });
+      }
     });
   };
 

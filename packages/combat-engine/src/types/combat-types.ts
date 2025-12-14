@@ -70,11 +70,17 @@ export interface UnitData {
   };
 }
 
-// Configuration de la grille
+// Configuration de la grille (fake isometric)
 export const GRID_CONFIG = {
-  cellSize: 64,
-  cols: 12,
-  rows: 9,
+  cellSize: 64, // base cell size (used for unit spacing logic)
+  cols: 20,
+  rows: 20,
+  // Isometric tile dimensions (2:1 ratio for fake isometric)
+  tileWidth: 96,
+  tileHeight: 48,
+  // Offset to center the grid in the canvas (800x600)
+  originX: 400,
+  originY: -150,
   lineColor: 0x2d5016,
   lineAlpha: 0.6,
   tileColor1: 0x5a9c3f,
@@ -84,13 +90,24 @@ export const GRID_CONFIG = {
 };
 
 // Event types for external subscribers
-export type CombatEngineEventType = 'unit:clicked' | 'unit:attacked' | 'unit:died' | 'turn:ended';
+export type CombatEngineEventType =
+  | 'unit:clicked'
+  | 'unit:attacked'
+  | 'unit:died'
+  | 'unit:moved'
+  | 'turn:ended';
 
 export interface UnitClickedPayload {
   unitId: string;
   isPlayer: boolean;
   stageX: number;
   stageY: number;
+}
+
+export interface UnitMovedPayload {
+  unitId: string;
+  gridX: number;
+  gridY: number;
 }
 
 export interface UnitAttackedPayload {
@@ -104,6 +121,7 @@ export interface CombatEngineEventPayload {
   'unit:clicked': UnitClickedPayload;
   'unit:attacked': UnitAttackedPayload;
   'unit:died': { unitId: string };
+  'unit:moved': UnitMovedPayload;
   'turn:ended': { roundNumber: number };
 }
 

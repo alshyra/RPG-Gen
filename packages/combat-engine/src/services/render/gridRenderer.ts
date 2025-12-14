@@ -14,26 +14,92 @@ const getGridCoordinates = () =>
     })),
   ).flat();
 
-// Crée tous les tiles en une seule passe avec un seul Graphics
+/**
+ * Convert grid coordinates to isometric pixel coordinates (center of diamond tile)
+ * Uses a 2:1 fake isometric projection
+ */
+export const gridToPixel = (gridX: number, gridY: number): { x: number; y: number } => {
+  const { tileWidth, tileHeight, originX, originY } = GRID_CONFIG;
+  // Isometric projection:
+  // x_screen = (gridX - gridY) * tileWidth/2 + originX
+  // y_screen = (gridX + gridY) * tileHeight/2 + originY
+  return {
+    x: (gridX - gridY) * (tileWidth / 2) + originX,
+    y: (gridX + gridY) * (tileHeight / 2) + originY,
+  };
+};
+
+/**
+ * Convert pixel coordinates to grid coordinates (inverse isometric projection)
+ * Clamped to valid grid bounds
+ */
+export const pixelToGrid = (pixelX: number, pixelY: number): { gridX: number; gridY: number } => {
+  const { tileWidth, tileHeight, originX, originY, cols, rows } = GRID_CONFIG;
+
+  // Inverse isometric projection:
+  // Forward: x = (gridX - gridY) * w/2 + originX, y = (gridX + gridY) * h/2 + originY
+  // Inverse: gridX = (x/w + y/h) / 2, gridY = (y/h - x/w) / 2
+  const relX = pixelX - originX;
+  const relY = pixelY - originY;
+
+  const rawGridX = (relX / (tileWidth / 2) + relY / (tileHeight / 2)) / 2;
+  const rawGridY = (relY / (tileHeight / 2) - relX / (tileWidth / 2)) / 2;
+
+  // Clamp to grid bounds
+  const gridX = Math.max(0, Math.min(cols - 1, Math.floor(rawGridX + 0.5)));
+  const gridY = Math.max(0, Math.min(rows - 1, Math.floor(rawGridY + 0.5)));
+
+  return { gridX, gridY };
+};
+
+/**
+ * Get the 4 corner points of a diamond tile at grid position (x, y)
+ * Returns [top, right, bottom, left] as a fixed tuple
+ */
+const getDiamondPoints = (
+  gridX: number,
+  gridY: number,
+): [
+  { x: number; y: number },
+  { x: number; y: number },
+  { x: number; y: number },
+  { x: number; y: number },
+] => {
+  const { tileWidth, tileHeight, originX, originY } = GRID_CONFIG;
+  const centerX = (gridX - gridY) * (tileWidth / 2) + originX;
+  const centerY = (gridX + gridY) * (tileHeight / 2) + originY;
+
+  // Diamond corners: top, right, bottom, left (relative to center)
+  return [
+    { x: centerX, y: centerY - tileHeight / 2 }, // top
+    { x: centerX + tileWidth / 2, y: centerY }, // right
+    { x: centerX, y: centerY + tileHeight / 2 }, // bottom
+    { x: centerX - tileWidth / 2, y: centerY }, // left
+  ];
+};
+
+// Crée tous les tiles en une seule passe avec un seul Graphics (diamond tiles)
 const createTilesGraphics = (): PIXI.Graphics => {
   const graphics = new PIXI.Graphics();
 
   getGridCoordinates().forEach(({ x, y }) => {
     const isEven = (x + y) % 2 === 0;
     const color = isEven ? GRID_CONFIG.tileColor1 : GRID_CONFIG.tileColor2;
-    graphics.rect(
-      x * GRID_CONFIG.cellSize,
-      y * GRID_CONFIG.cellSize,
-      GRID_CONFIG.cellSize,
-      GRID_CONFIG.cellSize,
-    );
+    const [top, right, bottom, left] = getDiamondPoints(x, y);
+
+    // Draw diamond polygon
+    graphics.moveTo(top.x, top.y);
+    graphics.lineTo(right.x, right.y);
+    graphics.lineTo(bottom.x, bottom.y);
+    graphics.lineTo(left.x, left.y);
+    graphics.closePath();
     graphics.fill({ color });
   });
 
   return graphics;
 };
 
-// Crée toutes les lignes de la grille en une seule passe
+// Crée toutes les lignes de la grille en une seule passe (diamond outlines)
 const createGridLinesGraphics = (): PIXI.Graphics => {
   const lines = new PIXI.Graphics();
   lines.setStrokeStyle({
@@ -42,47 +108,18 @@ const createGridLinesGraphics = (): PIXI.Graphics => {
     alpha: GRID_CONFIG.lineAlpha,
   });
 
-  // Lignes verticales
-  Array.from({ length: GRID_CONFIG.cols + 1 }).forEach((_, i) => {
-    const x = i * GRID_CONFIG.cellSize;
-    lines.moveTo(x, 0);
-    lines.lineTo(x, GRID_CONFIG.rows * GRID_CONFIG.cellSize);
-  });
-
-  // Lignes horizontales
-  Array.from({ length: GRID_CONFIG.rows + 1 }).forEach((_, i) => {
-    const y = i * GRID_CONFIG.cellSize;
-    lines.moveTo(0, y);
-    lines.lineTo(GRID_CONFIG.cols * GRID_CONFIG.cellSize, y);
+  // Draw outline for each diamond tile
+  getGridCoordinates().forEach(({ x, y }) => {
+    const [top, right, bottom, left] = getDiamondPoints(x, y);
+    lines.moveTo(top.x, top.y);
+    lines.lineTo(right.x, right.y);
+    lines.lineTo(bottom.x, bottom.y);
+    lines.lineTo(left.x, left.y);
+    lines.closePath();
   });
 
   lines.stroke();
   return lines;
-};
-
-/**
- * Convert grid coordinates to pixel coordinates (center of cell)
- */
-export const gridToPixel = (gridX: number, gridY: number): { x: number; y: number } => {
-  return {
-    x: gridX * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-    y: gridY * GRID_CONFIG.cellSize + GRID_CONFIG.cellSize / 2,
-  };
-};
-
-/**
- * Convert pixel coordinates to grid coordinates (clamped to valid grid bounds)
- */
-export const pixelToGrid = (pixelX: number, pixelY: number): { gridX: number; gridY: number } => {
-  const gridX = Math.max(
-    0,
-    Math.min(GRID_CONFIG.cols - 1, Math.floor(pixelX / GRID_CONFIG.cellSize)),
-  );
-  const gridY = Math.max(
-    0,
-    Math.min(GRID_CONFIG.rows - 1, Math.floor(pixelY / GRID_CONFIG.cellSize)),
-  );
-  return { gridX, gridY };
 };
 
 export const createGrid = (app: HasStage): PIXI.Container | null => {
@@ -119,7 +156,7 @@ export const showReachableCells = (
 
   overlay.removeChildren();
 
-  // Crée un seul Graphics pour toutes les cellules accessibles
+  // Crée un seul Graphics pour toutes les cellules accessibles (diamond tiles)
   const graphics = new PIXI.Graphics();
 
   getGridCoordinates()
@@ -128,15 +165,16 @@ export const showReachableCells = (
       return dist > 0 && dist <= range;
     })
     .forEach(({ x, y }) => {
-      graphics.rect(
-        x * GRID_CONFIG.cellSize,
-        y * GRID_CONFIG.cellSize,
-        GRID_CONFIG.cellSize,
-        GRID_CONFIG.cellSize,
-      );
+      const points = getDiamondPoints(x, y);
+      const [top, right, bottom, left] = points;
+      graphics.moveTo(top.x, top.y);
+      graphics.lineTo(right.x, right.y);
+      graphics.lineTo(bottom.x, bottom.y);
+      graphics.lineTo(left.x, left.y);
+      graphics.closePath();
     });
 
-  // Fill AFTER drawing all rects to apply color to all cells
+  // Fill AFTER drawing all diamonds to apply color to all cells
   graphics.fill({
     color: GRID_CONFIG.reachableColor,
     alpha: GRID_CONFIG.reachableAlpha,
@@ -147,4 +185,78 @@ export const showReachableCells = (
 
 export const hideReachableCells = (overlay: PIXI.Container | null): void => {
   overlay?.removeChildren();
+};
+
+/**
+ * Show a preview of the path that would be taken to reach a destination
+ * Displays in a different color (cyan) to differentiate from reachable cells
+ */
+export const showPathPreview = (
+  overlay: PIXI.Container | null,
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): void => {
+  if (!overlay) return;
+
+  // Don't show path to starting position
+  if (startX === endX && startY === endY) return;
+
+  const path = findManhattanPath(startX, startY, endX, endY);
+  if (path.length === 0) return;
+
+  // Create graphics for path preview
+  const graphics = new PIXI.Graphics();
+
+  path.forEach(({ gridX, gridY }) => {
+    const points = getDiamondPoints(gridX, gridY);
+    const [top, right, bottom, left] = points;
+    graphics.moveTo(top.x, top.y);
+    graphics.lineTo(right.x, right.y);
+    graphics.lineTo(bottom.x, bottom.y);
+    graphics.lineTo(left.x, left.y);
+    graphics.closePath();
+  });
+
+  // Cyan color with higher alpha for path preview
+  graphics.fill({
+    color: 0x00ffff,
+    alpha: 0.6,
+  });
+
+  overlay.addChild(graphics);
+};
+
+/**
+ * Find a path from (startX, startY) to (endX, endY) using Manhattan movement (no diagonals).
+ * Returns an array of waypoints including the destination but NOT the starting position.
+ * Path moves horizontally first, then vertically.
+ */
+export const findManhattanPath = (
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): { gridX: number; gridY: number }[] => {
+  const path: { gridX: number; gridY: number }[] = [];
+
+  let currentX = startX;
+  let currentY = startY;
+
+  // Move horizontally first (X axis)
+  const stepX = endX > currentX ? 1 : -1;
+  while (currentX !== endX) {
+    currentX += stepX;
+    path.push({ gridX: currentX, gridY: currentY });
+  }
+
+  // Then move vertically (Y axis)
+  const stepY = endY > currentY ? 1 : -1;
+  while (currentY !== endY) {
+    currentY += stepY;
+    path.push({ gridX: currentX, gridY: currentY });
+  }
+
+  return path;
 };
