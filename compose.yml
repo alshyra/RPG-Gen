@@ -25,6 +25,8 @@ services:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
       - FRONTEND_URL=http://localhost
+    ports:
+      - '3001:3001'
     env_file:
       - apps/backend/.env
     depends_on:

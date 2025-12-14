@@ -106,7 +106,7 @@ jobs:
           # Wait for backend health endpoint with longer timeout for seed completion
           echo "Waiting for backend health check..."
           timeout 90 bash -c '
-            until docker compose exec -T backend curl -sf http://localhost:3001/api/health > /dev/null 2>&1; do
+            until curl -sf http://localhost:3001/api/health > /dev/null 2>&1; do
               sleep 3
               echo "Backend health check pending..."
             done
