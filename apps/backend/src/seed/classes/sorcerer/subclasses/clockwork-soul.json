@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Clockwork Soul",
+  "baseClass": "Sorcerer",
+  "description": "You were affected by powerful machinery of order.",
+  "features": [
+    {
+      "level": 1,
+      "id": "clockwork-magic",
+      "name": "Clockwork Magic",
+      "description": "Gain knowledge of abjuration and transmutation spells."
+    },
+    {
+      "level": 1,
+      "id": "restore-balance",
+      "name": "Restore Balance",
+      "description": "Reaction to reduce spell damage taken by your CHA modifier."
+    },
+    {
+      "level": 6,
+      "id": "bastion-law",
+      "name": "Bastion of Law",
+      "description": "AC increases by 2 when you don't move."
+    },
+    {
+      "level": 14,
+      "id": "tether-essence",
+      "name": "Tether Essence",
+      "description": "When creature near you takes damage, you can redirect it to yourself."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Warrior of Mercy",
+  "baseClass": "Monk",
+  "description": "Healers trained in martial meditation and medicine.",
+  "features": [
+    {
+      "level": 3,
+      "id": "hand-healing",
+      "name": "Hand of Healing",
+      "description": "Spend Focus Point to heal creature 1d4 + WIS within 5 feet."
+    },
+    {
+      "level": 6,
+      "id": "hand-harm",
+      "name": "Hand of Harm",
+      "description": "Unarmed strikes deal extra damage to undead and fiends."
+    },
+    {
+      "level": 10,
+      "id": "healing-meditation",
+      "name": "Healing Meditation",
+      "description": "Spend level Focus Points to cure disease/poison."
+    },
+    {
+      "level": 17,
+      "id": "ultimate-medicine",
+      "name": "Ultimate Medicine",
+      "description": "Spend Focus Points to revive dying allies."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Necromancer",
+  "baseClass": "Wizard",
+  "description": "Masters of death magic and undeath.",
+  "features": [
+    {
+      "level": 2,
+      "id": "necromancy-savant",
+      "name": "Necromancy Savant",
+      "description": "Copy necromancy spells at half cost and time."
+    },
+    {
+      "level": 2,
+      "id": "grim-harvest",
+      "name": "Grim Harvest",
+      "description": "When spell kills creature, gain temporary HP."
+    },
+    {
+      "level": 6,
+      "id": "undead-thralls",
+      "name": "Undead Thralls",
+      "description": "Undead you create have increased hit points and AC."
+    },
+    {
+      "level": 10,
+      "id": "inured-undeath",
+      "name": "Inured to Undeath",
+      "description": "Immunity to necrotic damage. Resistance to cold damage."
+    }
+  ]
+}

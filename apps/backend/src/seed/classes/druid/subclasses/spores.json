@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Circle of Spores",
+  "baseClass": "Druid",
+  "description": "Circle of Spores Druids harness the power of decay and symbiosis, merging with fungal symbionts for power.",
+  "features": [
+    {
+      "level": 3,
+      "id": "symbiotic-entity",
+      "name": "Symbiotic Entity",
+      "description": "As a bonus action, you can summon a fungal symbiont that grants temporary hit points and lets you use unarmed strikes as magical."
+    },
+    {
+      "level": 3,
+      "id": "spore-burst",
+      "name": "Spore Burst",
+      "description": "When a creature moves within 10 feet of you while your symbiont is active, you can spend a reaction to force a saving throw or it takes poison damage."
+    },
+    {
+      "level": 6,
+      "id": "plague-carrier",
+      "name": "Plague Carrier",
+      "description": "Your symbiont grants resistance to disease and poison, and allies within 10 feet gain the same."
+    },
+    {
+      "level": 10,
+      "id": "sporeling-network",
+      "name": "Sporeling Network",
+      "description": "You can sense the presence of creatures within 30 feet through your spore network."
+    }
+  ]
+}

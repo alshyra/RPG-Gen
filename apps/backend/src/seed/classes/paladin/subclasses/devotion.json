@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Oath of Devotion",
+  "baseClass": "Paladin",
+  "description": "The oath of devotion binds a paladin to honesty, compassion and honor.",
+  "features": [
+    {
+      "level": 3,
+      "id": "sacred-weapon",
+      "name": "Sacred Weapon",
+      "description": "Add CHA modifier to attack rolls with weapons you're proficient with."
+    },
+    {
+      "level": 3,
+      "id": "blessed-strikes",
+      "name": "Blessed Strikes",
+      "description": "Weapon hits deal extra radiant damage."
+    },
+    {
+      "level": 7,
+      "id": "aura-of-devotion",
+      "name": "Aura of Devotion",
+      "description": "Allies within aura can't be charmed."
+    },
+    {
+      "level": 15,
+      "id": "purity-of-body",
+      "name": "Purity of Body",
+      "description": "Immunity to disease. Resistance to poison."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Circle of Wildfire",
+  "baseClass": "Druid",
+  "description": "Circle of Wildfire Druids summon wildfire spirits to aid them in battle and traverse dangerous terrain.",
+  "features": [
+    {
+      "level": 3,
+      "id": "wildfire-spirit",
+      "name": "Wildfire Spirit",
+      "description": "You can summon a wildfire spirit that appears in a space within 30 feet. The spirit can move and take actions on your turn."
+    },
+    {
+      "level": 3,
+      "id": "spirit-dependency",
+      "name": "Spirit Teleportation",
+      "description": "You can use the wildfire spirit to teleport yourself or swap positions with it."
+    },
+    {
+      "level": 6,
+      "id": "enhanced-bonfire",
+      "name": "Enhanced Bonfire",
+      "description": "The wildfire spirit's damage increases, and it grants you damage resistance to fire."
+    },
+    {
+      "level": 10,
+      "id": "blazing-endurance",
+      "name": "Blazing Endurance",
+      "description": "When the wildfire spirit is destroyed, you gain temporary hit points equal to your Druid level."
+    }
+  ]
+}

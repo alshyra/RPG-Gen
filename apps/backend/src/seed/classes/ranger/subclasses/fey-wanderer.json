@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Fey Wanderer",
+  "baseClass": "Ranger",
+  "description": "Rangers who traverse the Feywild and gain fey powers.",
+  "features": [
+    {
+      "level": 3,
+      "id": "wanderer-magic",
+      "name": "Wanderer Magic",
+      "description": "Learn fey spells and cast them using WIS."
+    },
+    {
+      "level": 7,
+      "id": "fey-reinforcements",
+      "name": "Fey Reinforcements",
+      "description": "Summon fey creature to aid you in battle."
+    },
+    {
+      "level": 11,
+      "id": "fey-glamour",
+      "name": "Fey Glamour",
+      "description": "CHA checks have advantage. Enemies have disadvantage on hostile actions."
+    },
+    {
+      "level": 15,
+      "id": "fey-mastery",
+      "name": "Fey Mastery",
+      "description": "Teleport using bonus action. Creatures can't track you."
+    }
+  ]
+}

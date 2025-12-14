@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Path of the Berserker",
+  "baseClass": "Barbarian",
+  "description": "Barbarians who walk the Path of the Berserker direct their Rage primarily toward violence. Their path is one of untrammeled fury, and they thrill in the chaos of battle as they allow their Rage to seize and empower them.",
+  "features": [
+    {
+      "level": 3,
+      "id": "frenzy",
+      "name": "Frenzy",
+      "description": "If you use Reckless Attack while your Rage is active, you deal extra damage to the first target you hit on your turn with a Strength-based attack. Roll a number of d6s equal to your Rage Damage bonus and add them together. The damage has the same type as the weapon or Unarmed Strike used."
+    },
+    {
+      "level": 6,
+      "id": "mindless-rage",
+      "name": "Mindless Rage",
+      "description": "You have immunity to the Charmed and Frightened conditions while your Rage is active. If you're Charmed or Frightened when you enter your Rage, that condition ends on you."
+    },
+    {
+      "level": 10,
+      "id": "retaliation",
+      "name": "Retaliation",
+      "description": "When you take damage from a creature within 5 feet of you, you can take a Reaction to make one melee attack against that creature using a weapon or Unarmed Strike."
+    },
+    {
+      "level": 14,
+      "id": "intimidating-presence",
+      "name": "Intimidating Presence",
+      "description": "As a Bonus Action, strike terror with your menacing presence and primal power. Each creature of your choice in a 30-foot Emanation originating from you must make a Wisdom saving throw (DC 8 + Strength modifier + Proficiency Bonus). On a failed save, creature has Frightened condition for 1 minute. Repeats save at end of each turn. Once you use this, can't use again until Long Rest unless you expend a Rage use."
+    }
+  ]
+}

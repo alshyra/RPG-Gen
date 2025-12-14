@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Wild Magic",
+  "baseClass": "Sorcerer",
+  "description": "Your magic is chaotic and unpredictable.",
+  "features": [
+    {
+      "level": 1,
+      "id": "wild-magic-surge",
+      "name": "Wild Magic Surge",
+      "description": "When you cast, roll 1d20. On 1, roll d100 for random magical effect."
+    },
+    {
+      "level": 1,
+      "id": "tides-chaos",
+      "name": "Tides of Chaos",
+      "description": "Bonus action for advantage on attack/ability check. Triggers wild magic surge."
+    },
+    {
+      "level": 6,
+      "id": "bend-luck",
+      "name": "Bend Luck",
+      "description": "Spend sorcery points to add/subtract from d20 rolls within 60 feet."
+    },
+    {
+      "level": 14,
+      "id": "controlled-chaos",
+      "name": "Controlled Chaos",
+      "description": "Reroll wild magic surge result. Can choose to use it or not."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "The Celestial Patron",
+  "baseClass": "Warlock",
+  "description": "Your patron is a powerful celestial being of good.",
+  "features": [
+    {
+      "level": 1,
+      "id": "expanded-spell-list",
+      "name": "Expanded Spell List",
+      "description": "Learn healing and restoration spells."
+    },
+    {
+      "level": 1,
+      "id": "healing-light",
+      "name": "Healing Light",
+      "description": "Spend pact slots to heal nearby creatures."
+    },
+    {
+      "level": 6,
+      "id": "radiant-soul",
+      "name": "Radiant Soul",
+      "description": "Spell damage becomes radiant. Add CHA to radiant damage rolls."
+    },
+    {
+      "level": 10,
+      "id": "celestial-resilience",
+      "name": "Celestial Resilience",
+      "description": "Gain temporary HP when you cast healing spell."
+    }
+  ]
+}

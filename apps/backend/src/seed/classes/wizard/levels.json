@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "className": "Wizard",
+  "hitDie": "1d6",
+  "primarySpellAbility": "Int",
+  "description": "Class-level progression for Wizard 2024.",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 3,
+      "spellsKnown": 6,
+      "spellSlots": { "1": 2 },
+      "features": [
+        {
+          "id": "spellcasting",
+          "name": "Spellcasting",
+          "description": "INT is spellcasting ability. Learn spells from spellbook."
+        },
+        {
+          "id": "ritual-adept",
+          "name": "Ritual Adept",
+          "description": "Cast ritual spells without preparation if in spellbook."
+        },
+        {
+          "id": "arcane-recovery",
+          "name": "Arcane Recovery",
+          "description": "On short rest, recover spell slots totaling half level (max 5)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 3,
+      "spellsKnown": 7,
+      "spellSlots": { "1": 3 },
+      "features": [
+        {
+          "id": "scholar",
+          "name": "Scholar",
+          "description": "Gain Expertise in Arcana, History, Investigation, Medicine, Nature, or Religion."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 3,
+      "spellsKnown": 8,
+      "spellSlots": { "1": 4, "2": 2 },
+      "features": [
+        {
+          "id": "wizard-subclass",
+          "name": "Wizard Subclass",
+          "description": "Choose: Abjurer, Conjurer, Diviner, Evoker, Illusionist, Enchanter, Necromancer, Transmuter."
+        }
+      ],
+      "choices": [
+        {
+          "id": "school",
+          "name": "Choose School of Magic",
+          "type": "subclass",
+          "options": [
+            "abjurer",
+            "conjurer",
+            "diviner",
+            "evoker",
+            "illusionist",
+            "enchanter",
+            "necromancer",
+            "transmuter"
+          ]
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 4,
+      "spellsKnown": 9,
+      "spellSlots": { "1": 4, "2": 3 },
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 4,
+      "spellsKnown": 11,
+      "spellSlots": { "1": 4, "2": 3, "3": 2 },
+      "features": [
+        {
+          "id": "memorize-spell",
+          "name": "Memorize Spell",
+          "description": "Can spend 1 hour to add spell from spellbook to memory without using spell slot."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 4,
+      "spellsKnown": 12,
+      "spellSlots": { "1": 4, "2": 3, "3": 3 },
+      "features": [
+        {
+          "id": "subclass-feature",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your school of magic."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 4,
+      "spellsKnown": 13,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 4,
+      "spellsKnown": 14,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 2 },
+      "features": [
+        {
+          "id": "asi-8",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 4,
+      "spellsKnown": 16,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 5,
+      "spellsKnown": 17,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2 },
+      "features": [
+        {
+          "id": "subclass-feature-10",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your school of magic."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 5,
+      "spellsKnown": 18,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 5,
+      "spellsKnown": 18,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1 },
+      "features": [
+        {
+          "id": "asi-12",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 5,
+      "spellsKnown": 19,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 5,
+      "spellsKnown": 20,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1 },
+      "features": [
+        {
+          "id": "subclass-feature-14",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your school of magic."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 5,
+      "spellsKnown": 21,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 5,
+      "spellsKnown": 23,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1 },
+      "features": [
+        {
+          "id": "asi-16",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 5,
+      "spellsKnown": 24,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1, "9": 1 },
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 5,
+      "spellsKnown": 25,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 1, "7": 1, "8": 1, "9": 1 },
+      "features": [
+        {
+          "id": "spell-mastery",
+          "name": "Spell Mastery",
+          "description": "Learn 2 spells to cast at will (1st/2nd level)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 5,
+      "spellsKnown": 26,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 1, "8": 1, "9": 1 },
+      "features": [{ "id": "epic-boon", "name": "Epic Boon", "description": "Gain an Epic Boon." }],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 5,
+      "spellsKnown": 27,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 2, "8": 1, "9": 1 },
+      "features": [
+        {
+          "id": "signature-spells",
+          "name": "Signature Spells",
+          "description": "Learn 2 spells (6th/7th level) to cast once without slot, regaining on rest."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Rune Knight",
+  "baseClass": "Fighter",
+  "description": "The Rune Knight harnesses ancient runes to fuel magical powers in combat.",
+  "features": [
+    {
+      "level": 3,
+      "id": "rune-magic",
+      "name": "Rune Magic",
+      "description": "Learn runes to inscribe on equipment. Each rune grants a benefit. Learn 2 runes, gaining more at higher levels."
+    },
+    {
+      "level": 3,
+      "id": "runic-shield",
+      "name": "Runic Shield",
+      "description": "Inscribe a rune on shield, gaining benefit (e.g., +2 AC, advantage vs fire)."
+    },
+    {
+      "level": 7,
+      "id": "giant-might",
+      "name": "Giant Might",
+      "description": "Cast enlarge self on yourself using Strength modifier + Dex, becoming larger and stronger."
+    },
+    {
+      "level": 10,
+      "id": "rune-mastery",
+      "name": "Rune Mastery",
+      "description": "Learn additional runes with enhanced effects. Can have multiple runes active."
+    }
+  ]
+}

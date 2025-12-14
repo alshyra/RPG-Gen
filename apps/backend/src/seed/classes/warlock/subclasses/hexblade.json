@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "The Hexblade Patron",
+  "baseClass": "Warlock",
+  "description": "Your patron is a powerful spirit weapon or cursed blade.",
+  "features": [
+    {
+      "level": 1,
+      "id": "hex-warrior",
+      "name": "Hex Warrior",
+      "description": "Use CHA for weapon attack/damage rolls with pact weapon."
+    },
+    {
+      "level": 1,
+      "id": "hexblade-curse",
+      "name": "Hexblade's Curse",
+      "description": "Curse creature within 30 feet. Crits at 19-20. Gain temp HP on kill."
+    },
+    {
+      "level": 6,
+      "id": "accursed-specter",
+      "name": "Accursed Specter",
+      "description": "Summon ghost of hexblade curse victim to attack enemies."
+    },
+    {
+      "level": 10,
+      "id": "armor-proficiency",
+      "name": "Armor Proficiency",
+      "description": "Gain proficiency with medium armor and shields."
+    }
+  ]
+}

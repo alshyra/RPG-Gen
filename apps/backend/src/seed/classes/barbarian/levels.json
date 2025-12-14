@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "className": "Barbarian",
   "hitDie": "1d12",
-  "description": "Class-level progression table and metadata for Barbarian (source: SRD / aidedd.org).",
+  "description": "Class-level progression table and metadata for Barbarian 2024 (source: SRD / WotC).",
   "levels": [
     {
       "level": 1,
@@ -11,17 +11,26 @@
         {
           "id": "rage",
           "name": "Rage",
-          "description": "Enter a rage as a bonus action. While raging you gain advantage on Strength checks and Strength saves, resistance to bludgeoning/piercing/slashing, and a damage bonus to melee weapon attacks using Strength.",
+          "description": "Enter a rage as a bonus action (not in heavy armor). Gain resistance to bludgeoning/piercing/slashing, advantage on Strength checks/saves, and +2 damage on Strength attacks. Lasts until end of your next turn; extend by attacking, forcing a save, or using bonus action. Max 10 minutes. Uses: 2.",
           "meta": {
             "uses": 2,
             "rageDamageBonus": 2,
-            "usesRecharge": "longRest"
+            "usesRecharge": "shortRest",
+            "duration": "1 minute (10 minutes max)"
           }
         },
         {
           "id": "unarmored-defense",
           "name": "Unarmored Defense",
-          "description": "While not wearing heavy armor, AC = 10 + Dex modifier + Con modifier. A shield can be used and still gain this benefit."
+          "description": "While not wearing armor, AC = 10 + Dex modifier + Con modifier. Shield can be used and benefit retained."
+        },
+        {
+          "id": "weapon-mastery",
+          "name": "Weapon Mastery",
+          "description": "Use mastery properties of 2 simple or martial melee weapons of your choice (e.g., Greataxes, Handaxes). Change weapon choices after a long rest.",
+          "meta": {
+            "weaponMasteryCount": 2
+          }
         }
       ],
       "choices": [],
@@ -32,14 +41,14 @@
       "proficiencyBonus": 2,
       "features": [
         {
-          "id": "reckless-attack",
-          "name": "Reckless Attack",
-          "description": "When you make your first attack on your turn, you can attack recklessly to gain advantage on melee weapon attack rolls using Strength for that turn. Attack rolls against you have advantage until your next turn."
-        },
-        {
           "id": "danger-sense",
           "name": "Danger Sense",
-          "description": "Advantage on Dexterity saving throws against effects you can see (traps, spells), provided you are not blinded, deafened, or incapacitated."
+          "description": "Advantage on Dexterity saving throws unless incapacitated."
+        },
+        {
+          "id": "reckless-attack",
+          "name": "Reckless Attack",
+          "description": "On your first attack roll of your turn, gain advantage on Strength-based attacks until start of next turn, but attack rolls against you have advantage during that time."
         }
       ],
       "choices": [],
@@ -50,15 +59,20 @@
       "proficiencyBonus": 2,
       "features": [
         {
-          "id": "primal-path",
-          "name": "Primal Path",
-          "description": "Choose a Primal Path (e.g., Path of the Berserker, Path of the Totem Warrior). Grants features at 3rd, 6th, 10th and 14th levels."
+          "id": "barbarian-subclass",
+          "name": "Barbarian Subclass",
+          "description": "Choose a Primal Path (Berserker, Wild Heart, World Tree, or Zealot). Grants features at 3rd, 6th, 10th, and 14th levels."
+        },
+        {
+          "id": "primal-knowledge",
+          "name": "Primal Knowledge",
+          "description": "Gain proficiency in another Barbarian skill. While raging, can make ability checks with Acrobatics, Intimidation, Perception, Stealth, or Survival using Strength instead of normal ability."
         }
       ],
       "choices": [
         {
           "type": "chooseSubclass",
-          "options": ["berserker", "totem-warrior"]
+          "options": ["berserker", "wild-heart", "world-tree", "zealot"]
         }
       ],
       "unlockedSpells": []
@@ -70,7 +84,7 @@
         {
           "id": "asi",
           "name": "Ability Score Improvement",
-          "description": "Increase one ability score by 2, or two scores by 1. Cannot raise a score above 20 by this feature."
+          "description": "Increase one ability score by 2, or two scores by 1. Cannot exceed 20 by this feature."
         }
       ],
       "choices": [
@@ -88,12 +102,12 @@
         {
           "id": "extra-attack",
           "name": "Extra Attack",
-          "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+          "description": "Attack twice instead of once when you take the Attack action."
         },
         {
           "id": "fast-movement",
           "name": "Fast Movement",
-          "description": "Your speed increases by 10 feet while you aren't wearing heavy armor."
+          "description": "Speed increases by 10 feet while not wearing heavy armor."
         }
       ],
       "choices": [],
@@ -104,9 +118,9 @@
       "proficiencyBonus": 3,
       "features": [
         {
-          "id": "path-feature-6",
-          "name": "Path Feature (6th)",
-          "description": "Feature granted by your chosen Primal Path at 6th level."
+          "id": "subclass-feature-6",
+          "name": "Subclass Feature (6th)",
+          "description": "Feature granted by your chosen Primal Path."
         }
       ],
       "choices": [],
@@ -119,7 +133,12 @@
         {
           "id": "feral-instinct",
           "name": "Feral Instinct",
-          "description": "You have advantage on initiative rolls. If surprised, you can act normally on the first turn if you enter your rage before doing anything else."
+          "description": "Advantage on Initiative rolls."
+        },
+        {
+          "id": "instinctive-pounce",
+          "name": "Instinctive Pounce",
+          "description": "As part of the bonus action to enter Rage, move up to half your speed."
         }
       ],
       "choices": [],
@@ -147,9 +166,13 @@
       "proficiencyBonus": 4,
       "features": [
         {
-          "id": "brutal-critical-1",
-          "name": "Brutal Critical (1 die)",
-          "description": "Roll one additional weapon damage die when determining extra damage for a critical hit."
+          "id": "brutal-strike",
+          "name": "Brutal Strike",
+          "description": "If using Reckless Attack, forgo advantage on one Strength attack. On hit, deal extra 1d10 damage and apply one Brutal Strike effect: Forceful Blow (push 15 ft) or Hamstring Blow (reduce speed 15 ft).",
+          "meta": {
+            "extraDamage": "1d10",
+            "effects": ["Forceful Blow", "Hamstring Blow"]
+          }
         }
       ],
       "choices": [],
@@ -160,9 +183,9 @@
       "proficiencyBonus": 4,
       "features": [
         {
-          "id": "path-feature-10",
-          "name": "Path Feature (10th)",
-          "description": "Feature granted by your chosen Primal Path at 10th level."
+          "id": "subclass-feature-10",
+          "name": "Subclass Feature (10th)",
+          "description": "Feature granted by your chosen Primal Path."
         }
       ],
       "choices": [],
@@ -175,7 +198,7 @@
         {
           "id": "relentless-rage",
           "name": "Relentless Rage",
-          "description": "If you drop to 0 HP while raging and don't die outright, make a DC 10 Con save to drop to 1 HP instead. DC increases by 5 each subsequent use until a rest."
+          "description": "If you drop to 0 HP while raging and don't die, make DC 10 Constitution save. On success, gain HP equal to twice your Barbarian level. DC increases by 5 each use; resets on short or long rest."
         }
       ],
       "choices": [],
@@ -203,9 +226,12 @@
       "proficiencyBonus": 5,
       "features": [
         {
-          "id": "brutal-critical-2",
-          "name": "Brutal Critical (2 dice)",
-          "description": "Roll two additional weapon damage dice when determining extra damage for a critical hit."
+          "id": "improved-brutal-strike",
+          "name": "Improved Brutal Strike",
+          "description": "Add Staggering Blow (disadvantage on next save, no opportunity attacks) and Sundering Blow (+5 bonus to next attack against target) to Brutal Strike options.",
+          "meta": {
+            "newEffects": ["Staggering Blow", "Sundering Blow"]
+          }
         }
       ],
       "choices": [],
@@ -216,9 +242,9 @@
       "proficiencyBonus": 5,
       "features": [
         {
-          "id": "path-feature-14",
-          "name": "Path Feature (14th)",
-          "description": "Feature granted by your chosen Primal Path at 14th level."
+          "id": "subclass-feature-14",
+          "name": "Subclass Feature (14th)",
+          "description": "Feature granted by your chosen Primal Path."
         }
       ],
       "choices": [],
@@ -231,7 +257,7 @@
         {
           "id": "persistent-rage",
           "name": "Persistent Rage",
-          "description": "Your rage ends early only if you fall unconscious or choose to end it."
+          "description": "When rolling initiative, regain all Rage uses. Can't do so again until long rest. Rage lasts 10 minutes without extending, ends only if unconscious or wearing heavy armor."
         }
       ],
       "choices": [],
@@ -259,9 +285,13 @@
       "proficiencyBonus": 6,
       "features": [
         {
-          "id": "brutal-critical-3",
-          "name": "Brutal Critical (3 dice)",
-          "description": "Roll three additional weapon damage dice when determining extra damage for a critical hit."
+          "id": "improved-brutal-strike-2",
+          "name": "Improved Brutal Strike (2)",
+          "description": "Extra damage from Brutal Strike increases to 2d10. Can use two different Brutal Strike effects with each use.",
+          "meta": {
+            "extraDamage": "2d10",
+            "effectCount": 2
+          }
         }
       ],
       "choices": [],
@@ -274,7 +304,7 @@
         {
           "id": "indomitable-might",
           "name": "Indomitable Might",
-          "description": "If your total for a Strength check is less than your Strength score, you can use your Strength score in place of the total."
+          "description": "If your total for a Strength check or save is less than your Strength score, use that score instead."
         }
       ],
       "choices": [],
@@ -285,14 +315,15 @@
       "proficiencyBonus": 6,
       "features": [
         {
-          "id": "asi",
-          "name": "Ability Score Improvement"
+          "id": "epic-boon",
+          "name": "Epic Boon",
+          "description": "Gain an Epic Boon feat or another feat of your choice. Boon of Irresistible Offense is recommended."
         }
       ],
       "choices": [
         {
-          "type": "chooseAbilityIncrease",
-          "points": 2
+          "type": "chooseFeat",
+          "category": "epicBoon"
         }
       ],
       "unlockedSpells": []
@@ -304,11 +335,11 @@
         {
           "id": "primal-champion",
           "name": "Primal Champion",
-          "description": "Your Strength and Constitution scores each increase by 4. Your maximum for those scores is now 24.",
+          "description": "Strength and Constitution scores increase by 4 (max 25). Unlimited Rage uses.",
           "meta": {
             "strengthIncrease": 4,
             "constitutionIncrease": 4,
-            "newMax": 24,
+            "newMax": 25,
             "rages": "unlimited",
             "rageDamageBonus": 4
           }

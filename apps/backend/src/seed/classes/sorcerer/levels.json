@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "className": "Sorcerer",
+  "hitDie": "1d6",
+  "primarySpellAbility": "Cha",
+  "description": "Class-level progression for Sorcerer 2024.",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 4,
+      "spellsKnown": 2,
+      "spellSlots": { "1": 2 },
+      "sorceryPoints": 0,
+      "features": [
+        {
+          "id": "spellcasting",
+          "name": "Spellcasting",
+          "description": "CHA is spellcasting ability. You know spells and cast them."
+        },
+        {
+          "id": "innate-sorcery",
+          "name": "Innate Sorcery",
+          "description": "2/long rest: spend 1 min to gain +1 spell save DC and advantage on spell attacks for 1 min."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 4,
+      "spellsKnown": 4,
+      "spellSlots": { "1": 3 },
+      "sorceryPoints": 2,
+      "features": [
+        {
+          "id": "font-of-magic",
+          "name": "Font of Magic",
+          "description": "Gain Sorcery Points = level. Use to create spell slots or fuel Metamagic."
+        },
+        {
+          "id": "metamagic",
+          "name": "Metamagic",
+          "description": "Learn 2 metamagic options (Careful, Distant, Empowered, Heightened, Quickened, Subtle, Transmuted, Twinned)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 4,
+      "spellsKnown": 6,
+      "spellSlots": { "1": 4, "2": 2 },
+      "sorceryPoints": 3,
+      "features": [
+        {
+          "id": "sorcerer-subclass",
+          "name": "Sorcerer Subclass",
+          "description": "Choose: Draconic Bloodline, Wild Magic, Shadow Magic, Aberrant Mind."
+        }
+      ],
+      "choices": [
+        {
+          "id": "origin",
+          "name": "Choose Sorcerous Origin",
+          "type": "subclass",
+          "options": [
+            "draconic",
+            "wild-magic",
+            "shadow-magic",
+            "aberrant-mind",
+            "clockwork-soul",
+            "lunar-sorcery"
+          ]
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "cantripsKnown": 5,
+      "spellsKnown": 7,
+      "spellSlots": { "1": 4, "2": 3 },
+      "sorceryPoints": 4,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 5,
+      "spellsKnown": 9,
+      "spellSlots": { "1": 4, "2": 3, "3": 2 },
+      "sorceryPoints": 5,
+      "features": [
+        {
+          "id": "sorcerous-restoration",
+          "name": "Sorcerous Restoration",
+          "description": "When short rest, regain sorcery points = 1/2 level (rounded up)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 5,
+      "spellsKnown": 10,
+      "spellSlots": { "1": 4, "2": 3, "3": 3 },
+      "sorceryPoints": 6,
+      "features": [
+        {
+          "id": "subclass-feature",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your sorcerous origin."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 5,
+      "spellsKnown": 11,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 1 },
+      "sorceryPoints": 7,
+      "features": [
+        {
+          "id": "sorcery-incarnate",
+          "name": "Sorcery Incarnate",
+          "description": "Spend sorcery points to increase spell save DC or spell attacks."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "cantripsKnown": 5,
+      "spellsKnown": 12,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 2 },
+      "sorceryPoints": 8,
+      "features": [
+        {
+          "id": "asi-8",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 5,
+      "spellsKnown": 14,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 1 },
+      "sorceryPoints": 9,
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 6,
+      "spellsKnown": 15,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2 },
+      "sorceryPoints": 10,
+      "features": [
+        {
+          "id": "metamagic-2",
+          "name": "Metamagic",
+          "description": "Learn 2 additional metamagic options."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 6,
+      "spellsKnown": 16,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1 },
+      "sorceryPoints": 11,
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "cantripsKnown": 6,
+      "spellsKnown": 16,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1 },
+      "sorceryPoints": 12,
+      "features": [
+        {
+          "id": "asi-12",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 6,
+      "spellsKnown": 17,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1 },
+      "sorceryPoints": 13,
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 6,
+      "spellsKnown": 17,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1 },
+      "sorceryPoints": 14,
+      "features": [
+        {
+          "id": "subclass-feature-14",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your sorcerous origin."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 6,
+      "spellsKnown": 18,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1 },
+      "sorceryPoints": 15,
+      "features": [],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "cantripsKnown": 6,
+      "spellsKnown": 18,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1 },
+      "sorceryPoints": 16,
+      "features": [
+        {
+          "id": "asi-16",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 6,
+      "spellsKnown": 19,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1, "9": 1 },
+      "sorceryPoints": 17,
+      "features": [
+        {
+          "id": "metamagic-3",
+          "name": "Metamagic",
+          "description": "Learn 2 additional metamagic options."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 6,
+      "spellsKnown": 20,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 1, "7": 1, "8": 1, "9": 1 },
+      "sorceryPoints": 18,
+      "features": [
+        {
+          "id": "subclass-feature-18",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your sorcerous origin."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 6,
+      "spellsKnown": 21,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 1, "8": 1, "9": 1 },
+      "sorceryPoints": 19,
+      "features": [{ "id": "epic-boon", "name": "Epic Boon", "description": "Gain an Epic Boon." }],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "cantripsKnown": 6,
+      "spellsKnown": 22,
+      "spellSlots": { "1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 2, "8": 1, "9": 1 },
+      "sorceryPoints": 20,
+      "features": [
+        {
+          "id": "arcane-apotheosis",
+          "name": "Arcane Apotheosis",
+          "description": "Metamagic costs reduced by 1 sorcery point (minimum 0). CHA increases by 2 to max 20."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ]
+}

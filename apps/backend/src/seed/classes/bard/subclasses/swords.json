@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "College of Swords",
+  "baseClass": "Bard",
+  "description": "The College of Swords is the home of bards who combine martial prowess with their bardic magic. These bards are master duelists who weave magic into their swordplay.",
+  "features": [
+    {
+      "level": 3,
+      "id": "bonus-proficiencies",
+      "name": "Bonus Proficiencies",
+      "description": "You gain proficiency with Medium armor, Martial melee weapons, and Scimitars."
+    },
+    {
+      "level": 3,
+      "id": "fighting-style",
+      "name": "Fighting Style",
+      "description": "Choose the Two-Weapon Fighting or Dueling fighting style. You gain the benefits of that style while wielding melee weapons."
+    },
+    {
+      "level": 6,
+      "id": "blade-flourish",
+      "name": "Blade Flourish",
+      "description": "When you take the Attack action on your turn, you can replace one attack with a Blade Flourish. Roll a Bardic Inspiration die and add the number to your AC until the start of your next turn."
+    },
+    {
+      "level": 14,
+      "id": "blade-flourish-enhanced",
+      "name": "Blade Flourish (Enhanced)",
+      "description": "Your Blade Flourish becomes more powerful. You can add both your weapon's damage die and your Bardic Inspiration die to one attack roll."
+    }
+  ]
+}

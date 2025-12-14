@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "College of Whispers",
+  "baseClass": "Bard",
+  "description": "The College of Whispers is the home of bards who master the art of deception. They use their performance to manipulate emotions and secrets.",
+  "features": [
+    {
+      "level": 3,
+      "id": "psychic-blades",
+      "name": "Psychic Blades",
+      "description": "When you use Bardic Inspiration, you can use it as a bonus action to make a melee attack. If the attack hits, the target takes extra psychic damage equal to the number rolled on the Inspiration die."
+    },
+    {
+      "level": 3,
+      "id": "words-of-terror",
+      "name": "Words of Terror",
+      "description": "You can use your Bardic focus to speak secret words of magical influence. When you use Bardic Inspiration on an ally, you can speak words only they can hear. That creature gains advantage on the next attack roll or saving throw."
+    },
+    {
+      "level": 6,
+      "id": "better-secrets",
+      "name": "Better Secrets",
+      "description": "You have advantage on Deception checks. Additionally, you can spend 1 Bardic Inspiration use to cast the spell Disguise Self without using a spell slot or material component."
+    },
+    {
+      "level": 14,
+      "id": "psychic-blades-enhanced",
+      "name": "Psychic Blades (Enhanced)",
+      "description": "When you use Psychic Blades, you can use it without expending an Inspiration use. You can do this a number of times equal to your Charisma modifier, regaining uses when you finish a Long Rest."
+    }
+  ]
+}

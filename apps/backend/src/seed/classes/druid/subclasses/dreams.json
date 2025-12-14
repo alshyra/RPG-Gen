@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Circle of Dreams",
+  "baseClass": "Druid",
+  "description": "Circle of Dreams Druids draw power from the dreaming realm, using illusion and healing magic.",
+  "features": [
+    {
+      "level": 3,
+      "id": "dream-mending",
+      "name": "Dream Mending",
+      "description": "When you cast a spell that restores hit points, you can add your Wisdom modifier to the amount restored."
+    },
+    {
+      "level": 3,
+      "id": "reverie-ward",
+      "name": "Reverie Ward",
+      "description": "You and nearby allies gain temporary hit points equal to your Wisdom modifier at the start of your turn."
+    },
+    {
+      "level": 6,
+      "id": "dream-step",
+      "name": "Dream Step",
+      "description": "As a reaction, you can teleport up to 60 feet when you or an ally within 30 feet takes damage."
+    },
+    {
+      "level": 10,
+      "id": "shared-dream",
+      "name": "Shared Dream",
+      "description": "You can cast dream spells on a target within 30 feet without line of sight."
+    }
+  ]
+}

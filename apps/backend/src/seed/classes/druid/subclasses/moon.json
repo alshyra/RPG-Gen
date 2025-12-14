@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Circle of the Moon",
+  "baseClass": "Druid",
+  "description": "Circle of the Moon Druids are fierce warriors who channel their wild shape to become powerful animal forms in combat.",
+  "features": [
+    {
+      "level": 3,
+      "id": "combat-wild-shape",
+      "name": "Combat Wild Shape",
+      "description": "Your wild shape bonus action can be used more frequently. You can also add your proficiency bonus to damage rolls in beast form."
+    },
+    {
+      "level": 3,
+      "id": "lunar-step",
+      "name": "Lunar Step",
+      "description": "When you cast a spell with a range of Self, you can use a bonus action to move up to your speed without provoking opportunity attacks."
+    },
+    {
+      "level": 6,
+      "id": "primal-strike",
+      "name": "Primal Strike",
+      "description": "Your beast form's unarmed strike count as magical for overcoming resistance."
+    },
+    {
+      "level": 10,
+      "id": "moonlit-form",
+      "name": "Moonlit Form",
+      "description": "Your wild shape forms gain temporary hit points equal to your Druid level when you assume the form."
+    }
+  ]
+}

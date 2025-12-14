@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Battle Master",
+  "baseClass": "Fighter",
+  "description": "The Battle Master uses martial maneuvers learned from war masters across the realm.",
+  "features": [
+    {
+      "level": 3,
+      "id": "battle-maneuvers",
+      "name": "Battle Maneuvers",
+      "description": "Learn 3 maneuvers. Use Superiority Dice (d8) to fuel them. Gain 4 Superiority Dice, regaining on short rest."
+    },
+    {
+      "level": 3,
+      "id": "know-enemy",
+      "name": "Know Your Enemy",
+      "description": "Spend 1 minute observing creature to gain insight into its capabilities."
+    },
+    {
+      "level": 7,
+      "id": "maneuver-mastery",
+      "name": "Maneuver Mastery",
+      "description": "Spend 1 Superiority Die when a creature hits you to reduce damage."
+    },
+    {
+      "level": 10,
+      "id": "improved-maneuvers",
+      "name": "Improved Maneuvers",
+      "description": "Learn additional maneuvers. Superiority Die size increases to d10."
+    }
+  ]
+}

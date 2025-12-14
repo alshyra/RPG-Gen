@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Lunar Sorcery",
+  "baseClass": "Sorcerer",
+  "description": "Your magic is tied to the lunar cycles.",
+  "features": [
+    {
+      "level": 1,
+      "id": "lunar-spells",
+      "name": "Lunar Spells",
+      "description": "Learn moon phase spells. Full Moon=white magic, New Moon=black magic."
+    },
+    {
+      "level": 1,
+      "id": "lunar-empowerment",
+      "name": "Lunar Empowerment",
+      "description": "Gain bonus to spell save DC and rolls based on lunar phase."
+    },
+    {
+      "level": 6,
+      "id": "waxing-waning",
+      "name": "Waxing and Waning Magic",
+      "description": "Spend sorcery points to enhance spells based on lunar phase."
+    },
+    {
+      "level": 14,
+      "id": "lunar-eclipse",
+      "name": "Lunar Eclipse",
+      "description": "When eclipse occurs (30 feet from you), gain powerful magic effects."
+    }
+  ]
+}

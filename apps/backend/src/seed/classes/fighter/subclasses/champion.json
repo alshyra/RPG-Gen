@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Champion",
+  "baseClass": "Fighter",
+  "description": "The Champion uses excellence in combat to overcome enemies through superior technique.",
+  "features": [
+    {
+      "level": 3,
+      "id": "improved-critical",
+      "name": "Improved Critical",
+      "description": "Critical hit range increases from 20 to 19-20."
+    },
+    {
+      "level": 3,
+      "id": "superior-technique",
+      "name": "Superior Technique",
+      "description": "When you roll for attack, you can use this feature to grant yourself advantage."
+    },
+    {
+      "level": 7,
+      "id": "remarkable-athlete",
+      "name": "Remarkable Athlete",
+      "description": "Add half proficiency to ability checks you are not proficient in."
+    },
+    {
+      "level": 10,
+      "id": "additional-fighting-style",
+      "name": "Additional Fighting Style",
+      "description": "Learn a second Fighting Style feat."
+    }
+  ]
+}

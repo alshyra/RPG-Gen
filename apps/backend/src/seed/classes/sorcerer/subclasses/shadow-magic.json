@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Shadow Magic",
+  "baseClass": "Sorcerer",
+  "description": "You draw power from shadow and darkness.",
+  "features": [
+    {
+      "level": 1,
+      "id": "eyes-darkness",
+      "name": "Eyes of Darkness",
+      "description": "See in darkness magical or nonmagical within 120 feet."
+    },
+    {
+      "level": 1,
+      "id": "strength-shadows",
+      "name": "Strength of the Shadows",
+      "description": "Advantage on Stealth checks. Dex and Cha checks in dim light have advantage."
+    },
+    {
+      "level": 6,
+      "id": "hound-ill-omen",
+      "name": "Hound of Ill Omen",
+      "description": "Spend sorcery points to summon shadow hound to attack enemies."
+    },
+    {
+      "level": 14,
+      "id": "shadow-walk",
+      "name": "Shadow Walk",
+      "description": "Teleport between shadows within 120 feet."
+    }
+  ]
+}

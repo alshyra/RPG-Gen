@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "className": "Fighter",
+  "hitDie": "1d10",
+  "primarySpellAbility": "",
+  "description": "Class-level progression table and metadata for Fighter 2024 (source: WotC / SRD).",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "fighting-style",
+          "name": "Fighting Style",
+          "description": "Choose Defense, Dueling, Great Weapon Fighting, or Two-Weapon Fighting."
+        },
+        {
+          "id": "second-wind",
+          "name": "Second Wind",
+          "description": "Bonus Action, 1d10+level. 2 uses, regain on short rest."
+        },
+        {
+          "id": "weapon-mastery",
+          "name": "Weapon Mastery",
+          "description": "Choose 3 weapon types to gain mastery properties."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "action-surge",
+          "name": "Action Surge",
+          "description": "One additional action on your turn. Regain on short or long rest. 1 use."
+        },
+        {
+          "id": "tactical-mind",
+          "name": "Tactical Mind",
+          "description": "When you fail an ability check, spend Second Wind use to add 1d10 to potentially turn it to success."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "fighter-subclass",
+          "name": "Fighter Subclass",
+          "description": "Choose your martial archetype: Champion, Battle Master, Eldritch Knight, Psi Warrior, or Rune Knight."
+        }
+      ],
+      "choices": [
+        {
+          "id": "archetype",
+          "name": "Choose Archetype",
+          "type": "subclass",
+          "options": ["champion", "battle-master", "eldritch-knight", "psi-knight", "rune-knight"]
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "asi-4",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "extra-attack",
+          "name": "Extra Attack",
+          "description": "Attack twice instead of once when taking Attack action."
+        },
+        {
+          "id": "tactical-shift",
+          "name": "Tactical Shift",
+          "description": "When activating Second Wind, move up to half speed without provoking OAs."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "asi-6",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "subclass-7",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your martial archetype."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "asi-8",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "indomitable",
+          "name": "Indomitable",
+          "description": "Reroll a failed save. Can't use again until long rest. 1 use."
+        },
+        {
+          "id": "tactical-master",
+          "name": "Tactical Master",
+          "description": "Replace weapon mastery property with Push, Sap, or Slow for one attack."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "subclass-10",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your martial archetype."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "two-extra-attack",
+          "name": "Two Extra Attacks",
+          "description": "Attack three times instead of once when taking Attack action."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "asi-12",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "indomitable-2",
+          "name": "Indomitable",
+          "description": "Reroll a failed save. Can't use again until long rest. 2 uses."
+        },
+        {
+          "id": "studied-attacks",
+          "name": "Studied Attacks",
+          "description": "Miss an attack: gain advantage on next attack vs same creature before end of next turn."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "asi-14",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "subclass-15",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your martial archetype."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "asi-16",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1 each."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "action-surge-2",
+          "name": "Action Surge",
+          "description": "Use Action Surge twice per short/long rest, but only once per turn."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "subclass-18",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your martial archetype."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "epic-boon",
+          "name": "Epic Boon",
+          "description": "Gain an Epic Boon of your choice."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "three-extra-attack",
+          "name": "Three Extra Attacks",
+          "description": "Attack four times instead of once when taking Attack action."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ]
+}

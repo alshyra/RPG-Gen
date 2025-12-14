@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Inquisitive",
+  "baseClass": "Rogue",
+  "description": "Rogues who uncover secrets and detect deception.",
+  "features": [
+    {
+      "level": 3,
+      "id": "eye-for-detail",
+      "name": "Eye for Detail",
+      "description": "Use insight checks to detect lies. Investigation has advantage."
+    },
+    {
+      "level": 3,
+      "id": "insightful-strikes",
+      "name": "Insightful Strikes",
+      "description": "Add WIS modifier to sneak attack damage."
+    },
+    {
+      "level": 9,
+      "id": "steady-eye",
+      "name": "Steady Eye",
+      "description": "Advantage on Perception and Investigation checks."
+    },
+    {
+      "level": 13,
+      "id": "penetrating-insight",
+      "name": "Penetrating Insight",
+      "description": "Learn all of target's abilities and resistances when attacking."
+    }
+  ]
+}

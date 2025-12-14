@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "The Genie Patron",
+  "baseClass": "Warlock",
+  "description": "Your patron is a powerful genie granting wishes.",
+  "features": [
+    {
+      "level": 1,
+      "id": "expanded-spell-list",
+      "name": "Expanded Spell List",
+      "description": "Learn evocation and transmutation spells."
+    },
+    {
+      "level": 1,
+      "id": "genie-vessel",
+      "name": "Genie's Vessel",
+      "description": "Gain a magical vessel (ring, lamp). Enter it to rest and gain bonuses."
+    },
+    {
+      "level": 6,
+      "id": "elemental-gift",
+      "name": "Elemental Gift",
+      "description": "Resistance to damage type matching genie type."
+    },
+    {
+      "level": 10,
+      "id": "limited-wish",
+      "name": "Limited Wish",
+      "description": "Cast wish spell 1/long rest without using spell slot."
+    }
+  ]
+}

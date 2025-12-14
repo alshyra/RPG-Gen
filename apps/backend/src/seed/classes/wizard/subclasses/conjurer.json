@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Conjurer",
+  "baseClass": "Wizard",
+  "description": "Masters of summoning and creation magic.",
+  "features": [
+    {
+      "level": 2,
+      "id": "conjuration-savant",
+      "name": "Conjuration Savant",
+      "description": "Copy conjuration spells at half cost and time."
+    },
+    {
+      "level": 2,
+      "id": "minor-conjuration",
+      "name": "Minor Conjuration",
+      "description": "Create nonmagical items worth max 10 GP. Last 1 hour."
+    },
+    {
+      "level": 6,
+      "id": "benign-transposition",
+      "name": "Benign Transposition",
+      "description": "Swap places with creature within 30 feet."
+    },
+    {
+      "level": 10,
+      "id": "focused-conjuration",
+      "name": "Focused Conjuration",
+      "description": "Concentration on conjuration spells doesn't break on damage."
+    }
+  ]
+}

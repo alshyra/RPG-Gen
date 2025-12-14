@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "College of Eloquence",
+  "baseClass": "Bard",
+  "description": "The College of Eloquence is the home of bards whose magic enhances their persuasion and oratory. These bards are masters of persuasion and rhetoric.",
+  "features": [
+    {
+      "level": 3,
+      "id": "silver-tongue",
+      "name": "Silver Tongue",
+      "description": "When you make a Persuasion check, you can treat a d20 roll of 9 or lower as a 10."
+    },
+    {
+      "level": 3,
+      "id": "unsettling-words",
+      "name": "Unsettling Words",
+      "description": "When you use Bardic Inspiration, you can choose to use Unsettling Words instead. The creature has disadvantage on the next saving throw within 1 minute."
+    },
+    {
+      "level": 6,
+      "id": "unfailing-inspiration",
+      "name": "Unfailing Inspiration",
+      "description": "When a creature uses one of your Bardic Inspiration dice and fails the ability check, attack roll, or saving throw, it doesn't expend the die."
+    },
+    {
+      "level": 14,
+      "id": "undeniable-words",
+      "name": "Undeniable Words",
+      "description": "When you use Unsettling Words, you can cause the target to have disadvantage on saving throws against Enchantment spells you cast within 1 minute."
+    }
+  ]
+}

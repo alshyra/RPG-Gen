@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Transmuter",
+  "baseClass": "Wizard",
+  "description": "Masters of change and transformation.",
+  "features": [
+    {
+      "level": 2,
+      "id": "transmutation-savant",
+      "name": "Transmutation Savant",
+      "description": "Copy transmutation spells at half cost and time."
+    },
+    {
+      "level": 2,
+      "id": "minor-alchemy",
+      "name": "Minor Alchemy",
+      "description": "Transform nonmagical material into another for up to 1 hour."
+    },
+    {
+      "level": 6,
+      "id": "transmuters-stone",
+      "name": "Transmuter's Stone",
+      "description": "Create stone granting resistance or bonus to ability check."
+    },
+    {
+      "level": 10,
+      "id": "master-transmuter",
+      "name": "Master Transmuter",
+      "description": "Spend spell slots to create permanent magical items."
+    }
+  ]
+}

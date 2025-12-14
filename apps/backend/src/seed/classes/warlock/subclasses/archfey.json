@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "The Archfey Patron",
+  "baseClass": "Warlock",
+  "description": "You made a bargain with an archfey from the Feywild.",
+  "features": [
+    {
+      "level": 1,
+      "id": "expanded-spell-list",
+      "name": "Expanded Spell List",
+      "description": "Learn enchantment and illusion spells."
+    },
+    {
+      "level": 1,
+      "id": "one-with-shadows",
+      "name": "One with the Shadows",
+      "description": "Invisibility spell is always prepared. Dim light makes you invisible when you don't move."
+    },
+    {
+      "level": 6,
+      "id": "misty-escape",
+      "name": "Misty Escape",
+      "description": "Reaction to turn invisible and teleport when hit by attack."
+    },
+    {
+      "level": 10,
+      "id": "bewitching-influence",
+      "name": "Bewitching Influence",
+      "description": "Creatures charmed by you have disadvantage on saves vs your magic."
+    }
+  ]
+}

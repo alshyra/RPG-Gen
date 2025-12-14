@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Arcane Trickster",
+  "baseClass": "Rogue",
+  "description": "Rogues who weave illusion and enchantment magic.",
+  "features": [
+    {
+      "level": 3,
+      "id": "spellcasting",
+      "name": "Spellcasting",
+      "description": "Learn Wizard spells focused on illusion/enchantment."
+    },
+    {
+      "level": 3,
+      "id": "trick-magic",
+      "name": "Trick Magic",
+      "description": "Mage Hand Legerdemain allows invisible mage hand."
+    },
+    {
+      "level": 9,
+      "id": "magical-ambush",
+      "name": "Magical Ambush",
+      "description": "Spell attacks have advantage on first turn."
+    },
+    {
+      "level": 13,
+      "id": "versatile-trickster",
+      "name": "Versatile Trickster",
+      "description": "Use bonus action to distract creature with mage hand."
+    }
+  ]
+}

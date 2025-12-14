@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Assassin",
+  "baseClass": "Rogue",
+  "description": "Professional killers trained in murder and disguise.",
+  "features": [
+    {
+      "level": 3,
+      "id": "assassination",
+      "name": "Assassination",
+      "description": "Advantage on attacks before you act in combat. Hit = auto crit."
+    },
+    {
+      "level": 3,
+      "id": "assassinate",
+      "name": "Assassinate",
+      "description": "Double sneak attack damage on first turn."
+    },
+    {
+      "level": 9,
+      "id": "infiltration-expertise",
+      "name": "Infiltration Expertise",
+      "description": "Disguise yourself perfectly. Deception checks have advantage."
+    },
+    {
+      "level": 13,
+      "id": "death-strike",
+      "name": "Death Strike",
+      "description": "Add extra damage dice to sneak attack vs incapacitated targets."
+    }
+  ]
+}

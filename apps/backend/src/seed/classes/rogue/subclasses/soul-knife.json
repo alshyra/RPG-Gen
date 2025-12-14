@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Soul Knife",
+  "baseClass": "Rogue",
+  "description": "Rogues who manifest psychic blades from the mind.",
+  "features": [
+    {
+      "level": 3,
+      "id": "psychic-blades",
+      "name": "Psychic Blades",
+      "description": "Create magical blades from psychic energy. Sneak attack uses d4 instead of d6."
+    },
+    {
+      "level": 3,
+      "id": "psionic-power",
+      "name": "Psionic Power",
+      "description": "Telepathic communication. Detect creatures by thoughts."
+    },
+    {
+      "level": 9,
+      "id": "hone-psychic-blades",
+      "name": "Hone Psychic Blades",
+      "description": "Psychic blades deal more damage and reappear magically."
+    },
+    {
+      "level": 13,
+      "id": "master-psychic-blades",
+      "name": "Master Psychic Blades",
+      "description": "Blades gain magical bonuses and can be thrown."
+    }
+  ]
+}

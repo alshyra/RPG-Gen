@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Evoker",
+  "baseClass": "Wizard",
+  "description": "Masters of destructive evocation magic.",
+  "features": [
+    {
+      "level": 2,
+      "id": "evocation-savant",
+      "name": "Evocation Savant",
+      "description": "Copy evocation spells at half cost and time."
+    },
+    {
+      "level": 2,
+      "id": "sculpt-spells",
+      "name": "Sculpt Spells",
+      "description": "Choose creatures to exclude from spell area damage."
+    },
+    {
+      "level": 6,
+      "id": "potent-cantrip",
+      "name": "Potent Cantrip",
+      "description": "Creatures save vs cantrips take half damage on success."
+    },
+    {
+      "level": 10,
+      "id": "overchannel",
+      "name": "Overchannel",
+      "description": "Spend hit points to cast evocation spell at higher level."
+    }
+  ]
+}

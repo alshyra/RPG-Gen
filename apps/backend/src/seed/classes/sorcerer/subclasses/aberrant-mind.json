@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Aberrant Mind",
+  "baseClass": "Sorcerer",
+  "description": "Your magic stems from a strange influence on your mind.",
+  "features": [
+    {
+      "level": 1,
+      "id": "psionic-spells",
+      "name": "Psionic Spells",
+      "description": "Learn additional spells. Cast using psionic energy instead of verbal/somatic components."
+    },
+    {
+      "level": 1,
+      "id": "telepathic",
+      "name": "Telepathic",
+      "description": "Telepathy within 60 feet. Creatures you touch can understand you."
+    },
+    {
+      "level": 6,
+      "id": "psionic-sorcery",
+      "name": "Psionic Sorcery",
+      "description": "Cast psionic spells without somatic components."
+    },
+    {
+      "level": 14,
+      "id": "revelation-mind",
+      "name": "Revelation in Mind",
+      "description": "Read mind of creature you touch. Know its alignment and languages."
+    }
+  ]
+}

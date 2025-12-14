@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Forge",
+  "baseClass": "Cleric",
+  "description": "Domain of craftsmanship, metalwork, and creation.",
+  "features": [
+    {
+      "level": 1,
+      "id": "forge-spells",
+      "name": "Forge Domain Spells",
+      "description": "Always prepared: identify, searing smite. Proficiency in medium armor and heavy armor and smith tools."
+    },
+    {
+      "level": 1,
+      "id": "potent-spellcasting",
+      "name": "Potent Spellcasting",
+      "description": "Add WIS modifier to damage of cleric cantrips."
+    },
+    {
+      "level": 6,
+      "id": "channel-divinity-artisans-blessing",
+      "name": "Channel Divinity: Artisan's Blessing",
+      "description": "Spend 1 minute to create masterwork nonmagical item."
+    },
+    {
+      "level": 6,
+      "id": "soul-of-the-forge",
+      "name": "Soul of the Forge",
+      "description": "AC +1 when wearing medium/heavy armor or shield."
+    }
+  ]
+}

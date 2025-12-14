@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "College of Glamour",
+  "baseClass": "Bard",
+  "description": "The College of Glamour is the home of bards who inspire wonder through magic and enchantment. These bards wield their magic through glittering performance and illusion.",
+  "features": [
+    {
+      "level": 3,
+      "id": "mantle-of-inspiration",
+      "name": "Mantle of Inspiration",
+      "description": "When you use Bardic Inspiration, the recipient gains temporary hit points equal to the number rolled on the Inspiration die plus your Charisma modifier."
+    },
+    {
+      "level": 3,
+      "id": "enthralling-performance",
+      "name": "Enthralling Performance",
+      "description": "When you perform for at least 1 minute, choose a number of humanoids equal to your Charisma modifier (minimum 1) who watched and listened to you. They must make a Charisma save or be Charmed by you. While Charmed, they have disadvantage on Wisdom (Perception) checks to perceive any creature other than you."
+    },
+    {
+      "level": 6,
+      "id": "mantle-of-inspiration-enhanced",
+      "name": "Mantle of Inspiration (Enhanced)",
+      "description": "A creature that gains temporary hit points from Mantle of Inspiration also gains advantage on the next Dexterity saving throw it makes before the end of its next turn."
+    },
+    {
+      "level": 14,
+      "id": "unbreakable-majesty",
+      "name": "Unbreakable Majesty",
+      "description": "As a Bonus Action, you can spend 4 Bardic Inspiration uses to cast the spell Enthrall. As a reaction when a creature you can see within 60 feet of you makes an attack roll against you, you can add your Charisma modifier to your AC against the attack."
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "className": "Rogue",
+  "hitDie": "1d8",
+  "primarySpellAbility": "",
+  "description": "Class-level progression for Rogue 2024.",
+  "levels": [
+    {
+      "level": 1,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "expertise",
+          "name": "Expertise",
+          "description": "Choose 2 skills for expertise (double proficiency)."
+        },
+        {
+          "id": "sneak-attack",
+          "name": "Sneak Attack",
+          "description": "1d6 extra damage with Finesse/Ranged weapons once per turn."
+        },
+        {
+          "id": "thieves-cant",
+          "name": "Thieves' Cant",
+          "description": "You know secret language and one other."
+        },
+        {
+          "id": "weapon-mastery",
+          "name": "Weapon Mastery",
+          "description": "Choose 2 weapon types for mastery."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 2,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "cunning-action",
+          "name": "Cunning Action",
+          "description": "Bonus action to Dash, Disengage, or Hide."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "rogue-subclass",
+          "name": "Rogue Subclass",
+          "description": "Choose: Thief, Assassin, Arcane Trickster, Phantom, Soul Knife."
+        }
+      ],
+      "choices": [
+        {
+          "id": "archetype",
+          "name": "Choose Archetype",
+          "type": "subclass",
+          "options": [
+            "thief",
+            "assassin",
+            "arcane-trickster",
+            "phantom",
+            "soul-knife",
+            "inquisitive"
+          ]
+        }
+      ],
+      "unlockedSpells": []
+    },
+    {
+      "level": 3,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "steady-aim",
+          "name": "Steady Aim",
+          "description": "Bonus action to give yourself advantage on next attack (must not move)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 4,
+      "proficiencyBonus": 2,
+      "features": [
+        {
+          "id": "asi",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 5,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "cunning-strike",
+          "name": "Cunning Strike",
+          "description": "When dealing Sneak Attack, add one effect (Poison, Trip, Withdraw)."
+        },
+        {
+          "id": "uncanny-dodge",
+          "name": "Uncanny Dodge",
+          "description": "Reaction to halve attack damage."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 6,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "expertise-2",
+          "name": "Expertise",
+          "description": "Gain expertise in 2 more skills."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 7,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "evasion",
+          "name": "Evasion",
+          "description": "DEX save vs half damage: no damage on success, half on failure."
+        },
+        {
+          "id": "reliable-talent",
+          "name": "Reliable Talent",
+          "description": "Treat any ability check roll of 9 or lower as 10 + modifier."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 8,
+      "proficiencyBonus": 3,
+      "features": [
+        {
+          "id": "asi-8",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 9,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "subclass-feature",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your subclass."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 10,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "asi-10",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 11,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "improved-cunning-strike",
+          "name": "Improved Cunning Strike",
+          "description": "Add additional effects to Cunning Strike (more dice)."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 12,
+      "proficiencyBonus": 4,
+      "features": [
+        {
+          "id": "asi-12",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 13,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "subclass-feature-13",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your subclass."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 14,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "devious-strikes",
+          "name": "Devious Strikes",
+          "description": "Gain more Cunning Strike effects to use in same turn."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 15,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "slippery-mind",
+          "name": "Slippery Mind",
+          "description": "Proficiency in WIS saves."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 16,
+      "proficiencyBonus": 5,
+      "features": [
+        {
+          "id": "asi-16",
+          "name": "Ability Score Improvement",
+          "description": "Increase ability score by 2 or two by 1."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 17,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "subclass-feature-17",
+          "name": "Subclass Feature",
+          "description": "Gain feature from your subclass."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 18,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "elusive",
+          "name": "Elusive",
+          "description": "Dodge normally impossible to hit with attacks."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 19,
+      "proficiencyBonus": 6,
+      "features": [{ "id": "epic-boon", "name": "Epic Boon", "description": "Gain an Epic Boon." }],
+      "choices": [],
+      "unlockedSpells": []
+    },
+    {
+      "level": 20,
+      "proficiencyBonus": 6,
+      "features": [
+        {
+          "id": "stroke-of-luck",
+          "name": "Stroke of Luck",
+          "description": "1/day: turn failed roll into a 20."
+        }
+      ],
+      "choices": [],
+      "unlockedSpells": []
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "className": "Barbarian",
+  "subclasses": [
+    {
+      "name": "Path of the Berserker",
+      "id": "berserker",
+      "description": "Direct your Rage primarily toward violence and untrammeled fury."
+    },
+    {
+      "name": "Path of the Wild Heart",
+      "id": "wild-heart",
+      "description": "View yourself as kin to the animal inhabitants of the natural world."
+    },
+    {
+      "name": "Path of the World Tree",
+      "id": "world-tree",
+      "description": "Link your Rage to the cosmic ash tree Yggdrasil for vitality and travel."
+    },
+    {
+      "name": "Path of the Zealot",
+      "id": "zealot",
+      "description": "Channel your Rage into dangerous religious fervor, serving as an instrument of your deity."
+    }
+  ]
+}

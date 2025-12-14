@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Path of the Wild Heart",
+  "baseClass": "Barbarian",
+  "description": "Barbarians who follow the Path of the Wild Heart view themselves as kin to the animal inhabitants of the natural world. They learn magical means to connect and communicate with animals, and their Rage heightens their connection to animals as it fills them with supernatural might.",
+  "features": [
+    {
+      "level": 3,
+      "id": "animal-speaker",
+      "name": "Animal Speaker",
+      "description": "You can cast the Beast Sense and Speak with Animals spells, but only as Rituals. Wisdom is your spellcasting ability for them."
+    },
+    {
+      "level": 3,
+      "id": "rage-of-the-wilds",
+      "name": "Rage of the Wilds",
+      "description": "Your Rage taps into the primal power of animals. Whenever you activate your Rage, you gain one of the following options of your choice: Bear (choose two damage types, gain resistance until Rage ends), Eagle (can take Disengage and Dash as bonus action while raging), or Wolf (allies have advantage on melee attacks against your enemies within 10 feet)."
+    },
+    {
+      "level": 6,
+      "id": "aspect-of-the-wilds",
+      "name": "Aspect of the Wilds",
+      "description": "Gain one of the following options of your choice (change after long rest): Owl (Darkvision 60 ft, or increase existing by 60 ft), Panther (Climb Speed equal to your Speed), or Salmon (Swim Speed equal to your Speed)."
+    },
+    {
+      "level": 10,
+      "id": "nature-speaker",
+      "name": "Nature Speaker",
+      "description": "You can cast the Commune with Nature spell, but only as a Ritual. Wisdom is your spellcasting ability for it."
+    },
+    {
+      "level": 14,
+      "id": "power-of-the-wilds",
+      "name": "Power of the Wilds",
+      "description": "Whenever you activate your Rage, you gain one of the following options of your choice: Falcon (Fly Speed equal to your Speed while not wearing armor), Lion (enemies within 5 feet have disadvantage on attack rolls against targets other than you), or Ram (cause Large or smaller creatures to be Prone on hit with melee attack)."
+    }
+  ]
+}

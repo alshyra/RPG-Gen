@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "subclassName": "Psi Knight",
+  "baseClass": "Fighter",
+  "description": "The Psi Knight harnesses psion­ic energy to enhance combat abilities.",
+  "features": [
+    {
+      "level": 3,
+      "id": "psionic-power",
+      "name": "Psionic Power",
+      "description": "Gain Psi Points equal to fighter level. Spend to fuel telekinetic feats and mental fortitude."
+    },
+    {
+      "level": 3,
+      "id": "telekinetic-movement",
+      "name": "Telekinetic Movement",
+      "description": "Use reaction to move object or creature within 30 feet when you're hit by attack."
+    },
+    {
+      "level": 7,
+      "id": "telekinetic-mastery",
+      "name": "Telekinetic Mastery",
+      "description": "When using maneuver, spend Psi Point to knock creature prone or move it 5 feet."
+    },
+    {
+      "level": 10,
+      "id": "guarded-mind",
+      "name": "Guarded Mind",
+      "description": "Immunity to magic that allows other creatures to sense your emotions or thoughts."
+    }
+  ]
+}
