@@ -68,8 +68,8 @@ jobs:
 
       - name: Create backend .env for testing
         run: |
-          mkdir -p packages/backend
-          cat > packages/backend/.env << 'EOF'
+          mkdir -p apps/backend
+          cat > apps/backend/.env << 'EOF'
           GOOGLE_API_KEY=test-key-will-be-mocked
           MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
           NODE_ENV=production
