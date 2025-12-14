@@ -10,10 +10,30 @@
  * - Validation errors when appending messages with missing narrative
  */
 import test from 'ava';
+import { Types } from 'mongoose';
 import { ConversationService } from '../../src/domain/chat/conversation.service.js';
 import { ChatModule } from '../../src/modules/chat.module.js';
 import { closeTestApp, createTestApp } from '../helpers/test-app.js';
+import history from '../mocks/history.js';
+
 const TEST_USER_ID = '507f1f77bcf86cd799439011';
+
+/**
+ * Transform extended JSON history mock (with $oid/$date placeholders)
+ * into a proper document with ObjectId and Date instances.
+ */
+function transformHistoryMock(mockData: any) {
+  return {
+    _id: new Types.ObjectId(mockData._id.$oid),
+    userId: new Types.ObjectId(mockData.userId.$oid),
+    characterId: mockData.characterId,
+    messages: mockData.messages,
+    lastUpdated: new Date(mockData.lastUpdated.$date),
+    createdAt: new Date(mockData.createdAt.$date),
+    updatedAt: new Date(mockData.updatedAt.$date),
+    __v: mockData.__v,
+  };
+}
 
 async function setup() {
   const ctx = await createTestApp([ChatModule]);
@@ -41,19 +61,24 @@ test('Conversation Integration append creates new history and stores message', a
 // Test: append appends to existing history
 test('Conversation Integration append appends message to existing history', async t => {
   const { ctx, convService } = await setup();
-  const cid = 'char-append-2';
-  await convService.append(TEST_USER_ID, cid, {
-    role: 'user',
-    narrative: 'First message',
-    instructions: [],
-  });
+  const cid = history.characterId;
+
+  // Seed the test DB with pre-existing history
+  const transformedHistory = transformHistoryMock(history);
+  // Update userId to TEST_USER_ID for this test
+  transformedHistory.userId = new Types.ObjectId(TEST_USER_ID);
+  await ctx.mongoConnection.collection('chathistories').insertOne(transformedHistory);
+
+  // Verify history was seeded (should have 1 message)
+  const initialHist = await convService.getHistoryMessages(TEST_USER_ID, cid);
+  t.truthy(initialHist);
+  t.is(initialHist?.length, 1);
+
+  // Append a new message
   await convService.append(TEST_USER_ID, cid, {
     role: 'assistant',
     narrative: 'Reply message',
-    instructions: [{
-      type: 'roll',
-      
-    }],
+    instructions: [],
   });
 
   const hist = await convService.getHistoryMessages(TEST_USER_ID, cid);
