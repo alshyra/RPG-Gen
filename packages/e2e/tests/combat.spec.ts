@@ -79,7 +79,9 @@ test.describe('Combat flow', () => {
     await expect(combatCanvas).toBeVisible();
 
     // Verify combat header shows turn info
-    const combatHeader = page.locator('[data-cy="combat-header"]').or(page.locator('text=/Round|Actions/i'));
+    const combatHeader = page
+      .locator('[data-cy="combat-header"]')
+      .or(page.locator('text=/Round|Actions/i'));
     await expect(combatHeader).toBeVisible({ timeout: 5000 });
 
     // Attack enemies until all are defeated
@@ -118,9 +120,8 @@ test.describe('Combat flow', () => {
 
         // Wait for attack to process
         await page.waitForResponse(
-          response =>
-            response.url().includes('/api/combat/') && response.url().includes('/attack'),
-          { timeout: 5000 }
+          response => response.url().includes('/api/combat/') && response.url().includes('/attack'),
+          { timeout: 5000 },
         );
 
         // Small delay for animation
@@ -133,14 +134,14 @@ test.describe('Combat flow', () => {
         const isEnabled = await endTurnBtn.isEnabled();
         if (isEnabled) {
           await endTurnBtn.click();
-          
+
           // Wait for end-turn response
           await page.waitForResponse(
             response =>
               response.url().includes('/api/combat/') && response.url().includes('/end-turn'),
-            { timeout: 5000 }
+            { timeout: 5000 },
           );
-          
+
           // Wait for enemy attack animations
           await page.waitForTimeout(1500);
         }

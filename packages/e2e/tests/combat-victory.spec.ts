@@ -12,14 +12,14 @@ test.describe('Combat Victory Flow', () => {
     await mockAuthentication(page);
 
     // Get character
-    const response = await page.goto('/home');
+    await page.goto('/home');
     await page.waitForLoadState('networkidle');
-    
+
     // Get first character
     const chars = await page.request.get('/api/characters');
     const characters = await chars.json();
     const characterId = characters[0]?.characterId;
-    
+
     if (!characterId) {
       throw new Error('No character found');
     }
@@ -40,12 +40,12 @@ test.describe('Combat Victory Flow', () => {
     // Get character
     await page.goto('/home');
     await page.waitForLoadState('networkidle');
-    
+
     // Get first character
     const chars = await page.request.get('/api/characters');
     const characters = await chars.json();
     const characterId = characters[0]?.characterId;
-    
+
     if (!characterId) {
       throw new Error('No character found');
     }

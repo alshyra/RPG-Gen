@@ -69,7 +69,11 @@ test.describe('Application Smoke Tests', () => {
 
     // Check for critical errors (warnings and favicon/devtools errors are okay)
     const criticalErrors = errors.filter(
-      e => !e.includes('favicon') && !e.includes('DevTools') && !e.includes('WebSocket') && !e.includes('404'),
+      e =>
+        !e.includes('favicon') &&
+        !e.includes('DevTools') &&
+        !e.includes('WebSocket') &&
+        !e.includes('404'),
     );
     expect(criticalErrors).toHaveLength(0);
   });
