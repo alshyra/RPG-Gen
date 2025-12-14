@@ -10,14 +10,12 @@
       </div>
     </template>
 
-    <template #content>
-      <div class="modal-content">
-        <!-- Narrative text -->
-        <div class="narrative-box">
-          <p class="narrative-text">{{ combatEndNarrative }}</p>
-        </div>
+    <div class="modal-content">
+      <!-- Narrative text -->
+      <div class="narrative-box">
+        <p class="narrative-text">{{ combatEndNarrative }}</p>
       </div>
-    </template>
+    </div>
 
     <template #footer>
       <UiButton
