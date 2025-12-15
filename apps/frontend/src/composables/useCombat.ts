@@ -1,4 +1,8 @@
-import type { CombatantDto, CombatStartInstructionMessageDto } from "@rpg-gen/shared";
+import type {
+  CombatantDto,
+  CombatStartInstructionMessageDto,
+  CombatActionResponseDto,
+} from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { combatService } from "../apis/combatApi";
@@ -158,7 +162,7 @@ export function useCombat() {
 
     // build client-friendly AttackView so components can display consistent values
     const targetBefore = prevEnemies.find((e) => e.id === target.id);
-    const targetAfter = result.combatState?.enemies?.find((e) => e.id === target.id);
+    const targetAfter = result.combatState?.enemies?.find((e: CombatantDto) => e.id === target.id);
 
     const attackView = {
       attacker: prevPlayer?.name ?? "Vous",
@@ -178,7 +182,9 @@ export function useCombat() {
     currentAttackView.value = attackView;
 
     currentAttackResult.value = result;
-    combatStore.initializeCombat(result.combatState);
+    if (result.combatState) {
+      combatStore.initializeCombat(result.combatState);
+    }
     await showPlayerAttackAnimation(result);
     displayAttackResultMessage(target, result);
     checkCombatVictory(result);

@@ -8,8 +8,6 @@
     "start:prod": "node dist/main",
     "build": "nest build",
     "type-check": "tsc -p tsconfig.json",
-    "lint": "npm run type-check && eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "ava",
     "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts",
     "import:spells": "ts-node ./src/scripts/import-spells.ts"

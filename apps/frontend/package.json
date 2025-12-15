@@ -12,6 +12,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@rpg-gen/api-client": "*",
     "@rpg-gen/combat-engine": "*",
     "@rpg-gen/shared": "*",
     "@rpg-gen/ui": "*",

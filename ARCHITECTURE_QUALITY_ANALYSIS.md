@@ -51,6 +51,11 @@ apps/frontend/
 packages/shared/
 ├── api-types.ts       # Generated from OpenAPI spec
 └── index.ts           # Type re-exports & aliases
+
+packages/api-client/   # NEW: Centralized API client
+├── src/
+│   └── index.ts      # Type-safe openapi-fetch wrapper
+└── README.md         # Usage documentation
 ```
 
 **Assessment**: ✅ **GOOD**
@@ -62,9 +67,8 @@ packages/shared/
 
 **Recommendations**:
 
-1. Consider adding a `packages/ui` for shared Vue 3 components (currently only in frontend)
-2. Document module export contracts in `modules/*.module.ts` comments
-3. Add architectural decision records (ADRs) for major design choices
+2. Document module export contracts in `modules/*.module.ts` - See example in `combat.module.exports.md`
+3. Add architectural decision records (ADRs) when patterns stabilize (project is 1 month old, defer for now)
 
 ### 2. Layering & Data Flow
 
@@ -91,7 +95,7 @@ CombatSessionModel (MongoDB)
 ⚠️ Chat module: Some cross-domain imports (ConversationService imports CharacterResponseDto directly)
 ⚠️ Image module: Uses Gemini services without orchestrator abstraction
 
-**Recommendation**: Create architectural tests to enforce module boundaries:
+**Recommendation**: ~~Create architectural tests to enforce module boundaries~~ ✅ **Example created** - See `apps/backend/test/architecture/module-boundaries.spec.ts`
 
 ```typescript
 // test/architecture.spec.ts
@@ -197,6 +201,8 @@ export * from "../domain/combat/combat.app.service.js";
 ### 1. Test Coverage
 
 **Current**: ~13% (31 test files, 232 source files)
+
+**Context**: Project is 1 month old, E2E tests are fragile and break frequently during rapid development. Focus on stability first, coverage later.
 
 **What's Tested** ✅:
 
@@ -329,11 +335,19 @@ async getCharacter(
 - ⚠️ `combatStore.ts` mixes animation state with game state
 - ⚠️ Some refs used globally (e.g., `showAttackResultModal`)
 
-**Recommendation**: Separate concerns:
+**Store Pattern Discussion**:
+
+Two approaches exist:
+
+1. **Multiple independent refs** (current) - Better performance, granular reactivity ✅ **Recommended for this app**
+2. **Single ref object** - Simpler but all mutations trigger all watchers ❌
+
+Current approach is correct for combat store with frequent UI updates. Consider grouping by domain:
 
 ```typescript
-// stores/combatGameStore.ts - Pure game state
-// stores/combatUIStore.ts - UI state (animations, modals)
+const gameState = ref({ roundNumber, phase, currentTurnIndex });
+const combatants = ref({ player, enemies, turnOrder });
+const ui = ref({ showModal, isProcessing });
 ```
 
 ### 2. Component Architecture
@@ -363,11 +377,11 @@ async attack(characterId, target, spellName?): Promise<CombatActionResponseDto>
 
 **Issues**:
 
-- Manual API client maintenance (could use OpenAPI generator)
+- Manual API client maintenance ~~(could use OpenAPI generator)~~ ✅ Current setup with openapi-typescript + openapi-fetch is optimal
 - Limited error handling
 - No retry logic
 
-**Recommendation**: Use `@openapitools/openapi-generator-cli` to generate TypeScript client from OpenAPI spec.
+**Recommendation**: ✅ **Created `packages/api-client`** - Centralized, type-safe API client. See `packages/api-client/README.md` for usage.
 
 ---
 
@@ -456,24 +470,24 @@ async attack(characterId, target, spellName?): Promise<CombatActionResponseDto>
 
 ### 🔴 Critical (Do First)
 
-1. **Add architectural boundary tests** - Prevent domain service cross-imports
-2. **Standardize error handling** - Create error hierarchy, use consistently
-3. **Eliminate `as unknown as Type`** - Replace with proper type guards
-4. **Add input validation** - Use pipes for path/query params
+1. ✅ **Add architectural boundary tests** - Example created in `test/architecture/module-boundaries.spec.ts`
+2. **Standardize error handling** - Create error hierarchy (defer until patterns stabilize)
+3. **Eliminate `as unknown as Type`** - Keep in mind for gradual improvement
+4. **Add input validation** - Use pipes for path/query params (defer, low priority)
 
-### 🟡 High (Sprint 1-2)
+### 🟡 High (When Ready)
 
-1. **Increase test coverage** to 50%+ (focus on orchestrators & workflows)
-2. **Document module boundaries** - What's public vs internal API
-3. **Add JSDoc to public methods** - Service methods especially
-4. **Implement error boundary in frontend** - Global error handler
+1. **Increase test coverage** - Focus on stability first, E2E tests too fragile currently
+2. ✅ **Document module boundaries** - Example created in `combat.module.exports.md`
+3. **Add JSDoc to public methods** - Start when API stabilizes
+4. **Implement error boundary in frontend** - Good for production
 
-### 🟢 Medium (Sprint 3+)
+### 🟢 Medium (Future)
 
-1. Generate OpenAPI client for frontend (replace manual API client)
+1. ✅ **Create `packages/api-client`** - Centralized type-safe client created
 2. Add bundle size monitoring
 3. Implement caching layer (Redis)
-4. Create architecture ADRs
+4. Create architecture ADRs when patterns are stable
 
 ---
 

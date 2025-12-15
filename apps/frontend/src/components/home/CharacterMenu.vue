@@ -15,18 +15,13 @@
         class="w-full h-40 object-cover"
         loading="lazy"
       />
-      <div
-        v-else
-        class="text-slate-400"
-      >
-        Pas de portrait
-      </div>
+      <div v-else class="text-slate-400">Pas de portrait</div>
     </div>
 
     <div class="p-4 flex-1 flex flex-col justify-between">
       <div>
         <div class="text-lg font-semibold text-slate-100">
-          {{ character.name || 'Personnage inconnu' }}
+          {{ character.name || "Personnage inconnu" }}
         </div>
         <div class="text-xs text-slate-400">
           {{ getCharSummary(character) }}
@@ -45,10 +40,7 @@
           :aria-label="`Supprimer ${character.name || 'personnage'}`"
           @click.stop="onDelete(character)"
         >
-          <Trash2
-            class="h-4 w-4 text-slate-200"
-            aria-hidden="true"
-          />
+          <Trash2 class="h-4 w-4 text-slate-200" aria-hidden="true" />
         </UiButton>
       </div>
     </div>
@@ -56,14 +48,14 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from '@/apis/characterApi';
-import { UiButton } from '@rpg-gen/ui';
-import { Trash2 } from 'lucide-vue-next';
-import type { CharacterResponseDto } from '@rpg-gen/shared';
-import { Ref, ref } from 'vue';
-import { showAlert, showConfirm } from '@/composables/useModal';
-import { useRouter } from 'vue-router';
-const emit = defineEmits<(e: 'deleted', id: string) => void>();
+import { characterApi } from "@/apis/characterApi";
+import { UiButton } from "@rpg-gen/ui";
+import { Trash2 } from "lucide-vue-next";
+import type { CharacterResponseDto } from "@rpg-gen/shared";
+import { ref } from "vue";
+import { showAlert, showConfirm } from "@/composables/useModal";
+import { useRouter } from "vue-router";
+const emit = defineEmits<(e: "deleted", id: string) => void>();
 
 const props = defineProps<{ character: CharacterResponseDto }>();
 const { character } = props;
@@ -72,9 +64,9 @@ const deletingCharacterId = ref<string | null>(null);
 const router = useRouter();
 
 const onResume = (character: CharacterResponseDto) => {
-  if (character.state === 'draft') {
+  if (character.state === "draft") {
     router.push({
-      name: 'character-step',
+      name: "character-step",
       params: {
         characterId: character.characterId,
         step: 1,
@@ -83,21 +75,21 @@ const onResume = (character: CharacterResponseDto) => {
     return;
   }
   router.push({
-    name: 'game',
+    name: "game",
     params: { characterId: character.characterId },
   });
 };
 
 const onDelete = async (character: CharacterResponseDto) => {
-  if (!character.characterId) throw new Error('Character ID is missing');
-  if (!(await showConfirm('Êtes-vous sûr de vouloir supprimer ce personnage ?'))) return;
+  if (!character.characterId) throw new Error("Character ID is missing");
+  if (!(await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?"))) return;
   deletingCharacterId.value = character.characterId;
   try {
     await characterApi.deleteCharacter(character.characterId);
-    emit('deleted', character.characterId);
+    emit("deleted", character.characterId);
   } catch (e) {
-    console.error('Failed to delete character', e);
-    await showAlert('Impossible de supprimer le personnage.');
+    console.error("Failed to delete character", e);
+    await showAlert("Impossible de supprimer le personnage.");
   } finally {
     deletingCharacterId.value = null;
   }
@@ -106,9 +98,9 @@ const onDelete = async (character: CharacterResponseDto) => {
 const getCharSummary = (character: Partial<CharacterResponseDto>): string => {
   const classes = character.classes || [];
   return classes
-    .map(c => (c?.name ? `${c.name} Niveau ${c.level}` : ''))
+    .map((c) => (c?.name ? `${c.name} Niveau ${c.level}` : ""))
     .filter(Boolean)
-    .join(', ');
+    .join(", ");
 };
 </script>
 
