@@ -15,14 +15,27 @@ if (!fs.existsSync(mdPath)) {
 }
 const md = fs.readFileSync(mdPath, 'utf8');
 
-const normalize = s => s.toString().normalize('NFKD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').trim();
+const normalize = s =>
+  s
+    .toString()
+    .normalize('NFKD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .trim();
 
-const lines = md.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+const lines = md
+  .split(/\r?\n/)
+  .map(l => l.trim())
+  .filter(Boolean);
 const mapping = {};
 const notfound = [];
 for (const line of lines) {
   // accept either tab-separated columns or a trailing level number ("Name 1")
-  const tabParts = line.split(/\t+/).map(p => p.trim()).filter(Boolean);
+  const tabParts = line
+    .split(/\t+/)
+    .map(p => p.trim())
+    .filter(Boolean);
   let name;
   let lvl;
   if (tabParts.length > 1) {
@@ -47,7 +60,9 @@ for (const line of lines) {
 }
 
 console.log('Mapping result (level -> count):');
-Object.keys(mapping).sort((a, b) => Number(a) - Number(b)).forEach(k => console.log(k, mapping[k].length));
+Object.keys(mapping)
+  .sort((a, b) => Number(a) - Number(b))
+  .forEach(k => console.log(k, mapping[k].length));
 if (notfound.length) {
   console.error('NOT FOUND ENTRIES', notfound);
 }
@@ -64,7 +79,14 @@ const emitResolved = process.argv.includes('--emit-resolved');
 
 if (emitMapped) {
   const out = { allowedSpellsByLevel: mapping };
-  const outPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.mapped.json');
+  const outPath = path.join(
+    base,
+    'src',
+    'seed',
+    'classes',
+    className,
+    'allowed-spells.mapped.json',
+  );
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
   console.log('\nwrote ' + outPath);
 }
@@ -73,14 +95,21 @@ if (emitMapped) {
 if (emitResolved) {
   const resolved = {};
   for (const [lvl, arr] of Object.entries(mapping)) {
-    resolved[lvl] = arr.map((id) => {
+    resolved[lvl] = arr.map(id => {
       const def = spells.find(s => s.definitionId === id) || null;
       if (def) return { name: def.name, definitionId: def.definitionId };
       const parts = id.split('-').slice(2).join(' ').replace(/-/g, ' ');
       return { name: parts, definitionId: null };
     });
   }
-  const resolvedOut = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.resolved.json');
+  const resolvedOut = path.join(
+    base,
+    'src',
+    'seed',
+    'classes',
+    className,
+    'allowed-spells.resolved.json',
+  );
   fs.writeFileSync(resolvedOut, JSON.stringify({ allowedSpellsByLevel: resolved }, null, 2));
   console.log('\nwrote ' + resolvedOut);
 }
@@ -89,7 +118,10 @@ if (emitResolved) {
 const full = {};
 for (const rawLine of lines) {
   // same parsing used above: accept tabs or trailing numeric level
-  const tabParts = rawLine.split(/\t+/).map(p => p.trim()).filter(Boolean);
+  const tabParts = rawLine
+    .split(/\t+/)
+    .map(p => p.trim())
+    .filter(Boolean);
   let name;
   let lvl;
   if (tabParts.length > 1) {

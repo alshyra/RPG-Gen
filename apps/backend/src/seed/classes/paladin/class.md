@@ -6,13 +6,13 @@ Paladin DnD 2024Paladins train to learn the skills of combat, mastering a variet
 Almost by definition, the life of a Paladin is an adventuring life, for every Paladin lives on the front lines of the cosmic struggle against annihilation. Fighters are rare enough among the ranks of a world’s armies, but even fewer people can claim the calling of a Paladin. When they do receive the call, these blessed folk turn from their former occupations and take up arms and magic.
 
 Core Paladin Traits
-Primery Ability	Strength and Charisma
-Hit Dice Die	D10 per Paladin level
-Saving Throws Proficiencies	Wisdom and Charisma
-Skill Proficiencies	Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, or Religion
-Weapons Proficiencies	Simple and Martial weapons
-Armor Training	Light, Medium, and Heavy armor and Shields
-Starting Equipment	Choose A or B: (A) Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest’s Pack, and 9 GP; or (B) 150 GP
+Primery Ability Strength and Charisma
+Hit Dice Die D10 per Paladin level
+Saving Throws Proficiencies Wisdom and Charisma
+Skill Proficiencies Choose 2: Athletics, Insight, Intimidation, Medicine, Persuasion, or Religion
+Weapons Proficiencies Simple and Martial weapons
+Armor Training Light, Medium, and Heavy armor and Shields
+Starting Equipment Choose A or B: (A) Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest’s Pack, and 9 GP; or (B) 150 GP
 Becoming a Paladin...
 As a Level 1 Character
 Gain all the traits in the Core Paladin Traits table.
@@ -22,29 +22,29 @@ Gain the following traits from the Core Paladin Traits table: Hit Point Die, pro
 Gain the Paladin’s level 1 features, which are listed in the Paladin Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 PALADIN
 Paladin Class Features
- 
- 	Prof.	 	Channel	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Divinity	Spells	1	2	3	4	5
-1	+2	Lay on Hands, Spellcasting, Weapon Mastery	-	2	2	-	-	-	-
-2	+2	Fighting Style, Paladin's Smite	-	3	2	-	-	-	-
-3	+2	Channel Divinity, Paladin Subclass	2	4	3	-	-	-	-
-4	+2	Ability Score Improvement	2	5	3	-	-	-	-
-5	+3	Extra Attack, Faithfull Steed	2	6	4	2	-	-	-
-6	+3	Aura of Protection	2	6	4	2	-	-	-
-7	+3	Subclass Feature	2	7	4	3	-	-	-
-8	+3	Ability Score Improvement	2	7	4	3	-	-	-
-9	+4	Abjure Foes	2	8	4	3	2	-	-
-10	+4	Aura of Courage	2	8	4	3	2	-	-
-11	+4	Radiant Strikes	3	10	4	3	3	-	-
-12	+4	Ability Score Improvement	3	10	4	3	3	-	-
-13	+5	-	3	11	4	3	3	1	-
-14	+5	RestoringTouch	3	11	4	3	3	1	-
-15	+5	Subclass Feature	3	12	4	3	3	2	-
-16	+5	Ability Score Improvement	3	12	4	3	3	2	-
-17	+6	-	3	14	4	3	3	3	1
-18	+6	Aura Expansion	3	14	4	3	3	3	1
-19	+6	Epic Boon	3	15	4	3	3	3	2
-20	+6	Subclass Feature	3	15	4	3	3	3	2
+
+Prof. Channel Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Divinity Spells 1 2 3 4 5
+1 +2 Lay on Hands, Spellcasting, Weapon Mastery - 2 2 - - - -
+2 +2 Fighting Style, Paladin's Smite - 3 2 - - - -
+3 +2 Channel Divinity, Paladin Subclass 2 4 3 - - - -
+4 +2 Ability Score Improvement 2 5 3 - - - -
+5 +3 Extra Attack, Faithfull Steed 2 6 4 2 - - -
+6 +3 Aura of Protection 2 6 4 2 - - -
+7 +3 Subclass Feature 2 7 4 3 - - -
+8 +3 Ability Score Improvement 2 7 4 3 - - -
+9 +4 Abjure Foes 2 8 4 3 2 - -
+10 +4 Aura of Courage 2 8 4 3 2 - -
+11 +4 Radiant Strikes 3 10 4 3 3 - -
+12 +4 Ability Score Improvement 3 10 4 3 3 - -
+13 +5 - 3 11 4 3 3 1 -
+14 +5 RestoringTouch 3 11 4 3 3 1 -
+15 +5 Subclass Feature 3 12 4 3 3 2 -
+16 +5 Ability Score Improvement 3 12 4 3 3 2 -
+17 +6 - 3 14 4 3 3 3 1
+18 +6 Aura Expansion 3 14 4 3 3 3 1
+19 +6 Epic Boon 3 15 4 3 3 3 2
+20 +6 Subclass Feature 3 15 4 3 3 3 2
 As a Paladin, you gain the following class features when you reach the specified Paladin levels. These features are listed in the Paladin Features table.
 
 Level 1: Lay on Hands
@@ -151,12 +151,12 @@ Level 3: Oath of Devotion Spells
 The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of Devotion Spells table, you thereafter always have the listed spells prepared.
 
 Oath of Devotion Spells
-Paladin Level	Spells
-3	Protection from Evil and Good, Shield of Faith
-5	Aid, Zone of Truth
-9	Beacon of Hope, Dispel Magic
-13	Freedom of Movement, Guardian of Faith
-17	Commune, Flame Strike
+Paladin Level Spells
+3 Protection from Evil and Good, Shield of Faith
+5 Aid, Zone of Truth
+9 Beacon of Hope, Dispel Magic
+13 Freedom of Movement, Guardian of Faith
+17 Commune, Flame Strike
 Level 3: Sacred Weapon
 When you take the Attack action, you can expend one use of your Channel Divinity to imbue one Melee weapon that you are holding with positive energy. For 10 minutes or until you use this feature again, you add your Charisma modifier to attack rolls you make with that weapon (minimum bonus of +1), and each time you hit with it, you cause it to deal its normal damage type or Radiant damage.
 
@@ -194,12 +194,12 @@ Level 3: Oath of Glory Spells
 The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of Glory Spells table, you thereafter always have the listed spells prepared.
 
 Oath of Glory Spells
-Paladin Level	Spells
-3	Guiding Bolt, Heroism
-5	Enhance Ability, Magic Weapon
-9	Haste, Protection from Energy
-13	Compulsion, Freedom of Movement
-17	Legend Lore, Yolande's Regal Presence
+Paladin Level Spells
+3 Guiding Bolt, Heroism
+5 Enhance Ability, Magic Weapon
+9 Haste, Protection from Energy
+13 Compulsion, Freedom of Movement
+17 Legend Lore, Yolande's Regal Presence
 Level 3: Peerless Athlete
 As a Bonus Action, you can expend one use of your Channel Divinity to augment your athleticism. For 1 hour, you have Advantage on Strength (Athletics) and Dexterity (Acrobatics) checks, and the distance of your Long and High jumps increases by 10 feet (this extra distance costs movement as normal).
 
@@ -237,12 +237,12 @@ Level 3: Oath of the Ancients Spells
 The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of the Ancients Spells table, you thereafter always have the listed spells prepared.
 
 Oath of the Ancients Spells
-Paladin Level	Spells
-3	Ensnaring Strike, Speak with Animals
-5	Misty Step, Moonbeam
-9	Plant Growth, Protection from Energy
-13	Ice Storm, Stoneskin
-17	Commune with Nature, Tree Stride
+Paladin Level Spells
+3 Ensnaring Strike, Speak with Animals
+5 Misty Step, Moonbeam
+9 Plant Growth, Protection from Energy
+13 Ice Storm, Stoneskin
+17 Commune with Nature, Tree Stride
 Level 7: Aura of Warding
 Ancient magic lies so heavily upon you that it forms an eldritch ward, blunting energy from beyond the Material Plane; you and your allies have Resistance to Necrotic, Psychic, and Radiant damage while in your Aura of Protection.
 
@@ -272,12 +272,12 @@ Level 3: Oath of Vengeance Spells
 The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of Vengeance Spells table, you thereafter always have the listed spells prepared.
 
 Oath of Vengeance Spells
-Paladin Level	Spells
-3	Bane, Hunter's Mark
-5	Hold Person, Misty Step
-9	Haste, Protection from Energy
-13	Banishment, Dimension Door
-17	Hold Monster, Scrying
+Paladin Level Spells
+3 Bane, Hunter's Mark
+5 Hold Person, Misty Step
+9 Haste, Protection from Energy
+13 Banishment, Dimension Door
+17 Hold Monster, Scrying
 Level 3: Vow of Enmity
 When you take the Attack action, you can expend one use of your Channel Divinity to utter a vow of enmity against a creature you can see within 30 feet of yourself. You gain Advantage on attack rolls against the creature for 1 minute or until you use this feature again.
 
@@ -297,5 +297,5 @@ Flight. You sprout spectral wings on your back, have a Fly Speed of 60 feet, and
 
 Frightful Aura. Whenever an enemy starts its turn in your Aura of Protection, that creature must succeed on a Wisdom saving throw or have the Frightened condition for 1 minute or until it takes any damage. Attack rolls against the Frightened creature have Advantage.
 
-English  ↳ Paladin 2024
+English ↳ Paladin 2024
 Donjons et Dragons 5 - D&D 5

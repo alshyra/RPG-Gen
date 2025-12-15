@@ -25,14 +25,11 @@ export const spellSchema = z
         damageType: z.string().optional(),
         saveType: z.string().optional(),
         // gracefully coerce unknown values into undefined rather than failing
-        attackType: z.preprocess(
-          v => {
-            if (typeof v !== 'string') return undefined;
-            const allowed = ['melee', 'ranged', 'spell'];
-            return allowed.includes(v) ? v : undefined;
-          },
-          z.enum(['melee', 'ranged', 'spell']).optional(),
-        ),
+        attackType: z.preprocess(v => {
+          if (typeof v !== 'string') return undefined;
+          const allowed = ['melee', 'ranged', 'spell'];
+          return allowed.includes(v) ? v : undefined;
+        }, z.enum(['melee', 'ranged', 'spell']).optional()),
         school: z.string().optional(),
         areaOfEffect: z.string().optional(),
         scaling: z.string().optional(),

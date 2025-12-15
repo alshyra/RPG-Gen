@@ -127,5 +127,4 @@ const toggleCombatOption = async (option: CombatOptionDto, selected: boolean) =>
 loadCombatOptions();
 
 onBeforeUnmount(async () => persistCombatSelections());
-
 </script>

@@ -39,4 +39,6 @@ try {
   await fs.copyFile(src, outPng);
 }
 
-console.log('Done. Place optimized files in your frontend public folder (they are already there if script ran).');
+console.log(
+  'Done. Place optimized files in your frontend public folder (they are already there if script ran).',
+);

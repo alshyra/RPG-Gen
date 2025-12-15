@@ -4,9 +4,7 @@ import { GridPositionDto } from '../../domain/combat/dto/GridPositionDto.js';
 import { MovementEventDto, MovementEventType } from '../../domain/combat/dto/MovementEventDto.js';
 import { MovementRequestDto } from '../../domain/combat/dto/MovementRequestDto.js';
 import { MovementResponseDto } from '../../domain/combat/dto/MovementResponseDto.js';
-import {
-  CombatGridService
-} from '../../domain/combat/services/combat-grid.service.js';
+import { CombatGridService } from '../../domain/combat/services/combat-grid.service.js';
 import {
   CombatantStats,
   OpportunityAttackResolver,

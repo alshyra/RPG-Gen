@@ -8,14 +8,14 @@ Many Monks find that a structured life of ascetic withdrawal helps them cultivat
 Monks generally view adventures as tests of their physical and mental development. They are driven by a desire to accomplish a greater mission than merely slaying monsters and plundering treasure; they strive to turn themselves into living weapons.
 
 Core Monk Traits
-Primery Ability	Dexterity and Wisdom
-Hit Dice Die	D8 per Monk level
-Saving Throws Proficiencies	Strength and Dexterity
-Skill Proficiencies	Choose 2: Acrobatics, Athletics, History, Insight, Religion, or Stealth
-Weapons Proficiencies	Simple weapons and Martial weapons that have the Light property
-Tool Proficiencies	Choose one type of Artisan’s Tool or Musical Instrument
-Armor Training	None
-Starting Equipment	Choose A or B: (A) Spear, 5 Daggers, Artisan’s Tools or Musical Instrument (same as above), Explorer’s Pack, and 11 GP; or (B) 50 GP
+Primery Ability Dexterity and Wisdom
+Hit Dice Die D8 per Monk level
+Saving Throws Proficiencies Strength and Dexterity
+Skill Proficiencies Choose 2: Acrobatics, Athletics, History, Insight, Religion, or Stealth
+Weapons Proficiencies Simple weapons and Martial weapons that have the Light property
+Tool Proficiencies Choose one type of Artisan’s Tool or Musical Instrument
+Armor Training None
+Starting Equipment Choose A or B: (A) Spear, 5 Daggers, Artisan’s Tools or Musical Instrument (same as above), Explorer’s Pack, and 11 GP; or (B) 50 GP
 Becoming a Monk...
 As a Level 1 Character
 Gain all the traits in the Core Monk Traits table.
@@ -25,31 +25,31 @@ Gain the Hit Point Die trait from the Core Monk Traits table.
 Gain the Monk’s level 1 features, which are listed in the Monk Features table.
 CREATE A 2024 MONK
 Monk Class Features
-Level	Prof.
-Bonus	Class Features	Martial
-Arts	Focus
-Points	Unarmored
+Level Prof.
+Bonus Class Features Martial
+Arts Focus
+Points Unarmored
 Movement
-1	+2	Martials Arts, Unarmored Defense	1d6	-	-
-2	+2	Monk’s Focus, Unarmored Movement, Uncanny Metabolism	1d6	2	+10 ft.
-3	+2	Deflect Attacks, Monk Subclass	1d6	3	+10 ft.
-4	+2	Ability Score Improvement, Slow Fall	1d6	4	+10 ft.
-5	+3	Extra Attack, Stunning Strike	1d8	5	+10 ft.
-6	+3	Empowered Strikes, Subclass Feature	1d8	6	+15 ft.
-7	+3	Evasion	1d8	7	+15 ft.
-8	+3	Ability Score Improvement	1d8	8	+15 ft.
-9	+4	Acrobatic Movement	1d8	9	+15 ft.
-10	+4	Heightened Focus, Self-Restoration	1d8	10	+20 ft.
-11	+4	Subclass Feature	1d10	11	+20 ft.
-12	+4	Ability Score Improvement	1d10	12	+20 ft.
-13	+5	Deflect Energy	1d10	13	+20 ft.
-14	+5	Disciplined Survivor	1d10	14	+25 ft.
-15	+5	Perfect Focus	1d10	15	+25 ft.
-16	+5	Ability Score Improvement	1d10	16	+25 ft.
-17	+6	Subclass Feature	1d12	17	+25 ft.
-18	+6	Superior Defense	1d12	18	+30 ft.
-19	+6	Epic Boon	1d12	19	+30 ft.
-20	+6	Body and Mind	1d12	20	+30 ft.
+1 +2 Martials Arts, Unarmored Defense 1d6 - -
+2 +2 Monk’s Focus, Unarmored Movement, Uncanny Metabolism 1d6 2 +10 ft.
+3 +2 Deflect Attacks, Monk Subclass 1d6 3 +10 ft.
+4 +2 Ability Score Improvement, Slow Fall 1d6 4 +10 ft.
+5 +3 Extra Attack, Stunning Strike 1d8 5 +10 ft.
+6 +3 Empowered Strikes, Subclass Feature 1d8 6 +15 ft.
+7 +3 Evasion 1d8 7 +15 ft.
+8 +3 Ability Score Improvement 1d8 8 +15 ft.
+9 +4 Acrobatic Movement 1d8 9 +15 ft.
+10 +4 Heightened Focus, Self-Restoration 1d8 10 +20 ft.
+11 +4 Subclass Feature 1d10 11 +20 ft.
+12 +4 Ability Score Improvement 1d10 12 +20 ft.
+13 +5 Deflect Energy 1d10 13 +20 ft.
+14 +5 Disciplined Survivor 1d10 14 +25 ft.
+15 +5 Perfect Focus 1d10 15 +25 ft.
+16 +5 Ability Score Improvement 1d10 16 +25 ft.
+17 +6 Subclass Feature 1d12 17 +25 ft.
+18 +6 Superior Defense 1d12 18 +30 ft.
+19 +6 Epic Boon 1d12 19 +30 ft.
+20 +6 Body and Mind 1d12 20 +30 ft.
 As a Monk, you gain the following class features when you reach the specified Monk levels. These features are listed in the Monk Features table.
 
 Level 1: Martial Arts
@@ -157,7 +157,7 @@ Level 20: Body and Mind
 You have developed your body and mind to new heights. Your Dexterity and Wisdom scores increase by 4, to a maximum of 25.
 
 Monk Subclasses
-A Monk subclass is a specialization that grants you features at certain levels, as specified in the subclass. This section presents the Warrior of Mercy, Warrior of Shadow, Warrior of the Elements, and Warrior of the Open Hand  subclasses.
+A Monk subclass is a specialization that grants you features at certain levels, as specified in the subclass. This section presents the Warrior of Mercy, Warrior of Shadow, Warrior of the Elements, and Warrior of the Open Hand subclasses.
 
 Warrior of Mercy
 See the Player's Handbook.
@@ -247,5 +247,5 @@ You gain the ability to set up lethal vibrations in someone’s body. When you h
 
 You can have only one creature under the effect of this feature at a time. You can end the vibrations harmlessly (no action required).
 
-English  ↳ Monk 2024
+English ↳ Monk 2024
 Donjons et Dragons 5 - D&D 5

@@ -17,8 +17,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "25.2.0"
-          cache: "npm"
+          node-version: '25.2.0'
+          cache: 'npm'
           cache-dependency-path: ./package-lock.json
 
       - name: Install dependencies
@@ -38,22 +38,22 @@ jobs:
       fail-fast: false
       matrix:
         specs:
-          - path: "tests/api-integration.spec.ts"
-            name: "api-integration"
-          - path: "tests/authentication.spec.ts"
-            name: "authentication"
-          - path: "tests/character-creation.spec.ts"
-            name: "character-creation"
-          - path: "tests/combat.spec.ts"
-            name: "combat"
-          - path: "tests/game-pages.spec.ts"
-            name: "game-pages"
-          - path: "tests/home.spec.ts"
-            name: "home"
-          - path: "tests/navigation.spec.ts"
-            name: "navigation"
-          - path: "tests/smoke.spec.ts"
-            name: "smoke"
+          - path: 'tests/api-integration.spec.ts'
+            name: 'api-integration'
+          - path: 'tests/authentication.spec.ts'
+            name: 'authentication'
+          - path: 'tests/character-creation.spec.ts'
+            name: 'character-creation'
+          - path: 'tests/combat.spec.ts'
+            name: 'combat'
+          - path: 'tests/game-pages.spec.ts'
+            name: 'game-pages'
+          - path: 'tests/home.spec.ts'
+            name: 'home'
+          - path: 'tests/navigation.spec.ts'
+            name: 'navigation'
+          - path: 'tests/smoke.spec.ts'
+            name: 'smoke'
 
     steps:
       - name: Checkout
@@ -62,8 +62,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "25.2.1"
-          cache: "npm"
+          node-version: '25.2.1'
+          cache: 'npm'
           cache-dependency-path: ./package-lock.json
 
       - name: Create backend .env for testing
@@ -85,7 +85,7 @@ jobs:
 
       - name: Start production Docker containers
         env:
-          DISABLE_AUTH_FOR_E2E: "true"
+          DISABLE_AUTH_FOR_E2E: 'true'
         run: |
           docker compose up --build -d mongodb backend frontend
 
@@ -131,7 +131,7 @@ jobs:
       - name: Prepare test DB (cleanup + seed)
         working-directory: .
         env:
-          E2E_API_URL: "http://localhost:3001"
+          E2E_API_URL: 'http://localhost:3001'
         run: |
           npm run e2e:cleanup-db || true
           npm run e2e:prepare-db -- --count 2
@@ -141,7 +141,7 @@ jobs:
         run: npx playwright test "${{ matrix.specs.path }}"
         env:
           CI: true
-          E2E_API_URL: "http://localhost:3001"
+          E2E_API_URL: 'http://localhost:3001'
 
       - name: Show container logs on failure
         if: failure()

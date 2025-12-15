@@ -56,9 +56,9 @@ describe('SpellSelector', () => {
 
     // Check weapon attack button is disabled
     const buttons = wrapper.findAll('button');
-    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
+    const attackButton = buttons.find(btn => btn.text().includes("Attaque à l'arme"));
     expect(attackButton?.attributes('disabled')).toBeDefined();
-    
+
     // Check spell button is disabled
     const spellButton = buttons.find(btn => btn.text().includes('Fireball'));
     expect(spellButton?.attributes('disabled')).toBeDefined();
@@ -97,9 +97,9 @@ describe('SpellSelector', () => {
 
     // Check weapon attack button is enabled
     const buttons = wrapper.findAll('button');
-    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
+    const attackButton = buttons.find(btn => btn.text().includes("Attaque à l'arme"));
     expect(attackButton?.attributes('disabled')).toBeUndefined();
-    
+
     // Check spell button is enabled
     const spellButton = buttons.find(btn => btn.text().includes('Fireball'));
     expect(spellButton?.attributes('disabled')).toBeUndefined();
@@ -152,7 +152,9 @@ describe('SpellSelector', () => {
       },
     });
 
-    const attackButton = wrapper.findAll('button').find(btn => btn.text().includes('Attaque à l\'arme'));
+    const attackButton = wrapper
+      .findAll('button')
+      .find(btn => btn.text().includes("Attaque à l'arme"));
     await attackButton?.trigger('click');
 
     expect(wrapper.emitted('attack')).toHaveLength(1);
@@ -182,15 +184,15 @@ describe('SpellSelector', () => {
     });
 
     const buttons = wrapper.findAll('button');
-    const attackButton = buttons.find(btn => btn.text().includes('Attaque à l\'arme'));
-    
+    const attackButton = buttons.find(btn => btn.text().includes("Attaque à l'arme"));
+
     // Button should be disabled when no actions
     expect(attackButton?.attributes('disabled')).toBeDefined();
-    
+
     // When disabled, clicking should not trigger action emit
     // (but we still close due to click handler, so we check no attack is emitted)
     await attackButton?.trigger('click');
-    
+
     // The attack event should not be emitted because canAct is false
     expect(wrapper.emitted('attack')).toBeUndefined();
   });

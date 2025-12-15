@@ -15,7 +15,12 @@
         class="w-full h-40 object-cover"
         loading="lazy"
       />
-      <div v-else class="text-slate-400">Pas de portrait</div>
+      <div
+        v-else
+        class="text-slate-400"
+      >
+        Pas de portrait
+      </div>
     </div>
 
     <div class="p-4 flex-1 flex flex-col justify-between">
@@ -40,7 +45,10 @@
           :aria-label="`Supprimer ${character.name || 'personnage'}`"
           @click.stop="onDelete(character)"
         >
-          <Trash2 class="h-4 w-4 text-slate-200" aria-hidden="true" />
+          <Trash2
+            class="h-4 w-4 text-slate-200"
+            aria-hidden="true"
+          />
         </UiButton>
       </div>
     </div>
@@ -48,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from '@rpg-gen/api-client';
+import { characterApi } from "@rpg-gen/api-client";
 import { UiButton } from "@rpg-gen/ui";
 import { Trash2 } from "lucide-vue-next";
 import type { CharacterResponseDto } from "@rpg-gen/shared";
@@ -85,7 +93,7 @@ const onDelete = async (character: CharacterResponseDto) => {
   if (!(await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?"))) return;
   deletingCharacterId.value = character.characterId;
   try {
-    await characterApi.deleteCharacter(character.characterId);
+    await characterApi.delete(character.characterId);
     emit("deleted", character.characterId);
   } catch (e) {
     console.error("Failed to delete character", e);

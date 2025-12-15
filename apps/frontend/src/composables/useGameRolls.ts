@@ -52,8 +52,9 @@ export function useGameRolls() {
 
   const confirmRoll = async () => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
+    if (!currentCharacter.value?.characterId) return;
 
-    const message = await chatApi.sendStructuredMessage({
+    const message = await chatApi.sendMessage(currentCharacter.value.characterId, {
       role: 'user',
       narrative: `I rolled ${rollData.value?.total}`,
       instructions: [],

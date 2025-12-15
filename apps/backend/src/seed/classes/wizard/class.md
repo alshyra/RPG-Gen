@@ -6,13 +6,13 @@ Most Wizards share a scholarly approach to magic. They examine the theoretical u
 Wizard DnD 2024The closest a Wizard is likely to come to an ordinary life is working as a sage or lecturer. Other Wizards sell their services as advisers, serve in military forces, or pursue lives of crime or domination. But the lure of knowledge calls even the most unadventurous Wizards from the safety of their libraries and laboratories and into crumbling ruins and lost cities. Most Wizards believe that their counterparts in ancient civilizations knew secrets of magic that have been lost to the ages, and discovering those secrets could unlock the path to a power greater than any magic available in the present age.
 
 Core Wizard Traits
-Primery Ability	Intelligence
-Hit Dice Die	D6 per Wizard level
-Saving Throws Proficiencies	Intelligence and Wisdom
-Skill Proficiencies	Choose 2: Arcana, History, Insight, Investigation, Medicine, Nature or Religion
-Weapons Proficiencies	Simple weapons
-Armor Training	None
-Starting Equipment	Choose A or B: (A) 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar’s Pack, and 5 GP; or (B) 55 GP
+Primery Ability Intelligence
+Hit Dice Die D6 per Wizard level
+Saving Throws Proficiencies Intelligence and Wisdom
+Skill Proficiencies Choose 2: Arcana, History, Insight, Investigation, Medicine, Nature or Religion
+Weapons Proficiencies Simple weapons
+Armor Training None
+Starting Equipment Choose A or B: (A) 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar’s Pack, and 5 GP; or (B) 55 GP
 Becoming a Wizard...
 As a Level 1 Character
 Gain all the traits in the Core Wizard Traits table.
@@ -22,29 +22,29 @@ Gain the Hit Point Die from the Core Wizard Traits table.
 Gain the Wizard’s level 1 features, which are listed in the Wizard Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 WIZARD
 Wizard Class Features
- 
- 	Prof.	 	 	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Cantrips	Spells	1	2	3	4	5	6	7	8	9
-1	+2	Spellcasting, Ritual Adept, Arcane Recovery	3	4	2	-	-	-	-	-	-	-	-
-2	+2	Scholar	3	5	3	-	-	-	-	-	-	-	-
-3	+2	Wizard Subclass	3	6	4	2	-	-	-	-	-	-	-
-4	+2	Ability Score Improvement	4	7	4	3	-	-	-	-	-	-	-
-5	+3	Memorize Spell	4	9	4	3	2	-	-	-	-	-	-
-6	+3	Subclass Feature	4	10	4	3	3	-	-	-	-	-	-
-7	+3	-	4	11	4	3	3	1	-	-	-	-	-
-8	+3	Ability Score Improvement	4	12	4	3	3	2	-	-	-	-	-
-9	+4	-	4	14	4	3	3	3	1	-	-	-	-
-10	+4	Subclass Feature	5	15	4	3	3	3	2	-	-	-	-
-11	+4	-	5	16	4	3	3	3	2	1	-	-	-
-12	+4	Ability Score Improvement	5	16	4	3	3	3	2	1	-	-	-
-13	+5	-	5	17	4	3	3	3	2	1	1	-	-
-14	+5	Subclass Feature	5	18	4	3	3	3	2	1	1	-	-
-15	+5	-	5	19	4	3	3	3	2	1	1	1	-
-16	+5	Ability Score Improvement	5	21	4	3	3	3	2	1	1	1	-
-17	+6	-	5	22	4	3	3	3	2	1	1	1	1
-18	+6	Spell Mastery	5	23	4	3	3	3	3	1	1	1	1
-19	+6	Epic Boon	5	24	4	3	3	3	3	2	1	1	1
-20	+6	Signature Spells	5	25	4	3	3	3	3	2	2	1	1
+
+Prof. Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Cantrips Spells 1 2 3 4 5 6 7 8 9
+1 +2 Spellcasting, Ritual Adept, Arcane Recovery 3 4 2 - - - - - - - -
+2 +2 Scholar 3 5 3 - - - - - - - -
+3 +2 Wizard Subclass 3 6 4 2 - - - - - - -
+4 +2 Ability Score Improvement 4 7 4 3 - - - - - - -
+5 +3 Memorize Spell 4 9 4 3 2 - - - - - -
+6 +3 Subclass Feature 4 10 4 3 3 - - - - - -
+7 +3 - 4 11 4 3 3 1 - - - - -
+8 +3 Ability Score Improvement 4 12 4 3 3 2 - - - - -
+9 +4 - 4 14 4 3 3 3 1 - - - -
+10 +4 Subclass Feature 5 15 4 3 3 3 2 - - - -
+11 +4 - 5 16 4 3 3 3 2 1 - - -
+12 +4 Ability Score Improvement 5 16 4 3 3 3 2 1 - - -
+13 +5 - 5 17 4 3 3 3 2 1 1 - -
+14 +5 Subclass Feature 5 18 4 3 3 3 2 1 1 - -
+15 +5 - 5 19 4 3 3 3 2 1 1 1 -
+16 +5 Ability Score Improvement 5 21 4 3 3 3 2 1 1 1 -
+17 +6 - 5 22 4 3 3 3 2 1 1 1 1
+18 +6 Spell Mastery 5 23 4 3 3 3 3 1 1 1 1
+19 +6 Epic Boon 5 24 4 3 3 3 3 2 1 1 1
+20 +6 Signature Spells 5 25 4 3 3 3 3 2 2 1 1
 As a Wizard, you gain the following class features when you reach the specified Wizard levels. These features are listed in the Wizard Features table.
 
 Level 1: Spellcasting
@@ -219,5 +219,5 @@ Once you use this feature, you can't use it again until you finish a Short or Lo
 Level 14: Illusory Reality
 You have learned to weave shadow magic into your illusions to give them a semi-reality. When you cast an Illusion spell with a spell slot, you can choose one inanimate, nonmagical object that is part of the illusion and make that object real. You can do this on your turn as a Bonus Action while the spell is ongoing. The object remains real for 1 minute, during which it can't deal damage or give any conditions. For example, you can create an illusion of a bridge over a chasm and then make it real and cross it.
 
-English  ↳ Wizard 2024
+English ↳ Wizard 2024
 Donjons et Dragons 5 - D&D 5

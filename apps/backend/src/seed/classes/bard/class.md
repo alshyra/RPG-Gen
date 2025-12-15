@@ -6,14 +6,14 @@ Bard DnD 2024Anything can inspire a new song or tale, so Bards are fascinated by
 A Bard’s life is spent traveling, gathering lore, telling stories, and living on the gratitude of audiences, much like any other entertainer. But Bards’ depth of knowledge and mastery of magic sets them apart.
 
 Core Bard Traits
-Primery Ability	Charisma
-Hit Dice Die	D8 per Bard level
-Saving Throws Proficiencies	Dexterity and Charisma
-Skill Proficiencies	Choose any 3 skills
-Weapons Proficiencies	Simple weapons
-Tools Proficiencies	Choose 3 Musical Instruments
-Armor Training	Light armor
-Starting Equipment	Choose A or B: (A) Leather Armor, 2 Daggers, Musical Instrument (of your choice), Entertainer’s Pack, and 19 GP; or (B) 90 GP
+Primery Ability Charisma
+Hit Dice Die D8 per Bard level
+Saving Throws Proficiencies Dexterity and Charisma
+Skill Proficiencies Choose any 3 skills
+Weapons Proficiencies Simple weapons
+Tools Proficiencies Choose 3 Musical Instruments
+Armor Training Light armor
+Starting Equipment Choose A or B: (A) Leather Armor, 2 Daggers, Musical Instrument (of your choice), Entertainer’s Pack, and 19 GP; or (B) 90 GP
 Becoming a Bard...
 As a Level 1 Character
 Gain all the traits in the Core Bard Traits table.
@@ -23,29 +23,29 @@ Gain the following traits from the Core Bard Traits table: Hit Point Die, profic
 Gain the Bard’s level 1 features, which are listed in the Bard Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 BARD
 Bard Class Features
- 
- 	Prof.	 	Bardic	 	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Die	Cantrips	Spells	1	2	3	4	5	6	7	8	9
-1	+2	Bardic Inspiration, Spellcasting	d6	2	4	2	-	-	-	-	-	-	-	-
-2	+2	Expertise, Jack of all Trades	d6	2	5	3	-	-	-	-	-	-	-	-
-3	+2	Bard Subclass	d6	2	6	4	2	-	-	-	-	-	-	-
-4	+2	Ability Score Improvement	d6	3	7	4	3	-	-	-	-	-	-	-
-5	+3	Font of Inspiration	d8	3	9	4	3	2	-	-	-	-	-	-
-6	+3	Subclass Feature	d8	3	10	4	3	3	-	-	-	-	-	-
-7	+3	Countercharm	d8	3	11	4	3	3	1	-	-	-	-	-
-8	+3	Ability Score Improvement	d8	3	12	4	3	3	2	-	-	-	-	-
-9	+4	Expertise	d8	3	14	4	3	3	3	1	-	-	-	-
-10	+4	Magical Secrets	d10	4	15	4	3	3	3	2	-	-	-	-
-11	+4	-	d10	4	16	4	3	3	3	2	1	-	-	-
-12	+4	Ability Score Improvement	d10	4	16	4	3	3	3	2	1	-	-	-
-13	+5	-	d10	4	17	4	3	3	3	2	1	1	-	-
-14	+5	Subclass Feature	d10	4	17	4	3	3	3	2	1	1	-	-
-15	+5	-	d12	4	18	4	3	3	3	2	1	1	1	-
-16	+5	Ability Score Improvement	d12	4	18	4	3	3	3	2	1	1	1	-
-17	+6	-	d12	4	19	4	3	3	3	2	1	1	1	1
-18	+6	Superior Inspiration	d12	4	20	4	3	3	3	3	1	1	1	1
-19	+6	Epic Boon	d12	4	21	4	3	3	3	3	2	1	1	1
-20	+6	Words of Creation	d12	4	22	4	3	3	3	3	2	2	1	1
+
+Prof. Bardic Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Die Cantrips Spells 1 2 3 4 5 6 7 8 9
+1 +2 Bardic Inspiration, Spellcasting d6 2 4 2 - - - - - - - -
+2 +2 Expertise, Jack of all Trades d6 2 5 3 - - - - - - - -
+3 +2 Bard Subclass d6 2 6 4 2 - - - - - - -
+4 +2 Ability Score Improvement d6 3 7 4 3 - - - - - - -
+5 +3 Font of Inspiration d8 3 9 4 3 2 - - - - - -
+6 +3 Subclass Feature d8 3 10 4 3 3 - - - - - -
+7 +3 Countercharm d8 3 11 4 3 3 1 - - - - -
+8 +3 Ability Score Improvement d8 3 12 4 3 3 2 - - - - -
+9 +4 Expertise d8 3 14 4 3 3 3 1 - - - -
+10 +4 Magical Secrets d10 4 15 4 3 3 3 2 - - - -
+11 +4 - d10 4 16 4 3 3 3 2 1 - - -
+12 +4 Ability Score Improvement d10 4 16 4 3 3 3 2 1 - - -
+13 +5 - d10 4 17 4 3 3 3 2 1 1 - -
+14 +5 Subclass Feature d10 4 17 4 3 3 3 2 1 1 - -
+15 +5 - d12 4 18 4 3 3 3 2 1 1 1 -
+16 +5 Ability Score Improvement d12 4 18 4 3 3 3 2 1 1 1 -
+17 +6 - d12 4 19 4 3 3 3 2 1 1 1 1
+18 +6 Superior Inspiration d12 4 20 4 3 3 3 3 1 1 1 1
+19 +6 Epic Boon d12 4 21 4 3 3 3 3 2 1 1 1
+20 +6 Words of Creation d12 4 22 4 3 3 3 3 2 2 1 1
 As a Bard, you gain the following class features when you reach the specified Bard levels. These features are listed in the Bard Features table.
 
 Level 1: Bardic Inspiration
@@ -209,6 +209,5 @@ In addition, you can cast one of your cantrips that has a casting time of an act
 Level 14: Battle Magic
 After you cast a spell that has a casting time of an action, you can make one attack with a weapon as a Bonus Action.
 
-English  ↳ Bard 2024
+English ↳ Bard 2024
 Donjons et Dragons 5 - D&D 5
-

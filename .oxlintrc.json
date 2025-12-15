@@ -4,7 +4,7 @@
     "typescript/no-unused-vars": "warn",
     "unicorn/no-for-loop": "error",
     "unicorn/prefer-array-flat-map": "error",
-    "unicorn/prefer-array-some": "error",
+    "unicorn/prefer-array-some": "error"
   },
   "env": {
     "browser": true,

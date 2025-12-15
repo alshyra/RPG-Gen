@@ -1,5 +1,5 @@
-import createClient from "openapi-fetch";
-import type { paths } from "@rpg-gen/shared";
+import createClient from 'openapi-fetch';
+import type { paths } from '@rpg-gen/shared';
 
 /**
  * Base API client configuration
@@ -8,7 +8,7 @@ export function createApiClient(baseUrl: string) {
   return createClient<paths>({
     baseUrl,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 }
@@ -23,7 +23,7 @@ export const apiClient = createApiClient(
   import.meta.env?.VITE_API_URL ||
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore - window is browser-specific
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3001")
+    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001'),
 );
 
 /**
@@ -33,13 +33,13 @@ export const apiClient = createApiClient(
 export function getData<T>(response: { data?: T; error?: unknown }): T {
   if (response.error) {
     throw new Error(
-      typeof response.error === "object" && response.error !== null
+      typeof response.error === 'object' && response.error !== null
         ? JSON.stringify(response.error)
-        : String(response.error)
+        : String(response.error),
     );
   }
   if (!response.data) {
-    throw new Error("No data in response");
+    throw new Error('No data in response');
   }
   return response.data;
 }
@@ -48,7 +48,7 @@ export function getData<T>(response: { data?: T; error?: unknown }): T {
  * Helper for authenticated requests
  * Returns a client with Authorization header
  */
-export function createAuthenticatedClient(token: string, baseUrl = "http://localhost:3001") {
+export function createAuthenticatedClient(token: string, baseUrl = 'http://localhost:3001') {
   const client = createApiClient(baseUrl);
   return {
     ...client,
@@ -69,7 +69,7 @@ export function createAuthenticatedClient(token: string, baseUrl = "http://local
       }),
     DELETE: (
       url: Parameters<typeof client.DELETE>[0],
-      init?: Parameters<typeof client.DELETE>[1]
+      init?: Parameters<typeof client.DELETE>[1],
     ) =>
       client.DELETE(url, {
         ...init,
@@ -84,4 +84,4 @@ export function createAuthenticatedClient(token: string, baseUrl = "http://local
 }
 
 // Re-export types for convenience
-export type { paths } from "@rpg-gen/shared";
+export type { paths } from '@rpg-gen/shared';

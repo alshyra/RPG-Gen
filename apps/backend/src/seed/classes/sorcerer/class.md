@@ -6,13 +6,13 @@ Sorcerer DnD 2024Sorcerers don’t learn magic; the raw, roiling power of magic 
 Sorcerers are rare. Some family lines produce exactly one Sorcerer in every generation, but most of the time, the talents of sorcery appear as a fluke. People who have this magical power soon discover that it doesn’t like to stay quiet. A Sorcerer’s magic wants to be wielded.
 
 Core Sorcerer Traits
-Primery Ability	Charisma
-Hit Dice Die	D6 per Sorcerer level
-Saving Throws Proficiencies	Constitution and Charisma
-Skill Proficiencies	Choose 2: Arcana, Deception, Insight, Intimidation, Persuasion, or Religion
-Weapons Proficiencies	Simple weapons
-Armor Training	None
-Starting Equipment	Choose A or B: (A) Spear, 2 Daggers, Arcane Focus (crystal), Dungeoneer’s Pack, and 28 GP; or (B) 50 GP
+Primery Ability Charisma
+Hit Dice Die D6 per Sorcerer level
+Saving Throws Proficiencies Constitution and Charisma
+Skill Proficiencies Choose 2: Arcana, Deception, Insight, Intimidation, Persuasion, or Religion
+Weapons Proficiencies Simple weapons
+Armor Training None
+Starting Equipment Choose A or B: (A) Spear, 2 Daggers, Arcane Focus (crystal), Dungeoneer’s Pack, and 28 GP; or (B) 50 GP
 Becoming a Sorcerer...
 As a Level 1 Character
 Gain all the traits in the Core Sorcerer Traits table.
@@ -22,29 +22,29 @@ Gain the Hit Point Die from the Core Sorcerer Traits table.
 Gain the Sorcerer’s level 1 features, which are listed in the Sorcerer Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 SORCERER
 Sorcerer Class Features
- 
- 	Prof.	 	Sorcery	 	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Points	Cantrips	Spells	1	2	3	4	5	6	7	8	9
-1	+2	Spellcasting, Innate Sorcery	-	4	2	2	-	-	-	-	-	-	-	-
-2	+2	Font of Magic, Metamagic	2	4	4	3	-	-	-	-	-	-	-	-
-3	+2	Sorcerer Subclass	3	4	6	4	2	-	-	-	-	-	-	-
-4	+2	Ability Score Improvement	4	5	7	4	3	-	-	-	-	-	-	-
-5	+3	Sorcerous Restoration	5	5	9	4	3	2	-	-	-	-	-	-
-6	+3	Subclass Feature	6	5	10	4	3	3	-	-	-	-	-	-
-7	+3	Sorcery Incarnate	7	5	11	4	3	3	1	-	-	-	-	-
-8	+3	Ability Score Improvement	8	5	12	4	3	3	2	-	-	-	-	-
-9	+4	-	9	5	14	4	3	3	3	1	-	-	-	-
-10	+4	Metamagic	10	6	15	4	3	3	3	2	-	-	-	-
-11	+4	-	11	6	16	4	3	3	3	2	1	-	-	-
-12	+4	Ability Score Improvement	12	6	16	4	3	3	3	2	1	-	-	-
-13	+5	-	13	6	17	4	3	3	3	2	1	1	-	-
-14	+5	Subclass Feature	14	6	17	4	3	3	3	2	1	1	-	-
-15	+5	-	15	6	18	4	3	3	3	2	1	1	1	-
-16	+5	Ability Score Improvement	16	6	18	4	3	3	3	2	1	1	1	-
-17	+6	Metamagic	17	6	19	4	3	3	3	2	1	1	1	1
-18	+6	Subclass Feature	18	6	20	4	3	3	3	3	1	1	1	1
-19	+6	Epic Boon	19	6	21	4	3	3	3	3	2	1	1	1
-20	+6	Arcane Apotheosis	20	6	22	4	3	3	3	3	2	2	1	1
+
+Prof. Sorcery Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Points Cantrips Spells 1 2 3 4 5 6 7 8 9
+1 +2 Spellcasting, Innate Sorcery - 4 2 2 - - - - - - - -
+2 +2 Font of Magic, Metamagic 2 4 4 3 - - - - - - - -
+3 +2 Sorcerer Subclass 3 4 6 4 2 - - - - - - -
+4 +2 Ability Score Improvement 4 5 7 4 3 - - - - - - -
+5 +3 Sorcerous Restoration 5 5 9 4 3 2 - - - - - -
+6 +3 Subclass Feature 6 5 10 4 3 3 - - - - - -
+7 +3 Sorcery Incarnate 7 5 11 4 3 3 1 - - - - -
+8 +3 Ability Score Improvement 8 5 12 4 3 3 2 - - - - -
+9 +4 - 9 5 14 4 3 3 3 1 - - - -
+10 +4 Metamagic 10 6 15 4 3 3 3 2 - - - -
+11 +4 - 11 6 16 4 3 3 3 2 1 - - -
+12 +4 Ability Score Improvement 12 6 16 4 3 3 3 2 1 - - -
+13 +5 - 13 6 17 4 3 3 3 2 1 1 - -
+14 +5 Subclass Feature 14 6 17 4 3 3 3 2 1 1 - -
+15 +5 - 15 6 18 4 3 3 3 2 1 1 1 -
+16 +5 Ability Score Improvement 16 6 18 4 3 3 3 2 1 1 1 -
+17 +6 Metamagic 17 6 19 4 3 3 3 2 1 1 1 1
+18 +6 Subclass Feature 18 6 20 4 3 3 3 3 1 1 1 1
+19 +6 Epic Boon 19 6 21 4 3 3 3 3 2 1 1 1
+20 +6 Arcane Apotheosis 20 6 22 4 3 3 3 3 2 2 1 1
 As a Sorcerer, you gain the following class features when you reach the specified Sorcerer levels. These features are listed in the Sorcerer Features table.
 
 Level 1: Spellcasting
@@ -90,14 +90,14 @@ Any spell slot you create with this feature vanishes when you finish a Long Rest
 
 Creating Spell Slots
 Spell Slot
-Level	Sorcery Point
-Cost	Min. Sorcerer
+Level Sorcery Point
+Cost Min. Sorcerer
 Level
-1	2	2
-2	3	3
-3	5	5
-4	6	7
-5	7	9
+1 2 2
+2 3 3
+3 5 5
+4 6 7
+5 7 9
 Level 2: Metamagic
 Because your magic flows from within, you can alter your spells to suit your needs; you gain two Metamagic options of your choice from the “Metamagic Options” later in this class’s description. You use the chosen options to temporarily modify spells you cast. To use an option, you must spend the number of Sorcery Points that it costs.
 
@@ -205,11 +205,11 @@ Level 3: Draconic Spells
 When you reach a Sorcerer level specified in the Draconic Spells table, you thereafter always have the listed spells prepared.
 
 Draconic Spells
-Sorcerer Level	Spells
-3	Alter Self, Chromatic Orb, Command, Dragon's Breath
-5	Fear, Fly
-7	Arcane Eye, Charm Monster
-9	Legend Lore, Summon Dragon
+Sorcerer Level Spells
+3 Alter Self, Chromatic Orb, Command, Dragon's Breath
+5 Fear, Fly
+7 Arcane Eye, Charm Monster
+9 Legend Lore, Summon Dragon
 Level 6: Elemental Affinity
 Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison.
 
@@ -248,5 +248,5 @@ Immediately after you cast a Sorcerer spell with a spell slot, you can create an
 
 Once you use this feature, you can’t do so again until you finish 1d4 Long Rests.
 
-English  ↳ Sorcerer 2024
+English ↳ Sorcerer 2024
 Donjons et Dragons 5 - D&D 5

@@ -48,6 +48,7 @@
               :class="canAct ? 'text-purple-200' : 'text-slate-500'"
             >
               {{ spell.description.substring(0, 60)
+
               }}{{ spell.description.length > 60 ? '...' : '' }}
             </div>
           </UiButton>

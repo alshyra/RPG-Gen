@@ -143,17 +143,17 @@ export const useCharacterStore = defineStore('character', () => {
       definitionId,
       quantity,
     );
-    const updated = await characterApi.removeInventoryItem(
+    const updated = await characterApi.removeInventory(
       currentCharacter.value.characterId,
       definitionId,
-      quantity,
+      { qty: quantity },
     );
     currentCharacter.value = updated;
   };
 
   const addInventoryItem = async (item: Partial<InventoryItemDto>) => {
     if (!currentCharacter.value?.characterId || !item) return;
-    const updated = await characterApi.addInventoryItem(currentCharacter.value.characterId, item);
+    const updated = await characterApi.addInventory(currentCharacter.value.characterId, item);
     currentCharacter.value = updated;
   };
 
@@ -166,24 +166,30 @@ export const useCharacterStore = defineStore('character', () => {
 
   const grantInspiration = async (amount = 1) => {
     if (!currentCharacter.value?.characterId) return;
-    const updated = await characterApi.grantInspiration(currentCharacter.value.characterId, amount);
-    currentCharacter.value = updated;
+    const result = await characterApi.grantInspiration(currentCharacter.value.characterId, {
+      amount,
+    });
+    if (result.character) {
+      currentCharacter.value = result.character;
+    }
   };
 
   const spendInspiration = async () => {
     if (!currentCharacter.value?.characterId) return;
-    const updated = await characterApi.spendInspiration(currentCharacter.value.characterId);
-    currentCharacter.value = updated;
+    const result = await characterApi.spendInspiration(currentCharacter.value.characterId);
+    if (result.character) {
+      currentCharacter.value = result.character;
+    }
   };
 
   const createCharacter = async (world: string) => {
-    const newChar = await characterApi.createCharacter(world);
+    const newChar = await characterApi.create({ world });
     currentCharacter.value = newChar;
     return newChar;
   };
 
   const updateCharacter = async (characterId: string, character: UpdateCharacterRequestDto) => {
-    const updated = await characterApi.saveCharacter(characterId, character);
+    const updated = await characterApi.update(characterId, character);
     // keep local store in sync with server response
     currentCharacter.value = updated;
     return updated;
@@ -193,7 +199,7 @@ export const useCharacterStore = defineStore('character', () => {
     currentCharacterId,
     async id => {
       if (!id) return;
-      const res = await characterApi.getCharacterById(id);
+      const res = await characterApi.findOne(id);
       currentCharacter.value = res || undefined;
     },
     { immediate: true },

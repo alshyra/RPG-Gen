@@ -6,14 +6,14 @@ Rogue DnD 2024In combat, Rogues prioritize subtle strikes over brute strength. T
 Some Rogues began their careers as criminals, while others used their cunning to fight crime. Whatever a Rogue’s relation to the law, no common criminal or officer of the law can match the subtle brilliance of the greatest Rogues.
 
 Core Rogue Traits
-Primery Ability	Dexterity
-Hit Dice Die	D8 per Rogue level
-Saving Throws Proficiencies	Dexterity and Intelligence
-Skill Proficiencies	Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Persuasion, Sleight of Hand, or Stealth
-Weapons Proficiencies	Simple weapons and Martial weapons that have the Finesse or Light property
-Tool Proficiencies	Thieves’ Tools
-Armor Training	Light armor
-Starting Equipment	Choose A or B: (A) Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves’ Tools, Burglar’s Pack, and 8 GP; or (B) 100 GP
+Primery Ability Dexterity
+Hit Dice Die D8 per Rogue level
+Saving Throws Proficiencies Dexterity and Intelligence
+Skill Proficiencies Choose 4: Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Persuasion, Sleight of Hand, or Stealth
+Weapons Proficiencies Simple weapons and Martial weapons that have the Finesse or Light property
+Tool Proficiencies Thieves’ Tools
+Armor Training Light armor
+Starting Equipment Choose A or B: (A) Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves’ Tools, Burglar’s Pack, and 8 GP; or (B) 100 GP
 Becoming a Rogue...
 As a Level 1 Character
 Gain all the traits in the Core Rogue Traits table.
@@ -23,29 +23,29 @@ Gain the following traits from the Core Rogue Traits table: Hit Point Die, profi
 Gain the Rogue’s level 1 features, which are listed in the Rogue Features table.
 CREATE A 2024 ROGUE
 Rogue Class Features
-Level	Prof.
-Bonus	Class Features	Sneak
+Level Prof.
+Bonus Class Features Sneak
 Attack
-1	+2	Expertise, Sneak Attack, Thieves’ Cant, Weapon Mastery	1d6
-2	+2	Cunning Action	1d6
-3	+2	Rogue Subclass, Steady Aim	2d6
-4	+2	Ability Score Improvement	2d6
-5	+3	Cunning Strike, Uncanny Dodge	3d6
-6	+3	Expertise	3d6
-7	+3	Evasion, Reliable Talent	4d6
-8	+3	Ability Score Improvement	4d6
-9	+4	Subclass Feature	5d6
-10	+4	Ability Score Improvement	5d6
-11	+4	Improved Cunning Strike	6d6
-12	+4	Ability Score Improvement	6d6
-13	+5	Subclass Feature	7d6
-14	+5	Devious Strikes	7d6
-15	+5	Slippery Mind	8d6
-16	+5	Ability Score Improvement	8d6
-17	+6	Subclass Feature	9d6
-18	+6	Elusive	9d6
-19	+6	Epic Boon	10d6
-20	+6	Stroke of Luck	10d6
+1 +2 Expertise, Sneak Attack, Thieves’ Cant, Weapon Mastery 1d6
+2 +2 Cunning Action 1d6
+3 +2 Rogue Subclass, Steady Aim 2d6
+4 +2 Ability Score Improvement 2d6
+5 +3 Cunning Strike, Uncanny Dodge 3d6
+6 +3 Expertise 3d6
+7 +3 Evasion, Reliable Talent 4d6
+8 +3 Ability Score Improvement 4d6
+9 +4 Subclass Feature 5d6
+10 +4 Ability Score Improvement 5d6
+11 +4 Improved Cunning Strike 6d6
+12 +4 Ability Score Improvement 6d6
+13 +5 Subclass Feature 7d6
+14 +5 Devious Strikes 7d6
+15 +5 Slippery Mind 8d6
+16 +5 Ability Score Improvement 8d6
+17 +6 Subclass Feature 9d6
+18 +6 Elusive 9d6
+19 +6 Epic Boon 10d6
+20 +6 Stroke of Luck 10d6
 As a Rogue, you gain the following class features when you reach the specified Rogue levels. These features are listed in the Rogue Features table.
 
 Level 1: Expertise
@@ -157,26 +157,26 @@ Spellcasting Ability. Intelligence is your spellcasting ability for your Arcane 
 Spellcasting Focus. You can use an Arcane Focus as a Spellcasting Focus for the spells you prepare for this subclass.
 
 Aracne Trickster Spellcasting
-Rogue	Prepared	- Spell Slots per Spell Level -
-Level	Spells	1	2	3	4
-3	3	2	-	-	-
-4	4	3	-	-	-
-5	4	3	-	-	-
-6	4	3	-	-	-
-7	6	4	2	-	-
-8	6	4	2	-	-
-9	6	4	2	-	-
-10	7	4	3	-	-
-11	7	4	3	-	-
-12	7	4	3	-	-
-13	9	4	3	2	-
-14	9	4	3	2	-
-15	9	4	3	2	-
-16	10	4	3	3	-
-17	10	4	3	3	-
-18	10	4	3	3	-
-19	11	4	3	3	1
-20	11	4	3	3	1
+Rogue Prepared - Spell Slots per Spell Level -
+Level Spells 1 2 3 4
+3 3 2 - - -
+4 4 3 - - -
+5 4 3 - - -
+6 4 3 - - -
+7 6 4 2 - -
+8 6 4 2 - -
+9 6 4 2 - -
+10 7 4 3 - -
+11 7 4 3 - -
+12 7 4 3 - -
+13 9 4 3 2 -
+14 9 4 3 2 -
+15 9 4 3 2 -
+16 10 4 3 3 -
+17 10 4 3 3 -
+18 10 4 3 3 -
+19 11 4 3 3 1
+20 11 4 3 3 1
 Level 3: Mage Hand Legerdemain
 When you cast Mage Hand, you can make the spectral hand invisible. You can control the hand as a Bonus Action, instead of an action, and through it, you can use Thieves’ Tools and make Dexterity (Sleight of Hand) checks.
 
@@ -256,5 +256,5 @@ Scrolls. You can use any Spell Scroll, using Intelligence as your spellcasting a
 Level 17: Thief's Reflexes
 You are adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal Initiative and your second turn at your Initiative minus 10.
 
-English  ↳ Rogue 2024
+English ↳ Rogue 2024
 Donjons et Dragons 5 - D&D 5

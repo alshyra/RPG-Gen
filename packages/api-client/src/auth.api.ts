@@ -1,14 +1,14 @@
-import type { AuthProfileDto } from "@rpg-gen/shared";
-import { apiClient, getData } from "./client.js";
+import type { AuthProfileDto } from '@rpg-gen/shared';
+import { apiClient, getData } from './client.js';
 
-const AUTH_BASE_URL = "/api/auth";
+const AUTH_BASE_URL = '/api/auth';
 
 export const authApi = {
   /**
    * Get current user profile
    */
   async getProfile(): Promise<AuthProfileDto> {
-    const response = await apiClient.GET("/api/auth/profile");
+    const response = await apiClient.GET('/api/auth/profile');
     return getData(response);
   },
 
@@ -25,6 +25,6 @@ export const authApi = {
    * Note: Client should clear token after this
    */
   async logout(): Promise<void> {
-    await apiClient.GET("/api/auth/logout");
+    await apiClient.GET('/api/auth/logout');
   },
 };

@@ -8,14 +8,14 @@ Druid DnD 2024
 Druids are concerned with the delicate ecological balance that sustains plant and animal life and with the need for people to live in harmony with nature. Druids often guard sacred sites or watch over regions of unspoiled nature, but when a significant danger arises, Druids take a more active role as adventurers who combat the threat.
 
 Core Druid Traits
-Primery Ability	Wisdom
-Hit Dice Die	D8 per Druid level
-Saving Throws Proficiencies	Intelligence and Wisdom
-Skill Proficiencies	Choose 2: Animal Handling, Arcana, Insight, Medicine, Nature, Perception, Religion, or Survival
-Weapons Proficiencies	Simple weapons
-Tools Proficiencies	Herbalism Kit
-Armor Training	Light armor and Shields
-Starting Equipment	Choose A or B: (A) Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer’s Pack, Herbalism Kit, and 9 GP; or (B) 50 GP
+Primery Ability Wisdom
+Hit Dice Die D8 per Druid level
+Saving Throws Proficiencies Intelligence and Wisdom
+Skill Proficiencies Choose 2: Animal Handling, Arcana, Insight, Medicine, Nature, Perception, Religion, or Survival
+Weapons Proficiencies Simple weapons
+Tools Proficiencies Herbalism Kit
+Armor Training Light armor and Shields
+Starting Equipment Choose A or B: (A) Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer’s Pack, Herbalism Kit, and 9 GP; or (B) 50 GP
 Becoming a Druid...
 As a Level 1 Character
 Gain all the traits in the Core Druid Traits table.
@@ -25,29 +25,29 @@ Gain the following traits from the Core Druid Traits table: Hit Point Die and tr
 Gain the Druid’s level 1 features, which are listed in the Druid Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 DRUID
 Druid Class Features
- 
- 	Prof.	 	Wild	 	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Shape	Cantrips	Spells	1	2	3	4	5	6	7	8	9
-1	+2	Spellcasting, Druidic, Primal Order	-	2	4	2	-	-	-	-	-	-	-	-
-2	+2	Wild Shape, Wild Companion	2	2	5	3	-	-	-	-	-	-	-	-
-3	+2	Druid Subclass	2	2	6	4	2	-	-	-	-	-	-	-
-4	+2	Ability Score Improvement	2	3	7	4	3	-	-	-	-	-	-	-
-5	+3	Wild Resurgence	2	3	9	4	3	2	-	-	-	-	-	-
-6	+3	Subclass Feature	3	3	10	4	3	3	-	-	-	-	-	-
-7	+3	Elemental Fury	3	3	11	4	3	3	1	-	-	-	-	-
-8	+3	Ability Score Improvement	3	3	12	4	3	3	2	-	-	-	-	-
-9	+4	-	3	3	14	4	3	3	3	1	-	-	-	-
-10	+4	Subclass Feature	3	4	15	4	3	3	3	2	-	-	-	-
-11	+4	-	3	4	16	4	3	3	3	2	1	-	-	-
-12	+4	Ability Score Improvement	3	4	16	4	3	3	3	2	1	-	-	-
-13	+5	-	3	4	17	4	3	3	3	2	1	1	-	-
-14	+5	Subclass Feature	3	4	17	4	3	3	3	2	1	1	-	-
-15	+5	Improved Elemental Fury	3	4	18	4	3	3	3	2	1	1	1	-
-16	+5	Ability Score Improvement	3	4	18	4	3	3	3	2	1	1	1	-
-17	+6	-	4	4	19	4	3	3	3	2	1	1	1	1
-18	+6	Beast Spells	4	4	20	4	3	3	3	2	1	1	1	1
-19	+6	Epic Boon	4	4	21	4	3	3	3	2	1	1	1	1
-20	+6	Archdruid	4	4	22	4	3	3	3	2	2	1	1	1
+
+Prof. Wild Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Shape Cantrips Spells 1 2 3 4 5 6 7 8 9
+1 +2 Spellcasting, Druidic, Primal Order - 2 4 2 - - - - - - - -
+2 +2 Wild Shape, Wild Companion 2 2 5 3 - - - - - - - -
+3 +2 Druid Subclass 2 2 6 4 2 - - - - - - -
+4 +2 Ability Score Improvement 2 3 7 4 3 - - - - - - -
+5 +3 Wild Resurgence 2 3 9 4 3 2 - - - - - -
+6 +3 Subclass Feature 3 3 10 4 3 3 - - - - - -
+7 +3 Elemental Fury 3 3 11 4 3 3 1 - - - - -
+8 +3 Ability Score Improvement 3 3 12 4 3 3 2 - - - - -
+9 +4 - 3 3 14 4 3 3 3 1 - - - -
+10 +4 Subclass Feature 3 4 15 4 3 3 3 2 - - - -
+11 +4 - 3 4 16 4 3 3 3 2 1 - - -
+12 +4 Ability Score Improvement 3 4 16 4 3 3 3 2 1 - - -
+13 +5 - 3 4 17 4 3 3 3 2 1 1 - -
+14 +5 Subclass Feature 3 4 17 4 3 3 3 2 1 1 - -
+15 +5 Improved Elemental Fury 3 4 18 4 3 3 3 2 1 1 1 -
+16 +5 Ability Score Improvement 3 4 18 4 3 3 3 2 1 1 1 -
+17 +6 - 4 4 19 4 3 3 3 2 1 1 1 1
+18 +6 Beast Spells 4 4 20 4 3 3 3 2 1 1 1 1
+19 +6 Epic Boon 4 4 21 4 3 3 3 2 1 1 1 1
+20 +6 Archdruid 4 4 22 4 3 3 3 2 2 1 1 1
 As a Druid, you gain the following class features when you reach the specified Druid levels. These features are listed in the Druid Features table.
 
 Level 1: Spellcasting
@@ -99,19 +99,19 @@ When you reach certain Druid levels, your number of known forms and the maximum 
 When choosing known forms, you may look in the Monster Manual or elsewhere for eligible Beasts if the Dungeon Master permits you to do so.
 
 Best Shapes
-Druid Level	Known Forms	Max CR	Fly Speed
-2	4	1/4	No
-4	6	1/2	No
-8	8	1	Yes
+Druid Level Known Forms Max CR Fly Speed
+2 4 1/4 No
+4 6 1/2 No
+8 8 1 Yes
 Rules While Shape-Shifted. While in a form, you retain your personality, memories, and ability to speak, and the following rules apply:
 
-  Temporary Hit Points. When you assume a Wild Shape form, you gain a number of Temporary Hit Points equal to your Druid level.
+Temporary Hit Points. When you assume a Wild Shape form, you gain a number of Temporary Hit Points equal to your Druid level.
 
-  Game Statistics. Your game statistics are replaced by the statistics of the Beast's stat block, but you retain your creature type; Hit Points; Hit Point Dice; Intelligence, Wisdom, and Charisma scores; class features; languages; and feats. You also retain your skill and saving throw proficiencies and use your Proficiency Bonus for them, in addition to gaining the proficiencies of the creature. If a skill or saving thow modifier in the Beast'stat block is higher than yours, use the one in the stat block.
+Game Statistics. Your game statistics are replaced by the statistics of the Beast's stat block, but you retain your creature type; Hit Points; Hit Point Dice; Intelligence, Wisdom, and Charisma scores; class features; languages; and feats. You also retain your skill and saving throw proficiencies and use your Proficiency Bonus for them, in addition to gaining the proficiencies of the creature. If a skill or saving thow modifier in the Beast'stat block is higher than yours, use the one in the stat block.
 
-  No Spellcasting. You can’t cast spells, but shape-shifting doesn’t break your Concentration or otherwise interfere with a spell you’ve already cast.
+No Spellcasting. You can’t cast spells, but shape-shifting doesn’t break your Concentration or otherwise interfere with a spell you’ve already cast.
 
-  Objects. Your ability to handle objects is determined by the form’s limbs rather than your own. In addition, you choose whether your equipment falls to the ground in your space, merges into your new form, or is worn by it. Worn equipment functions as normal, but the DM decides whether it's practical for the new form to wear a piece of equipment based on the creature’s size and shape. Your equipment doesn’t change size or shape to match the new form, and any equipment that the new form can’t wear must either fall to the ground or merge with the form. Equipment that merges with the form has no effect while you're in that form.
+Objects. Your ability to handle objects is determined by the form’s limbs rather than your own. In addition, you choose whether your equipment falls to the ground in your space, merges into your new form, or is worn by it. Worn equipment functions as normal, but the DM decides whether it's practical for the new form to wear a piece of equipment based on the creature’s size and shape. Your equipment doesn’t change size or shape to match the new form, and any equipment that the new form can’t wear must either fall to the ground or merge with the form. Equipment that merges with the form has no effect while you're in that form.
 
 Level 2: Wild Companion
 You can summon a nature spirit that assumes an animal form to aid you. As a Magic action, you can expend a spell slot or a use of Wild Shape to cast the Find Familiar spell without material components.
@@ -168,29 +168,29 @@ Level 3: Circle of the Land Spells
 Whenever you finish a Long Rest, choose one type of land: arid, polar, temperate, or tropical. Consult the table below that corresponds to the chosen type; you have the spells listed for your Druid level and lower prepared.
 
 Arid Land
-Druid Level	Circle Spells
-3	Blur, Burning Hands, Fire Bolt
-5	Fireball
-7	Blight
-9	Wall of Stone
+Druid Level Circle Spells
+3 Blur, Burning Hands, Fire Bolt
+5 Fireball
+7 Blight
+9 Wall of Stone
 Polar Land
-Druid Level	Circle Spells
-3	Fog Cloud, Hold Person, Ray of Frost
-5	Sleet Storm
-7	Ice Storm
-9	Cone of Cold
+Druid Level Circle Spells
+3 Fog Cloud, Hold Person, Ray of Frost
+5 Sleet Storm
+7 Ice Storm
+9 Cone of Cold
 Temperate Land
-Druid Level	Circle Spells
-3	Misty Step, Shocking Grasp, Sleep
-5	Lightning Bolt
-7	Freedom of Movement
-9	Tree Stride
+Druid Level Circle Spells
+3 Misty Step, Shocking Grasp, Sleep
+5 Lightning Bolt
+7 Freedom of Movement
+9 Tree Stride
 Tropical Land
-Druid Level	Circle Spells
-3	Acid Splash, Ray of Sickness, Web
-5	Stinking Cloud
-7	Polymorph
-9	Insect Plague
+Druid Level Circle Spells
+3 Acid Splash, Ray of Sickness, Web
+5 Stinking Cloud
+7 Polymorph
+9 Insect Plague
 Level 3: Land’s Aid
 As a Magic action, you can expend a use of your Wild Shape and choose a point within 60 feet of yourself. Vitality-giving flowers and life-draining thorns appear for a moment in a 10-foot-radius Sphere centered on that point. Each creature of your choice in the Sphere must make a Constitution saving throw against your spell save DC, taking 2d6 Necrotic damage on a failed save or half as much damage on a successful one. One creature of your choice in that area regains 2d6 Hit Points.
 
@@ -205,11 +205,11 @@ Level 10: Nature's Ward
 You are immune to the Poisoned condition, and you have Resistance to a damage type associated with your current land choice in the Circle Spells feature, as shown in the Nature’s Ward table.
 
 Nature's Ward
-Land Type	Resistance
-Arid	Fire
-Polar	Cold
-Temperate	Lightning
-Tropical	Poison
+Land Type Resistance
+Arid Fire
+Polar Cold
+Temperate Lightning
+Tropical Poison
 Level 14: Nature's Sanctuary
 As a Magic action, you can expend a use of your Wild Shape and cause spectral trees and vines to appear in a 15-foot Cube on the ground within 120 feet of yourself. They last there for 1 minute or until you have the Incapacitated condition or die. You and your allies have Half Cover while in that area, and your allies gain the current Resistance of your Nature’s Ward while there.
 
@@ -235,11 +235,11 @@ When you reach a Druid level specified in the Circle of the Moon Spells table, y
 In addition, you can cast the spells from this feature while you are in Wild Shape form.
 
 Circle of the Moon Spells
-Druid Level	Prepared Spells
-3	Cure Wounds, Moonbeam, Starry Wisp
-5	Conjure Animals
-7	Fount of Moonlight
-9	Mass Cure Wounds
+Druid Level Prepared Spells
+3 Cure Wounds, Moonbeam, Starry Wisp
+5 Conjure Animals
+7 Fount of Moonlight
+9 Mass Cure Wounds
 Level 6: Improved Circle Forms
 While in a Wild Shape form, you gain the following benefits.
 
@@ -267,11 +267,11 @@ Level 3: Circle of the Sea Spells
 Druid Sea DnD 2024Your connection to this circle ensures that you always have certain spells ready. When you reach a Druid level specified in the Circle of the Sea Spells table, you thereafter always have the listed spells prepared.
 
 Circle of the Sea Spells
-Druid Level	Prepared Spells
-3	Fog Cloud, Gust of Wind, Ray of Frost, Shatter, Thunderwave
-5	Lightning Bolt, Water Breathing
-7	Control Water, Ice Storm
-9	Conjure Elemental, Hold Monster
+Druid Level Prepared Spells
+3 Fog Cloud, Gust of Wind, Ray of Frost, Shatter, Thunderwave
+5 Lightning Bolt, Water Breathing
+7 Control Water, Ice Storm
+9 Conjure Elemental, Hold Monster
 Level 3: Wrath of the Sea
 As a Bonus Action, you can expend a use of your Wild Shape to manifest an aura that takes the form of ocean spray that surrounds you. The aura lasts for 10 minutes. It ends early if you have the Incapacitated condition, dismiss it (no action required), or manifest the aura again.
 
@@ -297,5 +297,5 @@ In addition, you can manifest the aura around both the other creature and yourse
 Circle of the Stars
 See the Player's Handbook.
 
-English  ↳ Druid 2024
+English ↳ Druid 2024
 Donjons et Dragons 5 - D&D 5

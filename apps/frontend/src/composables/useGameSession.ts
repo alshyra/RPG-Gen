@@ -115,7 +115,7 @@ export const useGameSession = () => {
 
   const fetchAndSetCharacter = async (charId: string) => {
     try {
-      const fetched = await characterApi.getCharacterById(charId);
+      const fetched = await characterApi.findOne(charId);
       if (!fetched) return undefined;
       currentCharacter.value = fetched;
       return fetched;
@@ -145,7 +145,8 @@ export const useGameSession = () => {
     isInitializing.value = true;
     try {
       if (character.isDeceased) showDeathModal.value = true;
-      const messages = await chatApi.startGame(character);
+      // Get history to start the game
+      const messages = await chatApi.getHistory(character.characterId);
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);

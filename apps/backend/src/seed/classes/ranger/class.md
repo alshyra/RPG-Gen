@@ -4,13 +4,13 @@ Ranger DnD 2024Far from bustling cities, amid the trees of trackless forests and
 Thanks to their connection with nature, Rangers can also cast spells that harness primal powers of the wilderness. A Ranger’s talents and magic are honed with deadly focus to protect the world from the ravages of monsters and tyrants.
 
 Core Ranger Traits
-Primery Ability	Dexterity and Wisdom
-Hit Dice Die	D10 per Ranger level
-Saving Throws Proficiencies	Strength and Dexterity
-Skill Proficiencies	Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, or Survival
-Weapons Proficiencies	Simple and Martial weapons
-Armor Training	Light and Medium armor and Shields
-Starting Equipment	Choose A or B: (A) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus (sprig of mistletoe), Explorer’s Pack, and 7 GP; or (B) 150 GP
+Primery Ability Dexterity and Wisdom
+Hit Dice Die D10 per Ranger level
+Saving Throws Proficiencies Strength and Dexterity
+Skill Proficiencies Choose 3: Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, or Survival
+Weapons Proficiencies Simple and Martial weapons
+Armor Training Light and Medium armor and Shields
+Starting Equipment Choose A or B: (A) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus (sprig of mistletoe), Explorer’s Pack, and 7 GP; or (B) 150 GP
 Becoming a Ranger...
 As a Level 1 Character
 Gain all the traits in the Core Ranger Traits table.
@@ -20,29 +20,29 @@ Gain the following traits from the Core Ranger Traits table: Hit Point Die, prof
 Gain the Ranger’s level 1 features, which are listed in the Ranger Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 RANGER
 Ranger Class Features
- 
- 	Prof.	 	Favored	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Enemy	Spells	1	2	3	4	5
-1	+2	Spellcasting, Favored Enemy, Weapon Mastery	2	2	2	-	-	-	-
-2	+2	Deft Explorer, Fighting Style	2	3	2	-	-	-	-
-3	+2	Ranger Subclass	2	4	3	-	-	-	-
-4	+2	Ability Score Improvement	2	5	3	-	-	-	-
-5	+3	Extra Attack	3	6	4	2	-	-	-
-6	+3	Roving	3	6	4	2	-	-	-
-7	+3	Subclass Feature	3	7	4	3	-	-	-
-8	+3	Ability Score Improvement	3	7	4	3	-	-	-
-9	+4	Expertise	4	8	4	3	2	-	-
-10	+4	Tireless	4	8	4	3	2	-	-
-11	+4	Subclass Feature	4	10	4	3	3	-	-
-12	+4	Ability Score Improvement	4	10	4	3	3	-	-
-13	+5	Relentless Hunter	5	11	4	3	3	1	-
-14	+5	Nature’s Veil	5	11	4	3	3	1	-
-15	+5	Subclass Feature	5	12	4	3	3	2	-
-16	+5	Ability Score Improvement	5	12	4	3	3	2	-
-17	+6	Precise Hunter	6	14	4	3	3	3	1
-18	+6	Feral Senses	6	14	4	3	3	3	1
-19	+6	Epic Boon	6	15	4	3	3	3	2
-20	+6	Foe Slayer	6	15	4	3	3	3	2
+
+Prof. Favored Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Enemy Spells 1 2 3 4 5
+1 +2 Spellcasting, Favored Enemy, Weapon Mastery 2 2 2 - - - -
+2 +2 Deft Explorer, Fighting Style 2 3 2 - - - -
+3 +2 Ranger Subclass 2 4 3 - - - -
+4 +2 Ability Score Improvement 2 5 3 - - - -
+5 +3 Extra Attack 3 6 4 2 - - -
+6 +3 Roving 3 6 4 2 - - -
+7 +3 Subclass Feature 3 7 4 3 - - -
+8 +3 Ability Score Improvement 3 7 4 3 - - -
+9 +4 Expertise 4 8 4 3 2 - -
+10 +4 Tireless 4 8 4 3 2 - -
+11 +4 Subclass Feature 4 10 4 3 3 - -
+12 +4 Ability Score Improvement 4 10 4 3 3 - -
+13 +5 Relentless Hunter 5 11 4 3 3 1 -
+14 +5 Nature’s Veil 5 11 4 3 3 1 -
+15 +5 Subclass Feature 5 12 4 3 3 2 -
+16 +5 Ability Score Improvement 5 12 4 3 3 2 -
+17 +6 Precise Hunter 6 14 4 3 3 3 1
+18 +6 Feral Senses 6 14 4 3 3 3 1
+19 +6 Epic Boon 6 15 4 3 3 3 2
+20 +6 Foe Slayer 6 15 4 3 3 3 2
 As a Ranger, you gain the following class features when you reach the specified Ranger levels. These features are listed in the Ranger Features table.
 
 Level 1: Spellcasting
@@ -176,12 +176,12 @@ Level 3: Gloom Stalker Spells
 When you reach a Ranger level specified in the Gloom Stalker Spells table, you thereafter always have the listed spells prepared.
 
 Gloom Stalker Spells
-Ranger Level	Spells
-3	Disguise Self
-5	Rope Trick
-9	Fear
-13	Greater Invisibility
-17	Seeming
+Ranger Level Spells
+3 Disguise Self
+5 Rope Trick
+9 Fear
+13 Greater Invisibility
+17 Seeming
 Level 3: Umbral Sight
 You gain Darkvision with a range of 60 feet. If you already have Darkvision when you gain this feature, its range increases by 60 feet.
 
@@ -226,5 +226,5 @@ Once per turn when you deal damage to a creature marked by your Hunter’s Mark,
 Level 15: Superior Hunter's Defense
 When you take damage, you can take a Reaction to give yourself Resistance to that damage and any other damage of the same type until the end of the current turn.
 
-English  ↳ Ranger 2024
+English ↳ Ranger 2024
 Donjons et Dragons 5 - D&D 5

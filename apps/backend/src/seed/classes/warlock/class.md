@@ -6,13 +6,13 @@ Warlock DnD 2024Warlocks view their patrons as resources, as means to the end of
 Once a pact is made, a Warlock’s thirst for knowledge and power can’t be slaked with mere study. Most Warlocks spend their days pursuing greater power and deeper knowledge, which typically means some kind of adventure.
 
 Core Warlock Traits
-Primery Ability	Charisma
-Hit Dice Die	D8 per Warlock level
-Saving Throws Proficiencies	Wisdom and Charisma
-Skill Proficiencies	Choose 2: Arcana, Deception, History, Intimidation, Investigation, Nature, or Religion
-Weapons Proficiencies	Simple weapons
-Armor Training	Light armor
-Starting Equipment	Choose A or B: (A) Leather Armor, Sickle, 2 Daggers, Arcane Focus (orb), Book (occult lore), Scholar’s Pack, and 15 GP; or (B) 100 GP
+Primery Ability Charisma
+Hit Dice Die D8 per Warlock level
+Saving Throws Proficiencies Wisdom and Charisma
+Skill Proficiencies Choose 2: Arcana, Deception, History, Intimidation, Investigation, Nature, or Religion
+Weapons Proficiencies Simple weapons
+Armor Training Light armor
+Starting Equipment Choose A or B: (A) Leather Armor, Sickle, 2 Daggers, Arcane Focus (orb), Book (occult lore), Scholar’s Pack, and 15 GP; or (B) 100 GP
 Becoming a Warlock...
 As a Level 1 Character
 Gain all the traits in the Core Warlock Traits table.
@@ -22,32 +22,32 @@ Gain the following traits from the Core Warlock Traits table: Hit Point Die and 
 Gain the Warlock’s level 1 features, which are listed in the Warlock Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 WARLOCK
 Warlock Class Features
-Level	Prof.
-Bonus	Class Features	Eldritch
-Invocations	Cantrips	Prepared
-Spells	Spell
-Slots	Slot
+Level Prof.
+Bonus Class Features Eldritch
+Invocations Cantrips Prepared
+Spells Spell
+Slots Slot
 Level
-1	+2	Eldritch Invocations, Pact Magic	1	2	2	1	1
-2	+2	Magical Cunning	3	2	3	2	1
-3	+2	Warlock Subclass	3	2	4	2	2
-4	+2	Ability Score Improvement	3	3	5	2	2
-5	+3	-	5	3	6	2	3
-6	+3	Subclass feature	5	3	7	2	3
-7	+3	-	6	3	8	2	4
-8	+3	Ability Score Improvement	6	3	9	2	4
-9	+4	Contact Patron	7	3	10	2	5
-10	+4	Subclass feature	7	4	10	2	5
-11	+4	Mystic Arcanum (level 6 spell)	7	4	11	3	5
-12	+4	Ability Score Improvement	8	4	11	3	5
-13	+5	Mystic Arcanum (level 7 spell)	8	4	12	3	5
-14	+5	Subclass feature	8	4	12	3	5
-15	+5	Mystic Arcanum (level 8 spell)	9	4	13	3	5
-16	+5	Ability Score Improvement	9	4	13	3	5
-17	+6	Mystic Arcanum (level 9 spell)	9	4	14	4	5
-18	+6	-	10	4	14	4	5
-19	+6	Epic Boon	10	4	15	4	5
-20	+6	Eldritch Master	10	4	15	4	5
+1 +2 Eldritch Invocations, Pact Magic 1 2 2 1 1
+2 +2 Magical Cunning 3 2 3 2 1
+3 +2 Warlock Subclass 3 2 4 2 2
+4 +2 Ability Score Improvement 3 3 5 2 2
+5 +3 - 5 3 6 2 3
+6 +3 Subclass feature 5 3 7 2 3
+7 +3 - 6 3 8 2 4
+8 +3 Ability Score Improvement 6 3 9 2 4
+9 +4 Contact Patron 7 3 10 2 5
+10 +4 Subclass feature 7 4 10 2 5
+11 +4 Mystic Arcanum (level 6 spell) 7 4 11 3 5
+12 +4 Ability Score Improvement 8 4 11 3 5
+13 +5 Mystic Arcanum (level 7 spell) 8 4 12 3 5
+14 +5 Subclass feature 8 4 12 3 5
+15 +5 Mystic Arcanum (level 8 spell) 9 4 13 3 5
+16 +5 Ability Score Improvement 9 4 13 3 5
+17 +6 Mystic Arcanum (level 9 spell) 9 4 14 4 5
+18 +6 - 10 4 14 4 5
+19 +6 Epic Boon 10 4 15 4 5
+20 +6 Eldritch Master 10 4 15 4 5
 As a Warlock, you gain the following class features when you reach the specified Warlock levels. These features are listed in the Warlock Features table.
 
 Level 1: Eldritch Invocations
@@ -125,11 +125,11 @@ Level 3: Archfey Spells
 The magic of your patron ensures you always have certain spells ready; when you reach a Warlock level specified in the Archfey Spells table, you thereafter always have the listed spells prepared.
 
 Archfey Spells
-Warlock Level	Spells
-3	Calm Emotions, Faerie Fire, Misty Step, Phantasmal Force, Sleep
-5	Blink, Plant Growth
-7	Dominate Beast, Greater Invisibility
-9	Dominate Person, Seeming
+Warlock Level Spells
+3 Calm Emotions, Faerie Fire, Misty Step, Phantasmal Force, Sleep
+5 Blink, Plant Growth
+7 Dominate Beast, Greater Invisibility
+9 Dominate Person, Seeming
 Level 3: Steps of the Fey
 Your patron bestows on you the ability to move between the boundaries of the planes. You can cast Misty Step without expending a spell slot a number of times equal to your Charisma modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
 
@@ -164,11 +164,11 @@ Level 3: Celestial Spells
 The magic of your otherworldly patron ensures you always have certain spells ready; when you reach a Warlock level specified in the Celestial Spells table, you thereafter always have the listed spells prepared.
 
 Celestial Spells
-Warlock Level	Spells
-3	Aid, Cure Wounds, Guiding Bolt, Lesser Restoration, Light, Sacred Flame
-5	Daylight, Revivify
-7	Guardian of Faith, Wall of Fire
-9	Greater Restoration, Summon Celestial
+Warlock Level Spells
+3 Aid, Cure Wounds, Guiding Bolt, Lesser Restoration, Light, Sacred Flame
+5 Daylight, Revivify
+7 Guardian of Faith, Wall of Fire
+9 Greater Restoration, Summon Celestial
 Level 3: Healing Light
 You gain the ability to channel celestial energy to heal wounds. You have a pool of d6s that you spend to fuel this healing. The number of dice in the pool equals 1 plus your Warlock level.
 
@@ -197,11 +197,11 @@ Level 3: Fiend Spells
 The magic of your patron ensures you always have certain spells ready; when you reach a Warlock level specified in the Fiend Spells table, you thereafter always have the listed spells prepared.
 
 Fiend Spells
-Warlock Level	Spells
-3	Burning Hands, Command, Scorching Ray, Suggestion
-5	Fireball, Stinking Cloud
-7	Fire Shield, Wall of Fire
-9	Geas, Insect Plague
+Warlock Level Spells
+3 Burning Hands, Command, Scorching Ray, Suggestion
+5 Fireball, Stinking Cloud
+7 Fire Shield, Wall of Fire
+9 Geas, Insect Plague
 Level 6: Dark One's Own Luck
 You can call on your fiendish patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add 1d10 to your roll. You can do so after seeing the roll but before any of the roll’s effects occur.
 
@@ -229,11 +229,11 @@ Level 3: Great Old One Spells
 The magic of your otherworldly patron ensures you always have certain spells ready; when you reach a Warlock level specified in the Great Old One Spells table, you thereafter always have the listed spells prepared.
 
 Great Old One Spells
-Warlock Level	Spells
-3	Detect Thoughts, Dissonant Whispers, Phantasmal Force, Tasha's Hideous Laughter
-5	Clairvoyance, Hunger of Hadar
-7	Confusion, Summon Aberration
-9	Modify Memory, Telekinesis
+Warlock Level Spells
+3 Detect Thoughts, Dissonant Whispers, Phantasmal Force, Tasha's Hideous Laughter
+5 Clairvoyance, Hunger of Hadar
+7 Confusion, Summon Aberration
+9 Modify Memory, Telekinesis
 Level 3: Psychic Spells
 When you cast a Warlock spell that deals damage, you can change its damage type to Psychic. In addition, when you cast a Warlock spell that is an Enchantment or Illusion, you can do so without verbal or somatic components.
 
@@ -254,5 +254,5 @@ Your patron grants you the ability to manifest a part of itself. You always have
 
 In addition, the first time each turn the Aberration hits a creature under the effect of your Hex, the Aberration deals extra Psychic damage to the target equal to the bonus damage of that spell.
 
-English  ↳ Warlock 2024
+English ↳ Warlock 2024
 Donjons et Dragons 5 - D&D 5

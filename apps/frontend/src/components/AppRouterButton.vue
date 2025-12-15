@@ -18,7 +18,7 @@
       </UiButton>
     </template>
   </RouterLink>
-  
+
   <UiButton
     v-else
     :variant="variant"

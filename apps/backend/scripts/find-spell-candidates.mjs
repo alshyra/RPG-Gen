@@ -7,7 +7,8 @@ import path from 'path';
 const lev = (a, b) => {
   if (!a) return b ? b.length : 0;
   if (!b) return a.length;
-  const m = a.length, n = b.length;
+  const m = a.length,
+    n = b.length;
   const dp = Array.from({ length: m + 1 }, () => Array.from({ length: n + 1 }, () => 0));
   for (let i = 0; i <= m; i++) dp[i][0] = i;
   for (let j = 0; j <= n; j++) dp[0][j] = j;
@@ -20,12 +21,19 @@ const lev = (a, b) => {
   return dp[m][n];
 };
 
-const normalize = s => s.toString().normalize('NFKD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').trim();
+const normalize = s =>
+  s
+    .toString()
+    .normalize('NFKD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .trim();
 
 const base = path.resolve(new URL(import.meta.url).pathname, '..', '..');
 const spellsPath = path.join(base, 'src', 'seed', 'spells.json');
 const className = process.argv[2] || 'bard';
-const fullPath = path.join(base, 'src', 'seed', 'classes',className ,'allowed-spells.full.json');
+const fullPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.full.json');
 
 if (!fs.existsSync(fullPath)) {
   console.error('Missing file', fullPath);
@@ -55,18 +63,28 @@ for (const [lvl, arr] of Object.entries(full.allowedSpellsByLevel || {})) {
     const name = typeof item === 'string' ? item : item.name;
     const norm = normalize(name.replace(/\s+\d+$/, '').trim());
     // compute candidate scores by Levenshtein ratio
-    const scored = candidates.map((c) => {
-      const d = lev(norm, c.norm);
-      const max = Math.max(norm.length, c.norm.length) || 1;
-      const score = 1 - d / max;
-      return { id: c.id, name: c.name, score };
-    }).sort((a, b) => b.score - a.score).slice(0, 6);
+    const scored = candidates
+      .map(c => {
+        const d = lev(norm, c.norm);
+        const max = Math.max(norm.length, c.norm.length) || 1;
+        const score = 1 - d / max;
+        return { id: c.id, name: c.name, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
 
     out[lvl].push({ name, candidates: scored });
   }
 }
 
-const outPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.candidates.json');
+const outPath = path.join(
+  base,
+  'src',
+  'seed',
+  'classes',
+  className,
+  'allowed-spells.candidates.json',
+);
 fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
 console.log('wrote', outPath);
 
@@ -116,7 +134,14 @@ if (emitReview) {
     }
     if (review[lvl].length === 0) delete review[lvl];
   }
-  const reviewPath = path.join(base, 'src', 'seed', 'classes', className, 'allowed-spells.review.json');
+  const reviewPath = path.join(
+    base,
+    'src',
+    'seed',
+    'classes',
+    className,
+    'allowed-spells.review.json',
+  );
   fs.writeFileSync(reviewPath, JSON.stringify(review, null, 2));
   console.log('wrote review file', reviewPath, ' (minScore=' + minScore + ')');
 }

@@ -38,7 +38,7 @@ const isDisabled = computed(() => isLoading || disabled);
 const buttonClass = computed(() => {
   if (isDisabled.value) {
     return 'opacity-50 cursor-not-allowed';
-  } 
+  }
   return 'cursor-pointer hover:opacity-90';
 });
 </script>

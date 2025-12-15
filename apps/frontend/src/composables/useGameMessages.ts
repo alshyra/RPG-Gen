@@ -49,7 +49,14 @@ export function useGameMessages() {
     gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
     try {
-      const response = await chatApi.sendMessage(messageText);
+      if (!currentCharacter.value?.characterId) {
+        throw new Error('No character loaded');
+      }
+      const response = await chatApi.sendMessage(currentCharacter.value.characterId, {
+        role: 'user',
+        narrative: messageText,
+        instructions: [],
+      });
       gameStore.clearLastFailedMessage();
       handleMessageResponse(response);
     } catch (e: unknown) {

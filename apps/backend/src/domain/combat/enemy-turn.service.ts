@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { DiceService } from "../dice/dice.service.js";
-import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
-import type { EnemyAttackLogDto } from "./dto/EnemyAttackLogDto.js";
-import type { CombatStateDto, CombatantDto } from "./dto/index.js";
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { DiceService } from '../dice/dice.service.js';
+import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
+import type { EnemyAttackLogDto } from './dto/EnemyAttackLogDto.js';
+import type { CombatStateDto, CombatantDto } from './dto/index.js';
 
 /**
  * Domain service for enemy turn mechanics.
@@ -14,7 +14,7 @@ import type { CombatStateDto, CombatantDto } from "./dto/index.js";
 @Injectable()
 export class EnemyTurnService {
   constructor(
-    @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>
+    @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
   ) {}
 
   /**
@@ -30,7 +30,7 @@ export class EnemyTurnService {
     characterId: string,
     enemy: CombatantDto,
     playerAC: number,
-    diceService: DiceService
+    diceService: DiceService,
   ): Promise<{
     log: EnemyAttackLogDto;
     damage: number;
@@ -58,9 +58,9 @@ export class EnemyTurnService {
 
     // Roll damage if hit
     const damageResult = diceService.rollDamage(
-      enemy.damageDice ?? "1d6",
+      enemy.damageDice ?? '1d6',
       attackRoll.isCrit,
-      enemy.damageBonus ?? 0
+      enemy.damageBonus ?? 0,
     );
     attackLog.damageRoll = damageResult;
     attackLog.damageTotal = damageResult.damageTotal;
@@ -95,7 +95,7 @@ export class EnemyTurnService {
     characterId: string,
     state: CombatStateDto,
     enemies: CombatantDto[],
-    diceService: DiceService
+    diceService: DiceService,
   ): Promise<{
     state: CombatStateDto;
     attackLogs: EnemyAttackLogDto[];
@@ -111,7 +111,7 @@ export class EnemyTurnService {
           characterId,
           enemy,
           acc.state.player.ac,
-          diceService
+          diceService,
         );
 
         // Fetch fresh state after attack to reflect HP changes
@@ -132,7 +132,7 @@ export class EnemyTurnService {
         attackLogs: [] as EnemyAttackLogDto[],
         totalDamage: 0,
         playerDefeated: false,
-      })
+      }),
     );
 
     return result;

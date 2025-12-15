@@ -41,10 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from '@rpg-gen/api-client';
-import type { CharacterResponseDto } from '@rpg-gen/shared';
-import { onMounted, ref } from 'vue';
-import CharacterMenu from './CharacterMenu.vue';
+import { characterApi } from "@rpg-gen/api-client";
+import type { CharacterResponseDto } from "@rpg-gen/shared";
+import { onMounted, ref } from "vue";
+import CharacterMenu from "./CharacterMenu.vue";
 
 const characters = ref<CharacterResponseDto[]>([]);
 const isLoading = ref(false);
@@ -52,10 +52,10 @@ const isLoading = ref(false);
 const loadCharacters = async () => {
   try {
     isLoading.value = true;
-    const res = await characterApi.getAllCharacters();
+    const res = await characterApi.findAll();
     characters.value = res || [];
   } catch (e) {
-    console.error('Failed to load characters', e);
+    console.error("Failed to load characters", e);
     characters.value = [];
   } finally {
     isLoading.value = false;
@@ -66,7 +66,7 @@ onMounted(() => {
   loadCharacters();
 });
 const onCharacterDeleted = (id: string) => {
-  characters.value = characters.value.filter(c => c.characterId !== id);
+  characters.value = characters.value.filter((c) => c.characterId !== id);
 };
 </script>
 

@@ -147,22 +147,22 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
-import type { LevelUpResult } from '@/interfaces';
-import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from '@rpg-gen/shared';
-import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { dndLevelUpService } from '../../services/dndLevelUpService';
-import { chatApi } from '@rpg-gen/api-client';
-import { characterApi } from '@rpg-gen/api-client';
-import { classesApi } from '@rpg-gen/api-client';
+import { useCharacterStore } from "@/stores/characterStore";
+import type { LevelUpResult } from "@/interfaces";
+import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from "@rpg-gen/shared";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { dndLevelUpService } from "../../services/dndLevelUpService";
+import { chatApi } from "@rpg-gen/api-client";
+import { characterApi } from "@rpg-gen/api-client";
+import { classesApi } from "@rpg-gen/api-client";
 
 const props = withDefaults(
   defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
   {
-    world: '',
+    world: "",
     initialCharacter: undefined,
-  },
+  }
 );
 
 const router = useRouter();
@@ -179,14 +179,14 @@ const currentLevel = computed(() => character.value.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));
 
 // Level up calculation
-const className = computed(() => character.value.classes?.[0]?.name || 'Fighter');
+const className = computed(() => character.value.classes?.[0]?.name || "Fighter");
 const conModifier = computed(() => {
   const conScore = character.value.scores?.Con || 10;
   return Math.floor((conScore - 10) / 2);
 });
 
 const levelUpReward = computed<LevelUpResult>(() =>
-  dndLevelUpService.levelUp(className.value, currentLevel.value, conModifier.value),
+  dndLevelUpService.levelUp(className.value, currentLevel.value, conModifier.value)
 );
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
@@ -199,12 +199,12 @@ const loadCombatOptions = async (): Promise<void> => {
   try {
     const options: LevelUpOptionsDto = await classesApi.getLevelOptions(
       className.value,
-      nextLevel.value,
+      nextLevel.value
     );
     availableCombatOptions.value = options.combatOptions || [];
     selectedCombatIds.value = [];
   } catch (err) {
-    console.error('Failed to load combat options:', err);
+    console.error("Failed to load combat options:", err);
     availableCombatOptions.value = [];
     selectedCombatIds.value = [];
   } finally {
@@ -237,7 +237,7 @@ const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): s
       newCombatProficiencies: selectedCombatIds.value,
     },
     null,
-    2,
+    2
   )}`;
 
 const executeLevelUp = async (): Promise<void> => {
@@ -252,7 +252,7 @@ const executeLevelUp = async (): Promise<void> => {
     ],
     hp: Math.min(
       (character.value.hp || 0) + levelUpReward.value.hpGain,
-      (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+      (character.value.hpMax || 0) + levelUpReward.value.hpGain
     ),
     hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
   };
@@ -262,7 +262,8 @@ const executeLevelUp = async (): Promise<void> => {
   if (updatedCharacter.characterId) {
     // Use the dedicated LevelUp API with combat selections
     try {
-      await characterApi.applyLevelUp(updatedCharacter.characterId, className.value, {
+      await characterApi.applyLevelUp(updatedCharacter.characterId, {
+        className: className.value,
         newSpellIds: [],
         abilityIncreases: [],
         selectedCombatProficiencies: selectedCombatIds.value,
@@ -274,13 +275,18 @@ const executeLevelUp = async (): Promise<void> => {
   }
 
   // Send to backend
+  if (!updatedCharacter.characterId) return;
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await chatApi.sendMessage(levelupMsg);
+  await chatApi.sendMessage(updatedCharacter.characterId, {
+    role: "user",
+    narrative: levelupMsg,
+    instructions: [],
+  });
 
   // Return to game
   setTimeout(() => {
     router.push({
-      name: 'game',
+      name: "game",
       params: { world: props.world },
     });
   }, 1500);

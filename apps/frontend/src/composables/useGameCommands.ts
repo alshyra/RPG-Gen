@@ -134,7 +134,7 @@ export function useGameCommands() {
     }
 
     try {
-      const response = await inventoryApi.useItem(characterId, defId);
+      const response = await inventoryApi.useItem(characterId, { itemId: defId });
       handleUseItemResponse(response);
     } catch {
       gameStore.messages.pop();
@@ -181,7 +181,14 @@ export function useGameCommands() {
     message: string,
     instructions: GameInstructionDto[] = [],
   ): Promise<void> => {
-    const response = await chatApi.sendMessage(message, instructions);
+    if (!characterStore.currentCharacter?.characterId) {
+      throw new Error('No character loaded');
+    }
+    const response = await chatApi.sendMessage(characterStore.currentCharacter.characterId, {
+      role: 'user',
+      narrative: message,
+      instructions,
+    });
     gameStore.messages.pop();
     gameStore.appendMessage('assistant', response.narrative);
     processInstructions(response.instructions ?? []);
@@ -318,10 +325,7 @@ export function useGameCommands() {
     gameStore.appendMessage('system', 'Equipping...');
 
     await executeWithLoading(async () => {
-      const updated = await characterApi.equipInventoryItem(
-        character.characterId,
-        item.definitionId,
-      );
+      const updated = await characterApi.equipItem(character.characterId, item.definitionId);
       characterStore.currentCharacter = updated;
       gameStore.appendMessage('system', `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);

@@ -60,24 +60,24 @@
 </template>
 
 <script setup lang="ts">
-import { useGameRolls } from '@/composables/useGameRolls';
-import { useCombatStore } from '@/stores/combatStore';
-import { useUiStore } from '@/stores/uiStore';
-import { storeToRefs } from 'pinia';
-import { computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { characterApi } from '@rpg-gen/api-client';
-import DeathModal from '../components/game/DeathModal.vue';
-import RollModal from '../components/game/RollModal.vue';
-import ChatBar from '../components/layout/ChatBar.vue';
-import { useCombat } from '../composables/useCombat';
-import { useGameCommands } from '../composables/useGameCommands';
-import { useGameMessages } from '../composables/useGameMessages';
-import { useGameSession } from '../composables/useGameSession';
-import { useCharacterStore } from '../stores/characterStore';
-import { useGameStore } from '../stores/gameStore';
-import { isCommand } from '../utils/chatCommands';
-import CharacterInfoPanel from './game/CharacterInfoPanel.vue';
+import { useGameRolls } from "@/composables/useGameRolls";
+import { useCombatStore } from "@/stores/combatStore";
+import { useUiStore } from "@/stores/uiStore";
+import { storeToRefs } from "pinia";
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { characterApi } from "@rpg-gen/api-client";
+import DeathModal from "../components/game/DeathModal.vue";
+import RollModal from "../components/game/RollModal.vue";
+import ChatBar from "../components/layout/ChatBar.vue";
+import { useCombat } from "../composables/useCombat";
+import { useGameCommands } from "../composables/useGameCommands";
+import { useGameMessages } from "../composables/useGameMessages";
+import { useGameSession } from "../composables/useGameSession";
+import { useCharacterStore } from "../stores/characterStore";
+import { useGameStore } from "../stores/gameStore";
+import { isCommand } from "../utils/chatCommands";
+import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
 
 // State
 const router = useRouter();
@@ -97,13 +97,13 @@ const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
 useGameRolls();
 
 const contentMaxHeight = computed(() => {
-  if (pendingInstruction.value?.type === 'roll') {
-    return 'calc(100vh - 200px)';
+  if (pendingInstruction.value?.type === "roll") {
+    return "calc(100vh - 200px)";
   }
   if (inCombat.value) {
-    return 'calc(100vh - 12rem)';
+    return "calc(100vh - 12rem)";
   }
-  return 'calc(100vh - 160px)';
+  return "calc(100vh - 160px)";
 });
 
 /**
@@ -114,7 +114,7 @@ const handleSendMessage = async () => {
   if (!input) return;
 
   if (isCommand(input)) {
-    gameStore.playerText = '';
+    gameStore.playerText = "";
     await handleInput(input);
   } else {
     await sendMessage();
@@ -130,24 +130,24 @@ const handleRetryMessage = async () => {
 
 onMounted(async () => {
   try {
-    console.log('stargame')
+    console.log("stargame");
     await startGame();
     // After session started, check backend combat status and initialize the combat store
     try {
       const wasInCombat = await combat.checkCombatStatus();
-      console.log('[GameView] combat status at startup', { wasInCombat });
+      console.log("[GameView] combat status at startup", { wasInCombat });
     } catch (err) {
-      console.warn('Failed to load combat status at startup', err);
+      console.warn("Failed to load combat status at startup", err);
     }
   } catch (e) {
-    gameStore.appendMessage('system', `Error: ${String(e)}`);
+    gameStore.appendMessage("system", `Error: ${String(e)}`);
   }
 });
 
 const onDeathConfirm = async () => {
   if (!currentCharacter.value?.characterId) return;
-  await characterApi.killCharacter(currentCharacter.value.characterId, currentCharacter.value.world);
+  await characterApi.kill(currentCharacter.value.characterId);
   showDeathModal.value = false;
-  router.push('/');
+  router.push("/");
 };
 </script>

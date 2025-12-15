@@ -4,9 +4,9 @@ metadata:
   name: rpggen-back
   annotations:
     run.googleapis.com/ingress: all
-    run.googleapis.com/minScale: "0"
-    run.googleapis.com/maxScale: "1"
-    run.googleapis.com/invoker-iam-disabled: "true"
+    run.googleapis.com/minScale: '0'
+    run.googleapis.com/maxScale: '1'
+    run.googleapis.com/invoker-iam-disabled: 'true'
 spec:
   template:
     spec:
@@ -19,7 +19,7 @@ spec:
               containerPort: 3001
           resources:
             limits:
-              cpu: "1"
+              cpu: '1'
               memory: 512Mi
           startupProbe:
             httpGet:
@@ -38,11 +38,11 @@ spec:
             timeoutSeconds: 3
           env:
             - name: NODE_ENV
-              value: "production"
+              value: 'production'
             - name: SERVER_PORT
-              value: "3001"
+              value: '3001'
             - name: FRONTEND_URL
-              value: "https://rpggen-front-469869562907.europe-west1.run.app"
+              value: 'https://rpggen-front-469869562907.europe-west1.run.app'
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
@@ -64,7 +64,7 @@ spec:
                   name: google-oauth-client-secret
                   key: latest
             - name: GOOGLE_OAUTH_CALLBACK_URL
-              value: "https://rpggen-front-469869562907.europe-west1.run.app/api/auth/google/callback"
+              value: 'https://rpggen-front-469869562907.europe-west1.run.app/api/auth/google/callback'
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

@@ -1,5 +1,8 @@
 <template>
-  <div v-if="user" class="flex items-center gap-3">
+  <div
+    v-if="user"
+    class="flex items-center gap-3"
+  >
     <div class="hidden sm:block text-right">
       <div class="text-sm font-medium text-white">
         {{ user.displayName }}

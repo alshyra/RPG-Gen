@@ -27,12 +27,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { showAlert } from '@/composables/useModal';
-import CharactersMenu from '../components/home/CharactersMenu.vue';
-import { UiButton } from '@rpg-gen/ui';
-import { characterApi } from '@rpg-gen/api-client';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { showAlert } from "@/composables/useModal";
+import CharactersMenu from "../components/home/CharactersMenu.vue";
+import { UiButton } from "@rpg-gen/ui";
+import { characterApi } from "@rpg-gen/api-client";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const creating = ref(false);
@@ -40,11 +40,11 @@ const creating = ref(false);
 const createDndCharacter = async () => {
   creating.value = true;
   try {
-    const newChar = await characterApi.createCharacter('dnd');
+    const newChar = await characterApi.create({ world: "dnd" });
     if (newChar && newChar.characterId) {
       // Navigate to character creation step 1 for the new character
       router.push({
-        name: 'character-step',
+        name: "character-step",
         params: {
           characterId: newChar.characterId,
           step: 1,
@@ -52,8 +52,8 @@ const createDndCharacter = async () => {
       });
     }
   } catch (e) {
-    console.error('Failed to create DnD character', e);
-    await showAlert('La création du personnage a échoué.');
+    console.error("Failed to create DnD character", e);
+    await showAlert("La création du personnage a échoué.");
   } finally {
     creating.value = false;
   }

@@ -32,7 +32,9 @@ for (let i = 0; i < argv.length; i++) {
     // append an assistant message with a combat_start instruction so combat initializes on history load
     opts.withChat = true;
   } else if (a === '--help' || a === '-h') {
-    console.log(`Usage: node scripts/prepare-e2e-db.mjs [--url <API_URL>] [--count <n>] [--cleanup]`);
+    console.log(
+      `Usage: node scripts/prepare-e2e-db.mjs [--url <API_URL>] [--count <n>] [--cleanup]`,
+    );
     process.exit(0);
   }
 }
@@ -147,10 +149,18 @@ async function main() {
             },
           });
           if (![200, 201].includes(invResp.status)) {
-            log('Failed to add inventory for', characterId, invResp.status, invResp.body || invResp.raw);
+            log(
+              'Failed to add inventory for',
+              characterId,
+              invResp.status,
+              invResp.body || invResp.raw,
+            );
           } else {
             // Ensure equipped via equip endpoint (some controllers expect definitionId equip)
-            await request(`/api/characters/${characterId}/inventory/equip`, { method: 'POST', body: { definitionId: 'weapon-rapier' } });
+            await request(`/api/characters/${characterId}/inventory/equip`, {
+              method: 'POST',
+              body: { definitionId: 'weapon-rapier' },
+            });
           }
         } catch (e) {
           log('Failed to add/equip starter weapon', e?.message || e);
@@ -163,12 +173,27 @@ async function main() {
           // Start combat directly via the combat API
           const combatStartBody = {
             combat_start: [
-              { name: 'Goblin', hp: 7, ac: 13, attack_bonus: 4, damage_dice: '1d6', damage_bonus: 2 },
+              {
+                name: 'Goblin',
+                hp: 7,
+                ac: 13,
+                attack_bonus: 4,
+                damage_dice: '1d6',
+                damage_bonus: 2,
+              },
             ],
           };
-          const combatResp = await request(`/api/combat/${characterId}/start`, { method: 'POST', body: combatStartBody });
+          const combatResp = await request(`/api/combat/${characterId}/start`, {
+            method: 'POST',
+            body: combatStartBody,
+          });
           if (![200, 201].includes(combatResp.status)) {
-            log('Failed to start combat for', characterId, combatResp.status, combatResp.body || combatResp.raw);
+            log(
+              'Failed to start combat for',
+              characterId,
+              combatResp.status,
+              combatResp.body || combatResp.raw,
+            );
           } else {
             log('Started combat for', characterId);
           }
@@ -185,7 +210,7 @@ async function main() {
   console.table(created);
 }
 
-main().catch((e) => {
+main().catch(e => {
   console.error('Unexpected error', e);
   process.exit(2);
 });

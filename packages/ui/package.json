@@ -5,14 +5,10 @@
   "description": "Shared Vue 3 UI components for RPG-Gen",
   "type": "module",
   "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
-    },
-    "./index.css": {
-      "import": "./index.css"
     },
     "./dist": {
       "types": "./dist/index.d.ts",
@@ -20,12 +16,16 @@
     },
     "./dist/index.css": {
       "import": "./dist/index.css"
+    },
+    "./index.css": {
+      "import": "./index.css"
     }
   },
+  "types": "./src/index.ts",
   "files": [
-    "src",
     "dist",
-    "index.css"
+    "index.css",
+    "src"
   ],
   "scripts": {
     "build": "vite build",
@@ -38,11 +38,11 @@
     "vue": "^3.5.24"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitest/ui": "^4.0.8",
     "@vue/test-utils": "^2.4.6",
-    "@tailwindcss/vite": "^4.1.18",
     "jsdom": "^27.2.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",

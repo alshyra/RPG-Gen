@@ -6,13 +6,13 @@ Cleric DnD 2024Because their power is a divine gift, Clerics typically associate
 Not every member of a temple or shrine is a Cleric. Some priests are called to a simple life of temple service, carrying out their devotion through prayer and rituals, not through magic. Many mortals claim to speak for the gods, but few can marshal the power of those gods the way a Cleric can.
 
 Core Cleric Traits
-Primery Ability	Wisdom
-Hit Dice Die	D8 per Cleric level
-Saving Throws Proficiencies	Wisdom and Charisma
-Skill Proficiencies	Choose 2: History, Insight, Medicine, Persuasion, or Religion
-Weapons Proficiencies	Simple weapons
-Armor Training	Light and Medium armor and Shields
-Starting Equipment	Chosse A or B: (A) Chain Shirt, Shield, Mace, Holy Symbol, Priest’s Pack, and 7 GP; or (B) 110 GP
+Primery Ability Wisdom
+Hit Dice Die D8 per Cleric level
+Saving Throws Proficiencies Wisdom and Charisma
+Skill Proficiencies Choose 2: History, Insight, Medicine, Persuasion, or Religion
+Weapons Proficiencies Simple weapons
+Armor Training Light and Medium armor and Shields
+Starting Equipment Chosse A or B: (A) Chain Shirt, Shield, Mace, Holy Symbol, Priest’s Pack, and 7 GP; or (B) 110 GP
 Becoming a Cleric...
 As a Level 1 Character
 Gain all the traits in the Core Cleric Traits table.
@@ -22,29 +22,29 @@ Gain the following traits from the Core Cleric Traits table: Hit Point Die and t
 Gain the Cleric’s level 1 features, which are listed in the Cleric Features table. See the multiclassing rules to determine your available spell slots.
 CREATE A 2024 CLERIC
 Cleric Class Features
- 
- 	Prof.	 	Channel	 	Prepared	- Spell Slots per Spell Level -
-Level	Bonus	Class Features	Divinity	Cantrips	Spells	1	2	3	4	5	6	7	8	9
-1	+2	Spellcasting, Divine Order	-	3	4	2	-	-	-	-	-	-	-	-
-2	+2	Channel Divinity	2	3	5	3	-	-	-	-	-	-	-	-
-3	+2	Cleric Subclass	2	3	6	4	2	-	-	-	-	-	-	-
-4	+2	Ability Score Improvement	2	4	7	4	3	-	-	-	-	-	-	-
-5	+3	Sear Undead	2	4	9	4	3	2	-	-	-	-	-	-
-6	+3	Subclass Feature	3	4	10	4	3	3	-	-	-	-	-	-
-7	+3	Blessed Strikes	3	4	11	4	3	3	1	-	-	-	-	-
-8	+3	Ability Score Improvement	3	4	12	4	3	3	2	-	-	-	-	-
-9	+4	-	3	4	14	4	3	3	3	1	-	-	-	-
-10	+4	Divine Intervention	3	5	15	4	3	3	3	2	-	-	-	-
-11	+4	-	3	5	16	4	3	3	3	2	1	-	-	-
-12	+4	Ability Score Improvement	3	5	16	4	3	3	3	2	1	-	-	-
-13	+5	-	3	5	17	4	3	3	3	2	1	1	-	-
-14	+5	Improved Blessed Strikes	3	5	17	4	3	3	3	2	1	1	-	-
-15	+5	-	3	5	18	4	3	3	3	2	1	1	1	-
-16	+5	Ability Score Improvement	3	5	18	4	3	3	3	2	1	1	1	-
-17	+6	Subclass Feature	3	5	19	4	3	3	3	2	1	1	1	1
-18	+6	-	4	5	20	4	3	3	3	3	1	1	1	1
-19	+6	Epic Boon	4	5	21	4	3	3	3	3	2	1	1	1
-20	+6	Greater Divine Intervention	4	5	22	4	3	3	3	3	2	2	1	1
+
+Prof. Channel Prepared - Spell Slots per Spell Level -
+Level Bonus Class Features Divinity Cantrips Spells 1 2 3 4 5 6 7 8 9
+1 +2 Spellcasting, Divine Order - 3 4 2 - - - - - - - -
+2 +2 Channel Divinity 2 3 5 3 - - - - - - - -
+3 +2 Cleric Subclass 2 3 6 4 2 - - - - - - -
+4 +2 Ability Score Improvement 2 4 7 4 3 - - - - - - -
+5 +3 Sear Undead 2 4 9 4 3 2 - - - - - -
+6 +3 Subclass Feature 3 4 10 4 3 3 - - - - - -
+7 +3 Blessed Strikes 3 4 11 4 3 3 1 - - - - -
+8 +3 Ability Score Improvement 3 4 12 4 3 3 2 - - - - -
+9 +4 - 3 4 14 4 3 3 3 1 - - - -
+10 +4 Divine Intervention 3 5 15 4 3 3 3 2 - - - -
+11 +4 - 3 5 16 4 3 3 3 2 1 - - -
+12 +4 Ability Score Improvement 3 5 16 4 3 3 3 2 1 - - -
+13 +5 - 3 5 17 4 3 3 3 2 1 1 - -
+14 +5 Improved Blessed Strikes 3 5 17 4 3 3 3 2 1 1 - -
+15 +5 - 3 5 18 4 3 3 3 2 1 1 1 -
+16 +5 Ability Score Improvement 3 5 18 4 3 3 3 2 1 1 1 -
+17 +6 Subclass Feature 3 5 19 4 3 3 3 2 1 1 1 1
+18 +6 - 4 5 20 4 3 3 3 3 1 1 1 1
+19 +6 Epic Boon 4 5 21 4 3 3 3 3 2 1 1 1
+20 +6 Greater Divine Intervention 4 5 22 4 3 3 3 3 2 2 1 1
 As a Cleric, you gain the following class features when you reach the specified Cleric levels. These features are listed in the Cleric Features table.
 
 Level 1: Spellcasting
@@ -137,11 +137,11 @@ Level 3: Life Domain Spells
 Your connection to this divine domain ensures you always have certain spells ready. When you reach a Cleric level specified in the Life Domain Spells table, you thereafter always have the listed spells prepared.
 
 Life Domain Spells
-Cleric Level	Prepared Spells
-3	Aid, Bless, Cure Wounds, Lesser Restoration
-5	Mass Healing Word, Revivify
-7	Aura of Life, Death Ward
-9	Greater Restoration, Mass Cure Wounds
+Cleric Level Prepared Spells
+3 Aid, Bless, Cure Wounds, Lesser Restoration
+5 Mass Healing Word, Revivify
+7 Aura of Life, Death Ward
+9 Greater Restoration, Mass Cure Wounds
 Level 3: Preserve Life
 As a Magic action, you present your Holy Symbol and expend a use of your Channel Divinity to evoke healing energy that can restore a number of Hit Points equal to five times your Cleric level. Choose Bloodied creatures within 30 feet of yourself (which can include you), and divide those Hit Points among them. This feature can restore a creature to no more than half its Hit Point maximum.
 
@@ -160,11 +160,11 @@ Level 3: Light Domain Spells
 Your connection to this divine domain ensures you always have certain spells ready. When you reach a Cleric level specified in the Light Domain Spells table, you thereafter always have the listed spells prepared.
 
 Light Domain Spells
-Cleric Level	Prepared Spells
-3	Burning Hands, Faerie Fire, Scorching Ray, See Invisibility
-5	Daylight, Fireball
-7	Arcane Eye, Wall of Fire
-9	Flame Strike, Scrying
+Cleric Level Prepared Spells
+3 Burning Hands, Faerie Fire, Scorching Ray, See Invisibility
+5 Daylight, Fireball
+7 Arcane Eye, Wall of Fire
+9 Flame Strike, Scrying
 Level 3: Radiance of the Dawn
 As a Magic action, you present your Holy Symbol and expend a use of your Channel Divinity to emit a flash of light in a 30-foot Emanation originating from yourself. Any magical darkness—such as that created by the Darkness spell—in that area is dispelled. Additionally, each creature of your choice in that area must make a Constitution saving throw, taking Radiant damage equal to 2d10 plus your Cleric level on a failed save, or half as much damage on a successful one.
 
@@ -205,11 +205,11 @@ Level 3: Trickery Domain Spells
 Your connection to this divine domain ensures you always have certain spells ready. When you reach a Cleric level specified in the Trickery Domain Spells table, you thereafter always have the listed spells prepared.
 
 Trickery Domain Spells
-Cleric Level	Prepared Spells
-3	Charm Person, Disguise Self, Invisibility, Pass without Trace
-5	Hypnotic Pattern, Nondetection
-7	Confusion, Dimension Door
-9	Dominate Person, Modify Memory
+Cleric Level Prepared Spells
+3 Charm Person, Disguise Self, Invisibility, Pass without Trace
+5 Hypnotic Pattern, Nondetection
+7 Confusion, Dimension Door
+9 Dominate Person, Modify Memory
 Level 6: Trickster's Transposition
 Whenever you take the Bonus Action to create or move the illusion of your Invoke Duplicity, you can teleport, swapping places with the illusion.
 
@@ -232,11 +232,11 @@ Level 3: War Domain Spells
 Your connection to this divine domain ensures you always have certain spells ready. When you reach a Cleric level specified in the War Domain Spells table, you thereafter always have the listed spells prepared.
 
 War Domain Spells
-Cleric Level	Prepared Spells
-3	Guiding Bolt, Magic Weapon, Shield of Faith, Spiritual Weapon
-5	Crusader’s Mantle, Spirit Guardians
-7	Fire Shield, Freedom of Movement
-9	Hold Monster, Steel Wind Strike
+Cleric Level Prepared Spells
+3 Guiding Bolt, Magic Weapon, Shield of Faith, Spiritual Weapon
+5 Crusader’s Mantle, Spirit Guardians
+7 Fire Shield, Freedom of Movement
+9 Hold Monster, Steel Wind Strike
 Level 3: War Priest
 As a Bonus Action, you can make one attack with a weapon or an Unarmed Strike. You can use this Bonus Action a number of times equal to your Wisdom modifier (minimum of once). You regain all expended uses when you finish a Short or Long Rest.
 
@@ -246,5 +246,5 @@ You can expend a use of your Channel Divinity to cast Shield of Faith or Spiritu
 Level 17: Avatar of Battle
 You gain Resistance to Bludgeoning, Piercing, and Slashing damage.
 
-English  ↳ Cleric 2024
+English ↳ Cleric 2024
 Donjons et Dragons 5 - D&D 5

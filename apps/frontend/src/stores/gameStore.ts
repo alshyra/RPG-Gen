@@ -37,7 +37,10 @@ export const useGameStore = defineStore('gameStore', () => {
 
   const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
     // Call diceService which uses the backend API and returns the roll result
-    const diceResultDto = await diceApi.roll(expr, advantage);
+    const diceResultDto = await diceApi.roll({
+      expr,
+      advantage: advantage || 'none',
+    });
     rolls.value.push(diceResultDto);
     latestRoll.value = diceResultDto;
     return diceResultDto;

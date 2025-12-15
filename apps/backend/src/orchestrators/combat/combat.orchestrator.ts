@@ -1,17 +1,17 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { CharacterService } from "../../domain/character/character.service.js";
-import { ConversationService } from "../../domain/chat/conversation.service.js";
-import { CombatAppService } from "../../domain/combat/combat.app.service.js";
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CharacterService } from '../../domain/character/character.service.js';
+import { ConversationService } from '../../domain/chat/conversation.service.js';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 
 import type {
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
   EndPlayerTurnResponseDto,
-} from "../../domain/combat/dto/index.js";
-import { DiceService } from "../../domain/dice/dice.service.js";
-import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
-import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+} from '../../domain/combat/dto/index.js';
+import { DiceService } from '../../domain/dice/dice.service.js';
+import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
+import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -33,7 +33,7 @@ export class CombatOrchestrator {
     private readonly diceService: DiceService,
     private readonly spellDefinitionService: SpellDefinitionService,
     private readonly conversationService: ConversationService,
-    private readonly geminiTexteService: GeminiTextService
+    private readonly geminiTexteService: GeminiTextService,
   ) {}
 
   /**
@@ -43,29 +43,29 @@ export class CombatOrchestrator {
   async startCombat(
     userId: string,
     characterId: string,
-    combatStartRequest: CombatStartRequestDto
+    combatStartRequest: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
     const characterDto = await this.characterService.findByCharacterId(userId, characterId);
     let state = await this.combatAppService.initializeCombat(
       characterDto,
       combatStartRequest,
-      userId
+      userId,
     );
 
     // Early return when there are no enemy turns before the player activation
     if (state.turnOrder.length === 0 || state.turnOrder[0].isPlayer) {
       this.logger.log(
-        `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`
+        `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
       );
       return {
         ...state,
         narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-        phase: "PLAYER_TURN" as const,
+        phase: 'PLAYER_TURN' as const,
       };
     }
 
     // If turn order begins with an enemy, simulate initial turns here
-    const playerIndex = state.turnOrder.findIndex((c) => c.isPlayer);
+    const playerIndex = state.turnOrder.findIndex(c => c.isPlayer);
     const enemyTurnsBeforeFirstPlayer =
       playerIndex >= 0 ? state.turnOrder.slice(0, playerIndex) : state.turnOrder.slice();
 
@@ -74,7 +74,7 @@ export class CombatOrchestrator {
       characterId,
       state,
       enemyTurnsBeforeFirstPlayer,
-      this.diceService
+      this.diceService,
     );
 
     // Update to processed state
@@ -83,20 +83,20 @@ export class CombatOrchestrator {
     if (playerDefeated) {
       await this.combatAppService.saveCombatState(state);
       this.logger.log(
-        `Combat initialized (and ended) for ${characterId} after initial enemy turns`
+        `Combat initialized (and ended) for ${characterId} after initial enemy turns`,
       );
       const narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
       return {
         ...state,
         narrative,
-        phase: "PLAYER_TURN" as const,
+        phase: 'PLAYER_TURN' as const,
       };
     }
 
     // Advance to player's activation and reset economy
     const finalState = await this.combatAppService.getCombatState(characterId);
-    finalState.currentTurnIndex = finalState.turnOrder.findIndex((c) => c.isPlayer) ?? 0;
-    finalState.phase = "PLAYER_TURN";
+    finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
+    finalState.phase = 'PLAYER_TURN';
     finalState.actionRemaining = finalState.actionMax ?? 1;
     finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
     await this.combatAppService.saveCombatState(finalState);
@@ -105,13 +105,13 @@ export class CombatOrchestrator {
     state = finalState;
 
     this.logger.log(
-      `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`
+      `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
     );
 
     return {
       ...state,
       narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-      phase: "PLAYER_TURN" as const,
+      phase: 'PLAYER_TURN' as const,
     };
   }
 
@@ -121,31 +121,31 @@ export class CombatOrchestrator {
    */
   public async endPlayerTurn(
     userId: string,
-    characterId: string
+    characterId: string,
   ): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
-    if (!combatState) throw new NotFoundException("combat state not found");
+    if (!combatState) throw new NotFoundException('combat state not found');
 
-    combatState.phase = "ENEMY_TURN";
+    combatState.phase = 'ENEMY_TURN';
 
     // Process enemy turns in order; collect attack logs via AppService
-    const aliveEnemies = combatState.enemies.filter((e) => (e.hp ?? 0) > 0);
+    const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
     const enemyTurnResult = await this.combatAppService.processEnemyTurns(
       characterId,
       combatState,
       aliveEnemies,
-      this.diceService
+      this.diceService,
     );
 
     const finalState = enemyTurnResult.state;
 
-    if (!finalState) throw new NotFoundException("combat state not found after enemy turns");
+    if (!finalState) throw new NotFoundException('combat state not found after enemy turns');
 
     // If the enemy turn did not end the combat (player still alive), advance to next player
     // activation and persist the refreshed state.
     if (!enemyTurnResult.playerDefeated) {
-      finalState.phase = "PLAYER_TURN";
-      finalState.currentTurnIndex = finalState.turnOrder.findIndex((c) => c.isPlayer) ?? 0;
+      finalState.phase = 'PLAYER_TURN';
+      finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
       finalState.actionRemaining = finalState.actionMax ?? 1;
       finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
@@ -172,10 +172,10 @@ export class CombatOrchestrator {
     await this.characterService.findByCharacterId(userId, characterId);
 
     const inCombat = await this.combatAppService.isInCombat(characterId);
-    if (!inCombat) throw new BadRequestException("No combat at the moment");
+    if (!inCombat) throw new BadRequestException('No combat at the moment');
 
     const state = await this.combatAppService.getCombatState(characterId);
-    if (!state) throw new BadRequestException("No combat at the moment");
+    if (!state) throw new BadRequestException('No combat at the moment');
 
     return state;
   }
@@ -186,13 +186,13 @@ export class CombatOrchestrator {
   async endCombat(userId: string, characterId: string): Promise<CombatEndResponseDto> {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character) {
-      throw new BadRequestException("Character not found");
+      throw new BadRequestException('Character not found');
     }
 
     if (!(await this.combatAppService.isInCombat(characterId))) {
       return {
         success: false,
-        message: "Aucun combat en cours.",
+        message: 'Aucun combat en cours.',
       };
     }
 
@@ -201,7 +201,7 @@ export class CombatOrchestrator {
 
     return {
       success: true,
-      message: "Vous avez fui le combat.",
+      message: 'Vous avez fui le combat.',
       instructions: [
         {
           combat_end: {

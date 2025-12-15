@@ -60,18 +60,18 @@
     "typescript-eslint": "^8.46.4"
   },
   "ava": {
-    "files": [
-      "test/**/*.test.ts"
-    ],
     "extensions": [
       "ts"
+    ],
+    "failFast": true,
+    "files": [
+      "test/**/*.test.ts"
     ],
     "nodeArguments": [
       "--loader=ts-node/esm",
       "--experimental-specifier-resolution=node",
       "--enable-source-maps",
       "--no-warnings"
-    ],
-    "failFast": true
+    ]
   }
 }

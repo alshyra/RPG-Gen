@@ -6,13 +6,13 @@ Fighters master various weapon techniques, and a well-equipped Fighter always ha
 Fighter DnD 2024Some concentrate on archery, some on fighting with two weapons at once, and some on augmenting their martial skills with magic. This combination of broad ability and extensive specialization makes Fighters superior combatants.
 
 Core Fighter Traits
-Primery Ability	Strength or Dexterity
-Hit Dice Die	D10 per Fighter level
-Saving Throws Proficiencies	Strength and Constitution
-Skill Proficiencies	Choose 2: Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Persuasion, Perception, or Survival
-Weapons Proficiencies	Simple and Martial weapons
-Armor Training	Light, Medium, and Heavy armor and Shields
-Starting Equipment	Chose A, B or C: (A) Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer’s Pack, and 4 GP; (B) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeonneer's Pack, and 11 GP; or (C) 155 GP
+Primery Ability Strength or Dexterity
+Hit Dice Die D10 per Fighter level
+Saving Throws Proficiencies Strength and Constitution
+Skill Proficiencies Choose 2: Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Persuasion, Perception, or Survival
+Weapons Proficiencies Simple and Martial weapons
+Armor Training Light, Medium, and Heavy armor and Shields
+Starting Equipment Chose A, B or C: (A) Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer’s Pack, and 4 GP; (B) Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeonneer's Pack, and 11 GP; or (C) 155 GP
 Becoming a Fighter...
 As a Level 1 Character
 Gain all the traits in the Core Fighter Traits table.
@@ -22,30 +22,30 @@ Gain the following traits from the Core Fighter Traits table: Hit Point Die, pro
 Gain the Fighter’s level 1 features, which are listed in the Fighter Features table.
 CREATE A 2024 FIGHTER
 Fighter Class Features
-Level	Prof.
-Bonus	Class Features	Second
-Wind	Weapon
+Level Prof.
+Bonus Class Features Second
+Wind Weapon
 Mastery
-1	+2	Fighting Style, Second Wind, Weapon Mastery	2	3
-2	+2	Action Surge (1), Tactical Mind	2	3
-3	+2	Fighter Subclass	2	3
-4	+2	Ability Score Improvement	3	4
-5	+3	Extra Attack, Tactical Shift	3	4
-6	+3	Ability Score Improvement	3	4
-7	+3	Subclass Feature	3	4
-8	+3	Ability Score Improvement	3	4
-9	+4	Indomitable (1), Tactical Master	3	4
-10	+4	Subclass Feature	4	5
-11	+4	Two Extra Attack	4	5
-12	+4	Ability Score Improvement	4	5
-13	+5	Indomitable (2), Studied Attacks	4	5
-14	+5	Ability Score Improvement	4	5
-15	+5	Subclass Feature	4	5
-16	+5	Ability Score Improvement	4	6
-17	+6	Action Surge (2), Indomitable (3)	4	6
-18	+6	Subclass Feature	4	6
-19	+6	Epic Boon	4	6
-20	+6	Three Extra Attack	4	6
+1 +2 Fighting Style, Second Wind, Weapon Mastery 2 3
+2 +2 Action Surge (1), Tactical Mind 2 3
+3 +2 Fighter Subclass 2 3
+4 +2 Ability Score Improvement 3 4
+5 +3 Extra Attack, Tactical Shift 3 4
+6 +3 Ability Score Improvement 3 4
+7 +3 Subclass Feature 3 4
+8 +3 Ability Score Improvement 3 4
+9 +4 Indomitable (1), Tactical Master 3 4
+10 +4 Subclass Feature 4 5
+11 +4 Two Extra Attack 4 5
+12 +4 Ability Score Improvement 4 5
+13 +5 Indomitable (2), Studied Attacks 4 5
+14 +5 Ability Score Improvement 4 5
+15 +5 Subclass Feature 4 5
+16 +5 Ability Score Improvement 4 6
+17 +6 Action Surge (2), Indomitable (3) 4 6
+18 +6 Subclass Feature 4 6
+19 +6 Epic Boon 4 6
+20 +6 Three Extra Attack 4 6
 As a Fighter, you gain the following class features when you reach the specified Fighter levels. These features are listed on the Fighter Features table.
 
 Level 1: Fighting Style
@@ -238,26 +238,26 @@ Spellcasting Ability. Intelligence is your spellcasting ability for your Eldritc
 Spellcasting Focus. You can use an Arcane Focus as a Spellcasting Focus for the spells you prepare for this subclass.
 
 Eldritch Knight Spellcasting
-Fighter	Spells	- Spell Slots per Spell Level -
-Level	Prepared	1	2	3	4
-3	3	2	-	-	-
-4	4	3	-	-	-
-5	4	3	-	-	-
-6	4	3	-	-	-
-7	5	4	2	-	-
-8	6	4	2	-	-
-9	6	4	2	-	-
-10	7	4	3	-	-
-11	8	4	3	-	-
-12	8	4	3	-	-
-13	9	4	3	2	-
-14	10	4	3	2	-
-15	10	4	3	2	-
-16	11	4	3	3	-
-17	11	4	3	3	-
-18	11	4	3	3	-
-19	12	4	3	3	1
-20	13	4	3	3	1
+Fighter Spells - Spell Slots per Spell Level -
+Level Prepared 1 2 3 4
+3 3 2 - - -
+4 4 3 - - -
+5 4 3 - - -
+6 4 3 - - -
+7 5 4 2 - -
+8 6 4 2 - -
+9 6 4 2 - -
+10 7 4 3 - -
+11 8 4 3 - -
+12 8 4 3 - -
+13 9 4 3 2 -
+14 10 4 3 2 -
+15 10 4 3 2 -
+16 11 4 3 3 -
+17 11 4 3 3 -
+18 11 4 3 3 -
+19 12 4 3 3 1
+20 13 4 3 3 1
 Level 3: War Bond
 You learn a ritual that creates a magical bond between yourself and one weapon. You perform the ritual over the course of 1 hour, which can be done during a Short Rest. The weapon must be within your reach throughout the ritual, at the conclusion of which you touch the weapon and forge the bond.
 
@@ -280,6 +280,5 @@ When you take the Attack action on your turn, you can replace two of the attacks
 Psi Warrior
 See the Player's Handbook.
 
-English  ↳ Fighter 2024
+English ↳ Fighter 2024
 Donjons et Dragons 5 - D&D 5
-

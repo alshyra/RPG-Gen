@@ -1,7 +1,7 @@
 {
   "name": "rpg-gen-monorepo",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -32,6 +32,12 @@
     "format": "oxfmt --write \"**/*.{ts,tsx,vue,js,jsx,json,md}\"",
     "format:check": "oxfmt --check \"**/*.{ts,tsx,vue,js,jsx,json,md}\""
   },
+  "dependencies": {
+    "@nestjs/cli": "^11.0.14",
+    "@typescript/native-preview": "^7.0.0-dev.20251212.1",
+    "jsonc-simple-parser": "^3.0.0",
+    "tsconfig-paths": "^4.2.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/express": "^5.0.6",
@@ -43,11 +49,5 @@
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0"
-  },
-  "dependencies": {
-    "@nestjs/cli": "^11.0.14",
-    "@typescript/native-preview": "^7.0.0-dev.20251212.1",
-    "jsonc-simple-parser": "^3.0.0",
-    "tsconfig-paths": "^4.2.0"
   }
 }
