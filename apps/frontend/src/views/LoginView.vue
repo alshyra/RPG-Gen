@@ -1,10 +1,10 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+    class="min-h-screen flex items-center justify-center p-6 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900"
   >
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-white mb-2">RPG Gemini</h1>
+        <h1 class="text-4xl font-extrabold text-white mb-2">RPG Gen</h1>
         <p class="text-slate-300">Connectez-vous pour commencer votre aventure</p>
       </div>
 

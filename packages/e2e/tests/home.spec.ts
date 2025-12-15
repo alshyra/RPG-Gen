@@ -18,12 +18,12 @@ test.describe('Home Page', () => {
   });
 
   test('should load the home page successfully', async ({ page }) => {
-    await expect(page.getByText('RPG Gemini')).toBeVisible();
+    await expect(page.getByText('RPG Gen')).toBeVisible();
     await expect(page.getByText("Un moteur d'aventure assisté par Gemini")).toBeVisible();
   });
 
   test('should display the world selector', async ({ page }) => {
-    await expect(page.locator('h1', { hasText: 'RPG Gemini' })).toBeVisible();
+    await expect(page.locator('h1', { hasText: 'RPG Gen' })).toBeVisible();
   });
 
   test('should display character list when characters exist', async ({ page }) => {

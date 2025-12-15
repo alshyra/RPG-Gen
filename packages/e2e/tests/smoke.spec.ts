@@ -50,7 +50,7 @@ test.describe('Application Smoke Tests', () => {
     await expect(viewport).toHaveCount(1);
 
     // Check title
-    await expect(page).toHaveTitle(/RPG Gemini/);
+    await expect(page).toHaveTitle(/RPG Gen/);
   });
 
   test('should load without critical console errors', async ({ page }) => {
@@ -75,6 +75,7 @@ test.describe('Application Smoke Tests', () => {
         !e.includes('WebSocket') &&
         !e.includes('404'),
     );
+    criticalErrors
     expect(criticalErrors).toHaveLength(0);
   });
 });

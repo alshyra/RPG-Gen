@@ -28,7 +28,7 @@ const setupCors = (app: INestApplication) => {
 
 const setupSwagger = (app: INestApplication) => {
   const config = new DocumentBuilder()
-    .setTitle('RPG Gemini Portal')
+    .setTitle('RPG Gen Portal')
     .setDescription('Prototype API for RPG portal using Gemini tokens')
     .setVersion('0.1')
     .addBearerAuth()

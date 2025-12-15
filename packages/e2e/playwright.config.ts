@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const baseURL = process.env.CI ? 'http://localhost' : 'http://localhost:5173';
 /**
  * Playwright E2E configuration for RPG-Gen frontend
  * Centralized E2E tests with automatic webServer management
@@ -13,7 +14,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'html',
 
   use: {
-    baseURL: 'http://localhost',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

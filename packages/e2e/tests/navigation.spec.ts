@@ -15,7 +15,7 @@ test.describe('Navigation', () => {
   test('should navigate between routes', async ({ page }) => {
     // Start at home
     await page.goto('/home');
-    await expect(page.getByText('RPG Gemini')).toBeVisible();
+    await expect(page.getByText('RPG Gen')).toBeVisible();
 
     // Navigate back to home
     await page.goto('/home');
@@ -53,7 +53,7 @@ test.describe('Navigation', () => {
       await page.waitForURL(/\/(game|character)\/[^/]+/);
 
       // Click title to go home
-      await page.locator('h1', { hasText: 'RPG Gemini' }).click();
+      await page.locator('h1', { hasText: 'RPG Gen' }).click();
       await page.waitForURL('**/home');
       expect(page.url()).toContain('/home');
     }

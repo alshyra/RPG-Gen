@@ -80,7 +80,7 @@ test.describe('API Integration', () => {
     await page.goto('/home');
 
     // Basic UI should still work
-    await expect(page.getByText('RPG Gemini')).toBeVisible();
+    await expect(page.getByText('RPG Gen')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Créer un personnage' })).toBeVisible();
   });
 });

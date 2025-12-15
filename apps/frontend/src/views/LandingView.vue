@@ -1,14 +1,14 @@
 <template>
   <div
-    class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+    class="min-h-screen flex flex-col items-center justify-center p-6 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900"
   >
     <div class="max-w-4xl w-full text-center">
       <!-- Hero Section -->
       <div class="mb-12">
         <h1
-          class="text-6xl font-extrabold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500"
+          class="text-6xl font-extrabold text-white mb-4 bg-clip-text bg-linear-to-r from-indigo-400 to-purple-500"
         >
-          RPG Gemini
+          RPG Gen
         </h1>
         <p class="text-2xl text-slate-300 mb-8">Vivez des aventures épiques générées par l'IA</p>
         <p class="text-lg text-slate-400 max-w-2xl mx-auto">
@@ -48,7 +48,7 @@
       <!-- CTA Button -->
       <div class="mb-8">
         <button
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xl font-bold px-12 py-4 rounded-lg transition-all transform hover:scale-105 shadow-xl"
+          class="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xl font-bold px-12 py-4 rounded-lg transition-all transform hover:scale-105 shadow-xl"
           @click="startPlaying"
         >
           Commencer à jouer

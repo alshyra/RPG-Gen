@@ -57,7 +57,8 @@ export async function verifyAuthenticated(page: Page) {
  * Clear authentication
  * Navigates to the base URL first to ensure localStorage is accessible
  */
-export async function clearAuthentication(page: Page, baseURL: string = 'http://localhost') {
+export async function clearAuthentication(page: Page, baseURL?: string) {
+  baseURL = baseURL || (process.env.CI ? 'http://localhost' : 'http://localhost:5173');
   // Navigate to base URL first to ensure we have access to localStorage
   await page.goto(baseURL);
   await page.evaluate(() => {
