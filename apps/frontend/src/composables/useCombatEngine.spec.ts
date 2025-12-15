@@ -60,7 +60,7 @@ vi.mock('@/stores/gameStore', () => ({
 }));
 
 vi.mock('@/apis/combatApi', () => ({
-  combatService: {
+  combatApi: {
     endActivation: vi.fn(),
   },
 }));

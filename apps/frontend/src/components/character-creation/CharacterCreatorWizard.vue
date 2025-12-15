@@ -112,8 +112,8 @@
 
 <script setup lang="ts">
 import { FullPageLoader, UiButton, UiLoader } from '@rpg-gen/ui';
-import { characterApi } from '@/apis/characterApi';
-import { conversationApi } from '@/apis/conversationApi';
+import { characterApi } from '@rpg-gen/api-client';
+import { chatApi } from '@rpg-gen/api-client';
 import { DnDRulesService } from '@/services/dndRulesService';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
@@ -246,7 +246,7 @@ const initConversationForCharacter = async () => {
   try {
     loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = 'Préparation du premier prompt du Maître de Jeu...';
-    if (currentCharacter.value) await conversationApi.startGame(currentCharacter.value);
+    if (currentCharacter.value) await chatApi.startGame(currentCharacter.value);
   } catch (e) {
     console.warn('Failed to initialize conversation/history', e);
   }

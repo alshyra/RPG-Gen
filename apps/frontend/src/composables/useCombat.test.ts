@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useCombatStore } from '@/stores/combatStore';
 import { useCharacterStore } from '@/stores/characterStore';
 import { useCombat } from './useCombat';
-import { combatService } from '@/apis/combatApi';
+import { combatApi } from '@rpg-gen/api-client';
 
 describe('useCombat processAttackResult => currentAttackView', () => {
   beforeEach(() => {
@@ -82,7 +82,7 @@ describe('useCombat processAttackResult => currentAttackView', () => {
       },
     } as any;
 
-    vi.spyOn(combatService, 'attack').mockResolvedValue(fakeResponse);
+    vi.spyOn(combatApi, 'attack').mockResolvedValue(fakeResponse);
 
     const { executeAttack } = useCombat();
 

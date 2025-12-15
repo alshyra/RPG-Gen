@@ -12,7 +12,7 @@ import CharacterLevelupView from '../views/CharacterLevelupView.vue';
 import NotFoundView from '../views/NotFoundView.vue';
 import LoginView from '../views/LoginView.vue';
 import AuthCallbackView from '../views/AuthCallbackView.vue';
-import { authService } from '../apis/authApi';
+import { authApi } from '@rpg-gen/api-client';
 import CombatPanel from '@/components/game/combat-panel/CombatPanel.vue';
 import { useCombatStore } from '@/stores/combatStore';
 
@@ -104,9 +104,17 @@ const router = createRouter({
 });
 
 // Navigation guard to check authentication and combat status
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const isPublic = to.meta.public === true;
-  const isAuthenticated = authService.isAuthenticated();
+  
+  // Try to get profile to check auth status
+  let isAuthenticated = false;
+  try {
+    await authApi.getProfile();
+    isAuthenticated = true;
+  } catch {
+    isAuthenticated = false;
+  }
 
   if (!isPublic && !isAuthenticated) {
     // Redirect to login if not authenticated and trying to access protected route

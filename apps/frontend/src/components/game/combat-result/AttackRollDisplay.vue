@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold">{{ currentAttackResult.diceResult.total }}</span>
         <span class="text-slate-400">
-          ({{ (currentAttackResult.diceResult as any).rolls?.join(" + ") || "" }} +
+          ({{ currentAttackResult.diceResult.rolls.join(' + ') }} +
           {{ currentAttackResult.diceResult.modifierValue }})
         </span>
       </div>

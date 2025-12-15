@@ -153,9 +153,9 @@ import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from '@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
-import { conversationApi } from '../../apis/conversationApi';
-import { levelUpApi } from '@/apis/levelUpApi';
-import { classesApi } from '@/apis/classesApi';
+import { chatApi } from '@rpg-gen/api-client';
+import { characterApi } from '@rpg-gen/api-client';
+import { classesApi } from '@rpg-gen/api-client';
 
 const props = withDefaults(
   defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
@@ -262,7 +262,7 @@ const executeLevelUp = async (): Promise<void> => {
   if (updatedCharacter.characterId) {
     // Use the dedicated LevelUp API with combat selections
     try {
-      await levelUpApi.applyLevelUp(updatedCharacter.characterId, className.value, {
+      await characterApi.applyLevelUp(updatedCharacter.characterId, className.value, {
         newSpellIds: [],
         abilityIncreases: [],
         selectedCombatProficiencies: selectedCombatIds.value,
@@ -275,7 +275,7 @@ const executeLevelUp = async (): Promise<void> => {
 
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await conversationApi.sendMessage(levelupMsg);
+  await chatApi.sendMessage(levelupMsg);
 
   // Return to game
   setTimeout(() => {

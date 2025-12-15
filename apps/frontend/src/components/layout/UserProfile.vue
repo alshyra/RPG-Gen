@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="user"
-    class="flex items-center gap-3"
-  >
+  <div v-if="user" class="flex items-center gap-3">
     <div class="hidden sm:block text-right">
       <div class="text-sm font-medium text-white">
         {{ user.displayName }}
@@ -48,21 +45,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { authService, type User } from '../../apis/authApi';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { authApi } from "@rpg-gen/api-client";
+import type { AuthProfileDto } from "@rpg-gen/shared";
 
 const router = useRouter();
-const user = ref<User | null>(null);
+const user = ref<AuthProfileDto | null>(null);
 const showMenu = ref(false);
 
-onMounted(() => {
-  user.value = authService.getUser();
+onMounted(async () => {
+  try {
+    user.value = await authApi.getProfile();
+  } catch (err) {
+    console.error("[UserProfile] Failed to load user", err);
+  }
 });
 
-const handleLogout = () => {
-  authService.logout();
-  showMenu.value = false;
-  router.push('/login');
+const handleLogout = async () => {
+  try {
+    await authApi.logout();
+  } catch (err) {
+    console.error('[UserProfile] Logout error', err);
+  } finally {
+    showMenu.value = false;
+    router.push('/login');
+  }
 };
 </script>

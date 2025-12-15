@@ -8,10 +8,10 @@ import type {
   EndPlayerTurnResponseDto,
   EnemyAttackLogDto,
 } from "@rpg-gen/shared";
+import { combatApi } from "@rpg-gen/api-client";
 import { defineStore } from "pinia";
 import type { Ref } from "vue";
 import { computed, ref } from "vue";
-import { combatService } from "../apis/combatApi";
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
@@ -215,20 +215,20 @@ export const useCombatStore = defineStore("combatStore", () => {
   };
 
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
-    const response = await combatService.startCombat(characterId, instruction);
+    const response = await combatApi.startCombat(characterId, instruction);
     initializeCombat(response);
     return response;
   };
 
   const fetchStatus = async (characterId: string) => {
-    const response = await combatService.getStatus(characterId);
+    const response = await combatApi.getStatus(characterId);
     if (response.inCombat && response.enemies) initializeCombat(response);
     else clearCombat();
     return response;
   };
 
   const endActivation = async (characterId: string) => {
-    const response = await combatService.endActivation(characterId);
+    const response = await combatApi.endTurn(characterId);
     if (response.attackLogs?.length) {
       await processAttackLogs(response.attackLogs);
     }

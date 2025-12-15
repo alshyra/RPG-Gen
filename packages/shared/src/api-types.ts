@@ -1100,6 +1100,26 @@ export interface components {
             /** @description Feature/ability ID (for class features) */
             featureId?: string;
         };
+        DiceResultDto: {
+            /** @description Individual dice roll results */
+            rolls: number[];
+            /** @description Modifier applied to the total */
+            modifierValue: number;
+            /** @description Total result (sum of rolls + modifier) */
+            total: number;
+        };
+        CombatDiceResultDto: {
+            /** @description Individual dice roll results */
+            rolls: number[];
+            /** @description Modifier applied to the total */
+            modifierValue: number;
+            /** @description Total result (sum of rolls + modifier) */
+            total: number;
+            /** @description Total damage dealt */
+            damageTotal: number;
+            /** @description Whether this was a critical hit */
+            isCrit: boolean;
+        };
         CombatActionResponseDto: {
             /** @description Whether the action was successful */
             success: boolean;
@@ -1127,9 +1147,9 @@ export interface components {
             /** @description Full combat state after action */
             combatState?: components["schemas"]["CombatStateDto"];
             /** @description Dice roll result (for attacks) */
-            diceResult?: Record<string, never>;
+            diceResult?: components["schemas"]["DiceResultDto"];
             /** @description Damage dice result details */
-            damageDiceResult?: Record<string, never>;
+            damageDiceResult?: components["schemas"]["CombatDiceResultDto"];
             /** @description Total damage dealt (convenience field) */
             damageTotal?: number;
             /** @description Whether the attack was a critical hit */
@@ -1138,26 +1158,6 @@ export interface components {
             combatEnd?: components["schemas"]["CombatEndDto"];
             /** @description Narrative text (e.g., for combat end) */
             narrative?: string;
-        };
-        DiceResultDto: {
-            /** @description Individual dice roll results */
-            rolls: number[];
-            /** @description Modifier applied to the total */
-            modifierValue: number;
-            /** @description Total result (sum of rolls + modifier) */
-            total: number;
-        };
-        CombatDiceResultDto: {
-            /** @description Individual dice roll results */
-            rolls: number[];
-            /** @description Modifier applied to the total */
-            modifierValue: number;
-            /** @description Total result (sum of rolls + modifier) */
-            total: number;
-            /** @description Total damage dealt by the roll */
-            damageTotal?: number;
-            /** @description Whether this damage roll was a critical hit */
-            isCrit?: boolean;
         };
         EnemyAttackLogDto: {
             /**

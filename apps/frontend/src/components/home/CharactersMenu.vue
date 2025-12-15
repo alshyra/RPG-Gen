@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from '@/apis/characterApi';
+import { characterApi } from '@rpg-gen/api-client';
 import type { CharacterResponseDto } from '@rpg-gen/shared';
 import { onMounted, ref } from 'vue';
 import CharacterMenu from './CharacterMenu.vue';

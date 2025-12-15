@@ -1,4 +1,4 @@
-import { characterApi } from '@/apis/characterApi';
+import { characterApi } from '@rpg-gen/api-client';
 import {
   CharacterResponseDto,
   InventoryItemDto,

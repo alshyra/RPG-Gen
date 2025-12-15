@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { authService } from '../apis/authApi';
+import { authApi } from '@rpg-gen/api-client';
 import { UiButton } from '@rpg-gen/ui';
 
 const router = useRouter();
@@ -64,14 +64,15 @@ const setError = (message: string) => {
 };
 
 const saveTokenAndFetchProfile = async (token: string) => {
-  // Save token
-  authService.setToken(token);
+  // Save token to localStorage
+  localStorage.setItem('auth_token', token);
 
-  // Fetch user profile
-  const user = await authService.fetchUserProfile(token);
-  if (!user) {
+  // Fetch user profile to validate token
+  try {
+    await authApi.getProfile();
+  } catch (err) {
     setError('Impossible de récupérer le profil utilisateur');
-    return;
+    throw err;
   }
 };
 

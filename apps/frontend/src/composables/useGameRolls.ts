@@ -2,7 +2,7 @@ import type { DiceResultDto, RollInstructionMessageDto } from '@rpg-gen/shared';
 import { isRollInstruction } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { watch } from 'vue';
-import { conversationApi } from '../apis/conversationApi';
+import { chatApi } from '@rpg-gen/api-client';
 import { getSkillBonus } from '../services/skillService';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
@@ -53,7 +53,7 @@ export function useGameRolls() {
   const confirmRoll = async () => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
 
-    const message = await conversationApi.sendStructuredMessage({
+    const message = await chatApi.sendStructuredMessage({
       role: 'user',
       narrative: `I rolled ${rollData.value?.total}`,
       instructions: [],

@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
-import { classesApi } from '@/apis/classesApi';
+import { classesApi } from '@rpg-gen/api-client';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, ref } from 'vue';

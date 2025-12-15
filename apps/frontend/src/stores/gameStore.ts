@@ -1,4 +1,4 @@
-import { diceApi } from '@/apis/diceApi';
+import { diceApi } from '@rpg-gen/api-client';
 import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from '@rpg-gen/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';

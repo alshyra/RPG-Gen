@@ -1,4 +1,4 @@
-import { characterApi } from '@/apis/characterApi';
+import { characterApi } from '@rpg-gen/api-client';
 import { useCharacterStore } from '@/stores/characterStore';
 import {
   RollInstructionMessageDto,
@@ -14,7 +14,7 @@ import {
 import { storeToRefs } from 'pinia';
 import { useCombat } from './useCombat';
 import { useRoute, useRouter } from 'vue-router';
-import { conversationApi } from '../apis/conversationApi';
+import { chatApi } from '@rpg-gen/api-client';
 import { useGameStore } from '../stores/gameStore';
 
 import type { HistoryMessage, ProcessedMessage } from '@/interfaces';
@@ -145,7 +145,7 @@ export const useGameSession = () => {
     isInitializing.value = true;
     try {
       if (character.isDeceased) showDeathModal.value = true;
-      const messages = await conversationApi.startGame(character);
+      const messages = await chatApi.startGame(character);
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);

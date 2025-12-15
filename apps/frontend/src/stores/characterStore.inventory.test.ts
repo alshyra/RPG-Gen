@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useCharacterStore } from './characterStore';
-import { characterServiceApi } from '@/apis/characterApi';
+import { characterApi } from '@rpg-gen/api-client';
 
 describe('characterStore inventory persistence', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('characterStore inventory persistence', () => {
 
   it('does nothing when no current character', async () => {
     const store = useCharacterStore();
-    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem');
+    const spy = vi.spyOn(characterApi, 'addInventoryItem');
     await store.addInventoryItem({ name: 'Test' } as any);
     expect(spy).not.toHaveBeenCalled();
   });
@@ -39,7 +39,7 @@ describe('characterStore inventory persistence', () => {
         },
       ],
     } as any;
-    const spy = vi.spyOn(characterServiceApi, 'addInventoryItem').mockResolvedValue(mockUpdated);
+    const spy = vi.spyOn(characterApi, 'addInventoryItem').mockResolvedValue(mockUpdated);
 
     await store.addInventoryItem({
       name: 'Sword',
@@ -75,7 +75,7 @@ describe('characterStore inventory persistence', () => {
       ...store.currentCharacter,
       inventory: [],
     } as any;
-    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue(mockUpdated);
+    const spy = vi.spyOn(characterApi, 'removeInventoryItem').mockResolvedValue(mockUpdated);
 
     await store.removeInventoryItem('weapon-sword', 2);
 
@@ -117,7 +117,7 @@ describe('characterStore inventory persistence', () => {
       ],
     };
 
-    const spy = vi.spyOn(characterServiceApi, 'removeInventoryItem').mockResolvedValue({
+    const spy = vi.spyOn(characterApi, 'removeInventoryItem').mockResolvedValue({
       ...store.currentCharacter,
       inventory: [
         {
@@ -154,7 +154,7 @@ describe('characterStore inventory persistence', () => {
     } as any;
 
     const spy = vi
-      .spyOn(characterServiceApi, 'addInventoryItem')
+      .spyOn(characterApi, 'addInventoryItem')
       .mockImplementation(async (_cid: string, payload: any) => {
         expect(payload.definitionId).toBe('weapon-sword');
         return {

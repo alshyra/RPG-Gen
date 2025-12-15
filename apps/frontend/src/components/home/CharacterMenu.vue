@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from "@/apis/characterApi";
+import { characterApi } from '@rpg-gen/api-client';
 import { UiButton } from "@rpg-gen/ui";
 import { Trash2 } from "lucide-vue-next";
 import type { CharacterResponseDto } from "@rpg-gen/shared";

@@ -1,4 +1,4 @@
-import { inventoryApi } from '@/apis/inventoryApi';
+import { inventoryApi } from '@rpg-gen/api-client';
 import {
   isCombatStartInstruction,
   type CharacterResponseDto,
@@ -9,13 +9,13 @@ import {
   type SpellInstructionMessageDto,
   type UseItemResponseDto,
 } from '@rpg-gen/shared';
-import { characterApi } from '../apis/characterApi';
+import { characterApi } from '@rpg-gen/api-client';
 import { useCharacterStore } from '../stores/characterStore';
 import { useCombatStore } from '../stores/combatStore';
 import { useGameStore } from '../stores/gameStore';
 import { parseCommand, type ParsedCommand } from '../utils/chatCommands';
 import { useCombat } from './useCombat';
-import { conversationApi } from '@/apis/conversationApi';
+import { chatApi } from '@rpg-gen/api-client';
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -181,7 +181,7 @@ export function useGameCommands() {
     message: string,
     instructions: GameInstructionDto[] = [],
   ): Promise<void> => {
-    const response = await conversationApi.sendMessage(message, instructions);
+    const response = await chatApi.sendMessage(message, instructions);
     gameStore.messages.pop();
     gameStore.appendMessage('assistant', response.narrative);
     processInstructions(response.instructions ?? []);

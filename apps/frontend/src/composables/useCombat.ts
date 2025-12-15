@@ -3,9 +3,9 @@ import type {
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
 } from "@rpg-gen/shared";
+import { combatApi } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import { combatService } from "../apis/combatApi";
 import { useCharacterStore } from "../stores/characterStore";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
@@ -208,11 +208,7 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatService.attack(
-        currentCharacter.value.characterId,
-        target,
-        spellName
-      );
+      const result = await combatApi.attack(currentCharacter.value.characterId, target, spellName);
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);
@@ -275,7 +271,7 @@ export function useCombat() {
     if (!character) return;
 
     try {
-      await combatService.endCombat(character.characterId);
+      await combatApi.flee(character.characterId);
       gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view

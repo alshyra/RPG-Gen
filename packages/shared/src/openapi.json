@@ -2765,6 +2765,66 @@
           "actionType"
         ]
       },
+      "DiceResultDto": {
+        "type": "object",
+        "properties": {
+          "rolls": {
+            "description": "Individual dice roll results",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "modifierValue": {
+            "type": "number",
+            "description": "Modifier applied to the total"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total result (sum of rolls + modifier)"
+          }
+        },
+        "required": [
+          "rolls",
+          "modifierValue",
+          "total"
+        ]
+      },
+      "CombatDiceResultDto": {
+        "type": "object",
+        "properties": {
+          "rolls": {
+            "description": "Individual dice roll results",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "modifierValue": {
+            "type": "number",
+            "description": "Modifier applied to the total"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total result (sum of rolls + modifier)"
+          },
+          "damageTotal": {
+            "type": "number",
+            "description": "Total damage dealt"
+          },
+          "isCrit": {
+            "type": "boolean",
+            "description": "Whether this was a critical hit"
+          }
+        },
+        "required": [
+          "rolls",
+          "modifierValue",
+          "total",
+          "damageTotal",
+          "isCrit"
+        ]
+      },
       "CombatActionResponseDto": {
         "type": "object",
         "properties": {
@@ -2826,12 +2886,20 @@
             ]
           },
           "diceResult": {
-            "type": "object",
-            "description": "Dice roll result (for attacks)"
+            "description": "Dice roll result (for attacks)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiceResultDto"
+              }
+            ]
           },
           "damageDiceResult": {
-            "type": "object",
-            "description": "Damage dice result details"
+            "description": "Damage dice result details",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatDiceResultDto"
+              }
+            ]
           },
           "damageTotal": {
             "type": "number",
@@ -2859,64 +2927,6 @@
           "cost",
           "actionsRemaining",
           "bonusActionsRemaining"
-        ]
-      },
-      "DiceResultDto": {
-        "type": "object",
-        "properties": {
-          "rolls": {
-            "description": "Individual dice roll results",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "modifierValue": {
-            "type": "number",
-            "description": "Modifier applied to the total"
-          },
-          "total": {
-            "type": "number",
-            "description": "Total result (sum of rolls + modifier)"
-          }
-        },
-        "required": [
-          "rolls",
-          "modifierValue",
-          "total"
-        ]
-      },
-      "CombatDiceResultDto": {
-        "type": "object",
-        "properties": {
-          "rolls": {
-            "description": "Individual dice roll results",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "modifierValue": {
-            "type": "number",
-            "description": "Modifier applied to the total"
-          },
-          "total": {
-            "type": "number",
-            "description": "Total result (sum of rolls + modifier)"
-          },
-          "damageTotal": {
-            "type": "number",
-            "description": "Total damage dealt by the roll"
-          },
-          "isCrit": {
-            "type": "boolean",
-            "description": "Whether this damage roll was a critical hit"
-          }
-        },
-        "required": [
-          "rolls",
-          "modifierValue",
-          "total"
         ]
       },
       "EnemyAttackLogDto": {

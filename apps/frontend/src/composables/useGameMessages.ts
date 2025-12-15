@@ -7,7 +7,7 @@ import {
   type InventoryInstructionMessageDto,
   isCombatStartInstruction,
 } from '@rpg-gen/shared';
-import { conversationApi } from '../apis/conversationApi';
+import { chatApi } from '@rpg-gen/api-client';
 import { useCharacterStore } from '../stores/characterStore';
 import { useGameStore } from '../stores/gameStore';
 import { useCombat } from './useCombat';
@@ -49,7 +49,7 @@ export function useGameMessages() {
     gameStore.appendMessage('system', '...thinking...');
     gameStore.sending = true;
     try {
-      const response = await conversationApi.sendMessage(messageText);
+      const response = await chatApi.sendMessage(messageText);
       gameStore.clearLastFailedMessage();
       handleMessageResponse(response);
     } catch (e: unknown) {

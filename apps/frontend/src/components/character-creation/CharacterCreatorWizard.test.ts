@@ -40,8 +40,8 @@ vi.mock('@/services/dndRulesService', () => ({
   DnDRulesService: { calculateHpForLevel1: () => 10 },
 }));
 
-vi.mock('@/apis/conversationApi', async () => ({
-  conversationApi: { startGame: vi.fn(async () => []) },
+vi.mock('@/apis/chatApi', async () => ({
+  chatApi: { startGame: vi.fn(async () => []) },
 }));
 
 describe('CharacterCreatorWizard finish flow', () => {
@@ -87,12 +87,12 @@ describe('CharacterCreatorWizard finish flow', () => {
     });
     (api.characterApi.generateAvatar as any).mockImplementation(() => genPromise);
 
-    const conv = await import('@/apis/conversationApi');
+    const conv = await import('@/apis/chatApi');
     let startResolve: (v?: any) => void = () => {};
     const startPromise = new Promise<any>(resolve => {
       startResolve = resolve;
     });
-    (conv.conversationApi.startGame as any).mockImplementation(() => startPromise);
+    (conv.chatApi.startGame as any).mockImplementation(() => startPromise);
 
     const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
       global: {
