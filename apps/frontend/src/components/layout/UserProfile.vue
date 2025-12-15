@@ -66,10 +66,10 @@ const handleLogout = async () => {
   try {
     await authApi.logout();
   } catch (err) {
-    console.error('[UserProfile] Logout error', err);
+    console.error("[UserProfile] Logout error", err);
   } finally {
     showMenu.value = false;
-    router.push('/login');
+    router.push("/login");
   }
 };
 </script>

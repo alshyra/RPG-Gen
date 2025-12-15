@@ -1,99 +1,99 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import LandingView from '../views/LandingView.vue';
-import HomeView from '../views/HomeView.vue';
-import GameView from '../views/GameView.vue';
-import MessagesView from '../views/game/MessagesView.vue';
-import InventoryView from '../views/game/InventoryView.vue';
-import SkillsView from '../views/game/SkillsView.vue';
-import SpellsView from '../views/game/SpellsView.vue';
-import QuestView from '../views/game/QuestView.vue';
-import CharacterCreatorView from '../views/CharacterCreatorView.vue';
-import CharacterLevelupView from '../views/CharacterLevelupView.vue';
-import NotFoundView from '../views/NotFoundView.vue';
-import LoginView from '../views/LoginView.vue';
-import AuthCallbackView from '../views/AuthCallbackView.vue';
-import { authApi } from '@rpg-gen/api-client';
-import CombatPanel from '@/components/game/combat-panel/CombatPanel.vue';
-import { useCombatStore } from '@/stores/combatStore';
+import { createRouter, createWebHistory } from "vue-router";
+import LandingView from "../views/LandingView.vue";
+import HomeView from "../views/HomeView.vue";
+import GameView from "../views/GameView.vue";
+import MessagesView from "../views/game/MessagesView.vue";
+import InventoryView from "../views/game/InventoryView.vue";
+import SkillsView from "../views/game/SkillsView.vue";
+import SpellsView from "../views/game/SpellsView.vue";
+import QuestView from "../views/game/QuestView.vue";
+import CharacterCreatorView from "../views/CharacterCreatorView.vue";
+import CharacterLevelupView from "../views/CharacterLevelupView.vue";
+import NotFoundView from "../views/NotFoundView.vue";
+import LoginView from "../views/LoginView.vue";
+import AuthCallbackView from "../views/AuthCallbackView.vue";
+import { authApi } from "@rpg-gen/api-client";
+import CombatPanel from "@/components/game/combat-panel/CombatPanel.vue";
+import { useCombatStore } from "@/stores/combatStore";
 
 const routes = [
   {
-    path: '/',
-    name: 'landing',
+    path: "/",
+    name: "landing",
     component: LandingView,
     meta: { public: true },
   },
   {
-    path: '/login',
-    name: 'login',
+    path: "/login",
+    name: "login",
     component: LoginView,
     meta: { public: true },
   },
   {
-    path: '/auth/callback',
-    name: 'auth-callback',
+    path: "/auth/callback",
+    name: "auth-callback",
     component: AuthCallbackView,
     meta: { public: true },
   },
   {
-    path: '/home',
-    name: 'home',
+    path: "/home",
+    name: "home",
     component: HomeView,
   },
   {
-    path: '/game/:characterId',
+    path: "/game/:characterId",
     component: GameView,
     children: [
       {
-        path: 'game',
-        name: 'game',
-        redirect: { name: 'game-message' },
+        path: "game",
+        name: "game",
+        redirect: { name: "game-message" },
       },
       {
-        path: 'messages',
-        name: 'game-message',
+        path: "messages",
+        name: "game-message",
         component: MessagesView,
       },
       {
-        path: 'inventory',
-        name: 'game-inventory',
+        path: "inventory",
+        name: "game-inventory",
         component: InventoryView,
       },
       {
-        path: 'skills',
-        name: 'game-skills',
+        path: "skills",
+        name: "game-skills",
         component: SkillsView,
       },
       {
-        path: 'spells',
-        name: 'game-spells',
+        path: "spells",
+        name: "game-spells",
         component: SpellsView,
       },
       {
-        path: 'quest',
-        name: 'game-quest',
+        path: "quest",
+        name: "game-quest",
         component: QuestView,
       },
       {
-        path: 'combat',
-        name: 'game-combat',
+        path: "combat",
+        name: "game-combat",
         component: CombatPanel,
       },
     ],
   },
   {
-    path: '/character/:characterId/step/:step',
-    name: 'character-step',
+    path: "/character/:characterId/step/:step",
+    name: "character-step",
     component: CharacterCreatorView,
   },
   {
-    path: '/levelup/:world?',
-    name: 'levelup',
+    path: "/levelup/:world?",
+    name: "levelup",
     component: CharacterLevelupView,
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'not-found',
+    path: "/:pathMatch(.*)*",
+    name: "not-found",
     component: NotFoundView,
   },
 ];
@@ -106,7 +106,7 @@ const router = createRouter({
 // Navigation guard to check authentication and combat status
 router.beforeEach(async (to, _from, next) => {
   const isPublic = to.meta.public === true;
-  
+
   // Try to get profile to check auth status
   let isAuthenticated = false;
   try {
@@ -118,16 +118,16 @@ router.beforeEach(async (to, _from, next) => {
 
   if (!isPublic && !isAuthenticated) {
     // Redirect to login if not authenticated and trying to access protected route
-    next({ name: 'login' });
-  } else if (to.name === 'login' && isAuthenticated) {
+    next({ name: "login" });
+  } else if (to.name === "login" && isAuthenticated) {
     // Redirect to home if already authenticated and trying to access login
-    next({ name: 'home' });
-  } else if (to.name === 'game-combat') {
+    next({ name: "home" });
+  } else if (to.name === "game-combat") {
     // Protect combat route: redirect to game messages if not in combat
     const combatStore = useCombatStore();
     if (!combatStore.inCombat) {
       next({
-        name: 'game',
+        name: "game",
         params: { characterId: to.params.characterId },
       });
     } else {
