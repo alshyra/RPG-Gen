@@ -1,4 +1,4 @@
-import type { AttackQueueItem, AttackView } from '@/interfaces';
+import type { AttackQueueItem, AttackView } from "@/interfaces";
 import type {
   CombatActionResponseDto,
   CombatantDto,
@@ -7,16 +7,16 @@ import type {
   CombatStateDto,
   EndPlayerTurnResponseDto,
   EnemyAttackLogDto,
-} from '@rpg-gen/shared';
-import { defineStore } from 'pinia';
-import type { Ref } from 'vue';
-import { computed, ref } from 'vue';
-import { combatService } from '../apis/combatApi';
+} from "@rpg-gen/shared";
+import { defineStore } from "pinia";
+import type { Ref } from "vue";
+import { computed, ref } from "vue";
+import { combatService } from "../apis/combatApi";
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
 
-export const useCombatStore = defineStore('combatStore', () => {
+export const useCombatStore = defineStore("combatStore", () => {
   const inCombat = ref(false);
   const roundNumber = ref(1);
   const enemies = ref<CombatantDto[]>([]);
@@ -24,7 +24,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const turnOrder = ref<CombatantDto[]>([]);
   const playerInitiative = ref(0);
   const currentTarget = ref<CombatantDto | null>(null);
-  const phase = ref<CombatPhase>('PLAYER_TURN');
+  const phase = ref<CombatPhase>("PLAYER_TURN");
   const showAttackResultModal = ref(false);
   const currentAttackResult = ref<CombatActionResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
@@ -35,7 +35,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentPlayerAttackLog = ref<CombatActionResponseDto | null>(null);
   const isEndingTurn = ref(false);
   const isCombatEndModalOpen = ref(false);
-  const combatEndNarrative = ref<string>('');
+  const combatEndNarrative = ref<string>("");
 
   const currentAttackView = ref<AttackView | null>(null);
 
@@ -44,8 +44,8 @@ export const useCombatStore = defineStore('combatStore', () => {
   const bonusActionRemaining = ref(1);
   const bonusActionMax = ref(1);
 
-  const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
-  const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
+  const aliveEnemies = computed(() => enemies.value.filter((e) => (e.hp ?? 0) > 0));
+  const validTargets = computed(() => aliveEnemies.value.map((e) => e.name));
   const hasValidTarget = computed(() => validTargets.value.length > 0);
   const canAct = computed(() => (actionRemaining.value ?? 0) > 0);
   const canBonusAct = computed(() => (bonusActionRemaining.value ?? 0) > 0);
@@ -58,7 +58,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const isPlayerTurn = computed(() => {
     const cc = currentCombatant.value;
     if (!cc) return false;
-    if (typeof cc.isPlayer === 'boolean') return cc.isPlayer;
+    if (typeof cc.isPlayer === "boolean") return cc.isPlayer;
     if (player.value && cc.id) return cc.id === player.value.id;
     if (player.value && cc.name && player.value.name) return cc.name === player.value.name;
     return false;
@@ -80,7 +80,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     inCombat.value = response.inCombat;
     roundNumber.value = response.roundNumber;
     currentTurnIndex.value = response.currentTurnIndex ?? 0;
-    phase.value = response.phase ?? 'PLAYER_TURN';
+    phase.value = response.phase ?? "PLAYER_TURN";
   };
 
   const setActionEconomy = (response: CombatStateDto): void => {
@@ -97,7 +97,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   };
 
   const selectNextAliveTarget = (enemyList: Ref<CombatantDto[]>): CombatantDto | null =>
-    enemyList.value.find(e => (e.hp ?? 0) > 0) ?? null;
+    enemyList.value.find((e) => (e.hp ?? 0) > 0) ?? null;
 
   const applyDamageToPlayer = (damage: number): void => {
     if (!player.value) return;
@@ -108,7 +108,7 @@ export const useCombatStore = defineStore('combatStore', () => {
     };
   };
 
-  const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
   const processOneAttackLog = async (log: EnemyAttackLogDto): Promise<void> => {
     currentEnemyAttackLog.value = log;
@@ -146,7 +146,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const checkCombatEnd = (result: EndPlayerTurnResponseDto): void => {
     if (result.playerDefeated || result.combatState?.enemies?.length === 0) {
       inCombat.value = false;
-      phase.value = 'COMBAT_ENDED';
+      phase.value = "COMBAT_ENDED";
     }
   };
 
@@ -164,7 +164,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const updateEnemiesOnly = (remainingEnemies: CombatantDto[], newRoundNumber: number): void => {
     // PERFORMANCE FIX: Mutate in place instead of creating new array to avoid triggering all watchers
     enemies.value.forEach((enemy, idx) => {
-      const updated = remainingEnemies.find(e => e.id === enemy.id);
+      const updated = remainingEnemies.find((e) => e.id === enemy.id);
       if (updated && updated.hp !== enemy.hp) {
         enemies.value[idx] = {
           ...enemy,
@@ -186,7 +186,7 @@ export const useCombatStore = defineStore('combatStore', () => {
   const resetCombatState = (): void => {
     inCombat.value = false;
     roundNumber.value = 1;
-    phase.value = 'PLAYER_TURN';
+    phase.value = "PLAYER_TURN";
     currentTurnIndex.value = 0;
   };
 

@@ -8,12 +8,12 @@ import type {
   CombatStartRequestDto,
   CombatStateDto,
   CombatantDto,
-} from '@rpg-gen/shared';
-import { api } from './apiClient';
+} from "@rpg-gen/shared";
+import { api } from "./apiClient";
 
 function getData<T>(response: { data?: T; error?: unknown }): T {
   if (response.error) throw response.error;
-  if (!response.data) throw new Error('No data in response');
+  if (!response.data) throw new Error("No data in response");
   return response.data;
 }
 
@@ -23,10 +23,10 @@ class CombatService {
    */
   async startCombat(
     characterId: string,
-    combatStart: CombatStartRequestDto,
+    combatStart: CombatStartRequestDto
   ): Promise<CombatStateDto> {
-    console.log('[combatApi] startCombat body', combatStart);
-    const response = await api.POST('/api/combat/{characterId}/start', {
+    console.log("[combatApi] startCombat body", combatStart);
+    const response = await api.POST("/api/combat/{characterId}/start", {
       params: { path: { characterId } },
       body: combatStart,
     });
@@ -39,25 +39,25 @@ class CombatService {
   async attack(
     characterId: string,
     target: CombatantDto,
-    spellName?: string,
+    spellName?: string
   ): Promise<CombatActionResponseDto> {
     // Validate inputs
     if (!characterId) {
-      throw new Error('combatApi.attack: characterId is required');
+      throw new Error("combatApi.attack: characterId is required");
     }
     if (!target?.id) {
-      throw new Error('combatApi.attack: target and target.id are required');
+      throw new Error("combatApi.attack: target and target.id are required");
     }
 
     try {
-      const actionType = spellName ? 'cast-spell' : 'attack';
+      const actionType = spellName ? "cast-spell" : "attack";
       const requestBody: CombatActionRequestDto = {
         actionType,
         targetId: target.id,
         ...(spellName && { spellName }),
       };
 
-      const response = await api.POST('/api/combat/{characterId}/action', {
+      const response = await api.POST("/api/combat/{characterId}/action", {
         params: {
           path: {
             characterId,
@@ -71,12 +71,12 @@ class CombatService {
       return result;
     } catch (err) {
       // Re-throw with context if not already a contextualized error
-      if (err instanceof Error && err.message.includes('combatApi.attack')) {
+      if (err instanceof Error && err.message.includes("combatApi.attack")) {
         throw err;
       }
       const errorMsg = err instanceof Error ? err.message : String(err);
       throw new Error(
-        `combatApi.attack: unexpected error (characterId=${characterId}, targetId=${target.id}): ${errorMsg}`,
+        `combatApi.attack: unexpected error (characterId=${characterId}, targetId=${target.id}): ${errorMsg}`
       );
     }
   }
@@ -85,7 +85,7 @@ class CombatService {
    * Get current combat status
    */
   async getStatus(characterId: string): Promise<CombatStateDto> {
-    const response = await api.GET('/api/combat/{characterId}/status', {
+    const response = await api.GET("/api/combat/{characterId}/status", {
       params: { path: { characterId } },
     });
     return getData<CombatStateDto>(response);
@@ -95,7 +95,7 @@ class CombatService {
    * End combat (flee)
    */
   async endCombat(characterId: string): Promise<CombatEndResponseDto> {
-    const response = await api.POST('/api/combat/{characterId}/flee', {
+    const response = await api.POST("/api/combat/{characterId}/flee", {
       params: { path: { characterId } },
     });
     return getData(response);
@@ -106,7 +106,7 @@ class CombatService {
    * This triggers enemy actions automatically until the next player activation.
    */
   async endActivation(characterId: string) {
-    const response = await api.POST('/api/combat/{characterId}/end-turn', {
+    const response = await api.POST("/api/combat/{characterId}/end-turn", {
       params: { path: { characterId } },
     });
     return getData(response);

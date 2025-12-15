@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from "@nes
 import { CharacterService } from "../../domain/character/character.service.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
-import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
+
 import type {
   CombatEndResponseDto,
   CombatStartRequestDto,
@@ -74,8 +74,7 @@ export class CombatOrchestrator {
       characterId,
       state,
       enemyTurnsBeforeFirstPlayer,
-      this.diceService,
-      userId
+      this.diceService
     );
 
     // Update to processed state
@@ -135,8 +134,7 @@ export class CombatOrchestrator {
       characterId,
       combatState,
       aliveEnemies,
-      this.diceService,
-      userId
+      this.diceService
     );
 
     const finalState = enemyTurnResult.state;

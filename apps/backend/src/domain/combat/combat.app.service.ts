@@ -16,6 +16,7 @@ import { CombatantDto } from "./dto/CombatantDto.js";
 import { CombatEndDto } from "./dto/CombatEndDto.js";
 import { CombatStartRequestDto } from "./dto/CombatStartRequestDto.js";
 import { CombatStateDto } from "./dto/CombatStateDto.js";
+import { EnemyAttackLogDto } from "./dto/EnemyAttackLogDto.js";
 import { ActionEconomyService } from "./services/action-economy.service.js";
 import { InitService } from "./services/init.service.js";
 import { TurnOrderService } from "./services/turn-order.service.js";
@@ -478,11 +479,10 @@ export class CombatAppService {
     characterId: string,
     state: CombatStateDto,
     enemies: CombatantDto[],
-    diceService: DiceService,
-    userId?: string
+    diceService: DiceService
   ): Promise<{
     state: CombatStateDto;
-    attackLogs: any[];
+    attackLogs: EnemyAttackLogDto[];
     totalDamage: number;
     playerDefeated: boolean;
   }> {

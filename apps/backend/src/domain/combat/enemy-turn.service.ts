@@ -116,7 +116,7 @@ export class EnemyTurnService {
 
         // Fetch fresh state after attack to reflect HP changes
         const freshSession = await this.combatSessionModel.findOne({ characterId });
-        if (freshSession) {
+        if (freshSession && freshSession.player.hp) {
           acc.state.player.hp = freshSession.player.hp;
         }
 

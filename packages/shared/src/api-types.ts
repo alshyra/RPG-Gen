@@ -294,7 +294,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/combat/{characterId}/attack": {
+    "/api/combat/{characterId}/action": {
         parameters: {
             query?: never;
             header?: never;
@@ -303,8 +303,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Execute player attack in combat, determine if player hit his target */
-        post: operations["CombatController_attack"];
+        /** Execute any combat action (attack, dash, disengage, spell, class feature) */
+        post: operations["CombatController_action"];
         delete?: never;
         options?: never;
         head?: never;
@@ -356,6 +356,23 @@ export interface paths {
         put?: never;
         /** Force end current combat (flee) */
         post: operations["CombatController_flee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute combatant movement on the grid */
+        post: operations["CombatController_move"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1067,12 +1084,60 @@ export interface components {
             bonusActionRemaining?: number;
             /** @description Maximum bonus actions per activation */
             bonusActionMax?: number;
+            /** @description Active turn effects (dash, disengage, etc.) */
+            activeEffects?: string[];
         };
-        AttackRequestDto: {
-            /** @description Target ID to attack */
-            targetId: string;
-            /** @description Optional spell name to cast instead of weapon attack */
+        CombatActionRequestDto: {
+            /**
+             * @description Type of action to perform
+             * @enum {string}
+             */
+            actionType: "attack" | "dash" | "disengage" | "cast-spell" | "second-wind" | "rage" | "cunning-action";
+            /** @description Target combatant ID (for attacks/spells targeting enemies) */
+            targetId?: string;
+            /** @description Spell name (for cast-spell actions) */
             spellName?: string;
+            /** @description Feature/ability ID (for class features) */
+            featureId?: string;
+        };
+        CombatActionResponseDto: {
+            /** @description Whether the action was successful */
+            success: boolean;
+            /**
+             * @description Cost of the action
+             * @enum {string}
+             */
+            cost: "action" | "bonus-action" | "reaction" | "free";
+            /** @description Whether attack/spell hit (if applicable) */
+            hit?: boolean;
+            /** @description Damage dealt (if applicable) */
+            damage?: number;
+            /** @description Healing restored (if applicable) */
+            healing?: number;
+            /** @description Description of action result */
+            description?: string;
+            /** @description Error message if action failed */
+            errorMessage?: string;
+            /** @description Remaining actions for current turn */
+            actionsRemaining: number;
+            /** @description Remaining bonus actions for current turn */
+            bonusActionsRemaining: number;
+            /** @description Active effects for current turn (dash, disengage, etc.) */
+            activeEffects?: string[];
+            /** @description Full combat state after action */
+            combatState?: components["schemas"]["CombatStateDto"];
+            /** @description Dice roll result (for attacks) */
+            diceResult?: Record<string, never>;
+            /** @description Damage dice result details */
+            damageDiceResult?: Record<string, never>;
+            /** @description Total damage dealt (convenience field) */
+            damageTotal?: number;
+            /** @description Whether the attack was a critical hit */
+            isCrit?: boolean;
+            /** @description Combat end result if combat finished */
+            combatEnd?: components["schemas"]["CombatEndDto"];
+            /** @description Narrative text (e.g., for combat end) */
+            narrative?: string;
         };
         DiceResultDto: {
             /** @description Individual dice roll results */
@@ -1093,22 +1158,6 @@ export interface components {
             damageTotal?: number;
             /** @description Whether this damage roll was a critical hit */
             isCrit?: boolean;
-        };
-        AttackResponseDto: {
-            /** @description Result of the hit roll for frontend display purposes. */
-            diceResult?: components["schemas"]["DiceResultDto"];
-            /** @description Damage roll result (includes isCrit and damageTotal), present when an attack hits. */
-            damageDiceResult?: components["schemas"]["CombatDiceResultDto"];
-            /** @description Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable). */
-            damageTotal?: number;
-            /** @description Whether the hit was a critical strike. */
-            isCrit?: boolean;
-            /** @description Returns the state of the combat */
-            combatState: components["schemas"]["CombatStateDto"];
-            /** @description Combat end information (present when combat ends due to this attack) */
-            combatEnd?: components["schemas"]["CombatEndDto"];
-            /** @description Narrative description of the attack outcome if combat ends, for frontend display purposes. */
-            narrative?: string;
         };
         EnemyAttackLogDto: {
             /**
@@ -1178,6 +1227,47 @@ export interface components {
             message: string;
             /** @description Optional instructions returned after ending combat */
             instructions?: components["schemas"]["CombatEndResultDto"][];
+        };
+        GridPositionDto: {
+            /** @description X coordinate on combat grid */
+            x: number;
+            /** @description Y coordinate on combat grid */
+            y: number;
+        };
+        MovementRequestDto: {
+            /** @description ID of the combatant to move */
+            combatantId: string;
+            /** @description Path of grid positions to traverse */
+            path: components["schemas"]["GridPositionDto"][];
+        };
+        MovementEventDto: {
+            /**
+             * @description Event type
+             * @enum {string}
+             */
+            type: "move" | "opportunity-attack" | "reaction" | "movement-interrupted";
+            /** @description Actor combatant ID */
+            actorId: string;
+            /** @description Target combatant ID (for attacks) */
+            targetId?: string;
+            /** @description Damage dealt (if applicable) */
+            damage?: number;
+            /** @description Whether attack hit */
+            hit?: boolean;
+            /** @description Description of event */
+            description?: string;
+        };
+        MovementResponseDto: {
+            /** @description Whether movement was successful */
+            success: boolean;
+            /** @description Final position after movement */
+            finalPosition: components["schemas"]["GridPositionDto"];
+            /** @description Ordered list of events that occurred during movement */
+            events: components["schemas"]["MovementEventDto"][];
+            /** @description Remaining movement speed after this action */
+            remainingMovement: number;
+            /** @description Error message if movement failed */
+            errorMessage?: string;
         };
         DiceRequestDto: {
             expr: string;
@@ -1850,7 +1940,7 @@ export interface operations {
             };
         };
     };
-    CombatController_attack: {
+    CombatController_action: {
         parameters: {
             query?: never;
             header?: never;
@@ -1861,7 +1951,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AttackRequestDto"];
+                "application/json": components["schemas"]["CombatActionRequestDto"];
             };
         };
         responses: {
@@ -1870,7 +1960,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AttackResponseDto"];
+                    "application/json": components["schemas"]["CombatActionResponseDto"];
                 };
             };
         };
@@ -1935,6 +2025,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CombatEndResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovementRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovementResponseDto"];
                 };
             };
         };

@@ -835,9 +835,9 @@
         ]
       }
     },
-    "/api/combat/{characterId}/attack": {
+    "/api/combat/{characterId}/action": {
       "post": {
-        "operationId": "CombatController_attack",
+        "operationId": "CombatController_action",
         "parameters": [
           {
             "name": "characterId",
@@ -853,7 +853,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AttackRequestDto"
+                "$ref": "#/components/schemas/CombatActionRequestDto"
               }
             }
           }
@@ -864,7 +864,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AttackResponseDto"
+                  "$ref": "#/components/schemas/CombatActionResponseDto"
                 }
               }
             }
@@ -875,7 +875,7 @@
             "bearer": []
           }
         ],
-        "summary": "Execute player attack in combat, determine if player hit his target",
+        "summary": "Execute any combat action (attack, dash, disengage, spell, class feature)",
         "tags": [
           "combat"
         ]
@@ -984,6 +984,52 @@
           }
         ],
         "summary": "Force end current combat (flee)",
+        "tags": [
+          "combat"
+        ]
+      }
+    },
+    "/api/combat/{characterId}/move": {
+      "post": {
+        "operationId": "CombatController_move",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovementRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovementResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Execute combatant movement on the grid",
         "tags": [
           "combat"
         ]
@@ -2667,6 +2713,13 @@
           "bonusActionMax": {
             "type": "number",
             "description": "Maximum bonus actions per activation"
+          },
+          "activeEffects": {
+            "description": "Active turn effects (dash, disengage, etc.)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -2679,20 +2732,133 @@
           "roundNumber"
         ]
       },
-      "AttackRequestDto": {
+      "CombatActionRequestDto": {
         "type": "object",
         "properties": {
+          "actionType": {
+            "type": "string",
+            "description": "Type of action to perform",
+            "enum": [
+              "attack",
+              "dash",
+              "disengage",
+              "cast-spell",
+              "second-wind",
+              "rage",
+              "cunning-action"
+            ]
+          },
           "targetId": {
             "type": "string",
-            "description": "Target ID to attack"
+            "description": "Target combatant ID (for attacks/spells targeting enemies)"
           },
           "spellName": {
             "type": "string",
-            "description": "Optional spell name to cast instead of weapon attack"
+            "description": "Spell name (for cast-spell actions)"
+          },
+          "featureId": {
+            "type": "string",
+            "description": "Feature/ability ID (for class features)"
           }
         },
         "required": [
-          "targetId"
+          "actionType"
+        ]
+      },
+      "CombatActionResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the action was successful"
+          },
+          "cost": {
+            "type": "string",
+            "description": "Cost of the action",
+            "enum": [
+              "action",
+              "bonus-action",
+              "reaction",
+              "free"
+            ]
+          },
+          "hit": {
+            "type": "boolean",
+            "description": "Whether attack/spell hit (if applicable)"
+          },
+          "damage": {
+            "type": "number",
+            "description": "Damage dealt (if applicable)"
+          },
+          "healing": {
+            "type": "number",
+            "description": "Healing restored (if applicable)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of action result"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "Error message if action failed"
+          },
+          "actionsRemaining": {
+            "type": "number",
+            "description": "Remaining actions for current turn"
+          },
+          "bonusActionsRemaining": {
+            "type": "number",
+            "description": "Remaining bonus actions for current turn"
+          },
+          "activeEffects": {
+            "description": "Active effects for current turn (dash, disengage, etc.)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "combatState": {
+            "description": "Full combat state after action",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatStateDto"
+              }
+            ]
+          },
+          "diceResult": {
+            "type": "object",
+            "description": "Dice roll result (for attacks)"
+          },
+          "damageDiceResult": {
+            "type": "object",
+            "description": "Damage dice result details"
+          },
+          "damageTotal": {
+            "type": "number",
+            "description": "Total damage dealt (convenience field)"
+          },
+          "isCrit": {
+            "type": "boolean",
+            "description": "Whether the attack was a critical hit"
+          },
+          "combatEnd": {
+            "description": "Combat end result if combat finished",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
+              }
+            ]
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Narrative text (e.g., for combat end)"
+          }
+        },
+        "required": [
+          "success",
+          "cost",
+          "actionsRemaining",
+          "bonusActionsRemaining"
         ]
       },
       "DiceResultDto": {
@@ -2751,58 +2917,6 @@
           "rolls",
           "modifierValue",
           "total"
-        ]
-      },
-      "AttackResponseDto": {
-        "type": "object",
-        "properties": {
-          "diceResult": {
-            "description": "Result of the hit roll for frontend display purposes.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DiceResultDto"
-              }
-            ]
-          },
-          "damageDiceResult": {
-            "description": "Damage roll result (includes isCrit and damageTotal), present when an attack hits.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatDiceResultDto"
-              }
-            ]
-          },
-          "damageTotal": {
-            "type": "number",
-            "description": "Total numeric damage applied to the target (includes damage bonus, doubled on crit if applicable)."
-          },
-          "isCrit": {
-            "type": "boolean",
-            "description": "Whether the hit was a critical strike."
-          },
-          "combatState": {
-            "description": "Returns the state of the combat",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatStateDto"
-              }
-            ]
-          },
-          "combatEnd": {
-            "description": "Combat end information (present when combat ends due to this attack)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatEndDto"
-              }
-            ]
-          },
-          "narrative": {
-            "type": "string",
-            "description": "Narrative description of the attack outcome if combat ends, for frontend display purposes."
-          }
-        },
-        "required": [
-          "combatState"
         ]
       },
       "EnemyAttackLogDto": {
@@ -2941,6 +3055,120 @@
         "required": [
           "success",
           "message"
+        ]
+      },
+      "GridPositionDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "X coordinate on combat grid"
+          },
+          "y": {
+            "type": "number",
+            "description": "Y coordinate on combat grid"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ]
+      },
+      "MovementRequestDto": {
+        "type": "object",
+        "properties": {
+          "combatantId": {
+            "type": "string",
+            "description": "ID of the combatant to move"
+          },
+          "path": {
+            "description": "Path of grid positions to traverse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GridPositionDto"
+            }
+          }
+        },
+        "required": [
+          "combatantId",
+          "path"
+        ]
+      },
+      "MovementEventDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Event type",
+            "enum": [
+              "move",
+              "opportunity-attack",
+              "reaction",
+              "movement-interrupted"
+            ]
+          },
+          "actorId": {
+            "type": "string",
+            "description": "Actor combatant ID"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "Target combatant ID (for attacks)"
+          },
+          "damage": {
+            "type": "number",
+            "description": "Damage dealt (if applicable)"
+          },
+          "hit": {
+            "type": "boolean",
+            "description": "Whether attack hit"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of event"
+          }
+        },
+        "required": [
+          "type",
+          "actorId"
+        ]
+      },
+      "MovementResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether movement was successful"
+          },
+          "finalPosition": {
+            "description": "Final position after movement",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GridPositionDto"
+              }
+            ]
+          },
+          "events": {
+            "description": "Ordered list of events that occurred during movement",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MovementEventDto"
+            }
+          },
+          "remainingMovement": {
+            "type": "number",
+            "description": "Remaining movement speed after this action"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "Error message if movement failed"
+          }
+        },
+        "required": [
+          "success",
+          "finalPosition",
+          "events",
+          "remainingMovement"
         ]
       },
       "DiceRequestDto": {
