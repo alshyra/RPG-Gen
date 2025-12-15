@@ -5,7 +5,6 @@
     "unicorn/no-for-loop": "error",
     "unicorn/prefer-array-flat-map": "error",
     "unicorn/prefer-array-some": "error",
-    "no-unused-expressions": "off"
   },
   "env": {
     "browser": true,

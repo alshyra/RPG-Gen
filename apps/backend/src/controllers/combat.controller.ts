@@ -2,8 +2,6 @@ import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nes
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import {
-  AttackRequestDto,
-  AttackResponseDto,
   CombatActionRequestDto,
   CombatActionResponseDto,
   CombatEndResponseDto,
@@ -74,30 +72,6 @@ export class CombatController {
   ): Promise<CombatActionResponseDto> {
     const userId = req.user._id.toString();
     return this.actionOrchestrator.executeAction(userId, characterId, body);
-  }
-
-  /**
-   * @deprecated Use /action endpoint instead
-   */
-  @Post(':characterId/attack')
-  @ApiOperation({ summary: '[DEPRECATED] Use /action instead' })
-  @ApiResponse({
-    status: 200,
-    type: AttackResponseDto,
-  })
-  @ApiBody({ type: AttackRequestDto })
-  async attack(
-    @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Body() body: AttackRequestDto,
-  ): Promise<AttackResponseDto> {
-    const userId = req.user._id.toString();
-    return this.combatOrchestrator.processAttack(
-      userId,
-      characterId,
-      body.targetId,
-      body.spellName,
-    );
   }
 
   @Get(':characterId/status')

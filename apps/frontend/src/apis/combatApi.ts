@@ -2,7 +2,8 @@
  * Combat service for interacting with the backend combat API
  */
 import type {
-  AttackResponseDto,
+  CombatActionRequestDto,
+  CombatActionResponseDto,
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
@@ -33,13 +34,13 @@ class CombatService {
   }
 
   /**
-   * Execute an attack against a target using an action token for idempotency
+   * Execute an attack or cast spell action against a target
    */
   async attack(
     characterId: string,
     target: CombatantDto,
     spellName?: string,
-  ): Promise<AttackResponseDto> {
+  ): Promise<CombatActionResponseDto> {
     // Validate inputs
     if (!characterId) {
       throw new Error('combatApi.attack: characterId is required');
@@ -49,20 +50,24 @@ class CombatService {
     }
 
     try {
-      const response = await api.POST('/api/combat/{characterId}/attack', {
+      const actionType = spellName ? 'cast-spell' : 'attack';
+      const requestBody: CombatActionRequestDto = {
+        actionType,
+        targetId: target.id,
+        ...(spellName && { spellName }),
+      };
+
+      const response = await api.POST('/api/combat/{characterId}/action', {
         params: {
           path: {
             characterId,
           },
         },
-        body: {
-          targetId: target.id,
-          ...(spellName && { spellName }),
-        },
+        body: requestBody,
       });
 
       // Use the getData helper which properly handles response errors
-      const result = getData<AttackResponseDto>(response);
+      const result = getData<CombatActionResponseDto>(response);
       return result;
     } catch (err) {
       // Re-throw with context if not already a contextualized error

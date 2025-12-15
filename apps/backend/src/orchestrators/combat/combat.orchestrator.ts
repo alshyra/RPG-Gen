@@ -5,7 +5,6 @@ import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import { CombatEndDto } from '../../domain/combat/dto/CombatEndDto.js';
 import type { EnemyAttackLogDto } from '../../domain/combat/dto/EnemyAttackLogDto.js';
 import type {
-  AttackResponseDto,
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
@@ -15,7 +14,6 @@ import type {
 import { DiceService } from '../../domain/dice/dice.service.js';
 import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
 import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
-import { ChatMessageDto } from '../../domain/chat/dto/ChatMessageDto.js';
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -44,7 +42,6 @@ export class CombatOrchestrator {
    * Initialize combat for a character.
    * Loads character data, initializes combat state, and generates first action token.
    */
-  // eslint-disable-next-line max-statements
   async startCombat(
     userId: string,
     characterId: string,
@@ -122,283 +119,9 @@ export class CombatOrchestrator {
   }
 
   /**
-   * Process a player attack action.
-   * Validates token, performs attack roll, and returns result or damage roll instruction.
-   * If spellName is provided, uses spell mechanics instead of weapon attack.
-   */
-  // eslint-disable-next-line max-statements
-  async processAttack(
-    userId: string,
-    characterId: string,
-    targetId: string,
-    spellName?: string,
-  ): Promise<AttackResponseDto> {
-    // Validate combat is active
-    if (!(await this.combatAppService.isInCombat(characterId))) {
-      throw new BadRequestException('Character is not in combat');
-    }
-
-    let combatState = await this.combatAppService.getCombatState(characterId);
-
-    // Find target enemy
-    const targetEnemy = combatState.enemies.find(
-      enemy => enemy.id.toLowerCase() === (targetId || '').toLowerCase() && (enemy.hp ?? 0) > 0,
-    );
-    const validTargetIds = combatState.enemies
-      .filter(e => (e.hp ?? 0) > 0)
-      .map(e => e.id)
-      .join(', ');
-    if (!targetEnemy) {
-      throw new BadRequestException(
-        `Invalid target: ${targetId}. Valid targets: ${validTargetIds}`,
-      );
-    }
-
-    // If spell name provided, use spell attack/save mechanics
-    if (spellName) {
-      return this.processSpellAttack(
-        userId,
-        characterId,
-        targetId,
-        targetEnemy,
-        combatState,
-        spellName,
-      );
-    }
-    return this.processMeleeAttack(userId, characterId, targetId, targetEnemy, combatState);
-  }
-
-  private async processMeleeAttack(
-    userId: string,
-    characterId: string,
-    targetId: string,
-    targetEnemy: CombatantDto,
-    combatState: CombatStateDto,
-  ) {
-    // DiceService now exposes rollAttack that encapsulates the 1d20 logic (+crit/fumble)
-    const attackRoll = this.diceService.rollAttack(
-      combatState.player.attackBonus,
-      targetEnemy.ac ?? 0,
-    );
-
-    if (!attackRoll.hit) {
-      // Decrement action (via CombatService) and persist to avoid client exploit / state mismatch
-      combatState = this.combatAppService.decrementAction(combatState);
-      await this.combatAppService.saveCombatState(combatState);
-
-      return {
-        combatState,
-        diceResult: attackRoll.diceResult,
-        damageTotal: 0,
-      } as AttackResponseDto;
-    }
-
-    // Hit: roll damage via DiceService (handles crit doubling) and get the damage result DTO
-    const damageResult = this.diceService.rollDamage(
-      combatState.player.damageDice,
-      attackRoll.isCrit,
-      combatState.player.damageBonus,
-    );
-
-    // Apply damage and finalize via CombatService (persist, consume action, maybe end combat)
-    const applyResult = await this.combatAppService.applyPlayerDamage(
-      characterId,
-      targetId,
-      damageResult.damageTotal,
-    );
-
-    // Build base response
-    const response: AttackResponseDto = {
-      combatState: applyResult.state,
-      diceResult: attackRoll.diceResult,
-      damageDiceResult: damageResult,
-      damageTotal: damageResult.damageTotal,
-      isCrit: damageResult.isCrit,
-    };
-
-    // If combat ended, attach combatEnd and apply XP to character
-    if (applyResult.endResult) {
-      return await this.handleCombatEnd(
-        userId,
-        characterId,
-        applyResult,
-        applyResult.state,
-        response,
-      );
-    }
-
-    return response;
-  }
-
-  /**
-   * Process a spell attack (attack roll or saving throw based).
-   * MVP: No spell slot tracking, cantrips and level 1 spells usable freely.
-   */
-  // eslint-disable-next-line max-statements
-  private async processSpellAttack(
-    userId: string,
-    characterId: string,
-    targetId: string,
-    targetEnemy: CombatantDto,
-    combatState: CombatStateDto,
-    spellName: string,
-  ): Promise<AttackResponseDto> {
-    // Load spell definition
-    const spellDef = await this.spellDefinitionService.findByName(spellName);
-    if (!spellDef) {
-      throw new BadRequestException(`Spell not found: ${spellName}`);
-    }
-
-    const damageDice = spellDef.meta?.damageDice || '1d4';
-    const saveType = spellDef.meta?.saveType;
-
-    // Calculate spell DC (8 + proficiency + spellcasting ability modifier)
-    // For MVP, using Charisma as default spellcasting ability
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    const chaMod = Math.floor(((character.scores?.Cha ?? 10) - 10) / 2);
-    const proficiency = character.proficiency ?? 2;
-    const spellDC = 8 + proficiency + chaMod;
-
-    let hit = false;
-    let isCrit = false;
-    let attackRoll:
-      | {
-          hit: boolean;
-          isCrit: boolean;
-          diceResult: { rolls: number[]; modifierValue: number; total: number };
-        }
-      | undefined;
-    let saveRoll:
-      | { success: boolean; diceResult: { rolls: number[]; modifierValue: number; total: number } }
-      | undefined;
-
-    if (saveType) {
-      // Saving throw spell
-      // Get target's save bonus (for MVP, use a default or estimate from enemy stats)
-      const savingThrowBonus = -1; // MVP: default, could be enhanced with enemy stat tracking
-      saveRoll = this.diceService.rollSave(savingThrowBonus, spellDC);
-      hit = !saveRoll.success; // Damage on failed save
-    } else {
-      // Attack roll spell (like fire bolt, ray of frost)
-      // Use player's spell attack bonus (proficiency + spellcasting mod)
-      const spellAttackBonus = proficiency + chaMod;
-      attackRoll = this.diceService.rollAttack(spellAttackBonus, targetEnemy.ac ?? 0);
-      ({ hit, isCrit } = attackRoll);
-    }
-
-    if (!hit) {
-      // Miss or successful save
-      combatState = this.combatAppService.decrementAction(combatState);
-      await this.combatAppService.saveCombatState(combatState);
-
-      return {
-        combatState,
-        diceResult: attackRoll?.diceResult || saveRoll?.diceResult,
-      };
-    }
-
-    // Hit or failed save: roll damage
-    const damageResult = this.diceService.rollDamage(damageDice, isCrit, 0);
-
-    // Apply damage
-    const applyResult = await this.combatAppService.applyPlayerDamage(
-      characterId,
-      targetId,
-      damageResult.damageTotal,
-    );
-
-    // Build response
-    const response: AttackResponseDto = {
-      combatState: applyResult.state,
-      diceResult: attackRoll?.diceResult || saveRoll?.diceResult,
-      damageDiceResult: damageResult,
-      damageTotal: damageResult.damageTotal,
-      isCrit: damageResult.isCrit,
-    };
-
-    return await this.handleCombatEnd(
-      userId,
-      characterId,
-      applyResult,
-      applyResult.state,
-      response,
-    );
-  }
-
-  private async handleCombatEnd(
-    userId: string,
-    characterId: string,
-    applyResult: { endResult?: { xp_gained?: number; enemies_defeated?: string[] } | undefined },
-    finalState: CombatStateDto,
-    response: AttackResponseDto,
-  ): Promise<AttackResponseDto> {
-    if (!applyResult.endResult) return response;
-
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    const victoryMessageForChat = `Message system: le personnage ${character.name} à triomphé de ${(applyResult.endResult?.enemies_defeated ?? []).join(', ')} en ${finalState.roundNumber}. Renvoie une brève description narrative de cette victoire.`;
-    const history = await this.conversationService.getHistoryMessages(userId, characterId);
-    this.geminiTexteService.initializeChatSession(
-      characterId,
-      this.geminiTexteService.initPrompt(
-        character,
-        this.conversationService.buildCharacterSummary(character),
-      ),
-      history ?? [],
-    );
-
-    const combatEnd = new CombatEndDto({
-      victory: true,
-      xp_gained: applyResult.endResult?.xp_gained ?? 0,
-      player_hp: finalState.player.hp,
-      enemies_defeated: applyResult.endResult?.enemies_defeated ?? [],
-    });
-
-    const messageResponse = await this.geminiTexteService.sendMessage(
-      characterId,
-      JSON.stringify({
-        narrative: victoryMessageForChat,
-        combatEnd: {
-          victory: combatEnd.victory,
-          xp_gained: combatEnd.xp_gained,
-          player_hp: combatEnd.player_hp,
-          enemies_defeated: combatEnd.enemies_defeated,
-        },
-      }),
-    );
-
-    if ((applyResult.endResult?.xp_gained ?? 0) > 0) {
-      await this.characterService.addXp(characterId, applyResult.endResult.xp_gained!);
-      this.logger.log(`Applied ${applyResult.endResult.xp_gained} XP to character ${characterId}`);
-    }
-
-    await this.conversationService.append(
-      userId,
-      characterId,
-      new ChatMessageDto({
-        role: 'assistant',
-        narrative: messageResponse.narrative,
-        instructions: [
-          {
-            type: 'combat_end',
-            combat_end: combatEnd,
-          },
-        ],
-      }),
-    );
-
-    return {
-      ...response,
-      combatEnd,
-      combatState: finalState,
-      narrative: messageResponse.narrative,
-    };
-  }
-
-  /**
    * End player turn and process all enemy attacks.
    * Returns attack logs for frontend to replay with animations.
    */
-  // eslint-disable-next-line max-statements
   public async endPlayerTurn(
     userId: string,
     characterId: string,

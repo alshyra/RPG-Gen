@@ -1,17 +1,16 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import {
-  CombatGridService,
-  CombatantPosition,
-} from '../../domain/combat/services/combat-grid.service.js';
-import {
-  OpportunityAttackResolver,
-  CombatantStats,
-} from '../../domain/combat/services/opportunity-attack.service.js';
-import { MovementRequestDto } from '../../domain/combat/dto/MovementRequestDto.js';
-import { MovementResponseDto } from '../../domain/combat/dto/MovementResponseDto.js';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { CombatAppService } from '../../domain/combat/combat.app.service.js';
 import { GridPositionDto } from '../../domain/combat/dto/GridPositionDto.js';
 import { MovementEventDto, MovementEventType } from '../../domain/combat/dto/MovementEventDto.js';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
+import { MovementRequestDto } from '../../domain/combat/dto/MovementRequestDto.js';
+import { MovementResponseDto } from '../../domain/combat/dto/MovementResponseDto.js';
+import {
+  CombatGridService
+} from '../../domain/combat/services/combat-grid.service.js';
+import {
+  CombatantStats,
+  OpportunityAttackResolver,
+} from '../../domain/combat/services/opportunity-attack.service.js';
 
 /**
  * Orchestrator for combat movement operations.

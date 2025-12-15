@@ -1,0 +1,19 @@
+{
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "packages/shared/src/openapi.json",
+    "packages/shared/src/api-types.ts",
+    "packages/shared/src/index.ts",
+    "*.min.js"
+  ],
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "arrowParens": "avoid",
+  "singleAttributePerLine": true,
+  "bracketSpacing": true
+}

@@ -1,5 +1,5 @@
 import type {
-  AttackResponseDto,
+  CombatActionResponseDto,
   CombatantDto,
   CombatStartInstructionMessageDto,
 } from '@rpg-gen/shared';
@@ -90,7 +90,10 @@ export function useCombat() {
     }
   };
 
-  const displayAttackResultMessage = (target: CombatantDto, result: AttackResponseDto): void => {
+  const displayAttackResultMessage = (
+    target: CombatantDto,
+    result: CombatActionResponseDto,
+  ): void => {
     const targetName = target?.name || 'cible inconnue';
     const { damageTotal, isCrit } = result;
     if (damageTotal && damageTotal > 0) {
@@ -120,7 +123,7 @@ export function useCombat() {
     }
   };
 
-  const checkCombatVictory = (result: AttackResponseDto): void => {
+  const checkCombatVictory = (result: CombatActionResponseDto): void => {
     // First check if backend returned explicit combatEnd
     if (!result.combatEnd) return;
     handleCombatEnd(
@@ -133,7 +136,7 @@ export function useCombat() {
 
   const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
-  const showPlayerAttackAnimation = async (result: AttackResponseDto): Promise<void> => {
+  const showPlayerAttackAnimation = async (result: CombatActionResponseDto): Promise<void> => {
     currentPlayerAttackLog.value = result;
     await delay(combatStore.PLAYER_ATTACK_DELAY_MS);
     currentPlayerAttackLog.value = null;
@@ -147,7 +150,7 @@ export function useCombat() {
     currentTarget.value = target;
   };
 
-  const processAttackResult = async (result: AttackResponseDto, target: CombatantDto) => {
+  const processAttackResult = async (result: CombatActionResponseDto, target: CombatantDto) => {
     if (!target?.id) {
       console.error('[useCombat] processAttackResult: invalid target', target);
       return;

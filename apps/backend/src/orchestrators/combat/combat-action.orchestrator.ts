@@ -11,6 +11,8 @@ import {
 } from '../../domain/combat/dto/CombatActionResponseDto.js';
 import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
 import { DiceService } from '../../domain/dice/dice.service.js';
+import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
+import { CharacterService } from '../../domain/character/character.service.js';
 
 /**
  * Orchestrator for unified combat actions.
@@ -23,6 +25,8 @@ export class CombatActionOrchestrator {
   constructor(
     @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
     private readonly diceService: DiceService,
+    private readonly spellDefinitionService: SpellDefinitionService,
+    private readonly characterService: CharacterService,
   ) {}
 
   /**
@@ -109,16 +113,21 @@ export class CombatActionOrchestrator {
       return this.failureResponse(ActionCost.ACTION, 'Target not found', session);
     }
 
-    // Use existing attack logic from combat service
-    const attackRoll = this.diceService.rollDiceExpr('1d20');
-    const playerAttackBonus = 4; // TODO: Get from character
-    const totalAttack = attackRoll.total + playerAttackBonus;
-    const hit = totalAttack >= (enemy.ac ?? 10);
+    // Get player's attack bonus from session (combat service sets this on combat start)
+    const playerAttackBonus = session.player?.attackBonus ?? 4;
+    const playerDamageDice = session.player?.damageDice ?? '1d8';
+    const playerDamageBonus = session.player?.damageBonus ?? 3;
+
+    // Roll attack using DiceService
+    const attackRoll = this.diceService.rollAttack(playerAttackBonus, enemy.ac ?? 10);
+    const hit = attackRoll.hit;
+    const isCrit = attackRoll.isCrit;
 
     let damage = 0;
+    let damageResult;
     if (hit) {
-      const damageRoll = this.diceService.rollDiceExpr('1d8');
-      damage = damageRoll.total + 3; // TODO: Get modifier from character
+      damageResult = this.diceService.rollDamage(playerDamageDice, isCrit, playerDamageBonus);
+      damage = damageResult.damageTotal;
       enemy.hp = Math.max(0, (enemy.hp ?? 0) - damage);
       await this.combatSessionModel.findOneAndUpdate(
         { characterId, userId, 'enemies.id': enemy.id },
@@ -131,10 +140,16 @@ export class CombatActionOrchestrator {
       cost: ActionCost.ACTION,
       hit,
       damage: hit ? damage : undefined,
-      description: hit ? `Hit ${enemy.name} for ${damage} damage` : `Missed ${enemy.name}`,
+      description: hit
+        ? `Hit ${enemy.name} for ${damage} damage${isCrit ? ' (CRITICAL!)' : ''}`
+        : `Missed ${enemy.name}`,
       actionsRemaining: session.actionRemaining ?? 0,
       bonusActionsRemaining: session.bonusActionRemaining ?? 0,
       activeEffects: session.activeEffects ?? [],
+      diceResult: attackRoll.diceResult,
+      damageDiceResult: damageResult,
+      damageTotal: damage,
+      isCrit,
     };
   }
 
@@ -198,8 +213,109 @@ export class CombatActionOrchestrator {
       return this.failureResponse(ActionCost.ACTION, 'Spell name required', session);
     }
 
-    // TODO: Implement spell casting logic
-    return this.failureResponse(ActionCost.ACTION, 'Spell casting not yet implemented', session);
+    if (!request.targetId) {
+      return this.failureResponse(ActionCost.ACTION, 'Target ID required for spell', session);
+    }
+
+    // Find target
+    const target = session.enemies.find(e => e.id === request.targetId);
+    if (!target) {
+      return this.failureResponse(ActionCost.ACTION, 'Target not found', session);
+    }
+
+    // Load spell definition
+    const spellDef = await this.spellDefinitionService.findByName(request.spellName);
+    if (!spellDef) {
+      return this.failureResponse(
+        ActionCost.ACTION,
+        `Spell not found: ${request.spellName}`,
+        session,
+      );
+    }
+
+    const damageDice = spellDef.meta?.damageDice || '1d4';
+    const saveType = spellDef.meta?.saveType;
+
+    // Calculate spell DC (8 + proficiency + spellcasting ability modifier)
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const chaMod = Math.floor(((character.scores?.Cha ?? 10) - 10) / 2);
+    const proficiency = character.proficiency ?? 2;
+    const spellDC = 8 + proficiency + chaMod;
+
+    let hit = false;
+    let isCrit = false;
+    let damage = 0;
+    let diceResult;
+    let damageDiceResult;
+
+    if (saveType) {
+      // Saving throw spell
+      const savingThrowBonus = -1; // MVP: default bonus
+      const saveRoll = this.diceService.rollSave(savingThrowBonus, spellDC);
+      hit = !saveRoll.success; // Damage on failed save
+      diceResult = saveRoll.diceResult;
+
+      if (hit) {
+        damageDiceResult = this.diceService.rollDamage(damageDice, false, 0);
+        damage = damageDiceResult.damageTotal;
+        target.hp = Math.max(0, (target.hp ?? 0) - damage);
+        await this.combatSessionModel.findOneAndUpdate(
+          { characterId, userId, 'enemies.id': target.id },
+          { $set: { 'enemies.$.hp': target.hp } },
+        );
+      }
+
+      return {
+        success: true,
+        cost: ActionCost.ACTION,
+        hit,
+        damage: hit ? damage : undefined,
+        description: hit
+          ? `${request.spellName}: ${target.name} failed save, took ${damage} damage`
+          : `${request.spellName}: ${target.name} succeeded on save`,
+        actionsRemaining: session.actionRemaining ?? 0,
+        bonusActionsRemaining: session.bonusActionRemaining ?? 0,
+        activeEffects: session.activeEffects ?? [],
+        diceResult,
+        damageDiceResult,
+        damageTotal: damage,
+        isCrit: false,
+      };
+    } else {
+      // Attack roll spell (like fire bolt, ray of frost)
+      const spellAttackBonus = proficiency + chaMod;
+      const attackRoll = this.diceService.rollAttack(spellAttackBonus, target.ac ?? 0);
+      hit = attackRoll.hit;
+      isCrit = attackRoll.isCrit;
+      diceResult = attackRoll.diceResult;
+
+      if (hit) {
+        damageDiceResult = this.diceService.rollDamage(damageDice, isCrit, 0);
+        damage = damageDiceResult.damageTotal;
+        target.hp = Math.max(0, (target.hp ?? 0) - damage);
+        await this.combatSessionModel.findOneAndUpdate(
+          { characterId, userId, 'enemies.id': target.id },
+          { $set: { 'enemies.$.hp': target.hp } },
+        );
+      }
+
+      return {
+        success: true,
+        cost: ActionCost.ACTION,
+        hit,
+        damage: hit ? damage : undefined,
+        description: hit
+          ? `${request.spellName}: Hit ${target.name} for ${damage} damage${isCrit ? ' (CRITICAL!)' : ''}`
+          : `${request.spellName}: Missed ${target.name}`,
+        actionsRemaining: session.actionRemaining ?? 0,
+        bonusActionsRemaining: session.bonusActionRemaining ?? 0,
+        activeEffects: session.activeEffects ?? [],
+        diceResult,
+        damageDiceResult,
+        damageTotal: damage,
+        isCrit,
+      };
+    }
   }
 
   private async executeSecondWind(

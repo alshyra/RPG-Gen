@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { CombatStateDto } from './CombatStateDto.js';
+import { CombatEndDto } from './CombatEndDto.js';
 
 export enum ActionCost {
   ACTION = 'action',
@@ -56,4 +65,51 @@ export class CombatActionResponseDto {
   @ApiPropertyOptional({ description: 'Active effects for current turn (dash, disengage, etc.)' })
   @IsOptional()
   activeEffects?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Full combat state after action',
+    type: () => CombatStateDto,
+  })
+  @IsOptional()
+  @IsObject()
+  combatState?: CombatStateDto;
+
+  @ApiPropertyOptional({ description: 'Dice roll result (for attacks)', type: Object })
+  @IsOptional()
+  @IsObject()
+  diceResult?: { rolls: number[]; modifierValue: number; total: number };
+
+  @ApiPropertyOptional({ description: 'Damage dice result details', type: Object })
+  @IsOptional()
+  @IsObject()
+  damageDiceResult?: {
+    rolls: number[];
+    modifierValue: number;
+    total: number;
+    damageTotal: number;
+    isCrit: boolean;
+  };
+
+  @ApiPropertyOptional({ description: 'Total damage dealt (convenience field)' })
+  @IsOptional()
+  @IsNumber()
+  damageTotal?: number;
+
+  @ApiPropertyOptional({ description: 'Whether the attack was a critical hit' })
+  @IsOptional()
+  @IsBoolean()
+  isCrit?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Combat end result if combat finished',
+    type: () => CombatEndDto,
+  })
+  @IsOptional()
+  @IsObject()
+  combatEnd?: CombatEndDto;
+
+  @ApiPropertyOptional({ description: 'Narrative text (e.g., for combat end)' })
+  @IsOptional()
+  @IsString()
+  narrative?: string;
 }

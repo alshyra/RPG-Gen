@@ -1,6 +1,6 @@
 import type { AttackQueueItem, AttackView } from '@/interfaces';
 import type {
-  AttackResponseDto,
+  CombatActionResponseDto,
   CombatantDto,
   CombatPhase,
   CombatStartRequestDto,
@@ -26,13 +26,13 @@ export const useCombatStore = defineStore('combatStore', () => {
   const currentTarget = ref<CombatantDto | null>(null);
   const phase = ref<CombatPhase>('PLAYER_TURN');
   const showAttackResultModal = ref(false);
-  const currentAttackResult = ref<AttackResponseDto>();
+  const currentAttackResult = ref<CombatActionResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
   const currentTurnIndex = ref(0);
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
-  const currentPlayerAttackLog = ref<AttackResponseDto | null>(null);
+  const currentPlayerAttackLog = ref<CombatActionResponseDto | null>(null);
   const isEndingTurn = ref(false);
   const isCombatEndModalOpen = ref(false);
   const combatEndNarrative = ref<string>('');

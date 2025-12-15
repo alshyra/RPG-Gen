@@ -29,8 +29,8 @@
     "e2e:prepare-db": "node scripts/prepare-e2e-db.mjs",
     "e2e:cleanup-db": "node scripts/prepare-e2e-db.mjs -- --cleanup",
     "generate:openapi": "npm --workspace @rpg-gen/backend run generate:openapi",
-    "format": "prettier --write \"**/*.{ts,tsx,vue,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,jsx,json,md}\""
+    "format": "oxfmt --write \"**/*.{ts,tsx,vue,js,jsx,json,md}\"",
+    "format:check": "oxfmt --check \"**/*.{ts,tsx,vue,js,jsx,json,md}\""
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

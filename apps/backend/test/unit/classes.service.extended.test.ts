@@ -4,7 +4,7 @@ import { ClassesService } from '../../src/domain/classes/classes.service.js';
 // Mock SpellDefinitionService
 function makeMockSpellDefService() {
   return {
-    findByLevel: async (level: number) => {
+    findByLevel: async (_level: number) => {
       // Return empty array for mock
       return [];
     },
@@ -14,7 +14,7 @@ function makeMockSpellDefService() {
 // Mock ClassDefinitionService
 function makeMockClassDefService() {
   return {
-    findByName: async (name: string) => null,
+    findByName: async (_name: string) => null,
   } as any;
 }
 
@@ -30,7 +30,7 @@ test('ClassesService.loadClassData should load Barbarian', async t => {
     t.is(data.className, 'Barbarian');
     t.truthy(data.levels);
     t.true(data.levels.length > 0);
-  } catch (err) {
+  } catch {
     // Expected to fail in test environment without proper file structure
     t.pass('ClassesService attempts to load class data (expected behavior)');
   }
