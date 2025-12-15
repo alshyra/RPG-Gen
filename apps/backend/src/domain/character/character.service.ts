@@ -125,6 +125,20 @@ export class CharacterService {
       updateDoc.spells = updates.spells;
     }
 
+    if (updates.selectedCombatProficiencies !== undefined) {
+      // Validate selectedCombatProficiencies is an array of strings
+      if (!Array.isArray(updates.selectedCombatProficiencies)) {
+        throw new BadRequestException('selectedCombatProficiencies must be an array');
+      }
+
+      const hasInvalid = updates.selectedCombatProficiencies.some(id => typeof id !== 'string');
+      if (hasInvalid) {
+        throw new BadRequestException('all selectedCombatProficiencies entries must be strings');
+      }
+
+      updateDoc.selectedCombatProficiencies = updates.selectedCombatProficiencies;
+    }
+
     const character = await this.characterModel.findOneAndUpdate(
       {
         userId,
@@ -412,6 +426,7 @@ export class CharacterService {
       inventory: doc.inventory,
       // Include spells so the API returns the currently known spells for the character
       spells: doc.spells,
+      selectedCombatProficiencies: doc.selectedCombatProficiencies,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,

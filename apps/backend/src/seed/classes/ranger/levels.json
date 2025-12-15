@@ -4,6 +4,16 @@
   "hitDie": "1d10",
   "primarySpellAbility": "Wis",
   "description": "Class-level progression for Ranger 2024.",
+  "combatOptionsByLevel": {
+    "1": [
+      {
+        "id": "favored-enemy",
+        "name": "Favored Enemy",
+        "description": "Choose enemies you specialize against (combat bonuses).",
+        "meta": { "types": ["beast", "humanoid", "undead"] }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

@@ -4,6 +4,56 @@
   "hitDie": "1d8",
   "primarySpellAbility": "",
   "description": "Class-level progression for Rogue 2024.",
+  "combatOptionsByLevel": {
+    "1": [
+      {
+        "id": "sneak-attack",
+        "name": "Sneak Attack",
+        "description": "Extra damage when conditions are met (Finesse/Ranged, advantage or ally nearby).",
+        "meta": {
+          "dice": "1d6",
+          "scaling": [
+            "1d6",
+            "1d6",
+            "1d6",
+            "2d6",
+            "3d6",
+            "3d6",
+            "4d6",
+            "4d6",
+            "5d6",
+            "5d6",
+            "6d6",
+            "6d6",
+            "7d6",
+            "7d6",
+            "8d6",
+            "8d6",
+            "9d6",
+            "9d6",
+            "10d6",
+            "10d6"
+          ]
+        }
+      }
+    ],
+    "3": [
+      {
+        "id": "steady-aim",
+        "name": "Steady Aim",
+        "description": "Bonus action to give yourself advantage on next attack if you do not move this turn.",
+        "meta": { "uses": "at-will", "requiresNoMovement": true }
+      }
+    ],
+    "5": [
+      {
+        "id": "cunning-strike",
+        "name": "Cunning Strike",
+        "description": "Spend Sneak Attack dice to add special effects (Poison, Trip, Withdraw).",
+        "meta": { "effects": ["poison", "trip", "withdraw"], "costPerEffect": "1d6" }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

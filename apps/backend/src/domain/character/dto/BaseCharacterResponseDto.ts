@@ -98,4 +98,10 @@ export class BaseCharacterResponseDto {
   @Type(() => SpellResponseDto)
   @IsArray()
   spells?: SpellResponseDto[];
+
+  @ApiPropertyOptional({
+    description: 'Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike")',
+    type: [String],
+  })
+  selectedCombatProficiencies?: string[];
 }

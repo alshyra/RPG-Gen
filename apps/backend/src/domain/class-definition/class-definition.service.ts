@@ -58,6 +58,7 @@ export class ClassDefinitionService {
               schemaVersion: classData.schemaVersion || 1,
               levels: classData.levels || [],
               allowedSpellsByLevel: classData.allowedSpellsByLevel || {},
+              combatOptionsByLevel: classData.combatOptionsByLevel || {},
             };
 
             await this.upsert(validated);

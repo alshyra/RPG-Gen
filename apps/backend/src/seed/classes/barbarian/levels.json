@@ -3,6 +3,16 @@
   "className": "Barbarian",
   "hitDie": "1d12",
   "description": "Class-level progression table and metadata for Barbarian 2024 (source: SRD / WotC).",
+  "combatOptionsByLevel": {
+    "1": [
+      {
+        "id": "rage",
+        "name": "Rage",
+        "description": "Enter a rage: resistance to B/P/S and bonus damage.",
+        "meta": { "damageBonus": 2, "uses": 2 }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

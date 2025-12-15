@@ -18,6 +18,7 @@ export type CombatEndDto = import('./api-types').components['schemas']['CombatEn
 export type CombatEndInstructionMessageDto = import('./api-types').components['schemas']['CombatEndInstructionMessageDto'];
 export type CombatEndResponseDto = import('./api-types').components['schemas']['CombatEndResponseDto'];
 export type CombatEndResultDto = import('./api-types').components['schemas']['CombatEndResultDto'];
+export type CombatOptionDto = import('./api-types').components['schemas']['CombatOptionDto'];
 export type CombatStartEntryDto = import('./api-types').components['schemas']['CombatStartEntryDto'];
 export type CombatStartInstructionMessageDto = import('./api-types').components['schemas']['CombatStartInstructionMessageDto'];
 export type CombatStartRequestDto = import('./api-types').components['schemas']['CombatStartRequestDto'];

@@ -4,6 +4,16 @@
   "hitDie": "1d10",
   "primarySpellAbility": "Cha",
   "description": "Class-level progression for Paladin 2024.",
+  "combatOptionsByLevel": {
+    "1": [
+      {
+        "id": "divine-smite",
+        "name": "Divine Smite",
+        "description": "Spend spell slots to deal radiant bonus damage on hit.",
+        "meta": { "baseDice": "2d8" }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

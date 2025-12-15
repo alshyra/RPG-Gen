@@ -72,6 +72,32 @@
             {{ levelUpReward.message }}
           </div>
 
+          <!-- Combat Options Selection -->
+          <div
+            v-if="availableCombatOptions.length > 0"
+            class="mb-6 rounded-md bg-slate-800 border border-slate-700 p-4"
+          >
+            <div class="text-sm text-slate-400 mb-3">Nouvelles Compétences de Combat</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                v-for="option in availableCombatOptions"
+                :key="option.id"
+                class="p-2 rounded border border-slate-600 bg-slate-900/50 cursor-pointer hover:border-indigo-500 transition"
+                :class="{
+                  'border-indigo-500 bg-indigo-900/30': selectedCombatIds.includes(option.id),
+                }"
+                @click="toggleCombatOption(option.id)"
+              >
+                <input
+                  type="checkbox"
+                  :checked="selectedCombatIds.includes(option.id)"
+                  class="mr-2"
+                />
+                <span class="text-xs font-medium">{{ option.name }}</span>
+              </div>
+            </div>
+          </div>
+
           <div class="flex gap-3 justify-center">
             <button
               class="px-4 py-2 rounded font-medium transition bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-600 disabled:cursor-not-allowed"
@@ -123,12 +149,13 @@
 <script setup lang="ts">
 import { useCharacterStore } from '@/stores/characterStore';
 import type { LevelUpResult } from '@/interfaces';
-import type { CharacterResponseDto } from '@rpg-gen/shared';
-import { computed, ref } from 'vue';
+import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from '@rpg-gen/shared';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { dndLevelUpService } from '../../services/dndLevelUpService';
 import { conversationApi } from '../../apis/conversationApi';
 import { levelUpApi } from '@/apis/levelUpApi';
+import { classesApi } from '@/apis/classesApi';
 
 const props = withDefaults(
   defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
@@ -139,10 +166,12 @@ const props = withDefaults(
 );
 
 const router = useRouter();
-// const gameStore = useGameStore();
 
 // State
 const isPending = ref(false);
+const availableCombatOptions = ref<CombatOptionDto[]>([]);
+const selectedCombatIds = ref<string[]>([]);
+const isLoadingOptions = ref(false);
 
 // Character data
 const character = computed<Partial<CharacterResponseDto>>(() => props.initialCharacter || {});
@@ -162,7 +191,37 @@ const levelUpReward = computed<LevelUpResult>(() =>
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
 
+// Load combat options for the next level
+const loadCombatOptions = async (): Promise<void> => {
+  if (!className.value) return;
+
+  isLoadingOptions.value = true;
+  try {
+    const options: LevelUpOptionsDto = await classesApi.getLevelOptions(
+      className.value,
+      nextLevel.value,
+    );
+    availableCombatOptions.value = options.combatOptions || [];
+    selectedCombatIds.value = [];
+  } catch (err) {
+    console.error('Failed to load combat options:', err);
+    availableCombatOptions.value = [];
+    selectedCombatIds.value = [];
+  } finally {
+    isLoadingOptions.value = false;
+  }
+};
+
 // Handlers
+
+const toggleCombatOption = (optionId: string): void => {
+  const idx = selectedCombatIds.value.indexOf(optionId);
+  if (idx >= 0) {
+    selectedCombatIds.value.splice(idx, 1);
+  } else {
+    selectedCombatIds.value.push(optionId);
+  }
+};
 
 const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): string =>
   `Player leveled up to ${nextLevel.value}!\nUpdated character:\n${JSON.stringify(
@@ -175,6 +234,7 @@ const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): s
       proficiency: proficiencyBonus.value,
       newFeatures: levelUpReward.value.newFeatures,
       hasASI: levelUpReward.value.hasASI,
+      newCombatProficiencies: selectedCombatIds.value,
     },
     null,
     2,
@@ -200,12 +260,12 @@ const executeLevelUp = async (): Promise<void> => {
   // Save to backend using the character store
   const characterStore = useCharacterStore();
   if (updatedCharacter.characterId) {
-    // Prefer the dedicated LevelUp API for applying the level-up server-side when available
+    // Use the dedicated LevelUp API with combat selections
     try {
       await levelUpApi.applyLevelUp(updatedCharacter.characterId, className.value, {
-        // No explicit spells/asi chosen in this flow — we apply the bare level-up server-side.
         newSpellIds: [],
         abilityIncreases: [],
+        selectedCombatProficiencies: selectedCombatIds.value,
       });
     } catch {
       // Fallback: save the computed character changes
@@ -216,7 +276,6 @@ const executeLevelUp = async (): Promise<void> => {
   // Send to backend
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
   await conversationApi.sendMessage(levelupMsg);
-  // gameStore.appendMessage('System', `✨ ${levelUpReward.value.message}`);
 
   // Return to game
   setTimeout(() => {
@@ -229,7 +288,6 @@ const executeLevelUp = async (): Promise<void> => {
 
 const handleConfirm = async (): Promise<void> => {
   if (!levelUpReward.value.success) {
-    // gameStore.appendMessage('Error', 'Cannot level up further');
     return;
   }
 
@@ -237,13 +295,18 @@ const handleConfirm = async (): Promise<void> => {
   try {
     await executeLevelUp();
   } catch {
-    // gameStore.appendMessage('Error', `Level up failed: ${error.message}`);
+    // Handle error
   } finally {
     isPending.value = false;
   }
 };
 
 const handleCancel = (): void => router.back();
+
+// Load combat options when component mounts
+onMounted(() => {
+  void loadCombatOptions();
+});
 </script>
 
 <style scoped></style>

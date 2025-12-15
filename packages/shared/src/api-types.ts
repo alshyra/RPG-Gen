@@ -767,6 +767,8 @@ export interface components {
             inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
+            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
+            selectedCombatProficiencies?: string[];
         };
         DeceasedCharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -814,6 +816,8 @@ export interface components {
             inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
+            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
+            selectedCombatProficiencies?: string[];
         };
         UpdateCharacterRequestDto: {
             /** @description Character name */
@@ -853,6 +857,8 @@ export interface components {
             inventory?: components["schemas"]["InventoryItemDto"][];
             /** @description Character spells */
             spells?: components["schemas"]["SpellResponseDto"][];
+            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
+            selectedCombatProficiencies?: string[];
         };
         KillCharacterBodyDto: {
             /** @description Location where character died */
@@ -976,6 +982,8 @@ export interface components {
             newSpellIds?: string[];
             /** @description Ability score increases, e.g. [{ ability: "Str", inc: 1 }] */
             abilityIncreases?: string[];
+            /** @description Selected combat proficiency IDs for the new level (e.g., "sneak-attack", "cunning-strike") */
+            selectedCombatProficiencies?: string[];
         };
         EquipInventoryDto: {
             /**
@@ -1175,6 +1183,16 @@ export interface components {
             expr: string;
             advantage?: string;
         };
+        CombatOptionDto: {
+            /** @description Option id */
+            id: string;
+            /** @description Display name */
+            name: string;
+            /** @description Description */
+            description: string;
+            /** @description Additional metadata (typed) */
+            meta: Record<string, never>;
+        };
         LevelUpOptionsDto: {
             /** @description Class name */
             className: string;
@@ -1184,6 +1202,8 @@ export interface components {
             nextLevel: number;
             /** @description List of unlocked spells available at that level */
             unlockedSpells: components["schemas"]["SpellResponseDto"][];
+            /** @description Combat-related options available at that level */
+            combatOptions: components["schemas"]["CombatOptionDto"][];
             /** @description Whether an Ability Score Improvement (or feat) is available at this level */
             asiAvailable: boolean;
             /** @description Whether proficiency bonus increases at this level */

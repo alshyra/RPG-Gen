@@ -1196,7 +1196,7 @@
     }
   },
   "info": {
-    "title": "RPG Gemini Portal",
+    "title": "RPG Gen Portal",
     "description": "Prototype API for RPG portal using Gemini tokens",
     "version": "0.1",
     "contact": {}
@@ -1947,6 +1947,13 @@
             "items": {
               "$ref": "#/components/schemas/SpellResponseDto"
             }
+          },
+          "selectedCombatProficiencies": {
+            "description": "Selected combat proficiency IDs (e.g., \"sneak-attack\", \"cunning-strike\")",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -2067,6 +2074,13 @@
             "items": {
               "$ref": "#/components/schemas/SpellResponseDto"
             }
+          },
+          "selectedCombatProficiencies": {
+            "description": "Selected combat proficiency IDs (e.g., \"sneak-attack\", \"cunning-strike\")",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -2170,6 +2184,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          },
+          "selectedCombatProficiencies": {
+            "description": "Selected combat proficiency IDs (e.g., \"sneak-attack\", \"cunning-strike\")",
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }
@@ -2438,6 +2459,13 @@
           },
           "abilityIncreases": {
             "description": "Ability score increases, e.g. [{ ability: \"Str\", inc: 1 }] ",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectedCombatProficiencies": {
+            "description": "Selected combat proficiency IDs for the new level (e.g., \"sneak-attack\", \"cunning-strike\")",
             "type": "array",
             "items": {
               "type": "string"
@@ -2929,6 +2957,33 @@
           "expr"
         ]
       },
+      "CombatOptionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Option id"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "meta": {
+            "type": "object",
+            "description": "Additional metadata (typed)"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "meta"
+        ]
+      },
       "LevelUpOptionsDto": {
         "type": "object",
         "properties": {
@@ -2949,6 +3004,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SpellResponseDto"
+            }
+          },
+          "combatOptions": {
+            "description": "Combat-related options available at that level",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombatOptionDto"
             }
           },
           "asiAvailable": {
@@ -2973,6 +3035,7 @@
           "currentLevel",
           "nextLevel",
           "unlockedSpells",
+          "combatOptions",
           "asiAvailable",
           "proficiencyIncrease",
           "cantripsKnown",

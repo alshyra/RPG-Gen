@@ -11,4 +11,10 @@ export class LevelUpApplyDto {
     ability: string;
     inc: number;
   }[];
+
+  @ApiPropertyOptional({
+    description:
+      'Selected combat proficiency IDs for the new level (e.g., "sneak-attack", "cunning-strike")',
+  })
+  selectedCombatProficiencies?: string[];
 }

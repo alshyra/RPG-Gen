@@ -4,6 +4,24 @@
   "hitDie": "1d10",
   "primarySpellAbility": "",
   "description": "Class-level progression table and metadata for Fighter 2024 (source: WotC / SRD).",
+  "combatOptionsByLevel": {
+    "1": [
+      {
+        "id": "fighting-style",
+        "name": "Fighting Style",
+        "description": "Choose a fighting style that modifies attacks/damage.",
+        "meta": { "options": ["dueling", "great-weapon-fighting", "archery", "defense"] }
+      }
+    ],
+    "2": [
+      {
+        "id": "second-wind",
+        "name": "Second Wind",
+        "description": "Regain hit points as a bonus action.",
+        "meta": { "uses": "1/short-rest" }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

@@ -129,11 +129,19 @@ export class LevelUpService {
       payload.abilityIncreases ?? [],
     );
 
+    // Handle selected combat proficiencies: append new selections to existing ones
+    const newCombatProficiencies = payload.selectedCombatProficiencies ?? [];
+    const existingCombatProficiencies = character.selectedCombatProficiencies ?? [];
+    const combinedCombatProficiencies = [...existingCombatProficiencies, ...newCombatProficiencies];
+    // Remove duplicates while preserving order
+    const uniqueCombatProficiencies = Array.from(new Set(combinedCombatProficiencies));
+
     // persist
     const updates = {
       classes: character.classes,
       spells: updatedSpells,
       scores: updatedScores,
+      selectedCombatProficiencies: uniqueCombatProficiencies,
     };
 
     const saved = await this.saveCharacterUpdates(userId, characterId, updates);

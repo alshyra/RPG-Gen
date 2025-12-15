@@ -138,6 +138,13 @@ export class Character {
     default: [],
   })
   spells: Spell[];
+
+  @Prop({
+    type: [String],
+    required: false,
+    default: [],
+  })
+  selectedCombatProficiencies: string[];
 }
 
 export type CharacterDocument = Character & Document;

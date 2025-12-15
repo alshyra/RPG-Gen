@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SpellResponseDto } from './SpellResponseDto.js';
+import { CombatOptionDto } from './CombatOptionDto.js';
 
 export class LevelUpOptionsDto {
   @ApiProperty({ description: 'Class name' })
@@ -16,6 +17,12 @@ export class LevelUpOptionsDto {
     type: [SpellResponseDto],
   })
   unlockedSpells: SpellResponseDto[];
+
+  @ApiProperty({
+    description: 'Combat-related options available at that level',
+    type: [CombatOptionDto],
+  })
+  combatOptions?: CombatOptionDto[];
 
   @ApiProperty({
     description: 'Whether an Ability Score Improvement (or feat) is available at this level',

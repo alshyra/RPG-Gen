@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { ClassLevel, ClassLevelSchema } from './ClassLevel.js';
+import CombatOption, { CombatOptionSchema } from './CombatOption.js';
+import { AllowedSpellsByLevel } from './AllowedSpellsByLevel.js';
 
 @Schema({ timestamps: true })
 export class ClassDefinition {
@@ -33,7 +35,14 @@ export class ClassDefinition {
     of: [Object],
     default: new Map(),
   })
-  allowedSpellsByLevel?: Map<string, { name: string; definitionId: string }[]>;
+  allowedSpellsByLevel: Map<string, AllowedSpellsByLevel[]>;
+
+  @Prop({
+    type: Map,
+    of: [CombatOptionSchema],
+    default: new Map(),
+  })
+  combatOptionsByLevel: Map<string, CombatOption[]>;
 }
 
 export type ClassDefinitionDocument = ClassDefinition & Document;

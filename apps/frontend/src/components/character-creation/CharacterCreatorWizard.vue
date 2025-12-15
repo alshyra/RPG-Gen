@@ -65,10 +65,13 @@
           <StepSpells v-if="currentStep === 3" />
         </div>
         <div class="h-full">
-          <StepInventory v-if="currentStep === 4" />
+          <StepCombat v-if="currentStep === 4" />
         </div>
         <div class="h-full">
-          <StepAvatar v-if="currentStep === 5" />
+          <StepInventory v-if="currentStep === 5" />
+        </div>
+        <div class="h-full">
+          <StepAvatar v-if="currentStep === 6" />
         </div>
       </div>
     </div>
@@ -119,6 +122,7 @@ import { useRoute, useRouter } from 'vue-router';
 import StepAbilityScores from './steps/StepAbilityScores.vue';
 import StepAvatar from './steps/StepAvatar.vue';
 import StepBasicInfo from './steps/StepBasicInfo.vue';
+import StepCombat from './steps/StepCombat.vue';
 import StepInventory from './steps/StepInventory.vue';
 import StepSpells from './steps/StepSpells.vue';
 import StepSkills from './steps/StepSkills.vue';
@@ -134,6 +138,7 @@ const steps = [
   'Classe et Capacités',
   'Compétences',
   'Sorts',
+  'Combat',
   'Inventaire',
   'Avatar',
 ];
