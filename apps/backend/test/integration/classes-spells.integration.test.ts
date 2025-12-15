@@ -6,9 +6,8 @@ import { ClassesService } from '../../src/domain/classes/classes.service.js';
 import { ClassDefinitionService } from '../../src/domain/class-definition/class-definition.service.js';
 import { SpellDefinitionService } from '../../src/domain/spell-definition/spell-definition.service.js';
 import { MongooseModule } from '@nestjs/mongoose';
-import { getModelToken } from '@nestjs/mongoose';
-import { ClassDefinition } from '../../src/infra/mongo/class/ClassDefinition.js';
-import { SpellDefinition } from '../../src/infra/mongo/spell/SpellDefinition.js';
+import { ClassDefinition, ClassDefinitionSchema } from '../../src/infra/mongo/class/ClassDefinition.js';
+import { SpellDefinition, SpellDefinitionSchema } from '../../src/infra/mongo/spell/SpellDefinition.js';
 
 let mongoServer: MongoMemoryServer;
 let app: INestApplication;
@@ -24,8 +23,8 @@ test.before(async () => {
     imports: [
       MongooseModule.forRoot(mongoUri),
       MongooseModule.forFeature([
-        { name: ClassDefinition.name, schema: ClassDefinition.schema },
-        { name: SpellDefinition.name, schema: SpellDefinition.schema },
+        { name: ClassDefinition.name, schema: ClassDefinitionSchema },
+        { name: SpellDefinition.name, schema: SpellDefinitionSchema },
       ]),
     ],
     providers: [ClassesService, ClassDefinitionService, SpellDefinitionService],
