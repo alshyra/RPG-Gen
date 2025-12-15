@@ -1,13 +1,19 @@
 import test from 'ava';
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { ClassesService } from '../../src/domain/classes/classes.service.js';
 import { ClassDefinitionService } from '../../src/domain/class-definition/class-definition.service.js';
 import { SpellDefinitionService } from '../../src/domain/spell-definition/spell-definition.service.js';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ClassDefinition, ClassDefinitionSchema } from '../../src/infra/mongo/class/ClassDefinition.js';
-import { SpellDefinition, SpellDefinitionSchema } from '../../src/infra/mongo/spell/SpellDefinition.js';
+import {
+  ClassDefinition,
+  ClassDefinitionSchema,
+} from '../../src/infra/mongo/class/ClassDefinition.js';
+import {
+  SpellDefinition,
+  SpellDefinitionSchema,
+} from '../../src/infra/mongo/spell/SpellDefinition.js';
 
 let mongoServer: MongoMemoryServer;
 let app: INestApplication;

@@ -11,6 +11,8 @@
         "name": "Sneak Attack",
         "description": "Extra damage when conditions are met (Finesse/Ranged, advantage or ally nearby).",
         "meta": {
+          "cost": "passive",
+          "cooldown": "1/turn",
           "dice": "1d6",
           "scaling": [
             "1d6",
@@ -37,12 +39,25 @@
         }
       }
     ],
+    "2": [
+      {
+        "id": "cunning-action",
+        "name": "Cunning Action",
+        "description": "Use a bonus action to Dash, Disengage, Hide, or Sleight of Hand.",
+        "meta": { "cost": "bonus-action", "cooldown": "at-will", "uses": "at-will" }
+      }
+    ],
     "3": [
       {
         "id": "steady-aim",
         "name": "Steady Aim",
         "description": "Bonus action to give yourself advantage on next attack if you do not move this turn.",
-        "meta": { "uses": "at-will", "requiresNoMovement": true }
+        "meta": {
+          "cost": "bonus-action",
+          "cooldown": "at-will",
+          "uses": "at-will",
+          "requiresNoMovement": true
+        }
       }
     ],
     "5": [
@@ -50,7 +65,12 @@
         "id": "cunning-strike",
         "name": "Cunning Strike",
         "description": "Spend Sneak Attack dice to add special effects (Poison, Trip, Withdraw).",
-        "meta": { "effects": ["poison", "trip", "withdraw"], "costPerEffect": "1d6" }
+        "meta": {
+          "cost": "passive",
+          "cooldown": "1/turn",
+          "effects": ["poison", "trip", "withdraw"],
+          "costPerEffect": "1d6"
+        }
       }
     ]
   },

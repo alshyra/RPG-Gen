@@ -10,7 +10,7 @@
         "id": "divine-smite",
         "name": "Divine Smite",
         "description": "Spend spell slots to deal radiant bonus damage on hit.",
-        "meta": { "baseDice": "2d8" }
+        "meta": { "cost": "action", "cooldown": "1/turn", "baseDice": "2d8" }
       }
     ]
   },

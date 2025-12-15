@@ -10,7 +10,11 @@
         "id": "fighting-style",
         "name": "Fighting Style",
         "description": "Choose a fighting style that modifies attacks/damage.",
-        "meta": { "options": ["dueling", "great-weapon-fighting", "archery", "defense"] }
+        "meta": {
+          "cost": "passive",
+          "cooldown": null,
+          "options": ["dueling", "great-weapon-fighting", "archery", "defense"]
+        }
       }
     ],
     "2": [
@@ -18,7 +22,13 @@
         "id": "second-wind",
         "name": "Second Wind",
         "description": "Regain hit points as a bonus action.",
-        "meta": { "uses": "1/short-rest" }
+        "meta": { "cost": "bonus-action", "cooldown": "1/short-rest", "uses": "1/short-rest" }
+      },
+      {
+        "id": "action-surge",
+        "name": "Action Surge",
+        "description": "Gain one additional action on your turn.",
+        "meta": { "cost": "action", "cooldown": "1/short-rest", "uses": 1 }
       }
     ]
   },

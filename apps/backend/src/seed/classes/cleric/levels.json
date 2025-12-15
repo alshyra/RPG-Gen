@@ -4,6 +4,16 @@
   "hitDie": "1d8",
   "primarySpellAbility": "Wisdom",
   "description": "Class-level progression table and metadata for Cleric 2024 (source: WotC / SRD). Allowed spells are provided below — names preserved plus resolved 'definitionId' when available.",
+  "combatOptionsByLevel": {
+    "2": [
+      {
+        "id": "turn-undead",
+        "name": "Turn Undead",
+        "description": "Use Channel Divinity to turn undead creatures with WIS save.",
+        "meta": { "cost": "action", "cooldown": "1/short-rest", "uses": "1 per short rest" }
+      }
+    ]
+  },
   "levels": [
     {
       "level": 1,

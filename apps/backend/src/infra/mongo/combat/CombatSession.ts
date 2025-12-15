@@ -96,6 +96,13 @@ export class CombatSession {
     default: 'PLAYER_TURN',
   })
   phase: string;
+
+  @Prop({
+    required: false,
+    type: [String],
+    default: [],
+  })
+  activeEffects: string[];
 }
 
 export const CombatSessionSchema = SchemaFactory.createForClass(CombatSession);

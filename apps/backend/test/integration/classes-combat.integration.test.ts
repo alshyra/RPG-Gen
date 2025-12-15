@@ -10,7 +10,7 @@ import {
   ClassDefinition,
   ClassDefinitionSchema,
 } from '../../src/infra/mongo/class/ClassDefinition.js';
-import { SneakAttackMeta } from 'src/domain/character/types/CombatOptionMeta.js';
+import type { SneakAttackMeta } from '../../src/domain/character/types/CombatOptionMeta.js';
 
 let mongoServer: MongoMemoryServer;
 let app: any;

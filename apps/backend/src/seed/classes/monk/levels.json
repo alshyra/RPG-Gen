@@ -11,6 +11,8 @@
         "name": "Martial Arts",
         "description": "Unarmed strike die used for damage and monk features.",
         "meta": {
+          "cost": "passive",
+          "cooldown": null,
           "dice": "1d4",
           "scaling": [
             "1d4",
@@ -35,6 +37,14 @@
             "1d12"
           ]
         }
+      }
+    ],
+    "3": [
+      {
+        "id": "deflect-attacks",
+        "name": "Deflect Attacks",
+        "description": "Use reaction to reduce attack damage by 1d10 + DEX + Monk level.",
+        "meta": { "cost": "reaction", "cooldown": "at-will", "uses": "at-will" }
       }
     ]
   },

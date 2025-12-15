@@ -5,11 +5,15 @@ import { CombatAppService } from '../domain/combat/combat.app.service.js';
 import { InitService } from '../domain/combat/services/init.service.js';
 import { TurnOrderService } from '../domain/combat/services/turn-order.service.js';
 import { ActionEconomyService } from '../domain/combat/services/action-economy.service.js';
+import { CombatGridService } from '../domain/combat/services/combat-grid.service.js';
+import { OpportunityAttackResolver } from '../domain/combat/services/opportunity-attack.service.js';
 import { CharacterModule } from './character.module.js';
 import { ChatModule } from './chat.module.js';
 import { DiceModule } from './dice.module.js';
 import { CombatSession, CombatSessionSchema } from '../infra/mongo/combat/CombatSession.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
+import { CombatMovementOrchestrator } from '../orchestrators/combat/combat-movement.orchestrator.js';
+import { CombatActionOrchestrator } from '../orchestrators/combat/combat-action.orchestrator.js';
 import { GeminiTextService } from '../infra/external/gemini-text.service.js';
 
 @Module({
@@ -30,13 +34,17 @@ import { GeminiTextService } from '../infra/external/gemini-text.service.js';
     InitService,
     TurnOrderService,
     ActionEconomyService,
+    CombatGridService,
+    OpportunityAttackResolver,
     GeminiTextService,
     // App service facade
     CombatAppService,
 
-    // Orchestrator
+    // Orchestrators
     CombatOrchestrator,
+    CombatMovementOrchestrator,
+    CombatActionOrchestrator,
   ],
-  exports: [CombatAppService, CombatOrchestrator],
+  exports: [CombatAppService, CombatOrchestrator, CombatGridService],
 })
 export class CombatModule {}

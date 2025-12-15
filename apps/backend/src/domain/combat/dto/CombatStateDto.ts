@@ -89,6 +89,11 @@ export class CombatStateDto {
   @IsNumber()
   bonusActionMax?: number;
 
+  @ApiPropertyOptional({ description: 'Active turn effects (dash, disengage, etc.)' })
+  @IsOptional()
+  @IsArray()
+  activeEffects?: string[];
+
   constructor(init?: Partial<CombatStateDto>) {
     Object.assign(this, init);
     if (!this.player || !this.enemies || !this.turnOrder) {
@@ -113,5 +118,6 @@ export class CombatStateDto {
     this.actionMax = this.actionMax ?? 1;
     this.bonusActionRemaining = this.bonusActionRemaining ?? 1;
     this.bonusActionMax = this.bonusActionMax ?? 1;
+    this.activeEffects = this.activeEffects ?? [];
   }
 }

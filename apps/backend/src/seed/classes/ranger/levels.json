@@ -10,7 +10,7 @@
         "id": "favored-enemy",
         "name": "Favored Enemy",
         "description": "Choose enemies you specialize against (combat bonuses).",
-        "meta": { "types": ["beast", "humanoid", "undead"] }
+        "meta": { "cost": "passive", "cooldown": null, "types": ["beast", "humanoid", "undead"] }
       }
     ]
   },

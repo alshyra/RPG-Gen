@@ -11,9 +11,17 @@ function makeMockSpellDefService() {
   } as any;
 }
 
+// Mock ClassDefinitionService
+function makeMockClassDefService() {
+  return {
+    findByName: async (name: string) => null,
+  } as any;
+}
+
 test('ClassesService.loadClassData should load Barbarian', async t => {
   const spellDefService = makeMockSpellDefService();
-  const service = new ClassesService(spellDefService);
+  const classDefService = makeMockClassDefService();
+  const service = new ClassesService(spellDefService, classDefService);
 
   try {
     // This will attempt to load from the actual seed file
@@ -45,21 +53,18 @@ test('All 12 D&D 5e classes are defined with levels', async t => {
   ];
 
   t.is(expectedClasses.length, 12, 'Should have 12 classes defined');
-  t.deepEqual(
-    expectedClasses,
-    [
-      'Barbarian',
-      'Bard',
-      'Cleric',
-      'Druid',
-      'Fighter',
-      'Monk',
-      'Paladin',
-      'Ranger',
-      'Rogue',
-      'Sorcerer',
-      'Warlock',
-      'Wizard',
-    ],
-  );
+  t.deepEqual(expectedClasses, [
+    'Barbarian',
+    'Bard',
+    'Cleric',
+    'Druid',
+    'Fighter',
+    'Monk',
+    'Paladin',
+    'Ranger',
+    'Rogue',
+    'Sorcerer',
+    'Warlock',
+    'Wizard',
+  ]);
 });

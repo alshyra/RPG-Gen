@@ -9,7 +9,15 @@
         "id": "rage",
         "name": "Rage",
         "description": "Enter a rage: resistance to B/P/S and bonus damage.",
-        "meta": { "damageBonus": 2, "uses": 2 }
+        "meta": { "cost": "bonus-action", "cooldown": "1/short-rest", "damageBonus": 2, "uses": 2 }
+      }
+    ],
+    "2": [
+      {
+        "id": "reckless-attack",
+        "name": "Reckless Attack",
+        "description": "Gain advantage on Strength attacks until start of next turn, but attack rolls against you have advantage.",
+        "meta": { "cost": "passive", "cooldown": "1/turn", "conditional": "while raging" }
       }
     ]
   },

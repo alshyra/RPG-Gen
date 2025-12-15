@@ -4,13 +4,19 @@ import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
 import {
   AttackRequestDto,
   AttackResponseDto,
+  CombatActionRequestDto,
+  CombatActionResponseDto,
   CombatEndResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
   EndPlayerTurnResponseDto,
+  MovementRequestDto,
+  MovementResponseDto,
 } from '../domain/combat/dto/index.js';
 import type { RPGRequest } from '../global.types.js';
 import { CombatOrchestrator } from '../orchestrators/combat/index.js';
+import { CombatMovementOrchestrator } from '../orchestrators/combat/combat-movement.orchestrator.js';
+import { CombatActionOrchestrator } from '../orchestrators/combat/combat-action.orchestrator.js';
 
 /**
  * CombatController - Thin controller that delegates to CombatOrchestrator.
@@ -29,7 +35,11 @@ import { CombatOrchestrator } from '../orchestrators/combat/index.js';
 export class CombatController {
   private readonly logger = new Logger(CombatController.name);
 
-  constructor(private readonly combatOrchestrator: CombatOrchestrator) {}
+  constructor(
+    private readonly combatOrchestrator: CombatOrchestrator,
+    private readonly movementOrchestrator: CombatMovementOrchestrator,
+    private readonly actionOrchestrator: CombatActionOrchestrator,
+  ) {}
 
   @Post(':characterId/start')
   @ApiOperation({ summary: 'Initialize combat with enemies' })
@@ -48,8 +58,29 @@ export class CombatController {
     return this.combatOrchestrator.startCombat(userId, characterId, body);
   }
 
+  @Post(':characterId/action')
+  @ApiOperation({
+    summary: 'Execute any combat action (attack, dash, disengage, spell, class feature)',
+  })
+  @ApiResponse({
+    status: 200,
+    type: CombatActionResponseDto,
+  })
+  @ApiBody({ type: CombatActionRequestDto })
+  async action(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+    @Body() body: CombatActionRequestDto,
+  ): Promise<CombatActionResponseDto> {
+    const userId = req.user._id.toString();
+    return this.actionOrchestrator.executeAction(userId, characterId, body);
+  }
+
+  /**
+   * @deprecated Use /action endpoint instead
+   */
   @Post(':characterId/attack')
-  @ApiOperation({ summary: 'Execute player attack in combat, determine if player hit his target' })
+  @ApiOperation({ summary: '[DEPRECATED] Use /action instead' })
   @ApiResponse({
     status: 200,
     type: AttackResponseDto,
@@ -109,5 +140,21 @@ export class CombatController {
   ): Promise<CombatEndResponseDto> {
     const userId = req.user._id.toString();
     return this.combatOrchestrator.endCombat(userId, characterId);
+  }
+
+  @Post(':characterId/move')
+  @ApiOperation({ summary: 'Execute combatant movement on the grid' })
+  @ApiBody({ type: MovementRequestDto })
+  @ApiResponse({
+    status: 200,
+    type: MovementResponseDto,
+  })
+  async move(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+    @Body() body: MovementRequestDto,
+  ): Promise<MovementResponseDto> {
+    const userId = req.user._id.toString();
+    return this.movementOrchestrator.executeMovement(userId, characterId, body);
   }
 }
