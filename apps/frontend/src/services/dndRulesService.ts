@@ -3,10 +3,10 @@
  * Handles ability calculations, HP, proficiency, etc.
  */
 
-import { AbilityScoresResponseDto } from '@rpg-gen/shared';
-import { getCurrentLevel } from '../utils/dndLevels';
+import { AbilityScoresResponseDto } from "@rpg-gen/shared";
+import { getCurrentLevel } from "../utils/dndLevels";
 
-export const ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'] as const;
+export const ABILITIES = ["Str", "Dex", "Con", "Int", "Wis", "Cha"] as const;
 export const DEFAULT_BASE_SCORES = {
   Str: 15,
   Dex: 14,
@@ -20,90 +20,90 @@ type RaceModifiers = Record<string, number>;
 
 type HitDieMap = Record<string, number>;
 
-import type { SkillRule as Skill } from '@/interfaces';
+import type { SkillRule as Skill } from "@/interfaces";
 
 type ClassProficiencies = Record<string, string[]>;
 
 // D&D 5e Skills mapped to abilities
 const SKILLS: Skill[] = [
   {
-    name: 'Acrobatics',
-    ability: 'Dex',
+    name: "Acrobatics",
+    ability: "Dex",
   },
   {
-    name: 'Animal Handling',
-    ability: 'Wis',
+    name: "Animal Handling",
+    ability: "Wis",
   },
   {
-    name: 'Arcana',
-    ability: 'Int',
+    name: "Arcana",
+    ability: "Int",
   },
   {
-    name: 'Athletics',
-    ability: 'Str',
+    name: "Athletics",
+    ability: "Str",
   },
   {
-    name: 'Deception',
-    ability: 'Cha',
+    name: "Deception",
+    ability: "Cha",
   },
   {
-    name: 'History',
-    ability: 'Int',
+    name: "History",
+    ability: "Int",
   },
   {
-    name: 'Insight',
-    ability: 'Wis',
+    name: "Insight",
+    ability: "Wis",
   },
   {
-    name: 'Intimidation',
-    ability: 'Cha',
+    name: "Intimidation",
+    ability: "Cha",
   },
   {
-    name: 'Investigation',
-    ability: 'Int',
+    name: "Investigation",
+    ability: "Int",
   },
   {
-    name: 'Medicine',
-    ability: 'Wis',
+    name: "Medicine",
+    ability: "Wis",
   },
   {
-    name: 'Nature',
-    ability: 'Int',
+    name: "Nature",
+    ability: "Int",
   },
   {
-    name: 'Perception',
-    ability: 'Wis',
+    name: "Perception",
+    ability: "Wis",
   },
   {
-    name: 'Performance',
-    ability: 'Cha',
+    name: "Performance",
+    ability: "Cha",
   },
   {
-    name: 'Persuasion',
-    ability: 'Cha',
+    name: "Persuasion",
+    ability: "Cha",
   },
   {
-    name: 'Religion',
-    ability: 'Int',
+    name: "Religion",
+    ability: "Int",
   },
   {
-    name: 'Sleight of Hand',
-    ability: 'Dex',
+    name: "Sleight of Hand",
+    ability: "Dex",
   },
   {
-    name: 'Stealth',
-    ability: 'Dex',
+    name: "Stealth",
+    ability: "Dex",
   },
   {
-    name: 'Survival',
-    ability: 'Wis',
+    name: "Survival",
+    ability: "Wis",
   },
 ];
 
 export const ALLOWED_RACES = [
   {
-    id: 'human',
-    name: 'Humain',
+    id: "human",
+    name: "Humain",
     mods: {
       Str: 1,
       Dex: 1,
@@ -114,49 +114,49 @@ export const ALLOWED_RACES = [
     },
   },
   {
-    id: 'dwarf',
-    name: 'Nain',
+    id: "dwarf",
+    name: "Nain",
     mods: { Con: 2 },
   },
   {
-    id: 'elf',
-    name: 'Elfe',
+    id: "elf",
+    name: "Elfe",
     mods: { Dex: 2 },
   },
   {
-    id: 'halfling',
-    name: 'Halfelin',
+    id: "halfling",
+    name: "Halfelin",
     mods: { Dex: 2 },
   },
   {
-    id: 'gnome',
-    name: 'Gnome',
+    id: "gnome",
+    name: "Gnome",
     mods: { Int: 2 },
   },
   {
-    id: 'half-elf',
-    name: 'Demi-elfe',
+    id: "half-elf",
+    name: "Demi-elfe",
     mods: { Cha: 2 },
   },
   {
-    id: 'half-orc',
-    name: 'Demi-orc',
+    id: "half-orc",
+    name: "Demi-orc",
     mods: {
       Str: 2,
       Con: 1,
     },
   },
   {
-    id: 'tiefling',
-    name: 'Tieffelin',
+    id: "tiefling",
+    name: "Tieffelin",
     mods: {
       Cha: 2,
       Int: 1,
     },
   },
   {
-    id: 'dragonborn',
-    name: 'Drakéide',
+    id: "dragonborn",
+    name: "Drakéide",
     mods: {
       Str: 2,
       Cha: 1,
@@ -165,102 +165,102 @@ export const ALLOWED_RACES = [
 ] as const;
 
 export const CLASSES_LIST = [
-  'Barbarian',
-  'Bard',
-  'Cleric',
-  'Druid',
-  'Fighter',
-  'Monk',
-  'Paladin',
-  'Ranger',
-  'Rogue',
-  'Sorcerer',
-  'Warlock',
-  'Wizard',
+  "Barbarian",
+  "Bard",
+  "Cleric",
+  "Druid",
+  "Fighter",
+  "Monk",
+  "Paladin",
+  "Ranger",
+  "Rogue",
+  "Sorcerer",
+  "Warlock",
+  "Wizard",
 ] as const;
-export const GENDERS = ['male', 'female'] as const;
+export const GENDERS = ["male", "female"] as const;
 export const [DEFAULT_RACE] = ALLOWED_RACES;
 
 // Class skill proficiencies (can choose X from this list)
 const CLASS_SKILL_PROFICIENCIES: ClassProficiencies = {
-  Barbarian: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+  Barbarian: ["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"],
   Bard: [
-    'Acrobatics',
-    'Animal Handling',
-    'Arcana',
-    'Athletics',
-    'Deception',
-    'History',
-    'Insight',
-    'Intimidation',
-    'Investigation',
-    'Medicine',
-    'Nature',
-    'Perception',
-    'Performance',
-    'Persuasion',
-    'Religion',
-    'Sleight of Hand',
-    'Stealth',
-    'Survival',
+    "Acrobatics",
+    "Animal Handling",
+    "Arcana",
+    "Athletics",
+    "Deception",
+    "History",
+    "Insight",
+    "Intimidation",
+    "Investigation",
+    "Medicine",
+    "Nature",
+    "Perception",
+    "Performance",
+    "Persuasion",
+    "Religion",
+    "Sleight of Hand",
+    "Stealth",
+    "Survival",
   ],
-  Cleric: ['Insight', 'Medicine', 'Persuasion', 'Religion'],
+  Cleric: ["Insight", "Medicine", "Persuasion", "Religion"],
   Druid: [
-    'Arcana',
-    'Animal Handling',
-    'Insight',
-    'Medicine',
-    'Nature',
-    'Perception',
-    'Religion',
-    'Survival',
+    "Arcana",
+    "Animal Handling",
+    "Insight",
+    "Medicine",
+    "Nature",
+    "Perception",
+    "Religion",
+    "Survival",
   ],
   Fighter: [
-    'Acrobatics',
-    'Animal Handling',
-    'Athletics',
-    'History',
-    'Insight',
-    'Intimidation',
-    'Perception',
+    "Acrobatics",
+    "Animal Handling",
+    "Athletics",
+    "History",
+    "Insight",
+    "Intimidation",
+    "Perception",
   ],
-  Monk: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
-  Paladin: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+  Monk: ["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"],
+  Paladin: ["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"],
   Ranger: [
-    'Animal Handling',
-    'Athletics',
-    'Insight',
-    'Investigation',
-    'Nature',
-    'Perception',
-    'Stealth',
-    'Survival',
+    "Animal Handling",
+    "Athletics",
+    "Insight",
+    "Investigation",
+    "Nature",
+    "Perception",
+    "Stealth",
+    "Survival",
   ],
   Rogue: [
-    'Acrobatics',
-    'Athletics',
-    'Deception',
-    'Insight',
-    'Intimidation',
-    'Investigation',
-    'Perception',
-    'Performance',
-    'Persuasion',
-    'Sleight of Hand',
-    'Stealth',
+    "Acrobatics",
+    "Athletics",
+    "Deception",
+    "Insight",
+    "Intimidation",
+    "Investigation",
+    "Perception",
+    "Performance",
+    "Persuasion",
+    "Sleight of Hand",
+    "Stealth",
   ],
-  Sorcerer: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
+  Sorcerer: ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"],
   Warlock: [
-    'Arcana',
-    'Deception',
-    'History',
-    'Insight',
-    'Intimidation',
-    'Investigation',
-    'Nature',
-    'Religion',
+    "Arcana",
+    "Deception",
+    "History",
+    "Insight",
+    "Intimidation",
+    "Investigation",
+    "Nature",
+    "Religion",
   ],
-  Wizard: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+  Wizard: ["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"],
 };
 
 // How many skills can be chosen per class

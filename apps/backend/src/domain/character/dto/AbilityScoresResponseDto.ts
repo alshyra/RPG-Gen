@@ -1,21 +1,21 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class AbilityScoresResponseDto {
-  @ApiPropertyOptional({ description: 'Strength score' })
+  @ApiPropertyOptional({ description: "Strength score" })
   Str?: number;
 
-  @ApiPropertyOptional({ description: 'Dexterity score' })
+  @ApiPropertyOptional({ description: "Dexterity score" })
   Dex?: number;
 
-  @ApiPropertyOptional({ description: 'Constitution score' })
+  @ApiPropertyOptional({ description: "Constitution score" })
   Con?: number;
 
-  @ApiPropertyOptional({ description: 'Intelligence score' })
+  @ApiPropertyOptional({ description: "Intelligence score" })
   Int?: number;
 
-  @ApiPropertyOptional({ description: 'Wisdom score' })
+  @ApiPropertyOptional({ description: "Wisdom score" })
   Wis?: number;
 
-  @ApiPropertyOptional({ description: 'Charisma score' })
+  @ApiPropertyOptional({ description: "Charisma score" })
   Cha?: number;
 }

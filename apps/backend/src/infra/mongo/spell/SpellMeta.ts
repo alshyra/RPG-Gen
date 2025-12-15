@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
 
 @Schema({ _id: false })
 export class SpellMeta {
@@ -16,7 +16,7 @@ export class SpellMeta {
   saveType?: string;
 
   @Prop({ required: false })
-  attackType?: 'melee' | 'ranged' | 'spell';
+  attackType?: "melee" | "ranged" | "spell";
 
   @Prop({ required: false })
   school?: string;

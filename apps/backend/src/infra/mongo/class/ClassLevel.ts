@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ClassLevelFeature, ClassLevelFeatureSchema } from './ClassLevelFeature.js';
-import { ClassLevelChoice, ClassLevelChoiceSchema } from './ClassLevelChoice.js';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ClassLevelFeature, ClassLevelFeatureSchema } from "./ClassLevelFeature.js";
+import { ClassLevelChoice, ClassLevelChoiceSchema } from "./ClassLevelChoice.js";
 
 @Schema({ _id: false })
 export class ClassLevel {

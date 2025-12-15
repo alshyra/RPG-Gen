@@ -1,17 +1,17 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { RollMetaDto } from './RolllMetaDto.js';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { RollMetaDto } from "./RolllMetaDto.js";
 
 /**
  * Metadata for roll instructions, typically used for combat attack/damage rolls
  */
 export class RollInstructionMessageDto {
   @ApiProperty({
-    description: 'Instruction type',
-    enum: ['roll'],
+    description: "Instruction type",
+    enum: ["roll"],
   })
-  type: 'roll';
+  type: "roll";
 
-  @ApiProperty({ description: 'Dice expression (e.g., 1d20+5)' })
+  @ApiProperty({ description: "Dice expression (e.g., 1d20+5)" })
   dices: string;
 
   @ApiPropertyOptional({
@@ -20,21 +20,21 @@ export class RollInstructionMessageDto {
   modifierLabel?: string;
 
   @ApiPropertyOptional({
-    description: 'Numeric modifier to apply to the roll (e.g., +3)',
+    description: "Numeric modifier to apply to the roll (e.g., +3)",
   })
   modifierValue?: number;
 
-  @ApiPropertyOptional({ description: 'Roll description' })
+  @ApiPropertyOptional({ description: "Roll description" })
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Advantage type',
-    enum: ['advantage', 'disadvantage', 'none'],
+    description: "Advantage type",
+    enum: ["advantage", "disadvantage", "none"],
   })
-  advantage?: 'advantage' | 'disadvantage' | 'none';
+  advantage?: "advantage" | "disadvantage" | "none";
 
   @ApiPropertyOptional({
-    description: 'Optional metadata for combat rolls',
+    description: "Optional metadata for combat rolls",
     type: () => RollMetaDto,
   })
   meta?: RollMetaDto;

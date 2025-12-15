@@ -1,12 +1,12 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { CharacterService } from './character.service.js';
-import { SpellDefinitionService } from '../spell-definition/spell-definition.service.js';
-import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
-import type { LevelUpOptionsDto } from './dto/LevelUpOptionsDto.js';
-import type { LevelUpApplyDto } from './dto/LevelUpApplyDto.js';
-import type { SpellResponseDto } from './dto/SpellResponseDto.js';
-import type { CharacterClassResponseDto } from './dto/CharacterClassResponseDto.js';
-import type { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
+import { Injectable, Logger, BadRequestException } from "@nestjs/common";
+import { CharacterService } from "./character.service.js";
+import { SpellDefinitionService } from "../spell-definition/spell-definition.service.js";
+import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
+import type { LevelUpOptionsDto } from "./dto/LevelUpOptionsDto.js";
+import type { LevelUpApplyDto } from "./dto/LevelUpApplyDto.js";
+import type { SpellResponseDto } from "./dto/SpellResponseDto.js";
+import type { CharacterClassResponseDto } from "./dto/CharacterClassResponseDto.js";
+import type { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
 
 @Injectable()
 export class LevelUpService {
@@ -102,7 +102,7 @@ export class LevelUpService {
     payload: LevelUpApplyDto,
   ) {
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) throw new BadRequestException('character not found');
+    if (!character) throw new BadRequestException("character not found");
 
     const { idx, nextLevel } = this.getClassLevelInfo(character, className);
 
@@ -112,7 +112,7 @@ export class LevelUpService {
       const invalid = await this.validateSelectedSpells(addSpells, nextLevel);
       if (invalid.length > 0)
         throw new BadRequestException(
-          `Invalid spells for level ${nextLevel}: ${invalid.join(', ')}`,
+          `Invalid spells for level ${nextLevel}: ${invalid.join(", ")}`,
         );
     }
 

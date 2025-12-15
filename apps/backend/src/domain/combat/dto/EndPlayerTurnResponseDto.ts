@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CombatStateDto } from './CombatStateDto.js';
-import { EnemyAttackLogDto } from './EnemyAttackLogDto.js';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { CombatStateDto } from "./CombatStateDto.js";
+import { EnemyAttackLogDto } from "./EnemyAttackLogDto.js";
 
 /**
  * Response DTO for endPlayerTurn.
@@ -8,31 +8,31 @@ import { EnemyAttackLogDto } from './EnemyAttackLogDto.js';
  */
 export class EndPlayerTurnResponseDto {
   @ApiProperty({
-    description: 'The current round number after enemy turn',
+    description: "The current round number after enemy turn",
     example: 2,
   })
   roundNumber: number;
 
   @ApiProperty({
-    description: 'List of enemy attack logs in execution order',
+    description: "List of enemy attack logs in execution order",
     type: [EnemyAttackLogDto],
   })
   attackLogs: EnemyAttackLogDto[];
 
   @ApiProperty({
-    description: 'Total damage dealt to the player this turn',
+    description: "Total damage dealt to the player this turn",
     example: 12,
   })
   totalDamageToPlayer: number;
 
   @ApiPropertyOptional({
-    description: 'Whether the player was defeated this turn',
+    description: "Whether the player was defeated this turn",
     example: false,
   })
   playerDefeated?: boolean;
 
   @ApiProperty({
-    description: 'Updated combat state after all enemy actions',
+    description: "Updated combat state after all enemy actions",
     type: CombatStateDto,
   })
   combatState: CombatStateDto;

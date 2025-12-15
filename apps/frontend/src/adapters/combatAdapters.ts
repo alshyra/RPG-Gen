@@ -1,6 +1,6 @@
 // packages/frontend/src/adapters/combatAdapter.ts
-import type { CombatStateDto } from '@rpg-gen/shared';
-import type { UnitConfig, CombatConfig, GridPosition } from '@rpg-gen/combat-engine';
+import type { CombatStateDto } from "@rpg-gen/shared";
+import type { UnitConfig, CombatConfig, GridPosition } from "@rpg-gen/combat-engine";
 
 export class CombatAdapter {
   /**
@@ -11,8 +11,8 @@ export class CombatAdapter {
       // Player
       {
         id: state.player.id,
-        characterKey: 'Archer-Green', // Player default sprite
-        position: this.getInitialPosition('player', state),
+        characterKey: "Archer-Green", // Player default sprite
+        position: this.getInitialPosition("player", state),
         stats: {
           hp: state.player.hp ?? 0,
           maxHp: state.player.hpMax ?? 0,
@@ -22,7 +22,7 @@ export class CombatAdapter {
           moveRange: 3,
           attackRange: 1,
         },
-        team: 'player',
+        team: "player",
         isPlayer: true,
       },
       // Enemies
@@ -30,7 +30,7 @@ export class CombatAdapter {
         (enemy, idx): UnitConfig => ({
           id: enemy.id,
           characterKey: this.mapEnemyToSprite(enemy.name),
-          position: this.getInitialPosition('enemy', state, idx),
+          position: this.getInitialPosition("enemy", state, idx),
           stats: {
             hp: enemy.hp ?? 0,
             maxHp: enemy.hpMax ?? 0,
@@ -40,7 +40,7 @@ export class CombatAdapter {
             moveRange: 2,
             attackRange: 1,
           },
-          team: 'enemy',
+          team: "enemy",
           isPlayer: false,
         }),
       ),
@@ -61,11 +61,11 @@ export class CombatAdapter {
    * Position initiale basée sur l'ordre de tour
    */
   private static getInitialPosition(
-    team: 'player' | 'enemy',
+    team: "player" | "enemy",
     _state: CombatStateDto,
     index = 0,
   ): GridPosition {
-    if (team === 'player') {
+    if (team === "player") {
       return {
         gridX: 2,
         gridY: 4,
@@ -83,10 +83,10 @@ export class CombatAdapter {
    */
   private static mapEnemyToSprite(name: string): string {
     const mapping: Record<string, string> = {
-      Goblin: 'Warrior-Red',
-      Orc: 'Warrior-Blue',
-      Skeleton: 'Mage-Cyan',
+      Goblin: "Warrior-Red",
+      Orc: "Warrior-Blue",
+      Skeleton: "Mage-Cyan",
     };
-    return mapping[name] ?? 'Soldier-Red';
+    return mapping[name] ?? "Soldier-Red";
   }
 }

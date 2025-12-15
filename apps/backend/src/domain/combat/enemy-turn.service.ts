@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { DiceService } from '../dice/dice.service.js';
-import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
-import type { EnemyAttackLogDto } from './dto/EnemyAttackLogDto.js';
-import type { CombatStateDto, CombatantDto } from './dto/index.js';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { DiceService } from "../dice/dice.service.js";
+import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
+import type { EnemyAttackLogDto } from "./dto/EnemyAttackLogDto.js";
+import type { CombatStateDto, CombatantDto } from "./dto/index.js";
 
 /**
  * Domain service for enemy turn mechanics.
@@ -58,7 +58,7 @@ export class EnemyTurnService {
 
     // Roll damage if hit
     const damageResult = diceService.rollDamage(
-      enemy.damageDice ?? '1d6',
+      enemy.damageDice ?? "1d6",
       attackRoll.isCrit,
       enemy.damageBonus ?? 0,
     );

@@ -1,14 +1,14 @@
 // packages/frontend/src/composables/useCombatEngine.ts
-import { CombatAdapter } from '@/adapters/combatAdapters';
-import { combatApi } from '@rpg-gen/api-client';
-import { useCombat as useBackendCombat } from '@/composables/useCombat';
-import { useCharacterStore } from '@/stores/characterStore';
-import { useCombatStore } from '@/stores/combatStore';
-import { useGameStore } from '@/stores/gameStore';
-import type { CombatEngineEventPayload, UnitClickedPayload } from '@rpg-gen/combat-engine';
-import type { CombatantDto, EnemyAttackLogDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { onUnmounted, ref, shallowRef, watch } from 'vue';
+import { CombatAdapter } from "@/adapters/combatAdapters";
+import { combatApi } from "@rpg-gen/api-client";
+import { useCombat as useBackendCombat } from "@/composables/useCombat";
+import { useCharacterStore } from "@/stores/characterStore";
+import { useCombatStore } from "@/stores/combatStore";
+import { useGameStore } from "@/stores/gameStore";
+import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
+import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
+import { storeToRefs } from "pinia";
+import { onUnmounted, ref, shallowRef, watch } from "vue";
 
 // Type for the exposed arena API from CombatArena.vue
 export interface CombatArenaApi {
@@ -103,12 +103,12 @@ export function useCombatEngine() {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (
-        message.includes('Combat session not found') ||
-        message.includes('No active combat found')
+        message.includes("Combat session not found") ||
+        message.includes("No active combat found")
       ) {
         combatStore.clearCombat();
         gameStore.appendMessage(
-          'system',
+          "system",
           "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
         );
       }
@@ -123,18 +123,18 @@ export function useCombatEngine() {
     if (!arenaApi.value) return;
 
     const handleUnitClicked = (payload: UnitClickedPayload) => {
-      console.log('[useCombatEngine] unit:clicked', payload);
+      console.log("[useCombatEngine] unit:clicked", payload);
 
       // Only open menu for enemy units
       if (payload.isPlayer) {
-        console.log('[useCombatEngine] Clicked player unit, ignoring');
+        console.log("[useCombatEngine] Clicked player unit, ignoring");
         return;
       }
 
       // Find the enemy in store
       const enemy = enemies.value.find(e => e.id === payload.unitId);
       if (!enemy) {
-        console.warn('[useCombatEngine] Enemy not found in store:', payload.unitId);
+        console.warn("[useCombatEngine] Enemy not found in store:", payload.unitId);
         return;
       }
 
@@ -143,9 +143,9 @@ export function useCombatEngine() {
       isActionModalOpen.value = true;
     };
 
-    arenaApi.value.on('unit:clicked', handleUnitClicked);
+    arenaApi.value.on("unit:clicked", handleUnitClicked);
     registeredHandlers.push({
-      event: 'unit:clicked',
+      event: "unit:clicked",
       handler: handleUnitClicked as (...args: unknown[]) => void,
     });
   };
@@ -153,19 +153,19 @@ export function useCombatEngine() {
   // Watch for player's attack results coming from the combat store and trigger visual indicators
   // The store sets `currentAttackView` when an attack is processed (see useCombat.processAttackResult)
   watch(
-    () => (typeof currentAttackView === 'undefined' ? null : currentAttackView.value),
+    () => (typeof currentAttackView === "undefined" ? null : currentAttackView.value),
     attackView => {
       if (!attackView || !arenaApi.value || !attackView.targetId) return;
       // Emit engine event so the visual engine can display hit/miss/crit and damage
       try {
-        arenaApi.value.emit('unit:attacked', {
-          attackerId: attackView.attackerId ?? 'player',
+        arenaApi.value.emit("unit:attacked", {
+          attackerId: attackView.attackerId ?? "player",
           targetId: attackView.targetId,
           damage: attackView.totalDamage ?? 0,
           isCrit: !!attackView.critical,
         });
       } catch (e) {
-        console.warn('[useCombatEngine] Failed to emit unit:attacked', e);
+        console.warn("[useCombatEngine] Failed to emit unit:attacked", e);
       }
     },
   );
@@ -176,12 +176,12 @@ export function useCombatEngine() {
    */
   const executeAttack = async (target: CombatantDto, spellName?: string) => {
     if (!target?.id) {
-      console.error('[useCombatEngine] Invalid target:', target);
+      console.error("[useCombatEngine] Invalid target:", target);
       return;
     }
 
     if (!arenaApi.value) {
-      console.warn('[useCombatEngine] No arena registered, skipping visual');
+      console.warn("[useCombatEngine] No arena registered, skipping visual");
     }
 
     // Close modal
@@ -199,7 +199,7 @@ export function useCombatEngine() {
         arenaApi.value.updateUnitHealth(target.id, damage);
       }
     } catch (err) {
-      console.error('[useCombatEngine] Attack failed:', err);
+      console.error("[useCombatEngine] Attack failed:", err);
       // Error is already handled by useCombat.executeAttack
     }
   };
@@ -240,7 +240,7 @@ export function useCombatEngine() {
     await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
-      characterId: currentCharacter.value?.characterId ?? '',
+      characterId: currentCharacter.value?.characterId ?? "",
       inCombat: combatStore.inCombat,
       enemies: enemies.value,
       player: player.value!,
@@ -279,7 +279,7 @@ export function useCombatEngine() {
       if (log.hit && log.damageTotal && arenaApi.value.updateUnitHealth && player.value) {
         arenaApi.value.updateUnitHealth(player.value.id, log.damageTotal);
         console.log(
-          '[useCombatEngine] Updated player HP after enemy attack, damage:',
+          "[useCombatEngine] Updated player HP after enemy attack, damage:",
           log.damageTotal,
         );
       }

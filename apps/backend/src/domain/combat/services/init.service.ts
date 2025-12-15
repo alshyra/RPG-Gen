@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import type { CombatStartRequestDto } from '../dto/CombatStartRequestDto.js';
-import { CombatantDto } from '../dto/CombatantDto.js';
+import { Injectable } from "@nestjs/common";
+import type { CombatStartRequestDto } from "../dto/CombatStartRequestDto.js";
+import { CombatantDto } from "../dto/CombatantDto.js";
 
 @Injectable()
 export class InitService {
@@ -26,7 +26,7 @@ export class InitService {
         ac: enemy.ac,
         initiative: initRoll,
         attackBonus: enemy.attack_bonus ?? 3,
-        damageDice: enemy.damage_dice ?? '1d6',
+        damageDice: enemy.damage_dice ?? "1d6",
         damageBonus: enemy.damage_bonus ?? 1,
       });
     });

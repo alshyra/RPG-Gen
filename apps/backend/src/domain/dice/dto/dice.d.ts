@@ -1,1 +1,1 @@
-export type AdvantageType = 'advantage' | 'disadvantage' | 'none';
+export type AdvantageType = "advantage" | "disadvantage" | "none";

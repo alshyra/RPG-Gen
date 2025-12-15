@@ -1,10 +1,10 @@
-import { useUnitsStore } from '../stores/units';
-import { storeToRefs } from 'pinia';
-import { markRaw } from 'vue';
-import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from 'pixi.js';
-import { animations } from '../services/spritesAnimations';
-import type { UnitData } from '../types/combat-types';
-import gsap from 'gsap';
+import { useUnitsStore } from "../stores/units";
+import { storeToRefs } from "pinia";
+import { markRaw } from "vue";
+import { AnimatedSprite, BitmapText, Container, Graphics, Texture, Sprite, Assets } from "pixi.js";
+import { animations } from "../services/spritesAnimations";
+import type { UnitData } from "../types/combat-types";
+import gsap from "gsap";
 
 /**
  * Unit service returns a tiny API working on an injected Map<string, UnitData>.
@@ -78,7 +78,7 @@ export const useCombatUnit = () => {
     const text = new BitmapText({
       text: `${hp}/${maxHp}`,
       style: {
-        fontFamily: 'HealthBarFont',
+        fontFamily: "HealthBarFont",
         fontSize: 10,
       },
     });
@@ -89,7 +89,7 @@ export const useCombatUnit = () => {
     // Add heart icon next to the health bar
     let heartSprite: Sprite | null = null;
     try {
-      const heartTexture = Assets.get('heart');
+      const heartTexture = Assets.get("heart");
       if (heartTexture instanceof Texture) {
         heartSprite = new Sprite(heartTexture);
         heartSprite.scale.set(0.1);
@@ -97,7 +97,7 @@ export const useCombatUnit = () => {
         container.addChild(heartSprite);
       }
     } catch {
-      console.warn('Heart texture not loaded, skipping heart icon');
+      console.warn("Heart texture not loaded, skipping heart icon");
     }
 
     const update = (newHp: number) => {
@@ -138,7 +138,7 @@ export const useCombatUnit = () => {
   };
 
   const animateDeath = (unit: UnitData) => {
-    const deathKey = 'death_bottom' as const;
+    const deathKey = "death_bottom" as const;
     const deathTextures = unit.animations[deathKey];
     const deathConfig = animations[deathKey];
 
@@ -163,7 +163,7 @@ export const useCombatUnit = () => {
       scale: 0.9,
       duration: 0.8,
       delay: deathDurationMs / 1000, // Wait for death animation to finish
-      ease: 'power2.in',
+      ease: "power2.in",
     });
   };
 

@@ -4,9 +4,9 @@ metadata:
   name: rpggen-front
   annotations:
     run.googleapis.com/ingress: all
-    run.googleapis.com/minScale: '0'
-    run.googleapis.com/maxScale: '1'
-    run.googleapis.com/invoker-iam-disabled: 'true'
+    run.googleapis.com/minScale: "0"
+    run.googleapis.com/maxScale: "1"
+    run.googleapis.com/invoker-iam-disabled: "true"
 spec:
   template:
     spec:
@@ -19,5 +19,5 @@ spec:
               containerPort: 80
           resources:
             limits:
-              cpu: '1'
+              cpu: "1"
               memory: 512Mi

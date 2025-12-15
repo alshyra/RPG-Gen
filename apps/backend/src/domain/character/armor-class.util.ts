@@ -1,6 +1,6 @@
-import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
-import { ArmorMeta } from './dto/InventoryItemMeta.js';
-import { InventoryItemDto } from './dto/InventoryItemDto.js';
+import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
+import { ArmorMeta } from "./dto/InventoryItemMeta.js";
+import { InventoryItemDto } from "./dto/InventoryItemDto.js";
 
 interface ParsedAc {
   baseAc: number;
@@ -19,7 +19,7 @@ export const getDexModifier = (character: CharacterResponseDto): number => {
 };
 
 const parseShieldAc = (trimmed: string): ParsedAc | null => {
-  if (trimmed.startsWith('+')) {
+  if (trimmed.startsWith("+")) {
     return {
       baseAc: parseInt(trimmed, 10),
       addDex: false,
@@ -79,14 +79,14 @@ export const parseArmorAc = (acString: string): ParsedAc => {
 };
 
 const isItemArmor = (item: InventoryItemDto): item is InventoryItemDto<ArmorMeta> =>
-  item.meta?.type === 'armor';
+  item.meta?.type === "armor";
 
 const findEquippedGear = (inventory: InventoryItemDto[]): EquippedGear => {
   const equippedItems = inventory.filter(
     item => item.equipped && isItemArmor(item),
   ) as InventoryItemDto<ArmorMeta>[];
-  const shield = equippedItems.find(item => item.meta?.class === 'Shield');
-  const armor = equippedItems.find(item => item.meta?.class !== 'Shield');
+  const shield = equippedItems.find(item => item.meta?.class === "Shield");
+  const armor = equippedItems.find(item => item.meta?.class !== "Shield");
   return {
     armor,
     shield,

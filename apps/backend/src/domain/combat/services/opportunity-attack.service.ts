@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { CombatGridService } from './combat-grid.service.js';
-import { GridPositionDto } from '../dto/GridPositionDto.js';
-import { MovementEventDto, MovementEventType } from '../dto/MovementEventDto.js';
-import { DiceService } from '../../dice/dice.service.js';
+import { Injectable, Logger } from "@nestjs/common";
+import { CombatGridService } from "./combat-grid.service.js";
+import { GridPositionDto } from "../dto/GridPositionDto.js";
+import { MovementEventDto, MovementEventType } from "../dto/MovementEventDto.js";
+import { DiceService } from "../../dice/dice.service.js";
 
 export interface CombatantStats {
   id: string;
@@ -38,7 +38,7 @@ export class OpportunityAttackResolver {
     const events: MovementEventDto[] = [];
 
     // Disengage prevents opportunity attacks
-    if (activeEffects.includes('disengaged')) {
+    if (activeEffects.includes("disengaged")) {
       this.logger.debug(`Combatant ${combatantId} disengaged, no OA checks`);
       return events;
     }
@@ -99,7 +99,7 @@ export class OpportunityAttackResolver {
     attackerId: string,
   ): MovementEventDto {
     // Roll attack
-    const attackRoll = this.diceService.rollDiceExpr('1d20');
+    const attackRoll = this.diceService.rollDiceExpr("1d20");
     const totalAttack = attackRoll.total + attacker.attackBonus;
 
     const hit = totalAttack >= defender.ac;

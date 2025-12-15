@@ -1,11 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import {
   SpellDefinition,
   SpellDefinitionDocument,
-} from '../../infra/mongo/spell/SpellDefinition.js';
-import { spellsArraySchema } from './validators.js';
+} from "../../infra/mongo/spell/SpellDefinition.js";
+import { spellsArraySchema } from "./validators.js";
 
 @Injectable()
 export class SpellDefinitionService {
@@ -39,7 +39,7 @@ export class SpellDefinitionService {
 
   async upsert(def: Partial<SpellDefinition>) {
     // Require a definitionId so we can reliably upsert seeded definitions
-    if (!def.definitionId) throw new Error('definitionId required');
+    if (!def.definitionId) throw new Error("definitionId required");
     const existing = await this.model.findOne({ definitionId: def.definitionId }).exec();
     if (existing) {
       Object.assign(existing, def);
@@ -60,22 +60,22 @@ export class SpellDefinitionService {
         existing = await this.model.findOne({ name: spell.name }).exec();
       }
 
-      if (existing) return 'skipped';
+      if (existing) return "skipped";
 
       // Ensure we have a definitionId before upsert
       if (!spell.definitionId && spell.name) {
         // fallback slug: simple ASCII-safe lowercase hyphenated
-        const fallback = `spell-${spell.level ?? 'x'}-${String(spell.name)
+        const fallback = `spell-${spell.level ?? "x"}-${String(spell.name)
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')}`;
+          .replace(/[^a-z0-9]+/g, "-")}`;
         spell.definitionId = fallback;
       }
 
       await this.upsert(spell);
-      return 'imported';
+      return "imported";
     } catch (error) {
       this.logger.warn(`Failed to seed spell ${spell.name}: ${(error as Error).message}`);
-      return 'error';
+      return "error";
     }
   }
 
@@ -104,8 +104,8 @@ export class SpellDefinitionService {
 
       const results = await Promise.all(validated.map(this.insertSpell.bind(this)));
 
-      const imported = results.filter(r => r === 'imported').length;
-      const skipped = results.filter(r => r === 'skipped').length;
+      const imported = results.filter(r => r === "imported").length;
+      const skipped = results.filter(r => r === "skipped").length;
 
       this.logger.log(`Spell definitions seeded: ${imported} imported, ${skipped} skipped`);
       return;

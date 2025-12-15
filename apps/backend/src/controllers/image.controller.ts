@@ -6,29 +6,29 @@ import {
   Post,
   Req,
   UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import Joi from 'joi';
-import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
-import { CharacterService } from '../domain/character/character.service.js';
-import type { CharacterResponseDto } from '../domain/character/dto/CharacterResponseDto.js';
-import { GeminiImageService } from '../infra/external/gemini-image.service.js';
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import Joi from "joi";
+import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import { CharacterService } from "../domain/character/character.service.js";
+import type { CharacterResponseDto } from "../domain/character/dto/CharacterResponseDto.js";
+import { GeminiImageService } from "../infra/external/gemini-image.service.js";
 import {
   AvatarResponseDto,
   CharacterIdBodyDto,
   ImageRequestDto,
-} from '../domain/image/dto/image-response.dto.js';
-import { ImageService } from '../domain/image/image.service.js';
-import type { RPGRequest } from '../global.types.js';
+} from "../domain/image/dto/image-response.dto.js";
+import { ImageService } from "../domain/image/image.service.js";
+import type { RPGRequest } from "../global.types.js";
 
 const schema = Joi.object({
-  token: Joi.string().allow('').optional(),
+  token: Joi.string().allow("").optional(),
   prompt: Joi.string().required(),
   model: Joi.string().optional(),
 });
 
-@ApiTags('image')
-@Controller('image')
+@ApiTags("image")
+@Controller("image")
 export class ImageController {
   private readonly logger = new Logger(ImageController.name);
 
@@ -39,38 +39,38 @@ export class ImageController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Generate image from prompt' })
+  @ApiOperation({ summary: "Generate image from prompt" })
   @ApiBody({ type: ImageRequestDto })
   @ApiResponse({
     status: 400,
-    description: 'Image generation not implemented',
+    description: "Image generation not implemented",
   })
   async generate(@Body() body: ImageRequestDto) {
     const { error } = schema.validate(body);
     if (error) throw new BadRequestException(error.message);
     // Image generation not implemented yet
-    throw new BadRequestException('Image generation is not yet implemented');
+    throw new BadRequestException("Image generation is not yet implemented");
   }
 
-  @Post('generate-avatar')
+  @Post("generate-avatar")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Generate character avatar from description' })
+  @ApiOperation({ summary: "Generate character avatar from description" })
   @ApiBody({ type: CharacterIdBodyDto })
   @ApiResponse({
     status: 201,
-    description: 'Avatar generated successfully',
+    description: "Avatar generated successfully",
     type: AvatarResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request or avatar generation failed',
+    description: "Invalid request or avatar generation failed",
   })
-  async generateAvatar(@Req() req: RPGRequest, @Body('characterId') characterId: string) {
+  async generateAvatar(@Req() req: RPGRequest, @Body("characterId") characterId: string) {
     this.logger.log(`Received avatar generation request payload: ${JSON.stringify(characterId)}`);
 
-    if (!characterId || typeof characterId !== 'string')
-      throw new BadRequestException('characterId is required');
+    if (!characterId || typeof characterId !== "string")
+      throw new BadRequestException("characterId is required");
 
     const { user } = req;
     const userId = user._id.toString();
@@ -94,8 +94,8 @@ export class ImageController {
 
       return { imageUrl: compressedImage };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to generate avatar';
-      this.logger.error('Avatar generation error:', message);
+      const message = error instanceof Error ? error.message : "Failed to generate avatar";
+      this.logger.error("Avatar generation error:", message);
       throw new BadRequestException(`Avatar generation failed: ${message}`);
     }
   }
@@ -118,11 +118,11 @@ export class ImageController {
       const classNames = character.classes
         .map(c => c.name)
         .filter(Boolean)
-        .join(', ');
+        .join(", ");
       if (classNames) characterContext.push(`Classes: ${classNames}`);
     }
 
-    const contextStr = characterContext.length ? `\n${characterContext.join('\n')}` : '';
+    const contextStr = characterContext.length ? `\n${characterContext.join("\n")}` : "";
     return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
   }
 }

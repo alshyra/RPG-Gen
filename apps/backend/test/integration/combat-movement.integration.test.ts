@@ -7,15 +7,15 @@
  * - Opportunity attack triggering when leaving hostile reach
  * - Active effects: 'disengaged' prevents OAs, 'dashed' doubles movement
  */
-import test from 'ava';
-import { CombatModule } from '../../src/modules/combat.module.js';
-import { CombatGridService } from '../../src/domain/combat/services/combat-grid.service.js';
-import { OpportunityAttackResolver } from '../../src/domain/combat/services/opportunity-attack.service.js';
-import { DiceService } from '../../src/domain/dice/dice.service.js';
-import { GridPositionDto } from '../../src/domain/combat/dto/GridPositionDto.js';
-import { MovementEventType } from '../../src/domain/combat/dto/MovementEventDto.js';
-import { createTestApp, closeTestApp, type TestAppContext } from '../helpers/test-app.js';
-import { createMockDiceService } from '../mocks/dice.mock.js';
+import test from "ava";
+import { CombatModule } from "../../src/modules/combat.module.js";
+import { CombatGridService } from "../../src/domain/combat/services/combat-grid.service.js";
+import { OpportunityAttackResolver } from "../../src/domain/combat/services/opportunity-attack.service.js";
+import { DiceService } from "../../src/domain/dice/dice.service.js";
+import { GridPositionDto } from "../../src/domain/combat/dto/GridPositionDto.js";
+import { MovementEventType } from "../../src/domain/combat/dto/MovementEventDto.js";
+import { createTestApp, closeTestApp, type TestAppContext } from "../helpers/test-app.js";
+import { createMockDiceService } from "../mocks/dice.mock.js";
 
 // ============= Test Context =============
 
@@ -25,9 +25,9 @@ interface MovementTestContext {
   oaResolver: OpportunityAttackResolver;
 }
 
-const TEST_COMBAT_ID = 'test-combat-1';
-const PLAYER_ID = 'player-1';
-const ENEMY_ID = 'enemy-1';
+const TEST_COMBAT_ID = "test-combat-1";
+const PLAYER_ID = "player-1";
+const ENEMY_ID = "enemy-1";
 
 // ============= Setup & Teardown =============
 
@@ -56,7 +56,7 @@ async function setupMovementTest(diceRolls: number[]): Promise<MovementTestConte
 
 // ============= Grid Initialization Tests =============
 
-test('should initialize grid with combatant positions', async t => {
+test("should initialize grid with combatant positions", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -77,7 +77,7 @@ test('should initialize grid with combatant positions', async t => {
   await closeTestApp(ctx);
 });
 
-test('should return all positions for a combat', async t => {
+test("should return all positions for a combat", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -95,7 +95,7 @@ test('should return all positions for a combat', async t => {
 
 // ============= Path Validation Tests =============
 
-test('should validate simple adjacent move', async t => {
+test("should validate simple adjacent move", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -110,7 +110,7 @@ test('should validate simple adjacent move', async t => {
   await closeTestApp(ctx);
 });
 
-test('should reject path exceeding movement speed', async t => {
+test("should reject path exceeding movement speed", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -128,12 +128,12 @@ test('should reject path exceeding movement speed', async t => {
   const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, []);
 
   t.false(result.valid);
-  t.regex(result.error ?? '', /exceeds available speed/i);
+  t.regex(result.error ?? "", /exceeds available speed/i);
 
   await closeTestApp(ctx);
 });
 
-test('should allow dash to double movement range', async t => {
+test("should allow dash to double movement range", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -150,14 +150,14 @@ test('should allow dash to double movement range', async t => {
     new GridPositionDto(5, 0),
     new GridPositionDto(6, 0),
   ];
-  const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, ['dashed']);
+  const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, ["dashed"]);
 
   t.true(result.valid);
 
   await closeTestApp(ctx);
 });
 
-test('should reject non-adjacent moves', async t => {
+test("should reject non-adjacent moves", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -169,12 +169,12 @@ test('should reject non-adjacent moves', async t => {
   const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, []);
 
   t.false(result.valid);
-  t.regex(result.error ?? '', /non-adjacent/i);
+  t.regex(result.error ?? "", /non-adjacent/i);
 
   await closeTestApp(ctx);
 });
 
-test('should reject out of bounds movement', async t => {
+test("should reject out of bounds movement", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 5, 5, [
@@ -186,12 +186,12 @@ test('should reject out of bounds movement', async t => {
   const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, []);
 
   t.false(result.valid);
-  t.regex(result.error ?? '', /out of bounds/i);
+  t.regex(result.error ?? "", /out of bounds/i);
 
   await closeTestApp(ctx);
 });
 
-test('should reject movement through occupied tiles', async t => {
+test("should reject movement through occupied tiles", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -208,14 +208,14 @@ test('should reject movement through occupied tiles', async t => {
   const result = gridService.validatePath(TEST_COMBAT_ID, PLAYER_ID, path, []);
 
   t.false(result.valid);
-  t.regex(result.error ?? '', /occupied/i);
+  t.regex(result.error ?? "", /occupied/i);
 
   await closeTestApp(ctx);
 });
 
 // ============= Movement Application Tests =============
 
-test('should update position after movement', async t => {
+test("should update position after movement", async t => {
   const { ctx, gridService } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -234,7 +234,7 @@ test('should update position after movement', async t => {
 
 // ============= Opportunity Attack Tests =============
 
-test('should trigger OA when leaving hostile reach', async t => {
+test("should trigger OA when leaving hostile reach", async t => {
   const { ctx, gridService, oaResolver } = await setupMovementTest([15, 4]); // attack roll 15, damage roll 4
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -250,8 +250,8 @@ test('should trigger OA when leaving hostile reach', async t => {
   ];
 
   const statsMap = new Map([
-    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: '1d6', damageBonus: 2, ac: 15 }],
-    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: '1d6', damageBonus: 2, ac: 13 }],
+    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: "1d6", damageBonus: 2, ac: 15 }],
+    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: "1d6", damageBonus: 2, ac: 13 }],
   ]);
 
   const events = oaResolver.resolveOpportunityAttacks(
@@ -272,7 +272,7 @@ test('should trigger OA when leaving hostile reach', async t => {
   await closeTestApp(ctx);
 });
 
-test('should not trigger OA when moving within reach', async t => {
+test("should not trigger OA when moving within reach", async t => {
   const { ctx, gridService, oaResolver } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -288,8 +288,8 @@ test('should not trigger OA when moving within reach', async t => {
   ];
 
   const statsMap = new Map([
-    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: '1d6', damageBonus: 2, ac: 15 }],
-    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: '1d6', damageBonus: 2, ac: 13 }],
+    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: "1d6", damageBonus: 2, ac: 15 }],
+    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: "1d6", damageBonus: 2, ac: 13 }],
   ]);
 
   const events = oaResolver.resolveOpportunityAttacks(
@@ -305,7 +305,7 @@ test('should not trigger OA when moving within reach', async t => {
   await closeTestApp(ctx);
 });
 
-test('should prevent OA when using disengage', async t => {
+test("should prevent OA when using disengage", async t => {
   const { ctx, gridService, oaResolver } = await setupMovementTest([]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -320,15 +320,15 @@ test('should prevent OA when using disengage', async t => {
   ];
 
   const statsMap = new Map([
-    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: '1d6', damageBonus: 2, ac: 15 }],
-    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: '1d6', damageBonus: 2, ac: 13 }],
+    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: "1d6", damageBonus: 2, ac: 15 }],
+    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: "1d6", damageBonus: 2, ac: 13 }],
   ]);
 
   const events = oaResolver.resolveOpportunityAttacks(
     TEST_COMBAT_ID,
     PLAYER_ID,
     path,
-    ['disengaged'],
+    ["disengaged"],
     statsMap,
   );
 
@@ -337,7 +337,7 @@ test('should prevent OA when using disengage', async t => {
   await closeTestApp(ctx);
 });
 
-test('should record missed OA', async t => {
+test("should record missed OA", async t => {
   const { ctx, gridService, oaResolver } = await setupMovementTest([5, 0]); // low attack roll misses
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -348,8 +348,8 @@ test('should record missed OA', async t => {
   const path = [new GridPositionDto(5, 5), new GridPositionDto(4, 5), new GridPositionDto(3, 5)];
 
   const statsMap = new Map([
-    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: '1d6', damageBonus: 2, ac: 15 }],
-    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: '1d6', damageBonus: 2, ac: 13 }],
+    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: "1d6", damageBonus: 2, ac: 15 }],
+    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: "1d6", damageBonus: 2, ac: 13 }],
   ]);
 
   const events = oaResolver.resolveOpportunityAttacks(
@@ -369,7 +369,7 @@ test('should record missed OA', async t => {
 
 // ============= Reach Tests =============
 
-test('should trigger OA from reach weapon at distance 2', async t => {
+test("should trigger OA from reach weapon at distance 2", async t => {
   const { ctx, gridService, oaResolver } = await setupMovementTest([15, 4]);
 
   gridService.initializeGrid(TEST_COMBAT_ID, 10, 10, [
@@ -384,8 +384,8 @@ test('should trigger OA from reach weapon at distance 2', async t => {
   ];
 
   const statsMap = new Map([
-    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: '1d6', damageBonus: 2, ac: 15 }],
-    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: '1d6', damageBonus: 2, ac: 13 }],
+    [PLAYER_ID, { id: PLAYER_ID, attackBonus: 3, damageDice: "1d6", damageBonus: 2, ac: 15 }],
+    [ENEMY_ID, { id: ENEMY_ID, attackBonus: 4, damageDice: "1d6", damageBonus: 2, ac: 13 }],
   ]);
 
   const events = oaResolver.resolveOpportunityAttacks(

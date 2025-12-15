@@ -1,6 +1,6 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class KillCharacterBodyDto {
-  @ApiPropertyOptional({ description: 'Location where character died' })
+  @ApiPropertyOptional({ description: "Location where character died" })
   deathLocation?: string;
 }

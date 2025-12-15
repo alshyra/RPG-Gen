@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
-import { mockAuthentication } from '../helpers/auth';
-import { prepareE2EDb, cleanupE2EDb } from '../helpers/api';
+import { test, expect } from "@playwright/test";
+import { mockAuthentication } from "../helpers/auth";
+import { prepareE2EDb, cleanupE2EDb } from "../helpers/api";
 
 /**
  * Combat Flow Tests
  * Tests combat panel, visual arena, and combat state
  */
 
-test.describe('Combat flow', () => {
+test.describe("Combat flow", () => {
   test.beforeAll(async () => {
     await cleanupE2EDb();
     const result = await prepareE2EDb({
@@ -18,12 +18,12 @@ test.describe('Combat flow', () => {
     expect(result.ok).toBe(true);
   });
 
-  test('loads combat panel with visual arena and verifies state', async ({ page }) => {
+  test("loads combat panel with visual arena and verifies state", async ({ page }) => {
     await mockAuthentication(page);
 
     // Setup route interception
-    const charactersPromise = page.waitForResponse('**/api/characters');
-    await page.goto('/home');
+    const charactersPromise = page.waitForResponse("**/api/characters");
+    await page.goto("/home");
     const charactersResponse = await charactersPromise;
     const chars = await charactersResponse.json();
 
@@ -34,12 +34,12 @@ test.describe('Combat flow', () => {
     await page.goto(`/game/${charId}`);
 
     // Wait for page to stabilize
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
 
     // Verify we successfully loaded the game page
     // The combat panel may or may not be visible depending on combat state
     // Just verify the page structure is present
-    const bodyContent = await page.locator('body').textContent();
+    const bodyContent = await page.locator("body").textContent();
     expect(bodyContent).toBeTruthy();
 
     // Check if game page elements are present
@@ -48,14 +48,14 @@ test.describe('Combat flow', () => {
     expect(hasGameContent).toBeTruthy();
   });
 
-  test.skip('plays full combat flow: start, attack enemies, achieve victory, return to messages', async ({
+  test.skip("plays full combat flow: start, attack enemies, achieve victory, return to messages", async ({
     page,
   }) => {
     await mockAuthentication(page);
 
     // Get character
-    const charactersPromise = page.waitForResponse('**/api/characters');
-    await page.goto('/home');
+    const charactersPromise = page.waitForResponse("**/api/characters");
+    await page.goto("/home");
     const charactersResponse = await charactersPromise;
     const chars = await charactersResponse.json();
     expect(chars.length).toBeGreaterThan(0);
@@ -63,12 +63,12 @@ test.describe('Combat flow', () => {
 
     // Navigate to game
     await page.goto(`/game/${charId}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
 
     // Start combat via chat message
     const chatInput = page.locator('textarea, input[type="text"]').last();
-    await chatInput.fill('je cherche un combat');
-    await chatInput.press('Enter');
+    await chatInput.fill("je cherche un combat");
+    await chatInput.press("Enter");
 
     // Wait for navigation to combat arena (which happens after combat_start is received)
     // Use a reasonable timeout since this involves Gemini API call
@@ -81,7 +81,7 @@ test.describe('Combat flow', () => {
     // Verify combat header shows turn info
     const combatHeader = page
       .locator('[data-cy="combat-header"]')
-      .or(page.locator('text=/Round|Actions/i'));
+      .or(page.locator("text=/Round|Actions/i"));
     await expect(combatHeader).toBeVisible({ timeout: 5000 });
 
     // Attack enemies until all are defeated
@@ -111,7 +111,7 @@ test.describe('Combat flow', () => {
         await firstButton.click();
 
         // Wait for spell selector modal to appear
-        const modal = page.locator('text=/Choisir une action|Attaque/i').first();
+        const modal = page.locator("text=/Choisir une action|Attaque/i").first();
         await expect(modal).toBeVisible({ timeout: 3000 });
 
         // Click weapon attack (first button in modal)
@@ -120,7 +120,7 @@ test.describe('Combat flow', () => {
 
         // Wait for attack to process
         await page.waitForResponse(
-          response => response.url().includes('/api/combat/') && response.url().includes('/attack'),
+          response => response.url().includes("/api/combat/") && response.url().includes("/attack"),
           { timeout: 5000 },
         );
 
@@ -138,7 +138,7 @@ test.describe('Combat flow', () => {
           // Wait for end-turn response
           await page.waitForResponse(
             response =>
-              response.url().includes('/api/combat/') && response.url().includes('/end-turn'),
+              response.url().includes("/api/combat/") && response.url().includes("/end-turn"),
             { timeout: 5000 },
           );
 
@@ -149,17 +149,17 @@ test.describe('Combat flow', () => {
 
       // Check if combat ended (navigated back to messages)
       const currentUrl = page.url();
-      if (!currentUrl.includes('/combat')) {
+      if (!currentUrl.includes("/combat")) {
         combatActive = false;
       }
     }
 
     // After victory, we should still be on combat page (victory modal shown on combat screen)
     const finalUrl = page.url();
-    expect(finalUrl).toContain('/combat');
+    expect(finalUrl).toContain("/combat");
 
     // Verify victory message in chat
-    const victoryMessage = page.locator('text=/Victoire|vaincu/i').last();
+    const victoryMessage = page.locator("text=/Victoire|vaincu/i").last();
     await expect(victoryMessage).toBeVisible({ timeout: 5000 });
 
     // Verify we can see the messages view again

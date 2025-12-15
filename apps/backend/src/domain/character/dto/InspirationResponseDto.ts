@@ -1,15 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { CharacterResponseDto } from './CharacterResponseDto.js';
+import { ApiProperty } from "@nestjs/swagger";
+import { CharacterResponseDto } from "./CharacterResponseDto.js";
 
 export class InspirationResponseDto {
-  @ApiProperty({ description: 'Operation success status' })
+  @ApiProperty({ description: "Operation success status" })
   ok: boolean;
 
-  @ApiProperty({ description: 'Updated inspiration points count' })
+  @ApiProperty({ description: "Updated inspiration points count" })
   inspirationPoints: number;
 
   @ApiProperty({
-    description: 'Updated character',
+    description: "Updated character",
     type: CharacterResponseDto,
   })
   character: CharacterResponseDto;

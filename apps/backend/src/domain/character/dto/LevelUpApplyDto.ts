@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class LevelUpApplyDto {
-  @ApiPropertyOptional({ description: 'List of spell definitionIds to add to the character' })
+  @ApiPropertyOptional({ description: "List of spell definitionIds to add to the character" })
   newSpellIds?: string[];
 
   @ApiPropertyOptional({

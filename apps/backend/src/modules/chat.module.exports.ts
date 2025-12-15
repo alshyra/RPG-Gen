@@ -12,5 +12,5 @@
  * - These are implementation details and should not be imported directly
  */
 
-export { ChatOrchestrator } from '../orchestrators/chat/index.js';
-export { ConversationService } from '../domain/chat/conversation.service.js';
+export { ChatOrchestrator } from "../orchestrators/chat/index.js";
+export { ConversationService } from "../domain/chat/conversation.service.js";

@@ -10,9 +10,9 @@
  * with all necessary combat and casting information.
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,7 +32,7 @@ interface SpellDefinition {
     damageDice?: string;
     damageType?: string;
     saveType?: string;
-    attackType?: 'melee' | 'ranged' | 'spell';
+    attackType?: "melee" | "ranged" | "spell";
     school?: string;
     areaOfEffect?: string;
     scaling?: string;
@@ -42,22 +42,22 @@ interface SpellDefinition {
 // Create a URL-friendly slug (remove accents, lower-case, replace spaces/non-alphanum with hyphens)
 function slugify(input: string): string {
   return input
-    .normalize('NFD') // split accented letters
-    .replace(/\p{Diacritic}/gu, '') // remove diacritics
+    .normalize("NFD") // split accented letters
+    .replace(/\p{Diacritic}/gu, "") // remove diacritics
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-') // replace non alphanumeric with '-'
-    .replace(/(^-|-$)/g, ''); // trim leading/trailing hyphens
+    .replace(/[^a-z0-9]+/g, "-") // replace non alphanumeric with '-'
+    .replace(/(^-|-$)/g, ""); // trim leading/trailing hyphens
 }
 
 // Map French spell schools to English for consistency
 const SCHOOL_MAP: Record<string, string> = {
-  enchantement: 'enchantment',
-  évocation: 'evocation',
-  divination: 'divination',
-  transmutation: 'transmutation',
-  illusion: 'illusion',
-  abjuration: 'abjuration',
-  invocation: 'conjuration',
+  enchantement: "enchantment",
+  évocation: "evocation",
+  divination: "divination",
+  transmutation: "transmutation",
+  illusion: "illusion",
+  abjuration: "abjuration",
+  invocation: "conjuration",
 };
 
 // Extract damage dice from description (pattern: 1d4, 2d8, etc.)
@@ -71,18 +71,18 @@ function extractDamageDice(description: string): string | undefined {
 function extractDamageType(description: string): string | undefined {
   if (!description) return undefined;
   const damageTypes = [
-    'psychiques',
-    'tonnerre',
-    'feu',
-    'froid',
-    'acide',
-    'poison',
-    'radieux',
-    'nécrotique',
-    'force',
-    'contondants',
-    'tranchants',
-    'perforants',
+    "psychiques",
+    "tonnerre",
+    "feu",
+    "froid",
+    "acide",
+    "poison",
+    "radieux",
+    "nécrotique",
+    "force",
+    "contondants",
+    "tranchants",
+    "perforants",
   ];
 
   const descLower = description.toLowerCase();
@@ -97,12 +97,12 @@ function extractSaveType(description: string): string | undefined {
   if (!saveMatch) return undefined;
 
   const saveMap: Record<string, string> = {
-    'Sag.': 'wisdom',
-    'Con.': 'constitution',
-    'Dex.': 'dexterity',
-    'For.': 'strength',
-    'Int.': 'intelligence',
-    'Cha.': 'charisma',
+    "Sag.": "wisdom",
+    "Con.": "constitution",
+    "Dex.": "dexterity",
+    "For.": "strength",
+    "Int.": "intelligence",
+    "Cha.": "charisma",
   };
 
   return saveMap[saveMatch[1]] || undefined;
@@ -125,9 +125,9 @@ function extractScaling(description: string): string | undefined {
 function getAttackType(
   saveType: string | undefined,
   damageDice: string | undefined,
-): 'melee' | 'ranged' | 'spell' | undefined {
-  if (saveType) return 'spell';
-  if (damageDice) return 'spell';
+): "melee" | "ranged" | "spell" | undefined {
+  if (saveType) return "spell";
+  if (damageDice) return "spell";
   return undefined;
 }
 
@@ -139,13 +139,13 @@ function parseSpellLine(line: string): SpellDefinition | null {
   // missing (e.g. duration, ritual). This prevents valid lines like
   // "Zone de vérité\t2\tenchantement\t...\tV,S\t\t\tDescription" from
   // being skipped.
-  const rawParts = line.split('\t');
+  const rawParts = line.split("\t");
   const parts = rawParts.map(p => p.trim());
 
   // Ensure we always have at least 9 elements to destructure safely (name, level, school,
   // castingTime, range, components, duration, ritual, description). Fill with empty
   // strings when columns are missing.
-  while (parts.length < 9) parts.push('');
+  while (parts.length < 9) parts.push("");
 
   if (parts.length < 8) return null; // Not enough data
 
@@ -153,10 +153,10 @@ function parseSpellLine(line: string): SpellDefinition | null {
     parts;
 
   // Skip header lines or empty lines
-  if (!name || name === 'Name' || !levelStr.match(/^\d+$/)) return null;
+  if (!name || name === "Name" || !levelStr.match(/^\d+$/)) return null;
 
   const level = parseInt(levelStr, 10);
-  const isRitual = ritual?.toLowerCase() === 'rituel';
+  const isRitual = ritual?.toLowerCase() === "rituel";
 
   const damageDice = extractDamageDice(description),
     damageType = extractDamageType(description),
@@ -173,7 +173,7 @@ function parseSpellLine(line: string): SpellDefinition | null {
     castingTime,
     range,
     components,
-    duration: duration || 'instantaneous',
+    duration: duration || "instantaneous",
     ritual: isRitual,
     description,
     meta: {
@@ -191,13 +191,13 @@ function parseSpellLine(line: string): SpellDefinition | null {
 function main() {
   // Default input is the seed file in this folder. You can replace this with any
   // other markdown/TSV file exported from aidedd.org.
-  const inputPath = join(__dirname, '../seed/spells.md');
-  const outputPath = join(__dirname, '../seed/spells.json');
+  const inputPath = join(__dirname, "../seed/spells.md");
+  const outputPath = join(__dirname, "../seed/spells.json");
 
-  console.log('Reading spell data from:', inputPath);
+  console.log("Reading spell data from:", inputPath);
 
-  const content = readFileSync(inputPath, 'utf-8');
-  const lines = content.split('\n');
+  const content = readFileSync(inputPath, "utf-8");
+  const lines = content.split("\n");
 
   const spells: SpellDefinition[] = lines
     .map(parseSpellLine)
@@ -220,7 +220,7 @@ function main() {
     return a.name.localeCompare(b.name);
   });
 
-  writeFileSync(outputPath, JSON.stringify(spells, null, 2), 'utf-8');
+  writeFileSync(outputPath, JSON.stringify(spells, null, 2), "utf-8");
   console.log(`✓ Spell data written to: ${outputPath}`);
 
   const byLevel = spells.reduce(

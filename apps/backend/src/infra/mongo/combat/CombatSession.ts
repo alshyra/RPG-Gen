@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Combatant } from './Combatant.js';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Schema as MongooseSchema } from "mongoose";
+import { Combatant } from "./Combatant.js";
 
 export type CombatSessionDocument = CombatSession & Document;
 
@@ -9,7 +9,7 @@ export class CombatSession {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   })
   userId: MongooseSchema.Types.ObjectId;
 
@@ -92,8 +92,8 @@ export class CombatSession {
   @Prop({
     required: false,
     type: String,
-    enum: ['PLAYER_TURN', 'AWAITING_DAMAGE_ROLL', 'ENEMY_TURN', 'COMBAT_ENDED'],
-    default: 'PLAYER_TURN',
+    enum: ["PLAYER_TURN", "AWAITING_DAMAGE_ROLL", "ENEMY_TURN", "COMBAT_ENDED"],
+    default: "PLAYER_TURN",
   })
   phase: string;
 

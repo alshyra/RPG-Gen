@@ -2,13 +2,13 @@ import type {
   CombatantDto,
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
-} from '@rpg-gen/shared';
-import { combatApi } from '@rpg-gen/api-client';
-import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
-import { useCharacterStore } from '../stores/characterStore';
-import { useCombatStore } from '../stores/combatStore';
-import { useGameStore } from '../stores/gameStore';
+} from "@rpg-gen/shared";
+import { combatApi } from "@rpg-gen/api-client";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import { useCharacterStore } from "../stores/characterStore";
+import { useCombatStore } from "../stores/combatStore";
+import { useGameStore } from "../stores/gameStore";
 
 /**
  * Composable for combat-specific actions and state management
@@ -36,23 +36,23 @@ export function useCombat() {
       initiative: number;
     }[];
   }): void => {
-    if (combatState.narrative) gameStore.appendMessage('system', combatState.narrative);
+    if (combatState.narrative) gameStore.appendMessage("system", combatState.narrative);
     const initiativeOrder = combatState.turnOrder
       .map(c => `${c.name} (${c.initiative})`)
-      .join(' → ');
-    gameStore.appendMessage('system', `📋 Ordre d'initiative: ${initiativeOrder}`);
-    gameStore.appendMessage('system', 'Utilisez /attack [nom_ennemi] pour attaquer.');
+      .join(" → ");
+    gameStore.appendMessage("system", `📋 Ordre d'initiative: ${initiativeOrder}`);
+    gameStore.appendMessage("system", "Utilisez /attack [nom_ennemi] pour attaquer.");
   };
 
   /**
    * Initialize combat from a combat_start instruction
    */
   const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
-    console.log('[useCombat] initializeCombat instruction', instruction);
+    console.log("[useCombat] initializeCombat instruction", instruction);
     if (!currentCharacter.value) return;
 
-    const enemyNames = instruction.combat_start.map(e => e.name).join(', ');
-    gameStore.appendMessage('system', `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
+    const enemyNames = instruction.combat_start.map(e => e.name).join(", ");
+    gameStore.appendMessage("system", `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
       const payload = { combat_start: instruction.combat_start };
@@ -67,7 +67,7 @@ export function useCombat() {
       const initialDamage = currentHp - newHp;
       if (initialDamage > 0) {
         gameStore.appendMessage(
-          'system',
+          "system",
           `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
         );
         // Sync HP to character store
@@ -81,12 +81,12 @@ export function useCombat() {
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
       await router.push({
-        name: 'game-combat',
+        name: "game-combat",
         params: { characterId: currentCharacter.value.characterId },
       });
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to start combat';
-      gameStore.appendMessage('system', `❌ Erreur de combat: ${errorMsg}`);
+      const errorMsg = err instanceof Error ? err.message : "Failed to start combat";
+      gameStore.appendMessage("system", `❌ Erreur de combat: ${errorMsg}`);
     }
   };
 
@@ -94,32 +94,32 @@ export function useCombat() {
     target: CombatantDto,
     result: CombatActionResponseDto,
   ): void => {
-    const targetName = target?.name || 'cible inconnue';
+    const targetName = target?.name || "cible inconnue";
     const { damageTotal, isCrit } = result;
     if (damageTotal && damageTotal > 0) {
-      const critMsg = isCrit ? ' (CRITIQUE!)' : '';
+      const critMsg = isCrit ? " (CRITIQUE!)" : "";
       gameStore.appendMessage(
-        'system',
+        "system",
         `✅ Attaque réussie contre ${targetName}! Dégâts: ${damageTotal}${critMsg}`,
       );
     } else {
-      gameStore.appendMessage('system', `❌ Attaque manquée contre ${targetName}.`);
+      gameStore.appendMessage("system", `❌ Attaque manquée contre ${targetName}.`);
     }
   };
 
   const handleAttackError = (err: unknown): void => {
-    const message = err instanceof Error ? err.message : 'Failed to attack';
+    const message = err instanceof Error ? err.message : "Failed to attack";
     const sessionLost =
-      message.includes('Combat session not found') ||
-      message.includes('Character is not in combat');
+      message.includes("Combat session not found") ||
+      message.includes("Character is not in combat");
     if (sessionLost) {
       combatStore.clearCombat();
       gameStore.appendMessage(
-        'system',
+        "system",
         "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
       );
     } else {
-      gameStore.appendMessage('system', `❌ Erreur: ${message}`);
+      gameStore.appendMessage("system", `❌ Erreur: ${message}`);
     }
   };
 
@@ -144,15 +144,15 @@ export function useCombat() {
 
   /* Helpers to keep executeAttack small (reduce statement count) */
   const beginAttack = (target: CombatantDto) => {
-    const targetName = target?.name || 'cible inconnue';
-    gameStore.appendMessage('user', `J'attaque ${targetName}!`);
+    const targetName = target?.name || "cible inconnue";
+    gameStore.appendMessage("user", `J'attaque ${targetName}!`);
     gameStore.sending = true;
     currentTarget.value = target;
   };
 
   const processAttackResult = async (result: CombatActionResponseDto, target: CombatantDto) => {
     if (!target?.id) {
-      console.error('[useCombat] processAttackResult: invalid target', target);
+      console.error("[useCombat] processAttackResult: invalid target", target);
       return;
     }
 
@@ -165,9 +165,9 @@ export function useCombat() {
     const targetAfter = result.combatState?.enemies?.find((e: CombatantDto) => e.id === target.id);
 
     const attackView = {
-      attacker: prevPlayer?.name ?? 'Vous',
+      attacker: prevPlayer?.name ?? "Vous",
       attackerId: prevPlayer?.id,
-      target: target.name ?? 'cible inconnue',
+      target: target.name ?? "cible inconnue",
       targetId: target.id,
       hit: result.damageTotal !== undefined || !!result.damageDiceResult,
       damageRoll: result.damageDiceResult?.rolls ?? [],
@@ -198,7 +198,7 @@ export function useCombat() {
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
     if (!combatStore.canPlayerAct) {
-      gameStore.appendMessage('system', `⚠️ Vous n'avez plus de points d'action disponibles.`);
+      gameStore.appendMessage("system", `⚠️ Vous n'avez plus de points d'action disponibles.`);
       return;
     }
 
@@ -227,23 +227,23 @@ export function useCombat() {
     narrative: string,
   ): Promise<void> => {
     if (!victory) {
-      gameStore.appendMessage('system', '💀 Combat terminé.');
+      gameStore.appendMessage("system", "💀 Combat terminé.");
       combatStore.clearCombat();
       // Navigate back to messages view
       await router.push({
-        name: 'game',
+        name: "game",
         params: { characterId: currentCharacter.value?.characterId },
       });
       return;
     }
 
     // Victory path: show modal with narrative first
-    gameStore.appendMessage('system', '🏆 Victoire!');
+    gameStore.appendMessage("system", "🏆 Victoire!");
     if (enemiesDefeated.length > 0) {
-      gameStore.appendMessage('system', `⚔️ Ennemis vaincus: ${enemiesDefeated.join(', ')}`);
+      gameStore.appendMessage("system", `⚔️ Ennemis vaincus: ${enemiesDefeated.join(", ")}`);
     }
     if (xpGained > 0) {
-      gameStore.appendMessage('system', `✨ XP gagnés: ${xpGained}`);
+      gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
       characterStore.updateXp(xpGained);
     }
 
@@ -258,7 +258,7 @@ export function useCombat() {
     isCombatEndModalOpen.value = false;
     combatStore.clearCombat();
     await router.push({
-      name: 'game',
+      name: "game",
       params: { characterId: currentCharacter.value?.characterId },
     });
   };
@@ -272,16 +272,16 @@ export function useCombat() {
 
     try {
       await combatApi.flee(character.characterId);
-      gameStore.appendMessage('system', '🏃 Vous avez fui le combat.');
+      gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view
       await router.push({
-        name: 'game',
+        name: "game",
         params: { characterId: character.characterId },
       });
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to flee';
-      gameStore.appendMessage('system', `❌ Erreur: ${errorMsg}`);
+      const errorMsg = err instanceof Error ? err.message : "Failed to flee";
+      gameStore.appendMessage("system", `❌ Erreur: ${errorMsg}`);
     }
   };
 
@@ -294,7 +294,7 @@ export function useCombat() {
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({
-        name: 'game-combat',
+        name: "game-combat",
         params: { characterId: currentCharacter.value.characterId },
       });
     }

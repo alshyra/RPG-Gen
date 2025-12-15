@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { SpellMeta, SpellMetaSchema } from './SpellMeta.js';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import { SpellMeta, SpellMetaSchema } from "./SpellMeta.js";
 
 @Schema({ timestamps: true })
 export class SpellDefinition {
@@ -31,13 +31,13 @@ export class SpellDefinition {
   @Prop({ required: true })
   components: string;
 
-  @Prop({ default: 'instantaneous' })
+  @Prop({ default: "instantaneous" })
   duration: string;
 
   @Prop({ default: false })
   ritual: boolean;
 
-  @Prop({ default: '' })
+  @Prop({ default: "" })
   description: string;
 
   @Prop({

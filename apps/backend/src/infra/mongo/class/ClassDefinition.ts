@@ -1,8 +1,8 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { ClassLevel, ClassLevelSchema } from './ClassLevel.js';
-import CombatOption, { CombatOptionSchema } from './CombatOption.js';
-import { AllowedSpellsByLevel } from './AllowedSpellsByLevel.js';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import { ClassLevel, ClassLevelSchema } from "./ClassLevel.js";
+import CombatOption, { CombatOptionSchema } from "./CombatOption.js";
+import { AllowedSpellsByLevel } from "./AllowedSpellsByLevel.js";
 
 @Schema({ timestamps: true })
 export class ClassDefinition {
@@ -15,10 +15,10 @@ export class ClassDefinition {
   @Prop({ required: true })
   hitDie: string; // e.g., '1d8', '1d12'
 
-  @Prop({ default: '' })
+  @Prop({ default: "" })
   primarySpellAbility?: string; // e.g., 'Cha', 'Sag', or null for non-spellcasters
 
-  @Prop({ default: '' })
+  @Prop({ default: "" })
   description: string;
 
   @Prop({ required: true })

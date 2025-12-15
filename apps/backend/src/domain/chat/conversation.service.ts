@@ -1,18 +1,18 @@
-import { Content } from '@google/genai';
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Schema } from 'mongoose';
-import { AbilityScoresResponseDto } from '../character/dto/AbilityScoresResponseDto.js';
-import { calculateArmorClass } from '../character/armor-class.util.js';
-import type { CharacterResponseDto } from '../character/dto/CharacterResponseDto.js';
-import type { ChatMessageDto } from './dto/ChatMessageDto.js';
-import type { GameInstructionDto } from './dto/GameInstructionDto.js';
-import { ChatHistory, ChatHistoryDocument } from '../../infra/mongo/chat/ChatHistory.js';
+import { Content } from "@google/genai";
+import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, Schema } from "mongoose";
+import { AbilityScoresResponseDto } from "../character/dto/AbilityScoresResponseDto.js";
+import { calculateArmorClass } from "../character/armor-class.util.js";
+import type { CharacterResponseDto } from "../character/dto/CharacterResponseDto.js";
+import type { ChatMessageDto } from "./dto/ChatMessageDto.js";
+import type { GameInstructionDto } from "./dto/GameInstructionDto.js";
+import { ChatHistory, ChatHistoryDocument } from "../../infra/mongo/chat/ChatHistory.js";
 
 @Injectable()
 export class ConversationService {
   private readonly logger = new Logger(ConversationService.name);
-  private readonly MAX_MESSAGES = Number(process.env.CONV_MAX_MESSAGES || '60');
+  private readonly MAX_MESSAGES = Number(process.env.CONV_MAX_MESSAGES || "60");
 
   constructor(
     @InjectModel(ChatHistory.name) private chatHistoryModel: Model<ChatHistoryDocument>,
@@ -30,13 +30,13 @@ export class ConversationService {
       .exec();
     if (!history) return undefined;
     const availablesTypes = [
-      'roll',
-      'xp',
-      'hp',
-      'spell',
-      'inventory',
-      'combat_start',
-      'combat_end',
+      "roll",
+      "xp",
+      "hp",
+      "spell",
+      "inventory",
+      "combat_start",
+      "combat_end",
     ];
     return history.messages.map(msg => ({
       role: msg.role,
@@ -55,33 +55,33 @@ export class ConversationService {
     const armorClass = calculateArmorClass(character);
     let summary = `
     Character Information:
-    - Name: ${character.name || 'Unknown'}
-    - Race: ${typeof character.race === 'object' ? character.race?.name : character.race || 'Unknown'}
-    - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(', ') || 'None'}
-    - Gender: ${character.gender || 'Unknown'}
-    - HP: ${character.hp || character.hpMax || 'Unknown'}/${character.hpMax || 'Unknown'}
+    - Name: ${character.name || "Unknown"}
+    - Race: ${typeof character.race === "object" ? character.race?.name : character.race || "Unknown"}
+    - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(", ") || "None"}
+    - Gender: ${character.gender || "Unknown"}
+    - HP: ${character.hp || character.hpMax || "Unknown"}/${character.hpMax || "Unknown"}
     - AC: ${armorClass}
     - XP: ${character.totalXp || 0}
     - Level: 1
     - Stats:
-      * STR ${this.getAbilityScore(character, 'Str')}
-      * DEX ${this.getAbilityScore(character, 'Dex')}
-      * CON ${this.getAbilityScore(character, 'Con')}
-      * INT ${this.getAbilityScore(character, 'Int')}
-      * WIS ${this.getAbilityScore(character, 'Wis')}
-      * CHA ${this.getAbilityScore(character, 'Cha')}
+      * STR ${this.getAbilityScore(character, "Str")}
+      * DEX ${this.getAbilityScore(character, "Dex")}
+      * CON ${this.getAbilityScore(character, "Con")}
+      * INT ${this.getAbilityScore(character, "Int")}
+      * WIS ${this.getAbilityScore(character, "Wis")}
+      * CHA ${this.getAbilityScore(character, "Cha")}
     `;
 
     if (character.spells && character.spells.length > 0) {
       summary += `- Spells Known: ${character.spells
         .map(s => `${s.name} (Lvl ${s.level})`)
-        .join(', ')}\n`;
+        .join(", ")}\n`;
     }
 
     if (character.inventory && character.inventory.length > 0) {
       summary += `- Inventory: ${character.inventory
         .map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`)
-        .join(', ')}\n`;
+        .join(", ")}\n`;
     }
 
     return summary;
@@ -89,13 +89,13 @@ export class ConversationService {
 
   formatHistoryForModel(chatMessage: ChatMessageDto): Content {
     return {
-      role: chatMessage.role === 'assistant' ? 'model' : chatMessage.role,
+      role: chatMessage.role === "assistant" ? "model" : chatMessage.role,
       parts: [{ text: chatMessage.narrative }],
     };
   }
 
   async append(userId: string, characterId: string, msg: ChatMessageDto) {
-    if (!msg.narrative) throw new InternalServerErrorException('Message narrative is required');
+    if (!msg.narrative) throw new InternalServerErrorException("Message narrative is required");
     const history = await this.chatHistoryModel.findOne({
       userId,
       characterId,
@@ -106,8 +106,8 @@ export class ConversationService {
         characterId,
         messages: [
           {
-            role: msg.role ?? 'user',
-            narrative: msg.narrative || 'Something went wrong.',
+            role: msg.role ?? "user",
+            narrative: msg.narrative || "Something went wrong.",
             instructions: msg.instructions || [],
           },
         ],
@@ -120,8 +120,8 @@ export class ConversationService {
     }
     this.logger.log(`💬 Saved new history to character ${characterId})`, msg);
     history.messages.push({
-      role: msg.role ?? 'user',
-      narrative: msg.narrative || 'Something went wrong.',
+      role: msg.role ?? "user",
+      narrative: msg.narrative || "Something went wrong.",
       instructions: msg.instructions || [],
     });
     history.lastUpdated = new Date();

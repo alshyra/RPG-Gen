@@ -3,14 +3,14 @@
  * These provide runtime type checking without using `as` casts
  */
 
-import type { components } from './api-types';
+import type { components } from "./api-types";
 
-type RollInstructionMessageDto = components['schemas']['RollInstructionMessageDto'];
-type HpInstructionMessageDto = components['schemas']['HpInstructionMessageDto'];
-type XpInstructionMessageDto = components['schemas']['XpInstructionMessageDto'];
-type SpellInstructionMessageDto = components['schemas']['SpellInstructionMessageDto'];
-type InventoryInstructionMessageDto = components['schemas']['InventoryInstructionMessageDto'];
-type CombatStartInstructionMessageDto = components['schemas']['CombatStartInstructionMessageDto'];
+type RollInstructionMessageDto = components["schemas"]["RollInstructionMessageDto"];
+type HpInstructionMessageDto = components["schemas"]["HpInstructionMessageDto"];
+type XpInstructionMessageDto = components["schemas"]["XpInstructionMessageDto"];
+type SpellInstructionMessageDto = components["schemas"]["SpellInstructionMessageDto"];
+type InventoryInstructionMessageDto = components["schemas"]["InventoryInstructionMessageDto"];
+type CombatStartInstructionMessageDto = components["schemas"]["CombatStartInstructionMessageDto"];
 // combat_end instruction removed (server returns CombatEndResponseDto via API)
 // CombatRollRequestDto and CombatRollResultDto no longer exist in the schema
 
@@ -29,7 +29,7 @@ export type GameInstructionDto =
  * Type guard for unknown instruction objects
  */
 function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+  return typeof value === "object" && value !== null;
 }
 
 /**
@@ -37,7 +37,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
  */
 export function isRollInstruction(instruction: unknown): instruction is RollInstructionMessageDto {
   return (
-    isObject(instruction) && instruction.type === 'roll' && typeof instruction.dices === 'string'
+    isObject(instruction) && instruction.type === "roll" && typeof instruction.dices === "string"
   );
 }
 
@@ -45,14 +45,14 @@ export function isRollInstruction(instruction: unknown): instruction is RollInst
  * Type guard for HP instructions
  */
 export function isHpInstruction(instruction: unknown): instruction is HpInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'hp' && typeof instruction.hp === 'number';
+  return isObject(instruction) && instruction.type === "hp" && typeof instruction.hp === "number";
 }
 
 /**
  * Type guard for XP instructions
  */
 export function isXpInstruction(instruction: unknown): instruction is XpInstructionMessageDto {
-  return isObject(instruction) && instruction.type === 'xp' && typeof instruction.xp === 'number';
+  return isObject(instruction) && instruction.type === "xp" && typeof instruction.xp === "number";
 }
 
 /**
@@ -62,7 +62,7 @@ export function isSpellInstruction(
   instruction: unknown,
 ): instruction is SpellInstructionMessageDto {
   return (
-    isObject(instruction) && instruction.type === 'spell' && typeof instruction.name === 'string'
+    isObject(instruction) && instruction.type === "spell" && typeof instruction.name === "string"
   );
 }
 
@@ -74,8 +74,8 @@ export function isInventoryInstruction(
 ): instruction is InventoryInstructionMessageDto {
   return (
     isObject(instruction) &&
-    instruction.type === 'inventory' &&
-    typeof instruction.name === 'string'
+    instruction.type === "inventory" &&
+    typeof instruction.name === "string"
   );
 }
 
@@ -87,7 +87,7 @@ export function isCombatStartInstruction(
 ): instruction is CombatStartInstructionMessageDto {
   return (
     isObject(instruction) &&
-    instruction.type === 'combat_start' &&
+    instruction.type === "combat_start" &&
     Array.isArray(instruction.combat_start)
   );
 }
@@ -109,4 +109,4 @@ export function isGameInstruction(instruction: unknown): instruction is GameInst
 /**
  * Combat phase type (matches backend CombatPhase)
  */
-export type CombatPhase = 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
+export type CombatPhase = "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";

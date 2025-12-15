@@ -9,14 +9,14 @@
  * - Appending new messages to history (creating new history when none exists)
  * - Validation errors when appending messages with missing narrative
  */
-import test from 'ava';
-import { Types } from 'mongoose';
-import { ConversationService } from '../../src/domain/chat/conversation.service.js';
-import { ChatModule } from '../../src/modules/chat.module.js';
-import { closeTestApp, createTestApp } from '../helpers/test-app.js';
-import history from '../mocks/history.js';
+import test from "ava";
+import { Types } from "mongoose";
+import { ConversationService } from "../../src/domain/chat/conversation.service.js";
+import { ChatModule } from "../../src/modules/chat.module.js";
+import { closeTestApp, createTestApp } from "../helpers/test-app.js";
+import history from "../mocks/history.js";
 
-const TEST_USER_ID = '507f1f77bcf86cd799439011';
+const TEST_USER_ID = "507f1f77bcf86cd799439011";
 
 /**
  * Transform extended JSON history mock (with $oid/$date placeholders)
@@ -42,24 +42,24 @@ async function setup() {
 }
 
 // Test: append creates new history when none exists
-test('Conversation Integration append creates new history and stores message', async t => {
+test("Conversation Integration append creates new history and stores message", async t => {
   const { ctx, convService } = await setup();
-  await convService.append(TEST_USER_ID, 'char-append-1', {
-    role: 'user',
-    narrative: 'Hello world',
+  await convService.append(TEST_USER_ID, "char-append-1", {
+    role: "user",
+    narrative: "Hello world",
     instructions: [],
   });
 
-  const hist = await convService.getHistoryMessages(TEST_USER_ID, 'char-append-1');
+  const hist = await convService.getHistoryMessages(TEST_USER_ID, "char-append-1");
   t.truthy(hist);
   t.is(hist?.length, 1);
-  t.is(hist?.[0].role, 'user');
-  t.is(hist?.[0].narrative, 'Hello world');
+  t.is(hist?.[0].role, "user");
+  t.is(hist?.[0].narrative, "Hello world");
   await closeTestApp(ctx);
 });
 
 // Test: append appends to existing history
-test('Conversation Integration append appends message to existing history', async t => {
+test("Conversation Integration append appends message to existing history", async t => {
   const { ctx, convService } = await setup();
   const cid = history.characterId;
 
@@ -67,7 +67,7 @@ test('Conversation Integration append appends message to existing history', asyn
   const transformedHistory = transformHistoryMock(history);
   // Update userId to TEST_USER_ID for this test
   transformedHistory.userId = new Types.ObjectId(TEST_USER_ID);
-  await ctx.mongoConnection.collection('chathistories').insertOne(transformedHistory);
+  await ctx.mongoConnection.collection("chathistories").insertOne(transformedHistory);
 
   // Verify history was seeded (should have 1 message)
   const initialHist = await convService.getHistoryMessages(TEST_USER_ID, cid);
@@ -76,28 +76,28 @@ test('Conversation Integration append appends message to existing history', asyn
 
   // Append a new message
   await convService.append(TEST_USER_ID, cid, {
-    role: 'assistant',
-    narrative: 'Reply message',
+    role: "assistant",
+    narrative: "Reply message",
     instructions: [],
   });
 
   const hist = await convService.getHistoryMessages(TEST_USER_ID, cid);
   t.truthy(hist);
   t.is(hist?.length, 2);
-  t.is(hist?.[1].role, 'assistant');
-  t.is(hist?.[1].narrative, 'Reply message');
+  t.is(hist?.[1].role, "assistant");
+  t.is(hist?.[1].narrative, "Reply message");
   await closeTestApp(ctx);
 });
 
 // Test: append without narrative throws
-test('Conversation Integration append without narrative throws', async t => {
+test("Conversation Integration append without narrative throws", async t => {
   const { ctx, convService } = await setup();
   try {
     await t.throwsAsync(() =>
-      convService.append(TEST_USER_ID, 'char-append-3', {
-        role: 'user',
+      convService.append(TEST_USER_ID, "char-append-3", {
+        role: "user",
         // narrative missing / empty should trigger validation
-        narrative: '',
+        narrative: "",
         instructions: [],
       }),
     );

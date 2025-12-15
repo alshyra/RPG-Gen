@@ -1,10 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 /**
  * Request body for avatar generation
  */
 export class CharacterIdBodyDto {
-  @ApiProperty({ description: 'UUID of the character' })
+  @ApiProperty({ description: "UUID of the character" })
   characterId: string;
 }
 
@@ -12,7 +12,7 @@ export class CharacterIdBodyDto {
  * Response from avatar generation
  */
 export class AvatarResponseDto {
-  @ApiProperty({ description: 'Generated avatar image URL or base64 data' })
+  @ApiProperty({ description: "Generated avatar image URL or base64 data" })
   imageUrl: string;
 }
 
@@ -20,12 +20,12 @@ export class AvatarResponseDto {
  * Request body for image generation
  */
 export class ImageRequestDto {
-  @ApiPropertyOptional({ description: 'API token (optional)' })
+  @ApiPropertyOptional({ description: "API token (optional)" })
   token?: string;
 
-  @ApiProperty({ description: 'Image prompt' })
+  @ApiProperty({ description: "Image prompt" })
   prompt: string;
 
-  @ApiPropertyOptional({ description: 'Model to use' })
+  @ApiPropertyOptional({ description: "Model to use" })
   model?: string;
 }

@@ -1,18 +1,18 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ItemDefinitionDto } from '../../domain/item-definition/item-definition.dto.js';
-import { CharacterService } from '../../domain/character/character.service.js';
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { ItemDefinitionDto } from "../../domain/item-definition/item-definition.dto.js";
+import { CharacterService } from "../../domain/character/character.service.js";
 import {
   CreateInventoryItemDto,
   type CharacterResponseDto,
-} from '../../domain/character/dto/index.js';
-import type { InventoryInstructionMessageDto } from '../../domain/chat/dto/index.js';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
-import type { CombatStateDto } from '../../domain/combat/dto/CombatStateDto.js';
-import { DiceService } from '../../domain/dice/dice.service.js';
-import { ItemDefinitionService } from '../../domain/item-definition/item-definition.service.js';
+} from "../../domain/character/dto/index.js";
+import type { InventoryInstructionMessageDto } from "../../domain/chat/dto/index.js";
+import { CombatAppService } from "../../domain/combat/combat.app.service.js";
+import type { CombatStateDto } from "../../domain/combat/dto/CombatStateDto.js";
+import { DiceService } from "../../domain/dice/dice.service.js";
+import { ItemDefinitionService } from "../../domain/item-definition/item-definition.service.js";
 
 interface ConsumableMetaWithHeal {
-  type: 'consumable';
+  type: "consumable";
   usable?: boolean;
   combatUsable?: boolean;
   restUsable?: boolean;
@@ -20,8 +20,8 @@ interface ConsumableMetaWithHeal {
 }
 
 function isConsumableWithHeal(meta: unknown): meta is ConsumableMetaWithHeal {
-  if (!meta || typeof meta !== 'object') return false;
-  return (meta as Record<string, unknown>).type === 'consumable';
+  if (!meta || typeof meta !== "object") return false;
+  return (meta as Record<string, unknown>).type === "consumable";
 }
 
 export interface UseItemResult {
@@ -56,21 +56,21 @@ export class ItemOrchestrator {
     instr: InventoryInstructionMessageDto,
   ) {
     if (!instr.itemId)
-      throw new BadRequestException('itemId is required for inventory instructions');
-    if (instr.action === 'add') {
+      throw new BadRequestException("itemId is required for inventory instructions");
+    if (instr.action === "add") {
       const item = await this.itemDefinitionService.findByDefinitionId(instr.itemId);
       if (!item) throw new BadRequestException(`Item definition ${instr.itemId} not found`);
       const newInventoryItem = new CreateInventoryItemDto(item);
       return this.characterService.addInventoryItem(userId, characterId, newInventoryItem);
     }
-    if (instr.action === 'remove') {
+    if (instr.action === "remove") {
       return this.characterService.removeInventoryItem(
         userId,
         characterId,
         instr.itemId,
         instr.quantity ?? 1,
       );
-    } else if (instr.action === 'use') {
+    } else if (instr.action === "use") {
       return this.useItem(userId, characterId, instr.itemId);
     }
   }
@@ -83,7 +83,7 @@ export class ItemOrchestrator {
     meta: ConsumableMetaWithHeal,
     inCombat: boolean,
   ): void {
-    const itemName = itemLike?.name || 'Item';
+    const itemName = itemLike?.name || "Item";
     if (inCombat && meta.combatUsable === false) {
       throw new BadRequestException(`${itemName} cannot be used in combat`);
     }
@@ -155,14 +155,14 @@ export class ItemOrchestrator {
     this.logger.log(`Item ${itemDefinition.name} consumed by character ${characterId}`);
 
     if (healAmount > 0 && inCombat)
-      return this.applyHealInCombat(characterId, healAmount, itemDefinition.name ?? 'Item');
+      return this.applyHealInCombat(characterId, healAmount, itemDefinition.name ?? "Item");
     if (healAmount > 0)
       return this.applyHealOutOfCombat(
         userId,
         characterId,
         character,
         healAmount,
-        itemDefinition.name ?? 'Item',
+        itemDefinition.name ?? "Item",
       );
 
     const updatedCharacter = await this.characterService.findByCharacterId(userId, characterId);

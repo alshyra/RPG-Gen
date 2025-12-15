@@ -1,5 +1,5 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsString, IsOptional } from "class-validator";
 
 export class SpellMetaDto {
   @ApiPropertyOptional({ description: 'Damage dice notation (e.g., "1d6")' })
@@ -7,35 +7,35 @@ export class SpellMetaDto {
   @IsString()
   damageDice?: string;
 
-  @ApiPropertyOptional({ description: 'Type of damage (fire, cold, etc.)' })
+  @ApiPropertyOptional({ description: "Type of damage (fire, cold, etc.)" })
   @IsOptional()
   @IsString()
   damageType?: string;
 
-  @ApiPropertyOptional({ description: 'Saving throw type (DEX, CON, etc.)' })
+  @ApiPropertyOptional({ description: "Saving throw type (DEX, CON, etc.)" })
   @IsOptional()
   @IsString()
   saveType?: string;
 
   @ApiPropertyOptional({
-    description: 'Attack type',
-    enum: ['melee', 'ranged', 'spell'],
+    description: "Attack type",
+    enum: ["melee", "ranged", "spell"],
   })
   @IsOptional()
   @IsString()
-  attackType?: 'melee' | 'ranged' | 'spell';
+  attackType?: "melee" | "ranged" | "spell";
 
-  @ApiPropertyOptional({ description: 'School of magic' })
+  @ApiPropertyOptional({ description: "School of magic" })
   @IsOptional()
   @IsString()
   school?: string;
 
-  @ApiPropertyOptional({ description: 'Area of effect description' })
+  @ApiPropertyOptional({ description: "Area of effect description" })
   @IsOptional()
   @IsString()
   areaOfEffect?: string;
 
-  @ApiPropertyOptional({ description: 'Scaling description' })
+  @ApiPropertyOptional({ description: "Scaling description" })
   @IsOptional()
   @IsString()
   scaling?: string;

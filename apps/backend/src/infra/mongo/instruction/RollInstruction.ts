@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema } from "@nestjs/mongoose";
 
 @Schema({ _id: false })
 export class RollInstruction {
@@ -29,7 +29,7 @@ export class RollInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: ['advantage', 'disadvantage', 'none'],
+    enum: ["advantage", "disadvantage", "none"],
   })
-  advantage?: 'advantage' | 'disadvantage' | 'none';
+  advantage?: "advantage" | "disadvantage" | "none";
 }

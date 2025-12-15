@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import type { CombatStateDto } from '../dto/CombatStateDto.js';
+import { Injectable } from "@nestjs/common";
+import type { CombatStateDto } from "../dto/CombatStateDto.js";
 
 @Injectable()
 export class ActionEconomyService {

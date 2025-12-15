@@ -8,15 +8,15 @@ import type {
   MovementRequestDto,
   MovementResponseDto,
   CombatantDto,
-} from '@rpg-gen/shared';
-import { apiClient, getData } from './index.js';
+} from "@rpg-gen/shared";
+import { apiClient, getData } from "./index.js";
 
 export const combatApi = {
   /**
    * Start a new combat session
    */
   async startCombat(characterId: string, request: CombatStartRequestDto): Promise<CombatStateDto> {
-    const response = await apiClient.POST('/api/combat/{characterId}/start', {
+    const response = await apiClient.POST("/api/combat/{characterId}/start", {
       params: { path: { characterId } },
       body: request,
     });
@@ -30,7 +30,7 @@ export const combatApi = {
     characterId: string,
     action: CombatActionRequestDto,
   ): Promise<CombatActionResponseDto> {
-    const response = await apiClient.POST('/api/combat/{characterId}/action', {
+    const response = await apiClient.POST("/api/combat/{characterId}/action", {
       params: { path: { characterId } },
       body: action,
     });
@@ -45,7 +45,7 @@ export const combatApi = {
     target: CombatantDto,
     spellName?: string,
   ): Promise<CombatActionResponseDto> {
-    const actionType = spellName ? 'cast-spell' : 'attack';
+    const actionType = spellName ? "cast-spell" : "attack";
     return this.executeAction(characterId, {
       actionType,
       targetId: target.id,
@@ -57,7 +57,7 @@ export const combatApi = {
    * Get current combat status
    */
   async getStatus(characterId: string): Promise<CombatStateDto> {
-    const response = await apiClient.GET('/api/combat/{characterId}/status', {
+    const response = await apiClient.GET("/api/combat/{characterId}/status", {
       params: { path: { characterId } },
     });
     return getData(response);
@@ -67,7 +67,7 @@ export const combatApi = {
    * End player turn and trigger enemy actions
    */
   async endTurn(characterId: string): Promise<EndPlayerTurnResponseDto> {
-    const response = await apiClient.POST('/api/combat/{characterId}/end-turn', {
+    const response = await apiClient.POST("/api/combat/{characterId}/end-turn", {
       params: { path: { characterId } },
     });
     return getData(response);
@@ -77,7 +77,7 @@ export const combatApi = {
    * Flee from combat
    */
   async flee(characterId: string): Promise<CombatEndResponseDto> {
-    const response = await apiClient.POST('/api/combat/{characterId}/flee', {
+    const response = await apiClient.POST("/api/combat/{characterId}/flee", {
       params: { path: { characterId } },
     });
     return getData(response);
@@ -87,7 +87,7 @@ export const combatApi = {
    * Move combatant on grid
    */
   async move(characterId: string, movement: MovementRequestDto): Promise<MovementResponseDto> {
-    const response = await apiClient.POST('/api/combat/{characterId}/move', {
+    const response = await apiClient.POST("/api/combat/{characterId}/move", {
       params: { path: { characterId } },
       body: movement,
     });

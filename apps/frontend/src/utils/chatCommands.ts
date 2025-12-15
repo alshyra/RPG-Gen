@@ -1,19 +1,19 @@
-import { InventoryItemDto, SpellResponseDto } from '@rpg-gen/shared';
+import { InventoryItemDto, SpellResponseDto } from "@rpg-gen/shared";
 import type {
   CommandType,
   ParsedCommand,
   CommandDefinition,
   ArgumentSuggestion,
   SuggestionResult,
-} from '@/interfaces';
+} from "@/interfaces";
 
-export type SuggestionType = 'command' | 'argument';
+export type SuggestionType = "command" | "argument";
 export type { ParsedCommand, CommandDefinition, ArgumentSuggestion, SuggestionResult, CommandType };
 
 const COMMAND_REGEX = /^\/(\w+)\s+(.+)$/;
 const COMMAND_WITH_SPACE_REGEX = /^\/(\w+)\s*(.*)$/;
 
-const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'use'];
+const VALID_COMMANDS: CommandType[] = ["cast", "equip", "use"];
 
 /**
  * Available commands with their descriptions for autocompletion
@@ -21,24 +21,24 @@ const VALID_COMMANDS: CommandType[] = ['cast', 'equip', 'use'];
  */
 export const COMMAND_DEFINITIONS: CommandDefinition[] = [
   {
-    command: 'cast',
-    description: 'Lancer un sort',
-    usage: '/cast <sort>',
+    command: "cast",
+    description: "Lancer un sort",
+    usage: "/cast <sort>",
   },
   {
-    command: 'equip',
-    description: 'Équiper un objet',
-    usage: '/equip <objet>',
+    command: "equip",
+    description: "Équiper un objet",
+    usage: "/equip <objet>",
   },
   {
-    command: 'attack',
-    description: 'Attaquer une cible',
-    usage: '/attack <cible>',
+    command: "attack",
+    description: "Attaquer une cible",
+    usage: "/attack <cible>",
   },
   {
-    command: 'use',
-    description: 'Utiliser un objet',
-    usage: '/use <objet>',
+    command: "use",
+    description: "Utiliser un objet",
+    usage: "/use <objet>",
   },
 ];
 
@@ -51,7 +51,7 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
   const trimmed = input.trim().toLowerCase();
 
   // Only provide suggestions if input starts with /
-  if (!trimmed.startsWith('/')) {
+  if (!trimmed.startsWith("/")) {
     return [];
   }
 
@@ -59,12 +59,12 @@ export const getCommandSuggestions = (input: string): CommandDefinition[] => {
   const partial = trimmed.slice(1);
 
   // If empty after slash, return all commands
-  if (partial === '') {
+  if (partial === "") {
     return COMMAND_DEFINITIONS;
   }
 
   // Check if input contains a space (command has argument)
-  if (partial.includes(' ')) {
+  if (partial.includes(" ")) {
     return [];
   }
 
@@ -83,10 +83,10 @@ export const parseActiveCommand = (
 } => {
   const trimmed = input.trim().toLowerCase();
 
-  if (!trimmed.startsWith('/')) {
+  if (!trimmed.startsWith("/")) {
     return {
       command: null,
-      argumentPartial: '',
+      argumentPartial: "",
     };
   }
 
@@ -94,7 +94,7 @@ export const parseActiveCommand = (
   if (!match) {
     return {
       command: null,
-      argumentPartial: '',
+      argumentPartial: "",
     };
   }
 
@@ -104,13 +104,13 @@ export const parseActiveCommand = (
   if (!VALID_COMMANDS.includes(type as CommandType)) {
     return {
       command: null,
-      argumentPartial: '',
+      argumentPartial: "",
     };
   }
 
   return {
     command: type as CommandType,
-    argumentPartial: arg || '',
+    argumentPartial: arg || "",
   };
 };
 
@@ -133,7 +133,7 @@ export const getArgumentSuggestions = (
   const partial = partialArg.toLowerCase();
 
   switch (command) {
-    case 'cast':
+    case "cast":
       // Filter spells by character level (spell level must be <= character level)
       return spells
         .filter(spell => {
@@ -145,47 +145,47 @@ export const getArgumentSuggestions = (
         .map(spell => ({
           name: spell.name,
           description: spell.description || `Niveau ${spell.level || 0}`,
-          type: 'spell' as const,
+          type: "spell" as const,
         }));
 
-    case 'use':
+    case "use":
       // Only show usable/consumable items for /use command
       return inventory
         .filter(item => {
           // Check if meta is consumable type with usable property
           const isUsable =
             item.meta &&
-            'type' in item.meta &&
-            item.meta.type === 'consumable' &&
+            "type" in item.meta &&
+            item.meta.type === "consumable" &&
             !!(item.meta as { usable?: boolean }).usable;
-          const matchesName = (item.name ?? '').toLowerCase().includes(partial);
+          const matchesName = (item.name ?? "").toLowerCase().includes(partial);
           return isUsable && matchesName;
         })
         .filter(item => item.name !== undefined)
         .map(item => ({
           name: item.name,
           description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
-          type: 'item' as const,
+          type: "item" as const,
         }));
 
-    case 'equip':
+    case "equip":
       // Show all items for /equip command
       return inventory
-        .filter(item => (item.name ?? '').toLowerCase().includes(partial))
+        .filter(item => (item.name ?? "").toLowerCase().includes(partial))
         .filter(item => item.name !== undefined)
         .map(item => ({
           name: item.name,
           description: item.description || ((item.qty ?? 1) > 1 ? `x${item.qty}` : undefined),
-          type: 'item' as const,
+          type: "item" as const,
         }));
 
-    case 'attack':
+    case "attack":
       // For attack, suggest valid targets (enemy names) if provided
       return validTargets
         .filter(name => name.toLowerCase().includes(partial))
         .map(name => ({
           name,
-          type: 'target' as const,
+          type: "target" as const,
         }));
 
     default:
@@ -210,9 +210,9 @@ export const getAllSuggestions = (
   const trimmed = input.trim();
 
   // Not a command
-  if (!trimmed.startsWith('/')) {
+  if (!trimmed.startsWith("/")) {
     return {
-      type: 'command',
+      type: "command",
       commandSuggestions: [],
       argumentSuggestions: [],
     };
@@ -224,7 +224,7 @@ export const getAllSuggestions = (
   // Just "/" or partial command without space - show command suggestions
   if (!hasSpaceAfterCommand) {
     return {
-      type: 'command',
+      type: "command",
       commandSuggestions: getCommandSuggestions(input),
       argumentSuggestions: [],
     };
@@ -243,7 +243,7 @@ export const getAllSuggestions = (
       validTargets,
     );
     return {
-      type: 'argument',
+      type: "argument",
       commandSuggestions: [],
       argumentSuggestions,
       activeCommand: command,
@@ -251,7 +251,7 @@ export const getAllSuggestions = (
   }
 
   return {
-    type: 'command',
+    type: "command",
     commandSuggestions: [],
     argumentSuggestions: [],
   };
@@ -260,7 +260,7 @@ export const getAllSuggestions = (
 /**
  * Check if the input is a valid chat command
  */
-export const isCommand = (input: string): boolean => input.startsWith('/');
+export const isCommand = (input: string): boolean => input.startsWith("/");
 
 /**
  * Parse a chat command string into a structured command object

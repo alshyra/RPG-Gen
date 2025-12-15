@@ -1,68 +1,68 @@
-import { mount } from '@vue/test-utils';
-import { describe, it, expect, vi } from 'vitest';
-import { ref } from 'vue';
+import { mount } from "@vue/test-utils";
+import { describe, it, expect, vi } from "vitest";
+import { ref } from "vue";
 
 // Route/mock helpers come from test/setup.ts vi.mock('vue-router')
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 
 // Mock character store and api
 const currentCharacter = ref({
-  characterId: 'c1',
+  characterId: "c1",
   classes: [
     {
-      name: 'Fighter',
+      name: "Fighter",
       level: 1,
     },
   ],
   scores: { Con: 12 },
-  name: 'Hero',
+  name: "Hero",
   inventory: [],
 });
 
-vi.mock('@/stores/characterStore', () => ({
+vi.mock("@/stores/characterStore", () => ({
   useCharacterStore: () => ({
     currentCharacter,
     updateCharacter: vi.fn(async () => {}),
   }),
 }));
 
-vi.mock('@/apis/characterApi', async () => ({
+vi.mock("@/apis/characterApi", async () => ({
   characterApi: {
-    generateAvatar: vi.fn(async (_: string) => 'data:image/png;base64,avatar'),
+    generateAvatar: vi.fn(async (_: string) => "data:image/png;base64,avatar"),
     getCharacterById: vi.fn(async (_: string) => ({
       ...currentCharacter.value,
-      portrait: 'data:image/png;base64,avatar',
+      portrait: "data:image/png;base64,avatar",
     })),
   },
 }));
 
-vi.mock('@/services/dndRulesService', () => ({
+vi.mock("@/services/dndRulesService", () => ({
   DnDRulesService: { calculateHpForLevel1: () => 10 },
 }));
 
-vi.mock('@/apis/chatApi', async () => ({
+vi.mock("@/apis/chatApi", async () => ({
   chatApi: { startGame: vi.fn(async () => []) },
 }));
 
-describe('CharacterCreatorWizard finish flow', () => {
-  it('generates avatar, refreshes store and navigates to game', async () => {
+describe("CharacterCreatorWizard finish flow", () => {
+  it("generates avatar, refreshes store and navigates to game", async () => {
     // ensure we are on last step
     const route = useRoute();
-    route.params.step = '7';
-    route.params.characterId = 'c1';
+    route.params.step = "7";
+    route.params.characterId = "c1";
 
-    const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
+    const wrapper = mount((await import("./CharacterCreatorWizard.vue")).default, {
       global: {
         stubs: [
-          'StepBasicInfo',
-          'StepRaceClass',
-          'StepAbilityScores',
-          'StepSkills',
-          'StepSpells',
-          'StepInventory',
-          'StepAvatar',
-          'UiLoader',
-          'UiButton',
+          "StepBasicInfo",
+          "StepRaceClass",
+          "StepAbilityScores",
+          "StepSkills",
+          "StepSpells",
+          "StepInventory",
+          "StepAvatar",
+          "UiLoader",
+          "UiButton",
         ],
       },
     });
@@ -74,39 +74,39 @@ describe('CharacterCreatorWizard finish flow', () => {
     expect((currentCharacter.value as any).portrait).toBeTruthy();
   });
 
-  it('shows full page loader while avatar and first prompt are prepared', async () => {
+  it("shows full page loader while avatar and first prompt are prepared", async () => {
     const route = useRoute() as any;
-    route.params.step = '7';
-    route.params.characterId = 'c1';
+    route.params.step = "7";
+    route.params.characterId = "c1";
 
     // Override mocks to return pending promises so we can assert the loader is visible
-    const api = await import('@/apis/characterApi');
+    const api = await import("@/apis/characterApi");
     let genResolve: (v?: any) => void = () => {};
     const genPromise = new Promise<string>(resolve => {
       genResolve = resolve;
     });
     (api.characterApi.generateAvatar as any).mockImplementation(() => genPromise);
 
-    const conv = await import('@/apis/chatApi');
+    const conv = await import("@/apis/chatApi");
     let startResolve: (v?: any) => void = () => {};
     const startPromise = new Promise<any>(resolve => {
       startResolve = resolve;
     });
     (conv.chatApi.startGame as any).mockImplementation(() => startPromise);
 
-    const wrapper = mount((await import('./CharacterCreatorWizard.vue')).default, {
+    const wrapper = mount((await import("./CharacterCreatorWizard.vue")).default, {
       global: {
         stubs: [
-          'StepBasicInfo',
-          'StepRaceClass',
-          'StepAbilityScores',
-          'StepSkills',
-          'StepSpells',
-          'StepInventory',
-          'StepAvatar',
-          'UiLoader',
-          'UiButton',
-          'FullPageLoader',
+          "StepBasicInfo",
+          "StepRaceClass",
+          "StepAbilityScores",
+          "StepSkills",
+          "StepSpells",
+          "StepInventory",
+          "StepAvatar",
+          "UiLoader",
+          "UiButton",
+          "FullPageLoader",
         ],
       },
     });
@@ -118,15 +118,15 @@ describe('CharacterCreatorWizard finish flow', () => {
 
     // While pending, isLoading flag should be true and the full page loader should be present
     expect((wrapper.vm as any).isLoading).toBe(true);
-    expect(wrapper.find('full-page-loader-stub').exists()).toBe(true);
+    expect(wrapper.find("full-page-loader-stub").exists()).toBe(true);
 
     // Resolve pending operations so finishCreation can complete
-    genResolve?.('data:image/png;base64,avatar');
+    genResolve?.("data:image/png;base64,avatar");
     startResolve?.([]);
     await promise;
 
     // isLoading should be false after completion and the loader removed
     expect((wrapper.vm as any).isLoading).toBe(false);
-    expect(wrapper.find('full-page-loader-stub').exists()).toBe(false);
+    expect(wrapper.find("full-page-loader-stub").exists()).toBe(false);
   });
 });

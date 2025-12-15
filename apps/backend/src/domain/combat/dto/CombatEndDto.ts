@@ -1,12 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsNumber, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsArray, IsBoolean, IsNumber, IsOptional } from "class-validator";
 
 export class CombatEndDto {
-  @ApiProperty({ description: 'Victory state' })
+  @ApiProperty({ description: "Victory state" })
   @IsBoolean()
   victory: boolean;
 
-  @ApiProperty({ description: 'XP gained' })
+  @ApiProperty({ description: "XP gained" })
   @IsNumber()
   xp_gained: number;
 
@@ -14,11 +14,11 @@ export class CombatEndDto {
   @IsNumber()
   player_hp: number;
 
-  @ApiProperty({ description: 'Enemies that were defeated' })
+  @ApiProperty({ description: "Enemies that were defeated" })
   @IsArray()
   enemies_defeated: string[];
 
-  @ApiPropertyOptional({ description: 'Flee indicator' })
+  @ApiPropertyOptional({ description: "Flee indicator" })
   @IsOptional()
   @IsBoolean()
   fled?: boolean;

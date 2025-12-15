@@ -13,31 +13,31 @@
 // (`gemini-schemas.ts`), so the schema here only enforces a basic, shallow JSON shape
 // that helps the model return valid JSON without creating a too-deep GenerationConfig.
 export const geminiResponseJsonSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     narrative: {
-      type: 'string',
-      description: 'Narrative text describing the scene and events',
+      type: "string",
+      description: "Narrative text describing the scene and events",
     },
     // Keep 'instructions' shallow: each item must be an object with required 'type'.
     // Full instruction structure is validated later using Zod on the response.
     instructions: {
-      type: 'array',
-      description: 'Game instructions to execute',
+      type: "array",
+      description: "Game instructions to execute",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          type: { type: 'string' },
+          type: { type: "string" },
           // allow a small free-form payload for the instruction; keep it shallow
           payload: {
-            type: 'object',
+            type: "object",
             additionalProperties: true,
           },
         },
-        required: ['type'],
+        required: ["type"],
         additionalProperties: true,
       },
     },
   },
-  required: ['narrative'],
+  required: ["narrative"],
 };

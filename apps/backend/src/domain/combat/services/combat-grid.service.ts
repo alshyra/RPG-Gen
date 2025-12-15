@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { GridPositionDto } from '../dto/GridPositionDto.js';
+import { Injectable, Logger } from "@nestjs/common";
+import { GridPositionDto } from "../dto/GridPositionDto.js";
 
 export interface CombatantPosition {
   combatantId: string;
@@ -90,27 +90,27 @@ export class CombatGridService {
   ): { valid: boolean; error?: string } {
     const state = this.gridStates.get(combatId);
     if (!state) {
-      return { valid: false, error: 'Combat session not found' };
+      return { valid: false, error: "Combat session not found" };
     }
 
     const combatant = state.positions.get(combatantId);
     if (!combatant) {
-      return { valid: false, error: 'Combatant not found' };
+      return { valid: false, error: "Combatant not found" };
     }
 
     if (path.length === 0) {
-      return { valid: false, error: 'Empty path' };
+      return { valid: false, error: "Empty path" };
     }
 
     // Check first position matches current position
     const current = combatant.position;
     if (path[0].x !== current.x || path[0].y !== current.y) {
-      return { valid: false, error: 'Path must start at current position' };
+      return { valid: false, error: "Path must start at current position" };
     }
 
     // Calculate movement cost - check for 'dashed' effect
     const distance = path.length - 1; // number of moves
-    const hasDashed = activeEffects.includes('dashed');
+    const hasDashed = activeEffects.includes("dashed");
     const maxDistance = hasDashed ? combatant.speed * 2 : combatant.speed;
 
     if (distance > maxDistance) {
@@ -155,12 +155,12 @@ export class CombatGridService {
   applyMovement(combatId: string, combatantId: string, newPosition: GridPositionDto): void {
     const state = this.gridStates.get(combatId);
     if (!state) {
-      throw new Error('Combat session not found');
+      throw new Error("Combat session not found");
     }
 
     const combatant = state.positions.get(combatantId);
     if (!combatant) {
-      throw new Error('Combatant not found');
+      throw new Error("Combatant not found");
     }
 
     // Clear old occupancy

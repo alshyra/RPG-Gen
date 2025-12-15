@@ -1,13 +1,13 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ItemDefinition } from '../../infra/mongo/item/ItemDefinition.js';
-import { ItemDefinitionService } from '../item-definition/item-definition.service.js';
-import { SpellDefinitionService } from '../spell-definition/spell-definition.service.js';
-import type { CharacterResponseDto } from './dto/CharacterResponseDto.js';
-import { CreateInventoryItemDto } from './dto/CreateInventoryItemDto.js';
-import { UpdateCharacterRequestDto } from './dto/UpdateCharacterRequestDto.js';
-import { Character, CharacterDocument, Item } from '../../infra/mongo/index.js';
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { ItemDefinition } from "../../infra/mongo/item/ItemDefinition.js";
+import { ItemDefinitionService } from "../item-definition/item-definition.service.js";
+import { SpellDefinitionService } from "../spell-definition/spell-definition.service.js";
+import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
+import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
+import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
+import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
 
 @Injectable()
 export class CharacterService {
@@ -38,7 +38,7 @@ export class CharacterService {
       totalXp: 0,
       proficiency: 2,
       world,
-      state: 'draft',
+      state: "draft",
       isDeceased: false,
       inventory: [],
       scores: this.DEFAULT_BASE_SCORES,
@@ -102,23 +102,23 @@ export class CharacterService {
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
     if (updates.spells !== undefined) {
       // Strict validation: spells must be an array of fully-formed spell objects
-      if (!Array.isArray(updates.spells)) throw new BadRequestException('spells must be an array');
+      if (!Array.isArray(updates.spells)) throw new BadRequestException("spells must be an array");
 
       // Validate all entries using functional style to comply with lint rules (avoid 'for')
       const hasInvalid = updates.spells.some(
         s =>
           !s ||
-          typeof s.definitionId !== 'string' ||
-          typeof s.name !== 'string' ||
-          typeof s.level !== 'number' ||
+          typeof s.definitionId !== "string" ||
+          typeof s.name !== "string" ||
+          typeof s.level !== "number" ||
           s.meta === undefined ||
           s.meta === null ||
-          typeof s.meta !== 'object',
+          typeof s.meta !== "object",
       );
 
       if (hasInvalid) {
         throw new BadRequestException(
-          'spells entries must include definitionId:string, name:string, level:number and meta:object',
+          "spells entries must include definitionId:string, name:string, level:number and meta:object",
         );
       }
 
@@ -128,12 +128,12 @@ export class CharacterService {
     if (updates.selectedCombatProficiencies !== undefined) {
       // Validate selectedCombatProficiencies is an array of strings
       if (!Array.isArray(updates.selectedCombatProficiencies)) {
-        throw new BadRequestException('selectedCombatProficiencies must be an array');
+        throw new BadRequestException("selectedCombatProficiencies must be an array");
       }
 
-      const hasInvalid = updates.selectedCombatProficiencies.some(id => typeof id !== 'string');
+      const hasInvalid = updates.selectedCombatProficiencies.some(id => typeof id !== "string");
       if (hasInvalid) {
-        throw new BadRequestException('all selectedCombatProficiencies entries must be strings');
+        throw new BadRequestException("all selectedCombatProficiencies entries must be strings");
       }
 
       updateDoc.selectedCombatProficiencies = updates.selectedCombatProficiencies;
@@ -201,7 +201,7 @@ export class CharacterService {
 
     character.isDeceased = true;
     character.diedAt = new Date();
-    character.deathLocation = deathLocation || 'Unknown location';
+    character.deathLocation = deathLocation || "Unknown location";
 
     const saved = await character.save();
     this.logger.log(`Character marked as deceased: ${saved.name} (${saved.characterId})`);
@@ -241,14 +241,14 @@ export class CharacterService {
       characterId,
     });
     if (!character) throw new NotFoundException(`Character ${characterId} not found`);
-    if (!definitionId) throw new BadRequestException('definitionId is required');
+    if (!definitionId) throw new BadRequestException("definitionId is required");
 
     // Resolve definition and ensure it's a weapon
     const def = await this.itemDefinitionService.findByDefinitionId(definitionId).catch(() => null);
     if (!def) throw new NotFoundException(`Item definition ${definitionId} not found`);
     const meta = def.meta || {};
-    if ((meta.type || '').toString().toLowerCase() !== 'weapon') {
-      throw new BadRequestException('Only weapon items can be equipped via this endpoint');
+    if ((meta.type || "").toString().toLowerCase() !== "weapon") {
+      throw new BadRequestException("Only weapon items can be equipped via this endpoint");
     }
 
     // Find existing inventory item with this definitionId
@@ -261,7 +261,7 @@ export class CharacterService {
         name: def.name || definitionId,
         definitionId: def.definitionId,
         qty: 1,
-        description: def.description || '',
+        description: def.description || "",
         equipped: false,
         meta: def.meta || {},
       };
@@ -273,8 +273,8 @@ export class CharacterService {
     // Ensure only the targeted weapon is equipped (no for loop)
     character.inventory = (character.inventory || []).map(it => {
       try {
-        const type = (it?.meta?.type || '').toString().toLowerCase();
-        if (type === 'weapon') {
+        const type = (it?.meta?.type || "").toString().toLowerCase();
+        if (type === "weapon") {
           return {
             ...it,
             equipped: it.definitionId === definitionId,

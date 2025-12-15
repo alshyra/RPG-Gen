@@ -1,8 +1,8 @@
-import { ABILITIES, DEFAULT_BASE_SCORES } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
-import { CharacterResponseDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import { ABILITIES, DEFAULT_BASE_SCORES } from "@/services/dndRulesService";
+import { useCharacterStore } from "@/stores/characterStore";
+import { CharacterResponseDto } from "@rpg-gen/shared";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 export const COST = {
   8: 0,
@@ -39,7 +39,7 @@ const useAbilityScores = () => {
     ability: (typeof ABILITIES)[number],
     newValue: number,
     maxBudget = 27,
-    initialScores?: CharacterResponseDto['scores'],
+    initialScores?: CharacterResponseDto["scores"],
   ) => {
     if (!currentCharacter.value) return { allowed: false };
 

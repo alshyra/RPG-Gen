@@ -1,15 +1,15 @@
-import tailwindcss from '@tailwindcss/vite';
-import vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'cypress';
-import { fileURLToPath, URL } from 'node:url';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import tailwindcss from "@tailwindcss/vite";
+import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "cypress";
+import { fileURLToPath, URL } from "node:url";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:80',
-    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'cypress/support/e2e.ts',
+    baseUrl: process.env.CYPRESS_BASE_URL || "http://localhost:80",
+    specPattern: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+    supportFile: "cypress/support/e2e.ts",
     video: process.env.CI ? true : false,
     screenshotOnRunFailure: true,
     viewportWidth: 1280,
@@ -28,25 +28,25 @@ export default defineConfig({
       // provide tasks to call the repository's e2e DB helper script
       const execFileAsync = promisify(execFile);
 
-      on('task', {
+      on("task", {
         async prepareE2EDb(opts) {
           const args: string[] = [];
           if (opts?.count) {
-            args.push('--count', String(opts.count));
+            args.push("--count", String(opts.count));
           }
           if (opts?.url) {
-            args.push('--url', opts.url);
+            args.push("--url", opts.url);
           }
           if (opts?.ready) {
-            args.push('--ready');
+            args.push("--ready");
           }
           if (opts?.withChat) {
-            args.push('--with-chat');
+            args.push("--with-chat");
           }
           try {
             const { stdout } = await execFileAsync(
-              'node',
-              ['../../scripts/prepare-e2e-db.mjs', ...args],
+              "node",
+              ["../../scripts/prepare-e2e-db.mjs", ...args],
               { cwd: config.projectRoot },
             );
             return {
@@ -65,9 +65,9 @@ export default defineConfig({
           if (!characterId)
             return {
               ok: false,
-              error: 'missing characterId',
+              error: "missing characterId",
             };
-          const base = process.env.CYPRESS_BASE_URL || 'http://localhost:80';
+          const base = process.env.CYPRESS_BASE_URL || "http://localhost:80";
           const url = `${base}/api/combat/${characterId}/start`;
           try {
             // When starting combat from tests we provide a small default payload
@@ -75,21 +75,21 @@ export default defineConfig({
             const defaultBody = JSON.stringify({
               combat_start: [
                 {
-                  name: 'Training Dummy',
+                  name: "Training Dummy",
                   hp: 10,
                   ac: 10,
                   attack_bonus: 1,
-                  damage_dice: '1d4',
+                  damage_dice: "1d4",
                 },
               ],
             });
-            await execFileAsync('curl', [
-              '-s',
-              '-X',
-              'POST',
-              '-H',
-              'Content-Type: application/json',
-              '-d',
+            await execFileAsync("curl", [
+              "-s",
+              "-X",
+              "POST",
+              "-H",
+              "Content-Type: application/json",
+              "-d",
               defaultBody,
               url,
             ]);
@@ -103,14 +103,14 @@ export default defineConfig({
         },
 
         async cleanupE2EDb(opts) {
-          const args: string[] = ['--cleanup'];
+          const args: string[] = ["--cleanup"];
           if (opts?.url) {
-            args.push('--url', opts.url);
+            args.push("--url", opts.url);
           }
           try {
             const { stdout } = await execFileAsync(
-              'node',
-              ['../../scripts/prepare-e2e-db.mjs', ...args],
+              "node",
+              ["../../scripts/prepare-e2e-db.mjs", ...args],
               { cwd: config.projectRoot },
             );
             return {
@@ -131,8 +131,8 @@ export default defineConfig({
   },
   component: {
     devServer: {
-      framework: 'vue',
-      bundler: 'vite',
+      framework: "vue",
+      bundler: "vite",
       viteConfig: {
         plugins: [tailwindcss(), vue()],
         server: {
@@ -140,12 +140,12 @@ export default defineConfig({
         },
         resolve: {
           alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url)),
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
           },
         },
       },
     },
-    specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'cypress/support/component.ts',
+    specPattern: "cypress/component/**/*.cy.{js,jsx,ts,tsx}",
+    supportFile: "cypress/support/component.ts",
   },
 });

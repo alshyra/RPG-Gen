@@ -1,16 +1,16 @@
-import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
-import { CharacterService } from '../domain/character/character.service.js';
-import { ConversationService } from '../domain/chat/conversation.service.js';
-import { ChatMessageDto } from '../domain/chat/dto/index.js';
-import type { RPGRequest } from '../global.types.js';
-import { GeminiTextService } from '../infra/external/gemini-text.service.js';
-import { ChatOrchestrator } from '../orchestrators/index.js';
+import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import { CharacterService } from "../domain/character/character.service.js";
+import { ConversationService } from "../domain/chat/conversation.service.js";
+import { ChatMessageDto } from "../domain/chat/dto/index.js";
+import type { RPGRequest } from "../global.types.js";
+import { GeminiTextService } from "../infra/external/gemini-text.service.js";
+import { ChatOrchestrator } from "../orchestrators/index.js";
 
-@ApiTags('chat')
-@Controller('chat')
+@ApiTags("chat")
+@Controller("chat")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class ChatController {
@@ -22,25 +22,25 @@ export class ChatController {
     private readonly chatOrchestrator: ChatOrchestrator,
   ) {}
 
-  @Post(':characterId')
-  @ApiOperation({ summary: 'Send prompt to Gemini (chat)' })
+  @Post(":characterId")
+  @ApiOperation({ summary: "Send prompt to Gemini (chat)" })
   @ApiBody({ type: ChatMessageDto })
   @ApiResponse({
     status: 201,
-    description: 'Chat message (assistant) with narrative and instructions',
+    description: "Chat message (assistant) with narrative and instructions",
     type: ChatMessageDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request',
+    description: "Invalid request",
   })
   @ApiResponse({
     status: 500,
-    description: 'Chat processing failed',
+    description: "Chat processing failed",
   })
   async chat(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() chatMessageDto: ChatMessageDto,
   ) {
     const { user } = req;
@@ -67,22 +67,22 @@ export class ChatController {
     return this.chatOrchestrator.getGMResponse(userId, characterId, chatMessageDto.narrative);
   }
 
-  @Get('/:characterId/history')
-  @ApiOperation({ summary: 'Get conversation history for a character' })
+  @Get("/:characterId/history")
+  @ApiOperation({ summary: "Get conversation history for a character" })
   @ApiResponse({
     status: 200,
-    description: 'Conversation history',
+    description: "Conversation history",
     type: [ChatMessageDto],
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request',
+    description: "Invalid request",
   })
   @ApiResponse({
     status: 500,
-    description: 'History retrieval failed',
+    description: "History retrieval failed",
   })
-  async getHistory(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+  async getHistory(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     this.logger.log(`Fetching chat history for characterId ${characterId}...`);
     const { user } = req;
     const userId = user._id.toString();
@@ -104,7 +104,7 @@ export class ChatController {
   ): Promise<void> {
     if (!messages?.length) return;
     const lastMessage = messages[messages.length - 1]; // last message
-    const combatInstrs = lastMessage?.instructions?.find(i => i.type === 'combat_start');
+    const combatInstrs = lastMessage?.instructions?.find(i => i.type === "combat_start");
     if (!combatInstrs) return;
 
     await this.chatOrchestrator.processInstructions(userId, characterId, [combatInstrs]);

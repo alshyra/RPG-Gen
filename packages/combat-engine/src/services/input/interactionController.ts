@@ -1,5 +1,5 @@
-import type * as PIXI from 'pixi.js';
-import type { UnitData } from '../../types/combat-types';
+import type * as PIXI from "pixi.js";
+import type { UnitData } from "../../types/combat-types";
 
 export const setupInteractionController = (
   app: PIXI.Application,
@@ -121,9 +121,9 @@ export const setupInteractionController = (
   };
 
   // Listen for mouse movement to show path preview
-  app.stage.on('pointermove', onStageMove);
+  app.stage.on("pointermove", onStageMove);
   // Listen for clicks on stage (background) for destination selection
-  app.stage.on('pointerdown', onStageClick);
+  app.stage.on("pointerdown", onStageClick);
 
   return {
     selectUnit,

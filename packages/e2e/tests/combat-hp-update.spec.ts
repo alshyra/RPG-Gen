@@ -1,12 +1,12 @@
-import { test, expect } from '@playwright/test';
-import { mockAuthentication } from '../helpers/auth';
-import { prepareE2EDb, cleanupE2EDb } from '../helpers/api';
+import { test, expect } from "@playwright/test";
+import { mockAuthentication } from "../helpers/auth";
+import { prepareE2EDb, cleanupE2EDb } from "../helpers/api";
 
 /**
  * Combat HP Visual Update Test
  * Verifies that HP bars update visually after attacks
  */
-test.describe('Combat HP Visual Updates', () => {
+test.describe("Combat HP Visual Updates", () => {
   test.beforeAll(async () => {
     await cleanupE2EDb();
     const result = await prepareE2EDb({
@@ -17,12 +17,12 @@ test.describe('Combat HP Visual Updates', () => {
     expect(result.ok).toBe(true);
   });
 
-  test.skip('should complete combat flow including HP updates', async ({ page }) => {
+  test.skip("should complete combat flow including HP updates", async ({ page }) => {
     await mockAuthentication(page);
 
     // Get character
-    const charactersPromise = page.waitForResponse('**/api/characters');
-    await page.goto('/home');
+    const charactersPromise = page.waitForResponse("**/api/characters");
+    await page.goto("/home");
     const charactersResponse = await charactersPromise;
     const chars = await charactersResponse.json();
     expect(chars.length).toBeGreaterThan(0);
@@ -30,12 +30,12 @@ test.describe('Combat HP Visual Updates', () => {
 
     // Navigate to game
     await page.goto(`/game/${charId}`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
 
     // Start combat via chat
     const chatInput = page.locator('textarea, input[type="text"]').last();
-    await chatInput.fill('je cherche un combat');
-    await chatInput.press('Enter');
+    await chatInput.fill("je cherche un combat");
+    await chatInput.press("Enter");
 
     // Wait for combat arena (Gemini processing + navigation)
     await page.waitForURL(new RegExp(`/game/${charId}/combat`), { timeout: 60000 });
@@ -64,7 +64,7 @@ test.describe('Combat HP Visual Updates', () => {
       await page.waitForTimeout(1500);
 
       // Verify no errors occurred
-      const hasError = await page.locator('text=/error|erreur/i').count();
+      const hasError = await page.locator("text=/error|erreur/i").count();
       expect(hasError).toBe(0);
     }
 

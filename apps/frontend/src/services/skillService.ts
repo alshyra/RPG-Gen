@@ -1,20 +1,20 @@
-import { CharacterResponseDto } from '@rpg-gen/shared';
-import { DnDRulesService } from './dndRulesService';
+import { CharacterResponseDto } from "@rpg-gen/shared";
+import { DnDRulesService } from "./dndRulesService";
 
 /**
  * Map ability names to their score keys in the character
  */
 const abilityMap: Record<string, string> = {
-  strength: 'Str',
-  dexterity: 'Dex',
-  constitution: 'Con',
-  intelligence: 'Int',
-  wisdom: 'Wis',
-  charisma: 'Cha',
+  strength: "Str",
+  dexterity: "Dex",
+  constitution: "Con",
+  intelligence: "Int",
+  wisdom: "Wis",
+  charisma: "Cha",
 };
 
 type Scores = Record<string, number>;
-import type { SkillEntry } from '@/interfaces';
+import type { SkillEntry } from "@/interfaces";
 
 /**
  * Calculate ability modifier from score
@@ -33,7 +33,7 @@ const findCharacterSkill = (
   skills: SkillEntry[] | undefined,
   skillName: string,
 ): SkillEntry | undefined =>
-  skills?.find(s => (s.name ?? '').toLowerCase() === skillName.toLowerCase());
+  skills?.find(s => (s.name ?? "").toLowerCase() === skillName.toLowerCase());
 
 /**
  * Find a skill in DnD rules (case-insensitive)
@@ -109,7 +109,7 @@ const handleSkillLookup = (
   const charSkill = findCharacterSkill(character.skills as SkillEntry[], skillName);
   if (!charSkill) return undefined;
 
-  if (typeof charSkill.modifier === 'number') return charSkill.modifier;
+  if (typeof charSkill.modifier === "number") return charSkill.modifier;
   return calculateSkillModifier(character, skillName) ?? charSkill.modifier ?? 0;
 };
 
@@ -126,7 +126,7 @@ export const getSkillBonus = (
 ): number => {
   if (!character) return 0;
 
-  const nameWithoutCheck = skillNameWithCheck.replace(' Check', '').trim();
+  const nameWithoutCheck = skillNameWithCheck.replace(" Check", "").trim();
   const abilitySkillMatch = nameWithoutCheck.match(/^(.+?)\s*\((.+?)\)$/u);
 
   if (abilitySkillMatch) {

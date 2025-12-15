@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 
 export interface GridPosition {
   gridX: number;
@@ -10,7 +10,7 @@ export interface UnitConfig {
   characterKey: string;
   position: GridPosition;
   stats: UnitStats;
-  team: 'player' | 'enemy';
+  team: "player" | "enemy";
   isPlayer?: boolean;
 }
 
@@ -35,22 +35,22 @@ export interface CombatConfig {
 }
 
 export type CombatEvent =
-  | { type: 'unit:moved'; unitId: string; from: GridPosition; to: GridPosition }
-  | { type: 'unit:attacked'; attackerId: string; targetId: string; damage: number }
-  | { type: 'unit:died'; unitId: string }
-  | { type: 'turn:changed'; currentTurn: 'player' | 'enemy' }
-  | { type: 'combat:ended'; winner: 'player' | 'enemy' };
+  | { type: "unit:moved"; unitId: string; from: GridPosition; to: GridPosition }
+  | { type: "unit:attacked"; attackerId: string; targetId: string; damage: number }
+  | { type: "unit:died"; unitId: string }
+  | { type: "turn:changed"; currentTurn: "player" | "enemy" }
+  | { type: "combat:ended"; winner: "player" | "enemy" };
 
 export type availableCharacterKeys =
-  | 'Archer-Green'
-  | 'Archer-Purple'
-  | 'Mage-Cyan'
-  | 'Mage-Red'
-  | 'Soldier-Blue'
-  | 'Soldier-Red'
-  | 'Soldier-Yellow'
-  | 'Warrior-Blue'
-  | 'Warrior-Red';
+  | "Archer-Green"
+  | "Archer-Purple"
+  | "Mage-Cyan"
+  | "Mage-Red"
+  | "Soldier-Blue"
+  | "Soldier-Red"
+  | "Soldier-Yellow"
+  | "Warrior-Blue"
+  | "Warrior-Red";
 
 // Interface pour stocker les données d'unité
 export interface UnitData {
@@ -91,11 +91,11 @@ export const GRID_CONFIG = {
 
 // Event types for external subscribers
 export type CombatEngineEventType =
-  | 'unit:clicked'
-  | 'unit:attacked'
-  | 'unit:died'
-  | 'unit:moved'
-  | 'turn:ended';
+  | "unit:clicked"
+  | "unit:attacked"
+  | "unit:died"
+  | "unit:moved"
+  | "turn:ended";
 
 export interface UnitClickedPayload {
   unitId: string;
@@ -118,11 +118,11 @@ export interface UnitAttackedPayload {
 }
 
 export interface CombatEngineEventPayload {
-  'unit:clicked': UnitClickedPayload;
-  'unit:attacked': UnitAttackedPayload;
-  'unit:died': { unitId: string };
-  'unit:moved': UnitMovedPayload;
-  'turn:ended': { roundNumber: number };
+  "unit:clicked": UnitClickedPayload;
+  "unit:attacked": UnitAttackedPayload;
+  "unit:died": { unitId: string };
+  "unit:moved": UnitMovedPayload;
+  "turn:ended": { roundNumber: number };
 }
 
 export type EventHandler<T extends CombatEngineEventType> = (

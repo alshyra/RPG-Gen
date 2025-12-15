@@ -1,18 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
-import type CombatOptionMeta from '../types/CombatOptionMeta.js';
-import { CombatOption } from 'src/infra/mongo/class/CombatOption.js';
+import { ApiProperty } from "@nestjs/swagger";
+import type CombatOptionMeta from "../types/CombatOptionMeta.js";
+import { CombatOption } from "src/infra/mongo/class/CombatOption.js";
 
 export class CombatOptionDto {
-  @ApiProperty({ description: 'Option id' })
+  @ApiProperty({ description: "Option id" })
   id: string;
 
-  @ApiProperty({ description: 'Display name' })
+  @ApiProperty({ description: "Display name" })
   name: string;
 
-  @ApiProperty({ description: 'Description' })
+  @ApiProperty({ description: "Description" })
   description: string;
 
-  @ApiProperty({ description: 'Additional metadata (typed)' })
+  @ApiProperty({ description: "Additional metadata (typed)" })
   meta: CombatOptionMeta;
 
   constructor(combatOption: CombatOption) {

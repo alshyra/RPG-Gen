@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 @Schema({ _id: false })
 export class ClassLevelFeature {
@@ -8,7 +8,7 @@ export class ClassLevelFeature {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ default: '' })
+  @Prop({ default: "" })
   description: string;
 
   @Prop({ type: Object, default: {} })

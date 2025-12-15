@@ -1,11 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { SpellDefinitionService } from '../spell-definition/spell-definition.service.js';
-import { ClassDefinitionService } from '../class-definition/class-definition.service.js';
-import type { LevelUpOptionsDto } from '../character/dto/LevelUpOptionsDto.js';
-import type { SpellResponseDto } from '../character/dto/SpellResponseDto.js';
-import CombatOption from 'src/infra/mongo/class/CombatOption.js';
-import { ClassDefinition } from 'src/infra/mongo/index.js';
-import { CombatOptionDto } from '../character/dto/CombatOptionDto.js';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { SpellDefinitionService } from "../spell-definition/spell-definition.service.js";
+import { ClassDefinitionService } from "../class-definition/class-definition.service.js";
+import type { LevelUpOptionsDto } from "../character/dto/LevelUpOptionsDto.js";
+import type { SpellResponseDto } from "../character/dto/SpellResponseDto.js";
+import CombatOption from "src/infra/mongo/class/CombatOption.js";
+import { ClassDefinition } from "src/infra/mongo/index.js";
+import { CombatOptionDto } from "../character/dto/CombatOptionDto.js";
 
 @Injectable()
 export class ClassesService {
@@ -24,7 +24,7 @@ export class ClassesService {
     const levelData = classData.levels.find(l => l.level === level);
     if (!levelData) {
       throw new NotFoundException(
-        `Level ${level} not found for class ${classData.name ?? 'unknown'}`,
+        `Level ${level} not found for class ${classData.name ?? "unknown"}`,
       );
     }
     return levelData;

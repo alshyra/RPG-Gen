@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 /**
  * Combat Engine E2E Tests
  * Tests the combat engine package in isolation using its dev server
  */
 
-test.describe('Combat Engine - Canvas Rendering', () => {
-  test('should render canvas with correct dimensions', async ({ page }) => {
-    await page.goto('/');
+test.describe("Combat Engine - Canvas Rendering", () => {
+  test("should render canvas with correct dimensions", async ({ page }) => {
+    await page.goto("/");
 
     // Wait for combat arena to be visible
     const arena = page.locator('[data-cy="combat-arena"]');
@@ -18,7 +18,7 @@ test.describe('Combat Engine - Canvas Rendering', () => {
     await expect(canvasContainer).toBeVisible();
 
     // Wait for PIXI canvas to be created
-    const canvas = canvasContainer.locator('canvas');
+    const canvas = canvasContainer.locator("canvas");
     await expect(canvas).toBeVisible({ timeout: 5000 });
 
     // Verify canvas dimensions (12 cols × 64px = 768, 9 rows × 64px = 576)
@@ -34,8 +34,8 @@ test.describe('Combat Engine - Canvas Rendering', () => {
     }
   });
 
-  test('should display grid with tiles and lines', async ({ page }) => {
-    await page.goto('/');
+  test("should display grid with tiles and lines", async ({ page }) => {
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
@@ -49,13 +49,13 @@ test.describe('Combat Engine - Canvas Rendering', () => {
   });
 });
 
-test.describe('Combat Engine - Unit Display', () => {
-  test('should create and display player unit', async ({ page }) => {
-    await page.goto('/');
+test.describe("Combat Engine - Unit Display", () => {
+  test("should create and display player unit", async ({ page }) => {
+    await page.goto("/");
 
     // Capture console messages to verify units are being created
     const consoleMsgs: string[] = [];
-    page.on('console', msg => {
+    page.on("console", msg => {
       consoleMsgs.push(msg.text());
     });
 
@@ -83,16 +83,16 @@ test.describe('Combat Engine - Unit Display', () => {
     }
   });
 
-  test('should create and display enemy unit', async ({ page }) => {
+  test("should create and display enemy unit", async ({ page }) => {
     // Capture errors and logs
     const errors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
+    page.on("console", msg => {
+      if (msg.type() === "error") {
         errors.push(msg.text());
       }
     });
 
-    await page.goto('/');
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
@@ -112,9 +112,9 @@ test.describe('Combat Engine - Unit Display', () => {
   });
 });
 
-test.describe('Combat Engine - Drag and Drop', () => {
-  test('should allow dragging player sprite to adjacent cell', async ({ page }) => {
-    await page.goto('/');
+test.describe("Combat Engine - Drag and Drop", () => {
+  test("should allow dragging player sprite to adjacent cell", async ({ page }) => {
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
@@ -165,8 +165,8 @@ test.describe('Combat Engine - Drag and Drop', () => {
     expect(stillVisible).toBe(true);
   });
 
-  test('should show reachable cells overlay on drag start', async ({ page }) => {
-    await page.goto('/');
+  test("should show reachable cells overlay on drag start", async ({ page }) => {
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
@@ -198,8 +198,8 @@ test.describe('Combat Engine - Drag and Drop', () => {
     expect(stillVisible).toBe(true);
   });
 
-  test('should move sprite to valid cell within move range', async ({ page }) => {
-    await page.goto('/');
+  test("should move sprite to valid cell within move range", async ({ page }) => {
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });
@@ -244,9 +244,9 @@ test.describe('Combat Engine - Drag and Drop', () => {
   });
 });
 
-test.describe('Combat Engine - Health Bars', () => {
-  test('should display health bars for units', async ({ page }) => {
-    await page.goto('/');
+test.describe("Combat Engine - Health Bars", () => {
+  test("should display health bars for units", async ({ page }) => {
+    await page.goto("/");
 
     const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
     await expect(canvas).toBeVisible({ timeout: 5000 });

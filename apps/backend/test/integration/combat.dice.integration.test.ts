@@ -1,9 +1,9 @@
-import test from 'ava';
-import util from 'util';
-import { DiceService } from '../../src/domain/dice/dice.service.js';
-import { CombatDiceResultDto } from '../../src/domain/dice/dto/CombatDiceResultDto.js';
-import { CombatModule } from '../../src/modules/combat.module.js';
-import { closeTestApp, createTestApp } from '../helpers/test-app.js';
+import test from "ava";
+import util from "util";
+import { DiceService } from "../../src/domain/dice/dice.service.js";
+import { CombatDiceResultDto } from "../../src/domain/dice/dto/CombatDiceResultDto.js";
+import { CombatModule } from "../../src/modules/combat.module.js";
+import { closeTestApp, createTestApp } from "../helpers/test-app.js";
 
 // Helper to convert simple roll arrays into DiceResultDto objects (matching expected output)
 function makeDiceResult(rolls: number[]): any {
@@ -14,7 +14,7 @@ function makeDiceResult(rolls: number[]): any {
   };
 }
 
-test('rollDamage computes correct damageTotal for non-crit with damage bonus', async t => {
+test("rollDamage computes correct damageTotal for non-crit with damage bonus", async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);
@@ -23,7 +23,7 @@ test('rollDamage computes correct damageTotal for non-crit with damage bonus', a
       showHidden: true,
       depth: null,
     });
-    console.error('Error while setting up test app (non-crit):', inspected);
+    console.error("Error while setting up test app (non-crit):", inspected);
     throw err;
   }
 
@@ -34,11 +34,11 @@ test('rollDamage computes correct damageTotal for non-crit with damage bonus', a
     const sequence = [makeDiceResult([4])];
     (diceService as any).rollDiceExpr = () => sequence.shift();
 
-    const result = diceService.rollDamage('1d6', false, 2) as CombatDiceResultDto;
+    const result = diceService.rollDamage("1d6", false, 2) as CombatDiceResultDto;
 
-    t.is(result.isCrit, false, 'isCrit should be false for non-crit');
-    t.is(result.damageTotal, 6, 'damageTotal should be base(4) + bonus(2) = 6');
-    t.deepEqual(result.rolls, [4], 'rolls should contain the base roll');
+    t.is(result.isCrit, false, "isCrit should be false for non-crit");
+    t.is(result.damageTotal, 6, "damageTotal should be base(4) + bonus(2) = 6");
+    t.deepEqual(result.rolls, [4], "rolls should contain the base roll");
     // restore
     (diceService as any).rollDiceExpr = original;
   } finally {
@@ -46,7 +46,7 @@ test('rollDamage computes correct damageTotal for non-crit with damage bonus', a
   }
 });
 
-test('rollDamage computes correct damageTotal for critical (extra dice)', async t => {
+test("rollDamage computes correct damageTotal for critical (extra dice)", async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);
@@ -55,7 +55,7 @@ test('rollDamage computes correct damageTotal for critical (extra dice)', async 
       showHidden: true,
       depth: null,
     });
-    console.error('Error while setting up test app (crit):', inspected);
+    console.error("Error while setting up test app (crit):", inspected);
     throw err;
   }
 
@@ -66,11 +66,11 @@ test('rollDamage computes correct damageTotal for critical (extra dice)', async 
     const sequence = [makeDiceResult([5]), makeDiceResult([3])];
     (diceService as any).rollDiceExpr = () => sequence.shift();
 
-    const result = diceService.rollDamage('1d6', true, 2) as CombatDiceResultDto;
+    const result = diceService.rollDamage("1d6", true, 2) as CombatDiceResultDto;
 
-    t.is(result.isCrit, true, 'isCrit should be true for crit');
-    t.is(result.damageTotal, 10, 'damageTotal should be base(5)+extra(3)+bonus(2) = 10');
-    t.deepEqual(result.rolls, [5], 'rolls should contain the base roll');
+    t.is(result.isCrit, true, "isCrit should be true for crit");
+    t.is(result.damageTotal, 10, "damageTotal should be base(5)+extra(3)+bonus(2) = 10");
+    t.deepEqual(result.rolls, [5], "rolls should contain the base roll");
     // We intentionally do not assert on extra rolls inside `rolls` (service might fold extra in a different field).
     // restore
     (diceService as any).rollDiceExpr = original;
@@ -79,7 +79,7 @@ test('rollDamage computes correct damageTotal for critical (extra dice)', async 
   }
 });
 
-test('rollDamage computes correct damageTotal for multi-dice critical (multiple rolls)', async t => {
+test("rollDamage computes correct damageTotal for multi-dice critical (multiple rolls)", async t => {
   let ctx;
   try {
     ctx = await createTestApp([CombatModule]);
@@ -88,7 +88,7 @@ test('rollDamage computes correct damageTotal for multi-dice critical (multiple 
       showHidden: true,
       depth: null,
     });
-    console.error('Error while setting up test app (multi-dice):', inspected);
+    console.error("Error while setting up test app (multi-dice):", inspected);
     throw err;
   }
 
@@ -101,11 +101,11 @@ test('rollDamage computes correct damageTotal for multi-dice critical (multiple 
     const sequence = [makeDiceResult([3, 4]), makeDiceResult([2, 3])];
     (diceService as any).rollDiceExpr = () => sequence.shift();
 
-    const result = diceService.rollDamage('2d6', true, 1) as CombatDiceResultDto;
+    const result = diceService.rollDamage("2d6", true, 1) as CombatDiceResultDto;
 
-    t.is(result.isCrit, true, 'isCrit should be true for crit');
-    t.is(result.damageTotal, 13, 'damageTotal should be 7 + 5 + 1 = 13');
-    t.deepEqual(result.rolls, [3, 4], 'rolls should contain the base rolls');
+    t.is(result.isCrit, true, "isCrit should be true for crit");
+    t.is(result.damageTotal, 13, "damageTotal should be 7 + 5 + 1 = 13");
+    t.deepEqual(result.rolls, [3, 4], "rolls should contain the base rolls");
     (diceService as any).rollDiceExpr = original;
   } finally {
     await closeTestApp(ctx);

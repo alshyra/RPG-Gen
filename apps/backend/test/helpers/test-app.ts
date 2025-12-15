@@ -2,15 +2,15 @@
  * Test application bootstrap utilities for integration tests.
  * Uses MongoMemoryServer for isolated, in-memory MongoDB instances.
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { MongooseModule } from '@nestjs/mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import path from 'path';
-import os from 'os';
-import fs from 'fs';
-import type { INestApplication } from '@nestjs/common';
-import type { Connection } from 'mongoose';
-import { getConnectionToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from "@nestjs/testing";
+import { MongooseModule } from "@nestjs/mongoose";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import path from "path";
+import os from "os";
+import fs from "fs";
+import type { INestApplication } from "@nestjs/common";
+import type { Connection } from "mongoose";
+import { getConnectionToken } from "@nestjs/mongoose";
 
 export interface TestAppContext {
   app: INestApplication;
@@ -25,7 +25,7 @@ export interface TestAppContext {
  * @param overrides - Optional provider overrides for mocking services
  */
 export async function createTestApp(
-  imports: Parameters<typeof Test.createTestingModule>[0]['imports'],
+  imports: Parameters<typeof Test.createTestingModule>[0]["imports"],
   overrides?: {
     provide: unknown;
     useValue: unknown;

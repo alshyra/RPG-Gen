@@ -1,42 +1,42 @@
-import { mount } from '@vue/test-utils';
-import { describe, it, expect } from 'vitest';
-import UiModal from '../src/UiModal.vue';
+import { mount } from "@vue/test-utils";
+import { describe, it, expect } from "vitest";
+import UiModal from "../src/UiModal.vue";
 
-describe('UiModal', () => {
-  it('renders title in header when provided and emits confirm/cancel', async () => {
+describe("UiModal", () => {
+  it("renders title in header when provided and emits confirm/cancel", async () => {
     const wrapper = mount(UiModal, {
       props: {
         isOpen: true,
-        title: 'Hello Title',
+        title: "Hello Title",
       },
     });
 
-    expect(wrapper.text()).toContain('Hello Title');
+    expect(wrapper.text()).toContain("Hello Title");
 
     const confirm = wrapper.get('[data-cy="modal-confirm"]');
-    await confirm.trigger('click');
-    expect(wrapper.emitted()).toHaveProperty('confirm');
-    expect(wrapper.emitted()).toHaveProperty('close');
+    await confirm.trigger("click");
+    expect(wrapper.emitted()).toHaveProperty("confirm");
+    expect(wrapper.emitted()).toHaveProperty("close");
 
     const cancel = wrapper.get('[data-cy="modal-cancel"]');
-    await cancel.trigger('click');
-    expect(wrapper.emitted()).toHaveProperty('cancel');
+    await cancel.trigger("click");
+    expect(wrapper.emitted()).toHaveProperty("cancel");
   });
 
-  it('header slot overrides title', () => {
+  it("header slot overrides title", () => {
     const wrapper = mount(UiModal, {
       props: {
         isOpen: true,
-        title: 'ignored',
+        title: "ignored",
       },
       slots: { header: '<div data-test="hdr">Slot header</div>' },
     });
 
     expect(wrapper.find('[data-test="hdr"]').exists()).toBe(true);
-    expect(wrapper.text()).not.toContain('ignored');
+    expect(wrapper.text()).not.toContain("ignored");
   });
 
-  it('footer slot overrides default actions', () => {
+  it("footer slot overrides default actions", () => {
     const wrapper = mount(UiModal, {
       props: { isOpen: true },
       slots: { footer: '<div data-test="custom-foot">My footer</div>' },

@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
+import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import {
   CombatActionRequestDto,
   CombatActionResponseDto,
@@ -10,11 +10,11 @@ import {
   EndPlayerTurnResponseDto,
   MovementRequestDto,
   MovementResponseDto,
-} from '../domain/combat/dto/index.js';
-import type { RPGRequest } from '../global.types.js';
-import { CombatOrchestrator } from '../orchestrators/combat/index.js';
-import { CombatMovementOrchestrator } from '../orchestrators/combat/combat-movement.orchestrator.js';
-import { CombatActionOrchestrator } from '../orchestrators/combat/combat-action.orchestrator.js';
+} from "../domain/combat/dto/index.js";
+import type { RPGRequest } from "../global.types.js";
+import { CombatOrchestrator } from "../orchestrators/combat/index.js";
+import { CombatMovementOrchestrator } from "../orchestrators/combat/combat-movement.orchestrator.js";
+import { CombatActionOrchestrator } from "../orchestrators/combat/combat-action.orchestrator.js";
 
 /**
  * CombatController - Thin controller that delegates to CombatOrchestrator.
@@ -26,8 +26,8 @@ import { CombatActionOrchestrator } from '../orchestrators/combat/combat-action.
  *
  * No direct calls to domain services (CombatService, CharacterService, etc.)
  */
-@ApiTags('combat')
-@Controller('combat')
+@ApiTags("combat")
+@Controller("combat")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CombatController {
@@ -39,8 +39,8 @@ export class CombatController {
     private readonly actionOrchestrator: CombatActionOrchestrator,
   ) {}
 
-  @Post(':characterId/start')
-  @ApiOperation({ summary: 'Initialize combat with enemies' })
+  @Post(":characterId/start")
+  @ApiOperation({ summary: "Initialize combat with enemies" })
   @ApiBody({ type: CombatStartRequestDto })
   @ApiResponse({
     status: 201,
@@ -48,7 +48,7 @@ export class CombatController {
   })
   async startCombat(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: CombatStartRequestDto,
   ) {
     const userId = req.user._id.toString();
@@ -56,9 +56,9 @@ export class CombatController {
     return this.combatOrchestrator.startCombat(userId, characterId, body);
   }
 
-  @Post(':characterId/action')
+  @Post(":characterId/action")
   @ApiOperation({
-    summary: 'Execute any combat action (attack, dash, disengage, spell, class feature)',
+    summary: "Execute any combat action (attack, dash, disengage, spell, class feature)",
   })
   @ApiResponse({
     status: 200,
@@ -67,57 +67,57 @@ export class CombatController {
   @ApiBody({ type: CombatActionRequestDto })
   async action(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: CombatActionRequestDto,
   ): Promise<CombatActionResponseDto> {
     const userId = req.user._id.toString();
     return this.actionOrchestrator.executeAction(userId, characterId, body);
   }
 
-  @Get(':characterId/status')
-  @ApiOperation({ summary: 'Get current combat status' })
+  @Get(":characterId/status")
+  @ApiOperation({ summary: "Get current combat status" })
   @ApiResponse({
     status: 200,
     type: CombatStateDto,
   })
-  async getStatus(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+  async getStatus(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const userId = req.user._id.toString();
     return this.combatOrchestrator.getStatus(userId, characterId);
   }
 
-  @Post(':characterId/end-turn')
+  @Post(":characterId/end-turn")
   @ApiOperation({
-    summary: 'End current player activation and advance turn (triggers enemy actions)',
+    summary: "End current player activation and advance turn (triggers enemy actions)",
   })
   @ApiResponse({
     status: 200,
     type: EndPlayerTurnResponseDto,
-    description: 'Returns attack logs for animations and new player turn state',
+    description: "Returns attack logs for animations and new player turn state",
   })
   async endTurn(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
   ): Promise<EndPlayerTurnResponseDto> {
     const userId = req.user._id.toString();
     return this.combatOrchestrator.endPlayerTurn(userId, characterId);
   }
 
-  @Post(':characterId/flee')
-  @ApiOperation({ summary: 'Force end current combat (flee)' })
+  @Post(":characterId/flee")
+  @ApiOperation({ summary: "Force end current combat (flee)" })
   @ApiResponse({
     status: 200,
     type: CombatEndResponseDto,
   })
   async flee(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
   ): Promise<CombatEndResponseDto> {
     const userId = req.user._id.toString();
     return this.combatOrchestrator.endCombat(userId, characterId);
   }
 
-  @Post(':characterId/move')
-  @ApiOperation({ summary: 'Execute combatant movement on the grid' })
+  @Post(":characterId/move")
+  @ApiOperation({ summary: "Execute combatant movement on the grid" })
   @ApiBody({ type: MovementRequestDto })
   @ApiResponse({
     status: 200,
@@ -125,7 +125,7 @@ export class CombatController {
   })
   async move(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: MovementRequestDto,
   ): Promise<MovementResponseDto> {
     const userId = req.user._id.toString();

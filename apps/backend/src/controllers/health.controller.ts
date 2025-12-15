@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get } from "@nestjs/common";
 
 /**
  * Health controller exposes a minimal public endpoint for healthchecks.
@@ -7,11 +7,11 @@ import { Controller, Get } from '@nestjs/common';
  */
 @Controller()
 export class HealthController {
-  @Get('health')
+  @Get("health")
   getHealth() {
     const now = Date.now();
     return {
-      status: 'ok',
+      status: "ok",
       pid: process.pid,
       uptime: process.uptime(),
       timestamp: now,

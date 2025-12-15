@@ -2,7 +2,7 @@
 
 export interface ModalState {
   isOpen: boolean;
-  type: 'alert' | 'confirm';
+  type: "alert" | "confirm";
   title?: string;
   message: string;
   _resolve?: (value?: unknown) => void;
@@ -14,9 +14,9 @@ export interface UiModalProps {
 }
 
 export interface UiModalEmits {
-  (e: 'close'): void;
-  (e: 'confirm'): void;
-  (e: 'cancel'): void;
+  (e: "close"): void;
+  (e: "confirm"): void;
+  (e: "cancel"): void;
 }
 
 export interface UiButtonOption {

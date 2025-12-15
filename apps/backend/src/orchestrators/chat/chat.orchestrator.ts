@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { CharacterService } from '../../domain/character/character.service.js';
-import type { CharacterResponseDto } from '../../domain/character/dto/index.js';
-import { ConversationService } from '../../domain/chat/conversation.service.js';
+import { Injectable, Logger } from "@nestjs/common";
+import { CharacterService } from "../../domain/character/character.service.js";
+import type { CharacterResponseDto } from "../../domain/character/dto/index.js";
+import { ConversationService } from "../../domain/chat/conversation.service.js";
 import type {
   CombatStartInstructionMessageDto,
   GameInstructionDto,
@@ -9,10 +9,10 @@ import type {
   RollInstructionMessageDto,
   SpellInstructionMessageDto,
   XpInstructionMessageDto,
-} from '../../domain/chat/dto/index.js';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
-import { GeminiTextService } from '../../infra/external/gemini-text.service.js';
-import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
+} from "../../domain/chat/dto/index.js";
+import { CombatAppService } from "../../domain/combat/combat.app.service.js";
+import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.
@@ -38,8 +38,8 @@ export class ChatOrchestrator {
   public async getGMResponse(userId: string, characterId: string, userText: string) {
     const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
     const assistantMsg = {
-      role: 'assistant' as const,
-      narrative: parsed.narrative || '',
+      role: "assistant" as const,
+      narrative: parsed.narrative || "",
       instructions: parsed.instructions || [],
     };
 
@@ -106,7 +106,7 @@ export class ChatOrchestrator {
     instr: HpInstructionMessageDto,
   ): Promise<void> {
     const { hp } = instr;
-    if (!characterDto || typeof hp !== 'number') return;
+    if (!characterDto || typeof hp !== "number") return;
 
     const newHp = (characterDto.hp || 0) + hp;
     if (newHp <= 0) {
@@ -125,7 +125,7 @@ export class ChatOrchestrator {
     instr: XpInstructionMessageDto,
   ): Promise<void> {
     const { xp } = instr;
-    if (!characterDto || typeof xp !== 'number') return;
+    if (!characterDto || typeof xp !== "number") return;
 
     const newXp = (characterDto?.totalXp || 0) + xp;
     await this.characterService.update(userId, characterId, { totalXp: newXp });
@@ -139,19 +139,19 @@ export class ChatOrchestrator {
     instr: SpellInstructionMessageDto,
   ): Promise<void> {
     try {
-      if (instr.action === 'learn') {
+      if (instr.action === "learn") {
         const existing = characterDto?.spells || [];
         const newSpell = await this.spellDefinitionService.findByDefinitionId(instr.definitionId);
         const spells = [...existing, newSpell];
         await this.characterService.update(userId, characterId, { spells });
         this.logger.log(`Spell learned for ${characterId}: ${instr.name}`);
-      } else if (instr.action === 'forget') {
+      } else if (instr.action === "forget") {
         const spells = (characterDto?.spells || []).filter(
           (sp: { name: string }) => sp.name !== instr.name,
         );
         await this.characterService.update(userId, characterId, { spells });
         this.logger.log(`Spell forgotten for ${characterId}: ${instr.name}`);
-      } else if (instr.action === 'cast') {
+      } else if (instr.action === "cast") {
         this.logger.log(`Spell cast by ${characterId}: ${instr.name}`);
       }
     } catch (e) {

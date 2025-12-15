@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Logger, Param, Post, Req, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -6,14 +6,14 @@ import {
   ApiParam,
   ApiResponse,
   ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
-import type { RPGRequest } from '../global.types.js';
-import { ItemOrchestrator } from '../orchestrators/item/index.js';
-import { UseItemRequestDto, UseItemResponseDto } from '../domain/item-definition/dto/index.js';
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import type { RPGRequest } from "../global.types.js";
+import { ItemOrchestrator } from "../orchestrators/item/index.js";
+import { UseItemRequestDto, UseItemResponseDto } from "../domain/item-definition/dto/index.js";
 
-@ApiTags('inventory')
-@Controller('characters/:characterId/inventory')
+@ApiTags("inventory")
+@Controller("characters/:characterId/inventory")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class InventoryController {
@@ -21,25 +21,25 @@ export class InventoryController {
 
   constructor(private readonly itemOrchestrator: ItemOrchestrator) {}
 
-  @Post('use')
-  @ApiOperation({ summary: 'Use an item from inventory' })
+  @Post("use")
+  @ApiOperation({ summary: "Use an item from inventory" })
   @ApiParam({
-    name: 'characterId',
-    description: 'Character ID',
+    name: "characterId",
+    description: "Character ID",
   })
   @ApiBody({ type: UseItemRequestDto })
   @ApiResponse({
     status: 200,
-    description: 'Item used successfully',
+    description: "Item used successfully",
     type: UseItemResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request (item not found, wrong context, etc.)',
+    description: "Bad request (item not found, wrong context, etc.)",
   })
   async useItem(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: UseItemRequestDto,
   ): Promise<UseItemResponseDto> {
     const userId = req.user.userId || req.user.id;

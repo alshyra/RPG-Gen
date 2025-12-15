@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateCharacterBodyDto {
-  @ApiProperty({ description: 'Game world (e.g., dnd, vtm)' })
+  @ApiProperty({ description: "Game world (e.g., dnd, vtm)" })
   world: string;
 }

@@ -1,11 +1,11 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const manifest = ref<string[] | null>(null);
 
 export const loadPortraitManifest = async (): Promise<string[] | null> => {
   if (manifest.value) return manifest.value;
   try {
-    const resp = await fetch('/images/enemies/manifest.json');
+    const resp = await fetch("/images/enemies/manifest.json");
     if (!resp.ok) {
       manifest.value = null;
       return null;
@@ -21,15 +21,15 @@ export const loadPortraitManifest = async (): Promise<string[] | null> => {
 const slugify = (s: string) => {
   const base = s
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-  const i = base.lastIndexOf('-');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const i = base.lastIndexOf("-");
   return i === -1 ? base : base.slice(0, i);
 };
 
 export const pickBestPortrait = async (nameOrId?: string) => {
   const files = await loadPortraitManifest();
-  const slug = slugify(String(nameOrId || 'enemy'));
+  const slug = slugify(String(nameOrId || "enemy"));
   if (!files || files.length === 0) return null;
   const candidates = [`${slug}.webp`, `${slug}.png`];
   const found = candidates.find(c => files.includes(c));
@@ -39,4 +39,4 @@ export const pickBestPortrait = async (nameOrId?: string) => {
 };
 
 export const getFallbackPortrait = (nameOrId?: string) =>
-  `/images/enemies/${slugify(String(nameOrId || 'enemy'))}.png`;
+  `/images/enemies/${slugify(String(nameOrId || "enemy"))}.png`;

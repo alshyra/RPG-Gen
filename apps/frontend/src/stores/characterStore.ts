@@ -1,32 +1,32 @@
-import { characterApi } from '@rpg-gen/api-client';
+import { characterApi } from "@rpg-gen/api-client";
 import {
   CharacterResponseDto,
   InventoryItemDto,
   SpellInstructionMessageDto,
   SpellResponseDto,
   UpdateCharacterRequestDto,
-} from '@rpg-gen/shared';
-import { defineStore } from 'pinia';
-import { computed, Ref, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useCombatStore } from './combatStore';
+} from "@rpg-gen/shared";
+import { defineStore } from "pinia";
+import { computed, Ref, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useCombatStore } from "./combatStore";
 
 // --- Module-level helper functions to reduce statements in store ---
 
 const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellResponseDto => {
-  if (!spell) throw new Error('spell is required');
-  if (!spell.definitionId || typeof spell.definitionId !== 'string' || !spell.definitionId.trim()) {
-    throw new Error('spell.definitionId is required and must be a non-empty string');
+  if (!spell) throw new Error("spell is required");
+  if (!spell.definitionId || typeof spell.definitionId !== "string" || !spell.definitionId.trim()) {
+    throw new Error("spell.definitionId is required and must be a non-empty string");
   }
-  if (!spell.name || typeof spell.name !== 'string' || !spell.name.trim()) {
-    throw new Error('spell.name is required and must be a non-empty string');
+  if (!spell.name || typeof spell.name !== "string" || !spell.name.trim()) {
+    throw new Error("spell.name is required and must be a non-empty string");
   }
-  if (spell.level === undefined || spell.level === null || typeof spell.level !== 'number') {
-    throw new Error('spell.level is required and must be a number');
+  if (spell.level === undefined || spell.level === null || typeof spell.level !== "number") {
+    throw new Error("spell.level is required and must be a number");
   }
 
-  if (spell.meta === undefined || spell.meta === null || typeof spell.meta !== 'object') {
-    throw new Error('spell.meta is required and must be an object');
+  if (spell.meta === undefined || spell.meta === null || typeof spell.meta !== "object") {
+    throw new Error("spell.meta is required and must be an object");
   }
   return {
     name: spell.name,
@@ -62,7 +62,7 @@ const findItemByIdentifier = (
 
 const isItemUsable = (item: InventoryItemDto): boolean => {
   // Check if meta is consumable type with usable property
-  if (item.meta && 'type' in item.meta && item.meta.type === 'consumable') {
+  if (item.meta && "type" in item.meta && item.meta.type === "consumable") {
     return !!(item.meta as { usable?: boolean }).usable;
   }
   return false;
@@ -115,10 +115,10 @@ const createSpellManager = (charRef: Ref<CharacterResponseDto | undefined>) => (
 });
 
 // eslint-disable-next-line max-statements
-export const useCharacterStore = defineStore('character', () => {
+export const useCharacterStore = defineStore("character", () => {
   const route = useRoute();
   const currentCharacterId = computed(() =>
-    typeof route.params.characterId === 'string' ? route.params.characterId : undefined,
+    typeof route.params.characterId === "string" ? route.params.characterId : undefined,
   );
 
   const currentCharacter = ref<CharacterResponseDto>();
@@ -134,7 +134,7 @@ export const useCharacterStore = defineStore('character', () => {
   const forgetSpell = spellManager.forget;
 
   const removeInventoryItem = async (
-    definitionId: InventoryItemDto['definitionId'],
+    definitionId: InventoryItemDto["definitionId"],
     quantity = 1,
   ) => {
     if (!currentCharacter.value?.characterId || !definitionId) return;

@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { AdvantageType } from './dto/dice.js';
-import { DiceResultDto } from './dto/DiceResultDto.js';
-import { CombatDiceResultDto } from './dto/CombatDiceResultDto.js';
+import { Injectable } from "@nestjs/common";
+import { AdvantageType } from "./dto/dice.js";
+import { DiceResultDto } from "./dto/DiceResultDto.js";
+import { CombatDiceResultDto } from "./dto/CombatDiceResultDto.js";
 
 @Injectable()
 export class DiceService {
@@ -13,7 +13,7 @@ export class DiceService {
   ): DiceResultDto {
     const roll1 = 1 + Math.floor(rand() * sides);
     const roll2 = 1 + Math.floor(rand() * sides);
-    const keptRoll = advantage === 'advantage' ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
+    const keptRoll = advantage === "advantage" ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
     return {
       rolls: [roll1, roll2],
       modifierValue: mod,
@@ -37,15 +37,15 @@ export class DiceService {
   }
 
   private parseDiceExpression(expr: string) {
-    const normalizedExpression = expr.replace(/\s+/g, '');
+    const normalizedExpression = expr.replace(/\s+/g, "");
     const match = normalizedExpression.match(/^([0-9]*)d([0-9]+)([+-][0-9]+)?$/i);
-    if (!match) throw new Error('Invalid dice expression. Use NdM+K, e.g. 2d6+1');
+    if (!match) throw new Error("Invalid dice expression. Use NdM+K, e.g. 2d6+1");
 
-    const diceCount = match[1] === '' ? 1 : parseInt(match[1], 10);
+    const diceCount = match[1] === "" ? 1 : parseInt(match[1], 10);
     const diceSides = parseInt(match[2], 10);
     const modifierValue = match[3] ? parseInt(match[3], 10) : 0;
 
-    if (diceCount < 1 || diceSides < 1) throw new Error('Invalid dice numbers');
+    if (diceCount < 1 || diceSides < 1) throw new Error("Invalid dice numbers");
 
     return {
       diceCount,
@@ -57,12 +57,12 @@ export class DiceService {
   rollDiceExpr(
     expr: string,
     rand: () => number = Math.random,
-    advantage: AdvantageType = 'none',
+    advantage: AdvantageType = "none",
   ): DiceResultDto {
     const { diceCount, diceSides, modifierValue } = this.parseDiceExpression(expr);
 
     // advantage rolls are only available for narrative and for d20 checks
-    if (advantage !== 'none' && diceSides === 20 && diceCount === 1) {
+    if (advantage !== "none" && diceSides === 20 && diceCount === 1) {
       return this.rollWithAdvantage(diceSides, modifierValue, advantage, rand);
     }
 
@@ -73,7 +73,7 @@ export class DiceService {
     attackBonus: number,
     targetAc: number,
   ): { hit: boolean; isCrit: boolean; diceResult: DiceResultDto } {
-    const diceResult = this.rollDiceExpr('1d20');
+    const diceResult = this.rollDiceExpr("1d20");
     const [die] = diceResult.rolls;
     const totalAttack = die + attackBonus;
     const isCrit = die === 20;
@@ -88,7 +88,7 @@ export class DiceService {
 
   private computeTotal(diceResult?: DiceResultDto): number {
     if (!diceResult) return 0;
-    if (typeof diceResult.total === 'number') return diceResult.total;
+    if (typeof diceResult.total === "number") return diceResult.total;
     if (Array.isArray(diceResult.rolls) && diceResult.rolls.length)
       return diceResult.rolls.reduce((s, v) => s + v, 0);
     return 0;
@@ -119,7 +119,7 @@ export class DiceService {
     savingThrowBonus: number,
     spellDC: number,
   ): { success: boolean; diceResult: DiceResultDto } {
-    const diceResult = this.rollDiceExpr('1d20');
+    const diceResult = this.rollDiceExpr("1d20");
     const [die] = diceResult.rolls;
     const totalSave = die + savingThrowBonus;
     const success = die === 20 || totalSave >= spellDC; // Natural 20 always succeeds

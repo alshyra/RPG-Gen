@@ -1,15 +1,15 @@
-import { Prop, Schema } from '@nestjs/mongoose';
-import { CombatStartEntry } from '../combat/CombatStartEntry.js';
-import { CombatEnd } from '../combat/CombatEnd.js';
+import { Prop, Schema } from "@nestjs/mongoose";
+import { CombatStartEntry } from "../combat/CombatStartEntry.js";
+import { CombatEnd } from "../combat/CombatEnd.js";
 
 @Schema({ _id: false })
 export class GameInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: ['roll', 'xp', 'hp', 'spell', 'inventory', 'combat_start', 'combat_end'],
+    enum: ["roll", "xp", "hp", "spell", "inventory", "combat_start", "combat_end"],
   })
-  type: 'roll' | 'xp' | 'hp' | 'spell' | 'inventory' | 'combat_start' | 'combat_end';
+  type: "roll" | "xp" | "hp" | "spell" | "inventory" | "combat_start" | "combat_end";
 
   @Prop({
     required: false,
@@ -38,9 +38,9 @@ export class GameInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: ['advantage', 'disadvantage', 'none'],
+    enum: ["advantage", "disadvantage", "none"],
   })
-  advantage?: 'advantage' | 'disadvantage' | 'none';
+  advantage?: "advantage" | "disadvantage" | "none";
 
   @Prop({
     required: false,
@@ -57,9 +57,9 @@ export class GameInstruction {
   @Prop({
     required: false,
     type: String,
-    enum: ['learn', 'cast', 'forget', 'add', 'remove', 'use'],
+    enum: ["learn", "cast", "forget", "add", "remove", "use"],
   })
-  action?: 'learn' | 'cast' | 'forget' | 'add' | 'remove' | 'use';
+  action?: "learn" | "cast" | "forget" | "add" | "remove" | "use";
 
   @Prop({
     required: false,

@@ -1,10 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import {
   ClassDefinition,
   ClassDefinitionDocument,
-} from '../../infra/mongo/class/ClassDefinition.js';
+} from "../../infra/mongo/class/ClassDefinition.js";
 
 @Injectable()
 export class ClassDefinitionService {
@@ -28,7 +28,7 @@ export class ClassDefinitionService {
 
   async upsert(def: Partial<ClassDefinition>) {
     // Require a name so we can reliably upsert seeded definitions
-    if (!def.name) throw new Error('name required');
+    if (!def.name) throw new Error("name required");
     const existing = await this.model.findOne({ name: def.name }).exec();
     if (existing) {
       Object.assign(existing, def);
@@ -40,7 +40,7 @@ export class ClassDefinitionService {
 
   async seedFromJson(rawClassData: unknown): Promise<void> {
     if (!Array.isArray(rawClassData)) {
-      this.logger.warn('Class seed data is not an array, skipping');
+      this.logger.warn("Class seed data is not an array, skipping");
       return;
     }
 
@@ -53,8 +53,8 @@ export class ClassDefinitionService {
             const validated = {
               name: classData.className,
               hitDie: classData.hitDie,
-              primarySpellAbility: classData.primarySpellAbility || '',
-              description: classData.description || '',
+              primarySpellAbility: classData.primarySpellAbility || "",
+              description: classData.description || "",
               schemaVersion: classData.schemaVersion || 1,
               levels: classData.levels || [],
               allowedSpellsByLevel: classData.allowedSpellsByLevel || {},
@@ -62,18 +62,18 @@ export class ClassDefinitionService {
             };
 
             await this.upsert(validated);
-            return { status: 'imported', name: classData.className };
+            return { status: "imported", name: classData.className };
           } catch (err) {
             this.logger.warn(
               `Failed to seed class ${classData.className}: ${(err as Error).message}`,
             );
-            return { status: 'error', name: classData.className };
+            return { status: "error", name: classData.className };
           }
         }),
       );
 
-      const imported = results.filter(r => r.status === 'imported').length;
-      const errors = results.filter(r => r.status === 'error').length;
+      const imported = results.filter(r => r.status === "imported").length;
+      const errors = results.filter(r => r.status === "error").length;
 
       this.logger.log(`Class definitions seeded: ${imported} imported, ${errors} errors`);
     } catch (err) {

@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { UiSelect } from '../src/';
+import { describe, it, expect, vi } from "vitest";
+import { mount } from "@vue/test-utils";
+import { UiSelect } from "../src/";
 
-describe('UiSelect Component', () => {
-  it('should render a select element', () => {
+describe("UiSelect Component", () => {
+  it("should render a select element", () => {
     const wrapper = mount(UiSelect, {
-      props: { modelValue: 'option1' },
+      props: { modelValue: "option1" },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -14,12 +14,12 @@ describe('UiSelect Component', () => {
       },
     });
 
-    expect(wrapper.find('select').exists()).toBe(true);
+    expect(wrapper.find("select").exists()).toBe(true);
   });
 
-  it('should display the selected value', () => {
+  it("should display the selected value", () => {
     const wrapper = mount(UiSelect, {
-      props: { modelValue: 'option2' },
+      props: { modelValue: "option2" },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -29,15 +29,15 @@ describe('UiSelect Component', () => {
       },
     });
 
-    expect(wrapper.find('select').element.value).toBe('option2');
+    expect(wrapper.find("select").element.value).toBe("option2");
   });
 
-  it('should emit update:modelValue when selection changes', async () => {
+  it("should emit update:modelValue when selection changes", async () => {
     const onUpdate = vi.fn();
     const wrapper = mount(UiSelect, {
       props: {
-        modelValue: 'option1',
-        'onUpdate:modelValue': onUpdate,
+        modelValue: "option1",
+        "onUpdate:modelValue": onUpdate,
       },
       slots: {
         default: `
@@ -48,15 +48,15 @@ describe('UiSelect Component', () => {
       },
     });
 
-    const select = wrapper.find('select');
-    await select.setValue('option2');
+    const select = wrapper.find("select");
+    await select.setValue("option2");
 
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['option2']);
+    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["option2"]);
   });
 
-  it('should render multiple options', () => {
+  it("should render multiple options", () => {
     const wrapper = mount(UiSelect, {
-      props: { modelValue: 'option1' },
+      props: { modelValue: "option1" },
       slots: {
         default: `
           <option value="option1">Option 1</option>
@@ -67,14 +67,14 @@ describe('UiSelect Component', () => {
       },
     });
 
-    const options = wrapper.findAll('option');
+    const options = wrapper.findAll("option");
     expect(options).toHaveLength(4);
   });
 
-  it('should be disabled when disabled prop is true', () => {
+  it("should be disabled when disabled prop is true", () => {
     const wrapper = mount(UiSelect, {
       props: {
-        modelValue: 'option1',
+        modelValue: "option1",
         disabled: true,
       },
       slots: {
@@ -82,13 +82,13 @@ describe('UiSelect Component', () => {
       },
     });
 
-    expect(wrapper.find('select').element.disabled).toBe(true);
+    expect(wrapper.find("select").element.disabled).toBe(true);
   });
 
-  it('should not be disabled when disabled prop is false', () => {
+  it("should not be disabled when disabled prop is false", () => {
     const wrapper = mount(UiSelect, {
       props: {
-        modelValue: 'option1',
+        modelValue: "option1",
         disabled: false,
       },
       slots: {
@@ -96,22 +96,22 @@ describe('UiSelect Component', () => {
       },
     });
 
-    expect(wrapper.find('select').element.disabled).toBe(false);
+    expect(wrapper.find("select").element.disabled).toBe(false);
   });
 
-  it('should have correct styling classes', () => {
+  it("should have correct styling classes", () => {
     const wrapper = mount(UiSelect, {
-      props: { modelValue: 'option1' },
+      props: { modelValue: "option1" },
       slots: {
         default: '<option value="option1">Option 1</option>',
       },
     });
 
-    const select = wrapper.find('select');
+    const select = wrapper.find("select");
     const classes = select.classes();
 
-    expect(classes).toContain('block');
-    expect(classes).toContain('w-full');
-    expect(classes).toContain('rounded');
+    expect(classes).toContain("block");
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("rounded");
   });
 });

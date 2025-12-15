@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Zod schema for incoming raw JSON spells. This accepts a loose shape, coerces
 // string levels like "2" -> number 2 and normalizes meta.attackType to one of
@@ -9,7 +9,7 @@ export const spellSchema = z
     name: z.string().optional(),
     // allow numbers or numeric strings
     level: z.preprocess(v => {
-      if (typeof v === 'string' && /^[0-9]+$/.test(v)) return Number(v);
+      if (typeof v === "string" && /^[0-9]+$/.test(v)) return Number(v);
       return v;
     }, z.number().int().nonnegative().optional()),
     school: z.string().optional(),
@@ -26,10 +26,10 @@ export const spellSchema = z
         saveType: z.string().optional(),
         // gracefully coerce unknown values into undefined rather than failing
         attackType: z.preprocess(v => {
-          if (typeof v !== 'string') return undefined;
-          const allowed = ['melee', 'ranged', 'spell'];
+          if (typeof v !== "string") return undefined;
+          const allowed = ["melee", "ranged", "spell"];
           return allowed.includes(v) ? v : undefined;
-        }, z.enum(['melee', 'ranged', 'spell']).optional()),
+        }, z.enum(["melee", "ranged", "spell"]).optional()),
         school: z.string().optional(),
         areaOfEffect: z.string().optional(),
         scaling: z.string().optional(),

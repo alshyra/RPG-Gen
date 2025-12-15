@@ -10,14 +10,14 @@ export const frameHeight = 32;
 
 // Direction order mapped to rows 0..7
 export const DIRECTIONS = [
-  'bottom',
-  'bottom_right',
-  'right',
-  'top_right',
-  'top',
-  'top_left',
-  'left',
-  'bottom_left',
+  "bottom",
+  "bottom_right",
+  "right",
+  "top_right",
+  "top",
+  "top_left",
+  "left",
+  "bottom_left",
 ] as const;
 
 export type Direction = (typeof DIRECTIONS)[number];
@@ -47,7 +47,7 @@ animTypeOrder.forEach(animType => {
 export const animations: Record<`${AnimType}_${Direction}`, AnimConfig> = Object.entries(ANIM_TYPES)
   .flatMap(([animType, animCfg]) => {
     const xOffset = animXOffsets[animType as AnimType];
-    console.log(animType, animCfg, 'xOffset:', xOffset);
+    console.log(animType, animCfg, "xOffset:", xOffset);
     return DIRECTIONS.map((dir, dirIdx): [string, AnimConfig] => [
       `${animType}_${dir}`,
       { row: dirIdx, frames: animCfg.frames, speed: animCfg.speed, xOffset },

@@ -7,7 +7,7 @@
     "packages/shared/src/index.ts",
     "*.min.js"
   ],
-  "singleQuote": true,
+  "singleQuote": false,
   "semi": true,
   "trailingComma": "all",
   "printWidth": 100,

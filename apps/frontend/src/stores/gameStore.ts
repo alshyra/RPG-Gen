@@ -1,22 +1,22 @@
-import { diceApi } from '@rpg-gen/api-client';
-import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from '@rpg-gen/shared';
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { diceApi } from "@rpg-gen/api-client";
+import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from "@rpg-gen/shared";
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-type DisplayRole = 'user' | 'assistant' | 'system';
-import type { RollModalData } from '@/interfaces';
+type DisplayRole = "user" | "assistant" | "system";
+import type { RollModalData } from "@/interfaces";
 
 // RollModalData is provided by /src/interface
-type StoredRole = 'user' | 'assistant' | 'system';
+type StoredRole = "user" | "assistant" | "system";
 
 // Map display roles to stored roles
 function toStoredRole(role: DisplayRole): StoredRole {
-  if (role === 'assistant') return 'assistant';
-  if (role === 'user') return 'user';
-  return 'system';
+  if (role === "assistant") return "assistant";
+  if (role === "user") return "user";
+  return "system";
 }
 
-export const useGameStore = defineStore('gameStore', () => {
+export const useGameStore = defineStore("gameStore", () => {
   const rolls = ref<DiceResultDto[]>([]);
   const latestRoll = ref<DiceResultDto | null>(null);
   const rollData = ref<RollModalData>({});
@@ -24,7 +24,7 @@ export const useGameStore = defineStore('gameStore', () => {
   // Minimal game session/message/pending instruction state used across app
   const messages = ref<(ChatMessageDto & { timestamp?: number })[]>([]);
   const pendingInstruction = ref<GameInstructionDto | null>(null);
-  const playerText = ref('');
+  const playerText = ref("");
   const isInitializing = ref(false);
   const sending = ref(false);
   const showRollModal = ref(false);
@@ -35,11 +35,11 @@ export const useGameStore = defineStore('gameStore', () => {
     error: string;
   } | null>(null);
 
-  const doRoll = async (expr: string, advantage?: 'advantage' | 'disadvantage' | 'none') => {
+  const doRoll = async (expr: string, advantage?: "advantage" | "disadvantage" | "none") => {
     // Call diceService which uses the backend API and returns the roll result
     const diceResultDto = await diceApi.roll({
       expr,
-      advantage: advantage || 'none',
+      advantage: advantage || "none",
     });
     rolls.value.push(diceResultDto);
     latestRoll.value = diceResultDto;

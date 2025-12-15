@@ -1,14 +1,14 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { CombatAppService } from '../../domain/combat/combat.app.service.js';
-import { GridPositionDto } from '../../domain/combat/dto/GridPositionDto.js';
-import { MovementEventDto, MovementEventType } from '../../domain/combat/dto/MovementEventDto.js';
-import { MovementRequestDto } from '../../domain/combat/dto/MovementRequestDto.js';
-import { MovementResponseDto } from '../../domain/combat/dto/MovementResponseDto.js';
-import { CombatGridService } from '../../domain/combat/services/combat-grid.service.js';
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { CombatAppService } from "../../domain/combat/combat.app.service.js";
+import { GridPositionDto } from "../../domain/combat/dto/GridPositionDto.js";
+import { MovementEventDto, MovementEventType } from "../../domain/combat/dto/MovementEventDto.js";
+import { MovementRequestDto } from "../../domain/combat/dto/MovementRequestDto.js";
+import { MovementResponseDto } from "../../domain/combat/dto/MovementResponseDto.js";
+import { CombatGridService } from "../../domain/combat/services/combat-grid.service.js";
 import {
   CombatantStats,
   OpportunityAttackResolver,
-} from '../../domain/combat/services/opportunity-attack.service.js';
+} from "../../domain/combat/services/opportunity-attack.service.js";
 
 /**
  * Orchestrator for combat movement operations.
@@ -70,7 +70,7 @@ export class CombatMovementOrchestrator {
         statsMap.set(pos.combatantId, {
           id: pos.combatantId,
           attackBonus: 4,
-          damageDice: '1d6',
+          damageDice: "1d6",
           damageBonus: 2,
           ac: 13,
         });
@@ -101,7 +101,7 @@ export class CombatMovementOrchestrator {
       const distance = request.path.length - 1;
       const combatantPos = positions.find(p => p.combatantId === request.combatantId);
       const baseSpeed = combatantPos?.speed ?? 30;
-      const hasDashed = activeEffects.includes('dashed');
+      const hasDashed = activeEffects.includes("dashed");
       const maxMovement = hasDashed ? baseSpeed * 2 : baseSpeed;
       const remainingMovement = maxMovement - distance;
 
@@ -113,7 +113,7 @@ export class CombatMovementOrchestrator {
       };
     } catch (error) {
       this.logger.error(`Movement failed for ${request.combatantId}:`, error);
-      throw new BadRequestException('Movement execution failed');
+      throw new BadRequestException("Movement execution failed");
     }
   }
 }

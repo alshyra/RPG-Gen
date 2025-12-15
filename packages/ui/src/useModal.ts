@@ -1,11 +1,11 @@
-import { reactive } from 'vue';
-import type { ModalState } from './interfaces';
+import { reactive } from "vue";
+import type { ModalState } from "./interfaces";
 
 const state = reactive<ModalState>({
   isOpen: false,
-  type: 'alert',
+  type: "alert",
   title: undefined,
-  message: '',
+  message: "",
 });
 
 export function useModalState() {
@@ -14,7 +14,7 @@ export function useModalState() {
 
 export function showAlert(message: string, title?: string): Promise<void> {
   return new Promise<void>(resolve => {
-    state.type = 'alert';
+    state.type = "alert";
     state.title = title;
     state.message = message;
     state.isOpen = true;
@@ -29,7 +29,7 @@ export function showAlert(message: string, title?: string): Promise<void> {
 
 export function showConfirm(message: string, title?: string): Promise<boolean> {
   return new Promise<boolean>(resolve => {
-    state.type = 'confirm';
+    state.type = "confirm";
     state.title = title;
     state.message = message;
     state.isOpen = true;

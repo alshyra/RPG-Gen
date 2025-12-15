@@ -2,7 +2,7 @@
 
 // Combat-related
 export interface AttackQueueItem {
-  result: import('@rpg-gen/shared').CombatActionResponseDto;
+  result: import("@rpg-gen/shared").CombatActionResponseDto;
   isPlayerAttack: boolean;
 }
 
@@ -24,7 +24,7 @@ export interface AttackView {
 // Modal / UI
 export interface ModalState {
   isOpen: boolean;
-  type: 'alert' | 'confirm';
+  type: "alert" | "confirm";
   title?: string;
   message: string;
   _resolve?: (value?: unknown) => void;
@@ -36,7 +36,7 @@ export interface RollModalData {
   bonus?: number | null;
   total?: number | null;
   skillName?: string;
-  advantage?: 'advantage' | 'disadvantage' | 'none';
+  advantage?: "advantage" | "disadvantage" | "none";
   keptRoll?: number | null;
   discardedRoll?: number | null;
   action?: string;
@@ -82,27 +82,27 @@ export interface UiModalProps {
   title?: string;
 }
 export interface UiModalEmits {
-  (e: 'close'): void;
-  (e: 'confirm'): void;
-  (e: 'cancel'): void;
+  (e: "close"): void;
+  (e: "confirm"): void;
+  (e: "cancel"): void;
 }
 
 // Game session messages
 export interface HistoryMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   narrative: string;
   timestamp?: number;
   instructions?:
-    | import('@rpg-gen/shared').GameInstructionDto
-    | import('@rpg-gen/shared').GameInstructionDto[];
+    | import("@rpg-gen/shared").GameInstructionDto
+    | import("@rpg-gen/shared").GameInstructionDto[];
 }
 export interface ProcessedMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   narrative: string;
 }
 
 // Chat command utilities (copied from utils/chatCommands)
-export type CommandType = 'cast' | 'equip' | 'attack' | 'use';
+export type CommandType = "cast" | "equip" | "attack" | "use";
 export interface ParsedCommand {
   type: CommandType;
   target: string;
@@ -115,9 +115,9 @@ export interface CommandDefinition {
 export interface ArgumentSuggestion {
   name: string;
   description?: string;
-  type: 'spell' | 'item' | 'target';
+  type: "spell" | "item" | "target";
 }
-export type SuggestionType = 'command' | 'argument';
+export type SuggestionType = "command" | "argument";
 export interface SuggestionResult {
   type: SuggestionType;
   commandSuggestions: CommandDefinition[];
@@ -151,5 +151,5 @@ export interface ClassLevelUpRules {
 
 export interface SkillRule {
   name: string;
-  ability: 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
+  ability: "Str" | "Dex" | "Con" | "Int" | "Wis" | "Cha";
 }

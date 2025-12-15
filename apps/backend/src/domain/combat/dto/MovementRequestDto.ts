@@ -1,15 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsArray, IsString, ValidateNested } from 'class-validator';
-import { GridPositionDto } from './GridPositionDto.js';
+import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import { IsArray, IsString, ValidateNested } from "class-validator";
+import { GridPositionDto } from "./GridPositionDto.js";
 
 export class MovementRequestDto {
-  @ApiProperty({ description: 'ID of the combatant to move' })
+  @ApiProperty({ description: "ID of the combatant to move" })
   @IsString()
   combatantId: string;
 
   @ApiProperty({
-    description: 'Path of grid positions to traverse',
+    description: "Path of grid positions to traverse",
     type: [GridPositionDto],
   })
   @IsArray()

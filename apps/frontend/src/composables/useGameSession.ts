@@ -1,5 +1,5 @@
-import { characterApi } from '@rpg-gen/api-client';
-import { useCharacterStore } from '@/stores/characterStore';
+import { characterApi } from "@rpg-gen/api-client";
+import { useCharacterStore } from "@/stores/characterStore";
 import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,
@@ -10,16 +10,16 @@ import {
   isHpInstruction,
   isXpInstruction,
   isCombatStartInstruction,
-} from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { useCombat } from './useCombat';
-import { useRoute, useRouter } from 'vue-router';
-import { chatApi } from '@rpg-gen/api-client';
-import { useGameStore } from '../stores/gameStore';
+} from "@rpg-gen/shared";
+import { storeToRefs } from "pinia";
+import { useCombat } from "./useCombat";
+import { useRoute, useRouter } from "vue-router";
+import { chatApi } from "@rpg-gen/api-client";
+import { useGameStore } from "../stores/gameStore";
 
-import type { HistoryMessage, ProcessedMessage } from '@/interfaces';
+import type { HistoryMessage, ProcessedMessage } from "@/interfaces";
 
-type DisplayRole = 'user' | 'assistant' | 'system';
+type DisplayRole = "user" | "assistant" | "system";
 
 // Type for instructions that processInstructionInMessage can handle
 type ProcessableInstruction =
@@ -49,12 +49,12 @@ export const useGameSession = () => {
     try {
       const inCombat = await checkCombatStatus();
       if (inCombat) {
-        gameStore.appendMessage('system', '⚔️ Combat en cours restauré.');
+        gameStore.appendMessage("system", "⚔️ Combat en cours restauré.");
       } else {
-        gameStore.appendMessage('system', '⚔️ Combat terminé.');
+        gameStore.appendMessage("system", "⚔️ Combat terminé.");
       }
     } catch {
-      gameStore.appendMessage('system', '⚠️ Impossible de vérifier le statut du combat.');
+      gameStore.appendMessage("system", "⚠️ Impossible de vérifier le statut du combat.");
     }
   };
 
@@ -68,24 +68,24 @@ export const useGameSession = () => {
     }
     if (isRollInstruction(instr)) {
       if (isLastMessage) gameStore.pendingInstruction = instr;
-      const label = instr.modifierLabel ?? '';
+      const label = instr.modifierLabel ?? "";
       const value = instr.modifierValue ?? 0;
-      const modDisplay = label ? ` (${label})` : value ? ` + ${value}` : '';
-      gameStore.appendMessage('system', `🎲 Roll needed: ${instr.dices}${modDisplay}`);
+      const modDisplay = label ? ` (${label})` : value ? ` + ${value}` : "";
+      gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${modDisplay}`);
     } else if (isXpInstruction(instr)) {
-      gameStore.appendMessage('system', `✨ Gained ${instr.xp} XP`);
+      gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
       characterStore.updateXp(instr.xp);
     } else if (isHpInstruction(instr)) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
-      gameStore.appendMessage('system', `❤️ HP changed: ${hpChange}`);
+      gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
       characterStore.updateHp(instr.hp);
     }
   };
 
-  const mapRoleToDisplay = (role: 'user' | 'assistant' | 'system'): DisplayRole => {
-    if (role === 'assistant') return 'assistant';
-    if (role === 'user') return 'user';
-    return 'system';
+  const mapRoleToDisplay = (role: "user" | "assistant" | "system"): DisplayRole => {
+    if (role === "assistant") return "assistant";
+    if (role === "user") return "user";
+    return "system";
   };
 
   const processHistoryMessages = (history: HistoryMessage[]): ProcessedMessage[] =>
@@ -109,7 +109,7 @@ export const useGameSession = () => {
 
   const getCharIdFromRoute = (): string | undefined => {
     const route = useRoute();
-    const charId = String(route.params.characterId || '');
+    const charId = String(route.params.characterId || "");
     return charId || undefined;
   };
 
@@ -128,12 +128,12 @@ export const useGameSession = () => {
     if (currentCharacter?.value) return currentCharacter.value;
     const charId = getCharIdFromRoute();
     if (!charId) {
-      await router.push('/home');
+      await router.push("/home");
       return undefined;
     }
     const fetched = await fetchAndSetCharacter(charId);
     if (!fetched) {
-      await router.push('/home');
+      await router.push("/home");
       return undefined;
     }
     return fetched;
@@ -153,7 +153,7 @@ export const useGameSession = () => {
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      gameStore.appendMessage('system', `Error: ${msg}`);
+      gameStore.appendMessage("system", `Error: ${msg}`);
     }
     isInitializing.value = false;
   };

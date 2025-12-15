@@ -2,7 +2,7 @@ import type {
   CombatEngineEventType,
   CombatEngineEventPayload,
   EventHandler,
-} from '../types/combat-types';
+} from "../types/combat-types";
 
 // Module-level singleton: persistent listeners Map shared across all useEventBus() calls
 const globalListeners = new Map<CombatEngineEventType, Set<EventHandler<CombatEngineEventType>>>();

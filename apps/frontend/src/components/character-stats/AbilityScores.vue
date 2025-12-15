@@ -17,6 +17,7 @@
           <span class="text-xs text-slate-500 mt-0.5">
             ({{ getModifier(getAbilityScore(key)) > 0 ? '+' : ''
 
+
             }}{{ getModifier(getAbilityScore(key)) }})
           </span>
         </div>

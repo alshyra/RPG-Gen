@@ -1,16 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
-import { BaseMeta } from './BaseMeta.js';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { BaseMeta } from "./BaseMeta.js";
 
 export class ConsumableMeta extends BaseMeta {
   @ApiProperty({
-    enum: ['consumable'],
-    description: 'Type discriminator for consumables',
+    enum: ["consumable"],
+    description: "Type discriminator for consumables",
   })
-  type = 'consumable' as const;
+  type = "consumable" as const;
 
   @ApiProperty({
-    description: 'Whether the item can be used directly',
+    description: "Whether the item can be used directly",
     required: false,
   })
   @IsOptional()
@@ -18,7 +18,7 @@ export class ConsumableMeta extends BaseMeta {
   usable?: boolean;
 
   @ApiProperty({
-    description: 'Whether the item can be used in combat (e.g., potions)',
+    description: "Whether the item can be used in combat (e.g., potions)",
     required: false,
   })
   @IsOptional()
@@ -26,7 +26,7 @@ export class ConsumableMeta extends BaseMeta {
   combatUsable?: boolean;
 
   @ApiProperty({
-    description: 'Whether the item can be used during rest (e.g., rations)',
+    description: "Whether the item can be used during rest (e.g., rations)",
     required: false,
   })
   @IsOptional()

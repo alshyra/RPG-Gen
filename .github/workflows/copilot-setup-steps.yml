@@ -1,4 +1,4 @@
-name: 'Copilot Setup Steps'
+name: "Copilot Setup Steps"
 
 on:
   workflow_dispatch:
@@ -24,8 +24,8 @@ jobs:
       - name: Set up frontend
         uses: actions/setup-node@v4
         with:
-          node-version: '25.2.1'
-          cache: 'npm'
+          node-version: "25.2.1"
+          cache: "npm"
           cache-dependency-path: package-lock.json
       - name: Install shared dependencies
         run: npm ci

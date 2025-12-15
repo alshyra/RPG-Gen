@@ -11,7 +11,7 @@ import {
   Put,
   Req,
   UseGuards,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -19,13 +19,13 @@ import {
   ApiParam,
   ApiResponse,
   ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../domain/auth/jwt-auth.guard.js';
-import type { RPGRequest } from '../global.types.js';
-import { CharacterService } from '../domain/character/character.service.js';
-import { LevelUpService } from '../domain/character/levelup.service.js';
-import { CreateInventoryItemDto } from '../domain/character/dto/CreateInventoryItemDto.js';
-import { EquipInventoryDto } from '../domain/character/dto/EquipInventoryDto.js';
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import type { RPGRequest } from "../global.types.js";
+import { CharacterService } from "../domain/character/character.service.js";
+import { LevelUpService } from "../domain/character/levelup.service.js";
+import { CreateInventoryItemDto } from "../domain/character/dto/CreateInventoryItemDto.js";
+import { EquipInventoryDto } from "../domain/character/dto/EquipInventoryDto.js";
 import {
   CharacterResponseDto,
   CreateCharacterBodyDto,
@@ -36,10 +36,10 @@ import {
   RemoveInventoryBodyDto,
   UpdateCharacterRequestDto,
   LevelUpApplyDto,
-} from '../domain/character/dto/index.js';
+} from "../domain/character/dto/index.js";
 
-@ApiTags('characters')
-@Controller('characters')
+@ApiTags("characters")
+@Controller("characters")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CharacterController {
@@ -51,14 +51,14 @@ export class CharacterController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new character' })
+  @ApiOperation({ summary: "Create a new character" })
   @ApiBody({ type: CreateCharacterBodyDto })
   @ApiResponse({
     status: 201,
-    description: 'Character created successfully',
+    description: "Character created successfully",
     type: CharacterResponseDto,
   })
-  async create(@Req() req: RPGRequest, @Body('world') world: string) {
+  async create(@Req() req: RPGRequest, @Body("world") world: string) {
     const { user } = req;
 
     const userId = user._id.toString();
@@ -67,10 +67,10 @@ export class CharacterController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all characters for the current user' })
+  @ApiOperation({ summary: "Get all characters for the current user" })
   @ApiResponse({
     status: 200,
-    description: 'List of characters',
+    description: "List of characters",
     type: [CharacterResponseDto],
   })
   async findAll(@Req() req: RPGRequest) {
@@ -81,11 +81,11 @@ export class CharacterController {
     return characters.map(c => this.characterService.toCharacterDto(c));
   }
 
-  @Get('deceased')
-  @ApiOperation({ summary: 'Get all deceased characters' })
+  @Get("deceased")
+  @ApiOperation({ summary: "Get all deceased characters" })
   @ApiResponse({
     status: 200,
-    description: 'List of deceased characters',
+    description: "List of deceased characters",
     type: [DeceasedCharacterResponseDto],
   })
   async getDeceased(@Req() req: RPGRequest) {
@@ -100,18 +100,18 @@ export class CharacterController {
     }));
   }
 
-  @Get(':characterId')
-  @ApiOperation({ summary: 'Get a specific character by ID' })
+  @Get(":characterId")
+  @ApiOperation({ summary: "Get a specific character by ID" })
   @ApiResponse({
     status: 200,
-    description: 'Character found',
+    description: "Character found",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
-  async findOne(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+  async findOne(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
     const userId = user._id.toString();
 
@@ -119,28 +119,28 @@ export class CharacterController {
     return character;
   }
 
-  @Put(':characterId')
-  @ApiOperation({ summary: 'Update a character' })
+  @Put(":characterId")
+  @ApiOperation({ summary: "Update a character" })
   @ApiResponse({
     status: 200,
-    description: 'Character updated',
+    description: "Character updated",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
   @ApiParam({
-    name: 'characterId',
-    description: 'ID of the character to update',
+    name: "characterId",
+    description: "ID of the character to update",
   })
   @ApiBody({
-    description: 'Fields to update',
+    description: "Fields to update",
     type: UpdateCharacterRequestDto,
   })
   async update(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() updates: UpdateCharacterRequestDto,
   ) {
     const { user } = req;
@@ -150,18 +150,18 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Delete(':characterId')
-  @ApiOperation({ summary: 'Delete a character' })
+  @Delete(":characterId")
+  @ApiOperation({ summary: "Delete a character" })
   @ApiResponse({
     status: 200,
-    description: 'Character deleted',
+    description: "Character deleted",
     type: Object,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
-  async delete(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+  async delete(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
     const userId = user._id.toString();
 
@@ -169,21 +169,21 @@ export class CharacterController {
     return { ok: true };
   }
 
-  @Post(':characterId/kill')
-  @ApiOperation({ summary: 'Mark a character as deceased' })
+  @Post(":characterId/kill")
+  @ApiOperation({ summary: "Mark a character as deceased" })
   @ApiBody({ type: KillCharacterBodyDto })
   @ApiResponse({
     status: 201,
-    description: 'Character marked as deceased',
+    description: "Character marked as deceased",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
   async kill(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: KillCharacterBodyDto,
   ) {
     const { user } = req;
@@ -197,20 +197,20 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Post(':characterId/inventory')
+  @Post(":characterId/inventory")
   @ApiOperation({ summary: "Add an item to character's inventory" })
   @ApiResponse({
     status: 201,
-    description: 'Item added to inventory',
+    description: "Item added to inventory",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
   async addInventory(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() item: CreateInventoryItemDto,
   ) {
     const { user } = req;
@@ -220,18 +220,18 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Post(':characterId/levelup/:className')
-  @ApiOperation({ summary: 'Apply level-up choices for a character class' })
+  @Post(":characterId/levelup/:className")
+  @ApiOperation({ summary: "Apply level-up choices for a character class" })
   @ApiBody({ type: LevelUpApplyDto })
   @ApiResponse({
     status: 200,
-    description: 'Updated character after levelup',
+    description: "Updated character after levelup",
     type: CharacterResponseDto,
   })
   async applyLevelUp(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Param('className') className: string,
+    @Param("characterId") characterId: string,
+    @Param("className") className: string,
     @Body() body: LevelUpApplyDto,
   ) {
     const userId = req.user._id.toString();
@@ -239,17 +239,17 @@ export class CharacterController {
     return updated;
   }
 
-  @Post(':characterId/inventory/equip')
-  @ApiOperation({ summary: 'Equip an item by definitionId (weapon only)' })
+  @Post(":characterId/inventory/equip")
+  @ApiOperation({ summary: "Equip an item by definitionId (weapon only)" })
   @ApiBody({ type: EquipInventoryDto })
   @ApiResponse({
     status: 200,
-    description: 'Character updated with equipped item',
+    description: "Character updated with equipped item",
     type: CharacterResponseDto,
   })
   async equipInventory(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
+    @Param("characterId") characterId: string,
     @Body() body: { definitionId: string },
   ) {
     const { user } = req;
@@ -262,22 +262,22 @@ export class CharacterController {
     return character;
   }
 
-  @Patch(':characterId/inventory/:itemId')
+  @Patch(":characterId/inventory/:itemId")
   @ApiOperation({ summary: "Update an item in character's inventory" })
   @ApiResponse({
     status: 200,
-    description: 'Inventory item updated',
+    description: "Inventory item updated",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character or item not found',
+    description: "Character or item not found",
   })
   @ApiBody({ type: CreateInventoryItemDto })
   async updateInventory(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Param('itemId') itemId: string,
+    @Param("characterId") characterId: string,
+    @Param("itemId") itemId: string,
     @Body() updates: CreateInventoryItemDto,
   ) {
     const { user } = req;
@@ -292,22 +292,22 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Delete(':characterId/inventory/:itemId')
+  @Delete(":characterId/inventory/:itemId")
   @ApiOperation({ summary: "Remove an item from character's inventory" })
   @ApiBody({ type: RemoveInventoryBodyDto })
   @ApiResponse({
     status: 200,
-    description: 'Item removed from inventory',
+    description: "Item removed from inventory",
     type: CharacterResponseDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Character or item not found',
+    description: "Character or item not found",
   })
   async removeInventory(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Param('itemId') itemId: string,
+    @Param("characterId") characterId: string,
+    @Param("itemId") itemId: string,
     @Body() body: RemoveInventoryBodyDto,
   ) {
     const { user } = req;
@@ -322,33 +322,33 @@ export class CharacterController {
     return this.characterService.toCharacterDto(character);
   }
 
-  @Post(':characterId/inspiration/grant')
-  @ApiOperation({ summary: 'Grant inspiration point(s) to a character' })
+  @Post(":characterId/inspiration/grant")
+  @ApiOperation({ summary: "Grant inspiration point(s) to a character" })
   @ApiBody({ type: GrantInspirationBodyDto })
   @ApiResponse({
     status: 201,
-    description: 'Inspiration granted',
+    description: "Inspiration granted",
     type: InspirationResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid amount',
+    description: "Invalid amount",
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
   async grantInspiration(
     @Req() req: RPGRequest,
-    @Param('characterId') characterId: string,
-    @Body('amount') amount: number,
+    @Param("characterId") characterId: string,
+    @Body("amount") amount: number,
   ) {
     const { user } = req;
     const userId = user._id.toString();
 
     // Validate amount
-    if (typeof amount !== 'number' || amount <= 0 || amount > 5) {
-      throw new BadRequestException('Amount must be a positive number between 1 and 5');
+    if (typeof amount !== "number" || amount <= 0 || amount > 5) {
+      throw new BadRequestException("Amount must be a positive number between 1 and 5");
     }
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
@@ -366,29 +366,29 @@ export class CharacterController {
     };
   }
 
-  @Post(':characterId/inspiration/spend')
-  @ApiOperation({ summary: 'Spend an inspiration point' })
+  @Post(":characterId/inspiration/spend")
+  @ApiOperation({ summary: "Spend an inspiration point" })
   @ApiResponse({
     status: 201,
-    description: 'Inspiration spent',
+    description: "Inspiration spent",
     type: InspirationResponseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'No inspiration points available',
+    description: "No inspiration points available",
   })
   @ApiResponse({
     status: 404,
-    description: 'Character not found',
+    description: "Character not found",
   })
-  async spendInspiration(@Req() req: RPGRequest, @Param('characterId') characterId: string) {
+  async spendInspiration(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
     const currentPoints = character.inspirationPoints || 0;
     if (currentPoints <= 0) {
-      throw new BadRequestException('No inspiration points available');
+      throw new BadRequestException("No inspiration points available");
     }
 
     const updated = await this.characterService.update(userId, characterId, {

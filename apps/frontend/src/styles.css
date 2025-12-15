@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import '@rpg-gen/ui/index.css';
+@import "tailwindcss";
+@import "@rpg-gen/ui/index.css";
 
 @layer base {
   body {

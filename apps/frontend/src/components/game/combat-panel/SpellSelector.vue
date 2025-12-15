@@ -49,6 +49,7 @@
             >
               {{ spell.description.substring(0, 60)
 
+
               }}{{ spell.description.length > 60 ? '...' : '' }}
             </div>
           </UiButton>

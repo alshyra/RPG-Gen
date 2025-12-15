@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ItemDefinition, ItemDefinitionDocument } from '../../infra/mongo/item/ItemDefinition.js';
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { ItemDefinition, ItemDefinitionDocument } from "../../infra/mongo/item/ItemDefinition.js";
 
 @Injectable()
 export class ItemDefinitionService {
@@ -18,7 +18,7 @@ export class ItemDefinitionService {
   }
 
   async upsert(def: Partial<ItemDefinition>) {
-    if (!def.definitionId) throw new Error('definitionId required');
+    if (!def.definitionId) throw new Error("definitionId required");
     const existing = await this.model.findOne({ definitionId: def.definitionId }).exec();
     if (existing) {
       Object.assign(existing, def);

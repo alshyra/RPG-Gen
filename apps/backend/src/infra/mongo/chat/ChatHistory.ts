@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
-import { ChatMessage } from './ChatMessage.js';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Schema as MongooseSchema } from "mongoose";
+import { ChatMessage } from "./ChatMessage.js";
 
 export type ChatHistoryDocument = ChatHistory & Document;
 
@@ -9,7 +9,7 @@ export class ChatHistory {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   })
   userId: MongooseSchema.Types.ObjectId;
 

@@ -1,10 +1,10 @@
-import 'whatwg-fetch';
-import { vi } from 'vitest';
-import { reactive } from 'vue';
+import "whatwg-fetch";
+import { vi } from "vitest";
+import { reactive } from "vue";
 
 let shouldMockLocalStorage = true;
 try {
-  if (typeof globalThis.localStorage !== 'undefined') shouldMockLocalStorage = false;
+  if (typeof globalThis.localStorage !== "undefined") shouldMockLocalStorage = false;
 } catch {
   shouldMockLocalStorage = true;
 }
@@ -31,7 +31,7 @@ if (shouldMockLocalStorage) {
 }
 
 // Basic matchMedia stub
-if (typeof window !== 'undefined' && !window.matchMedia) {
+if (typeof window !== "undefined" && !window.matchMedia) {
   (window as unknown).matchMedia = function matchMedia() {
     return {
       matches: false,
@@ -46,12 +46,12 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
 }
 
 // Ensure window.URLSearchParams exists
-if (typeof window !== 'undefined' && !window.URLSearchParams) {
+if (typeof window !== "undefined" && !window.URLSearchParams) {
   window.URLSearchParams = globalThis.URLSearchParams;
 }
 
 // Mock vue-router composables to avoid `useRoute()` failures in tests
-vi.mock('vue-router', () => {
+vi.mock("vue-router", () => {
   const route = reactive({ params: {} });
   return {
     useRoute: () => route,

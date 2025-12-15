@@ -1,19 +1,19 @@
-import test from 'ava';
-import { Test } from '@nestjs/testing';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongooseModule } from '@nestjs/mongoose';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import test from "ava";
+import { Test } from "@nestjs/testing";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongooseModule } from "@nestjs/mongoose";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 import {
   ClassDefinition,
   ClassDefinitionSchema,
-} from '../../src/infra/mongo/class/ClassDefinition.js';
+} from "../../src/infra/mongo/class/ClassDefinition.js";
 
-import { ClassDefinitionService } from '../../src/domain/class-definition/class-definition.service.js';
-import { ClassesService } from '../../src/domain/classes/classes.service.js';
+import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
+import { ClassesService } from "../../src/domain/classes/classes.service.js";
 
 let mongoServer: MongoMemoryServer;
 let classesService: ClassesService;
@@ -32,7 +32,7 @@ test.before(async () => {
       ClassesService,
       ClassDefinitionService,
       {
-        provide: (await import('../../src/domain/spell-definition/spell-definition.service.js'))
+        provide: (await import("../../src/domain/spell-definition/spell-definition.service.js"))
           .SpellDefinitionService,
         useValue: { findByLevel: async () => [] },
       },
@@ -43,18 +43,18 @@ test.before(async () => {
   classDefService = moduleRef.get(ClassDefinitionService);
 });
 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 test.after.always(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
 });
 
-test('All martial classes expose combatOptionsByLevel via getOptionsForLevel', async t => {
-  const classes = ['barbarian', 'fighter', 'monk', 'paladin', 'ranger'];
+test("All martial classes expose combatOptionsByLevel via getOptionsForLevel", async t => {
+  const classes = ["barbarian", "fighter", "monk", "paladin", "ranger"];
   for (const cls of classes) {
-    const path = join(__dirname, '..', '..', 'src', 'seed', 'classes', cls, 'levels.json');
-    const raw = JSON.parse(readFileSync(path, 'utf-8'));
+    const path = join(__dirname, "..", "..", "src", "seed", "classes", cls, "levels.json");
+    const raw = JSON.parse(readFileSync(path, "utf-8"));
     await classDefService.seedFromJson([raw]);
     // pick level 1 to inspect
     const opts = await classesService.getOptionsForLevel(raw.className, 1);

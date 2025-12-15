@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CombatantDto } from './CombatantDto.js';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { CombatantDto } from "./CombatantDto.js";
 import {
   IsString,
   IsBoolean,
@@ -7,22 +7,22 @@ import {
   IsNumber,
   IsOptional,
   ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+} from "class-validator";
+import { Type } from "class-transformer";
 
-export type CombatPhase = 'PLAYER_TURN' | 'AWAITING_DAMAGE_ROLL' | 'ENEMY_TURN' | 'COMBAT_ENDED';
+export type CombatPhase = "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";
 
 export class CombatStateDto {
-  @ApiProperty({ description: 'Character ID' })
+  @ApiProperty({ description: "Character ID" })
   @IsString()
   characterId: string;
 
-  @ApiProperty({ description: 'Whether currently in combat' })
+  @ApiProperty({ description: "Whether currently in combat" })
   @IsBoolean()
   inCombat: boolean;
 
   @ApiProperty({
-    description: 'Active enemies',
+    description: "Active enemies",
     type: [CombatantDto],
   })
   @IsArray()
@@ -31,7 +31,7 @@ export class CombatStateDto {
   enemies: CombatantDto[];
 
   @ApiProperty({
-    description: 'Player state',
+    description: "Player state",
     type: CombatantDto,
   })
   @ValidateNested()
@@ -39,7 +39,7 @@ export class CombatStateDto {
   player: CombatantDto;
 
   @ApiProperty({
-    description: 'Turn order for combat',
+    description: "Turn order for combat",
     type: [CombatantDto],
   })
   @IsArray()
@@ -47,49 +47,49 @@ export class CombatStateDto {
   @Type(() => CombatantDto)
   turnOrder: CombatantDto[];
 
-  @ApiProperty({ description: 'Index of current turn in turnOrder' })
+  @ApiProperty({ description: "Index of current turn in turnOrder" })
   @IsNumber()
   currentTurnIndex: number;
 
-  @ApiProperty({ description: 'Current round number' })
+  @ApiProperty({ description: "Current round number" })
   @IsNumber()
   roundNumber: number;
 
-  @ApiPropertyOptional({ description: 'Narrative summary of current combat' })
+  @ApiPropertyOptional({ description: "Narrative summary of current combat" })
   @IsOptional()
   @IsString()
   narrative?: string;
 
   @ApiPropertyOptional({
-    description: 'Current combat phase',
-    enum: ['PLAYER_TURN', 'AWAITING_DAMAGE_ROLL', 'ENEMY_TURN', 'COMBAT_ENDED'],
+    description: "Current combat phase",
+    enum: ["PLAYER_TURN", "AWAITING_DAMAGE_ROLL", "ENEMY_TURN", "COMBAT_ENDED"],
   })
   @IsOptional()
   @IsString()
   phase?: CombatPhase;
 
   // D&D 5e Action Economy
-  @ApiPropertyOptional({ description: 'Remaining standard actions for current activation' })
+  @ApiPropertyOptional({ description: "Remaining standard actions for current activation" })
   @IsOptional()
   @IsNumber()
   actionRemaining?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum standard actions per activation' })
+  @ApiPropertyOptional({ description: "Maximum standard actions per activation" })
   @IsOptional()
   @IsNumber()
   actionMax?: number;
 
-  @ApiPropertyOptional({ description: 'Remaining bonus actions for current activation' })
+  @ApiPropertyOptional({ description: "Remaining bonus actions for current activation" })
   @IsOptional()
   @IsNumber()
   bonusActionRemaining?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum bonus actions per activation' })
+  @ApiPropertyOptional({ description: "Maximum bonus actions per activation" })
   @IsOptional()
   @IsNumber()
   bonusActionMax?: number;
 
-  @ApiPropertyOptional({ description: 'Active turn effects (dash, disengage, etc.)' })
+  @ApiPropertyOptional({ description: "Active turn effects (dash, disengage, etc.)" })
   @IsOptional()
   @IsArray()
   activeEffects?: string[];
@@ -97,7 +97,7 @@ export class CombatStateDto {
   constructor(init?: Partial<CombatStateDto>) {
     Object.assign(this, init);
     if (!this.player || !this.enemies || !this.turnOrder) {
-      throw new Error('CombatStateDto requires player, enemies, and turnOrder to be provided');
+      throw new Error("CombatStateDto requires player, enemies, and turnOrder to be provided");
     }
     // defaults
     this.enemies = this.enemies ?? [];
@@ -105,15 +105,15 @@ export class CombatStateDto {
       this.player ??
       new CombatantDto({
         isPlayer: true,
-        id: '',
+        id: "",
         initiative: 0,
       });
     this.turnOrder = this.turnOrder ?? [];
-    this.characterId = this.characterId ?? '';
+    this.characterId = this.characterId ?? "";
     this.inCombat = this.inCombat ?? false;
     this.currentTurnIndex = this.currentTurnIndex ?? 0;
     this.roundNumber = this.roundNumber ?? 1;
-    this.phase = this.phase ?? 'PLAYER_TURN';
+    this.phase = this.phase ?? "PLAYER_TURN";
     this.actionRemaining = this.actionRemaining ?? 1;
     this.actionMax = this.actionMax ?? 1;
     this.bonusActionRemaining = this.bonusActionRemaining ?? 1;

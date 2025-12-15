@@ -1,11 +1,11 @@
-import type { DiceResultDto, RollInstructionMessageDto } from '@rpg-gen/shared';
-import { isRollInstruction } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { watch } from 'vue';
-import { chatApi } from '@rpg-gen/api-client';
-import { getSkillBonus } from '../services/skillService';
-import { useCharacterStore } from '../stores/characterStore';
-import { useGameStore } from '../stores/gameStore';
+import type { DiceResultDto, RollInstructionMessageDto } from "@rpg-gen/shared";
+import { isRollInstruction } from "@rpg-gen/shared";
+import { storeToRefs } from "pinia";
+import { watch } from "vue";
+import { chatApi } from "@rpg-gen/api-client";
+import { getSkillBonus } from "../services/skillService";
+import { useCharacterStore } from "../stores/characterStore";
+import { useGameStore } from "../stores/gameStore";
 
 export function useGameRolls() {
   const gameStore = useGameStore();
@@ -30,14 +30,14 @@ export function useGameRolls() {
       discardedRoll: null,
       action: meta?.action,
       target: meta?.target,
-      targetAc: typeof meta?.targetAc === 'number' ? meta.targetAc : null,
+      targetAc: typeof meta?.targetAc === "number" ? meta.targetAc : null,
     };
   };
 
   const onDiceRolled = async (rollResult: DiceResultDto): Promise<void> => {
     const pending = gameStore.pendingInstruction;
     if (!pending || !isRollInstruction(pending)) return;
-    const skillName = pending.modifierLabel ?? 'Roll';
+    const skillName = pending.modifierLabel ?? "Roll";
     const skillBonus = pending.modifierLabel
       ? getSkillBonus(characterStore.currentCharacter ?? null, skillName)
       : (pending.modifierValue ?? 0);
@@ -55,11 +55,11 @@ export function useGameRolls() {
     if (!currentCharacter.value?.characterId) return;
 
     const message = await chatApi.sendMessage(currentCharacter.value.characterId, {
-      role: 'user',
+      role: "user",
       narrative: `I rolled ${rollData.value?.total}`,
       instructions: [],
     });
-    if (!message) throw new Error('No message returned from confirmRoll');
+    if (!message) throw new Error("No message returned from confirmRoll");
 
     return message;
   };
@@ -69,12 +69,12 @@ export function useGameRolls() {
     try {
       const payload = await gameStore.doRoll(
         pendingInstruction.dices,
-        pendingInstruction.advantage ?? 'none',
+        pendingInstruction.advantage ?? "none",
       );
       await onDiceRolled(payload);
     } catch (e) {
       gameStore.appendMessage(
-        'system',
+        "system",
         `Reroll failed: ${e instanceof Error ? e.message : String(e)}`,
       );
     }

@@ -1,5 +1,5 @@
-import { Prop, Schema } from '@nestjs/mongoose';
-import { GameInstruction } from '../instruction/GameInstruction.js';
+import { Prop, Schema } from "@nestjs/mongoose";
+import { GameInstruction } from "../instruction/GameInstruction.js";
 
 @Schema({ _id: false })
 export class ChatMessage {
@@ -7,7 +7,7 @@ export class ChatMessage {
     required: true,
     type: String,
   })
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
 
   @Prop({
     required: true,

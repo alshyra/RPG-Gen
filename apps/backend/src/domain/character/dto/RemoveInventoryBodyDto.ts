@@ -1,6 +1,6 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class RemoveInventoryBodyDto {
-  @ApiPropertyOptional({ description: 'Quantity to remove (-1 = remove all)' })
+  @ApiPropertyOptional({ description: "Quantity to remove (-1 = remove all)" })
   qty: number;
 }

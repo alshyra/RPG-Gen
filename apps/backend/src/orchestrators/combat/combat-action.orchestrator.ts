@@ -1,18 +1,18 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable, Logger, BadRequestException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import {
   CombatActionRequestDto,
   CombatActionType,
-} from '../../domain/combat/dto/CombatActionRequestDto.js';
+} from "../../domain/combat/dto/CombatActionRequestDto.js";
 import {
   CombatActionResponseDto,
   ActionCost,
-} from '../../domain/combat/dto/CombatActionResponseDto.js';
-import { CombatSession } from '../../infra/mongo/combat/CombatSession.js';
-import { DiceService } from '../../domain/dice/dice.service.js';
-import { SpellDefinitionService } from '../../domain/spell-definition/spell-definition.service.js';
-import { CharacterService } from '../../domain/character/character.service.js';
+} from "../../domain/combat/dto/CombatActionResponseDto.js";
+import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
+import { DiceService } from "../../domain/dice/dice.service.js";
+import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
+import { CharacterService } from "../../domain/character/character.service.js";
 
 /**
  * Orchestrator for unified combat actions.
@@ -39,7 +39,7 @@ export class CombatActionOrchestrator {
   ): Promise<CombatActionResponseDto> {
     const session = await this.combatSessionModel.findOne({ characterId, userId }).exec();
     if (!session) {
-      throw new BadRequestException('No active combat session');
+      throw new BadRequestException("No active combat session");
     }
 
     // Determine action cost
@@ -47,10 +47,10 @@ export class CombatActionOrchestrator {
 
     // Validate action economy
     if (cost === ActionCost.ACTION && (session.actionRemaining ?? 0) <= 0) {
-      return this.failureResponse(cost, 'No actions remaining', session);
+      return this.failureResponse(cost, "No actions remaining", session);
     }
     if (cost === ActionCost.BONUS_ACTION && (session.bonusActionRemaining ?? 0) <= 0) {
-      return this.failureResponse(cost, 'No bonus actions remaining', session);
+      return this.failureResponse(cost, "No bonus actions remaining", session);
     }
 
     // Execute the specific action
@@ -105,17 +105,17 @@ export class CombatActionOrchestrator {
     characterId: string,
   ): Promise<CombatActionResponseDto> {
     if (!request.targetId) {
-      return this.failureResponse(ActionCost.ACTION, 'Target ID required for attack', session);
+      return this.failureResponse(ActionCost.ACTION, "Target ID required for attack", session);
     }
 
     const enemy = session.enemies.find(e => e.id === request.targetId);
     if (!enemy) {
-      return this.failureResponse(ActionCost.ACTION, 'Target not found', session);
+      return this.failureResponse(ActionCost.ACTION, "Target not found", session);
     }
 
     // Get player's attack bonus from session (combat service sets this on combat start)
     const playerAttackBonus = session.player?.attackBonus ?? 4;
-    const playerDamageDice = session.player?.damageDice ?? '1d8';
+    const playerDamageDice = session.player?.damageDice ?? "1d8";
     const playerDamageBonus = session.player?.damageBonus ?? 3;
 
     // Roll attack using DiceService
@@ -130,8 +130,8 @@ export class CombatActionOrchestrator {
       damage = damageResult.damageTotal;
       enemy.hp = Math.max(0, (enemy.hp ?? 0) - damage);
       await this.combatSessionModel.findOneAndUpdate(
-        { characterId, userId, 'enemies.id': enemy.id },
-        { $set: { 'enemies.$.hp': enemy.hp } },
+        { characterId, userId, "enemies.id": enemy.id },
+        { $set: { "enemies.$.hp": enemy.hp } },
       );
     }
 
@@ -141,7 +141,7 @@ export class CombatActionOrchestrator {
       hit,
       damage: hit ? damage : undefined,
       description: hit
-        ? `Hit ${enemy.name} for ${damage} damage${isCrit ? ' (CRITICAL!)' : ''}`
+        ? `Hit ${enemy.name} for ${damage} damage${isCrit ? " (CRITICAL!)" : ""}`
         : `Missed ${enemy.name}`,
       actionsRemaining: session.actionRemaining ?? 0,
       bonusActionsRemaining: session.bonusActionRemaining ?? 0,
@@ -160,8 +160,8 @@ export class CombatActionOrchestrator {
   ): Promise<CombatActionResponseDto> {
     // Add 'dashed' effect for current turn (doubles movement)
     if (!session.activeEffects) session.activeEffects = [];
-    if (!session.activeEffects.includes('dashed')) {
-      session.activeEffects.push('dashed');
+    if (!session.activeEffects.includes("dashed")) {
+      session.activeEffects.push("dashed");
       await this.combatSessionModel.findOneAndUpdate(
         { characterId, userId },
         { $set: { activeEffects: session.activeEffects } },
@@ -171,7 +171,7 @@ export class CombatActionOrchestrator {
     return {
       success: true,
       cost: ActionCost.ACTION,
-      description: 'You take the Dash action, doubling your movement speed for this turn',
+      description: "You take the Dash action, doubling your movement speed for this turn",
       actionsRemaining: session.actionRemaining ?? 0,
       bonusActionsRemaining: session.bonusActionRemaining ?? 0,
       activeEffects: session.activeEffects,
@@ -185,8 +185,8 @@ export class CombatActionOrchestrator {
   ): Promise<CombatActionResponseDto> {
     // Add 'disengaged' effect for current turn (no OAs)
     if (!session.activeEffects) session.activeEffects = [];
-    if (!session.activeEffects.includes('disengaged')) {
-      session.activeEffects.push('disengaged');
+    if (!session.activeEffects.includes("disengaged")) {
+      session.activeEffects.push("disengaged");
       await this.combatSessionModel.findOneAndUpdate(
         { characterId, userId },
         { $set: { activeEffects: session.activeEffects } },
@@ -196,7 +196,7 @@ export class CombatActionOrchestrator {
     return {
       success: true,
       cost: ActionCost.BONUS_ACTION,
-      description: 'You disengage, avoiding opportunity attacks for this turn',
+      description: "You disengage, avoiding opportunity attacks for this turn",
       actionsRemaining: session.actionRemaining ?? 0,
       bonusActionsRemaining: session.bonusActionRemaining ?? 0,
       activeEffects: session.activeEffects,
@@ -210,17 +210,17 @@ export class CombatActionOrchestrator {
     characterId: string,
   ): Promise<CombatActionResponseDto> {
     if (!request.spellName) {
-      return this.failureResponse(ActionCost.ACTION, 'Spell name required', session);
+      return this.failureResponse(ActionCost.ACTION, "Spell name required", session);
     }
 
     if (!request.targetId) {
-      return this.failureResponse(ActionCost.ACTION, 'Target ID required for spell', session);
+      return this.failureResponse(ActionCost.ACTION, "Target ID required for spell", session);
     }
 
     // Find target
     const target = session.enemies.find(e => e.id === request.targetId);
     if (!target) {
-      return this.failureResponse(ActionCost.ACTION, 'Target not found', session);
+      return this.failureResponse(ActionCost.ACTION, "Target not found", session);
     }
 
     // Load spell definition
@@ -233,7 +233,7 @@ export class CombatActionOrchestrator {
       );
     }
 
-    const damageDice = spellDef.meta?.damageDice || '1d4';
+    const damageDice = spellDef.meta?.damageDice || "1d4";
     const saveType = spellDef.meta?.saveType;
 
     // Calculate spell DC (8 + proficiency + spellcasting ability modifier)
@@ -260,8 +260,8 @@ export class CombatActionOrchestrator {
         damage = damageDiceResult.damageTotal;
         target.hp = Math.max(0, (target.hp ?? 0) - damage);
         await this.combatSessionModel.findOneAndUpdate(
-          { characterId, userId, 'enemies.id': target.id },
-          { $set: { 'enemies.$.hp': target.hp } },
+          { characterId, userId, "enemies.id": target.id },
+          { $set: { "enemies.$.hp": target.hp } },
         );
       }
 
@@ -294,8 +294,8 @@ export class CombatActionOrchestrator {
         damage = damageDiceResult.damageTotal;
         target.hp = Math.max(0, (target.hp ?? 0) - damage);
         await this.combatSessionModel.findOneAndUpdate(
-          { characterId, userId, 'enemies.id': target.id },
-          { $set: { 'enemies.$.hp': target.hp } },
+          { characterId, userId, "enemies.id": target.id },
+          { $set: { "enemies.$.hp": target.hp } },
         );
       }
 
@@ -305,7 +305,7 @@ export class CombatActionOrchestrator {
         hit,
         damage: hit ? damage : undefined,
         description: hit
-          ? `${request.spellName}: Hit ${target.name} for ${damage} damage${isCrit ? ' (CRITICAL!)' : ''}`
+          ? `${request.spellName}: Hit ${target.name} for ${damage} damage${isCrit ? " (CRITICAL!)" : ""}`
           : `${request.spellName}: Missed ${target.name}`,
         actionsRemaining: session.actionRemaining ?? 0,
         bonusActionsRemaining: session.bonusActionRemaining ?? 0,
@@ -328,7 +328,7 @@ export class CombatActionOrchestrator {
     const newHp = Math.min((session.player.hp ?? 0) + healing, session.player.hpMax ?? 20);
     await this.combatSessionModel.findOneAndUpdate(
       { characterId, userId },
-      { $set: { 'player.hp': newHp } },
+      { $set: { "player.hp": newHp } },
     );
 
     return {

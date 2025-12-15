@@ -1,4 +1,4 @@
-import type { SkillResponseDto } from '@rpg-gen/shared';
+import type { SkillResponseDto } from "@rpg-gen/shared";
 
 /**
  * Update skills array when toggling a skill.

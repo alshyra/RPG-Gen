@@ -1,5 +1,5 @@
-import test from 'ava';
-import { LevelUpService } from '../../src/domain/character/levelup.service.js';
+import test from "ava";
+import { LevelUpService } from "../../src/domain/character/levelup.service.js";
 
 function makeMockCharacterService(initialCharacter) {
   return {
@@ -24,12 +24,12 @@ function makeMockSpellDefService(spellsByLevel) {
   };
 }
 
-test('getOptionsForClass returns next level and available spells', async t => {
+test("getOptionsForClass returns next level and available spells", async t => {
   const character = {
-    characterId: 'c1',
+    characterId: "c1",
     classes: [
       {
-        name: 'Wizard',
+        name: "Wizard",
         level: 1,
       },
     ],
@@ -48,9 +48,9 @@ test('getOptionsForClass returns next level and available spells', async t => {
   const spellDefs = {
     2: [
       {
-        name: 'Magic Missile',
+        name: "Magic Missile",
         level: 2,
-        definitionId: 'spell-2-magic-missile',
+        definitionId: "spell-2-magic-missile",
       },
     ],
   };
@@ -60,21 +60,21 @@ test('getOptionsForClass returns next level and available spells', async t => {
 
   const service = new LevelUpService(mockCharService as any, mockSpellService as any);
 
-  const options = await service.getOptionsForClass(character as any, 'Wizard');
+  const options = await service.getOptionsForClass(character as any, "Wizard");
 
   t.is(options.currentLevel, 1);
   t.is(options.nextLevel, 2);
   t.truthy(Array.isArray(options.unlockedSpells));
   t.is(options.unlockedSpells.length, 1);
-  t.is(options.unlockedSpells[0].name, 'Magic Missile');
+  t.is(options.unlockedSpells[0].name, "Magic Missile");
 });
 
-test('applyLevelUp increments class level and adds spells and ASI', async t => {
+test("applyLevelUp increments class level and adds spells and ASI", async t => {
   const character = {
-    characterId: 'c2',
+    characterId: "c2",
     classes: [
       {
-        name: 'Cleric',
+        name: "Cleric",
         level: 1,
       },
     ],
@@ -88,15 +88,15 @@ test('applyLevelUp increments class level and adds spells and ASI', async t => {
       Cha: 10,
     },
     proficiency: 2,
-    userId: 'u1',
+    userId: "u1",
   };
 
   const spellDefs = {
     2: [
       {
-        name: 'Healing Word',
+        name: "Healing Word",
         level: 2,
-        definitionId: 'spell-2-healing-word',
+        definitionId: "spell-2-healing-word",
       },
     ],
   };
@@ -105,18 +105,18 @@ test('applyLevelUp increments class level and adds spells and ASI', async t => {
   const mockSpellService = makeMockSpellDefService(spellDefs);
   const service = new LevelUpService(mockCharService as any, mockSpellService as any);
 
-  const updated = await service.applyLevelUp('u1', 'c2', 'Cleric', {
-    newSpellIds: ['spell-2-healing-word'],
+  const updated = await service.applyLevelUp("u1", "c2", "Cleric", {
+    newSpellIds: ["spell-2-healing-word"],
     abilityIncreases: [
       {
-        ability: 'Wis',
+        ability: "Wis",
         inc: 1,
       },
     ],
   });
 
   t.is(updated.classes?.[0].level, 2);
-  t.truthy(updated.spells && updated.spells.find(s => s.definitionId === 'spell-2-healing-word'));
+  t.truthy(updated.spells && updated.spells.find(s => s.definitionId === "spell-2-healing-word"));
   t.truthy(updated.scores);
   t.is(updated.scores!.Wis, 13);
 });

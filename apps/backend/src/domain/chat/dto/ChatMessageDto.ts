@@ -1,4 +1,4 @@
-import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,
@@ -8,8 +8,8 @@ import {
   GameInstructionDto,
   CombatEndInstructionMessageDto,
   CombatStartInstructionMessageDto,
-} from './GameInstructionDto.js';
-import { IsArray, IsString } from 'class-validator';
+} from "./GameInstructionDto.js";
+import { IsArray, IsString } from "class-validator";
 
 @ApiExtraModels(
   RollInstructionMessageDto,
@@ -22,19 +22,19 @@ import { IsArray, IsString } from 'class-validator';
 )
 export class ChatMessageDto {
   @ApiProperty({
-    description: 'Message role',
-    enum: ['user', 'assistant', 'system'],
+    description: "Message role",
+    enum: ["user", "assistant", "system"],
   })
   @IsString()
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
 
-  @ApiProperty({ description: 'Narrative text (for assistant messages)' })
+  @ApiProperty({ description: "Narrative text (for assistant messages)" })
   @IsString()
   narrative: string;
 
   @ApiPropertyOptional({
-    description: 'Game instructions (for assistant messages)',
-    type: 'array',
+    description: "Game instructions (for assistant messages)",
+    type: "array",
     items: {
       oneOf: [
         { $ref: getSchemaPath(RollInstructionMessageDto) },

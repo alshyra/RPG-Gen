@@ -1,11 +1,11 @@
-import { shallowRef, onUnmounted, markRaw } from 'vue';
-import * as PIXI from 'pixi.js';
-import { gsap } from 'gsap';
-import type { availableCharacterKeys } from '../types/combat-types';
-import { animations as animationConfig, animations } from '../services/spritesAnimations';
+import { shallowRef, onUnmounted, markRaw } from "vue";
+import * as PIXI from "pixi.js";
+import { gsap } from "gsap";
+import type { availableCharacterKeys } from "../types/combat-types";
+import { animations as animationConfig, animations } from "../services/spritesAnimations";
 
 // New modules
-import { loadTextures, preloadFont, preloadHeartIcon } from '../services/assets/assetManager';
+import { loadTextures, preloadFont, preloadHeartIcon } from "../services/assets/assetManager";
 import {
   createGrid,
   createRangeOverlay,
@@ -15,12 +15,12 @@ import {
   pixelToGrid,
   findManhattanPath,
   showPathPreview,
-} from '../services/render/gridRenderer';
-import { useCombatUnit } from './useCombatUnit';
-import { setupInteractionController } from '../services/input/interactionController';
-import { useUnitsStore } from '../stores/units';
-import { storeToRefs } from 'pinia';
-import { useEventBus } from '../services/eventBus';
+} from "../services/render/gridRenderer";
+import { useCombatUnit } from "./useCombatUnit";
+import { setupInteractionController } from "../services/input/interactionController";
+import { useUnitsStore } from "../stores/units";
+import { storeToRefs } from "pinia";
+import { useEventBus } from "../services/eventBus";
 
 export function useCombat() {
   // PERFORMANCE: Use shallowRef for PIXI objects to avoid deep reactivity
@@ -55,14 +55,14 @@ export function useCombat() {
       backgroundColor: 0x1e1e1e,
       resolution: Math.min(window.devicePixelRatio || 1, 2), // Cap at 2x for performance
       antialias: false, // Disable antialiasing for better performance
-      preference: 'webgl', // Force WebGL if available
-      powerPreference: 'high-performance',
+      preference: "webgl", // Force WebGL if available
+      powerPreference: "high-performance",
     });
 
     container.appendChild(pixiApp.canvas);
     // Center the canvas
-    pixiApp.canvas.style.display = 'block';
-    pixiApp.canvas.style.margin = '0 auto';
+    pixiApp.canvas.style.display = "block";
+    pixiApp.canvas.style.margin = "0 auto";
 
     pixiApp.stage.sortableChildren = true;
     combatPixiInstance.value = pixiApp;
@@ -83,21 +83,21 @@ export function useCombat() {
 
       const isMiss = !payload.damage || payload.damage <= 0;
       const label = isMiss
-        ? 'Miss'
+        ? "Miss"
         : payload.isCrit
           ? `CRIT! -${payload.damage}`
           : `-${payload.damage}`;
 
       const textStyle = new PIXI.TextStyle({
-        fontFamily: 'Arial',
+        fontFamily: "Arial",
         fontSize: payload.isCrit ? 28 : 20,
-        fill: isMiss ? '#9ca3af' : payload.isCrit ? '#ffdd57' : '#ffffff',
+        fill: isMiss ? "#9ca3af" : payload.isCrit ? "#ffdd57" : "#ffffff",
         stroke: {
-          color: '#000000',
+          color: "#000000",
           width: 4,
         },
         dropShadow: {
-          color: '#000000',
+          color: "#000000",
           blur: 6,
         },
       });
@@ -114,7 +114,7 @@ export function useCombat() {
         y: y - 40,
         alpha: 0,
         duration: 1.0,
-        ease: 'power2.out',
+        ease: "power2.out",
         onComplete: () => {
           if (text && text.parent) text.parent.removeChild(text);
           // @ts-ignore
@@ -123,7 +123,7 @@ export function useCombat() {
       });
     };
 
-    on('unit:attacked', handleUnitAttackedRef);
+    on("unit:attacked", handleUnitAttackedRef);
 
     gridContainer.value = createGrid(combatPixiInstance.value);
     rangeOverlay.value = createRangeOverlay(combatPixiInstance.value);
@@ -184,7 +184,7 @@ export function useCombat() {
         },
       );
     }
-    console.log('Combat engine initialisé.');
+    console.log("Combat engine initialisé.");
   };
 
   // createUnit now delegates texture loading + sprite creation
@@ -193,16 +193,16 @@ export function useCombat() {
     gridX = 6,
     gridY = 4,
     maxMoveRange = 3,
-    characterKey: availableCharacterKeys = 'Archer-Green' as const,
+    characterKey: availableCharacterKeys = "Archer-Green" as const,
     hp = 100,
     maxHp = 100,
     isPlayerUnit = false,
   ) => {
     if (!combatPixiInstance.value) return null;
     const animations = await loadTextures(characterKey);
-    const idleKey = 'idle_bottom';
+    const idleKey = "idle_bottom";
     if (!animations[idleKey] || animations[idleKey].length === 0) {
-      console.error('No idle textures');
+      console.error("No idle textures");
       return null;
     }
     const sprite = new PIXI.AnimatedSprite(animations[idleKey]);
@@ -214,8 +214,8 @@ export function useCombat() {
     sprite.zIndex = 1;
     const { x, y } = gridToPixel(gridX, gridY);
     sprite.position.set(x, y);
-    sprite.eventMode = 'static';
-    sprite.cursor = 'pointer';
+    sprite.eventMode = "static";
+    sprite.cursor = "pointer";
 
     sprite.play();
     combatPixiInstance.value.stage.addChild(sprite);
@@ -243,7 +243,7 @@ export function useCombat() {
     }
 
     // Now attach pointer handler after unit is guaranteed in store
-    sprite.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
+    sprite.on("pointerdown", (event: PIXI.FederatedPointerEvent) => {
       // Stop event propagation to prevent stage click handler from firing
       event.stopPropagation();
 
@@ -253,10 +253,10 @@ export function useCombat() {
       if (isPlayer && interactionController?.selectUnit) {
         interactionController.selectUnit(unitId);
       } else if (!isPlayer) {
-        console.debug('[useCombat] Enemy unit cannot be selected:', unitId);
+        console.debug("[useCombat] Enemy unit cannot be selected:", unitId);
       }
 
-      emit('unit:clicked', {
+      emit("unit:clicked", {
         unitId,
         isPlayer,
         stageX: event.global.x,
@@ -269,15 +269,15 @@ export function useCombat() {
 
   // movement logic: choose animations, animate sprite, update state via unitService
   const getDirectionFromDelta = (dx: number, dy: number) => {
-    if (dx === 0 && dy > 0) return 'bottom';
-    if (dx === 0 && dy < 0) return 'top';
-    if (dx > 0 && dy === 0) return 'right';
-    if (dx < 0 && dy === 0) return 'left';
-    if (dx > 0 && dy > 0) return 'bottom_right';
-    if (dx > 0 && dy < 0) return 'top_right';
-    if (dx < 0 && dy > 0) return 'bottom_left';
-    if (dx < 0 && dy < 0) return 'top_left';
-    return 'bottom';
+    if (dx === 0 && dy > 0) return "bottom";
+    if (dx === 0 && dy < 0) return "top";
+    if (dx > 0 && dy === 0) return "right";
+    if (dx < 0 && dy === 0) return "left";
+    if (dx > 0 && dy > 0) return "bottom_right";
+    if (dx > 0 && dy < 0) return "top_right";
+    if (dx < 0 && dy > 0) return "bottom_left";
+    if (dx < 0 && dy < 0) return "top_left";
+    return "bottom";
   };
 
   /**
@@ -336,7 +336,7 @@ export function useCombat() {
       unit.sprite.play();
     }
 
-    emit('turn:ended', { roundNumber: 0 });
+    emit("turn:ended", { roundNumber: 0 });
   };
 
   /**
@@ -373,7 +373,7 @@ export function useCombat() {
         x: targetX,
         y: targetY,
         duration: 0.2, // Fast per-tile animation
-        ease: 'linear',
+        ease: "linear",
         onComplete: () => {
           if (unit.healthBar?.container) {
             unit.healthBar.container.position.set(targetX, targetY - 40);
@@ -391,7 +391,7 @@ export function useCombat() {
           x: targetX,
           y: targetY - 40,
           duration: 0.2,
-          ease: 'linear',
+          ease: "linear",
         });
       }
     });
@@ -404,17 +404,17 @@ export function useCombat() {
     const wasDefeated = newHp === 0;
 
     combatUnit.updateHp(unitId, newHp);
-    emit('unit:attacked', {
-      attackerId: 'unknown',
+    emit("unit:attacked", {
+      attackerId: "unknown",
       targetId: unitId,
       damage,
     });
-    if (wasDefeated) emit('unit:died', { unitId });
+    if (wasDefeated) emit("unit:died", { unitId });
   };
 
   const setupDragEvents = () => {
     if (!combatPixiInstance.value) return;
-    combatPixiInstance.value.stage.eventMode = 'static';
+    combatPixiInstance.value.stage.eventMode = "static";
     combatPixiInstance.value.stage.hitArea = combatPixiInstance.value.screen;
   };
 
@@ -454,7 +454,7 @@ export function useCombat() {
     } catch {}
     // remove global listeners to avoid leaks
     if (handleUnitAttackedRef) {
-      off('unit:attacked', handleUnitAttackedRef);
+      off("unit:attacked", handleUnitAttackedRef);
     }
   });
 

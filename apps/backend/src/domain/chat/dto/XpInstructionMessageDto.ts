@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class XpInstructionMessageDto {
   @ApiProperty({
-    description: 'Instruction type',
-    enum: ['xp'],
+    description: "Instruction type",
+    enum: ["xp"],
   })
-  type: 'xp';
+  type: "xp";
 
-  @ApiProperty({ description: 'Amount of XP gained' })
+  @ApiProperty({ description: "Amount of XP gained" })
   xp: number;
 }

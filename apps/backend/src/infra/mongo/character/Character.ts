@@ -1,18 +1,18 @@
-import { Prop, Schema } from '@nestjs/mongoose';
-import { Schema as MongooseSchema, Document } from 'mongoose';
-import { Race } from './Race.js';
-import { CharacterClass } from './CharacterClass.js';
-import { AbilityScores } from './AbilityScores.js';
-import { Skill } from './Skill.js';
-import { Item } from '../item/Item.js';
-import { Spell } from '../spell/Spell.js';
+import { Prop, Schema } from "@nestjs/mongoose";
+import { Schema as MongooseSchema, Document } from "mongoose";
+import { Race } from "./Race.js";
+import { CharacterClass } from "./CharacterClass.js";
+import { AbilityScores } from "./AbilityScores.js";
+import { Skill } from "./Skill.js";
+import { Item } from "../item/Item.js";
+import { Spell } from "../spell/Spell.js";
 
 @Schema({ timestamps: true })
 export class Character {
   @Prop({
     required: false,
     type: MongooseSchema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
   })
   userId: MongooseSchema.Types.ObjectId;
 
@@ -120,10 +120,10 @@ export class Character {
 
   @Prop({
     required: true,
-    default: 'draft',
+    default: "draft",
     type: String,
   })
-  state: 'draft' | 'created';
+  state: "draft" | "created";
 
   @Prop({
     type: [Item],

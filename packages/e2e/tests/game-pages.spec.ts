@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
-import { mockAuthentication } from '../helpers/auth';
-import { prepareE2EDb } from '../helpers/api';
+import { test, expect } from "@playwright/test";
+import { mockAuthentication } from "../helpers/auth";
+import { prepareE2EDb } from "../helpers/api";
 
 /**
  * Game Detail Pages Tests
  * Tests navigation to inventory, spells, and other game pages
  */
 
-test.describe('Game detail pages', () => {
+test.describe("Game detail pages", () => {
   test.beforeEach(async ({ page }) => {
     await mockAuthentication(page);
 
@@ -16,10 +16,10 @@ test.describe('Game detail pages', () => {
     expect(result.ok).toBe(true);
   });
 
-  test.skip('should navigate to inventory page from sidebar', async ({ page }) => {
+  test.skip("should navigate to inventory page from sidebar", async ({ page }) => {
     // Intercept and navigate
-    const charactersPromise = page.waitForResponse('**/api/characters');
-    await page.goto('/home');
+    const charactersPromise = page.waitForResponse("**/api/characters");
+    await page.goto("/home");
     await charactersPromise;
 
     // Click first character card to resume
@@ -39,21 +39,21 @@ test.describe('Game detail pages', () => {
     await expect(page).toHaveURL(/\/game\/[A-Za-z0-9-]+$/);
 
     // Click Inventory in sidebar - use role link with timeout
-    await page.getByRole('link', { name: 'Inventaire' }).click({ timeout: 10000 });
+    await page.getByRole("link", { name: "Inventaire" }).click({ timeout: 10000 });
 
     // Inventory page should be visible - use heading to avoid ambiguity
-    await expect(page.getByRole('heading', { name: 'Inventaire' })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Inventaire" })).toBeVisible();
 
     // Either shows empty state or items list
-    const bodyText = await page.locator('body').textContent();
+    const bodyText = await page.locator("body").textContent();
     expect(
-      bodyText?.includes('Aucun objet pour le moment.') || bodyText?.includes('item(s)'),
+      bodyText?.includes("Aucun objet pour le moment.") || bodyText?.includes("item(s)"),
     ).toBeTruthy();
   });
 
-  test('should navigate to spells page and show placeholder', async ({ page }) => {
-    const charactersPromise = page.waitForResponse('**/api/characters');
-    await page.goto('/home');
+  test("should navigate to spells page and show placeholder", async ({ page }) => {
+    const charactersPromise = page.waitForResponse("**/api/characters");
+    await page.goto("/home");
     await charactersPromise;
 
     // Click first character card
@@ -78,10 +78,10 @@ test.describe('Game detail pages', () => {
     }
 
     // Verify we're on spells page - look for heading
-    await expect(page.getByRole('heading', { name: 'Sorts' })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sorts" })).toBeVisible();
 
     // Check page content - may show empty state or spell list
-    const bodyText = await page.locator('body').textContent();
+    const bodyText = await page.locator("body").textContent();
     // Just verify we have some content related to spells
     expect(bodyText).toBeTruthy();
   });

@@ -1,6 +1,6 @@
-import * as PIXI from 'pixi.js';
-import { animations as animationConfig, frameWidth, frameHeight } from '../spritesAnimations';
-import { Texture, Assets } from 'pixi.js';
+import * as PIXI from "pixi.js";
+import { animations as animationConfig, frameWidth, frameHeight } from "../spritesAnimations";
+import { Texture, Assets } from "pixi.js";
 
 const createFrameTexture = (base: Texture, x: number, y: number, w: number, h: number): Texture => {
   return new Texture({
@@ -33,14 +33,14 @@ const buildFromAtlas = (texture: Texture) => {
 
 export const preloadFont = async () =>
   Assets.load({
-    alias: 'HealthBarFont',
-    src: '/Literata-Medium.fnt',
+    alias: "HealthBarFont",
+    src: "/Literata-Medium.fnt",
   });
 
 export const preloadHeartIcon = async () =>
   Assets.load({
-    alias: 'heart',
-    src: '/heart.png',
+    alias: "heart",
+    src: "/heart.png",
   });
 
 export const loadTextures = async (characterKey: string): Promise<Record<string, Texture[]>> => {
