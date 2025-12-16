@@ -112,9 +112,8 @@
 
 <script setup lang="ts">
 import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
-import { characterApi, chatApi, imageApi } from "@rpg-gen/api-client";
+import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
 import { DnDRulesService } from "@/services/dndRulesService";
-import { useCharacterStore } from "@/stores/characterStore";
 import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -143,8 +142,10 @@ const steps = [
 ];
 
 const characterStore = useCharacterStore();
-const { updateCharacter } = characterStore;
 const { currentCharacter } = storeToRefs(characterStore);
+const chat = useChat(() => currentCharacter.value?.characterId);
+const image = useImage();
+
 const skillsToChoose = computed(() =>
   DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || "")
 );
@@ -228,14 +229,9 @@ const saveFinalCharacter = async () => {
 
 const generateAndApplyAvatar = async () => {
   try {
-    const imageUrl = await imageApi.generateAvatar(currentCharacter.value!.characterId);
-    try {
-      const refreshed = await characterApi.findOne(currentCharacter.value!.characterId);
-      if (refreshed) currentCharacter.value = refreshed;
-      else currentCharacter.value!.portrait = imageUrl;
-    } catch {
-      currentCharacter.value!.portrait = imageUrl;
-    }
+    await image.generateAvatar.mutateAsync({ characterId: currentCharacter.value!.characterId });
+    // Refetch character to get the updated portrait
+    await characterStore.refetchCharacter();
   } catch (e) {
     console.warn("Avatar generation failed — continuing to game", e);
   }
@@ -246,7 +242,8 @@ const initConversationForCharacter = async () => {
     loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = "Préparation du premier prompt du Maître de Jeu...";
     if (currentCharacter.value) {
-      await chatApi.getHistory(currentCharacter.value.characterId);
+      // History will be loaded automatically by useChat
+      await chat.history.refetch();
     }
   } catch (e) {
     console.warn("Failed to initialize conversation/history", e);

@@ -2,13 +2,18 @@ import type {
   CombatantDto,
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
+  CombatStartRequestDto,
+  CombatStateDto,
+  EndPlayerTurnResponseDto,
 } from "@rpg-gen/shared";
-import { combatApi } from "@rpg-gen/api-client";
+import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import { useCharacterStore } from "../stores/characterStore";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { useCharacterId } from "./useCharacterId";
+import { useCombatInfo } from "./useCombatStatus";
 
 /**
  * Composable for combat-specific actions and state management
@@ -17,17 +22,78 @@ import { useGameStore } from "../stores/gameStore";
 export function useCombat() {
   const router = useRouter();
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
+  const currentCharacter = useCurrentCharacter();
+  const characterId = useCharacterId();
   const combatStore = useCombatStore();
-  const {
-    currentTarget,
-    currentAttackResult,
-    currentPlayerAttackLog,
-    currentAttackView,
-    combatEndNarrative,
-    isCombatEndModalOpen,
-  } = storeToRefs(combatStore);
-  const { currentCharacter } = storeToRefs(characterStore);
+  const { currentTarget, currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
+    storeToRefs(combatStore);
+  const combatApi = useCombatApi(characterId);
+  const combatInfo = useCombatInfo();
+  const character = useCharacter(characterId);
+
+  /**
+   * Start a combat session
+   * Replaces combatStore.startCombat()
+   */
+  const startCombat = async (
+    charId: string,
+    instruction: CombatStartRequestDto,
+  ): Promise<CombatStateDto> => {
+    const response = await combatApi.startCombat.mutateAsync({ characterId: charId, data: instruction });
+    if (response.enemies && response.enemies.length > 0) {
+      currentTarget.value = response.enemies[0];
+    }
+    return response;
+  };
+
+  /**
+   * Fetch current combat status
+   * Replaces combatStore.fetchStatus()
+   */
+  const fetchCombatStatus = async (): Promise<void> => {
+    await combatApi.status.refetch();
+  };
+
+  /**
+   * End player turn and get enemy attack logs
+   * Replaces combatStore.endActivation()
+   */
+  const endActivation = async (charId: string): Promise<EndPlayerTurnResponseDto> => {
+    const response = await combatApi.endTurn.mutateAsync(charId);
+    if (response.attackLogs?.length) {
+      await combatStore.processAttackLogs(response.attackLogs);
+    }
+    // Auto-select next target if current is dead
+    const enemies = combatInfo.enemies.value ?? [];
+    const selectNextAliveTarget = (enemyList: typeof enemies) =>
+      enemyList.find(e => (e.hp ?? 0) > 0) ?? null;
+    currentTarget.value = selectNextAliveTarget(enemies);
+    return response;
+  };
+
+  /**
+   * Perform an attack against a target
+   * Replaces combatStore.performAttack() - now uses executeAttack internally
+   */
+  const performAttack = async (
+    target: CombatantDto,
+    spellName?: string,
+  ): Promise<CombatActionResponseDto> => {
+    return combatApi.attack.mutateAsync({
+      characterId: characterId.value!,
+      targetName: target.name ?? "",
+      spellName,
+    });
+  };
+
+  /**
+   * End the current combat session
+   * Replaces combatStore.endCombatSession()
+   */
+  const endCombatSession = async (charId: string): Promise<void> => {
+    await combatApi.endCombat.mutateAsync(charId);
+    combatStore.clearCombat();
+  };
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -57,7 +123,7 @@ export function useCombat() {
     try {
       const payload = { combat_start: instruction.combat_start };
       const currentHp = currentCharacter.value.hp ?? 0;
-      const combatState = await combatStore.startCombat(
+      const combatState = await startCombat(
         currentCharacter.value.characterId,
         payload,
       );
@@ -70,12 +136,12 @@ export function useCombat() {
           "system",
           `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
         );
-        // Sync HP to character store
-        characterStore.updateHp(-initialDamage);
+        // Sync HP to character store (will update via TanStack Query cache)
+        await character.updateHp.mutateAsync(newHp);
       }
-      currentCharacter.value.hp = combatState.player?.hp ?? currentCharacter.value.hp;
-      if ((currentCharacter.value.hp ?? 1) <= 0) {
-        characterStore.showDeathModal = true;
+
+      if (newHp <= 0) {
+        gameStore.showDeathModal = true;
       }
 
       displayCombatStartSuccess(combatState);
@@ -157,8 +223,8 @@ export function useCombat() {
     }
 
     // snapshot previous state (before applying server-returned state)
-    const prevEnemies = combatStore.enemies.map(e => ({ ...e }));
-    const prevPlayer = combatStore.player ? { ...combatStore.player } : null;
+    const prevEnemies = combatInfo.enemies.value.map(e => ({ ...e }));
+    const prevPlayer = combatInfo.player.value ? { ...combatInfo.player.value } : null;
 
     // build client-friendly AttackView so components can display consistent values
     const targetBefore = prevEnemies.find(e => e.id === target.id);
@@ -181,10 +247,8 @@ export function useCombat() {
 
     currentAttackView.value = attackView;
 
-    currentAttackResult.value = result;
-    if (result.combatState) {
-      combatStore.initializeCombat(result.combatState);
-    }
+    // Combat state (including attack result) is automatically updated via TanStack Query
+    // Components can read combatApi.attack.data directly
     await showPlayerAttackAnimation(result);
     displayAttackResultMessage(target, result);
     checkCombatVictory(result);
@@ -197,7 +261,7 @@ export function useCombat() {
     if (!currentCharacter.value) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
-    if (!combatStore.canPlayerAct) {
+    if (!combatInfo.canAct.value) {
       gameStore.appendMessage("system", `⚠️ Vous n'avez plus de points d'action disponibles.`);
       return;
     }
@@ -208,7 +272,7 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatApi.attack(currentCharacter.value.characterId, target, spellName);
+      const result = await combatApi.attack.mutateAsync({ target, spellName });
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);
@@ -224,7 +288,7 @@ export function useCombat() {
     victory: boolean,
     xpGained: number,
     enemiesDefeated: string[],
-    narrative: string,
+    _narrative: string,
   ): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage("system", "💀 Combat terminé.");
@@ -244,10 +308,9 @@ export function useCombat() {
     }
     if (xpGained > 0) {
       gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
-      characterStore.updateXp(xpGained);
+      await character.updateXp.mutateAsync(xpGained);
     }
 
-    combatEndNarrative.value = narrative;
     isCombatEndModalOpen.value = true;
   };
 
@@ -267,17 +330,17 @@ export function useCombat() {
    * Flee from combat
    */
   const fleeCombat = async (): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
     try {
-      await combatApi.flee(character.characterId);
+      await combatApi.endCombat.mutateAsync(characterId.value!);
       gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view
       await router.push({
         name: "game",
-        params: { characterId: character.characterId },
+        params: { characterId: c.characterId },
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to flee";
@@ -290,7 +353,8 @@ export function useCombat() {
    */
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter.value) return false;
-    const { inCombat } = await combatStore.fetchStatus(currentCharacter.value?.characterId);
+    await fetchCombatStatus();
+    const inCombat = combatInfo.inCombat.value;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({
@@ -302,6 +366,13 @@ export function useCombat() {
   };
 
   return {
+    // Workflow functions (moved from combatStore)
+    startCombat,
+    fetchCombatStatus,
+    endActivation,
+    performAttack,
+    endCombatSession,
+
     // Actions
     initializeCombat,
     executeAttack,
@@ -312,7 +383,6 @@ export function useCombat() {
 
     // Modal state
     isCombatEndModalOpen,
-    combatEndNarrative,
     closeCombatEndModal,
   };
 }

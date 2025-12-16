@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { storeToRefs } from 'pinia';
 import FighterPortrait from '../FighterPortrait.vue';

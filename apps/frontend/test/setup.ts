@@ -1,6 +1,12 @@
 import "whatwg-fetch";
 import { vi } from "vitest";
 import { reactive } from "vue";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import { createApp } from "vue";
+
+// Setup Vue Query for tests
+const app = createApp({});
+app.use(VueQueryPlugin);
 
 let shouldMockLocalStorage = true;
 try {

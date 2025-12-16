@@ -14,7 +14,8 @@ import LoginView from "../views/LoginView.vue";
 import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { authApi } from "@rpg-gen/api-client";
 import CombatPanel from "@/components/game/combat-panel/CombatPanel.vue";
-import { useCombatStore } from "@/stores/combatStore";
+import { useCombat } from "@rpg-gen/api-client";
+import { useCharacterId } from "@/composables/useCharacterId";
 
 const routes = [
   {
@@ -124,8 +125,10 @@ router.beforeEach(async (to, _from, next) => {
     next({ name: "home" });
   } else if (to.name === "game-combat") {
     // Protect combat route: redirect to game messages if not in combat
-    const combatStore = useCombatStore();
-    if (!combatStore.inCombat) {
+    const characterId = useCharacterId();
+    const combat = useCombat(characterId);
+    const inCombat = combat.status.data.value?.inCombat ?? false;
+    if (!inCombat) {
       next({
         name: "game",
         params: { characterId: to.params.characterId },

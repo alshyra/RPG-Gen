@@ -320,6 +320,80 @@ async getCharacter(
 
 ---
 
+## Frontend Architecture Issues (Updated Dec 16)
+
+### ⚠️ CRITICAL: Layering Violations in combatStore
+
+**Issue Identified:**
+
+The `combatStore` exports action methods that perform **dynamic imports of composables**:
+
+```typescript
+// ❌ WRONG - combatStore doing dynamic import of composables
+const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
+  const { useCombatApi } = await import("../composables/useCombatStatus");
+  const combatApi = useCombatApi();
+  const response = await combatApi.startCombat.mutateAsync({ characterId, data: instruction });
+  if (response.enemies && response.enemies.length > 0) {
+    currentTarget.value = response.enemies[0];
+  }
+  return response;
+};
+```
+
+**Why This is Wrong:**
+
+1. **Inverted Dependency** - Store importing composables violates layering (should be Component → Composable → Store)
+2. **Workflow in Store** - Complex business logic belongs in composables, not stores
+3. **Pass-Through Methods** - Store methods just delegate to composables (wrapper without value)
+4. **Unused useCombatApi()** - Wrapper function that adds no value:
+   ```typescript
+   export function useCombatApi() {
+     const characterId = useCharacterId();
+     return useCombat(characterId);
+   }
+   // This is just: useCharacterId() + useCombat() without adding anything
+   ```
+
+**Correct Architecture:**
+
+```
+Components (React to user input)
+    ↓
+Composables (workflow orchestration + TanStack Query mutations)
+    ↓
+Stores (UI state ONLY: modals, animations, selection flags)
+    ↓
+API Client (data layer)
+```
+
+**Required Store Actions:**
+
+Store should ONLY have actions for **UI state management**:
+- Toggle modal: `showAttackResultModal`
+- Set selection: `currentTarget`
+- Clear UI: `clearCombat()`
+- Process animations: `processAttackLogs()`
+
+Store should NOT have:
+- ❌ `startCombat()` - Workflow, belongs in composable
+- ❌ `performAttack()` - Workflow, belongs in composable  
+- ❌ `endActivation()` - Workflow, belongs in composable
+- ❌ `fetchStatus()` - Data fetching, belongs in composable
+- ❌ `endCombatSession()` - Workflow, belongs in composable
+
+**Remediation Plan:**
+
+1. Remove all workflow actions from combatStore - keep ONLY UI state
+2. Delete `useCombatApi()` wrapper (no added value)
+3. Move workflow logic to composables (useCombat, useCombatEngine)
+4. Remove all `await import()` from combatStore
+5. Ensure components call composables directly, not store actions
+
+**Status**: 🔴 CRITICAL - To be fixed in next iteration
+
+---
+
 ## Frontend Quality
 
 ### 1. State Management (Pinia)
@@ -511,19 +585,44 @@ RPG-Gen demonstrates **solid engineering practices** with good foundational arch
 1. **Type Safety** - Move from runtime validation to compile-time checks
 2. **Test Coverage** - Expand testing significantly for confidence
 3. **Code Consistency** - Standardize error handling and validation
-4. **Documentation** - Formalize architectural decisions and API contracts
+4. **Frontend Layering** - Fix store-composable inversion (see critical issue above)
+5. **Documentation** - Formalize architectural decisions and API contracts
+
+**Critical Issues** 🔴:
+
+- Frontend: combatStore violates layering (store → composable imports)
+- Frontend: useCombatApi() is pass-through without value
+- TypeScript: ~302 type assertions need remediation
+- Frontend: Type checking fails (32+ errors in lint phase)
 
 The project is **well-positioned for scaling** with some targeted improvements. The orchestrator pattern and module-based structure provide good foundations for adding new features (new classes, new spell systems, new combat mechanics).
 
 **Next Steps**:
 
-1. Review this analysis with team
-2. Create GitHub issues for critical items
-3. Estimate effort for high-priority improvements
-4. Schedule implementation into roadmap
+1. ✅ Review this analysis with team
+2. ✅ Identify critical vs nice-to-have improvements
+3. **Fix frontend layering violations** (store → composable) - HIGH PRIORITY
+4. Estimate effort for high-priority improvements
+5. Schedule implementation into roadmap
+
+**Build Status** (Dec 16, 2025):
+- ✅ Frontend build: 9.52s (successful)
+- 🔴 Frontend type-check: 32+ errors
+  - Pre-existing issues from before this session:
+    - combatStore trying to access removed properties (enemies, player, inCombat, etc)
+    - useCombatEngine accessing wrong combatStore properties
+    - useGameMessages, useGameCommands accessing removed combatStore methods
+    - characterStore cleanup left orphaned test file
+    - Missing gameStore properties (showDeathModal)
+    - API client properties mismatch (character.useInventoryItem)
+  - These errors confirm the architectural layering problems identified above
+
+**Status**: 🔴 **Type checking must be fixed before deployment**
+- Root cause: Incomplete refactoring of combatStore changes
+- Related to: Store-composable inversion issues identified above
 
 ---
 
-**Analysis performed**: December 15, 2025
-**Analyzed by**: GitHub Copilot Code Analysis
-**Tools used**: TypeScript compiler, grep pattern matching, semantic search
+**Analysis performed**: December 16, 2025 (Updated)
+**Analyzed by**: GitHub Copilot Code Analysis + Manual Architecture Review
+**Tools used**: TypeScript compiler, grep pattern matching, semantic search, manual code review

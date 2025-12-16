@@ -1,4 +1,4 @@
-import { inventoryApi } from "@rpg-gen/api-client";
+import { useInventory, useChat, useCharacter } from "@rpg-gen/api-client";
 import {
   isCombatStartInstruction,
   type CharacterResponseDto,
@@ -9,16 +9,15 @@ import {
   type SpellInstructionMessageDto,
   type UseItemResponseDto,
 } from "@rpg-gen/shared";
-import { characterApi } from "@rpg-gen/api-client";
-import { useCharacterStore } from "../stores/characterStore";
-import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { parseCommand, type ParsedCommand } from "../utils/chatCommands";
+import { useSpellManagement } from "./useSpellManagement";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { useCharacterId } from "./useCharacterId";
 import { useCombat } from "./useCombat";
-import { chatApi } from "@rpg-gen/api-client";
+import { useCombatInfo } from "./useCombatStatus";
 
 type GameStore = ReturnType<typeof useGameStore>;
-type CharacterStore = ReturnType<typeof useCharacterStore>;
 type InstructionItem = Record<string, unknown>;
 
 // ----- Instruction Processors -----
@@ -30,22 +29,24 @@ const processRollInstruction = (instr: RollInstructionMessageDto, gameStore: Gam
   gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${mod}`);
 };
 
-const processXpInstruction = (
+const processXpInstruction = async (
   xp: number,
   gameStore: GameStore,
-  characterStore: CharacterStore,
-): void => {
+  character: ReturnType<typeof useCharacter>,
+): Promise<void> => {
   gameStore.appendMessage("system", `✨ Gained ${xp} XP`);
-  characterStore.updateXp(xp);
+  await character.updateXp.mutateAsync(xp);
 };
 
 // Keep combat HP in sync when an HP instruction arrives while in combat
 
-const processSpellInstruction = (
+const processSpellInstruction = async (
   instr: InstructionItem,
   gameStore: GameStore,
-  characterStore: CharacterStore,
-): void => {
+  characterId: string | undefined,
+): Promise<void> => {
+  if (!characterId) return;
+  const spellMgmt = useSpellManagement(characterId);
   const spell = instr as {
     action?: string;
     name?: string;
@@ -54,20 +55,20 @@ const processSpellInstruction = (
   const { action, name, level } = spell;
   if (action === "learn") {
     gameStore.appendMessage("system", `📖 Learned spell: ${name} (Level ${level})`);
-    characterStore.learnSpell(instr as SpellInstructionMessageDto);
+    await spellMgmt.learnSpell(instr as SpellInstructionMessageDto);
   } else if (action === "cast") {
     gameStore.appendMessage("system", `✨ Cast spell: ${name}`);
   } else if (action === "forget") {
     gameStore.appendMessage("system", `🚫 Forgot spell: ${name}`);
-    characterStore.forgetSpell(name ?? "");
+    await spellMgmt.forgetSpell(name ?? "");
   }
 };
 
-const processInventoryInstruction = (
+const processInventoryInstruction = async (
   instr: InstructionItem,
   gameStore: GameStore,
-  characterStore: CharacterStore,
-): void => {
+  character: ReturnType<typeof useCharacter>,
+): Promise<void> => {
   const inventory = instr as {
     action?: string;
     name?: string;
@@ -76,16 +77,23 @@ const processInventoryInstruction = (
   const { action, name, quantity = 1 } = inventory;
   if (action === "add") {
     gameStore.appendMessage("system", `🎒 Added to inventory: ${name} (x${quantity})`);
-    characterStore.addInventoryItem({
+    await character.addInventory.mutateAsync({
+      definitionId: name ?? "unknown",
       name: name ?? "",
       qty: quantity,
+      description: "",
+      equipped: false,
+      meta: { type: "consumable" },
     });
   } else if (action === "remove") {
     gameStore.appendMessage("system", `🗑️ Removed from inventory: ${name} (x${quantity})`);
-    characterStore.removeInventoryItem(name ?? "", quantity);
+    await character.removeInventory.mutateAsync({
+      itemId: name ?? "",
+      qty: quantity,
+    });
   } else if (action === "use") {
     gameStore.appendMessage("system", `⚡ Used item: ${name}`);
-    characterStore.useInventoryItem(name ?? "");
+    await character.useInventoryItem.mutateAsync(name ?? "");
   }
 };
 
@@ -107,8 +115,10 @@ const findItem = (character: CharacterResponseDto, itemName: string) =>
 // eslint-disable-next-line max-statements
 export function useGameCommands() {
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
-  const combatStore = useCombatStore();
+  const combatInfo = useCombatInfo();
+  const currentCharacter = useCurrentCharacter();
+  const characterId = useCharacterId();
+  const character = useCharacter(characterId);
   const combat = useCombat();
 
   // Helper to trigger UI and loading state for using an item
@@ -118,9 +128,12 @@ export function useGameCommands() {
     gameStore.sending = true;
   };
 
+  const inventory = useInventory(characterId);
+  const chat = useChat(characterId);
+
   // Execute the API call and handle the response
   const executeUseItemRequest = async (
-    characterId: string,
+    _characterId: string,
     item: {
       name?: string;
       definitionId?: string;
@@ -134,7 +147,7 @@ export function useGameCommands() {
     }
 
     try {
-      const response = await inventoryApi.useItem(characterId, { itemId: defId });
+      const response = await inventory.useItem.mutateAsync({ itemId: defId });
       handleUseItemResponse(response);
     } catch {
       gameStore.messages.pop();
@@ -147,44 +160,40 @@ export function useGameCommands() {
   // Deduplicated response handling (uses inferred type from API)
   const handleUseItemResponse = (response: UseItemResponseDto) => {
     if (typeof response.healAmount === "number") {
-      const character = characterStore.currentCharacter;
-      if (!character) return;
-      character.hp = response.healAmount + (character.hp ?? 0);
+      const c = currentCharacter.value;
+      if (!c) return;
+      c.hp = response.healAmount + (c.hp ?? 0);
       // Keep combat HP in sync with healing, as is done in other flows
       syncHpToCombatIfNeeded(response.healAmount);
     }
   };
 
-  const syncHpToCombatIfNeeded = (hp: number) => {
-    if (!combatStore.inCombat) return;
-    if (!combatStore.player) return;
-    // Apply delta
-    const newHp = Math.max(0, (combatStore.player.hp ?? 0) + (hp ?? 0));
-    combatStore.player = {
-      ...combatStore.player,
-      hp: newHp,
-    };
+  const syncHpToCombatIfNeeded = (_hp: number) => {
+    // No need to manually sync - TanStack Query will update combat state automatically
+    // when characterStore.updateHp is called
   };
 
-  const processHpInstruction = (
+  const processHpInstruction = async (
     hp: number,
     gameStore: GameStore,
-    characterStore: CharacterStore,
-  ): void => {
+    character: ReturnType<typeof useCharacter>,
+  ): Promise<void> => {
     const hpChange = hp > 0 ? `+${hp}` : hp;
     gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-    characterStore.updateHp(hp);
+    await character.updateHp.mutateAsync(hp);
     syncHpToCombatIfNeeded(hp);
-    if (characterStore.isDead) characterStore.showDeathModal = true;
+    if (currentCharacter.value && currentCharacter.value.isDead) {
+      gameStore.showDeathModal = true;
+    }
   };
   const sendToGemini = async (
     message: string,
     instructions: GameInstructionDto[] = [],
   ): Promise<void> => {
-    if (!characterStore.currentCharacter?.characterId) {
+    if (!characterId.value) {
       throw new Error("No character loaded");
     }
-    const response = await chatApi.sendMessage(characterStore.currentCharacter.characterId, {
+    const response = await chat.sendMessage.mutateAsync({
       role: "user",
       narrative: message,
       instructions,
@@ -222,10 +231,10 @@ export function useGameCommands() {
    * Execute a parsed command
    */
   const executeCommand = async (command: ParsedCommand): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
-    const target = combatStore.aliveEnemies.find(
+    const target = combatInfo.aliveEnemies.value.find(
       e => e.id.toLocaleLowerCase() === command.target.toLowerCase(),
     );
     switch (command.type) {
@@ -250,10 +259,10 @@ export function useGameCommands() {
    * Execute a cast spell command
    */
   const executeCastCommand = async (spellName: string): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
-    const spell = findSpell(character, spellName);
+    const spell = findSpell(c, spellName);
     if (!spell) {
       gameStore.appendMessage("system", `❌ Spell not found: ${spellName}`);
       return;
@@ -285,17 +294,17 @@ export function useGameCommands() {
    * Execute a use item command
    */
   const executeUseCommand = async (itemName: string): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
-    const item = findItem(character, itemName);
+    const item = findItem(c, itemName);
     if (!item || !item.definitionId) {
       gameStore.appendMessage("system", `❌ Item not found: ${itemName}`);
       return;
     }
 
     prepareUseCommand(item);
-    await executeUseItemRequest(character.characterId, item);
+    await executeUseItemRequest(c.characterId, item);
   };
 
   /**
@@ -312,10 +321,10 @@ export function useGameCommands() {
   };
 
   const executeEquipCommand = async (itemName: string): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
-    const result = findEquippableItem(character, itemName);
+    const result = findEquippableItem(c, itemName);
     if (result.error) {
       gameStore.appendMessage("system", result.error);
       return;
@@ -325,8 +334,8 @@ export function useGameCommands() {
     gameStore.appendMessage("system", "Equipping...");
 
     await executeWithLoading(async () => {
-      const updated = await characterApi.equipItem(character.characterId, item.definitionId);
-      characterStore.currentCharacter = updated;
+      await character.equipItem.mutateAsync({ definitionId: item.definitionId });
+      // TanStack Query will automatically update currentCharacter
       gameStore.appendMessage("system", `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);
   };
@@ -335,10 +344,10 @@ export function useGameCommands() {
    * Execute an attack command - uses backend combat system when in combat
    */
   const executeAttackCommand = async (target: CombatantDto): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
-    const isInCombat = combatStore.inCombat || (await combat.checkCombatStatus());
+    const isInCombat = combatInfo.inCombat.value || (await combat.checkCombatStatus());
     if (isInCombat) {
       await combat.executeAttack(target);
       return;
@@ -362,13 +371,13 @@ export function useGameCommands() {
       if (type === "roll") {
         processRollInstruction(instr as RollInstructionMessageDto, gameStore);
       } else if (type === "xp" && typeof instr.xp === "number") {
-        processXpInstruction(instr.xp, gameStore, characterStore);
+        processXpInstruction(instr.xp, gameStore, character);
       } else if (type === "hp" && typeof instr.hp === "number") {
-        processHpInstruction(instr.hp, gameStore, characterStore);
+        processHpInstruction(instr.hp, gameStore, character);
       } else if (type === "spell" && typeof instr.name === "string") {
-        processSpellInstruction(instr, gameStore, characterStore);
+        processSpellInstruction(instr, gameStore, characterId.value);
       } else if (type === "inventory" && typeof instr.name === "string") {
-        processInventoryInstruction(instr, gameStore, characterStore);
+        processInventoryInstruction(instr, gameStore, character);
       } else if (isCombatStartInstruction(item)) {
         combat.initializeCombat(item);
       }

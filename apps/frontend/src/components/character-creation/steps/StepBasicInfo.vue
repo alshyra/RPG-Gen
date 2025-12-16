@@ -31,13 +31,10 @@
 <script setup lang="ts">
 import { UiButtonToggle, UiInputText } from '@rpg-gen/ui';
 import { GENDERS } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import RacePicker from '../RacePicker.vue';
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
 
 const genderOptions = computed(() =>
   GENDERS.map(g => ({
@@ -53,7 +50,7 @@ const onUpdateName = useDebounceFn(async (name: string) => {
 
   if (!charId) return;
 
-  await characterStore.updateCharacter(charId, { name: name });
+  await characterStore.character.update.mutateAsync({ name: name });
 }, 300);
 
 const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
@@ -63,6 +60,6 @@ const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
   const charId = currentCharacter.value.characterId;
   if (!charId) return;
 
-  await characterStore.updateCharacter(charId, { gender: String(gender) });
+  await characterStore.character.update.mutateAsync({ gender: String(gender) });
 };
 </script>

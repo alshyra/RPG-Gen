@@ -17,6 +17,7 @@
     "@rpg-gen/shared": "*",
     "@rpg-gen/ui": "*",
     "@tailwindcss/vite": "^4.1.17",
+    "@tanstack/vue-query": "^5.92.1",
     "@vue/test-utils": "^2.4.6",
     "@vueuse/core": "^14.0.0",
     "eslint": "^9.39.1",

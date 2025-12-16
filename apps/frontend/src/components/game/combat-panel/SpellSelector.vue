@@ -84,7 +84,6 @@
 import { UiButton } from '@rpg-gen/ui';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@/composables/useCombat';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';

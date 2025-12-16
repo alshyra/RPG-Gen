@@ -79,7 +79,6 @@
 import { computed, onMounted, ref } from 'vue';
 import { useCombat } from '@/composables/useCombat';
 import type { CombatantDto } from '@rpg-gen/shared';
-import { useCharacterStore } from '@/stores/characterStore';
 import { pickBestPortrait, getFallbackPortrait } from '@/composables/usePortraits';
 import { useCombatStore } from '@/stores/combatStore';
 import { useGameStore } from '@/stores/gameStore';

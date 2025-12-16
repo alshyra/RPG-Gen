@@ -1,9 +1,11 @@
 // packages/frontend/src/composables/useCombatEngine.ts
 import { CombatAdapter } from "@/adapters/combatAdapters";
-import { combatApi } from "@rpg-gen/api-client";
+import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { useCombat as useBackendCombat } from "@/composables/useCombat";
-import { useCharacterStore } from "@/stores/characterStore";
+import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
+import { useCharacterId } from "@/composables/useCharacterId";
 import { useCombatStore } from "@/stores/combatStore";
+import { useCombatInfo } from "@/composables/useCombatStatus";
 import { useGameStore } from "@/stores/gameStore";
 import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
@@ -46,9 +48,11 @@ export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
-  const { enemies, player, isEndingTurn, currentAttackView } = storeToRefs(combatStore);
-  const { currentCharacter } = storeToRefs(characterStore);
+  const { currentAttackView } = storeToRefs(combatStore);
+  const combatInfo = useCombatInfo();
+  const { enemies, player } = combatInfo;
+  const currentCharacter = useCurrentCharacter();
+  const characterId = useCharacterId();
 
   // Reference to the CombatArena component API (set via registerArena)
   const arenaApi = shallowRef<CombatArenaApi | null>(null);
@@ -84,22 +88,22 @@ export function useCombatEngine() {
     arenaApi.value = null;
   };
 
+  const combat = useCombatApi(characterId);
+
   const endTurn = async () => {
-    if (!currentCharacter.value || isEndingTurn.value) return;
+    if (!currentCharacter.value || combat.endTurn.isPending.value) return;
 
     try {
-      isEndingTurn.value = true;
-
-      // Call the API directly to get the response with attackLogs
-      const response = await combatApi.endTurn(currentCharacter.value.characterId);
+      // Use the mutation to end turn and get response with attackLogs
+      const response = await combat.endTurn.mutateAsync(characterId.value!);
 
       // Replay enemy attacks on visual engine (if arena is registered)
       if (response.attackLogs?.length) {
         await replayEnemyAttacks(response.attackLogs);
       }
 
-      // Update combat store with the result
-      combatStore.updateFromTurnResult(response);
+      // Combat state is automatically updated via TanStack Query after endTurn
+      // No need to manually update - the query will invalidate and refetch
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (
@@ -112,8 +116,6 @@ export function useCombatEngine() {
           "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
         );
       }
-    } finally {
-      isEndingTurn.value = false;
     }
   };
   /**
@@ -234,22 +236,22 @@ export function useCombatEngine() {
    * Initialize visual arena with current combat state
    */
   const initializeVisual = async () => {
-    if (!arenaApi.value || !combatStore.inCombat) return;
+    if (!arenaApi.value || !combatInfo.inCombat.value) return;
 
     // Clear old units before re-initializing
     await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter.value?.characterId ?? "",
-      inCombat: combatStore.inCombat,
+      inCombat: combatInfo.inCombat.value,
       enemies: enemies.value,
       player: player.value!,
-      turnOrder: combatStore.turnOrder,
-      currentTurnIndex: combatStore.currentTurnIndex,
-      roundNumber: combatStore.roundNumber,
-      phase: combatStore.phase,
-      actionRemaining: combatStore.actionRemaining,
-      actionMax: combatStore.actionMax,
+      turnOrder: combatInfo.turnOrder.value,
+      currentTurnIndex: combatInfo.currentTurnIndex.value,
+      roundNumber: combatInfo.roundNumber.value,
+      phase: combatInfo.phase.value,
+      actionRemaining: combatInfo.actionRemaining.value,
+      actionMax: combatInfo.actionMax.value,
     });
 
     // Create units from config

@@ -1,5 +1,4 @@
-import { characterApi } from "@rpg-gen/api-client";
-import { useCharacterStore } from "@/stores/characterStore";
+import { useCharacter, useChat } from "@rpg-gen/api-client";
 import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,
@@ -14,8 +13,9 @@ import {
 import { storeToRefs } from "pinia";
 import { useCombat } from "./useCombat";
 import { useRoute, useRouter } from "vue-router";
-import { chatApi } from "@rpg-gen/api-client";
 import { useGameStore } from "../stores/gameStore";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { useCharacterId } from "./useCharacterId";
 
 import type { HistoryMessage, ProcessedMessage } from "@/interfaces";
 
@@ -38,8 +38,8 @@ const isProcessableInstruction = (instr: GameInstructionDto): instr is Processab
 export const useGameSession = () => {
   const router = useRouter();
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
-  const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
+  const currentCharacter = useCurrentCharacter();
+  const characterId = useCharacterId();
 
   const { isInitializing } = storeToRefs(gameStore);
 
@@ -74,11 +74,17 @@ export const useGameSession = () => {
       gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${modDisplay}`);
     } else if (isXpInstruction(instr)) {
       gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
-      characterStore.updateXp(instr.xp);
+      if (characterId.value) {
+        const character = useCharacter(characterId);
+        await character.updateXp.mutateAsync(instr.xp);
+      }
     } else if (isHpInstruction(instr)) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-      characterStore.updateHp(instr.hp);
+      if (characterId.value) {
+        const character = useCharacter(characterId);
+        await character.updateHp.mutateAsync(instr.hp);
+      }
     }
   };
 
@@ -113,17 +119,6 @@ export const useGameSession = () => {
     return charId || undefined;
   };
 
-  const fetchAndSetCharacter = async (charId: string) => {
-    try {
-      const fetched = await characterApi.findOne(charId);
-      if (!fetched) return undefined;
-      currentCharacter.value = fetched;
-      return fetched;
-    } catch {
-      return undefined;
-    }
-  };
-
   const ensureCharacterLoaded = async () => {
     if (currentCharacter?.value) return currentCharacter.value;
     const charId = getCharIdFromRoute();
@@ -131,12 +126,14 @@ export const useGameSession = () => {
       await router.push("/home");
       return undefined;
     }
-    const fetched = await fetchAndSetCharacter(charId);
-    if (!fetched) {
+    // Character will be loaded by the useCharacter hook
+    // Wait a bit for it to load
+    await new Promise(resolve => setTimeout(resolve, 100));
+    if (!currentCharacter.value) {
       await router.push("/home");
       return undefined;
     }
-    return fetched;
+    return currentCharacter.value;
   };
 
   const startGame = async () => {
@@ -144,9 +141,10 @@ export const useGameSession = () => {
     if (!character) return;
     isInitializing.value = true;
     try {
-      if (character.isDeceased) showDeathModal.value = true;
-      // Get history to start the game
-      const messages = await chatApi.getHistory(character.characterId);
+      if (character.isDeceased) gameStore.showDeathModal = true;
+      // Get history using Vue Query hook
+      const chat = useChat(characterId);
+      const messages = chat.history.data.value;
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);
         gameStore.updateMessages(processed);

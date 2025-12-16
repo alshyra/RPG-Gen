@@ -27,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import type { AbilityScoresResponseDto } from '@rpg-gen/shared';
 

@@ -18,10 +18,8 @@ export function createApiClient(baseUrl: string) {
  * Uses VITE_API_URL in dev, window.location.origin in prod
  */
 export const apiClient = createApiClient(
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore - import.meta.env is Vite-specific
   import.meta.env?.VITE_API_URL ||
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore - window is browser-specific
     (typeof window !== "undefined" ? window.location.origin : "http://localhost:3001"),
 );

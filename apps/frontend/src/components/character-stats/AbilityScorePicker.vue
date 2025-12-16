@@ -38,7 +38,6 @@
 <script setup lang="ts">
 import useAbilityScores from '@/composables/useAbilityScores';
 import { ABILITIES } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { UiInputNumber } from '@rpg-gen/ui';
 
@@ -58,7 +57,7 @@ const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: nu
   const value = val ?? currentCharacter?.value?.scores?.[ability] ?? 8;
   const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.character.update.mutateAsync({
     scores: currentCharacter.value.scores,
   });
 };

@@ -139,7 +139,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
 import { InventoryItemDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { onBeforeUnmount, ref } from 'vue';
@@ -163,8 +162,6 @@ type LocalInventoryItem = Omit<InventoryItemDto, 'meta'> & {
   };
 };
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
 
 const basePack: LocalInventoryItem[] = [
   {
@@ -448,7 +445,7 @@ onBeforeUnmount(async () => {
       chosenArmor.value,
       ...basePack,
     ].filter((i): i is LocalInventoryItem => !!i);
-    await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    await characterStore.character.update.mutateAsync({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inventory: inventoryToSave as any,
     });

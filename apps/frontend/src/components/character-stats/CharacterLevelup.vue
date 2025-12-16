@@ -147,15 +147,12 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from "@/stores/characterStore";
 import type { LevelUpResult } from "@/interfaces";
 import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from "@rpg-gen/shared";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { dndLevelUpService } from "../../services/dndLevelUpService";
-import { chatApi } from "@rpg-gen/api-client";
-import { characterApi } from "@rpg-gen/api-client";
-import { classesApi } from "@rpg-gen/api-client";
+import { useChat, useClasses } from "@rpg-gen/api-client";
 
 const props = withDefaults(
   defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
@@ -171,7 +168,6 @@ const router = useRouter();
 const isPending = ref(false);
 const availableCombatOptions = ref<CombatOptionDto[]>([]);
 const selectedCombatIds = ref<string[]>([]);
-const isLoadingOptions = ref(false);
 
 // Character data
 const character = computed<Partial<CharacterResponseDto>>(() => props.initialCharacter || {});
@@ -191,26 +187,27 @@ const levelUpReward = computed<LevelUpResult>(() =>
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
 
-// Load combat options for the next level
-const loadCombatOptions = async (): Promise<void> => {
-  if (!className.value) return;
+// Vue Query hooks
+const characterStore = useCharacterStore();
+const classes = useClasses(className, nextLevel);
+const chat = useChat(() => character.value.characterId);
 
-  isLoadingOptions.value = true;
-  try {
-    const options: LevelUpOptionsDto = await classesApi.getLevelOptions(
-      className.value,
-      nextLevel.value
-    );
+// Load combat options for the next level
+onMounted(() => {
+  // Options will be loaded automatically by the query
+  if (classes.levelOptions.data.value) {
+    availableCombatOptions.value = classes.levelOptions.data.value.combatOptions || [];
+  }
+});
+
+// Watch for query data changes
+import { watch } from "vue";
+watch(() => classes.levelOptions.data.value, (options) => {
+  if (options) {
     availableCombatOptions.value = options.combatOptions || [];
     selectedCombatIds.value = [];
-  } catch (err) {
-    console.error("Failed to load combat options:", err);
-    availableCombatOptions.value = [];
-    selectedCombatIds.value = [];
-  } finally {
-    isLoadingOptions.value = false;
   }
-};
+});
 
 // Handlers
 
@@ -257,27 +254,28 @@ const executeLevelUp = async (): Promise<void> => {
     hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
   };
 
-  // Save to backend using the character store
-  const characterStore = useCharacterStore();
+  // Save to backend using the character store mutations
   if (updatedCharacter.characterId) {
-    // Use the dedicated LevelUp API with combat selections
+    // Use the dedicated LevelUp mutation with combat selections
     try {
-      await characterApi.applyLevelUp(updatedCharacter.characterId, {
+      await characterStore.character.applyLevelUp.mutateAsync({
         className: className.value,
-        newSpellIds: [],
-        abilityIncreases: [],
-        selectedCombatProficiencies: selectedCombatIds.value,
+        body: {
+          newSpellIds: [],
+          abilityIncreases: [],
+          selectedCombatProficiencies: selectedCombatIds.value,
+        },
       });
     } catch {
       // Fallback: save the computed character changes
-      await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);
+      await characterStore.character.update.mutateAsync(updatedCharacter);
     }
   }
 
-  // Send to backend
+  // Send to backend using chat mutation
   if (!updatedCharacter.characterId) return;
   const levelupMsg = buildLevelUpMessage(updatedCharacter);
-  await chatApi.sendMessage(updatedCharacter.characterId, {
+  await chat.sendMessage.mutateAsync({
     role: "user",
     narrative: levelupMsg,
     instructions: [],

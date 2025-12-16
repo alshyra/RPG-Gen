@@ -33,13 +33,10 @@
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
 import { DnDRulesService } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import type { SkillResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
 const proficientSkills = computed(() =>
@@ -55,7 +52,7 @@ const saveCurrent = async () => {
 
   if (!currentCharacter.value.characterId) return;
 
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.character.update.mutateAsync({
     skills: currentCharacter.value.skills,
   });
 };

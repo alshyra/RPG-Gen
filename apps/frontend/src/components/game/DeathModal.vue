@@ -48,15 +48,13 @@
 import { computed } from 'vue';
 import { UiModal, UiButton } from '@rpg-gen/ui';
 import { getCurrentLevel } from '../../utils/dndLevels';
-import { storeToRefs } from 'pinia';
-import { useCharacterStore } from '@/stores/characterStore';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 
 import type { DeathModalProps, DeathModalEmits } from '@/interfaces';
 
 const { isOpen } = defineProps<DeathModalProps>();
 const emit = defineEmits<DeathModalEmits>();
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter();
 
 const characterName = computed(() => currentCharacter.value?.name || 'Unknown');
 const characterClass = computed(() => {

@@ -76,15 +76,14 @@
 import AppRouterButton from '@/components/AppRouterButton.vue';
 import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
-import { useCharacterStore } from '@/stores/characterStore';
-import { useCombatStore } from '@/stores/combatStore';
+import { useCombatInfo } from '@/composables/useCombatStatus';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();
-const combatStore = useCombatStore();
+const combatInfo = useCombatInfo();
 const ui = useUiStore();
 
 const { currentCharacter } = storeToRefs(characterStore);
-const { inCombat } = storeToRefs(combatStore);
+const inCombat = combatInfo.inCombat;
 </script>

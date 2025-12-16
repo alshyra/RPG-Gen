@@ -61,20 +61,18 @@
 
 <script setup lang="ts">
 import { useGameRolls } from "@/composables/useGameRolls";
-import { useCombatStore } from "@/stores/combatStore";
 import { useUiStore } from "@/stores/uiStore";
 import { storeToRefs } from "pinia";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { characterApi } from "@rpg-gen/api-client";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
 import { useCombat } from "../composables/useCombat";
+import { useCombatInfo } from "../composables/useCombatStatus";
 import { useGameCommands } from "../composables/useGameCommands";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
-import { useCharacterStore } from "../stores/characterStore";
 import { useGameStore } from "../stores/gameStore";
 import { isCommand } from "../utils/chatCommands";
 import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
@@ -82,17 +80,16 @@ import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
 // State
 const router = useRouter();
 const gameStore = useGameStore();
-const characterStore = useCharacterStore();
-const combatStore = useCombatStore();
 
 const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
-const { inCombat } = storeToRefs(combatStore);
+const combatInfo = useCombatInfo();
+const inCombat = combatInfo.inCombat;
 const { pendingInstruction } = storeToRefs(gameStore);
-const { currentCharacter, showDeathModal } = storeToRefs(characterStore);
+const showDeathModal = ref(false);
 
 useGameRolls();
 
@@ -146,7 +143,9 @@ onMounted(async () => {
 
 const onDeathConfirm = async () => {
   if (!currentCharacter.value?.characterId) return;
-  await characterApi.kill(currentCharacter.value.characterId);
+  await characterApi.kill(currentCharacter.value.characterId, {
+    deathLocation: "In combat",
+  });
   showDeathModal.value = false;
   router.push("/");
 };

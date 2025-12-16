@@ -7,13 +7,20 @@ import {
   type InventoryInstructionMessageDto,
   isCombatStartInstruction,
 } from "@rpg-gen/shared";
-import { chatApi } from "@rpg-gen/api-client";
-import { useCharacterStore } from "../stores/characterStore";
+import { useChat, useCharacter } from "@rpg-gen/api-client";
 import { useGameStore } from "../stores/gameStore";
 import { useCombat } from "./useCombat";
+import { useSpellManagement } from "./useSpellManagement";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { computed } from "vue";
 
 export function useGameMessages() {
   const gameStore = useGameStore();
+  const currentCharacter = useCurrentCharacter();
+  const characterId = computed(() => currentCharacter.value?.characterId);
+  const chat = useChat(characterId);
+  const character = useCharacter(characterId);
+  const spellMgmt = useSpellManagement(characterId);
   const combat = useCombat();
 
   const handleMessageResponse = (response: ChatMessageDto): void => {
@@ -49,10 +56,10 @@ export function useGameMessages() {
     gameStore.appendMessage("system", "...thinking...");
     gameStore.sending = true;
     try {
-      if (!currentCharacter.value?.characterId) {
+      if (!characterStore.currentCharacter?.characterId) {
         throw new Error("No character loaded");
       }
-      const response = await chatApi.sendMessage(currentCharacter.value.characterId, {
+      const response = await chat.sendMessage.mutateAsync({
         role: "user",
         narrative: messageText,
         instructions: [],
@@ -84,21 +91,21 @@ export function useGameMessages() {
     gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${modDisplay}`);
   };
 
-  const handleXpInstruction = (instr: XpInstructionMessageDto): void => {
-    const characterStore = useCharacterStore();
+  const handleXpInstruction = async (instr: XpInstructionMessageDto): Promise<void> => {
     if (instr.xp !== undefined) {
       gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
-      characterStore.updateXp(instr.xp);
+      await character.updateXp.mutateAsync(instr.xp);
     }
   };
 
-  const handleHpInstruction = (instr: HpInstructionMessageDto): void => {
+  const handleHpInstruction = async (instr: HpInstructionMessageDto): Promise<void> => {
     if (instr.hp !== undefined) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-      const characterStore = useCharacterStore();
-      characterStore.updateHp(instr.hp);
-      if (characterStore.isDead) characterStore.showDeathModal = true;
+      await character.updateHp.mutateAsync(instr.hp);
+      if (currentCharacter.value && currentCharacter.value.isDead) {
+        gameStore.showDeathModal = true;
+      }
     }
   };
 
@@ -106,31 +113,37 @@ export function useGameMessages() {
     if (instr.type !== "spell") return;
     if (instr.action === "learn") {
       gameStore.appendMessage("system", `📖 Learned spell: ${instr.name} (Level ${instr.level})`);
-      useCharacterStore().learnSpell(instr);
+      spellMgmt.learnSpell(instr);
     } else if (instr.action === "cast") {
       gameStore.appendMessage("system", `✨ Cast spell: ${instr.name}`);
     } else if (instr.action === "forget") {
       gameStore.appendMessage("system", `🚫 Forgot spell: ${instr.name}`);
-      useCharacterStore().forgetSpell(instr.name || "");
+      spellMgmt.forgetSpell(instr.name || "");
     }
   };
 
-  const handleInventoryInstruction = (instr: InventoryInstructionMessageDto): void => {
+  const handleInventoryInstruction = async (
+    instr: InventoryInstructionMessageDto,
+  ): Promise<void> => {
     if (instr.type !== "inventory") return;
     if (instr.action === "add") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      useCharacterStore().addInventoryItem({
+      await character.addInventory.mutateAsync({
+        definitionId: instr.name,
         name: instr.name,
         qty,
+        description: "",
+        equipped: false,
+        meta: { type: "consumable" },
       });
     } else if (instr.action === "remove") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🗑️ Removed from inventory: ${instr.name} (x${qty})`);
-      useCharacterStore().removeInventoryItem(instr.name, qty);
+      await character.removeInventory.mutateAsync({ itemId: instr.name, qty });
     } else if (instr.action === "use") {
       gameStore.appendMessage("system", `⚡ Used item: ${instr.name}`);
-      useCharacterStore().useInventoryItem(instr.name || "");
+      await character.useInventoryItem.mutateAsync(instr.name || "");
     }
   };
 

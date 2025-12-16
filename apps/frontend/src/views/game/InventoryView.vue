@@ -81,10 +81,9 @@
 import { computed } from 'vue';
 // rpg-awesome provides a set of RPG icons via CSS classes (ra ra-<name>)
 import 'rpg-awesome/css/rpg-awesome.css';
-import { useCharacterStore } from '@/stores/characterStore';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { useGameCommands } from '@/composables/useGameCommands';
 import { generateUseCommand, generateEquipCommand } from '@/utils/chatCommands';
-import { storeToRefs } from 'pinia';
 import { showAlert } from '@/composables/useModal';
 import type { InventoryItemDto } from '@rpg-gen/shared';
 
@@ -99,8 +98,7 @@ type InventoryItem = Omit<InventoryItemDto, 'meta'> & {
   };
 };
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter();
 const { insertCommand } = useGameCommands();
 
 const items = computed<InventoryItem[]>(
