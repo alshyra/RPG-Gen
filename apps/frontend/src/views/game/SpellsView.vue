@@ -13,23 +13,23 @@
         class="space-y-2"
       >
         <li
-          v-for="s in spells"
-          :key="s.name"
+          v-for="spell in spells"
+          :key="spell.name"
           class="p-2 bg-slate-800/40 rounded border border-slate-700/30 hover:bg-slate-700/40 transition-colors"
         >
           <div class="font-medium text-slate-100">
-            {{ s.name }} <span class="text-xs text-slate-300">Niv {{ s.level }}</span>
+            {{ spell.name }} <span class="text-xs text-slate-300">Niv {{ spell.level }}</span>
           </div>
           <div
-            v-if="s.description"
+            v-if="spell.description"
             class="text-xs text-slate-400 mt-1"
           >
-            {{ s.description }}
+            {{ spell.description }}
           </div>
           <div class="mt-2">
             <button
               class="text-xs px-2 py-1 bg-purple-600/50 hover:bg-purple-600 rounded text-purple-100 transition-colors"
-              @click="onCastSpell(s.name)"
+              @click="onCastSpell(spell.name)"
             >
               Lancer
             </button>
@@ -41,18 +41,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import { useGameCommands } from '@/composables/useGameCommands';
-import { generateCastCommand } from '@/utils/chatCommands';
+import { computed } from 'vue';
 
 const currentCharacter = useCurrentCharacter();
-const { insertCommand } = useGameCommands();
 
 const spells = computed(() => currentCharacter.value?.spells || []);
 const hasSpells = computed(() => spells.value.length > 0);
 
-const onCastSpell = (spellName: string) => {
-  insertCommand(generateCastCommand(spellName));
+const onCastSpell = (_spellName: string) => {
+  throw new Error("Not implemented: cast spell");
 };
 </script>

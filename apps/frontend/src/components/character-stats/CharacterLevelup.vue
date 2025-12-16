@@ -7,10 +7,10 @@
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4">
           <div class="text-center">
             <div class="text-4xl font-bold text-amber-400">
-              {{ character.classes?.[0]?.level || 1 }}
+              {{ currentCharacter?.classes?.[0]?.level || 1 }}
             </div>
             <div class="text-sm text-slate-400">
-              {{ character.classes?.[0]?.name }}
+              {{ currentCharacter?.classes?.[0]?.name }}
             </div>
           </div>
         </div>
@@ -31,7 +31,7 @@
           <div class="flex items-center gap-2">
             <span class="text-red-400 font-bold text-lg">+{{ levelUpReward.hpGain }}</span>
             <span class="text-xs text-slate-500">
-              ({{ character.hp || 0 }} → {{ (character.hp || 0) + levelUpReward.hpGain }})
+              ({{ currentCharacter?.hp || 0 }} → {{ (currentCharacter?.hp || 0) + levelUpReward.hpGain }})
             </span>
           </div>
         </div>
@@ -123,16 +123,16 @@
           <div class="space-y-2 text-sm">
             <div>
               <span class="text-slate-400">Name:</span>
-              <span class="ml-2 text-white">{{ character.name }}</span>
+              <span class="ml-2 text-white">{{ currentCharacter?.name }}</span>
             </div>
             <div>
               <span class="text-slate-400">Race:</span>
-              <span class="ml-2 text-white">{{ character.race?.name }}</span>
+              <span class="ml-2 text-white">{{ currentCharacter?.race?.name }}</span>
             </div>
             <div>
               <span class="text-slate-400">Current HP:</span>
               <span class="ml-2 text-red-400"
-                >{{ character.hp || 0 }}/{{ character.hpMax || 0 }}</span
+                >{{ currentCharacter?.hp || 0 }}/{{ currentCharacter?.hpMax || 0 }}</span
               >
             </div>
             <div>
@@ -147,20 +147,14 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterId } from "@/composables/useCharacterId";
 import type { LevelUpResult } from "@/interfaces";
-import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from "@rpg-gen/shared";
-import { computed, onMounted, ref } from "vue";
+import { useCharacter, useChat, useClasses } from "@rpg-gen/api-client";
+import type { CharacterResponseDto, CombatOptionDto } from "@rpg-gen/shared";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { dndLevelUpService } from "../../services/dndLevelUpService";
-import { useChat, useClasses } from "@rpg-gen/api-client";
-
-const props = withDefaults(
-  defineProps<{ world?: string; initialCharacter?: CharacterResponseDto }>(),
-  {
-    world: "",
-    initialCharacter: undefined,
-  }
-);
+import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 
 const router = useRouter();
 
@@ -170,14 +164,19 @@ const availableCombatOptions = ref<CombatOptionDto[]>([]);
 const selectedCombatIds = ref<string[]>([]);
 
 // Character data
-const character = computed<Partial<CharacterResponseDto>>(() => props.initialCharacter || {});
-const currentLevel = computed(() => character.value.classes?.[0]?.level || 1);
+const characterId = useCharacterId()
+const { update, applyLevelUp } = useCharacter(characterId)
+const currentCharacter = useCurrentCharacter();
+const chat = useChat(characterId);
+const currentLevel = computed(() => currentCharacter.value?.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));
 
 // Level up calculation
-const className = computed(() => character.value.classes?.[0]?.name || "Fighter");
+const className = computed(() => currentCharacter.value?.classes?.[0]?.name || "Fighter");
+const classes = useClasses(className, nextLevel);
+
 const conModifier = computed(() => {
-  const conScore = character.value.scores?.Con || 10;
+  const conScore = currentCharacter.value?.scores?.Con || 10;
   return Math.floor((conScore - 10) / 2);
 });
 
@@ -187,10 +186,7 @@ const levelUpReward = computed<LevelUpResult>(() =>
 
 const proficiencyBonus = computed(() => dndLevelUpService.getProficiencyBonus(nextLevel.value));
 
-// Vue Query hooks
-const characterStore = useCharacterStore();
-const classes = useClasses(className, nextLevel);
-const chat = useChat(() => character.value.characterId);
+
 
 // Load combat options for the next level
 onMounted(() => {
@@ -201,7 +197,7 @@ onMounted(() => {
 });
 
 // Watch for query data changes
-import { watch } from "vue";
+
 watch(() => classes.levelOptions.data.value, (options) => {
   if (options) {
     availableCombatOptions.value = options.combatOptions || [];
@@ -240,25 +236,25 @@ const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): s
 const executeLevelUp = async (): Promise<void> => {
   // Update character with new level and HP
   const updatedCharacter: Partial<CharacterResponseDto> = {
-    ...character.value,
+    ...currentCharacter.value,
     classes: [
       {
-        ...character.value.classes?.[0],
+        ...currentCharacter.value?.classes?.[0],
         level: nextLevel.value,
       },
     ],
     hp: Math.min(
-      (character.value.hp || 0) + levelUpReward.value.hpGain,
-      (character.value.hpMax || 0) + levelUpReward.value.hpGain
+      (currentCharacter.value?.hp || 0) + levelUpReward.value.hpGain,
+      (currentCharacter.value?.hpMax || 0) + levelUpReward.value.hpGain
     ),
-    hpMax: (character.value.hpMax || 0) + levelUpReward.value.hpGain,
+    hpMax: (currentCharacter.value?.hpMax || 0) + levelUpReward.value.hpGain,
   };
 
   // Save to backend using the character store mutations
   if (updatedCharacter.characterId) {
     // Use the dedicated LevelUp mutation with combat selections
     try {
-      await characterStore.character.applyLevelUp.mutateAsync({
+      await applyLevelUp.mutateAsync({
         className: className.value,
         body: {
           newSpellIds: [],
@@ -268,7 +264,7 @@ const executeLevelUp = async (): Promise<void> => {
       });
     } catch {
       // Fallback: save the computed character changes
-      await characterStore.character.update.mutateAsync(updatedCharacter);
+      await update.mutateAsync(updatedCharacter);
     }
   }
 
@@ -285,7 +281,7 @@ const executeLevelUp = async (): Promise<void> => {
   setTimeout(() => {
     router.push({
       name: "game",
-      params: { world: props.world },
+      params: { characterId: characterId.value }
     });
   }, 1500);
 };
@@ -306,11 +302,6 @@ const handleConfirm = async (): Promise<void> => {
 };
 
 const handleCancel = (): void => router.back();
-
-// Load combat options when component mounts
-onMounted(() => {
-  void loadCombatOptions();
-});
 </script>
 
 <style scoped></style>

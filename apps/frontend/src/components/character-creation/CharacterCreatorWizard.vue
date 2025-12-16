@@ -111,10 +111,11 @@
 </template>
 
 <script setup lang="ts">
-import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
-import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
+import { useCharacterId } from "@/composables/useCharacterId";
+import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { DnDRulesService } from "@/services/dndRulesService";
-import { storeToRefs } from "pinia";
+import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
+import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import StepAbilityScores from "./steps/StepAbilityScores.vue";
@@ -122,8 +123,8 @@ import StepAvatar from "./steps/StepAvatar.vue";
 import StepBasicInfo from "./steps/StepBasicInfo.vue";
 import StepCombat from "./steps/StepCombat.vue";
 import StepInventory from "./steps/StepInventory.vue";
-import StepSpells from "./steps/StepSpells.vue";
 import StepSkills from "./steps/StepSkills.vue";
+import StepSpells from "./steps/StepSpells.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -141,10 +142,11 @@ const steps = [
   "Avatar",
 ];
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
-const chat = useChat(() => currentCharacter.value?.characterId);
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const chat = useChat(characterId.value);
 const image = useImage();
+const { update, character } = useCharacter(characterId);
 
 const skillsToChoose = computed(() =>
   DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || "")
@@ -216,7 +218,7 @@ const saveFinalCharacter = async () => {
     currentCharacter.value.classes[0].name,
     currentCharacter.value.scores.Con
   );
-  await updateCharacter(currentCharacter.value.characterId, {
+  await update.mutateAsync({
     ...currentCharacter.value,
     state: "created",
     hpMax,
@@ -231,7 +233,7 @@ const generateAndApplyAvatar = async () => {
   try {
     await image.generateAvatar.mutateAsync({ characterId: currentCharacter.value!.characterId });
     // Refetch character to get the updated portrait
-    await characterStore.refetchCharacter();
+    await character.refetch();
   } catch (e) {
     console.warn("Avatar generation failed — continuing to game", e);
   }

@@ -82,8 +82,6 @@ import { computed } from 'vue';
 // rpg-awesome provides a set of RPG icons via CSS classes (ra ra-<name>)
 import 'rpg-awesome/css/rpg-awesome.css';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import { useGameCommands } from '@/composables/useGameCommands';
-import { generateUseCommand, generateEquipCommand } from '@/utils/chatCommands';
 import { showAlert } from '@/composables/useModal';
 import type { InventoryItemDto } from '@rpg-gen/shared';
 
@@ -99,7 +97,6 @@ type InventoryItem = Omit<InventoryItemDto, 'meta'> & {
 };
 
 const currentCharacter = useCurrentCharacter();
-const { insertCommand } = useGameCommands();
 
 const items = computed<InventoryItem[]>(
   () => (currentCharacter.value?.inventory || []) as InventoryItem[],
@@ -140,12 +137,12 @@ const groupLabel = (key: string) => {
   }
 };
 
-const onUseItem = (itemName: string) => {
-  insertCommand(generateUseCommand(itemName));
+const onUseItem = (_itemName: string) => {
+  throw new Error("Not implemented: use inventory item");
 };
 
-const onEquipItem = (itemName: string) => {
-  insertCommand(generateEquipCommand(itemName));
+const onEquipItem = (_itemName: string) => {
+  throw new Error("Not implemented: equip inventory item");
 };
 
 const onCardClick = async (item: InventoryItem) => {

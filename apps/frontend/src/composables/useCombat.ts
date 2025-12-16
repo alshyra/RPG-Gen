@@ -39,7 +39,10 @@ export function useCombat() {
     charId: string,
     instruction: CombatStartRequestDto,
   ): Promise<CombatStateDto> => {
-    const response = await combatApi.startCombat.mutateAsync({ characterId: charId, data: instruction });
+    const response = await combatApi.startCombat.mutateAsync({
+      characterId: charId,
+      data: instruction,
+    });
     if (response.enemies && response.enemies.length > 0) {
       currentTarget.value = response.enemies[0];
     }
@@ -81,7 +84,7 @@ export function useCombat() {
   ): Promise<CombatActionResponseDto> => {
     return combatApi.attack.mutateAsync({
       characterId: characterId.value!,
-      targetName: target.name ?? "",
+      target,
       spellName,
     });
   };
@@ -123,10 +126,7 @@ export function useCombat() {
     try {
       const payload = { combat_start: instruction.combat_start };
       const currentHp = currentCharacter.value.hp ?? 0;
-      const combatState = await startCombat(
-        currentCharacter.value.characterId,
-        payload,
-      );
+      const combatState = await startCombat(currentCharacter.value.characterId, payload);
 
       // Check if player took damage during initiative (enemy attacked first)
       const newHp = combatState.player?.hp ?? currentHp;
@@ -140,9 +140,7 @@ export function useCombat() {
         await character.updateHp.mutateAsync(newHp);
       }
 
-      if (newHp <= 0) {
-        gameStore.showDeathModal = true;
-      }
+      currentCharacter.value.isDeceased = newHp <= 0;
 
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
@@ -272,7 +270,11 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatApi.attack.mutateAsync({ target, spellName });
+      const result = await combatApi.attack.mutateAsync({
+        spellName,
+        target,
+        characterId: currentCharacter.value.characterId,
+      });
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);

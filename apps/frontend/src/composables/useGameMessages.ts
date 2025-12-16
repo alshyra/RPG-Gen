@@ -1,18 +1,16 @@
+import { useCharacter, useChat } from "@rpg-gen/api-client";
 import {
   type ChatMessageDto,
-  type RollInstructionMessageDto,
   type HpInstructionMessageDto,
-  type XpInstructionMessageDto,
-  type SpellInstructionMessageDto,
   type InventoryInstructionMessageDto,
   isCombatStartInstruction,
+  type RollInstructionMessageDto,
+  type XpInstructionMessageDto,
 } from "@rpg-gen/shared";
-import { useChat, useCharacter } from "@rpg-gen/api-client";
+import { computed } from "vue";
 import { useGameStore } from "../stores/gameStore";
 import { useCombat } from "./useCombat";
-import { useSpellManagement } from "./useSpellManagement";
 import { useCurrentCharacter } from "./useCurrentCharacter";
-import { computed } from "vue";
 
 export function useGameMessages() {
   const gameStore = useGameStore();
@@ -20,7 +18,6 @@ export function useGameMessages() {
   const characterId = computed(() => currentCharacter.value?.characterId);
   const chat = useChat(characterId);
   const character = useCharacter(characterId);
-  const spellMgmt = useSpellManagement(characterId);
   const combat = useCombat();
 
   const handleMessageResponse = (response: ChatMessageDto): void => {
@@ -56,7 +53,7 @@ export function useGameMessages() {
     gameStore.appendMessage("system", "...thinking...");
     gameStore.sending = true;
     try {
-      if (!characterStore.currentCharacter?.characterId) {
+      if (!currentCharacter.value?.characterId) {
         throw new Error("No character loaded");
       }
       const response = await chat.sendMessage.mutateAsync({
@@ -103,22 +100,6 @@ export function useGameMessages() {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
       await character.updateHp.mutateAsync(instr.hp);
-      if (currentCharacter.value && currentCharacter.value.isDead) {
-        gameStore.showDeathModal = true;
-      }
-    }
-  };
-
-  const handleSpellInstruction = (instr: SpellInstructionMessageDto): void => {
-    if (instr.type !== "spell") return;
-    if (instr.action === "learn") {
-      gameStore.appendMessage("system", `📖 Learned spell: ${instr.name} (Level ${instr.level})`);
-      spellMgmt.learnSpell(instr);
-    } else if (instr.action === "cast") {
-      gameStore.appendMessage("system", `✨ Cast spell: ${instr.name}`);
-    } else if (instr.action === "forget") {
-      gameStore.appendMessage("system", `🚫 Forgot spell: ${instr.name}`);
-      spellMgmt.forgetSpell(instr.name || "");
     }
   };
 
@@ -143,7 +124,7 @@ export function useGameMessages() {
       await character.removeInventory.mutateAsync({ itemId: instr.name, qty });
     } else if (instr.action === "use") {
       gameStore.appendMessage("system", `⚡ Used item: ${instr.name}`);
-      await character.useInventoryItem.mutateAsync(instr.name || "");
+      throw new Error("Not implemented: use inventory item");
     }
   };
 
@@ -157,16 +138,14 @@ export function useGameMessages() {
       if (type === "roll") {
         handleRollInstruction(instr as RollInstructionMessageDto);
       } else if (type === "xp") {
-        handleXpInstruction(instr as XpInstructionMessageDto);
+        void handleXpInstruction(instr as XpInstructionMessageDto);
       } else if (type === "hp") {
-        handleHpInstruction(instr as HpInstructionMessageDto);
-      } else if (type === "spell") {
-        handleSpellInstruction(instr as SpellInstructionMessageDto);
+        void handleHpInstruction(instr as HpInstructionMessageDto);
       } else if (type === "inventory") {
-        handleInventoryInstruction(instr as InventoryInstructionMessageDto);
+        void handleInventoryInstruction(instr as InventoryInstructionMessageDto);
       } else if (isCombatStartInstruction(item)) {
         // Delegate to combat composable
-        combat.initializeCombat(item);
+        void combat.initializeCombat(item);
       }
     });
   };

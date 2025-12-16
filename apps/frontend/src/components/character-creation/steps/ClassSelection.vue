@@ -15,10 +15,15 @@
 </template>
 
 <script setup lang="ts">
-import { CLASSES_LIST, DnDRulesService } from '@/services/dndRulesService';
-import { storeToRefs } from 'pinia';
-import { UiSelect } from '@rpg-gen/ui';
+import { useCharacterId } from "@/composables/useCharacterId";
+import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
+import { CLASSES_LIST, DnDRulesService } from "@/services/dndRulesService";
+import { useCharacter } from "@rpg-gen/api-client";
+import { UiSelect } from "@rpg-gen/ui";
 
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const { update } = useCharacter(characterId);
 
 const updateClass = async (newClass: string) => {
   if (!currentCharacter.value) return;
@@ -29,13 +34,13 @@ const updateClass = async (newClass: string) => {
   };
 
   currentCharacter.value.skills = DnDRulesService.getAvailableSkillsForClass(newClass).map(
-    skill => ({
+    (skill) => ({
       name: skill,
       proficient: false,
     }),
   );
 
-  await characterStore.character.update.mutateAsync({
+  await update.mutateAsync({
     classes: currentCharacter.value.classes,
     skills: currentCharacter.value.skills,
   });

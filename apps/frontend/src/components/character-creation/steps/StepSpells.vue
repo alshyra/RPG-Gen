@@ -116,30 +116,38 @@
 
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
-import { useClasses } from '@rpg-gen/api-client';
-import { storeToRefs } from 'pinia';import { useSpellManagement } from "@/composables/useSpellManagement";import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useCharacter, useClasses } from '@rpg-gen/api-client';
+import { useSpellManagement } from "@/composables/useSpellManagement";
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { LevelUpOptionsDto, SpellResponseDto } from '@rpg-gen/shared';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { useCharacterId } from '@/composables/useCharacterId';
 
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const characterSpellManager = useSpellManagement(characterId.value);
+const { update } = useCharacter(characterId);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
 const classes = useClasses(primaryClass, () => 1);
-const availableSpells = computed(() => classes.levelOptions.data.value?.spells || []);
+const availableSpells = computed(() => classes.levelOptions.data.value?.unlockedSpells || []);
+const isLoadingSpells = computed(() => classes.levelOptions.isLoading.value);
 const cantripsKnown = ref(0);
 const spellsKnown = ref(0);
 
 // Separate cantrips (level 0) from spells (level 1+)
-const cantrips = computed(() => availableSpells.value.filter(s => s.level === 0));
-const spells = computed(() => availableSpells.value.filter(s => (s.level ?? 0) > 0));
+const cantrips = computed(() => availableSpells.value.filter((s: SpellResponseDto) => s.level === 0));
+const spells = computed(() => availableSpells.value.filter((s: SpellResponseDto) => (s.level ?? 0) > 0));
 
 // Count selected cantrips and spells
 const selectedCantripsCount = computed(() => {
   if (!currentCharacter.value?.spells) return 0;
-  return currentCharacter.value.spells.filter(s => s.level === 0).length;
+  return currentCharacter.value.spells.filter((s: SpellResponseDto) => s.level === 0).length;
 });
 
 const selectedSpellsCount = computed(() => {
   if (!currentCharacter.value?.spells) return 0;
-  return currentCharacter.value.spells.filter(s => s.level > 0).length;
+  return currentCharacter.value.spells.filter((s: SpellResponseDto) => s.level > 0).length;
 });
 
 // Fetch spells from backend when class is set
@@ -154,7 +162,7 @@ const applyOptions = (options: LevelUpOptionsDto) => {
 };
 
 // Watch for changes in query data
-watch(() => classes.levelOptions.data.value, (options) => {
+watch(() => classes.levelOptions.data.value, (options: LevelUpOptionsDto | undefined) => {
   if (options) {
     applyOptions(options);
   } else {
@@ -162,21 +170,13 @@ watch(() => classes.levelOptions.data.value, (options) => {
   }
 }, { immediate: true });
 
-watch(
-  primaryClass,
-  className => {
-    void loadSpellsForClass(className);
-  },
-  { immediate: true },
-);
-
 const spellIsSelected = (definitionId: string) =>
   (currentCharacter.value?.spells || []).some(s => s.definitionId === definitionId);
 
 const persistSpells = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.character.update.mutateAsync({
+    await update.mutateAsync({
       spells: currentCharacter.value.spells || [],
     });
   } catch (err) {
@@ -191,7 +191,6 @@ const canAddSpell = (s: SpellResponseDto) => {
     : selectedSpellsCount.value < spellsKnown.value;
 };
 
-const spellMgmt = useSpellManagement(() => currentCharacter.value?.characterId);
 
 const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
   if (!currentCharacter.value || !s.definitionId) return;
@@ -200,7 +199,7 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
     // Check limits before adding
     if (!canAddSpell(s)) return;
 
-    await spellMgmt.learnSpell({
+    await characterSpellManager.learnSpell({
       type: 'spell',
       action: 'learn',
       name: s.name,
@@ -210,7 +209,7 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
       meta: s.meta,
     });
   } else {
-    await spellMgmt.forgetSpell(s.name);
+    await characterSpellManager.forgetSpell(s.name);
   }
 
   await persistSpells();

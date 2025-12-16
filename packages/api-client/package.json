@@ -7,8 +7,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint ."
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@rpg-gen/shared": "*",

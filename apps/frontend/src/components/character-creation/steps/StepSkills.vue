@@ -34,13 +34,18 @@
 import { UiInputCheckbox } from '@rpg-gen/ui';
 import { DnDRulesService } from '@/services/dndRulesService';
 import type { SkillResponseDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { useCharacter } from '@rpg-gen/api-client';
+import { useCharacterId } from '@/composables/useCharacterId';
 
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const { update } = useCharacter(characterId)
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
 const proficientSkills = computed(() =>
-  (currentCharacter.value?.skills || []).filter(s => s.proficient).map(s => s.name),
+  (currentCharacter.value?.skills || []).filter((s: SkillResponseDto) => s.proficient).map((s: SkillResponseDto) => s.name),
 );
 const availableSkills = computed(() =>
   DnDRulesService.getAvailableSkillsForClass(primaryClass.value),
@@ -52,7 +57,7 @@ const saveCurrent = async () => {
 
   if (!currentCharacter.value.characterId) return;
 
-  await characterStore.character.update.mutateAsync({
+  await update.mutateAsync({
     skills: currentCharacter.value.skills,
   });
 };
@@ -62,16 +67,16 @@ const setSkillProficiency = async (skill: string, isProficient: boolean) => {
   const existingSkills = currentCharacter.value.skills || [];
 
   // If skill exists, update its proficient flag; otherwise add it when setting true
-  const present = existingSkills.find(s => s.name === skill);
+  const present = existingSkills.find((s: SkillResponseDto) => s.name === skill);
   let updated: SkillResponseDto[];
   if (present) {
-    updated = existingSkills.map(s =>
-      s.name === skill
+    updated = existingSkills.map((skill: SkillResponseDto) =>
+      skill.name === skill
         ? {
-            ...s,
+            ...skill,
             proficient: isProficient,
           }
-        : s,
+        : skill,
     );
   } else if (isProficient) {
     updated = [

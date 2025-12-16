@@ -15,10 +15,7 @@
             {{ getAbilityScore(key) }}
           </span>
           <span class="text-xs text-slate-500 mt-0.5">
-            ({{ getModifier(getAbilityScore(key)) > 0 ? '+' : ''
-
-
-            }}{{ getModifier(getAbilityScore(key)) }})
+            ({{ getModifier(getAbilityScore(key)) > 0 ? '+' : ''}}{{ getModifier(getAbilityScore(key)) }})
           </span>
         </div>
       </div>
@@ -27,13 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import type { AbilityScoresResponseDto } from '@rpg-gen/shared';
 
 type AbilityKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter();
 
 const abilities = {
   str: {
@@ -74,5 +70,3 @@ const getAbilityScore = (key: string): number => {
 
 const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 </script>
-
-<style scoped></style>

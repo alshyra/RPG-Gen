@@ -136,8 +136,8 @@ export function useCombat(
     mutationFn: async (data: { characterId: string; data: CombatStartRequestDto }) => {
       return combatApi.startCombat(data.characterId, data.data);
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
     },
   });
 
@@ -145,21 +145,18 @@ export function useCombat(
     mutationFn: async (data: { characterId: string; action: CombatActionRequestDto }) => {
       return combatApi.executeAction(data.characterId, data.action);
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
     },
   });
 
   const attack = useMutation({
-    mutationFn: async (data: { characterId: string; targetName: string; spellName?: string }) => {
-      // Find target from current status
-      const currentStatus = status.data.value;
-      const target = currentStatus?.enemies?.find(e => e.name === data.targetName);
-      if (!target) throw new Error(`Target ${data.targetName} not found`);
-      return combatApi.attack(data.characterId, target, data.spellName);
+    mutationFn: async (data: { characterId: string; target: CombatantDto; spellName?: string }) => {
+      if (!data.target) throw new Error(`Target not found`);
+      return combatApi.attack(data.characterId, data.target, data.spellName);
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
     },
   });
 
@@ -167,8 +164,8 @@ export function useCombat(
     mutationFn: async (characterId: string) => {
       return combatApi.endTurn(characterId);
     },
-    onSuccess: (_data, characterId) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
+    onSuccess: async (_data, characterId) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
     },
   });
 
@@ -176,8 +173,8 @@ export function useCombat(
     mutationFn: async (characterId: string) => {
       return combatApi.flee(characterId);
     },
-    onSuccess: (_data, characterId) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
+    onSuccess: async (_data, characterId) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
     },
   });
 
@@ -185,8 +182,8 @@ export function useCombat(
     mutationFn: async (data: { characterId: string; movement: MovementRequestDto }) => {
       return combatApi.move(data.characterId, data.movement);
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
     },
   });
 

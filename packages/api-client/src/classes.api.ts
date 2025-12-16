@@ -1,11 +1,9 @@
 import type { LevelUpOptionsDto } from "@rpg-gen/shared";
+import { useQuery } from "@tanstack/vue-query";
 import type { MaybeRefOrGetter } from "vue";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { computed, toValue } from "vue";
 import { apiClient, getData } from "./index.js";
 
-// Exported temporarily for legacy code - prefer using useClasses()
-// Internal API functions (private - use useClasses() hook)
 const classesApi = {
   async getLevelOptions(className: string, level: number): Promise<LevelUpOptionsDto> {
     const response = await apiClient.GET("/api/classes/{className}/levels/{level}", {
@@ -25,25 +23,24 @@ export function useClasses(
   level: MaybeRefOrGetter<number | undefined>,
   options?: { enabled?: boolean },
 ) {
-  const queryClient = useQueryClient();
-  const cls = computed(() => toValue(className));
-  const lvl = computed(() => toValue(level));
+  const computedClassName = computed(() => toValue(className));
+  const currentLevelValue = computed(() => toValue(level));
 
   const levelOptions = useQuery({
     queryKey: computed(() => {
-      const c = cls.value;
-      const l = lvl.value;
+      const c = computedClassName.value;
+      const l = currentLevelValue.value;
       return c && l ? classesKeys.levelOptions(c, l) : ["classes"];
     }),
     queryFn: async () => {
-      const c = cls.value;
-      const l = lvl.value;
+      const c = computedClassName.value;
+      const l = currentLevelValue.value;
       if (!c || !l) throw new Error("Class name and level are required");
       return classesApi.getLevelOptions(c, l);
     },
     enabled: computed(() => {
-      const c = cls.value;
-      const l = lvl.value;
+      const c = computedClassName.value;
+      const l = currentLevelValue.value;
       return options?.enabled !== false && !!c && !!l;
     }),
   });

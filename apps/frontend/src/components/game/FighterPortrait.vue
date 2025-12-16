@@ -25,27 +25,6 @@
         </div>
       </div>
 
-      <div class="absolute bottom-1 left-1 right-1 flex items-center justify-center">
-        <div class="mx-2 pointer-events-auto">
-          <button
-            v-if="!isPlayer && (fighter?.hp ?? 0) > 0"
-            :disabled="!showAttackButton"
-            class="px-2 py-0.5 text-[11px] rounded bg-amber-400 hover:bg-amber-300 text-amber-900 disabled:bg-slate-600 disabled:text-slate-400"
-            data-cy="attack-button"
-            :aria-disabled="!showAttackButton"
-            @click.prevent="openActionSelector"
-          >
-            Attaquer
-          </button>
-          <div
-            v-else
-            class="px-2 py-0.5 text-[11px] rounded bg-slate-600 text-slate-200"
-          >
-            {{ altLabel }}
-          </div>
-        </div>
-      </div>
-
       <div class="absolute inset-y-2 right-1 flex items-center pointer-events-none">
         <div
           class="relative w-3 h-full bg-slate-700 rounded overflow-hidden"
@@ -53,7 +32,7 @@
           :data-hp="String(fighterDisplayHp)"
         >
           <div
-            class="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-red-600 to-red-400"
+            class="absolute left-0 right-0 bottom-0 bg-linear-to-t from-red-600 to-red-400"
             :style="{ height: hpPct }"
           />
           <div class="absolute inset-0 flex items-center justify-center">
@@ -65,49 +44,35 @@
       </div>
     </div>
   </div>
-
-  <!-- Spell/Action Selector Modal -->
-  <SpellSelector
-    :is-open="showSpellSelector"
-    :target="fighter"
-    @close="showSpellSelector = false"
-    @attack="handleAttack"
-  />
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { useCombat } from '@/composables/useCombat';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { getFallbackPortrait, pickBestPortrait } from '@/composables/usePortraits';
+import { useCombat } from '@rpg-gen/api-client';
 import type { CombatantDto } from '@rpg-gen/shared';
-import { pickBestPortrait, getFallbackPortrait } from '@/composables/usePortraits';
-import { useCombatStore } from '@/stores/combatStore';
-import { useGameStore } from '@/stores/gameStore';
-import { storeToRefs } from 'pinia';
-import SpellSelector from './combat-panel/SpellSelector.vue';
+import { computed, onMounted, ref } from 'vue';
 
 const { fighter, isPlayer } = defineProps<{
   fighter: CombatantDto | null;
   isPlayer?: boolean;
 }>();
-const combatStore = useCombatStore();
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
-const { player: combatPlayer, inCombat } = storeToRefs(combatStore);
-const combat = useCombat();
-const gameStore = useGameStore();
+const currentCharacter = useCurrentCharacter();
 
+const { isInCombat, status } = useCombat(currentCharacter.value?.characterId);
+const combatPlayer = computed(() => status.data.value?.player);
 const title = computed(() =>
   isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy'),
 );
 // For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
 const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
 const fighterDisplayHp = computed(() => {
-  if (isPlayer && inCombat.value && combatPlayer.value) return combatPlayer.value.hp ?? 0;
+  if (isPlayer && isInCombat.value && combatPlayer.value) return combatPlayer.value.hp ?? 0;
   if (isPlayer) return currentCharacter.value?.hp ?? 0;
   return fighter?.hp ?? 0;
 });
 const fighterDisplayMaxHp = computed(() => {
-  if (isPlayer && inCombat.value && combatPlayer.value) return combatPlayer.value.hpMax ?? '-';
+  if (isPlayer && isInCombat.value && combatPlayer.value) return combatPlayer.value.hpMax ?? '-';
   if (isPlayer) return currentCharacter.value?.hpMax ?? '-';
   return fighter?.hpMax ?? '-';
 });
@@ -134,32 +99,6 @@ onMounted(async () => {
   resolvedPortrait.value = byManifest || getFallbackPortrait(fighter.name || fighter.id || 'enemy');
 });
 
-// Attack button should be active only when all the following are true:
-// - card is an enemy (not the player)
-// - enemy is alive
-// - it's currently the player's activation
-// - player has at least one action remaining
-// - no active sending in progress (to avoid duplicate clicks)
-const showAttackButton = computed(
-  () =>
-    !isPlayer &&
-    (fighter?.hp ?? 0) > 0 &&
-    combatStore.canPlayerAct &&
-    combatStore.isPlayerTurn &&
-    !gameStore.sending,
-);
-const altLabel = computed(() => (isPlayer ? 'Vous' : 'Mort'));
-
-const showSpellSelector = ref(false);
-
-const openActionSelector = () => {
-  showSpellSelector.value = true;
-};
-
-const handleAttack = async (target: CombatantDto, spellName?: string) => {
-  if (!currentCharacter.value?.characterId) return;
-  await combat.executeAttack(target, spellName);
-};
 </script>
 
 <style scoped>

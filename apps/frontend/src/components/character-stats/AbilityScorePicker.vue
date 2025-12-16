@@ -37,8 +37,10 @@
 
 <script setup lang="ts">
 import useAbilityScores from '@/composables/useAbilityScores';
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { ABILITIES } from '@/services/dndRulesService';
-import { storeToRefs } from 'pinia';
+import { useCharacter } from '@rpg-gen/api-client';
 import { UiInputNumber } from '@rpg-gen/ui';
 
 const props = defineProps<{
@@ -48,8 +50,10 @@ const props = defineProps<{
   initialScores?: Record<string, number>;
 }>();
 const { mode = 'point-buy', proficiency = 1 } = props;
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const { update } = useCharacter(characterId)
 
 const { formatMod, applyPointBuyChange } = useAbilityScores();
 
@@ -57,7 +61,7 @@ const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: nu
   const value = val ?? currentCharacter?.value?.scores?.[ability] ?? 8;
   const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
-  await characterStore.character.update.mutateAsync({
+  await update.mutateAsync({
     scores: currentCharacter.value.scores,
   });
 };

@@ -18,15 +18,20 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { useCharacter } from '@rpg-gen/api-client';
 import { UiInputTextarea } from '@rpg-gen/ui';
 import { useDebounceFn } from '@vueuse/core';
-import { storeToRefs } from 'pinia';
 
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId()
+const {update} = useCharacter(characterId)
 
 const updateDescription = useDebounceFn(async (physicalDescription: string) => {
   if (!currentCharacter.value) return;
   currentCharacter.value.physicalDescription = physicalDescription;
-  await characterStore.character.update.mutateAsync({
+  await update.mutateAsync({
     physicalDescription,
   });
 }, 1000);

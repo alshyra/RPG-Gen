@@ -33,14 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import { useCombatStore } from '@/stores/combatStore';
-import { storeToRefs } from 'pinia';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { useCombat } from '@rpg-gen/api-client';
+import { computed } from 'vue';
 import FighterPortrait from '../FighterPortrait.vue';
+import { useCharacterId } from '@/composables/useCharacterId';
 
 defineEmits<(e: 'acted', payload?: unknown) => void>();
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
-const combatStore = useCombatStore();
-const { enemies } = storeToRefs(combatStore);
+const currentCharacter = useCurrentCharacter();
+const characterId = useCharacterId();
+const { status } = useCombat(characterId);
+
+const enemies = computed(() => status.data.value?.enemies || []);
 </script>

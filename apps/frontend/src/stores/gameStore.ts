@@ -2,9 +2,9 @@ import { useDice } from "@rpg-gen/api-client";
 import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from "@rpg-gen/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import type { RollModalData } from "@/interfaces";
 
 type DisplayRole = "user" | "assistant" | "system";
-import type { RollModalData } from "@/interfaces";
 
 type StoredRole = "user" | "assistant" | "system";
 

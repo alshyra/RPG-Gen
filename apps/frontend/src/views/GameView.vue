@@ -60,6 +60,7 @@
 </template>
 
 <script setup lang="ts">
+import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useGameRolls } from "@/composables/useGameRolls";
 import { useUiStore } from "@/stores/uiStore";
 import { storeToRefs } from "pinia";
@@ -70,21 +71,20 @@ import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
 import { useCombat } from "../composables/useCombat";
 import { useCombatInfo } from "../composables/useCombatStatus";
-import { useGameCommands } from "../composables/useGameCommands";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
 import { useGameStore } from "../stores/gameStore";
-import { isCommand } from "../utils/chatCommands";
 import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
+import { useCharacter } from "@rpg-gen/api-client";
 
 // State
 const router = useRouter();
 const gameStore = useGameStore();
-
+const currentCharacter = useCurrentCharacter()
+const { kill } = useCharacter(currentCharacter.value?.characterId)
 const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
-const { handleInput } = useGameCommands();
 const combat = useCombat();
 const combatInfo = useCombatInfo();
 const inCombat = combatInfo.inCombat;
@@ -110,12 +110,7 @@ const handleSendMessage = async () => {
   const input = gameStore.playerText.trim();
   if (!input) return;
 
-  if (isCommand(input)) {
-    gameStore.playerText = "";
-    await handleInput(input);
-  } else {
-    await sendMessage();
-  }
+  await sendMessage();
 };
 
 /**
@@ -143,7 +138,7 @@ onMounted(async () => {
 
 const onDeathConfirm = async () => {
   if (!currentCharacter.value?.characterId) return;
-  await characterApi.kill(currentCharacter.value.characterId, {
+  await kill.mutateAsync({
     deathLocation: "In combat",
   });
   showDeathModal.value = false;

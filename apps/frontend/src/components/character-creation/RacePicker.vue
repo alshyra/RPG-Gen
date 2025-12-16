@@ -20,15 +20,18 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { ALLOWED_RACES } from '@/services/dndRulesService';
+import { useCharacter } from '@rpg-gen/api-client';
 import { RaceResponseDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
 const allowedRaces = computed(() => ALLOWED_RACES);
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter();
+const currentCharacterId = useCharacterId();
+const { update } = useCharacter(currentCharacterId);
 
 const additionalSelectedClass = (allowedRace: RaceResponseDto) =>
   currentCharacter.value?.race?.id === allowedRace.id
@@ -48,13 +51,13 @@ const summaryMods = (mods: RaceResponseDto['mods']) => {
   }
 };
 
-const onRaceUpdate = (race: RaceResponseDto) => {
+const onRaceUpdate = async (race: RaceResponseDto) => {
   if (!currentCharacter.value) return;
 
   currentCharacter.value.race = race;
 
   if (!currentCharacter.value?.characterId) return;
 
-  characterStore.character.update.mutateAsync({ race });
+  await update.mutateAsync({ race });
 };
 </script>

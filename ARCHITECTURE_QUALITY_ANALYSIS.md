@@ -370,14 +370,16 @@ API Client (data layer)
 **Required Store Actions:**
 
 Store should ONLY have actions for **UI state management**:
+
 - Toggle modal: `showAttackResultModal`
 - Set selection: `currentTarget`
 - Clear UI: `clearCombat()`
 - Process animations: `processAttackLogs()`
 
 Store should NOT have:
+
 - ❌ `startCombat()` - Workflow, belongs in composable
-- ❌ `performAttack()` - Workflow, belongs in composable  
+- ❌ `performAttack()` - Workflow, belongs in composable
 - ❌ `endActivation()` - Workflow, belongs in composable
 - ❌ `fetchStatus()` - Data fetching, belongs in composable
 - ❌ `endCombatSession()` - Workflow, belongs in composable
@@ -606,6 +608,7 @@ The project is **well-positioned for scaling** with some targeted improvements. 
 5. Schedule implementation into roadmap
 
 **Build Status** (Dec 16, 2025):
+
 - ✅ Frontend build: 9.52s (successful)
 - 🔴 Frontend type-check: 32+ errors
   - Pre-existing issues from before this session:
@@ -618,6 +621,7 @@ The project is **well-positioned for scaling** with some targeted improvements. 
   - These errors confirm the architectural layering problems identified above
 
 **Status**: 🔴 **Type checking must be fixed before deployment**
+
 - Root cause: Incomplete refactoring of combatStore changes
 - Related to: Store-composable inversion issues identified above
 

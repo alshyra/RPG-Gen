@@ -47,10 +47,7 @@
               class="text-xs mt-1"
               :class="canAct ? 'text-purple-200' : 'text-slate-500'"
             >
-              {{ spell.description.substring(0, 60)
-
-
-              }}{{ spell.description.length > 60 ? '...' : '' }}
+              {{ spell.description.substring(0, 60) }}{{ spell.description.length > 60 ? '...' : '' }}
             </div>
           </UiButton>
         </div>
@@ -81,24 +78,28 @@
 </template>
 
 <script setup lang="ts">
-import { UiButton } from '@rpg-gen/ui';
-import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCharacterId } from '@/composables/useCharacterId';
 import { useCombat } from '@/composables/useCombat';
-import { useCombatStore } from '@/stores/combatStore';
+import { useCombatEngine } from '@/composables/useCombatEngine';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import type { CombatantDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
+import { useCombat as useCombatApi } from '@rpg-gen/api-client';
+import { UiButton } from '@rpg-gen/ui';
 import { computed } from 'vue';
 
 const props = defineProps<{
   isOpen: boolean;
   target: CombatantDto | null;
 }>();
-const characterStore = useCharacterStore();
-const combatStore = useCombatStore();
+const characterId = useCharacterId();
+const currentCharacter = useCurrentCharacter();
 const { endTurn } = useCombatEngine();
 const { executeAttack } = useCombat();
-const { currentCharacter } = storeToRefs(characterStore);
-const { actionRemaining, actionMax } = storeToRefs(combatStore);
+
+const { status } = useCombatApi(characterId);
+
+const actionRemaining = computed(() => status.data.value?.actionRemaining ?? 0);
+const actionMax = computed(() => status.data.value?.actionMax ?? 0);
 
 const emit = defineEmits<{
   close: [];

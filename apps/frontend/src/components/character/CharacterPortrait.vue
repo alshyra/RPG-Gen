@@ -40,27 +40,28 @@
 </template>
 
 <script setup lang="ts">
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import type { InventoryItemForUi as InventoryItem } from '@/interfaces';
+import { DnDRulesService } from '@/services/dndRulesService';
 import { useCombatStore } from '@/stores/combatStore';
+import { useCombat } from '@rpg-gen/api-client';
+import { UiXpBar } from '@rpg-gen/ui';
 import { computed } from 'vue';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
-import { DnDRulesService } from '@/services/dndRulesService';
-import { UiXpBar } from '@rpg-gen/ui';
 import CharacterIllustration from './CharacterIllustration.vue';
-import { storeToRefs } from 'pinia';
-import type { InventoryItemForUi as InventoryItem } from '@/interfaces';
+import { useCharacterId } from '@/composables/useCharacterId';
 
-// InventoryItem type imported as alias from '@/interface'
+const currentCharacterId = useCharacterId();
+const currentCharacter = useCurrentCharacter();
+const {status} = useCombat(currentCharacterId);
 
-const characterStore = useCharacterStore();
-const combatStore = useCombatStore();
-const { currentCharacter } = storeToRefs(characterStore);
-const { inCombat, player: combatPlayer } = storeToRefs(combatStore);
+const combatStatus = computed(() => status.data.value);
 
 const hp = computed(() => {
-  if (inCombat.value && combatPlayer.value) {
-    return `${combatPlayer.value.hp ?? 0}/${combatPlayer.value.hpMax ?? 12}`;
+  if (status.data.value?.inCombat && status) {
+    return `${combatStatus.value?.inCombat ?? 0}/${combatStatus.value?.player.hpMax}`;
   }
-  if (!currentCharacter.value) return '0/0';
+  if (!currentCharacter.value) throw new Error('No current character');
   return `${currentCharacter.value.hp || 0}/${currentCharacter.value.hpMax || 12}`;
 });
 
@@ -122,7 +123,7 @@ const computeArmorAc = (
 
 const ac = computed(() => {
   // If combat is active, prefer combat player's AC (derived at combat init)
-  if (inCombat.value && combatPlayer.value) return combatPlayer.value.ac ?? '-';
+  if (combatStatus.value?.inCombat && combatStatus.value.player) return combatStatus.value.player.ac ?? '-';
   if (!currentCharacter.value) return '-';
 
   const charValue = getCharValue();

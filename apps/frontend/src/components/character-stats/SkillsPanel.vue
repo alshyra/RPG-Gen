@@ -23,12 +23,11 @@
 </template>
 
 <script setup lang="ts">
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { computed } from 'vue';
 import { DnDRulesService } from '../../services/dndRulesService';
-import { storeToRefs } from 'pinia';
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter()
 
 const skills = computed(() => {
   if (

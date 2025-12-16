@@ -139,31 +139,18 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
+import { useCharacter } from '@rpg-gen/api-client';
 import { InventoryItemDto } from '@rpg-gen/shared';
-import { storeToRefs } from 'pinia';
-import { onBeforeUnmount, ref } from 'vue';
 import { UiInputCheckbox, UiInputNumber } from '@rpg-gen/ui';
+import { onBeforeUnmount, ref } from 'vue';
 
-// Local type to allow string values for cost/weight which the schema incorrectly defines as Record<string, never>
-type LocalInventoryItem = Omit<InventoryItemDto, 'meta'> & {
-  meta?: {
-    type?: string;
-    class?: string;
-    cost?: string;
-    weight?: string;
-    damage?: string;
-    properties?: string[];
-    starter?: boolean;
-    ac?: string;
-    strength?: string;
-    stealth?: string;
-    usable?: boolean;
-    [key: string]: unknown;
-  };
-};
+const currentCharacter = useCurrentCharacter()
+const characterId = useCharacterId();
+const { update } = useCharacter(characterId)
 
-
-const basePack: LocalInventoryItem[] = [
+const basePack: InventoryItemDto[] = [
   {
     definitionId: 'pack-backpack',
     name: 'Sac à dos',
@@ -215,7 +202,7 @@ const basePack: LocalInventoryItem[] = [
 ];
 
 // Weapon choices — separate main weapons from secondary items (shield/bow)
-const availableMainWeapons: LocalInventoryItem[] = [
+const availableMainWeapons: InventoryItemDto[] = [
   {
     definitionId: 'weapon-dagger',
     name: 'Dague',
@@ -224,9 +211,9 @@ const availableMainWeapons: LocalInventoryItem[] = [
     meta: {
       type: 'weapon',
       class: 'Simple Melee',
-      cost: '2 gp',
+      // cost: '2 gp',
       damage: '1d4 piercing',
-      weight: '1 lb',
+      // weight: '1 lb',
       properties: ['Finesse', 'Light', 'Thrown 20/60'],
       starter: true,
     },
@@ -240,9 +227,9 @@ const availableMainWeapons: LocalInventoryItem[] = [
     meta: {
       type: 'weapon',
       class: 'Simple Melee',
-      cost: '2 sp',
+      // cost: '2 sp',
       damage: '1d6 bludgeoning',
-      weight: '4 lb',
+      // weight: '4 lb',
       properties: ['Versatile 1d8'],
       starter: true,
     },
@@ -256,9 +243,9 @@ const availableMainWeapons: LocalInventoryItem[] = [
     meta: {
       type: 'weapon',
       class: 'Martial Melee',
-      cost: '15 gp',
+      // cost: '15 gp',
       damage: '1d8 slashing',
-      weight: '3 lb',
+      // weight: '3 lb',
       properties: ['Versatile 1d10'],
       starter: true,
     },
@@ -272,9 +259,9 @@ const availableMainWeapons: LocalInventoryItem[] = [
     meta: {
       type: 'weapon',
       class: 'Martial Melee',
-      cost: '25 gp',
+      // cost: '25 gp',
       damage: '1d8 piercing',
-      weight: '2 lb',
+      // weight: '2 lb',
       properties: ['Finesse'],
       starter: true,
     },
@@ -284,7 +271,7 @@ const availableMainWeapons: LocalInventoryItem[] = [
 const chosenMainWeapon = ref(availableMainWeapons[0]);
 const availableMainWeaponsDefinitionIds = availableMainWeapons.map(w => w.definitionId);
 
-const availableSecondaryItems: LocalInventoryItem[] = [
+const availableSecondaryItems: InventoryItemDto[] = [
   {
     definitionId: 'weapon-shortbow',
     name: 'Shortbow',
@@ -293,9 +280,9 @@ const availableSecondaryItems: LocalInventoryItem[] = [
     meta: {
       type: 'weapon',
       class: 'Simple Ranged',
-      cost: '25 gp',
+      // cost: '25 gp',
       damage: '1d6 piercing',
-      weight: '2 lb',
+      // weight: '2 lb',
       properties: ['Ammunition 80/320', 'Two-handed'],
       starter: true,
     },
@@ -309,11 +296,11 @@ const availableSecondaryItems: LocalInventoryItem[] = [
     meta: {
       type: 'armor',
       class: 'Shield',
-      cost: '10 gp',
+      // cost: '10 gp',
       ac: '+2',
       strength: '—',
       stealth: '—',
-      weight: '6 lb',
+      // weight: '6 lb',
       starter: true,
     },
     equipped: false,
@@ -321,7 +308,7 @@ const availableSecondaryItems: LocalInventoryItem[] = [
 ];
 
 // Armor choice (pick one among a few armor options)
-const availableArmors: LocalInventoryItem[] = [
+const availableArmors: InventoryItemDto[] = [
   {
     definitionId: 'armor-leather',
     name: 'Leather',
@@ -330,10 +317,10 @@ const availableArmors: LocalInventoryItem[] = [
     meta: {
       type: 'armor',
       class: 'Light Armor',
-      cost: '10 gp',
+      // cost: '10 gp',
       ac: '11 + Dex modifier',
       stealth: '—',
-      weight: '10 lb',
+      // weight: '10 lb',
       starter: true,
     },
     equipped: false,
@@ -346,36 +333,36 @@ const availableArmors: LocalInventoryItem[] = [
     meta: {
       type: 'armor',
       class: 'Medium Armor',
-      cost: '10 gp',
+      // cost: '10 gp',
       ac: '12 + Dex modifier (max 2)',
       stealth: '—',
-      weight: '12 lb',
+      // weight: '12 lb',
       starter: true,
     },
     equipped: false,
   },
 ];
 const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
-const chosenArmor = ref<LocalInventoryItem | null>(availableArmors[0]);
+const chosenArmor = ref<InventoryItemDto | null>(availableArmors[0]);
 
-const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map(i => i.definitionId);
-const chosenSecondaryItem = ref<LocalInventoryItem>(availableSecondaryItems[0]);
-const weaponIsSelected = (weapon: LocalInventoryItem) =>
+const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map((i: InventoryItemDto) => i.definitionId);
+const chosenSecondaryItem = ref<InventoryItemDto>(availableSecondaryItems[0]);
+const weaponIsSelected = (weapon: InventoryItemDto) =>
   (currentCharacter.value?.inventory || []).some(
-    i => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name,
+    (i: InventoryItemDto) => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name,
   );
 
-const armorIsSelected = (armor: LocalInventoryItem) =>
+const armorIsSelected = (armor: InventoryItemDto) =>
   (currentCharacter.value?.inventory || []).some(
-    i => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name,
+    (i: InventoryItemDto) => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name,
   );
 
-const toggleArmor = (armor: LocalInventoryItem) => {
+const toggleArmor = (armor: InventoryItemDto) => {
   if (!currentCharacter.value) return;
   chosenArmor.value = armor;
   console.log('Toggling armor:', armor);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
-    i =>
+    (i: InventoryItemDto) =>
       !availableArmorDefinitionIds.includes(i.definitionId) &&
       !availableMainWeaponsDefinitionIds.includes(i.definitionId) &&
       !availableSecondaryItemsDefinitionIds.includes(i.definitionId),
@@ -387,17 +374,17 @@ const toggleArmor = (armor: LocalInventoryItem) => {
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is LocalInventoryItem => !!i);
+  ].filter((i): i is InventoryItemDto => !!i);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentCharacter.value.inventory = newInventory as any;
 };
 
-const toggleWeapon = (weapon: LocalInventoryItem) => {
+const toggleWeapon = (weapon: InventoryItemDto) => {
   if (!currentCharacter.value) return;
   chosenMainWeapon.value = weapon;
   console.log('Toggling weapon:', weapon);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
-    item =>
+    (item: InventoryItemDto) =>
       item.definitionId !== weapon.definitionId &&
       !availableSecondaryItemsDefinitionIds.includes(item.definitionId),
   );
@@ -408,17 +395,17 @@ const toggleWeapon = (weapon: LocalInventoryItem) => {
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is LocalInventoryItem => !!i);
+  ].filter((i): i is InventoryItemDto => !!i);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentCharacter.value.inventory = newInventory as any;
 };
 
-const toggleSecondaryItem = (item: LocalInventoryItem) => {
+const toggleSecondaryItem = (item: InventoryItemDto) => {
   if (!currentCharacter.value) return;
   chosenSecondaryItem.value = item;
   console.log('Toggling secondary item:', item);
   currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
-    i =>
+    (i: InventoryItemDto) =>
       i.definitionId !== item.definitionId &&
       !availableMainWeaponsDefinitionIds.includes(i.definitionId),
   );
@@ -429,7 +416,7 @@ const toggleSecondaryItem = (item: LocalInventoryItem) => {
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
-  ].filter((i): i is LocalInventoryItem => !!i);
+  ].filter((i): i is InventoryItemDto => !!i);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentCharacter.value.inventory = newInventory as any;
 };
@@ -444,10 +431,9 @@ onBeforeUnmount(async () => {
       chosenSecondaryItem.value,
       chosenArmor.value,
       ...basePack,
-    ].filter((i): i is LocalInventoryItem => !!i);
-    await characterStore.character.update.mutateAsync({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inventory: inventoryToSave as any,
+    ].filter((i): i is InventoryItemDto => !!i);
+    await update.mutateAsync({
+      inventory: inventoryToSave,
     });
   } catch (error) {
     console.error('Failed to save inventory on unmount:', error);

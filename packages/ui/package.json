@@ -5,22 +5,6 @@
   "description": "Shared Vue 3 UI components for RPG-Gen",
   "type": "module",
   "main": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
-    },
-    "./dist": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./dist/index.css": {
-      "import": "./dist/index.css"
-    },
-    "./index.css": {
-      "import": "./index.css"
-    }
-  },
   "types": "./src/index.ts",
   "files": [
     "dist",

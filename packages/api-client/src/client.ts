@@ -1,4 +1,4 @@
-import createClient from "openapi-fetch";
+import createClient, { Client } from "openapi-fetch";
 import type { paths } from "@rpg-gen/shared";
 
 /**
@@ -40,45 +40,6 @@ export function getData<T>(response: { data?: T; error?: unknown }): T {
     throw new Error("No data in response");
   }
   return response.data;
-}
-
-/**
- * Helper for authenticated requests
- * Returns a client with Authorization header
- */
-export function createAuthenticatedClient(token: string, baseUrl = "http://localhost:3001") {
-  const client = createApiClient(baseUrl);
-  return {
-    ...client,
-    GET: (url: Parameters<typeof client.GET>[0], init?: Parameters<typeof client.GET>[1]) =>
-      client.GET(url, {
-        ...init,
-        headers: { ...init?.headers, Authorization: `Bearer ${token}` },
-      }),
-    POST: (url: Parameters<typeof client.POST>[0], init?: Parameters<typeof client.POST>[1]) =>
-      client.POST(url, {
-        ...init,
-        headers: { ...init?.headers, Authorization: `Bearer ${token}` },
-      }),
-    PUT: (url: Parameters<typeof client.PUT>[0], init?: Parameters<typeof client.PUT>[1]) =>
-      client.PUT(url, {
-        ...init,
-        headers: { ...init?.headers, Authorization: `Bearer ${token}` },
-      }),
-    DELETE: (
-      url: Parameters<typeof client.DELETE>[0],
-      init?: Parameters<typeof client.DELETE>[1],
-    ) =>
-      client.DELETE(url, {
-        ...init,
-        headers: { ...init?.headers, Authorization: `Bearer ${token}` },
-      }),
-    PATCH: (url: Parameters<typeof client.PATCH>[0], init?: Parameters<typeof client.PATCH>[1]) =>
-      client.PATCH(url, {
-        ...init,
-        headers: { ...init?.headers, Authorization: `Bearer ${token}` },
-      }),
-  };
 }
 
 // Re-export types for convenience

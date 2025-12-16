@@ -48,15 +48,15 @@
             Sorts
           </AppRouterButton>
           <AppRouterButton
-            :disabled="!inCombat"
+            :disabled="!isInCombat"
             variant="ghost"
             :to="
-              inCombat
+              isInCombat
                 ? { name: 'game-combat', params: { characterId: currentCharacter.characterId } }
                 : undefined
             "
             class="w-full text-left px-3 py-2"
-            :class="!inCombat && 'opacity-50 cursor-not-allowed'"
+            :class="!isInCombat && 'opacity-50 cursor-not-allowed'"
           >
             Combat
           </AppRouterButton>
@@ -76,14 +76,15 @@
 import AppRouterButton from '@/components/AppRouterButton.vue';
 import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
-import { useCombatInfo } from '@/composables/useCombatStatus';
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { useUiStore } from '@/stores/uiStore';
-import { storeToRefs } from 'pinia';
+import { useCombat } from '@rpg-gen/api-client';
 
-const characterStore = useCharacterStore();
-const combatInfo = useCombatInfo();
 const ui = useUiStore();
 
-const { currentCharacter } = storeToRefs(characterStore);
-const inCombat = combatInfo.inCombat;
+const characterId = useCharacterId();
+const currentCharacter = useCurrentCharacter();
+const { isInCombat } = useCombat(characterId);
+
 </script>
