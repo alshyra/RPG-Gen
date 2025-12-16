@@ -53,16 +53,17 @@
 <script setup lang="ts">
 import { UiButton } from '@rpg-gen/ui';
 import { useCombatEngine } from '@/composables/useCombatEngine';
-import { useCombatStore } from '@/stores/combatStore';
-import { useCombatApi } from '@/composables/useCombatStatus';
+import { useCombat } from '@rpg-gen/api-client';
+import { useCombatInfo } from '@/composables/useCombatStatus';
+import { useCharacterId } from '@/composables/useCharacterId';
 import { Activity, Flag, Star } from 'lucide-vue-next';
-import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
-const combatStore = useCombatStore();
 const { endTurn } = useCombatEngine();
-const combatApi = useCombatApi();
-const { roundNumber, actionRemaining, bonusActionRemaining, phase } = storeToRefs(combatStore);
+const characterId = useCharacterId();
+const combatApi = useCombat(characterId);
+const combatInfo = useCombatInfo();
+const { roundNumber, actionRemaining, bonusActionRemaining, phase } = combatInfo;
 
 const phaseLabel = computed(() => {
   switch (phase.value) {

@@ -2,7 +2,6 @@ import type { AttackQueueItem, AttackView } from "@/interfaces";
 import type {
   CombatActionResponseDto,
   CombatantDto,
-  CombatStartRequestDto,
   EnemyAttackLogDto,
 } from "@rpg-gen/shared";
 import { defineStore } from "pinia";
@@ -66,51 +65,6 @@ export const useCombatStore = defineStore("combatStore", () => {
     resetModalState();
   };
 
-  // --- Actions ---
-  const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
-    const { useCombatApi } = await import("../composables/useCombatStatus");
-    const combatApi = useCombatApi();
-    const response = await combatApi.startCombat.mutateAsync({ characterId, data: instruction });
-    if (response.enemies && response.enemies.length > 0) {
-      currentTarget.value = response.enemies[0];
-    }
-    return response;
-  };
-
-  const fetchStatus = async () => {
-    const { useCombatApi } = await import("../composables/useCombatStatus");
-    const combatApi = useCombatApi();
-    await combatApi.status.refetch();
-  };
-
-  const endActivation = async (characterId: string) => {
-    const { useCombatApi } = await import("../composables/useCombatStatus");
-    const combatApi = useCombatApi();
-    const response = await combatApi.endTurn.mutateAsync(characterId);
-    if (response.attackLogs?.length) {
-      await processAttackLogs(response.attackLogs);
-    }
-    // Auto-select next target if current is dead
-    const { useCombatStatus } = await import("../composables/useCombatStatus");
-    const combatStatus = useCombatStatus();
-    const enemies = combatStatus.value?.enemies ?? [];
-    currentTarget.value = selectNextAliveTarget(enemies);
-    return response;
-  };
-
-  const performAttack = async (characterId: string, targetName: string, spellName?: string) => {
-    const { useCombatApi } = await import("../composables/useCombatStatus");
-    const combatApi = useCombatApi();
-    return combatApi.attack.mutateAsync({ characterId, targetName, spellName });
-  };
-
-  const endCombatSession = async (characterId: string) => {
-    const { useCombatApi } = await import("../composables/useCombatStatus");
-    const combatApi = useCombatApi();
-    await combatApi.endCombat.mutateAsync(characterId);
-    clearCombat();
-  };
-
   return {
     // UI State only
     currentTarget,
@@ -126,12 +80,9 @@ export const useCombatStore = defineStore("combatStore", () => {
     // Constants
     PLAYER_ATTACK_DELAY_MS,
 
-    // Actions
-    startCombat,
-    fetchStatus,
-    endActivation,
-    performAttack,
-    endCombatSession,
+    // UI State Helpers (no API calls)
     clearCombat,
+    resetModalState,
+    processAttackLogs,
   };
 });

@@ -2,15 +2,18 @@ import type {
   CombatantDto,
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
+  CombatStartRequestDto,
+  CombatStateDto,
+  EndPlayerTurnResponseDto,
 } from "@rpg-gen/shared";
-import { useCharacter } from "@rpg-gen/api-client";
+import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useCharacterId } from "./useCharacterId";
-import { useCombatInfo, useCombatApi } from "./useCombatStatus";
+import { useCombatInfo } from "./useCombatStatus";
 
 /**
  * Composable for combat-specific actions and state management
@@ -24,9 +27,73 @@ export function useCombat() {
   const combatStore = useCombatStore();
   const { currentTarget, currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
     storeToRefs(combatStore);
-  const combatApi = useCombatApi();
+  const combatApi = useCombatApi(characterId);
   const combatInfo = useCombatInfo();
   const character = useCharacter(characterId);
+
+  /**
+   * Start a combat session
+   * Replaces combatStore.startCombat()
+   */
+  const startCombat = async (
+    charId: string,
+    instruction: CombatStartRequestDto,
+  ): Promise<CombatStateDto> => {
+    const response = await combatApi.startCombat.mutateAsync({ characterId: charId, data: instruction });
+    if (response.enemies && response.enemies.length > 0) {
+      currentTarget.value = response.enemies[0];
+    }
+    return response;
+  };
+
+  /**
+   * Fetch current combat status
+   * Replaces combatStore.fetchStatus()
+   */
+  const fetchCombatStatus = async (): Promise<void> => {
+    await combatApi.status.refetch();
+  };
+
+  /**
+   * End player turn and get enemy attack logs
+   * Replaces combatStore.endActivation()
+   */
+  const endActivation = async (charId: string): Promise<EndPlayerTurnResponseDto> => {
+    const response = await combatApi.endTurn.mutateAsync(charId);
+    if (response.attackLogs?.length) {
+      await combatStore.processAttackLogs(response.attackLogs);
+    }
+    // Auto-select next target if current is dead
+    const enemies = combatInfo.enemies.value ?? [];
+    const selectNextAliveTarget = (enemyList: typeof enemies) =>
+      enemyList.find(e => (e.hp ?? 0) > 0) ?? null;
+    currentTarget.value = selectNextAliveTarget(enemies);
+    return response;
+  };
+
+  /**
+   * Perform an attack against a target
+   * Replaces combatStore.performAttack() - now uses executeAttack internally
+   */
+  const performAttack = async (
+    target: CombatantDto,
+    spellName?: string,
+  ): Promise<CombatActionResponseDto> => {
+    return combatApi.attack.mutateAsync({
+      characterId: characterId.value!,
+      targetName: target.name ?? "",
+      spellName,
+    });
+  };
+
+  /**
+   * End the current combat session
+   * Replaces combatStore.endCombatSession()
+   */
+  const endCombatSession = async (charId: string): Promise<void> => {
+    await combatApi.endCombat.mutateAsync(charId);
+    combatStore.clearCombat();
+  };
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -56,7 +123,7 @@ export function useCombat() {
     try {
       const payload = { combat_start: instruction.combat_start };
       const currentHp = currentCharacter.value.hp ?? 0;
-      const combatState = await combatStore.startCombat(
+      const combatState = await startCombat(
         currentCharacter.value.characterId,
         payload,
       );
@@ -194,7 +261,7 @@ export function useCombat() {
     if (!currentCharacter.value) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
-    if (!combatStore.canPlayerAct) {
+    if (!combatInfo.canAct.value) {
       gameStore.appendMessage("system", `⚠️ Vous n'avez plus de points d'action disponibles.`);
       return;
     }
@@ -286,7 +353,7 @@ export function useCombat() {
    */
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter.value) return false;
-    await combatStore.fetchStatus();
+    await fetchCombatStatus();
     const inCombat = combatInfo.inCombat.value;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
@@ -299,6 +366,13 @@ export function useCombat() {
   };
 
   return {
+    // Workflow functions (moved from combatStore)
+    startCombat,
+    fetchCombatStatus,
+    endActivation,
+    performAttack,
+    endCombatSession,
+
     // Actions
     initializeCombat,
     executeAttack,

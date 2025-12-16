@@ -23,10 +23,12 @@
 </template>
 
 <script setup lang="ts">
-import { useCombatApi } from "@/composables/useCombatStatus";
+import { useCombat } from "@rpg-gen/api-client";
+import { useCharacterId } from "@/composables/useCharacterId";
 import { computed } from "vue";
 
-const combatApi = useCombatApi();
+const characterId = useCharacterId();
+const combatApi = useCombat(characterId);
 const attackResult = computed(() => combatApi.attack.data.value);
 </script>
 

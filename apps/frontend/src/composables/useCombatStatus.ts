@@ -14,15 +14,6 @@ export function useCombatStatus() {
 }
 
 /**
- * Get combat API hook with mutations
- * Replaces useCombatStore().combat
- */
-export function useCombatApi() {
-  const characterId = useCharacterId();
-  return useCombat(characterId);
-}
-
-/**
  * Get derived combat properties
  * Replaces useCombatStore().inCombat, .enemies, .player, etc
  */

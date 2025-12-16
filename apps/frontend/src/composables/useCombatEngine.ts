@@ -5,6 +5,7 @@ import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCombatStore } from "@/stores/combatStore";
+import { useCombatInfo } from "@/composables/useCombatStatus";
 import { useGameStore } from "@/stores/gameStore";
 import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
@@ -47,7 +48,9 @@ export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
   const gameStore = useGameStore();
-  const { enemies, player, currentAttackView } = storeToRefs(combatStore);
+  const { currentAttackView } = storeToRefs(combatStore);
+  const combatInfo = useCombatInfo();
+  const { enemies, player } = combatInfo;
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
 
@@ -233,22 +236,22 @@ export function useCombatEngine() {
    * Initialize visual arena with current combat state
    */
   const initializeVisual = async () => {
-    if (!arenaApi.value || !combatStore.inCombat) return;
+    if (!arenaApi.value || !combatInfo.inCombat.value) return;
 
     // Clear old units before re-initializing
     await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter.value?.characterId ?? "",
-      inCombat: combatStore.inCombat,
+      inCombat: combatInfo.inCombat.value,
       enemies: enemies.value,
       player: player.value!,
-      turnOrder: combatStore.turnOrder,
-      currentTurnIndex: combatStore.currentTurnIndex,
-      roundNumber: combatStore.roundNumber,
-      phase: combatStore.phase,
-      actionRemaining: combatStore.actionRemaining,
-      actionMax: combatStore.actionMax,
+      turnOrder: combatInfo.turnOrder.value,
+      currentTurnIndex: combatInfo.currentTurnIndex.value,
+      roundNumber: combatInfo.roundNumber.value,
+      phase: combatInfo.phase.value,
+      actionRemaining: combatInfo.actionRemaining.value,
+      actionMax: combatInfo.actionMax.value,
     });
 
     // Create units from config
