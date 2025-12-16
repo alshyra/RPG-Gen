@@ -28,20 +28,25 @@ API
 
 ```
 Components
-  ↓ (call composable functions)
-useCombat.startCombat()
-  ↓ (calls Vue Query mutation)
-combatApi.startCombat.mutateAsync()
-  ↓ (mutation returns .data, .isPending, .error)
-  ↓ (composable updates store UI state)
-combatStore.currentTarget = response.enemies[0]
   ↓
-API
+Composables (workflows)
+  ├─→ Vue Query Mutations/Queries (data layer)
+  │   └─→ mutation.data, mutation.isPending, mutation.error
+  │       (reactive, auto-updated by Vue Query)
+  │
+  └─→ Pinia Stores (UI state only)
+      └─→ currentTarget, showModal, currentAttackView
+          (UI state, selections, animations)
+
+Components access:
+  - combatApi.status.data (for combat data)
+  - combatStore.currentTarget (for UI selections)
 ```
 
 **Benefits:**
-- Clear dependency direction: Component → Composable → Store → API
-- Workflow logic in composable (where it belongs)
+- Clear separation: Vue Query = data, Stores = UI state
+- No data duplication (mutation.data is source of truth)
+- Workflow logic in composables (where it belongs)
 - No unnecessary wrappers
 - Easy to test (mock composables)
 - Vue Query reactivity works directly
