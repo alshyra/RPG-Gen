@@ -169,7 +169,7 @@ const selectedCombatIds = ref<string[]>([]);
 const characterId = useCharacterId()
 const { update, applyLevelUp } = useCharacter(characterId)
 const currentCharacter = useCurrentCharacter();
-const chat = useChat(characterId);
+const chat = useChat(characterId, { enabled: false });
 const currentLevel = computed(() => currentCharacter.value?.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));
 

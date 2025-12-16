@@ -144,7 +144,7 @@ const steps = [
 
 const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
-const chat = useChat(characterId.value);
+const chat = useChat(characterId.value, { enabled: false }); // Disable history query during creation
 const image = useImage();
 const { update, character } = useCharacter(characterId);
 
@@ -244,8 +244,7 @@ const initConversationForCharacter = async () => {
   try {
     loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = "Préparation du premier prompt du Maître de Jeu...";
-    if (currentCharacter) {
-      // History will be loaded automatically by useChat
+    if (currentCharacter?.value?.characterId) {
       await chat.history.refetch();
     }
   } catch (e) {

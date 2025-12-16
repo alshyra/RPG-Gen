@@ -30,9 +30,30 @@ export class ClassesService {
     return levelData;
   }
 
+  /**
+   * Safely access spell definitions from map-like objects from Mongoose.
+   */
+  private getSpellDefinitions(
+    mapLike: unknown,
+    key: string,
+  ): { definitionId?: string }[] {
+    if (!mapLike) return [];
+    const candidate = (mapLike as Record<PropertyKey, unknown>)[key];
+    return Array.isArray(candidate) ? candidate : [];
+  }
+
+  /**
+   * Safely access combat options from map-like objects from Mongoose.
+   */
+  private getCombatOptions(mapLike: unknown, key: string): CombatOption[] {
+    if (!mapLike) return [];
+    const candidate = (mapLike as Record<PropertyKey, unknown>)[key];
+    return Array.isArray(candidate) ? candidate : [];
+  }
+
   private getDefinitionIdsByLevel(allowedSpellsByLevel: Map<string, { definitionId?: string }[]>) {
     return (lvl: number) =>
-      (allowedSpellsByLevel?.get(lvl.toString()) ?? [])
+      this.getSpellDefinitions(allowedSpellsByLevel, lvl.toString())
         .filter(spell => !!(spell && spell.definitionId))
         .map(spell => spell.definitionId)
         .filter((definitionId): definitionId is string => !!definitionId);
@@ -53,13 +74,12 @@ export class ClassesService {
     combatOptionsByLevel: Map<string, CombatOption[]>,
     maxLevel: number,
   ) {
-    return Array.from(
-      new Set(
-        Array.from({ length: maxLevel + 1 }, (_, i) => i)
-          .flatMap(lvl => combatOptionsByLevel.get(lvl.toString()))
-          .filter(combatOption => !!combatOption),
-      ),
-    ).map(combatOption => new CombatOptionDto(combatOption));
+    const allOptions = Array.from({ length: maxLevel + 1 }, (_, i) => i)
+      .flatMap(lvl => this.getCombatOptions(combatOptionsByLevel, lvl.toString()) ?? [])
+      .filter(combatOption => !!combatOption);
+    
+    return Array.from(new Set(allOptions))
+      .map(combatOption => new CombatOptionDto(combatOption));
   }
 
   private async fetchAllSpellsUpToLevel(level: number): Promise<SpellResponseDto[]> {

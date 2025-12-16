@@ -31,16 +31,14 @@ export class ClassDefinition {
   levels: ClassLevel[];
 
   @Prop({
-    type: Map,
-    of: [Object],
-    default: new Map(),
+    type: Object,
+    default: {},
   })
   allowedSpellsByLevel: Map<string, AllowedSpellsByLevel[]>;
 
   @Prop({
-    type: Map,
-    of: [CombatOptionSchema],
-    default: new Map(),
+    type: Object,
+    default: {},
   })
   combatOptionsByLevel: Map<string, CombatOption[]>;
 }

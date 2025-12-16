@@ -96,7 +96,9 @@ export class CombatActionResponseDto {
   isCrit?: boolean;
 
   @ApiPropertyOptional({
-    description: "Combat end result if combat finished",
+    description:
+      "Combat end result if combat finished. Currently not returned by backend - " +
+      "frontend detects combat end via watchers on combatState. Reserved for future use.",
     type: () => CombatEndDto,
   })
   @IsOptional()
