@@ -21,14 +21,6 @@
     </div>
 
     <div class="relative flex items-center gap-2">
-      <!-- Command and argument suggestions dropdown -->
-      <CommandSuggestions
-        ref="suggestionsRef"
-        :input-text="playerText"
-        @select-command="handleCommandSelect"
-        @select-argument="handleArgumentSelect"
-      />
-
       <!-- Message input -->
       <input
         ref="inputRef"
@@ -79,7 +71,7 @@ const { connectedTop = false, hasFailedMessage = false } = defineProps<{
   hasFailedMessage?: boolean;
 }>();
 import { useGameStore } from '@/stores/gameStore';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
 
 type Emits = {
@@ -89,8 +81,6 @@ type Emits = {
 
 const emit = defineEmits<Emits>();
 const gameStore = useGameStore();
-
-const inputRef = ref<HTMLInputElement | null>(null);
 
 const playerText = computed({
   get: () => gameStore.playerText,
@@ -118,16 +108,6 @@ const pendingRollText = computed(() => {
   const modDisplay = label ? ` (${label})` : value ? ` +${value}` : '';
   return `🎲 ${p.dices}${modDisplay}`;
 });
-
-const handleCommandSelect = (command: string) => {
-  playerText.value = `/${command} `;
-  inputRef.value?.focus();
-};
-
-const handleArgumentSelect = (command: string, argument: string) => {
-  playerText.value = `/${command} ${argument}`;
-  inputRef.value?.focus();
-};
 
 const send = () => emit('send');
 

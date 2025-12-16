@@ -40,7 +40,7 @@
         <div
           :class="[
             'w-full h-16 bg-linear-to-t from-slate-900/95 to-transparent backdrop-blur-sm',
-            inCombat ? 'rounded-b-lg' : 'rounded-lg',
+            isInCombat ? 'rounded-b-lg' : 'rounded-lg',
           ]"
         />
       </div>
@@ -49,7 +49,7 @@
     <div class="fixed bottom-4 inset-x-4 max-w-5xl mx-auto z-50 pointer-events-none">
       <div class="pointer-events-auto">
         <ChatBar
-          :connected-top="inCombat"
+          :connected-top="isInCombat"
           :has-failed-message="!!gameStore.lastFailedMessage"
           @send="handleSendMessage"
           @retry="handleRetryMessage"
@@ -63,31 +63,28 @@
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useGameRolls } from "@/composables/useGameRolls";
 import { useUiStore } from "@/stores/uiStore";
+import { useCharacter, useCombat } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
-import { useCombat } from "../composables/useCombat";
 import { useCombatInfo } from "../composables/useCombatStatus";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
 import { useGameStore } from "../stores/gameStore";
 import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
-import { useCharacter } from "@rpg-gen/api-client";
 
 // State
 const router = useRouter();
 const gameStore = useGameStore();
 const currentCharacter = useCurrentCharacter()
-const { kill } = useCharacter(currentCharacter.value?.characterId)
+const { kill } = useCharacter(currentCharacter?.value?.characterId)
 const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
-const combat = useCombat();
-const combatInfo = useCombatInfo();
-const inCombat = combatInfo.inCombat;
+const { isInCombat } = useCombat(currentCharacter?.value?.characterId)
 const { pendingInstruction } = storeToRefs(gameStore);
 const showDeathModal = ref(false);
 
@@ -97,7 +94,7 @@ const contentMaxHeight = computed(() => {
   if (pendingInstruction.value?.type === "roll") {
     return "calc(100vh - 200px)";
   }
-  if (inCombat.value) {
+  if (isInCombat.value) {
     return "calc(100vh - 12rem)";
   }
   return "calc(100vh - 160px)";
@@ -121,23 +118,11 @@ const handleRetryMessage = async () => {
 };
 
 onMounted(async () => {
-  try {
-    console.log("stargame");
-    await startGame();
-    // After session started, check backend combat status and initialize the combat store
-    try {
-      const wasInCombat = await combat.checkCombatStatus();
-      console.log("[GameView] combat status at startup", { wasInCombat });
-    } catch (err) {
-      console.warn("Failed to load combat status at startup", err);
-    }
-  } catch (e) {
-    gameStore.appendMessage("system", `Error: ${String(e)}`);
-  }
+  await startGame();
 });
 
 const onDeathConfirm = async () => {
-  if (!currentCharacter.value?.characterId) return;
+  if (!currentCharacter?.value?.characterId) return;
   await kill.mutateAsync({
     deathLocation: "In combat",
   });

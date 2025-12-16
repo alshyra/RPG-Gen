@@ -91,7 +91,7 @@ export function useCombatEngine() {
   const combat = useCombatApi(characterId);
 
   const endTurn = async () => {
-    if (!currentCharacter.value || combat.endTurn.isPending.value) return;
+    if (!currentCharacter || combat.endTurn.isPending.value) return;
 
     try {
       // Use the mutation to end turn and get response with attackLogs
@@ -242,7 +242,7 @@ export function useCombatEngine() {
     await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
-      characterId: currentCharacter.value?.characterId ?? "",
+      characterId: currentCharacter?.value?.characterId ?? "",
       inCombat: combatInfo.inCombat.value,
       enemies: enemies.value,
       player: player.value!,

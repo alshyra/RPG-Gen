@@ -1,5 +1,5 @@
 <template>
-  <div class="app app-bg rounded-lg min-h-screen pt-16">
+  <div class="overflow-hidden app app-bg rounded-lg min-h-screen pt-16">
     <div class="flex flex-col justify-between gap-2 lg:gap-0">
       <HeaderBar />
     </div>
@@ -13,3 +13,9 @@
 import HeaderBar from './components/layout/HeaderBar.vue';
 import { UiAlertModal } from '@rpg-gen/ui';
 </script>
+
+<style>
+body {
+  overflow: hidden;
+}
+</style>

@@ -42,7 +42,7 @@ export function useGameRolls() {
     if (!pending || !isRollInstruction(pending)) return;
     const skillName = pending.modifierLabel ?? "Roll";
     const skillBonus = pending.modifierLabel
-      ? getSkillBonus(currentCharacter.value ?? null, skillName)
+      ? getSkillBonus(currentCharacter ?? null, skillName)
       : (pending.modifierValue ?? 0);
     gameStore.rollData = buildRollData(rollResult, pending, skillName, skillBonus);
     gameStore.showRollModal = true;

@@ -1,7 +1,7 @@
 import { ABILITIES, DEFAULT_BASE_SCORES } from "@/services/dndRulesService";
 import { CharacterResponseDto } from "@rpg-gen/shared";
-import { storeToRefs } from "pinia";
 import { computed } from "vue";
+import { useCurrentCharacter } from "./useCurrentCharacter";
 
 export const COST = {
   8: 0,
@@ -18,7 +18,8 @@ export const COST = {
 } as const;
 
 const useAbilityScores = () => {
-  const characterScores = computed(() => currentCharacter.value?.scores || DEFAULT_BASE_SCORES);
+  const currentCharacter = useCurrentCharacter();
+  const characterScores = computed(() => currentCharacter?.value?.scores || DEFAULT_BASE_SCORES);
 
   const pointsUsed = computed(() =>
     ABILITIES.map(score => characterScores.value[score] ?? 8).reduce(
@@ -38,7 +39,7 @@ const useAbilityScores = () => {
     maxBudget = 27,
     initialScores?: CharacterResponseDto["scores"],
   ) => {
-    if (!currentCharacter.value) return { allowed: false };
+    if (!currentCharacter) return { allowed: false };
 
     const current = characterScores.value[ability] ?? 8;
     let newUsed = 0;
@@ -58,14 +59,13 @@ const useAbilityScores = () => {
       if (newUsed > maxBudget) return { allowed: false };
     }
 
-    currentCharacter.value = {
-      ...currentCharacter.value,
+    return {
+      allowed: true,
       scores: {
         ...characterScores.value,
         [ability]: newValue,
       },
     };
-    return { allowed: true };
   };
 
   return {

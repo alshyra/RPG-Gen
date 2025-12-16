@@ -82,8 +82,8 @@ import { computed } from 'vue';
 // rpg-awesome provides a set of RPG icons via CSS classes (ra ra-<name>)
 import 'rpg-awesome/css/rpg-awesome.css';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import { showAlert } from '@/composables/useModal';
 import type { InventoryItemDto } from '@rpg-gen/shared';
+import { showAlert } from '@rpg-gen/ui';
 
 // Extended item type with meta fields - using type instead of interface to avoid inheritance issues
 type InventoryItem = Omit<InventoryItemDto, 'meta'> & {
@@ -99,7 +99,7 @@ type InventoryItem = Omit<InventoryItemDto, 'meta'> & {
 const currentCharacter = useCurrentCharacter();
 
 const items = computed<InventoryItem[]>(
-  () => (currentCharacter.value?.inventory || []) as InventoryItem[],
+  () => (currentCharacter?.value?.inventory || []) as InventoryItem[],
 );
 const hasItems = computed(() => items.value.length > 0);
 const itemsCount = computed(() => items.value.length || 0);

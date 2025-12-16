@@ -149,7 +149,7 @@ const image = useImage();
 const { update, character } = useCharacter(characterId);
 
 const skillsToChoose = computed(() =>
-  DnDRulesService.getSkillChoicesForClass(currentCharacter.value?.classes?.[0]?.name || "")
+  DnDRulesService.getSkillChoicesForClass(currentCharacter?.value?.classes?.[0]?.name || "")
 );
 
 // Get current step from route, or from draft if no route param
@@ -161,7 +161,7 @@ const currentStep = computed({
     return Math.min(routeStep - 1, steps.length - 1);
   },
   set: (value: number) => {
-    const charId = (route.params.characterId as string) || currentCharacter.value?.characterId;
+    const charId = (route.params.characterId as string) || currentCharacter?.value?.characterId;
     router.push({
       name: "character-step",
       params: {
@@ -173,15 +173,15 @@ const currentStep = computed({
 });
 
 const chosenSkills = computed(
-  () => (currentCharacter.value?.skills || []).filter((skill) => !!skill.proficient).length || 0
+  () => (currentCharacter?.value?.skills || []).filter((skill) => !!skill.proficient).length || 0
 );
 
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return currentCharacter.value?.name?.trim();
+      return currentCharacter?.value?.name?.trim();
     case 1:
-      return currentCharacter.value?.race && currentCharacter.value?.classes?.[0];
+      return currentCharacter?.value?.race && currentCharacter?.value?.classes?.[0];
     case 2:
       return chosenSkills.value === skillsToChoose.value;
     case 3:
@@ -207,31 +207,32 @@ const previousStep = () => {
 
 // --- helper functions extracted from finishCreation for readability ---
 const saveFinalCharacter = async () => {
-  console.log("Finishing character creation for", currentCharacter.value);
+  console.log("Finishing character creation for", currentCharacter);
   if (
-    !currentCharacter.value ||
-    !currentCharacter.value.classes?.[0].name ||
-    !currentCharacter.value.scores?.Con
+    !currentCharacter||
+    !currentCharacter?.value?.classes?.[0].name ||
+    !currentCharacter?.value?.scores?.Con
   )
     return;
   const hpMax = DnDRulesService.calculateHpForLevel1(
-    currentCharacter.value.classes[0].name,
-    currentCharacter.value.scores.Con
+    currentCharacter?.value?.classes[0].name,
+    currentCharacter?.value?.scores.Con
   );
   await update.mutateAsync({
-    ...currentCharacter.value,
+    ...currentCharacter,
     state: "created",
     hpMax,
     hp: hpMax,
-    skills: currentCharacter.value.skills,
-    spells: currentCharacter.value.spells,
-    ...(currentCharacter.value.inventory ? { inventory: currentCharacter.value.inventory } : {}),
+    skills: currentCharacter?.value?.skills,
+    spells: currentCharacter?.value?.spells,
+    ...(currentCharacter?.value?.inventory ? { inventory: currentCharacter?.value?.inventory } : {}),
   });
 };
 
 const generateAndApplyAvatar = async () => {
   try {
-    await image.generateAvatar.mutateAsync({ characterId: currentCharacter.value!.characterId });
+    if (!currentCharacter?.value?.characterId) return;
+    await image.generateAvatar.mutateAsync({ characterId: currentCharacter.value.characterId });
     // Refetch character to get the updated portrait
     await character.refetch();
   } catch (e) {
@@ -243,7 +244,7 @@ const initConversationForCharacter = async () => {
   try {
     loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = "Préparation du premier prompt du Maître de Jeu...";
-    if (currentCharacter.value) {
+    if (currentCharacter) {
       // History will be loaded automatically by useChat
       await chat.history.refetch();
     }
@@ -253,17 +254,18 @@ const initConversationForCharacter = async () => {
 };
 
 const navigateToGame = async () => {
+  if (!currentCharacter?.value?.characterId) return;
   await router.push({
     name: "game",
-    params: { characterId: currentCharacter.value!.characterId },
+    params: { characterId: currentCharacter.value.characterId },
   });
 };
 
 const finishCreation = async () => {
   if (
-    !currentCharacter.value ||
-    !currentCharacter.value.classes?.[0].name ||
-    !currentCharacter.value.scores?.Con
+    !currentCharacter||
+    !currentCharacter?.value?.classes?.[0].name ||
+    !currentCharacter?.value?.scores?.Con
   )
     return;
 

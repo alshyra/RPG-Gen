@@ -28,9 +28,8 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { showAlert } from "@/composables/useModal";
 import CharactersMenu from "../components/home/CharactersMenu.vue";
-import { UiButton } from "@rpg-gen/ui";
+import { showAlert, UiButton } from "@rpg-gen/ui";
 import { useCharacter } from "@rpg-gen/api-client";
 import { useRouter } from "vue-router";
 

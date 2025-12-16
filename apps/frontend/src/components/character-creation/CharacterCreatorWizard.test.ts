@@ -30,7 +30,7 @@ vi.mock("@/apis/characterApi", async () => ({
   characterApi: {
     generateAvatar: vi.fn(async (_: string) => "data:image/png;base64,avatar"),
     getCharacterById: vi.fn(async (_: string) => ({
-      ...currentCharacter.value,
+      ...currentCharacter,
       portrait: "data:image/png;base64,avatar",
     })),
   },
@@ -71,7 +71,7 @@ describe("CharacterCreatorWizard finish flow", () => {
     await (wrapper.vm as any).finishCreation();
 
     // after finishCreation the currentCharacter should include portrait
-    expect((currentCharacter.value as any).portrait).toBeTruthy();
+    expect((currentCharacteras any).portrait).toBeTruthy();
   });
 
   it("shows full page loader while avatar and first prompt are prepared", async () => {

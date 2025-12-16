@@ -62,7 +62,7 @@
             <UiInputCheckbox
               :name="`weapon-${availableWeapon.definitionId}`"
               :model-value="weaponIsSelected(availableWeapon)"
-              @update:model-value="() => toggleWeapon(availableWeapon)"
+              @update:model-value="(v) => toggleWeapon(availableWeapon, v)"
             >
               <div class="flex-1">
                 <div class="font-medium">
@@ -90,7 +90,7 @@
             <UiInputCheckbox
               :name="`secondary-item-${secondaryItem.definitionId}`"
               :model-value="weaponIsSelected(secondaryItem)"
-              @update:model-value="() => toggleSecondaryItem(secondaryItem)"
+              @update:model-value="(v) => toggleSecondaryItem(secondaryItem, v)"
             >
               <div class="flex-1">
                 <div class="font-medium">
@@ -121,7 +121,7 @@
           <UiInputCheckbox
             :name="`armor-${armor.definitionId}`"
             :model-value="armorIsSelected(armor)"
-            @update:model-value="() => toggleArmor(armor)"
+            @update:model-value="(v) => toggleArmor(armor, v)"
           >
             <div class="flex-1">
               <div class="font-medium">
@@ -268,7 +268,7 @@ const availableMainWeapons: InventoryItemDto[] = [
     equipped: false,
   },
 ];
-const chosenMainWeapon = ref(availableMainWeapons[0]);
+const chosenMainWeapon = ref<InventoryItemDto | null>(availableMainWeapons[0]);
 const availableMainWeaponsDefinitionIds = availableMainWeapons.map(w => w.definitionId);
 
 const availableSecondaryItems: InventoryItemDto[] = [
@@ -346,7 +346,8 @@ const availableArmorDefinitionIds = availableArmors.map(a => a.definitionId);
 const chosenArmor = ref<InventoryItemDto | null>(availableArmors[0]);
 
 const availableSecondaryItemsDefinitionIds = availableSecondaryItems.map((i: InventoryItemDto) => i.definitionId);
-const chosenSecondaryItem = ref<InventoryItemDto>(availableSecondaryItems[0]);
+const chosenSecondaryItem = ref<InventoryItemDto | null>(availableSecondaryItems[0]);
+
 const weaponIsSelected = (weapon: InventoryItemDto) =>
   (currentCharacter.value?.inventory || []).some(
     (i: InventoryItemDto) => (i.definitionId && i.definitionId === weapon.definitionId) || i.name === weapon.name,
@@ -357,86 +358,74 @@ const armorIsSelected = (armor: InventoryItemDto) =>
     (i: InventoryItemDto) => (i.definitionId && i.definitionId === armor.definitionId) || i.name === armor.name,
   );
 
-const toggleArmor = (armor: InventoryItemDto) => {
+// Build and persist the new inventory without mutating currentCharacter
+const toggleArmor = async (armor: InventoryItemDto, selected = true) => {
   if (!currentCharacter.value) return;
-  chosenArmor.value = armor;
-  console.log('Toggling armor:', armor);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
+  chosenArmor.value = selected ? armor : null;
+  console.log('Toggling armor:', armor, selected);
+
+  const currentInv = currentCharacter.value.inventory || [];
+  const filtered = currentInv.filter(
     (i: InventoryItemDto) =>
       !availableArmorDefinitionIds.includes(i.definitionId) &&
       !availableMainWeaponsDefinitionIds.includes(i.definitionId) &&
       !availableSecondaryItemsDefinitionIds.includes(i.definitionId),
   );
 
-  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
+    ...filtered,
     chosenMainWeapon.value,
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
   ].filter((i): i is InventoryItemDto => !!i);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  currentCharacter.value.inventory = newInventory as any;
+
+  await update.mutateAsync({ inventory: newInventory });
 };
 
-const toggleWeapon = (weapon: InventoryItemDto) => {
+const toggleWeapon = async (weapon: InventoryItemDto, selected = true) => {
   if (!currentCharacter.value) return;
-  chosenMainWeapon.value = weapon;
-  console.log('Toggling weapon:', weapon);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
-    (item: InventoryItemDto) =>
-      item.definitionId !== weapon.definitionId &&
-      !availableSecondaryItemsDefinitionIds.includes(item.definitionId),
-  );
+  chosenMainWeapon.value = selected ? weapon : null;
 
-  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
-  const newInventory = [
-    chosenMainWeapon.value,
-    chosenSecondaryItem.value,
-    chosenArmor.value,
-    ...basePack,
-  ].filter((i): i is InventoryItemDto => !!i);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  currentCharacter.value.inventory = newInventory as any;
-};
-
-const toggleSecondaryItem = (item: InventoryItemDto) => {
-  if (!currentCharacter.value) return;
-  chosenSecondaryItem.value = item;
-  console.log('Toggling secondary item:', item);
-  currentCharacter.value.inventory = (currentCharacter.value.inventory || []).filter(
+  const currentInv = currentCharacter.value.inventory || [];
+  const filtered = currentInv.filter(
     (i: InventoryItemDto) =>
-      i.definitionId !== item.definitionId &&
-      !availableMainWeaponsDefinitionIds.includes(i.definitionId),
+      !availableArmorDefinitionIds.includes(i.definitionId) &&
+      !availableMainWeaponsDefinitionIds.includes(i.definitionId) &&
+      !availableSecondaryItemsDefinitionIds.includes(i.definitionId),
   );
 
-  // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
   const newInventory = [
+    ...filtered,
     chosenMainWeapon.value,
     chosenSecondaryItem.value,
     chosenArmor.value,
     ...basePack,
   ].filter((i): i is InventoryItemDto => !!i);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  currentCharacter.value.inventory = newInventory as any;
+
+  await update.mutateAsync({ inventory: newInventory });
 };
 
-onBeforeUnmount(async () => {
-  try {
-    if (!currentCharacter.value?.characterId) return;
-    chosenMainWeapon.value.equipped = true;
-    // Type assertion needed due to schema mismatch: cost/weight in schema is Record<string, never> but should be string
-    const inventoryToSave = [
-      chosenMainWeapon.value,
-      chosenSecondaryItem.value,
-      chosenArmor.value,
-      ...basePack,
-    ].filter((i): i is InventoryItemDto => !!i);
-    await update.mutateAsync({
-      inventory: inventoryToSave,
-    });
-  } catch (error) {
-    console.error('Failed to save inventory on unmount:', error);
-  }
-});
+const toggleSecondaryItem = async (item: InventoryItemDto, selected = true) => {
+  if (!currentCharacter.value) return;
+  chosenSecondaryItem.value = selected ? item : null;
+
+  const currentInv = currentCharacter.value.inventory || [];
+  const filtered = currentInv.filter(
+    (i: InventoryItemDto) =>
+      !availableArmorDefinitionIds.includes(i.definitionId) &&
+      !availableMainWeaponsDefinitionIds.includes(i.definitionId) &&
+      !availableSecondaryItemsDefinitionIds.includes(i.definitionId),
+  );
+
+  const newInventory = [
+    ...filtered,
+    chosenMainWeapon.value,
+    chosenSecondaryItem.value,
+    chosenArmor.value,
+    ...basePack,
+  ].filter((i): i is InventoryItemDto => !!i);
+
+  await update.mutateAsync({ inventory: newInventory });
+};
 </script>

@@ -7,10 +7,10 @@
         <div class="rounded-md bg-slate-800 border border-slate-700 p-4 mb-4">
           <div class="text-center">
             <div class="text-4xl font-bold text-amber-400">
-              {{ currentCharacter?.classes?.[0]?.level || 1 }}
+              {{ currentCharacter?.value?.classes?.[0]?.level || 1 }}
             </div>
             <div class="text-sm text-slate-400">
-              {{ currentCharacter?.classes?.[0]?.name }}
+              {{ currentCharacter?.value?.classes?.[0]?.name }}
             </div>
           </div>
         </div>
@@ -31,7 +31,7 @@
           <div class="flex items-center gap-2">
             <span class="text-red-400 font-bold text-lg">+{{ levelUpReward.hpGain }}</span>
             <span class="text-xs text-slate-500">
-              ({{ currentCharacter?.hp || 0 }} → {{ (currentCharacter?.hp || 0) + levelUpReward.hpGain }})
+              ({{ currentCharacter?.value?.hp || 0 }} → {{ (currentCharacter?.value?.hp || 0) + levelUpReward.hpGain }})
             </span>
           </div>
         </div>
@@ -123,16 +123,16 @@
           <div class="space-y-2 text-sm">
             <div>
               <span class="text-slate-400">Name:</span>
-              <span class="ml-2 text-white">{{ currentCharacter?.name }}</span>
+              <span class="ml-2 text-white">{{ currentCharacter?.value?.name }}</span>
             </div>
             <div>
               <span class="text-slate-400">Race:</span>
-              <span class="ml-2 text-white">{{ currentCharacter?.race?.name }}</span>
+              <span class="ml-2 text-white">{{ currentCharacter?.value?.race?.name }}</span>
             </div>
             <div>
               <span class="text-slate-400">Current HP:</span>
               <span class="ml-2 text-red-400"
-                >{{ currentCharacter?.hp || 0 }}/{{ currentCharacter?.hpMax || 0 }}</span
+                >{{ currentCharacter?.value?.hp || 0 }}/{{ currentCharacter?.value?.hpMax || 0 }}</span
               >
             </div>
             <div>
@@ -168,15 +168,15 @@ const characterId = useCharacterId()
 const { update, applyLevelUp } = useCharacter(characterId)
 const currentCharacter = useCurrentCharacter();
 const chat = useChat(characterId);
-const currentLevel = computed(() => currentCharacter.value?.classes?.[0]?.level || 1);
+const currentLevel = computed(() => currentCharacter?.value?.classes?.[0]?.level || 1);
 const nextLevel = computed(() => Math.min(currentLevel.value + 1, 20));
 
 // Level up calculation
-const className = computed(() => currentCharacter.value?.classes?.[0]?.name || "Fighter");
+const className = computed(() => currentCharacter?.value?.classes?.[0]?.name || "Fighter");
 const classes = useClasses(className, nextLevel);
 
 const conModifier = computed(() => {
-  const conScore = currentCharacter.value?.scores?.Con || 10;
+  const conScore = currentCharacter?.value?.scores?.Con || 10;
   return Math.floor((conScore - 10) / 2);
 });
 
@@ -236,18 +236,18 @@ const buildLevelUpMessage = (updatedCharacter: Partial<CharacterResponseDto>): s
 const executeLevelUp = async (): Promise<void> => {
   // Update character with new level and HP
   const updatedCharacter: Partial<CharacterResponseDto> = {
-    ...currentCharacter.value,
+    ...currentCharacter,
     classes: [
       {
-        ...currentCharacter.value?.classes?.[0],
+        ...currentCharacter?.value?.classes?.[0],
         level: nextLevel.value,
       },
     ],
     hp: Math.min(
-      (currentCharacter.value?.hp || 0) + levelUpReward.value.hpGain,
-      (currentCharacter.value?.hpMax || 0) + levelUpReward.value.hpGain
+      (currentCharacter?.value?.hp || 0) + levelUpReward.value.hpGain,
+      (currentCharacter?.value?.hpMax || 0) + levelUpReward.value.hpGain
     ),
-    hpMax: (currentCharacter.value?.hpMax || 0) + levelUpReward.value.hpGain,
+    hpMax: (currentCharacter?.value?.hpMax || 0) + levelUpReward.value.hpGain,
   };
 
   // Save to backend using the character store mutations

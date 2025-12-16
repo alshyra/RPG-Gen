@@ -56,13 +56,13 @@ const { isOpen } = defineProps<DeathModalProps>();
 const emit = defineEmits<DeathModalEmits>();
 const currentCharacter = useCurrentCharacter();
 
-const characterName = computed(() => currentCharacter.value?.name || 'Unknown');
+const characterName = computed(() => currentCharacter?.value?.name || 'Unknown');
 const characterClass = computed(() => {
-  const classes = currentCharacter.value?.classes || [];
+  const classes = currentCharacter?.value?.classes || [];
   return classes.map(c => `${c.name} ${c.level}`).join(', ') || '';
 });
-const characterXp = computed(() => currentCharacter.value?.totalXp || 0);
-const characterLevel = computed(() => getCurrentLevel(currentCharacter.value?.totalXp || 0).level);
+const characterXp = computed(() => currentCharacter?.value?.totalXp || 0);
+const characterLevel = computed(() => getCurrentLevel(currentCharacter?.value?.totalXp || 0).level);
 const diedDate = computed(() =>
   new Date().toLocaleDateString('fr-FR', {
     year: 'numeric',

@@ -47,8 +47,8 @@ describe("characterStore inventory persistence", () => {
     } as any);
 
     expect(spy).toHaveBeenCalledOnce();
-    expect(store.currentCharacter?.inventory?.[0].name).toBe("Sword");
-    expect(store.currentCharacter?.inventory?.[0].qty).toBe(2);
+    expect(store.currentCharacter?.value?.inventory?.[0].name).toBe("Sword");
+    expect(store.currentCharacter?.value?.inventory?.[0].qty).toBe(2);
   });
 
   it("calls API and updates store on removeInventoryItem", async () => {
@@ -80,7 +80,7 @@ describe("characterStore inventory persistence", () => {
     await store.removeInventoryItem("weapon-sword", 2);
 
     expect(spy).toHaveBeenCalledOnce();
-    expect(store.currentCharacter?.inventory?.length).toBe(0);
+    expect(store.currentCharacter?.value?.inventory?.length).toBe(0);
   });
 
   it("uses inventory item only if it is usable (consumable)", async () => {

@@ -55,38 +55,31 @@
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
 import { useCharacter, useClasses } from '@rpg-gen/api-client';
-import { computed, onBeforeUnmount } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { CombatOptionDto } from '@rpg-gen/shared';
 import { useCharacterId } from '@/composables/useCharacterId';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 
 const characterId = useCharacterId();
 const currentCharacter = useCurrentCharacter();
+const editableLocalCharacterRef = ref({...currentCharacter});
 const { update } = useCharacter(characterId)
 
-const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
+const primaryClass = computed(() => editableLocalCharacterRef.value?.classes?.[0]?.name ?? '');
 const classes = useClasses(primaryClass, () => 1);
 const availableCombatOptions = computed(() => classes.levelOptions.data.value?.combatOptions || []);
 const isLoadingCombat = computed(() => classes.levelOptions.isLoading.value);
 
 const combatIsSelected = (optionId: string) =>
-  (currentCharacter.value?.selectedCombatProficiencies || []).includes(optionId);
+  (editableLocalCharacterRef.value?.selectedCombatProficiencies || []).includes(optionId);
 
-const persistCombatSelections = async () => {
-  if (!currentCharacter.value?.characterId) return;
-  try {
-    await update.mutateAsync({
-      selectedCombatProficiencies: currentCharacter.value.selectedCombatProficiencies || [],
-    });
-  } catch (err) {
-    console.error('Failed to persist combat selections:', err);
-  }
-};
+const persistCombatSelections = async () => await update.mutateAsync({
+  selectedCombatProficiencies: editableLocalCharacterRef.value?.selectedCombatProficiencies || [],
+});
 
 const toggleCombatOption = async (option: CombatOptionDto, selected: boolean) => {
-  if (!currentCharacter.value) return;
-
-  const proficiencies = currentCharacter.value.selectedCombatProficiencies || [];
+  if (!editableLocalCharacterRef.value) return;
+  const proficiencies = editableLocalCharacterRef.value?.selectedCombatProficiencies || [];
 
   if (selected) {
     // Add if not already present
@@ -102,10 +95,10 @@ const toggleCombatOption = async (option: CombatOptionDto, selected: boolean) =>
   }
 
   // Update store
-  if (!currentCharacter.value.selectedCombatProficiencies) {
-    currentCharacter.value.selectedCombatProficiencies = [];
+  if (!editableLocalCharacterRef.value?.selectedCombatProficiencies) {
+    editableLocalCharacterRef.value.selectedCombatProficiencies = [];
   }
-  currentCharacter.value.selectedCombatProficiencies = proficiencies;
+  editableLocalCharacterRef.value.selectedCombatProficiencies = proficiencies;
 
   await persistCombatSelections();
 };

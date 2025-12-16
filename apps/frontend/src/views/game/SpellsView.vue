@@ -46,7 +46,7 @@ import { computed } from 'vue';
 
 const currentCharacter = useCurrentCharacter();
 
-const spells = computed(() => currentCharacter.value?.spells || []);
+const spells = computed(() => currentCharacter?.value?.spells || []);
 const hasSpells = computed(() => spells.value.length > 0);
 
 const onCastSpell = (_spellName: string) => {

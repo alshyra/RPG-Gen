@@ -59,21 +59,21 @@ const { fighter, isPlayer } = defineProps<{
 }>();
 const currentCharacter = useCurrentCharacter();
 
-const { isInCombat, status } = useCombat(currentCharacter.value?.characterId);
+const { isInCombat, status } = useCombat(currentCharacter?.value?.characterId);
 const combatPlayer = computed(() => status.data.value?.player);
 const title = computed(() =>
-  isPlayer ? (currentCharacter.value?.name ?? 'You') : (fighter?.name ?? 'Enemy'),
+  isPlayer ? (currentCharacter?.value?.name ?? 'You') : (fighter?.name ?? 'Enemy'),
 );
 // For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
 const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
 const fighterDisplayHp = computed(() => {
   if (isPlayer && isInCombat.value && combatPlayer.value) return combatPlayer.value.hp ?? 0;
-  if (isPlayer) return currentCharacter.value?.hp ?? 0;
+  if (isPlayer) return currentCharacter?.value?.hp ?? 0;
   return fighter?.hp ?? 0;
 });
 const fighterDisplayMaxHp = computed(() => {
   if (isPlayer && isInCombat.value && combatPlayer.value) return combatPlayer.value.hpMax ?? '-';
-  if (isPlayer) return currentCharacter.value?.hpMax ?? '-';
+  if (isPlayer) return currentCharacter?.value?.hpMax ?? '-';
   return fighter?.hpMax ?? '-';
 });
 const hpPct = computed(() => {
@@ -88,7 +88,7 @@ const resolvedPortrait = ref<string>(`/images/enemies/enemy.png`);
 
 onMounted(async () => {
   if (isPlayer) {
-    resolvedPortrait.value = currentCharacter.value?.portrait || `/images/enemies/hero.png`;
+    resolvedPortrait.value = currentCharacter?.value?.portrait || `/images/enemies/hero.png`;
     return;
   }
   if (!fighter) {

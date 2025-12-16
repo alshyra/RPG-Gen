@@ -34,7 +34,7 @@ const currentCharacterId = useCharacterId();
 const { update } = useCharacter(currentCharacterId);
 
 const additionalSelectedClass = (allowedRace: RaceResponseDto) =>
-  currentCharacter.value?.race?.id === allowedRace.id
+  currentCharacter?.value?.race?.id === allowedRace.id
     ? 'border-indigo-500 bg-indigo-600/20'
     : 'border-slate-700';
 
@@ -51,13 +51,5 @@ const summaryMods = (mods: RaceResponseDto['mods']) => {
   }
 };
 
-const onRaceUpdate = async (race: RaceResponseDto) => {
-  if (!currentCharacter.value) return;
-
-  currentCharacter.value.race = race;
-
-  if (!currentCharacter.value?.characterId) return;
-
-  await update.mutateAsync({ race });
-};
+const onRaceUpdate = async (race: RaceResponseDto) => await update.mutateAsync({ race });
 </script>

@@ -28,7 +28,8 @@ export function useCombat() {
   const combatInfo = useCombatInfo();
   const character = useCharacter(characterId);
   const combatStore = useCombatStore();
-  const { currentPlayerAttackLog } = storeToRefs(combatStore);
+  const { currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
+    storeToRefs(combatStore);
 
   /**
    * Start a combat session
@@ -109,15 +110,15 @@ export function useCombat() {
    */
   const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
     console.log("[useCombat] initializeCombat instruction", instruction);
-    if (!currentCharacter.value) return;
+    if (!currentCharacter) return;
 
     const enemyNames = instruction.combat_start.map(e => e.name).join(", ");
     gameStore.appendMessage("system", `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
       const payload = { combat_start: instruction.combat_start };
-      const currentHp = currentCharacter.value.hp ?? 0;
-      const combatState = await startCombat(currentCharacter.value.characterId, payload);
+      const currentHp = currentCharacter?.value?.hp ?? 0;
+      const combatState = await startCombat(currentCharacter?.value?.characterId, payload);
 
       // Check if player took damage during initiative (enemy attacked first)
       const newHp = combatState.player?.hp ?? currentHp;
@@ -131,13 +132,13 @@ export function useCombat() {
         await character.updateHp.mutateAsync(newHp);
       }
 
-      currentCharacter.value.isDeceased = newHp <= 0;
+      currentCharacter.isDeceased = newHp <= 0;
 
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
       await router.push({
         name: "game-combat",
-        params: { characterId: currentCharacter.value.characterId },
+        params: { characterId: currentCharacter?.value?.characterId },
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to start combat";
@@ -244,7 +245,7 @@ export function useCombat() {
    * Execute an attack against a target
    */
   const executeAttack = async (target: CombatantDto, spellName?: string): Promise<void> => {
-    if (!currentCharacter.value) return;
+    if (!currentCharacter) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
     if (!combatInfo.canAct.value) {
@@ -261,7 +262,7 @@ export function useCombat() {
       const result = await combatApi.attack.mutateAsync({
         spellName,
         target,
-        characterId: currentCharacter.value.characterId,
+        characterId: currentCharacter?.value?.characterId,
       });
       await processAttackResult(result, target);
     } catch (err) {
@@ -286,7 +287,7 @@ export function useCombat() {
       // Navigate back to messages view
       await router.push({
         name: "game",
-        params: { characterId: currentCharacter.value?.characterId },
+        params: { characterId: currentCharacter?.value?.characterId },
       });
       return;
     }
@@ -312,7 +313,7 @@ export function useCombat() {
     combatStore.clearCombat();
     await router.push({
       name: "game",
-      params: { characterId: currentCharacter.value?.characterId },
+      params: { characterId: currentCharacter?.value?.characterId },
     });
   };
 
@@ -320,7 +321,7 @@ export function useCombat() {
    * Flee from combat
    */
   const fleeCombat = async (): Promise<void> => {
-    const c = currentCharacter.value;
+    const c = currentCharacter;
     if (!c) return;
 
     try {
@@ -342,14 +343,14 @@ export function useCombat() {
    * Check if currently in combat
    */
   const checkCombatStatus = async (): Promise<boolean> => {
-    if (!currentCharacter.value) return false;
+    if (!currentCharacter) return false;
     await fetchCombatStatus();
     const inCombat = combatInfo.inCombat.value;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({
         name: "game-combat",
-        params: { characterId: currentCharacter.value.characterId },
+        params: { characterId: currentCharacter?.value?.characterId },
       });
     }
     return inCombat;
@@ -371,8 +372,6 @@ export function useCombat() {
     checkCombatStatus,
     checkCombatVictory,
 
-    // Modal state
-    isCombatEndModalOpen,
     closeCombatEndModal,
   };
 }

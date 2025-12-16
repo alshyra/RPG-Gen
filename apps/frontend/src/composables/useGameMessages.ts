@@ -15,7 +15,7 @@ import { useCurrentCharacter } from "./useCurrentCharacter";
 export function useGameMessages() {
   const gameStore = useGameStore();
   const currentCharacter = useCurrentCharacter();
-  const characterId = computed(() => currentCharacter.value?.characterId);
+  const characterId = computed(() => currentCharacter?.value?.characterId);
   const chat = useChat(characterId);
   const character = useCharacter(characterId);
   const combat = useCombat();
@@ -53,7 +53,7 @@ export function useGameMessages() {
     gameStore.appendMessage("system", "...thinking...");
     gameStore.sending = true;
     try {
-      if (!currentCharacter.value?.characterId) {
+      if (!currentCharacter?.value?.characterId) {
         throw new Error("No character loaded");
       }
       const response = await chat.sendMessage.mutateAsync({

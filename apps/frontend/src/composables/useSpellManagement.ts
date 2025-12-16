@@ -30,32 +30,28 @@ const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellR
  */
 export function useSpellManagement(characterId: string | undefined) {
   const character = useCharacter(characterId);
-
-  const learnSpell = async (spell: SpellInstructionMessageDto) => {
-    const currentCharacter = character.character.data.value;
-    if (!currentCharacter?.characterId) return;
+  const currentCharacter = character.character.data;
+  const learnSpell = async (spell: SpellResponseDto) => {
+    if (!currentCharacter?.value?.characterId) return;
 
     // Check if spell already learned
     if (
-      currentCharacter.spells &&
-      currentCharacter.spells.some(s => s.definitionId === spell.definitionId)
+      currentCharacter?.value?.spells &&
+      currentCharacter.value.spells.some(existingSpell => existingSpell.definitionId === spell.definitionId)
     ) {
       return;
     }
 
-    // Update with new spell list
-    const spellDto = convertSpellInstructionToDto(spell);
     await character.update.mutateAsync({
-      spells: [...(currentCharacter.spells || []), spellDto],
+      spells: [...(currentCharacter.value.spells || []), spell],
     });
   };
 
   const forgetSpell = async (name: string) => {
-    const currentCharacter = character.character.data.value;
-    if (!currentCharacter?.characterId) return;
+    if (!currentCharacter?.value?.characterId) return;
 
     await character.update.mutateAsync({
-      spells: (currentCharacter.spells || []).filter(s => s.name !== name),
+      spells: (currentCharacter.value.spells || []).filter(spell => spell.name !== name),
     });
   };
 

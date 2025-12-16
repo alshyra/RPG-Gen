@@ -108,9 +108,9 @@ const emit = defineEmits<{
 
 // Filter to only damaging spells (require meta.damageDice). Keep cantrips/low-level for UI where appropriate.
 const availableSpells = computed(() => {
-  if (!currentCharacter.value?.spells) return [];
+  if (!currentCharacter?.value?.spells) return [];
 
-  return currentCharacter.value.spells.filter(spell => !!(spell.meta && spell.meta.damageDice));
+  return currentCharacter?.value?.spells.filter(spell => !!(spell.meta && spell.meta.damageDice));
 });
 
 // Check if player can still act

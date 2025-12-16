@@ -21,7 +21,7 @@ describe("useAbilityScores", () => {
     });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
+    currentCharacter = { scores: abilities.value } as CharacterResponseDto;
     const { pointsUsed } = useAbilityScores();
     // 15 -> 9, 14 -> 7, 13 -> 5, 12 -> 4, 10 -> 2, 8 -> 0 => sum 27
     expect(pointsUsed.value).toBe(27);
@@ -38,7 +38,7 @@ describe("useAbilityScores", () => {
     });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
+    currentCharacter = { scores: abilities.value } as CharacterResponseDto;
     const { formatMod } = useAbilityScores();
 
     expect(formatMod(18)).toBe("+4");
@@ -57,13 +57,13 @@ describe("useAbilityScores", () => {
     });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
+    currentCharacter = { scores: abilities.value } as CharacterResponseDto;
 
     const { pointsUsed, applyPointBuyChange } = useAbilityScores();
 
     const resDown = applyPointBuyChange("Str", 14);
     expect(resDown.allowed).toBe(true);
-    expect(currentCharacter.value?.scores).toHaveProperty("Str", 14);
+    expect(currentCharacter?.value?.scores).toHaveProperty("Str", 14);
     expect(pointsUsed.value).equal(25);
 
     const resInvalid = applyPointBuyChange("Str", 16);
@@ -81,7 +81,7 @@ describe("useAbilityScores", () => {
     });
     const characterStore = useCharacterStore();
     const { currentCharacter } = storeToRefs(characterStore);
-    currentCharacter.value = { scores: abilities.value } as CharacterResponseDto;
+    currentCharacter = { scores: abilities.value } as CharacterResponseDto;
     const { applyPointBuyChange } = useAbilityScores();
 
     // current cost = 9 + 9 + 7 = 25; upgrading Cha to 15 costs 9 -> 34 > 27

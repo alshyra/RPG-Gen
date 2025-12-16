@@ -40,6 +40,7 @@ export const useGameSession = () => {
   const gameStore = useGameStore();
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
+  const chat = useChat(characterId);
 
   const { isInitializing } = storeToRefs(gameStore);
 
@@ -120,20 +121,18 @@ export const useGameSession = () => {
   };
 
   const ensureCharacterLoaded = async () => {
-    if (currentCharacter?.value) return currentCharacter.value;
+    if (currentCharacter) return currentCharacter;
     const charId = getCharIdFromRoute();
     if (!charId) {
       await router.push("/home");
       return undefined;
     }
-    // Character will be loaded by the useCharacter hook
-    // Wait a bit for it to load
     await new Promise(resolve => setTimeout(resolve, 100));
-    if (!currentCharacter.value) {
+    if (!currentCharacter) {
       await router.push("/home");
       return undefined;
     }
-    return currentCharacter.value;
+    return currentCharacter;
   };
 
   const startGame = async () => {
@@ -141,9 +140,7 @@ export const useGameSession = () => {
     if (!character) return;
     isInitializing.value = true;
     try {
-      if (character.isDeceased) gameStore.showDeathModal = true;
       // Get history using Vue Query hook
-      const chat = useChat(characterId);
       const messages = chat.history.data.value;
       if (messages?.length) {
         const processed = processHistoryMessages(messages as HistoryMessage[]);

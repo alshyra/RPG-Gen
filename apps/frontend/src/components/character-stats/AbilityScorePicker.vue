@@ -58,11 +58,10 @@ const { update } = useCharacter(characterId)
 const { formatMod, applyPointBuyChange } = useAbilityScores();
 
 const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: number) => {
-  const value = val ?? currentCharacter?.value?.scores?.[ability] ?? 8;
-  const result = applyPointBuyChange(ability, value);
-  if (!result?.allowed || !currentCharacter?.value?.characterId) return;
+  const { allowed, scores } = applyPointBuyChange(ability, val);
+  if (!allowed) return;
   await update.mutateAsync({
-    scores: currentCharacter?.value?.scores,
+    scores,
   });
 };
 </script>

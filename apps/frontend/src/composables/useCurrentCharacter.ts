@@ -1,5 +1,4 @@
 import { useCharacter } from "@rpg-gen/api-client";
-import { computed } from "vue";
 import { useCharacterId } from "./useCharacterId";
 
 /**
@@ -10,5 +9,5 @@ export function useCurrentCharacter() {
   const characterId = useCharacterId();
   const character = useCharacter(characterId);
 
-  return computed(() => character.character.data.value);
+  return character.character.data;
 }
