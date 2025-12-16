@@ -55,7 +55,7 @@ const saveCurrent = async () => {
 
   if (!currentCharacter.value.characterId) return;
 
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.update.mutateAsync({
     skills: currentCharacter.value.skills,
   });
 };

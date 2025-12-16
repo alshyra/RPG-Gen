@@ -54,34 +54,18 @@
 
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
-import { classesApi } from '@rpg-gen/api-client';
+import { useClasses } from '@rpg-gen/api-client';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { CombatOptionDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const availableCombatOptions = ref<CombatOptionDto[]>([]);
-const isLoadingCombat = ref(false);
-
-// Load combat options for the current class
-const loadCombatOptions = async () => {
-  const className = primaryClass.value;
-
-  isLoadingCombat.value = true;
-  try {
-    const options = await classesApi.getLevelOptions(className, 1);
-    availableCombatOptions.value = options.combatOptions || [];
-  } catch (err) {
-    console.error('Failed to fetch combat options for class:', err);
-    availableCombatOptions.value = [];
-  } finally {
-    isLoadingCombat.value = false;
-  }
-};
+const classes = useClasses(primaryClass, () => 1);
+const availableCombatOptions = computed(() => classes.levelOptions.data.value?.combatOptions || []);
 
 const combatIsSelected = (optionId: string) =>
   (currentCharacter.value?.selectedCombatProficiencies || []).includes(optionId);
@@ -89,7 +73,7 @@ const combatIsSelected = (optionId: string) =>
 const persistCombatSelections = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    await characterStore.update.mutateAsync({
       selectedCombatProficiencies: currentCharacter.value.selectedCombatProficiencies || [],
     });
   } catch (err) {

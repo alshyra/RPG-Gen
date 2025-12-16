@@ -41,32 +41,17 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from "@rpg-gen/api-client";
-import type { CharacterResponseDto } from "@rpg-gen/shared";
-import { onMounted, ref } from "vue";
+import { useCharactersList } from "@rpg-gen/api-client";
 import CharacterMenu from "./CharacterMenu.vue";
+import { computed } from "vue";
 
-const characters = ref<CharacterResponseDto[]>([]);
-const isLoading = ref(false);
+const charactersList = useCharactersList();
+const characters = computed(() => charactersList.data.value || []);
+const isLoading = computed(() => charactersList.isLoading.value);
 
-const loadCharacters = async () => {
-  try {
-    isLoading.value = true;
-    const res = await characterApi.findAll();
-    characters.value = res || [];
-  } catch (e) {
-    console.error("Failed to load characters", e);
-    characters.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(() => {
-  loadCharacters();
-});
 const onCharacterDeleted = (id: string) => {
-  characters.value = characters.value.filter((c) => c.characterId !== id);
+  // Refetch the list after deletion
+  charactersList.refetch();
 };
 </script>
 

@@ -25,8 +25,8 @@ export const characterKeys = {
   detail: (id: string) => [...characterKeys.details(), id] as const,
 };
 
-// Internal API functions (exported temporarily for legacy code - prefer using useCharacter())
-export const characterApi = {
+// Internal API functions (private - use useCharacter() hook)
+const characterApi = {
   async create(body: CreateCharacterBodyDto): Promise<CharacterResponseDto> {
     const response = await apiClient.POST("/api/characters", { body });
     return getData(response);

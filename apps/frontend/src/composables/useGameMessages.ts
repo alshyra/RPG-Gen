@@ -120,12 +120,14 @@ export function useGameMessages() {
     }
   };
 
-  const handleInventoryInstruction = (instr: InventoryInstructionMessageDto): void => {
+  const handleInventoryInstruction = async (
+    instr: InventoryInstructionMessageDto,
+  ): Promise<void> => {
     if (instr.type !== "inventory") return;
     if (instr.action === "add") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      characterStore.addInventoryItem({
+      await characterStore.addInventory.mutateAsync({
         definitionId: instr.name,
         name: instr.name,
         qty,
@@ -136,7 +138,7 @@ export function useGameMessages() {
     } else if (instr.action === "remove") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🗑️ Removed from inventory: ${instr.name} (x${qty})`);
-      useCharacterStore().removeInventoryItem(instr.name, qty);
+      await useCharacterStore().removeInventory.mutateAsync({ itemId: instr.name, qty });
     } else if (instr.action === "use") {
       gameStore.appendMessage("system", `⚡ Used item: ${instr.name}`);
       useCharacterStore().useInventoryItem(instr.name || "");

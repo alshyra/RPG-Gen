@@ -51,29 +51,11 @@ export const useCharacterStore = defineStore("character", () => {
   const character = useCharacter(currentCharacterId);
 
   // --- Computed ---
-  const isDead = computed(() => !!character.character.data.value && (character.character.data.value.hp ?? 1) <= 0);
+  const isDead = computed(
+    () => !!character.character.data.value && (character.character.data.value.hp ?? 1) <= 0,
+  );
 
-  // --- Actions ---
-  const createCharacter = async (world: string) => {
-    const newChar = await character.create.mutateAsync({ world });
-    return newChar;
-  };
-
-  const updateCharacter = async (characterId: string, data: UpdateCharacterRequestDto) => {
-    const updated = await character.update.mutateAsync({ id: characterId, data });
-    return updated;
-  };
-
-  const updateHp = async (hp: number) => {
-    if (!character.character.data.value?.characterId) return;
-    await character.updateHp.mutateAsync(hp);
-  };
-
-  const updateXp = async (xp: number) => {
-    if (!character.character.data.value?.characterId) return;
-    await character.updateXp.mutateAsync(xp);
-  };
-
+  // --- Business Logic Actions (keep only complex logic) ---
   const learnSpell = async (spell: SpellInstructionMessageDto) => {
     const currentCharacter = character.character.data.value;
     if (!currentCharacter?.characterId) return;
@@ -89,9 +71,7 @@ export const useCharacterStore = defineStore("character", () => {
     // Update with new spell list
     const spellDto = convertSpellInstructionToDto(spell);
     await character.update.mutateAsync({
-      data: {
-        spells: [...(currentCharacter.spells || []), spellDto],
-      },
+      spells: [...(currentCharacter.spells || []), spellDto],
     });
   };
 
@@ -100,30 +80,8 @@ export const useCharacterStore = defineStore("character", () => {
     if (!currentCharacter?.characterId) return;
 
     await character.update.mutateAsync({
-      data: {
-        spells: (currentCharacter.spells || []).filter(s => s.name !== name),
-      },
+      spells: (currentCharacter.spells || []).filter(s => s.name !== name),
     });
-  };
-
-  const grantInspiration = async (amount = 1) => {
-    if (!character.character.data.value?.characterId) return;
-    await character.grantInspiration.mutateAsync(amount);
-  };
-
-  const spendInspiration = async () => {
-    if (!character.character.data.value?.characterId) return;
-    await character.spendInspiration.mutateAsync();
-  };
-
-  const addInventoryItem = async (item: InventoryItemDto) => {
-    if (!character.character.data.value?.characterId || !item || !item.definitionId) return;
-    await character.addInventory.mutateAsync(item);
-  };
-
-  const removeInventoryItem = async (definitionId: string, quantity = 1) => {
-    if (!character.character.data.value?.characterId || !definitionId) return;
-    await character.removeInventory.mutateAsync({ itemId: definitionId, qty: quantity });
   };
 
   const useInventoryItem = async (itemIdentifier: string) => {
@@ -147,31 +105,42 @@ export const useCharacterStore = defineStore("character", () => {
 
     if (!isUsable) return undefined;
 
-    return removeInventoryItem(item._id ?? item.definitionId, 1);
+    // Use the mutation directly
+    await character.removeInventory.mutateAsync({
+      itemId: item._id ?? item.definitionId,
+      qty: 1,
+    });
   };
 
   return {
-    // Query data
+    // Query data - simplified access
     currentCharacter: computed(() => character.character.data.value),
     isLoadingCharacter: character.isLoading,
     characterError: computed(() => character.character.error.value),
     refetchCharacter: character.character.refetch,
 
+    // Expose mutations directly (no pass-through wrappers)
+    create: character.create,
+    update: character.update,
+    deleteCharacter: character.deleteCharacter,
+    updateHp: character.updateHp,
+    updateXp: character.updateXp,
+    addInventory: character.addInventory,
+    removeInventory: character.removeInventory,
+    updateInventory: character.updateInventory,
+    equipItem: character.equipItem,
+    grantInspiration: character.grantInspiration,
+    spendInspiration: character.spendInspiration,
+    kill: character.kill,
+    applyLevelUp: character.applyLevelUp,
+
     // UI state
     showDeathModal,
-    isDead,
+    isDead: character.isDead,
 
-    // Actions
-    createCharacter,
-    updateCharacter,
-    updateHp,
-    updateXp,
+    // Business logic actions (complex logic only)
     learnSpell,
     forgetSpell,
-    addInventoryItem,
-    removeInventoryItem,
     useInventoryItem,
-    grantInspiration,
-    spendInspiration,
   };
 });

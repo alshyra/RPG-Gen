@@ -58,7 +58,7 @@ const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: nu
   const value = val ?? currentCharacter?.value?.scores?.[ability] ?? 8;
   const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.update.mutateAsync({
     scores: currentCharacter.value.scores,
   });
 };

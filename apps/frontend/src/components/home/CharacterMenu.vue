@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { characterApi } from "@rpg-gen/api-client";
+import { useCharacter } from "@rpg-gen/api-client";
 import { UiButton } from "@rpg-gen/ui";
 import { Trash2 } from "lucide-vue-next";
 import type { CharacterResponseDto } from "@rpg-gen/shared";
@@ -70,6 +70,7 @@ const { character } = props;
 const deletingCharacterId = ref<string | null>(null);
 
 const router = useRouter();
+const characterApi = useCharacter(() => character.characterId);
 
 const onResume = (character: CharacterResponseDto) => {
   if (character.state === "draft") {
@@ -93,7 +94,7 @@ const onDelete = async (character: CharacterResponseDto) => {
   if (!(await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?"))) return;
   deletingCharacterId.value = character.characterId;
   try {
-    await characterApi.delete(character.characterId);
+    await characterApi.deleteCharacter.mutateAsync();
     emit("deleted", character.characterId);
   } catch (e) {
     console.error("Failed to delete character", e);

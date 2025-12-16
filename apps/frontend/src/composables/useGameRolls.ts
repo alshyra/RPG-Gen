@@ -2,7 +2,7 @@ import type { DiceResultDto, RollInstructionMessageDto } from "@rpg-gen/shared";
 import { isRollInstruction } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
-import { chatApi } from "@rpg-gen/api-client";
+import { useChat } from "@rpg-gen/api-client";
 import { getSkillBonus } from "../services/skillService";
 import { useCharacterStore } from "../stores/characterStore";
 import { useGameStore } from "../stores/gameStore";
@@ -50,11 +50,13 @@ export function useGameRolls() {
     latest => latest && onDiceRolled(latest),
   );
 
+  const chat = useChat(() => characterStore.currentCharacter?.characterId);
+
   const confirmRoll = async () => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
     if (!characterStore.currentCharacter?.characterId) return;
 
-    const message = await chatApi.sendMessage(characterStore.currentCharacter.characterId, {
+    const message = await chat.sendMessage.mutateAsync({
       role: "user",
       narrative: `I rolled ${rollData.value?.total}`,
       instructions: [],

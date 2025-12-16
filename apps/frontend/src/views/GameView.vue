@@ -66,7 +66,6 @@ import { useUiStore } from "@/stores/uiStore";
 import { storeToRefs } from "pinia";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { characterApi } from "@rpg-gen/api-client";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";

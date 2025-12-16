@@ -1,4 +1,4 @@
-import { inventoryApi } from "@rpg-gen/api-client";
+import { useInventory, useChat } from "@rpg-gen/api-client";
 import {
   isCombatStartInstruction,
   type CharacterResponseDto,
@@ -9,13 +9,11 @@ import {
   type SpellInstructionMessageDto,
   type UseItemResponseDto,
 } from "@rpg-gen/shared";
-import { characterApi } from "@rpg-gen/api-client";
 import { useCharacterStore } from "../stores/characterStore";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { parseCommand, type ParsedCommand } from "../utils/chatCommands";
 import { useCombat } from "./useCombat";
-import { chatApi } from "@rpg-gen/api-client";
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -30,13 +28,13 @@ const processRollInstruction = (instr: RollInstructionMessageDto, gameStore: Gam
   gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${mod}`);
 };
 
-const processXpInstruction = (
+const processXpInstruction = async (
   xp: number,
   gameStore: GameStore,
   characterStore: CharacterStore,
-): void => {
+): Promise<void> => {
   gameStore.appendMessage("system", `✨ Gained ${xp} XP`);
-  characterStore.updateXp(xp);
+  await characterStore.updateXp.mutateAsync(xp);
 };
 
 // Keep combat HP in sync when an HP instruction arrives while in combat
@@ -63,11 +61,11 @@ const processSpellInstruction = (
   }
 };
 
-const processInventoryInstruction = (
+const processInventoryInstruction = async (
   instr: InstructionItem,
   gameStore: GameStore,
   characterStore: CharacterStore,
-): void => {
+): Promise<void> => {
   const inventory = instr as {
     action?: string;
     name?: string;
@@ -77,7 +75,7 @@ const processInventoryInstruction = (
   if (action === "add") {
     gameStore.appendMessage("system", `🎒 Added to inventory: ${name} (x${quantity})`);
     // Create a minimal inventory item - backend should provide complete details
-    characterStore.addInventoryItem({
+    await characterStore.addInventory.mutateAsync({
       definitionId: name ?? "unknown",
       name: name ?? "",
       qty: quantity,
@@ -87,10 +85,10 @@ const processInventoryInstruction = (
     });
   } else if (action === "remove") {
     gameStore.appendMessage("system", `🗑️ Removed from inventory: ${name} (x${quantity})`);
-    characterStore.removeInventoryItem(name ?? "", quantity);
+    await characterStore.removeInventory.mutateAsync({ itemId: name ?? "", qty: quantity });
   } else if (action === "use") {
     gameStore.appendMessage("system", `⚡ Used item: ${name}`);
-    characterStore.useInventoryItem(name ?? "");
+    await characterStore.useInventoryItem(name ?? "");
   }
 };
 
@@ -123,9 +121,12 @@ export function useGameCommands() {
     gameStore.sending = true;
   };
 
+  const inventory = useInventory(() => characterStore.currentCharacter?.characterId);
+  const chat = useChat(() => characterStore.currentCharacter?.characterId);
+
   // Execute the API call and handle the response
   const executeUseItemRequest = async (
-    characterId: string,
+    _characterId: string,
     item: {
       name?: string;
       definitionId?: string;
@@ -139,7 +140,7 @@ export function useGameCommands() {
     }
 
     try {
-      const response = await inventoryApi.useItem(characterId, { itemId: defId });
+      const response = await inventory.useItem.mutateAsync({ itemId: defId });
       handleUseItemResponse(response);
     } catch {
       gameStore.messages.pop();
@@ -165,16 +166,16 @@ export function useGameCommands() {
     // when characterStore.updateHp is called
   };
 
-  const processHpInstruction = (
+  const processHpInstruction = async (
     hp: number,
     gameStore: GameStore,
     characterStore: CharacterStore,
-  ): void => {
+  ): Promise<void> => {
     const hpChange = hp > 0 ? `+${hp}` : hp;
     gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-    characterStore.updateHp(hp);
+    await characterStore.updateHp.mutateAsync(hp);
     syncHpToCombatIfNeeded(hp);
-    if (characterStore.isDead) characterStore.showDeathModal = true;
+    if (characterStore.isDead.value) characterStore.showDeathModal = true;
   };
   const sendToGemini = async (
     message: string,
@@ -183,7 +184,7 @@ export function useGameCommands() {
     if (!characterStore.currentCharacter?.characterId) {
       throw new Error("No character loaded");
     }
-    const response = await chatApi.sendMessage(characterStore.currentCharacter.characterId, {
+    const response = await chat.sendMessage.mutateAsync({
       role: "user",
       narrative: message,
       instructions,

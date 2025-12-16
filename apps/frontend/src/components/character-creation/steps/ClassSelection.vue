@@ -38,7 +38,7 @@ const updateClass = async (newClass: string) => {
     }),
   );
 
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.update.mutateAsync({
     classes: currentCharacter.value.classes,
     skills: currentCharacter.value.skills,
   });

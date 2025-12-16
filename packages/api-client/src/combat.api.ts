@@ -15,7 +15,8 @@ import { computed, toValue } from "vue";
 import { apiClient, getData } from "./index.js";
 
 // Exported temporarily for legacy code - prefer using useCombat()
-export const combatApi = {
+// Internal API functions (private - use useCombat() hook)
+const combatApi = {
   /**
    * Start a new combat session
    */

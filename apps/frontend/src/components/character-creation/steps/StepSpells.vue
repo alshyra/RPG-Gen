@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
-import { classesApi } from '@rpg-gen/api-client';
+import { useClasses } from '@rpg-gen/api-client';
 import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
@@ -126,8 +126,8 @@ const characterStore = useCharacterStore();
 const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
-const availableSpells = ref<SpellResponseDto[]>([]);
-const isLoadingSpells = ref(false);
+const classes = useClasses(primaryClass, () => 1);
+const availableSpells = computed(() => classes.levelOptions.data.value?.spells || []);
 const cantripsKnown = ref(0);
 const spellsKnown = ref(0);
 
@@ -148,34 +148,23 @@ const selectedSpellsCount = computed(() => {
 
 // Fetch spells from backend when class is set
 const setDefaultSpells = () => {
-  availableSpells.value = [];
   cantripsKnown.value = 0;
   spellsKnown.value = 0;
 };
 
 const applyOptions = (options: LevelUpOptionsDto) => {
-  availableSpells.value = options.unlockedSpells || [];
   cantripsKnown.value = options.cantripsKnown || 0;
   spellsKnown.value = options.spellsKnown || 0;
 };
 
-const loadSpellsForClass = async (className: string | undefined) => {
-  if (!className) {
-    setDefaultSpells();
-    return;
-  }
-
-  isLoadingSpells.value = true;
-  try {
-    const options = await classesApi.getLevelOptions(className, 1);
+// Watch for changes in query data
+watch(() => classes.levelOptions.data.value, (options) => {
+  if (options) {
     applyOptions(options);
-  } catch (err) {
-    console.error('Failed to fetch spells for class:', err);
+  } else {
     setDefaultSpells();
-  } finally {
-    isLoadingSpells.value = false;
   }
-};
+}, { immediate: true });
 
 watch(
   primaryClass,
@@ -191,7 +180,7 @@ const spellIsSelected = (definitionId: string) =>
 const persistSpells = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.updateCharacter(currentCharacter.value.characterId, {
+    await characterStore.update.mutateAsync({
       spells: currentCharacter.value.spells || [],
     });
   } catch (err) {

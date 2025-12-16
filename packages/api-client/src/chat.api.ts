@@ -11,7 +11,8 @@ export const chatKeys = {
 };
 
 // Exported temporarily for legacy code - prefer using useChat()
-export const chatApi = {
+// Internal API functions (private - use useChat() hook)
+const chatApi = {
   async sendMessage(characterId: string, message: ChatMessageDto): Promise<ChatMessageDto> {
     const response = await apiClient.POST("/api/chat/{characterId}", {
       params: { path: { characterId } },

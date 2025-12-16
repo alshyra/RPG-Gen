@@ -5,7 +5,8 @@ import { computed, toValue } from "vue";
 import { apiClient, getData } from "./index.js";
 
 // Exported temporarily for legacy code - prefer using useClasses()
-export const classesApi = {
+// Internal API functions (private - use useClasses() hook)
+const classesApi = {
   async getLevelOptions(className: string, level: number): Promise<LevelUpOptionsDto> {
     const response = await apiClient.GET("/api/classes/{className}/levels/{level}", {
       params: { path: { className, level } },

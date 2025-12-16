@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { apiClient, getData } from "./index.js";
 
 // Exported temporarily for legacy code - prefer using useImage()
-export const imageApi = {
+// Internal API functions (private - use useImage() hook)
+const imageApi = {
   async generate(request: ImageRequestDto): Promise<void> {
     const response = await apiClient.POST("/api/image", {
       body: request,

@@ -1,6 +1,6 @@
 // packages/frontend/src/composables/useCombatEngine.ts
 import { CombatAdapter } from "@/adapters/combatAdapters";
-import { combatApi } from "@rpg-gen/api-client";
+import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCharacterStore } from "@/stores/characterStore";
 import { useCombatStore } from "@/stores/combatStore";
@@ -84,14 +84,16 @@ export function useCombatEngine() {
     arenaApi.value = null;
   };
 
+  const combat = useCombatApi(() => currentCharacter.value?.characterId);
+
   const endTurn = async () => {
     if (!currentCharacter.value || isEndingTurn.value) return;
 
     try {
       isEndingTurn.value = true;
 
-      // Call the API directly to get the response with attackLogs
-      const response = await combatApi.endTurn(currentCharacter.value.characterId);
+      // Use the mutation to end turn and get response with attackLogs
+      const response = await combat.endTurn.mutateAsync();
 
       // Replay enemy attacks on visual engine (if arena is registered)
       if (response.attackLogs?.length) {

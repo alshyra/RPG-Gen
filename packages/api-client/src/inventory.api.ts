@@ -5,7 +5,8 @@ import { computed, toValue } from "vue";
 import { apiClient, getData } from "./index.js";
 
 // Exported temporarily for legacy code - prefer using useInventory()
-export const inventoryApi = {
+// Internal API functions (private - use useInventory() hook)
+const inventoryApi = {
   async useItem(characterId: string, request: UseItemRequestDto): Promise<UseItemResponseDto> {
     const response = await apiClient.POST("/api/characters/{characterId}/inventory/use", {
       params: { path: { characterId } },

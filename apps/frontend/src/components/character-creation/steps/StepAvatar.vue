@@ -29,7 +29,7 @@ const { currentCharacter } = storeToRefs(characterStore);
 const updateDescription = useDebounceFn(async (physicalDescription: string) => {
   if (!currentCharacter.value) return;
   currentCharacter.value.physicalDescription = physicalDescription;
-  await characterStore.updateCharacter(currentCharacter.value.characterId, {
+  await characterStore.update.mutateAsync({
     physicalDescription,
   });
 }, 1000);

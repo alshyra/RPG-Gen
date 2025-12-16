@@ -31,16 +31,18 @@ import { ref } from "vue";
 import { showAlert } from "@/composables/useModal";
 import CharactersMenu from "../components/home/CharactersMenu.vue";
 import { UiButton } from "@rpg-gen/ui";
-import { characterApi } from "@rpg-gen/api-client";
+import { useCharacter } from "@rpg-gen/api-client";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const creating = ref(false);
 
+const character = useCharacter(undefined);
+
 const createDndCharacter = async () => {
   creating.value = true;
   try {
-    const newChar = await characterApi.create({ world: "dnd" });
+    const newChar = await character.create.mutateAsync({ world: "dnd" });
     if (newChar && newChar.characterId) {
       // Navigate to character creation step 1 for the new character
       router.push({

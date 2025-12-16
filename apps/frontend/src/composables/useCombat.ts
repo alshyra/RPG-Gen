@@ -3,7 +3,7 @@ import type {
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
 } from "@rpg-gen/shared";
-import { combatApi } from "@rpg-gen/api-client";
+import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useCharacterStore } from "../stores/characterStore";
@@ -28,6 +28,7 @@ export function useCombat() {
     isCombatEndModalOpen,
   } = storeToRefs(combatStore);
   const { currentCharacter } = storeToRefs(characterStore);
+  const combatApi = useCombatApi(() => currentCharacter.value?.characterId);
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -73,7 +74,7 @@ export function useCombat() {
         // Sync HP to character store (will update via TanStack Query cache)
         await characterStore.updateHp(newHp);
       }
-      
+
       if (newHp <= 0) {
         characterStore.showDeathModal = true;
       }
@@ -206,7 +207,7 @@ export function useCombat() {
     beginAttack(target);
 
     try {
-      const result = await combatApi.attack(currentCharacter.value.characterId, target, spellName);
+      const result = await combatApi.attack.mutateAsync({ target, spellName });
       await processAttackResult(result, target);
     } catch (err) {
       handleAttackError(err);
@@ -242,7 +243,7 @@ export function useCombat() {
     }
     if (xpGained > 0) {
       gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
-      characterStore.updateXp(xpGained);
+      await characterStore.updateXp.mutateAsync(xpGained);
     }
 
     combatEndNarrative.value = narrative;
@@ -269,7 +270,7 @@ export function useCombat() {
     if (!character) return;
 
     try {
-      await combatApi.flee(character.characterId);
+      await combatApi.endCombat.mutateAsync();
       gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view
