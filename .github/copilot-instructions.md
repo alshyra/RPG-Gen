@@ -44,7 +44,7 @@ Strict rule: Do not use `as` casting in production code.
     ```
   - Use immutability to update typed objects, as in the first example, rather than mutating casts.
 
-- Special cases: If there is a compelling, unavoidable reason to use `as` (third-party untyped libs, incremental migration), open a short PR for discussion and request a reviewer to explicitly approve this temporary exception; do not leave in-code `as` usage unreviewed. Avoid documenting the exception via inline comments in code; track the exception in the PR description and remediate later.
+- Special cases: If there is a compelling, unavoidable reason to use `as` (third-party untyped libs), open a short PR for discussion and request a reviewer to explicitly approve this temporary exception; do not leave in-code `as` usage unreviewed. Avoid documenting the exception via inline comments in code; track the exception in the PR description and remediate later.
 
 - Development: start everything with Docker Compose (root):
   - docker compose -f compose.dev.yml up -d
@@ -72,9 +72,11 @@ Security / Deployment
 Where to look first
 
 - `README.md` — project overview + dev flow
-- `packages/backend/src` — main backend code and tests
-- `packages/frontend/src` — frontend UI, Cypress tests
+- `apps/backend/src` — main backend code and tests
+- `apps/frontend/src` — frontend UI, Cypress tests
 - `packages/shared/src` — generated DTOs and public API shapes
+- `packages/ui` — shared Vue 3 components and styles
+- `packages/api-client` — TypeScript API client for frontend-backend communication wrapped in vuequery
 - `.github/workflows` — CI steps, test orchestration, node versions and docker compose usage
 
 If unclear: ask 1–2 clarifying questions before making changes (for example: "Do you want an API-only change or end-to-end validation?" or "Should I add unit tests, or a small integration test using Docker Compose?").

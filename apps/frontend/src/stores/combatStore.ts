@@ -2,87 +2,34 @@ import type { AttackQueueItem, AttackView } from "@/interfaces";
 import type {
   CombatActionResponseDto,
   CombatantDto,
-  CombatPhase,
   CombatStartRequestDto,
   EnemyAttackLogDto,
 } from "@rpg-gen/shared";
-import { useCombat } from "@rpg-gen/api-client";
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref } from "vue";
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
 
 /**
- * Combat Store - Mix of UI state and cached combat data from TanStack Query
+ * Combat Store - UI state only
  *
- * UI state: modals, animations, processing flags
- * API data: combat status managed by vue-query
+ * UI state: modals, animations, processing flags, target selection
+ * Combat data (enemies, player, turn order) is managed by useCharacter hooks via useCombatStatus
  */
 export const useCombatStore = defineStore("combatStore", () => {
-  const route = useRoute();
-  const currentCharacterId = computed(() =>
-    typeof route.params.characterId === "string" ? route.params.characterId : undefined,
-  );
-
-  // --- Query Hooks ---
-  const combat = useCombat(currentCharacterId);
-  const combatStatus = combat.status.data;
-  const isLoadingCombat = combat.isLoading;
-  const refetchCombatStatus = combat.status.refetch;
-
-  // --- UI State (modals, animations, processing) ---
+  // --- UI State only (modals, animations, processing flags) ---
   const showAttackResultModal = ref(false);
-  const currentAttackResult = ref<CombatActionResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
   const currentPlayerAttackLog = ref<CombatActionResponseDto | null>(null);
-  const isEndingTurn = ref(false);
   const isCombatEndModalOpen = ref(false);
-  const combatEndNarrative = ref<string>("");
   const currentAttackView = ref<AttackView | null>(null);
 
   // --- Local UI state for target selection ---
   const currentTarget = ref<CombatantDto | null>(null);
-
-  // --- Computed properties from combat status ---
-  const inCombat = computed(() => combatStatus.value?.inCombat ?? false);
-  const roundNumber = computed(() => combatStatus.value?.roundNumber ?? 1);
-  const enemies = computed(() => combatStatus.value?.enemies ?? []);
-  const player = computed(() => combatStatus.value?.player ?? null);
-  const turnOrder = computed(() => combatStatus.value?.turnOrder ?? []);
-  const playerInitiative = computed(() => combatStatus.value?.player?.initiative ?? 0);
-  const currentTurnIndex = computed(() => combatStatus.value?.currentTurnIndex ?? 0);
-  const phase = computed<CombatPhase>(() => combatStatus.value?.phase ?? "PLAYER_TURN");
-
-  const actionRemaining = computed(() => combatStatus.value?.actionRemaining ?? 1);
-  const actionMax = computed(() => combatStatus.value?.actionMax ?? 1);
-  const bonusActionRemaining = computed(() => combatStatus.value?.bonusActionRemaining ?? 1);
-  const bonusActionMax = computed(() => combatStatus.value?.bonusActionMax ?? 1);
-
-  const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
-  const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
-  const hasValidTarget = computed(() => validTargets.value.length > 0);
-  const canAct = computed(() => (actionRemaining.value ?? 0) > 0);
-  const canBonusAct = computed(() => (bonusActionRemaining.value ?? 0) > 0);
-
-  const currentCombatant = computed(() => {
-    if (turnOrder.value.length === 0) return null;
-    return turnOrder.value[currentTurnIndex.value] ?? null;
-  });
-
-  const isPlayerTurn = computed(() => {
-    const cc = currentCombatant.value;
-    if (!cc) return false;
-    if (typeof cc.isPlayer === "boolean") return cc.isPlayer;
-    if (player.value && cc.name && player.value.name) return cc.name === player.value.name;
-    return false;
-  });
-
-  const canPlayerAct = computed(() => !isProcessingEnemyTurn.value && canAct.value);
 
   // --- Helpers ---
   const selectNextAliveTarget = (enemyList: CombatantDto[]): CombatantDto | null =>
@@ -107,7 +54,6 @@ export const useCombatStore = defineStore("combatStore", () => {
 
   const resetModalState = (): void => {
     showAttackResultModal.value = false;
-    currentAttackResult.value = undefined;
     currentAttackView.value = null;
     isCurrentAttackPlayerAttack.value = true;
     attackResultQueue.value = [];
@@ -122,7 +68,9 @@ export const useCombatStore = defineStore("combatStore", () => {
 
   // --- Actions ---
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
-    const response = await combat.startCombat.mutateAsync({ characterId, data: instruction });
+    const { useCombatApi } = await import("../composables/useCombatStatus");
+    const combatApi = useCombatApi();
+    const response = await combatApi.startCombat.mutateAsync({ characterId, data: instruction });
     if (response.enemies && response.enemies.length > 0) {
       currentTarget.value = response.enemies[0];
     }
@@ -130,76 +78,49 @@ export const useCombatStore = defineStore("combatStore", () => {
   };
 
   const fetchStatus = async () => {
-    await refetchCombatStatus();
+    const { useCombatApi } = await import("../composables/useCombatStatus");
+    const combatApi = useCombatApi();
+    await combatApi.status.refetch();
   };
 
   const endActivation = async (characterId: string) => {
-    const response = await combat.endTurn.mutateAsync(characterId);
+    const { useCombatApi } = await import("../composables/useCombatStatus");
+    const combatApi = useCombatApi();
+    const response = await combatApi.endTurn.mutateAsync(characterId);
     if (response.attackLogs?.length) {
       await processAttackLogs(response.attackLogs);
     }
     // Auto-select next target if current is dead
-    currentTarget.value = selectNextAliveTarget(enemies.value);
+    const { useCombatStatus } = await import("../composables/useCombatStatus");
+    const combatStatus = useCombatStatus();
+    const enemies = combatStatus.value?.enemies ?? [];
+    currentTarget.value = selectNextAliveTarget(enemies);
     return response;
   };
 
   const performAttack = async (characterId: string, targetName: string, spellName?: string) => {
-    return combat.attack.mutateAsync({ characterId, targetName, spellName });
+    const { useCombatApi } = await import("../composables/useCombatStatus");
+    const combatApi = useCombatApi();
+    return combatApi.attack.mutateAsync({ characterId, targetName, spellName });
   };
 
   const endCombatSession = async (characterId: string) => {
-    await combat.endCombat.mutateAsync(characterId);
+    const { useCombatApi } = await import("../composables/useCombatStatus");
+    const combatApi = useCombatApi();
+    await combatApi.endCombat.mutateAsync(characterId);
     clearCombat();
   };
 
-  // --- Watchers ---
-  // Auto-update currentTarget when combat starts or enemies change
-  watch([inCombat, enemies], ([combat, enemyList]) => {
-    if (combat && !currentTarget.value && enemyList.length > 0) {
-      currentTarget.value = selectNextAliveTarget(enemyList);
-    }
-  });
-
   return {
-    // Query data
-    combatStatus,
-    isLoadingCombat,
-    refetchCombatStatus,
-
-    // Computed from combat status
-    inCombat,
-    roundNumber,
-    enemies,
-    player,
-    turnOrder,
-    playerInitiative,
-    currentTurnIndex,
-    phase,
-    actionRemaining,
-    actionMax,
-    bonusActionRemaining,
-    bonusActionMax,
-    aliveEnemies,
-    validTargets,
-    hasValidTarget,
-    canAct,
-    canBonusAct,
-    canPlayerAct,
-    isPlayerTurn,
-    currentCombatant,
-
-    // UI State
+    // UI State only
     currentTarget,
-    isEndingTurn,
     showAttackResultModal,
-    currentAttackResult,
     isCurrentAttackPlayerAttack,
     attackResultQueue,
     isProcessingEnemyTurn,
     currentEnemyAttackLog,
     currentPlayerAttackLog,
     currentAttackView,
-    combatEndNarrative,
     isCombatEndModalOpen,
 
     // Constants

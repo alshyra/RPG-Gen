@@ -32,19 +32,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { storeToRefs } from 'pinia';
 import { CombatArena } from '@rpg-gen/combat-engine';
 import CombatHeader from './CombatHeader.vue';
 import SpellSelector from './SpellSelector.vue';
 import CombatEndModal from './CombatEndModal.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@/composables/useCombat';
-import { useCombatStore } from '@/stores/combatStore';
+import { useCombatInfo } from '@/composables/useCombatStatus';
 import type { CombatantDto } from '@rpg-gen/shared';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
-
-const combatStore = useCombatStore();
-const { inCombat } = storeToRefs(combatStore);
 
 const {
   registerArena,
@@ -57,11 +53,11 @@ const {
 } = useCombatEngine();
 
 const { isCombatEndModalOpen, closeCombatEndModal } = useCombat();
+const combatInfo = useCombatInfo();
+const inCombat = combatInfo.inCombat;
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);
-
-// Handle attack from SpellSelector modal
 const handleAttack = async (target: CombatantDto, spellName?: string) => {
   await executeAttack(target, spellName);
 };
@@ -86,7 +82,7 @@ onMounted(async () => {
 
 // Watch only for combat starting (inCombat changing from false to true)
 watch(
-  () => combatStore.inCombat,
+  () => combatInfo.inCombat.value,
   async (inCombatNow, wasInCombat) => {
     if (!inCombatNow || wasInCombat || !arenaRef.value) return;
     // Only initialize when combat STARTS, not on every state change

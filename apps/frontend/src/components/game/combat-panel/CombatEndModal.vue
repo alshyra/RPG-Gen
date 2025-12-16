@@ -30,11 +30,15 @@
 
 <script setup lang="ts">
 import { useCombatStore } from '@/stores/combatStore';
+import { useCombatApi } from '@/composables/useCombatStatus';
 import { UiButton, UiModal } from '@rpg-gen/ui';
-import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 const combatStore = useCombatStore();
-const { combatEndNarrative } = storeToRefs(combatStore);
+const combatApi = useCombatApi();
+
+// Read narrative from the attack mutation that triggered combat end
+const combatEndNarrative = computed(() => combatApi.attack.data.value?.narrative ?? '');
 
 withDefaults(
   defineProps<{

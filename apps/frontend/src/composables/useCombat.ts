@@ -3,13 +3,14 @@ import type {
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
 } from "@rpg-gen/shared";
-import { useCombat as useCombatApi, useCharacter } from "@rpg-gen/api-client";
+import { useCharacter } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useCharacterId } from "./useCharacterId";
+import { useCombatInfo, useCombatApi } from "./useCombatStatus";
 
 /**
  * Composable for combat-specific actions and state management
@@ -21,15 +22,10 @@ export function useCombat() {
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
   const combatStore = useCombatStore();
-  const {
-    currentTarget,
-    currentAttackResult,
-    currentPlayerAttackLog,
-    currentAttackView,
-    combatEndNarrative,
-    isCombatEndModalOpen,
-  } = storeToRefs(combatStore);
-  const combatApi = useCombatApi(characterId);
+  const { currentTarget, currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
+    storeToRefs(combatStore);
+  const combatApi = useCombatApi();
+  const combatInfo = useCombatInfo();
   const character = useCharacter(characterId);
 
   const displayCombatStartSuccess = (combatState: {
@@ -160,8 +156,8 @@ export function useCombat() {
     }
 
     // snapshot previous state (before applying server-returned state)
-    const prevEnemies = combatStore.enemies.map(e => ({ ...e }));
-    const prevPlayer = combatStore.player ? { ...combatStore.player } : null;
+    const prevEnemies = combatInfo.enemies.value.map(e => ({ ...e }));
+    const prevPlayer = combatInfo.player.value ? { ...combatInfo.player.value } : null;
 
     // build client-friendly AttackView so components can display consistent values
     const targetBefore = prevEnemies.find(e => e.id === target.id);
@@ -184,8 +180,8 @@ export function useCombat() {
 
     currentAttackView.value = attackView;
 
-    currentAttackResult.value = result;
-    // Combat state is automatically updated via TanStack Query after the attack
+    // Combat state (including attack result) is automatically updated via TanStack Query
+    // Components can read combatApi.attack.data directly
     await showPlayerAttackAnimation(result);
     displayAttackResultMessage(target, result);
     checkCombatVictory(result);
@@ -225,7 +221,7 @@ export function useCombat() {
     victory: boolean,
     xpGained: number,
     enemiesDefeated: string[],
-    narrative: string,
+    _narrative: string,
   ): Promise<void> => {
     if (!victory) {
       gameStore.appendMessage("system", "💀 Combat terminé.");
@@ -248,7 +244,6 @@ export function useCombat() {
       await character.updateXp.mutateAsync(xpGained);
     }
 
-    combatEndNarrative.value = narrative;
     isCombatEndModalOpen.value = true;
   };
 
@@ -292,7 +287,7 @@ export function useCombat() {
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter.value) return false;
     await combatStore.fetchStatus();
-    const inCombat = combatStore.inCombat;
+    const inCombat = combatInfo.inCombat.value;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({
@@ -314,7 +309,6 @@ export function useCombat() {
 
     // Modal state
     isCombatEndModalOpen,
-    combatEndNarrative,
     closeCombatEndModal,
   };
 }
