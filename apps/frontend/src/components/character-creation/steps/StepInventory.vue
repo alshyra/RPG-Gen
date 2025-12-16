@@ -144,7 +144,7 @@ import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { useCharacter } from '@rpg-gen/api-client';
 import { InventoryItemDto } from '@rpg-gen/shared';
 import { UiInputCheckbox, UiInputNumber } from '@rpg-gen/ui';
-import { onBeforeUnmount, ref } from 'vue';
+import { ref } from 'vue';
 
 const currentCharacter = useCurrentCharacter()
 const characterId = useCharacterId();

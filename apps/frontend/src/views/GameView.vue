@@ -70,11 +70,11 @@ import { useRouter } from "vue-router";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
-import { useCombatInfo } from "../composables/useCombatStatus";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
 import { useGameStore } from "../stores/gameStore";
 import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
+import { useCharacterId } from "@/composables/useCharacterId";
 
 // State
 const router = useRouter();
@@ -84,6 +84,7 @@ const { kill } = useCharacter(currentCharacter?.value?.characterId)
 const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
+const characterId = useCharacterId()
 const { isInCombat } = useCombat(currentCharacter?.value?.characterId)
 const { pendingInstruction } = storeToRefs(gameStore);
 const showDeathModal = ref(false);
@@ -119,6 +120,12 @@ const handleRetryMessage = async () => {
 
 onMounted(async () => {
   await startGame();
+  if (!isInCombat.value) {
+    router.push({
+      name: "game",
+      params: { characterId: characterId.value },
+    })
+  }
 });
 
 const onDeathConfirm = async () => {

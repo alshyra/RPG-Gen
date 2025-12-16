@@ -110,15 +110,16 @@ export function useCombat() {
    */
   const initializeCombat = async (instruction: CombatStartInstructionMessageDto): Promise<void> => {
     console.log("[useCombat] initializeCombat instruction", instruction);
-    if (!currentCharacter) return;
+    const c = currentCharacter.value;
+    if (!c?.characterId) return;
 
     const enemyNames = instruction.combat_start.map(e => e.name).join(", ");
     gameStore.appendMessage("system", `⚔️ Combat engagé! Ennemis: ${enemyNames}`);
 
     try {
       const payload = { combat_start: instruction.combat_start };
-      const currentHp = currentCharacter?.value?.hp ?? 0;
-      const combatState = await startCombat(currentCharacter?.value?.characterId, payload);
+      const currentHp = c.hp ?? 0;
+      const combatState = await startCombat(c.characterId, payload);
 
       // Check if player took damage during initiative (enemy attacked first)
       const newHp = combatState.player?.hp ?? currentHp;
@@ -132,13 +133,16 @@ export function useCombat() {
         await character.updateHp.mutateAsync(newHp);
       }
 
-      currentCharacter.isDeceased = newHp <= 0;
+      // Update character state
+      if (newHp <= 0) {
+        await character.kill.mutateAsync({ deathLocation: "Combat" });
+      }
 
       displayCombatStartSuccess(combatState);
       // Navigate to combat arena when combat starts
       await router.push({
         name: "game-combat",
-        params: { characterId: currentCharacter?.value?.characterId },
+        params: { characterId: c.characterId },
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to start combat";
@@ -245,7 +249,8 @@ export function useCombat() {
    * Execute an attack against a target
    */
   const executeAttack = async (target: CombatantDto, spellName?: string): Promise<void> => {
-    if (!currentCharacter) return;
+    const c = currentCharacter.value;
+    if (!c?.characterId) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
     if (!combatInfo.canAct.value) {
@@ -262,7 +267,7 @@ export function useCombat() {
       const result = await combatApi.attack.mutateAsync({
         spellName,
         target,
-        characterId: currentCharacter?.value?.characterId,
+        characterId: c.characterId,
       });
       await processAttackResult(result, target);
     } catch (err) {
@@ -309,11 +314,14 @@ export function useCombat() {
    * Close combat end modal and navigate home
    */
   const closeCombatEndModal = async () => {
+    const c = currentCharacter.value;
+    if (!c?.characterId) return;
+
     isCombatEndModalOpen.value = false;
     combatStore.clearCombat();
     await router.push({
       name: "game",
-      params: { characterId: currentCharacter?.value?.characterId },
+      params: { characterId: c.characterId },
     });
   };
 
@@ -321,11 +329,11 @@ export function useCombat() {
    * Flee from combat
    */
   const fleeCombat = async (): Promise<void> => {
-    const c = currentCharacter;
-    if (!c) return;
+    const c = currentCharacter.value;
+    if (!c?.characterId) return;
 
     try {
-      await combatApi.endCombat.mutateAsync(characterId.value!);
+      await combatApi.endCombat.mutateAsync(c.characterId);
       gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view
@@ -367,11 +375,11 @@ export function useCombat() {
     // Actions
     initializeCombat,
     executeAttack,
-    handleCombatEnd,
     fleeCombat,
     checkCombatStatus,
-    checkCombatVictory,
 
+    // Modal state and actions
+    isCombatEndModalOpen,
     closeCombatEndModal,
   };
 }

@@ -14,8 +14,6 @@ import LoginView from "../views/LoginView.vue";
 import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { authApi } from "@rpg-gen/api-client";
 import CombatPanel from "@/components/game/combat-panel/CombatPanel.vue";
-import { useCombat } from "@rpg-gen/api-client";
-import { useCharacterId } from "@/composables/useCharacterId";
 
 const routes = [
   {

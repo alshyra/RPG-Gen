@@ -33,12 +33,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { CombatArena } from '@rpg-gen/combat-engine';
+import { storeToRefs } from 'pinia';
 import CombatHeader from './CombatHeader.vue';
 import SpellSelector from './SpellSelector.vue';
 import CombatEndModal from './CombatEndModal.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@/composables/useCombat';
 import { useCombatInfo } from '@/composables/useCombatStatus';
+import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
 
@@ -52,7 +54,9 @@ const {
   initializeVisual,
 } = useCombatEngine();
 
-const { isCombatEndModalOpen, closeCombatEndModal } = useCombat();
+const { closeCombatEndModal } = useCombat();
+const combatStore = useCombatStore();
+const { isCombatEndModalOpen } = storeToRefs(combatStore);
 const combatInfo = useCombatInfo();
 const inCombat = combatInfo.inCombat;
 

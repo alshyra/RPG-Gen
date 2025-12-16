@@ -18,7 +18,7 @@ const inventoryApi = {
 
 export function useInventory(
   characterId: MaybeRefOrGetter<string | undefined>,
-  options?: { enabled?: boolean },
+  _options?: { enabled?: boolean },
 ) {
   const queryClient = useQueryClient();
   const id = computed(() => toValue(characterId));

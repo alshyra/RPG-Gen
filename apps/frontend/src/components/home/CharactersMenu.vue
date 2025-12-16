@@ -49,7 +49,7 @@ const charactersList = useCharactersList();
 const characters = computed(() => charactersList.data.value || []);
 const isLoading = computed(() => charactersList.isLoading.value);
 
-const onCharacterDeleted = (id: string) => {
+const onCharacterDeleted = () => {
   // Refetch the list after deletion
   charactersList.refetch();
 };

@@ -1,6 +1,7 @@
 import { useCharacter } from "@rpg-gen/api-client";
-import type { SpellInstructionMessageDto, SpellResponseDto } from "@rpg-gen/shared";
+import type { SpellResponseDto } from "@rpg-gen/shared";
 
+/* Note: This helper is not currently used but kept for future spell conversion needs
 const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellResponseDto => {
   if (!spell) throw new Error("spell is required");
   if (!spell.definitionId || typeof spell.definitionId !== "string" || !spell.definitionId.trim()) {
@@ -23,6 +24,7 @@ const convertSpellInstructionToDto = (spell: SpellInstructionMessageDto): SpellR
     meta: spell.meta,
   };
 };
+*/
 
 /**
  * Composable for spell management logic (learn/forget spells)

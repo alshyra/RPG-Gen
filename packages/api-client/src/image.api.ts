@@ -20,7 +20,8 @@ const imageApi = {
 };
 
 export function useImage() {
-  const queryClient = useQueryClient();
+  // queryClient reserved for future optimistic updates
+  void useQueryClient();
 
   return {
     generate: useMutation({

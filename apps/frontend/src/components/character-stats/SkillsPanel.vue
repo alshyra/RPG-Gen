@@ -31,18 +31,18 @@ const currentCharacter = useCurrentCharacter()
 
 const skills = computed(() => {
   if (
-    currentCharacter== null ||
-    !currentCharacter?.value?.scores ||
-    !currentCharacter?.value?.skills?.length
+    !currentCharacter.value ||
+    !currentCharacter.value?.scores ||
+    !currentCharacter.value?.skills?.length
   )
     return [];
 
-  return currentCharacter?.value?.skills.map(skill => ({
+  return currentCharacter.value?.skills.map(skill => ({
     ...skill,
     modifier: DnDRulesService.calculateSkillModifier(
       skill.name!,
-      currentCharacter.scores!,
-      currentCharacter.proficiency!,
+      currentCharacter.value!.scores!,
+      currentCharacter.value!.proficiency!,
       skill.proficient!,
     ),
   }));
