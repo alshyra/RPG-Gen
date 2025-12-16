@@ -21,7 +21,6 @@
 
 <script setup lang="ts">
 import { ALLOWED_RACES } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { RaceResponseDto } from '@rpg-gen/shared';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';

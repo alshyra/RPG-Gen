@@ -1,5 +1,4 @@
 import { ABILITIES, DEFAULT_BASE_SCORES } from "@/services/dndRulesService";
-import { useCharacterStore } from "@/stores/characterStore";
 import { CharacterResponseDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
@@ -19,8 +18,6 @@ export const COST = {
 } as const;
 
 const useAbilityScores = () => {
-  const characterStore = useCharacterStore();
-  const { currentCharacter } = storeToRefs(characterStore);
   const characterScores = computed(() => currentCharacter.value?.scores || DEFAULT_BASE_SCORES);
 
   const pointsUsed = computed(() =>

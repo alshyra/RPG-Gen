@@ -117,12 +117,9 @@
 <script setup lang="ts">
 import { UiInputCheckbox } from '@rpg-gen/ui';
 import { useClasses } from '@rpg-gen/api-client';
-import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';import { useSpellManagement } from "@/composables/useSpellManagement";import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { LevelUpOptionsDto, SpellResponseDto } from '@rpg-gen/shared';
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
 
 const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
 const classes = useClasses(primaryClass, () => 1);

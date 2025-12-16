@@ -2,7 +2,6 @@
 import { CombatAdapter } from "@/adapters/combatAdapters";
 import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { useCombat as useBackendCombat } from "@/composables/useCombat";
-import { useCharacterStore } from "@/stores/characterStore";
 import { useCombatStore } from "@/stores/combatStore";
 import { useGameStore } from "@/stores/gameStore";
 import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
@@ -46,9 +45,7 @@ export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
   const { enemies, player, isEndingTurn, currentAttackView } = storeToRefs(combatStore);
-  const { currentCharacter } = storeToRefs(characterStore);
 
   // Reference to the CombatArena component API (set via registerArena)
   const arenaApi = shallowRef<CombatArenaApi | null>(null);

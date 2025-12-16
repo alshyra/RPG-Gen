@@ -38,7 +38,6 @@
 <script setup lang="ts">
 import useAbilityScores from '@/composables/useAbilityScores';
 import { ABILITIES } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 import { UiInputNumber } from '@rpg-gen/ui';
 

@@ -7,19 +7,21 @@ import {
   type InventoryInstructionMessageDto,
   isCombatStartInstruction,
 } from "@rpg-gen/shared";
-import { useChat } from "@rpg-gen/api-client";
-import { useCharacterStore } from "../stores/characterStore";
+import { useChat, useCharacter } from "@rpg-gen/api-client";
 import { useGameStore } from "../stores/gameStore";
 import { useCombat } from "./useCombat";
+import { useSpellManagement } from "./useSpellManagement";
+import { useCurrentCharacter } from "./useCurrentCharacter";
 import { computed } from "vue";
 
 export function useGameMessages() {
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
-  const combat = useCombat();
-
-  const characterId = computed(() => characterStore.currentCharacter?.characterId);
+  const currentCharacter = useCurrentCharacter();
+  const characterId = computed(() => currentCharacter.value?.characterId);
   const chat = useChat(characterId);
+  const character = useCharacter(characterId);
+  const spellMgmt = useSpellManagement(characterId);
+  const combat = useCombat();
 
   const handleMessageResponse = (response: ChatMessageDto): void => {
     gameStore.messages.pop();
@@ -90,10 +92,9 @@ export function useGameMessages() {
   };
 
   const handleXpInstruction = async (instr: XpInstructionMessageDto): Promise<void> => {
-    const characterStore = useCharacterStore();
     if (instr.xp !== undefined) {
       gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
-      await characterStore.character.updateXp.mutateAsync(instr.xp);
+      await character.updateXp.mutateAsync(instr.xp);
     }
   };
 
@@ -101,9 +102,10 @@ export function useGameMessages() {
     if (instr.hp !== undefined) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-      const characterStore = useCharacterStore();
-      await characterStore.character.updateHp.mutateAsync(instr.hp);
-      if (characterStore.isDead.value) characterStore.showDeathModal = true;
+      await character.updateHp.mutateAsync(instr.hp);
+      if (currentCharacter.value && currentCharacter.value.isDead) {
+        gameStore.showDeathModal = true;
+      }
     }
   };
 
@@ -111,12 +113,12 @@ export function useGameMessages() {
     if (instr.type !== "spell") return;
     if (instr.action === "learn") {
       gameStore.appendMessage("system", `📖 Learned spell: ${instr.name} (Level ${instr.level})`);
-      useCharacterStore().learnSpell(instr);
+      spellMgmt.learnSpell(instr);
     } else if (instr.action === "cast") {
       gameStore.appendMessage("system", `✨ Cast spell: ${instr.name}`);
     } else if (instr.action === "forget") {
       gameStore.appendMessage("system", `🚫 Forgot spell: ${instr.name}`);
-      useCharacterStore().forgetSpell(instr.name || "");
+      spellMgmt.forgetSpell(instr.name || "");
     }
   };
 
@@ -127,7 +129,7 @@ export function useGameMessages() {
     if (instr.action === "add") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      await characterStore.character.addInventory.mutateAsync({
+      await character.addInventory.mutateAsync({
         definitionId: instr.name,
         name: instr.name,
         qty,
@@ -138,10 +140,10 @@ export function useGameMessages() {
     } else if (instr.action === "remove") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🗑️ Removed from inventory: ${instr.name} (x${qty})`);
-      await useCharacterStore().removeInventory.mutateAsync({ itemId: instr.name, qty });
+      await character.removeInventory.mutateAsync({ itemId: instr.name, qty });
     } else if (instr.action === "use") {
       gameStore.appendMessage("system", `⚡ Used item: ${instr.name}`);
-      useCharacterStore().useInventoryItem(instr.name || "");
+      await character.useInventoryItem.mutateAsync(instr.name || "");
     }
   };
 

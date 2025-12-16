@@ -3,12 +3,13 @@ import type {
   CombatStartInstructionMessageDto,
   CombatActionResponseDto,
 } from "@rpg-gen/shared";
-import { useCombat as useCombatApi } from "@rpg-gen/api-client";
+import { useCombat as useCombatApi, useCharacter } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import { useCharacterStore } from "../stores/characterStore";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { useCharacterId } from "./useCharacterId";
 
 /**
  * Composable for combat-specific actions and state management
@@ -17,7 +18,8 @@ import { useGameStore } from "../stores/gameStore";
 export function useCombat() {
   const router = useRouter();
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
+  const currentCharacter = useCurrentCharacter();
+  const characterId = useCharacterId();
   const combatStore = useCombatStore();
   const {
     currentTarget,
@@ -27,8 +29,8 @@ export function useCombat() {
     combatEndNarrative,
     isCombatEndModalOpen,
   } = storeToRefs(combatStore);
-  const { currentCharacter } = storeToRefs(characterStore);
-  const combatApi = useCombatApi(() => currentCharacter.value?.characterId);
+  const combatApi = useCombatApi(characterId);
+  const character = useCharacter(characterId);
 
   const displayCombatStartSuccess = (combatState: {
     narrative?: string;
@@ -72,11 +74,11 @@ export function useCombat() {
           `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
         );
         // Sync HP to character store (will update via TanStack Query cache)
-        await characterStore.character.updateHp.mutateAsync(newHp);
+        await character.updateHp.mutateAsync(newHp);
       }
 
       if (newHp <= 0) {
-        characterStore.showDeathModal = true;
+        gameStore.showDeathModal = true;
       }
 
       displayCombatStartSuccess(combatState);
@@ -243,7 +245,7 @@ export function useCombat() {
     }
     if (xpGained > 0) {
       gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
-      await characterStore.character.updateXp.mutateAsync(xpGained);
+      await character.updateXp.mutateAsync(xpGained);
     }
 
     combatEndNarrative.value = narrative;
@@ -266,8 +268,8 @@ export function useCombat() {
    * Flee from combat
    */
   const fleeCombat = async (): Promise<void> => {
-    const character = characterStore.currentCharacter;
-    if (!character) return;
+    const c = currentCharacter.value;
+    if (!c) return;
 
     try {
       await combatApi.endCombat.mutateAsync();

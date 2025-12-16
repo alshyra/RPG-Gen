@@ -25,7 +25,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { DnDRulesService } from '../../services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { storeToRefs } from 'pinia';
 
 const characterStore = useCharacterStore();

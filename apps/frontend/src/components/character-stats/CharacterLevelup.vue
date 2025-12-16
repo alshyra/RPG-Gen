@@ -147,7 +147,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from "@/stores/characterStore";
 import type { LevelUpResult } from "@/interfaces";
 import type { CharacterResponseDto, CombatOptionDto, LevelUpOptionsDto } from "@rpg-gen/shared";
 import { computed, onMounted, ref } from "vue";

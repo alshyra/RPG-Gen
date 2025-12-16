@@ -76,7 +76,6 @@
 import AppRouterButton from '@/components/AppRouterButton.vue';
 import AbilityScores from '@/components/character-stats/AbilityScores.vue';
 import CharacterPortrait from '@/components/character/CharacterPortrait.vue';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { useUiStore } from '@/stores/uiStore';
 import { storeToRefs } from 'pinia';

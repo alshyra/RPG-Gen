@@ -42,13 +42,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useCharacterStore } from '@/stores/characterStore';
+import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { useGameCommands } from '@/composables/useGameCommands';
 import { generateCastCommand } from '@/utils/chatCommands';
-import { storeToRefs } from 'pinia';
 
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
+const currentCharacter = useCurrentCharacter();
 const { insertCommand } = useGameCommands();
 
 const spells = computed(() => currentCharacter.value?.spells || []);

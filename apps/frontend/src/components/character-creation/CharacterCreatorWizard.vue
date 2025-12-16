@@ -114,7 +114,6 @@
 import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
 import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
 import { DnDRulesService } from "@/services/dndRulesService";
-import { useCharacterStore } from "@/stores/characterStore";
 import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";

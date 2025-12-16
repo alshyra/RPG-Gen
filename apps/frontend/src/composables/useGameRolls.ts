@@ -4,13 +4,16 @@ import { storeToRefs } from "pinia";
 import { watch } from "vue";
 import { useChat } from "@rpg-gen/api-client";
 import { getSkillBonus } from "../services/skillService";
-import { useCharacterStore } from "../stores/characterStore";
+import { useCharacterId } from "./useCharacterId";
+import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useGameStore } from "../stores/gameStore";
 
 export function useGameRolls() {
   const gameStore = useGameStore();
-  const characterStore = useCharacterStore();
+  const characterId = useCharacterId();
+  const currentCharacter = useCurrentCharacter();
   const { rollData, pendingInstruction } = storeToRefs(gameStore);
+  const chat = useChat(characterId);
 
   const buildRollData = (
     rollResult: DiceResultDto,
@@ -39,7 +42,7 @@ export function useGameRolls() {
     if (!pending || !isRollInstruction(pending)) return;
     const skillName = pending.modifierLabel ?? "Roll";
     const skillBonus = pending.modifierLabel
-      ? getSkillBonus(characterStore.currentCharacter ?? null, skillName)
+      ? getSkillBonus(currentCharacter.value ?? null, skillName)
       : (pending.modifierValue ?? 0);
     gameStore.rollData = buildRollData(rollResult, pending, skillName, skillBonus);
     gameStore.showRollModal = true;
@@ -50,11 +53,9 @@ export function useGameRolls() {
     latest => latest && onDiceRolled(latest),
   );
 
-  const chat = useChat(() => characterStore.currentCharacter?.characterId);
-
   const confirmRoll = async () => {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
-    if (!characterStore.currentCharacter?.characterId) return;
+    if (!characterId.value) return;
 
     const message = await chat.sendMessage.mutateAsync({
       role: "user",

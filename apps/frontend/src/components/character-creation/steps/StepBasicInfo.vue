@@ -31,13 +31,10 @@
 <script setup lang="ts">
 import { UiButtonToggle, UiInputText } from '@rpg-gen/ui';
 import { GENDERS } from '@/services/dndRulesService';
-import { useCharacterStore } from '@/stores/characterStore';
 import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import RacePicker from '../RacePicker.vue';
-const characterStore = useCharacterStore();
-const { currentCharacter } = storeToRefs(characterStore);
 
 const genderOptions = computed(() =>
   GENDERS.map(g => ({

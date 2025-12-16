@@ -51,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { getAllSuggestions } from '@/utils/chatCommands';
 import type { ArgumentSuggestion, CommandDefinition } from '@/interfaces';

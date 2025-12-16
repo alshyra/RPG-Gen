@@ -40,7 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterStore } from '@/stores/characterStore';
 import { useCombatStore } from '@/stores/combatStore';
 import { computed } from 'vue';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
