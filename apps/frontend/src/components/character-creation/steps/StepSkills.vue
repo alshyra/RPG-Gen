@@ -31,68 +31,36 @@
 </template>
 
 <script setup lang="ts">
-import { UiInputCheckbox } from '@rpg-gen/ui';
-import { DnDRulesService } from '@/services/dndRulesService';
-import type { SkillResponseDto } from '@rpg-gen/shared';
-import { computed } from 'vue';
-import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import { useCharacter } from '@rpg-gen/api-client';
 import { useCharacterId } from '@/composables/useCharacterId';
+import { DnDRulesService } from '@/services/dndRulesService';
+import { useCharacter } from '@rpg-gen/api-client';
+import type { SkillResponseDto } from '@rpg-gen/shared';
+import { UiInputCheckbox } from '@rpg-gen/ui';
+import { computed } from 'vue';
 
-const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
-const { update } = useCharacter(characterId)
+const { update, character } = useCharacter(characterId)
+const currentCharacter = computed(() => character.data.value);
 
-const primaryClass = computed(() => currentCharacter.value?.classes?.[0]?.name ?? '');
+const primaryClass = computed(() => currentCharacter?.value?.classes?.[0]?.name ?? '');
 const proficientSkills = computed(() =>
-  (currentCharacter.value?.skills || []).filter((s: SkillResponseDto) => s.proficient).map((s: SkillResponseDto) => s.name),
+  (currentCharacter?.value?.skills || []).filter((s: SkillResponseDto) => s.proficient).map((s: SkillResponseDto) => s.name),
 );
 const availableSkills = computed(() =>
   DnDRulesService.getAvailableSkillsForClass(primaryClass.value),
 );
 const skillsToChoose = computed(() => DnDRulesService.getSkillChoicesForClass(primaryClass.value));
 
-const saveCurrent = async () => {
-  if (!currentCharacter.value) return;
-
-  if (!currentCharacter.value.characterId) return;
-
-  await update.mutateAsync({
-    skills: currentCharacter.value.skills,
-  });
-};
-
-const setSkillProficiency = async (skill: string, isProficient: boolean) => {
-  if (!currentCharacter.value) return;
-  const existingSkills = currentCharacter.value.skills || [];
-
-  // If skill exists, update its proficient flag; otherwise add it when setting true
-  const present = existingSkills.find((s: SkillResponseDto) => s.name === skill);
-  let updated: SkillResponseDto[];
-  if (present) {
-    updated = existingSkills.map((skill: SkillResponseDto) =>
-      skill.name === skill
-        ? {
-            ...skill,
-            proficient: isProficient,
-          }
-        : skill,
-    );
-  } else if (isProficient) {
-    updated = [
-      ...existingSkills,
-      {
-        name: skill,
-        proficient: true,
-        modifier: 0,
-      },
-    ];
-  } else {
-    // not present and setting to false — no-op
-    updated = existingSkills;
-  }
-
-  currentCharacter.value.skills = updated;
-  await saveCurrent();
+const setSkillProficiency = async (skillName: string, isProficient: boolean) => {
+  if (!currentCharacter?.value?.skills) return;
+  const skills = currentCharacter?.value?.skills.map((skill: SkillResponseDto) =>
+    skill.name === skillName
+      ? {
+          ...skill,
+          proficient: isProficient,
+        }
+      : skill,
+  );
+  await update.mutateAsync({ skills });
 };
 </script>

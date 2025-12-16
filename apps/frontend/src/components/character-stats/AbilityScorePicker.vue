@@ -62,7 +62,7 @@ const onUpdateAbilityValue = async (ability: (typeof ABILITIES)[number], val: nu
   const result = applyPointBuyChange(ability, value);
   if (!result?.allowed || !currentCharacter?.value?.characterId) return;
   await update.mutateAsync({
-    scores: currentCharacter.value.scores,
+    scores: currentCharacter?.value?.scores,
   });
 };
 </script>

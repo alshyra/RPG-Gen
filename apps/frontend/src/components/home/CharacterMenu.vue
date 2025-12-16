@@ -61,7 +61,7 @@ import { UiButton } from "@rpg-gen/ui";
 import { Trash2 } from "lucide-vue-next";
 import type { CharacterResponseDto } from "@rpg-gen/shared";
 import { ref } from "vue";
-import { showAlert, showConfirm } from "@/composables/useModal";
+import { showAlert, showConfirm } from "@rpg-gen/ui";
 import { useRouter } from "vue-router";
 const emit = defineEmits<(e: "deleted", id: string) => void>();
 
@@ -90,13 +90,9 @@ const onResume = (character: CharacterResponseDto) => {
 };
 
 const onDelete = async (character: CharacterResponseDto) => {
-  console.log(character, character.characterId)
   if (!character.characterId) throw new Error("Character ID is missing");
-  console.log('did not throw')
-  await showAlert('qwe')
-  const res = await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?");
-  console.log(res)
-  if (!res) return;
+  const confirmationResponse = await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?");
+  if (!confirmationResponse) return;
   deletingCharacterId.value = character.characterId;
   try {
     await characterApi.deleteCharacter.mutateAsync();

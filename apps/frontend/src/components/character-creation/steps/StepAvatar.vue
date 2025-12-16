@@ -8,7 +8,7 @@
     <div class="mt-4">
       <label class="block font-medium mb-2">Description physique</label>
       <UiInputTextarea
-        :model-value="currentCharacter?.physicalDescription"
+        :model-value="physicalDescription"
         placeholder="Ex: Grand et musclé, cheveux noirs long, cicatrice sur la joue gauche..."
         :rows="4"
         @update:model-value="updateDescription"
@@ -25,12 +25,11 @@ import { UiInputTextarea } from '@rpg-gen/ui';
 import { useDebounceFn } from '@vueuse/core';
 
 const currentCharacter = useCurrentCharacter();
+const physicalDescription = currentCharacter?.value?.physicalDescription || '';
 const characterId = useCharacterId()
 const {update} = useCharacter(characterId)
 
 const updateDescription = useDebounceFn(async (physicalDescription: string) => {
-  if (!currentCharacter.value) return;
-  currentCharacter.value.physicalDescription = physicalDescription;
   await update.mutateAsync({
     physicalDescription,
   });

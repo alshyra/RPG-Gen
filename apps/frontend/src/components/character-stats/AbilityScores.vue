@@ -59,11 +59,11 @@ const abilities = {
 };
 
 const getAbilityScore = (key: string): number => {
-  if (!currentCharacter.value?.scores) return 10;
+  if (!currentCharacter?.value?.scores) return 10;
 
   // Convert to capitalized format (Str, Dex, etc.)
   const capitalized = (key.charAt(0).toUpperCase() + key.slice(1)) as AbilityKey;
-  const scores: AbilityScoresResponseDto = currentCharacter.value.scores;
+  const scores: AbilityScoresResponseDto = currentCharacter?.value?.scores;
 
   return scores[capitalized] ?? 10;
 };

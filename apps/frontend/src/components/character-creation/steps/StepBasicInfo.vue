@@ -40,7 +40,7 @@ import { useCharacterId } from '@/composables/useCharacterId';
 
 const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
-const {update} = useCharacter(characterId)
+const { update } = useCharacter(characterId)
 
 const genderOptions = computed(() =>
   GENDERS.map(g => ({
@@ -50,22 +50,10 @@ const genderOptions = computed(() =>
 );
 
 const onUpdateName = useDebounceFn(async (name: string) => {
-  if (!currentCharacter.value) return;
-  currentCharacter.value.name = name;
-  const charId = currentCharacter.value.characterId;
-
-  if (!charId) return;
-
   await update.mutateAsync({ name: name });
 }, 300);
 
 const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
-  if (!currentCharacter.value) return;
-
-  currentCharacter.value.gender = gender;
-  const charId = currentCharacter.value.characterId;
-  if (!charId) return;
-
   await update.mutateAsync({ gender: String(gender) });
 };
 </script>

@@ -40,16 +40,15 @@
 </template>
 
 <script setup lang="ts">
+import { useCharacterId } from '@/composables/useCharacterId';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import type { InventoryItemForUi as InventoryItem } from '@/interfaces';
 import { DnDRulesService } from '@/services/dndRulesService';
-import { useCombatStore } from '@/stores/combatStore';
 import { useCombat } from '@rpg-gen/api-client';
 import { UiXpBar } from '@rpg-gen/ui';
 import { computed } from 'vue';
 import { getCurrentLevel, getXpProgress } from '../../utils/dndLevels';
 import CharacterIllustration from './CharacterIllustration.vue';
-import { useCharacterId } from '@/composables/useCharacterId';
 
 const currentCharacterId = useCharacterId();
 const currentCharacter = useCurrentCharacter();
@@ -61,18 +60,18 @@ const hp = computed(() => {
   if (status.data.value?.inCombat && status) {
     return `${combatStatus.value?.inCombat ?? 0}/${combatStatus.value?.player.hpMax}`;
   }
-  if (!currentCharacter.value) throw new Error('No current character');
-  return `${currentCharacter.value.hp || 0}/${currentCharacter.value.hpMax || 12}`;
+  if (!currentCharacter) throw new Error('No current character');
+  return `${currentCharacter?.value?.hp || 0}/${currentCharacter?.value?.hpMax || 12}`;
 });
 
 const currentLevel = computed(() => {
-  const xp = currentCharacter.value?.totalXp || 0;
+  const xp = currentCharacter?.value?.totalXp || 0;
   const level = getCurrentLevel(xp);
   return `Level ${level.level}`;
 });
 
 const xpPercent = computed(() => {
-  const xp = currentCharacter.value?.totalXp || 0;
+  const xp = currentCharacter?.value?.totalXp || 0;
   const progress = getXpProgress(xp);
   return progress.percentage;
 });
@@ -98,10 +97,10 @@ const calculateDexBonus = (acRaw: string, dexMod: number): number => {
   return dexMod;
 };
 
-const inspirationPoints = computed(() => currentCharacter.value?.inspirationPoints || 0);
+const inspirationPoints = computed(() => currentCharacter?.value?.inspirationPoints || 0);
 
 const getCharValue = () =>
-  currentCharacter.value as {
+  currentCharacter as {
     ac?: number;
     armorClass?: number;
     scores?: Record<string, number>;
@@ -124,13 +123,13 @@ const computeArmorAc = (
 const ac = computed(() => {
   // If combat is active, prefer combat player's AC (derived at combat init)
   if (combatStatus.value?.inCombat && combatStatus.value.player) return combatStatus.value.player.ac ?? '-';
-  if (!currentCharacter.value) return '-';
+  if (!currentCharacter) return '-';
 
   const charValue = getCharValue();
   const explicitAc = charValue.ac ?? charValue.armorClass;
   if (explicitAc !== undefined && explicitAc !== null) return explicitAc;
 
-  const inv = currentCharacter.value.inventory ?? [];
+  const inv = currentCharacter?.value?.inventory ?? [];
   const shield = inv.find(isShield);
   const shieldBonus = shield ? parseShieldBonus(shield) : 0;
   const armor = inv.find((i: InventoryItem) => i.meta?.type === 'armor' && !isShield(i));

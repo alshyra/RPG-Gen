@@ -26,23 +26,17 @@ const characterId = useCharacterId();
 const { update } = useCharacter(characterId);
 
 const updateClass = async (newClass: string) => {
-  if (!currentCharacter.value) return;
-  if (!currentCharacter.value.characterId) return;
-  currentCharacter.value.classes![0] = {
-    name: newClass,
-    level: 1,
-  };
-
-  currentCharacter.value.skills = DnDRulesService.getAvailableSkillsForClass(newClass).map(
-    (skill) => ({
+  await update.mutateAsync({
+    classes: [
+      {
+        name: newClass,
+        level: 1,
+      },
+    ],
+    skills: DnDRulesService.getAvailableSkillsForClass(newClass).map((skill) => ({
       name: skill,
       proficient: false,
-    }),
-  );
-
-  await update.mutateAsync({
-    classes: currentCharacter.value.classes,
-    skills: currentCharacter.value.skills,
+    })),
   });
 };
 </script>
