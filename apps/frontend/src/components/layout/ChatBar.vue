@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
+      'bg-linear-to-t from-slate-950 via-slate-900/80 to-slate-900/40 p-3 border border-slate-700',
       connectedTop ? 'rounded-b-lg' : 'rounded-lg',
     ]"
   >
@@ -37,8 +37,6 @@
         placeholder="Parle à l'IA..."
         class="input flex-1 min-h-10"
         :disabled="isRolling || gameStore.sending"
-        @keydown="handleKeydown"
-        @blur="handleBlur"
       />
 
       <!-- Dice Roll / Send button -->
@@ -83,10 +81,6 @@ const { connectedTop = false, hasFailedMessage = false } = defineProps<{
 import { useGameStore } from '@/stores/gameStore';
 import { computed, ref } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
-import CommandSuggestions from './CommandSuggestions.vue';
-
-/** Delay in ms before hiding suggestions on blur to allow click events to process */
-const SUGGESTION_BLUR_DELAY_MS = 150;
 
 type Emits = {
   send: [];
@@ -97,8 +91,6 @@ const emit = defineEmits<Emits>();
 const gameStore = useGameStore();
 
 const inputRef = ref<HTMLInputElement | null>(null);
-const suggestionsRef = ref<InstanceType<typeof CommandSuggestions> | null>(null);
-const showSuggestions = ref(true);
 
 const playerText = computed({
   get: () => gameStore.playerText,
@@ -135,41 +127,6 @@ const handleCommandSelect = (command: string) => {
 const handleArgumentSelect = (command: string, argument: string) => {
   playerText.value = `/${command} ${argument}`;
   inputRef.value?.focus();
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  const hasSuggestions = suggestionsRef.value?.hasSuggestions;
-
-  if (showSuggestions.value && hasSuggestions) {
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        suggestionsRef.value?.navigateDown();
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        suggestionsRef.value?.navigateUp();
-        break;
-      case 'Tab':
-      case 'Enter':
-        event.preventDefault();
-        suggestionsRef.value?.selectCurrent();
-        break;
-      case 'Escape':
-        event.preventDefault();
-        showSuggestions.value = false;
-        break;
-    }
-  } else if (event.key === 'Enter') {
-    event.preventDefault();
-    send();
-  }
-};
-
-const handleBlur = () => {
-  setTimeout(() => {
-    showSuggestions.value = false;
-  }, SUGGESTION_BLUR_DELAY_MS);
 };
 
 const send = () => emit('send');

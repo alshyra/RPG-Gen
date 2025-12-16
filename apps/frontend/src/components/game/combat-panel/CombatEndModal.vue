@@ -29,13 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import { useCombatStore } from '@/stores/combatStore';
-import { useCombat } from '@rpg-gen/api-client';
 import { useCharacterId } from '@/composables/useCharacterId';
+import { useCombat } from '@rpg-gen/api-client';
 import { UiButton, UiModal } from '@rpg-gen/ui';
 import { computed } from 'vue';
 
-const combatStore = useCombatStore();
 const characterId = useCharacterId();
 const combatApi = useCombat(characterId);
 

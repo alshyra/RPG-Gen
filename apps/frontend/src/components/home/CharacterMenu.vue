@@ -90,8 +90,13 @@ const onResume = (character: CharacterResponseDto) => {
 };
 
 const onDelete = async (character: CharacterResponseDto) => {
+  console.log(character, character.characterId)
   if (!character.characterId) throw new Error("Character ID is missing");
-  if (!(await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?"))) return;
+  console.log('did not throw')
+  await showAlert('qwe')
+  const res = await showConfirm("Êtes-vous sûr de vouloir supprimer ce personnage ?");
+  console.log(res)
+  if (!res) return;
   deletingCharacterId.value = character.characterId;
   try {
     await characterApi.deleteCharacter.mutateAsync();

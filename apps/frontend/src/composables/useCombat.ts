@@ -1,19 +1,19 @@
+import { useCombatStore } from "@/stores/combatStore";
+import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
 import type {
+  CombatActionResponseDto,
   CombatantDto,
   CombatStartInstructionMessageDto,
-  CombatActionResponseDto,
   CombatStartRequestDto,
   CombatStateDto,
   EndPlayerTurnResponseDto,
 } from "@rpg-gen/shared";
-import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
-import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
-import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useCharacterId } from "./useCharacterId";
 import { useCombatInfo } from "./useCombatStatus";
+import { useCurrentCharacter } from "./useCurrentCharacter";
+import { storeToRefs } from "pinia";
 
 /**
  * Composable for combat-specific actions and state management
@@ -24,12 +24,11 @@ export function useCombat() {
   const gameStore = useGameStore();
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
-  const combatStore = useCombatStore();
-  const { currentTarget, currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
-    storeToRefs(combatStore);
   const combatApi = useCombatApi(characterId);
   const combatInfo = useCombatInfo();
   const character = useCharacter(characterId);
+  const combatStore = useCombatStore();
+  const { currentPlayerAttackLog } = storeToRefs(combatStore);
 
   /**
    * Start a combat session
@@ -43,9 +42,6 @@ export function useCombat() {
       characterId: charId,
       data: instruction,
     });
-    if (response.enemies && response.enemies.length > 0) {
-      currentTarget.value = response.enemies[0];
-    }
     return response;
   };
 
@@ -66,11 +62,6 @@ export function useCombat() {
     if (response.attackLogs?.length) {
       await combatStore.processAttackLogs(response.attackLogs);
     }
-    // Auto-select next target if current is dead
-    const enemies = combatInfo.enemies.value ?? [];
-    const selectNextAliveTarget = (enemyList: typeof enemies) =>
-      enemyList.find(e => (e.hp ?? 0) > 0) ?? null;
-    currentTarget.value = selectNextAliveTarget(enemies);
     return response;
   };
 
@@ -190,7 +181,7 @@ export function useCombat() {
   const checkCombatVictory = (result: CombatActionResponseDto): void => {
     // First check if backend returned explicit combatEnd
     if (!result.combatEnd) return;
-    handleCombatEnd(
+    void handleCombatEnd(
       result.combatEnd.victory,
       result.combatEnd.xp_gained,
       result.combatEnd.enemies_defeated,
@@ -211,7 +202,6 @@ export function useCombat() {
     const targetName = target?.name || "cible inconnue";
     gameStore.appendMessage("user", `J'attaque ${targetName}!`);
     gameStore.sending = true;
-    currentTarget.value = target;
   };
 
   const processAttackResult = async (result: CombatActionResponseDto, target: CombatantDto) => {
@@ -245,8 +235,6 @@ export function useCombat() {
 
     currentAttackView.value = attackView;
 
-    // Combat state (including attack result) is automatically updated via TanStack Query
-    // Components can read combatApi.attack.data directly
     await showPlayerAttackAnimation(result);
     displayAttackResultMessage(target, result);
     checkCombatVictory(result);
