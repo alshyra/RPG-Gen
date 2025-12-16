@@ -9,13 +9,13 @@ import {
   type SpellInstructionMessageDto,
   type UseItemResponseDto,
 } from "@rpg-gen/shared";
-import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { parseCommand, type ParsedCommand } from "../utils/chatCommands";
 import { useSpellManagement } from "./useSpellManagement";
 import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useCharacterId } from "./useCharacterId";
 import { useCombat } from "./useCombat";
+import { useCombatInfo } from "./useCombatStatus";
 
 type GameStore = ReturnType<typeof useGameStore>;
 type InstructionItem = Record<string, unknown>;
@@ -115,7 +115,7 @@ const findItem = (character: CharacterResponseDto, itemName: string) =>
 // eslint-disable-next-line max-statements
 export function useGameCommands() {
   const gameStore = useGameStore();
-  const combatStore = useCombatStore();
+  const combatInfo = useCombatInfo();
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
   const character = useCharacter(characterId);
@@ -234,7 +234,7 @@ export function useGameCommands() {
     const c = currentCharacter.value;
     if (!c) return;
 
-    const target = combatStore.aliveEnemies.find(
+    const target = combatInfo.aliveEnemies.value.find(
       e => e.id.toLocaleLowerCase() === command.target.toLowerCase(),
     );
     switch (command.type) {
@@ -347,7 +347,7 @@ export function useGameCommands() {
     const c = currentCharacter.value;
     if (!c) return;
 
-    const isInCombat = combatStore.inCombat || (await combat.checkCombatStatus());
+    const isInCombat = combatInfo.inCombat.value || (await combat.checkCombatStatus());
     if (isInCombat) {
       await combat.executeAttack(target);
       return;

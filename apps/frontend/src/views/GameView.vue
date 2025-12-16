@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import { useGameRolls } from "@/composables/useGameRolls";
-import { useCombatStore } from "@/stores/combatStore";
 import { useUiStore } from "@/stores/uiStore";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
@@ -70,6 +69,7 @@ import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
 import { useCombat } from "../composables/useCombat";
+import { useCombatInfo } from "../composables/useCombatStatus";
 import { useGameCommands } from "../composables/useGameCommands";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
@@ -80,14 +80,14 @@ import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
 // State
 const router = useRouter();
 const gameStore = useGameStore();
-const combatStore = useCombatStore();
 
 const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
 const { handleInput } = useGameCommands();
 const combat = useCombat();
-const { inCombat } = storeToRefs(combatStore);
+const combatInfo = useCombatInfo();
+const inCombat = combatInfo.inCombat;
 const { pendingInstruction } = storeToRefs(gameStore);
 const showDeathModal = ref(false);
 

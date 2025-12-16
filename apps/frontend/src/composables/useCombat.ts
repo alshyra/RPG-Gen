@@ -334,13 +334,13 @@ export function useCombat() {
     if (!c) return;
 
     try {
-      await combatApi.endCombat.mutateAsync();
+      await combatApi.endCombat.mutateAsync(characterId.value!);
       gameStore.appendMessage("system", "🏃 Vous avez fui le combat.");
       combatStore.clearCombat();
       // Navigate back to messages view
       await router.push({
         name: "game",
-        params: { characterId: character.characterId },
+        params: { characterId: c.characterId },
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to flee";

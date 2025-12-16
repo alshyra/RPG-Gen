@@ -31,9 +31,6 @@ export const useCombatStore = defineStore("combatStore", () => {
   const currentTarget = ref<CombatantDto | null>(null);
 
   // --- Helpers ---
-  const selectNextAliveTarget = (enemyList: CombatantDto[]): CombatantDto | null =>
-    enemyList.find(e => (e.hp ?? 0) > 0) ?? null;
-
   const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
   const processOneAttackLog = async (log: EnemyAttackLogDto): Promise<void> => {
