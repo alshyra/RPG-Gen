@@ -1,9 +1,5 @@
 import type { AttackQueueItem, AttackView } from "@/interfaces";
-import type {
-  CombatActionResponseDto,
-  CombatantDto,
-  EnemyAttackLogDto,
-} from "@rpg-gen/shared";
+import type { CombatActionResponseDto, EnemyAttackLogDto } from "@rpg-gen/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

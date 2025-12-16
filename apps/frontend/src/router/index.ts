@@ -123,19 +123,6 @@ router.beforeEach(async (to, _from, next) => {
   } else if (to.name === "login" && isAuthenticated) {
     // Redirect to home if already authenticated and trying to access login
     next({ name: "home" });
-  } else if (to.name === "game-combat") {
-    // Protect combat route: redirect to game messages if not in combat
-    const characterId = useCharacterId();
-    const combat = useCombat(characterId);
-    const inCombat = combat.status.data.value?.inCombat ?? false;
-    if (!inCombat) {
-      next({
-        name: "game",
-        params: { characterId: to.params.characterId },
-      });
-    } else {
-      next();
-    }
   } else {
     next();
   }

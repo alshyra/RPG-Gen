@@ -37,7 +37,9 @@ export function useSpellManagement(characterId: string | undefined) {
     // Check if spell already learned
     if (
       currentCharacter?.value?.spells &&
-      currentCharacter.value.spells.some(existingSpell => existingSpell.definitionId === spell.definitionId)
+      currentCharacter.value.spells.some(
+        existingSpell => existingSpell.definitionId === spell.definitionId,
+      )
     ) {
       return;
     }

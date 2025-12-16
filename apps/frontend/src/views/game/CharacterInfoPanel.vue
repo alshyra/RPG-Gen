@@ -86,5 +86,4 @@ const ui = useUiStore();
 const characterId = useCharacterId();
 const currentCharacter = useCurrentCharacter();
 const { isInCombat } = useCombat(characterId);
-
 </script>

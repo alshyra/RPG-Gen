@@ -98,7 +98,6 @@ onMounted(async () => {
   const byManifest = await pickBestPortrait(fighter.name || fighter.id || 'enemy');
   resolvedPortrait.value = byManifest || getFallbackPortrait(fighter.name || fighter.id || 'enemy');
 });
-
 </script>
 
 <style scoped>

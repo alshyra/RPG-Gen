@@ -31,7 +31,8 @@
           <div class="flex items-center gap-2">
             <span class="text-red-400 font-bold text-lg">+{{ levelUpReward.hpGain }}</span>
             <span class="text-xs text-slate-500">
-              ({{ currentCharacter?.value?.hp || 0 }} → {{ (currentCharacter?.value?.hp || 0) + levelUpReward.hpGain }})
+              ({{ currentCharacter?.hp || 0 }} →
+              {{ (currentCharacter?.hp || 0) + levelUpReward.hpGain }})
             </span>
           </div>
         </div>
@@ -132,7 +133,8 @@
             <div>
               <span class="text-slate-400">Current HP:</span>
               <span class="ml-2 text-red-400"
-                >{{ currentCharacter?.value?.hp || 0 }}/{{ currentCharacter?.value?.hpMax || 0 }}</span
+                >{{ currentCharacter?.hp || 0
+                }}/{{ currentCharacter?.hpMax || 0 }}</span
               >
             </div>
             <div>
