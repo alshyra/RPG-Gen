@@ -70,11 +70,11 @@ export function useCombat() {
           "system",
           `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
         );
-        // Sync HP to character store
-        characterStore.updateHp(-initialDamage);
+        // Sync HP to character store (will update via TanStack Query cache)
+        await characterStore.updateHp(newHp);
       }
-      currentCharacter.value.hp = combatState.player?.hp ?? currentCharacter.value.hp;
-      if ((currentCharacter.value.hp ?? 1) <= 0) {
+      
+      if (newHp <= 0) {
         characterStore.showDeathModal = true;
       }
 
@@ -182,9 +182,7 @@ export function useCombat() {
     currentAttackView.value = attackView;
 
     currentAttackResult.value = result;
-    if (result.combatState) {
-      combatStore.initializeCombat(result.combatState);
-    }
+    // Combat state is automatically updated via TanStack Query after the attack
     await showPlayerAttackAnimation(result);
     displayAttackResultMessage(target, result);
     checkCombatVictory(result);
@@ -290,7 +288,8 @@ export function useCombat() {
    */
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter.value) return false;
-    const { inCombat } = await combatStore.fetchStatus(currentCharacter.value?.characterId);
+    await combatStore.fetchStatus();
+    const inCombat = combatStore.inCombat;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({

@@ -228,14 +228,9 @@ const saveFinalCharacter = async () => {
 
 const generateAndApplyAvatar = async () => {
   try {
-    const imageUrl = await imageApi.generateAvatar(currentCharacter.value!.characterId);
-    try {
-      const refreshed = await characterApi.findOne(currentCharacter.value!.characterId);
-      if (refreshed) currentCharacter.value = refreshed;
-      else currentCharacter.value!.portrait = imageUrl;
-    } catch {
-      currentCharacter.value!.portrait = imageUrl;
-    }
+    await imageApi.generateAvatar({ characterId: currentCharacter.value!.characterId });
+    // Refetch character to get the updated portrait
+    await characterStore.refetchCharacter();
   } catch (e) {
     console.warn("Avatar generation failed — continuing to game", e);
   }

@@ -98,8 +98,8 @@ export function useCombatEngine() {
         await replayEnemyAttacks(response.attackLogs);
       }
 
-      // Update combat store with the result
-      combatStore.updateFromTurnResult(response);
+      // Combat state is automatically updated via TanStack Query after endTurn
+      // No need to manually update - the query will invalidate and refetch
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (

@@ -262,12 +262,15 @@ const executeLevelUp = async (): Promise<void> => {
   if (updatedCharacter.characterId) {
     // Use the dedicated LevelUp API with combat selections
     try {
-      await characterApi.applyLevelUp(updatedCharacter.characterId, {
-        className: className.value,
-        newSpellIds: [],
-        abilityIncreases: [],
-        selectedCombatProficiencies: selectedCombatIds.value,
-      });
+      await characterApi.applyLevelUp(
+        updatedCharacter.characterId,
+        className.value,
+        {
+          newSpellIds: [],
+          abilityIncreases: [],
+          selectedCombatProficiencies: selectedCombatIds.value,
+        },
+      );
     } catch {
       // Fallback: save the computed character changes
       await characterStore.updateCharacter(updatedCharacter.characterId, updatedCharacter);

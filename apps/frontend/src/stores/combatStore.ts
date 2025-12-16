@@ -4,45 +4,64 @@ import type {
   CombatantDto,
   CombatPhase,
   CombatStartRequestDto,
-  CombatStateDto,
-  EndPlayerTurnResponseDto,
   EnemyAttackLogDto,
 } from "@rpg-gen/shared";
-import { combatApi } from "@rpg-gen/api-client";
+import { useCombat } from "@rpg-gen/api-client";
 import { defineStore } from "pinia";
-import type { Ref } from "vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
 
+/**
+ * Combat Store - Mix of UI state and cached combat data from TanStack Query
+ *
+ * UI state: modals, animations, processing flags
+ * API data: combat status managed by vue-query
+ */
 export const useCombatStore = defineStore("combatStore", () => {
-  const inCombat = ref(false);
-  const roundNumber = ref(1);
-  const enemies = ref<CombatantDto[]>([]);
-  const player = ref<CombatantDto | null>(null);
-  const turnOrder = ref<CombatantDto[]>([]);
-  const playerInitiative = ref(0);
-  const currentTarget = ref<CombatantDto | null>(null);
-  const phase = ref<CombatPhase>("PLAYER_TURN");
+  const route = useRoute();
+  const currentCharacterId = computed(() =>
+    typeof route.params.characterId === "string" ? route.params.characterId : undefined,
+  );
+
+  // --- Query Hooks ---
+  const combat = useCombat(currentCharacterId);
+  const combatStatus = combat.status.data;
+  const isLoadingCombat = combat.isLoading;
+  const refetchCombatStatus = combat.status.refetch;
+
+  // --- UI State (modals, animations, processing) ---
   const showAttackResultModal = ref(false);
   const currentAttackResult = ref<CombatActionResponseDto>();
   const isCurrentAttackPlayerAttack = ref(true);
   const attackResultQueue = ref<AttackQueueItem[]>([]);
-  const currentTurnIndex = ref(0);
   const isProcessingEnemyTurn = ref(false);
   const currentEnemyAttackLog = ref<EnemyAttackLogDto | null>(null);
   const currentPlayerAttackLog = ref<CombatActionResponseDto | null>(null);
   const isEndingTurn = ref(false);
   const isCombatEndModalOpen = ref(false);
   const combatEndNarrative = ref<string>("");
-
   const currentAttackView = ref<AttackView | null>(null);
 
-  const actionRemaining = ref(1);
-  const actionMax = ref(1);
-  const bonusActionRemaining = ref(1);
-  const bonusActionMax = ref(1);
+  // --- Local UI state for target selection ---
+  const currentTarget = ref<CombatantDto | null>(null);
+
+  // --- Computed properties from combat status ---
+  const inCombat = computed(() => combatStatus.value?.inCombat ?? false);
+  const roundNumber = computed(() => combatStatus.value?.roundNumber ?? 1);
+  const enemies = computed(() => combatStatus.value?.enemies ?? []);
+  const player = computed(() => combatStatus.value?.player ?? null);
+  const turnOrder = computed(() => combatStatus.value?.turnOrder ?? []);
+  const playerInitiative = computed(() => combatStatus.value?.player?.initiative ?? 0);
+  const currentTurnIndex = computed(() => combatStatus.value?.currentTurnIndex ?? 0);
+  const phase = computed<CombatPhase>(() => combatStatus.value?.phase ?? "PLAYER_TURN");
+
+  const actionRemaining = computed(() => combatStatus.value?.actionRemaining ?? 1);
+  const actionMax = computed(() => combatStatus.value?.actionMax ?? 1);
+  const bonusActionRemaining = computed(() => combatStatus.value?.bonusActionRemaining ?? 1);
+  const bonusActionMax = computed(() => combatStatus.value?.bonusActionMax ?? 1);
 
   const aliveEnemies = computed(() => enemies.value.filter(e => (e.hp ?? 0) > 0));
   const validTargets = computed(() => aliveEnemies.value.map(e => e.name));
@@ -59,62 +78,20 @@ export const useCombatStore = defineStore("combatStore", () => {
     const cc = currentCombatant.value;
     if (!cc) return false;
     if (typeof cc.isPlayer === "boolean") return cc.isPlayer;
-    if (player.value && cc.id) return cc.id === player.value.id;
     if (player.value && cc.name && player.value.name) return cc.name === player.value.name;
     return false;
   });
 
   const canPlayerAct = computed(() => !isProcessingEnemyTurn.value && canAct.value);
 
-  const setCombatParticipants = (response: CombatStateDto): void => {
-    player.value = response.player ?? null;
-    playerInitiative.value = response.player?.initiative ?? 0;
-    enemies.value = response.enemies ?? [];
-    turnOrder.value = response.turnOrder ?? [];
-    if (response.enemies.length > 0) {
-      [currentTarget.value] = response.enemies;
-    }
-  };
-
-  const setCombatState = (response: CombatStateDto): void => {
-    inCombat.value = response.inCombat;
-    roundNumber.value = response.roundNumber;
-    currentTurnIndex.value = response.currentTurnIndex ?? 0;
-    phase.value = response.phase ?? "PLAYER_TURN";
-  };
-
-  const setActionEconomy = (response: CombatStateDto): void => {
-    actionRemaining.value = response.actionRemaining ?? 1;
-    actionMax.value = response.actionMax ?? 1;
-    bonusActionRemaining.value = response.bonusActionRemaining ?? 1;
-    bonusActionMax.value = response.bonusActionMax ?? 1;
-  };
-
-  const initializeCombat = (response: CombatStateDto): void => {
-    setCombatParticipants(response);
-    setCombatState(response);
-    setActionEconomy(response);
-  };
-
-  const selectNextAliveTarget = (enemyList: Ref<CombatantDto[]>): CombatantDto | null =>
-    enemyList.value.find(e => (e.hp ?? 0) > 0) ?? null;
-
-  const applyDamageToPlayer = (damage: number): void => {
-    if (!player.value) return;
-    const newHp = Math.max(0, (player.value.hp ?? 0) - damage);
-    player.value = {
-      ...player.value,
-      hp: newHp,
-    };
-  };
+  // --- Helpers ---
+  const selectNextAliveTarget = (enemyList: CombatantDto[]): CombatantDto | null =>
+    enemyList.find(e => (e.hp ?? 0) > 0) ?? null;
 
   const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
   const processOneAttackLog = async (log: EnemyAttackLogDto): Promise<void> => {
     currentEnemyAttackLog.value = log;
-    if (log.hit && log.damageTotal) {
-      applyDamageToPlayer(log.damageTotal);
-    }
     await delay(ENEMY_ATTACK_DELAY_MS);
   };
 
@@ -128,75 +105,6 @@ export const useCombatStore = defineStore("combatStore", () => {
     isProcessingEnemyTurn.value = false;
   };
 
-  const applyTurnCombatState = (combatState: CombatStateDto): void => {
-    enemies.value = combatState.enemies ?? enemies.value;
-    roundNumber.value = combatState.roundNumber ?? roundNumber.value;
-    turnOrder.value = combatState.turnOrder ?? turnOrder.value;
-    currentTurnIndex.value = combatState.currentTurnIndex ?? currentTurnIndex.value;
-    phase.value = combatState.phase ?? phase.value;
-  };
-
-  const applyTurnActionEconomy = (s: CombatStateDto): void => {
-    actionRemaining.value = s.actionRemaining ?? actionRemaining.value;
-    actionMax.value = s.actionMax ?? actionMax.value;
-    bonusActionRemaining.value = s.bonusActionRemaining ?? bonusActionRemaining.value;
-    bonusActionMax.value = s.bonusActionMax ?? bonusActionMax.value;
-  };
-
-  const checkCombatEnd = (result: EndPlayerTurnResponseDto): void => {
-    if (result.playerDefeated || result.combatState?.enemies?.length === 0) {
-      inCombat.value = false;
-      phase.value = "COMBAT_ENDED";
-    }
-  };
-
-  const updateFromTurnResult = (result: EndPlayerTurnResponseDto): void => {
-    if (result.combatState) {
-      applyTurnCombatState(result.combatState);
-      applyTurnActionEconomy(result.combatState);
-    } else {
-      roundNumber.value = result.roundNumber;
-    }
-    checkCombatEnd(result);
-    currentTarget.value = selectNextAliveTarget(enemies);
-  };
-
-  const updateEnemiesOnly = (remainingEnemies: CombatantDto[], newRoundNumber: number): void => {
-    // PERFORMANCE FIX: Mutate in place instead of creating new array to avoid triggering all watchers
-    enemies.value.forEach((enemy, idx) => {
-      const updated = remainingEnemies.find(e => e.id === enemy.id);
-      if (updated && updated.hp !== enemy.hp) {
-        enemies.value[idx] = {
-          ...enemy,
-          hp: updated.hp,
-        };
-      }
-    });
-    roundNumber.value = newRoundNumber;
-    currentTarget.value = selectNextAliveTarget(enemies);
-  };
-
-  const resetCombatParticipants = (): void => {
-    enemies.value = [];
-    turnOrder.value = [];
-    playerInitiative.value = 0;
-    currentTarget.value = null;
-  };
-
-  const resetCombatState = (): void => {
-    inCombat.value = false;
-    roundNumber.value = 1;
-    phase.value = "PLAYER_TURN";
-    currentTurnIndex.value = 0;
-  };
-
-  const resetActionEconomy = (): void => {
-    actionRemaining.value = 1;
-    actionMax.value = 1;
-    bonusActionRemaining.value = 1;
-    bonusActionMax.value = 1;
-  };
-
   const resetModalState = (): void => {
     showAttackResultModal.value = false;
     currentAttackResult.value = undefined;
@@ -208,49 +116,65 @@ export const useCombatStore = defineStore("combatStore", () => {
   };
 
   const clearCombat = (): void => {
-    resetCombatParticipants();
-    resetCombatState();
-    resetActionEconomy();
+    currentTarget.value = null;
     resetModalState();
   };
 
+  // --- Actions ---
   const startCombat = async (characterId: string, instruction: CombatStartRequestDto) => {
-    const response = await combatApi.startCombat(characterId, instruction);
-    initializeCombat(response);
+    const response = await combat.startCombat.mutateAsync({ characterId, data: instruction });
+    if (response.enemies && response.enemies.length > 0) {
+      currentTarget.value = response.enemies[0];
+    }
     return response;
   };
 
-  const fetchStatus = async (characterId: string) => {
-    const response = await combatApi.getStatus(characterId);
-    if (response.inCombat && response.enemies) initializeCombat(response);
-    else clearCombat();
-    return response;
+  const fetchStatus = async () => {
+    await refetchCombatStatus();
   };
 
   const endActivation = async (characterId: string) => {
-    const response = await combatApi.endTurn(characterId);
+    const response = await combat.endTurn.mutateAsync(characterId);
     if (response.attackLogs?.length) {
       await processAttackLogs(response.attackLogs);
     }
-    updateFromTurnResult(response);
+    // Auto-select next target if current is dead
+    currentTarget.value = selectNextAliveTarget(enemies.value);
     return response;
   };
 
+  const performAttack = async (characterId: string, targetName: string, spellName?: string) => {
+    return combat.attack.mutateAsync({ characterId, targetName, spellName });
+  };
+
+  const endCombatSession = async (characterId: string) => {
+    await combat.endCombat.mutateAsync(characterId);
+    clearCombat();
+  };
+
+  // --- Watchers ---
+  // Auto-update currentTarget when combat starts or enemies change
+  watch([inCombat, enemies], ([combat, enemyList]) => {
+    if (combat && !currentTarget.value && enemyList.length > 0) {
+      currentTarget.value = selectNextAliveTarget(enemyList);
+    }
+  });
+
   return {
+    // Query data
+    combatStatus,
+    isLoadingCombat,
+    refetchCombatStatus,
+
+    // Computed from combat status
     inCombat,
-    isEndingTurn,
+    roundNumber,
     enemies,
     player,
-    currentTarget,
-    roundNumber,
-    phase,
-    playerInitiative,
     turnOrder,
+    playerInitiative,
     currentTurnIndex,
-    showAttackResultModal,
-    currentAttackResult,
-    isCurrentAttackPlayerAttack,
-    attackResultQueue,
+    phase,
     actionRemaining,
     actionMax,
     bonusActionRemaining,
@@ -263,19 +187,30 @@ export const useCombatStore = defineStore("combatStore", () => {
     canPlayerAct,
     isPlayerTurn,
     currentCombatant,
+
+    // UI State
+    currentTarget,
+    isEndingTurn,
+    showAttackResultModal,
+    currentAttackResult,
+    isCurrentAttackPlayerAttack,
+    attackResultQueue,
     isProcessingEnemyTurn,
     currentEnemyAttackLog,
     currentPlayerAttackLog,
     currentAttackView,
     combatEndNarrative,
     isCombatEndModalOpen,
+
+    // Constants
     PLAYER_ATTACK_DELAY_MS,
-    initializeCombat,
-    updateFromTurnResult,
-    updateEnemiesOnly,
-    clearCombat,
+
+    // Actions
     startCombat,
     fetchStatus,
     endActivation,
+    performAttack,
+    endCombatSession,
+    clearCombat,
   };
 });

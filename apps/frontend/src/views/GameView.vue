@@ -146,7 +146,9 @@ onMounted(async () => {
 
 const onDeathConfirm = async () => {
   if (!currentCharacter.value?.characterId) return;
-  await characterApi.kill(currentCharacter.value.characterId);
+  await characterApi.kill(currentCharacter.value.characterId, {
+    deathLocation: "In combat",
+  });
   showDeathModal.value = false;
   router.push("/");
 };

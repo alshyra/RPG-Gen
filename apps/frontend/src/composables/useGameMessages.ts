@@ -7,14 +7,19 @@ import {
   type InventoryInstructionMessageDto,
   isCombatStartInstruction,
 } from "@rpg-gen/shared";
-import { chatApi } from "@rpg-gen/api-client";
+import { useChat } from "@rpg-gen/api-client";
 import { useCharacterStore } from "../stores/characterStore";
 import { useGameStore } from "../stores/gameStore";
 import { useCombat } from "./useCombat";
+import { computed } from "vue";
 
 export function useGameMessages() {
   const gameStore = useGameStore();
+  const characterStore = useCharacterStore();
   const combat = useCombat();
+
+  const characterId = computed(() => characterStore.currentCharacter?.characterId);
+  const chat = useChat(characterId);
 
   const handleMessageResponse = (response: ChatMessageDto): void => {
     gameStore.messages.pop();
@@ -49,10 +54,10 @@ export function useGameMessages() {
     gameStore.appendMessage("system", "...thinking...");
     gameStore.sending = true;
     try {
-      if (!currentCharacter.value?.characterId) {
+      if (!characterStore.currentCharacter?.characterId) {
         throw new Error("No character loaded");
       }
-      const response = await chatApi.sendMessage(currentCharacter.value.characterId, {
+      const response = await chat.sendMessage.mutateAsync({
         role: "user",
         narrative: messageText,
         instructions: [],
@@ -120,9 +125,13 @@ export function useGameMessages() {
     if (instr.action === "add") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      useCharacterStore().addInventoryItem({
+      characterStore.addInventoryItem({
+        definitionId: instr.name,
         name: instr.name,
         qty,
+        description: "",
+        equipped: false,
+        meta: { type: "consumable" },
       });
     } else if (instr.action === "remove") {
       const qty = instr.quantity || 1;

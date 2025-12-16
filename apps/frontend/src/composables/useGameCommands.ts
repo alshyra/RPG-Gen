@@ -76,9 +76,14 @@ const processInventoryInstruction = (
   const { action, name, quantity = 1 } = inventory;
   if (action === "add") {
     gameStore.appendMessage("system", `🎒 Added to inventory: ${name} (x${quantity})`);
+    // Create a minimal inventory item - backend should provide complete details
     characterStore.addInventoryItem({
+      definitionId: name ?? "unknown",
       name: name ?? "",
       qty: quantity,
+      description: "",
+      equipped: false,
+      meta: { type: "consumable" },
     });
   } else if (action === "remove") {
     gameStore.appendMessage("system", `🗑️ Removed from inventory: ${name} (x${quantity})`);
@@ -155,15 +160,9 @@ export function useGameCommands() {
     }
   };
 
-  const syncHpToCombatIfNeeded = (hp: number) => {
-    if (!combatStore.inCombat) return;
-    if (!combatStore.player) return;
-    // Apply delta
-    const newHp = Math.max(0, (combatStore.player.hp ?? 0) + (hp ?? 0));
-    combatStore.player = {
-      ...combatStore.player,
-      hp: newHp,
-    };
+  const syncHpToCombatIfNeeded = (_hp: number) => {
+    // No need to manually sync - TanStack Query will update combat state automatically
+    // when characterStore.updateHp is called
   };
 
   const processHpInstruction = (
@@ -325,8 +324,8 @@ export function useGameCommands() {
     gameStore.appendMessage("system", "Equipping...");
 
     await executeWithLoading(async () => {
-      const updated = await characterApi.equipItem(character.characterId, item.definitionId);
-      characterStore.currentCharacter = updated;
+      await characterApi.equipItem(character.characterId, { definitionId: item.definitionId });
+      // TanStack Query will automatically update currentCharacter
       gameStore.appendMessage("system", `✅ Equipped ${item.name}`);
     }, `Failed to equip item: ${item.name}`);
   };

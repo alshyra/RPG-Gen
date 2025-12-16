@@ -7,7 +7,7 @@
 // Re-export base client and utilities
 export * from "./client";
 
-// Re-export all API modules
+// Re-export all API modules with Vue Query wrappers
 export * from "./auth.api";
 export * from "./character.api";
 export * from "./chat.api";
@@ -16,3 +16,4 @@ export * from "./combat.api";
 export * from "./dice.api";
 export * from "./image.api";
 export * from "./inventory.api";
+

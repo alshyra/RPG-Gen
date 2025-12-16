@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@rpg-gen/shared": "*",
+    "@tanstack/vue-query": "^5.92.1",
     "openapi-fetch": "^0.12.2"
   },
   "devDependencies": {
