@@ -73,11 +73,11 @@ export const useGameSession = () => {
       gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${modDisplay}`);
     } else if (isXpInstruction(instr)) {
       gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
-      await characterStore.updateXp.mutateAsync(instr.xp);
+      await characterStore.character.updateXp.mutateAsync(instr.xp);
     } else if (isHpInstruction(instr)) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-      await characterStore.updateHp.mutateAsync(instr.hp);
+      await characterStore.character.updateHp.mutateAsync(instr.hp);
     }
   };
 

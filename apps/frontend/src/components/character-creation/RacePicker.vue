@@ -56,6 +56,6 @@ const onRaceUpdate = (race: RaceResponseDto) => {
 
   if (!currentCharacter.value?.characterId) return;
 
-  characterStore.update.mutateAsync({ race });
+  characterStore.character.update.mutateAsync({ race });
 };
 </script>

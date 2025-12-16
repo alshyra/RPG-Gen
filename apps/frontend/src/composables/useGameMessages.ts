@@ -89,21 +89,21 @@ export function useGameMessages() {
     gameStore.appendMessage("system", `🎲 Roll needed: ${instr.dices}${modDisplay}`);
   };
 
-  const handleXpInstruction = (instr: XpInstructionMessageDto): void => {
+  const handleXpInstruction = async (instr: XpInstructionMessageDto): Promise<void> => {
     const characterStore = useCharacterStore();
     if (instr.xp !== undefined) {
       gameStore.appendMessage("system", `✨ Gained ${instr.xp} XP`);
-      characterStore.updateXp(instr.xp);
+      await characterStore.character.updateXp.mutateAsync(instr.xp);
     }
   };
 
-  const handleHpInstruction = (instr: HpInstructionMessageDto): void => {
+  const handleHpInstruction = async (instr: HpInstructionMessageDto): Promise<void> => {
     if (instr.hp !== undefined) {
       const hpChange = instr.hp > 0 ? `+${instr.hp}` : instr.hp;
       gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
       const characterStore = useCharacterStore();
-      characterStore.updateHp(instr.hp);
-      if (characterStore.isDead) characterStore.showDeathModal = true;
+      await characterStore.character.updateHp.mutateAsync(instr.hp);
+      if (characterStore.isDead.value) characterStore.showDeathModal = true;
     }
   };
 
@@ -127,7 +127,7 @@ export function useGameMessages() {
     if (instr.action === "add") {
       const qty = instr.quantity || 1;
       gameStore.appendMessage("system", `🎒 Added to inventory: ${instr.name} (x${qty})`);
-      await characterStore.addInventory.mutateAsync({
+      await characterStore.character.addInventory.mutateAsync({
         definitionId: instr.name,
         name: instr.name,
         qty,

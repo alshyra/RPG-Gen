@@ -72,7 +72,7 @@ export function useCombat() {
           `⚡ Les ennemis attaquent en premier! Vous subissez ${initialDamage} dégâts!`,
         );
         // Sync HP to character store (will update via TanStack Query cache)
-        await characterStore.updateHp(newHp);
+        await characterStore.character.updateHp.mutateAsync(newHp);
       }
 
       if (newHp <= 0) {
@@ -243,7 +243,7 @@ export function useCombat() {
     }
     if (xpGained > 0) {
       gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
-      await characterStore.updateXp.mutateAsync(xpGained);
+      await characterStore.character.updateXp.mutateAsync(xpGained);
     }
 
     combatEndNarrative.value = narrative;

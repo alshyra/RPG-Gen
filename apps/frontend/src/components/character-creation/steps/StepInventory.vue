@@ -448,7 +448,7 @@ onBeforeUnmount(async () => {
       chosenArmor.value,
       ...basePack,
     ].filter((i): i is LocalInventoryItem => !!i);
-    await characterStore.update.mutateAsync({
+    await characterStore.character.update.mutateAsync({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inventory: inventoryToSave as any,
     });

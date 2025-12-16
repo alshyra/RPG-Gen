@@ -53,7 +53,7 @@ const onUpdateName = useDebounceFn(async (name: string) => {
 
   if (!charId) return;
 
-  await characterStore.update.mutateAsync({ name: name });
+  await characterStore.character.update.mutateAsync({ name: name });
 }, 300);
 
 const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
@@ -63,6 +63,6 @@ const onUpdateGender = async (gender: (typeof GENDERS)[number]) => {
   const charId = currentCharacter.value.characterId;
   if (!charId) return;
 
-  await characterStore.update.mutateAsync({ gender: String(gender) });
+  await characterStore.character.update.mutateAsync({ gender: String(gender) });
 };
 </script>

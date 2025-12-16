@@ -259,7 +259,7 @@ const executeLevelUp = async (): Promise<void> => {
   if (updatedCharacter.characterId) {
     // Use the dedicated LevelUp mutation with combat selections
     try {
-      await characterStore.applyLevelUp.mutateAsync({
+      await characterStore.character.applyLevelUp.mutateAsync({
         className: className.value,
         body: {
           newSpellIds: [],
@@ -269,7 +269,7 @@ const executeLevelUp = async (): Promise<void> => {
       });
     } catch {
       // Fallback: save the computed character changes
-      await characterStore.update.mutateAsync(updatedCharacter);
+      await characterStore.character.update.mutateAsync(updatedCharacter);
     }
   }
 

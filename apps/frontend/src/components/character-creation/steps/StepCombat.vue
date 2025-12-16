@@ -73,7 +73,7 @@ const combatIsSelected = (optionId: string) =>
 const persistCombatSelections = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.update.mutateAsync({
+    await characterStore.character.update.mutateAsync({
       selectedCombatProficiencies: currentCharacter.value.selectedCombatProficiencies || [],
     });
   } catch (err) {

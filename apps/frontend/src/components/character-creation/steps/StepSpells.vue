@@ -118,8 +118,7 @@
 import { UiInputCheckbox } from '@rpg-gen/ui';
 import { useClasses } from '@rpg-gen/api-client';
 import { useCharacterStore } from '@/stores/characterStore';
-import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';import { useSpellManagement } from "@/composables/useSpellManagement";import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { LevelUpOptionsDto, SpellResponseDto } from '@rpg-gen/shared';
 
 const characterStore = useCharacterStore();
@@ -180,7 +179,7 @@ const spellIsSelected = (definitionId: string) =>
 const persistSpells = async () => {
   if (!currentCharacter.value?.characterId) return;
   try {
-    await characterStore.update.mutateAsync({
+    await characterStore.character.update.mutateAsync({
       spells: currentCharacter.value.spells || [],
     });
   } catch (err) {
@@ -195,6 +194,8 @@ const canAddSpell = (s: SpellResponseDto) => {
     : selectedSpellsCount.value < spellsKnown.value;
 };
 
+const spellMgmt = useSpellManagement(() => currentCharacter.value?.characterId);
+
 const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
   if (!currentCharacter.value || !s.definitionId) return;
 
@@ -202,7 +203,7 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
     // Check limits before adding
     if (!canAddSpell(s)) return;
 
-    characterStore.learnSpell({
+    await spellMgmt.learnSpell({
       type: 'spell',
       action: 'learn',
       name: s.name,
@@ -212,7 +213,7 @@ const toggleSpell = async (s: SpellResponseDto, selected: boolean) => {
       meta: s.meta,
     });
   } else {
-    characterStore.forgetSpell(s.name);
+    await spellMgmt.forgetSpell(s.name);
   }
 
   await persistSpells();

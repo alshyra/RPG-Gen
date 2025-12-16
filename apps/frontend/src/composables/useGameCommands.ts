@@ -13,7 +13,7 @@ import { useCharacterStore } from "../stores/characterStore";
 import { useCombatStore } from "../stores/combatStore";
 import { useGameStore } from "../stores/gameStore";
 import { parseCommand, type ParsedCommand } from "../utils/chatCommands";
-import { useCombat } from "./useCombat";
+import { useSpellManagement } from "./useSpellManagement";
 
 type GameStore = ReturnType<typeof useGameStore>;
 type CharacterStore = ReturnType<typeof useCharacterStore>;
@@ -34,16 +34,17 @@ const processXpInstruction = async (
   characterStore: CharacterStore,
 ): Promise<void> => {
   gameStore.appendMessage("system", `✨ Gained ${xp} XP`);
-  await characterStore.updateXp.mutateAsync(xp);
+  await characterStore.character.updateXp.mutateAsync(xp);
 };
 
 // Keep combat HP in sync when an HP instruction arrives while in combat
 
-const processSpellInstruction = (
+const processSpellInstruction = async (
   instr: InstructionItem,
   gameStore: GameStore,
   characterStore: CharacterStore,
-): void => {
+): Promise<void> => {
+  const spellMgmt = useSpellManagement(characterStore.currentCharacterId);
   const spell = instr as {
     action?: string;
     name?: string;
@@ -52,12 +53,12 @@ const processSpellInstruction = (
   const { action, name, level } = spell;
   if (action === "learn") {
     gameStore.appendMessage("system", `📖 Learned spell: ${name} (Level ${level})`);
-    characterStore.learnSpell(instr as SpellInstructionMessageDto);
+    await spellMgmt.learnSpell(instr as SpellInstructionMessageDto);
   } else if (action === "cast") {
     gameStore.appendMessage("system", `✨ Cast spell: ${name}`);
   } else if (action === "forget") {
     gameStore.appendMessage("system", `🚫 Forgot spell: ${name}`);
-    characterStore.forgetSpell(name ?? "");
+    await spellMgmt.forgetSpell(name ?? "");
   }
 };
 
@@ -75,7 +76,7 @@ const processInventoryInstruction = async (
   if (action === "add") {
     gameStore.appendMessage("system", `🎒 Added to inventory: ${name} (x${quantity})`);
     // Create a minimal inventory item - backend should provide complete details
-    await characterStore.addInventory.mutateAsync({
+    await characterStore.character.addInventory.mutateAsync({
       definitionId: name ?? "unknown",
       name: name ?? "",
       qty: quantity,
@@ -85,7 +86,10 @@ const processInventoryInstruction = async (
     });
   } else if (action === "remove") {
     gameStore.appendMessage("system", `🗑️ Removed from inventory: ${name} (x${quantity})`);
-    await characterStore.removeInventory.mutateAsync({ itemId: name ?? "", qty: quantity });
+    await characterStore.character.removeInventory.mutateAsync({
+      itemId: name ?? "",
+      qty: quantity,
+    });
   } else if (action === "use") {
     gameStore.appendMessage("system", `⚡ Used item: ${name}`);
     await characterStore.useInventoryItem(name ?? "");
@@ -173,7 +177,7 @@ export function useGameCommands() {
   ): Promise<void> => {
     const hpChange = hp > 0 ? `+${hp}` : hp;
     gameStore.appendMessage("system", `❤️ HP changed: ${hpChange}`);
-    await characterStore.updateHp.mutateAsync(hp);
+    await characterStore.character.updateHp.mutateAsync(hp);
     syncHpToCombatIfNeeded(hp);
     if (characterStore.isDead.value) characterStore.showDeathModal = true;
   };
