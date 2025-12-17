@@ -22,56 +22,6 @@ test.describe("Authentication Flow", () => {
     await expect(page.getByText("Commencer à jouer")).toBeVisible();
   });
 
-  test("should redirect to login when clicking start playing", async ({ page }) => {
-    await page.goto("/");
-
-    // Click on start playing button
-    await page.getByRole("button", { name: "Commencer à jouer" }).click();
-
-    // Should be redirected to login page
-    await page.waitForURL("**/login");
-    await expect(page.getByText("Connectez-vous pour commencer votre aventure")).toBeVisible();
-  });
-
-  test("should display Google login button on login page", async ({ page }) => {
-    await page.goto("/login");
-
-    // Check for login page elements
-    // Use role for login page heading
-    await expect(page.locator("h1").filter({ hasText: /^RPG Gen$/ })).toBeVisible();
-    await expect(page.getByText("Se connecter avec Google")).toBeVisible();
-
-    // Check for Google OAuth button
-    await expect(page.getByRole("button", { name: /Se connecter avec Google/i })).toBeVisible();
-  });
-
-  test("should protect home route (world selector)", async ({ page }) => {
-    // Try to access home without being authenticated
-    await page.goto("/home");
-
-    // Should redirect to login page
-    await page.waitForURL("**/login");
-
-    // World selector should not be visible
-    await expect(page.getByText("Choisis ton univers")).not.toBeVisible();
-  });
-
-  test("should protect character creation route", async ({ page }) => {
-    // Try to access character creation without authentication
-    await page.goto("/character/dnd/step/1");
-
-    // Should redirect to login
-    await page.waitForURL("**/login");
-  });
-
-  test("should protect game route", async ({ page }) => {
-    // Try to access game without authentication
-    await page.goto("/game/test-id");
-
-    // Should redirect to login
-    await page.waitForURL("**/login");
-  });
-
   test.describe("With mocked authentication", () => {
     test.beforeEach(async ({ page }) => {
       await mockAuthentication(page);

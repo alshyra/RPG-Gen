@@ -202,10 +202,10 @@ export class CombatOrchestrator {
   async getStatus(userId: string, characterId: string): Promise<CombatStateDto> {
     const inCombat = await this.combatAppService.isInCombat(characterId);
     // If not in combat, return a state with combat end info (option 2: only in /status)
+    const state = await this.combatAppService.getCombatState(characterId);
     if (!inCombat) {
       // Get combat session to check if narrative already exists
       const session = await this.combatAppService.getCombatSessionRaw(characterId);
-
       let narrative = session?.narrative;
 
       // Lazy generate narrative if not already present
@@ -215,7 +215,7 @@ export class CombatOrchestrator {
           victory: true,
           xp_gained: 100,
           player_hp: character?.hp ?? 0,
-          enemies_defeated: [],
+          enemies_defeated: state.enemies.map(e => e.name),
           fled: false,
         });
 
@@ -230,7 +230,7 @@ export class CombatOrchestrator {
         victory: true,
         xp_gained: 100,
         player_hp: character?.hp ?? 0,
-        enemies_defeated: [],
+        enemies_defeated: state.enemies.map(e => e.name),
         fled: false,
       });
 
@@ -242,18 +242,13 @@ export class CombatOrchestrator {
       });
     }
 
-    const state = await this.combatAppService.getCombatState(characterId);
     if (!state) throw new BadRequestException("No combat at the moment");
 
     if (!state.enemies.every(e => e.hp !== undefined && e.hp <= 0)) {
       return state;
     }
-
-    // return victory state generate gemini narrative
-    return new CombatStateDto({
-      ...state,
-      inCombat: false,
-    });
+    state.inCombat = false;
+    return state;
   }
 
   /**

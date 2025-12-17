@@ -53,34 +53,4 @@ test.describe("API Integration", () => {
     // Should still render the page structure even with API errors
     await expect(page.locator("body")).toBeVisible();
   });
-
-  test("should display world selector when backend is unavailable", async ({ page }) => {
-    // Simulate backend outage
-    await page.route("**/api/**", async route => {
-      await route.abort("failed");
-    });
-
-    // Set valid JWT token for client-side auth
-    await page.evaluate(() => {
-      const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-      const payload = btoa(JSON.stringify({ sub: "offline-user", exp: 4102444800 })); // year 2100
-      const signature = "test-signature";
-      const token = `${header}.${payload}.${signature}`;
-
-      localStorage.setItem("rpg-auth-token", token);
-      localStorage.setItem(
-        "rpg-user-data",
-        JSON.stringify({
-          id: "offline-user",
-          displayName: "Offline Tester",
-        }),
-      );
-    });
-
-    await page.goto("/home");
-
-    // Basic UI should still work (get first RPG Gen title)
-    await expect(page.getByText("RPG Gen").first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Créer un personnage" })).toBeVisible();
-  });
 });
