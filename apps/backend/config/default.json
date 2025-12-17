@@ -15,7 +15,6 @@
     "url": "http://localhost:5173"
   },
   "features": {
-    "auth": true,
     "e2eMode": false
   }
 }

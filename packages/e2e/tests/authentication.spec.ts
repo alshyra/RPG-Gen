@@ -84,8 +84,8 @@ test.describe("Authentication Flow", () => {
       expect(page.url()).not.toContain("/login");
       expect(page.url()).toContain("/home");
 
-      // Should see home page content
-      await expect(page.getByText("RPG Gen")).toBeVisible();
+      // Should see home page content (get first RPG Gen title)
+      await expect(page.getByText("RPG Gen").first()).toBeVisible();
     });
 
     test("should redirect authenticated users from login to home", async ({ page }) => {

@@ -63,9 +63,6 @@ export function loadConfig(): AppConfig {
             process.env.GOOGLE_OAUTH_CLIENT_SECRET || rawConfig.google.oauth.clientSecret,
         },
       },
-      features: {
-        e2eMode: process.env.DISABLE_AUTH_FOR_E2E === "true",
-      },
     };
 
     const { error, value } = configSchema.validate(rawConfig, {

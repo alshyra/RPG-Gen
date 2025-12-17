@@ -26,9 +26,4 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-
-  // Playwright will use existing docker compose setup
-  // Frontend is on http://localhost (port 80) via docker
-  // Tests assume services are already running
-  // To run tests: docker compose -f compose.dev.yml up -d && npm run test:e2e
 });
