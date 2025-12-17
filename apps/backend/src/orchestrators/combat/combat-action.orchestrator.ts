@@ -49,10 +49,18 @@ export class CombatActionOrchestrator {
 
     // Validate action economy
     if (cost === ActionCost.ACTION && (session.actionRemaining ?? 0) <= 0) {
-      return this.failureResponse(cost, "No actions remaining", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost,
+        errorMessage: "No actions remaining",
+      });
     }
     if (cost === ActionCost.BONUS_ACTION && (session.bonusActionRemaining ?? 0) <= 0) {
-      return this.failureResponse(cost, "No bonus actions remaining", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost,
+        errorMessage: "No bonus actions remaining",
+      });
     }
 
     // Execute the specific action
@@ -105,17 +113,17 @@ export class CombatActionOrchestrator {
    */
   private async checkAndEndCombatIfNeeded(characterId: string, userId: string): Promise<boolean> {
     const updatedSession = await this.combatSessionModel.findOne({ characterId, userId }).exec();
-    if (updatedSession) {
-      const allEnemiesDead = updatedSession.enemies.every((e: any) => (e.hp ?? 0) <= 0);
-      if (allEnemiesDead) {
-        // End combat: set inCombat flag to false and cleanup
-        updatedSession.inCombat = false;
-        await updatedSession.save();
-        this.logger.log(`Combat ended: all enemies defeated for character ${characterId}`);
-        return true;
-      }
-    }
-    return false;
+
+    if (!updatedSession) return false;
+
+    const allEnemiesDead = updatedSession.enemies.every(e => (e.hp ?? 0) <= 0);
+    if (!allEnemiesDead) return false;
+
+    // End combat: set inCombat flag to false and cleanup
+    updatedSession.inCombat = false;
+    await updatedSession.save();
+    this.logger.log(`Combat ended: all enemies defeated for character ${characterId}`);
+    return true;
   }
 
   private async executeAttack(
@@ -125,12 +133,20 @@ export class CombatActionOrchestrator {
     characterId: string,
   ): Promise<CombatActionResponseDto> {
     if (!request.targetId) {
-      return this.failureResponse(ActionCost.ACTION, "Target ID required for attack", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: "Target ID required for attack",
+      });
     }
 
     const enemy = session.enemies.find(e => e.id === request.targetId);
     if (!enemy) {
-      return this.failureResponse(ActionCost.ACTION, "Target not found", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: "Target not found",
+      });
     }
 
     // Get player's attack bonus from session (combat service sets this on combat start)
@@ -144,9 +160,8 @@ export class CombatActionOrchestrator {
     const isCrit = attackRoll.isCrit;
 
     let damage = 0;
-    let damageResult;
+    const damageResult = this.diceService.rollDamage(playerDamageDice, isCrit, playerDamageBonus);
     if (hit) {
-      damageResult = this.diceService.rollDamage(playerDamageDice, isCrit, playerDamageBonus);
       damage = damageResult.damageTotal;
       enemy.hp = Math.max(0, (enemy.hp ?? 0) - damage);
       await this.combatSessionModel.findOneAndUpdate(
@@ -158,7 +173,7 @@ export class CombatActionOrchestrator {
       await this.checkAndEndCombatIfNeeded(characterId, userId);
     }
 
-    return {
+    return new CombatActionResponseDto({
       success: true,
       cost: ActionCost.ACTION,
       hit,
@@ -166,14 +181,11 @@ export class CombatActionOrchestrator {
       description: hit
         ? `Hit ${enemy.name} for ${damage} damage${isCrit ? " (CRITICAL!)" : ""}`
         : `Missed ${enemy.name}`,
-      actionsRemaining: session.actionRemaining ?? 0,
-      bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-      activeEffects: session.activeEffects ?? [],
       diceResult: attackRoll.diceResult,
       damageDiceResult: damageResult,
       damageTotal: damage,
       isCrit,
-    };
+    });
   }
 
   private async executeDash(
@@ -191,14 +203,11 @@ export class CombatActionOrchestrator {
       );
     }
 
-    return {
+    return new CombatActionResponseDto({
       success: true,
       cost: ActionCost.ACTION,
       description: "You take the Dash action, doubling your movement speed for this turn",
-      actionsRemaining: session.actionRemaining ?? 0,
-      bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-      activeEffects: session.activeEffects,
-    };
+    });
   }
 
   private async executeDisengage(
@@ -216,14 +225,11 @@ export class CombatActionOrchestrator {
       );
     }
 
-    return {
+    return new CombatActionResponseDto({
       success: true,
       cost: ActionCost.BONUS_ACTION,
       description: "You disengage, avoiding opportunity attacks for this turn",
-      actionsRemaining: session.actionRemaining ?? 0,
-      bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-      activeEffects: session.activeEffects,
-    };
+    });
   }
 
   private async executeCastSpell(
@@ -233,27 +239,39 @@ export class CombatActionOrchestrator {
     characterId: string,
   ): Promise<CombatActionResponseDto> {
     if (!request.spellName) {
-      return this.failureResponse(ActionCost.ACTION, "Spell name required", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: "Spell name required",
+      });
     }
 
     if (!request.targetId) {
-      return this.failureResponse(ActionCost.ACTION, "Target ID required for spell", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: "Target ID required for spell",
+      });
     }
 
     // Find target
     const target = session.enemies.find(e => e.id === request.targetId);
     if (!target) {
-      return this.failureResponse(ActionCost.ACTION, "Target not found", session);
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: "Target not found",
+      });
     }
 
     // Load spell definition
     const spellDef = await this.spellDefinitionService.findByName(request.spellName);
     if (!spellDef) {
-      return this.failureResponse(
-        ActionCost.ACTION,
-        `Spell not found: ${request.spellName}`,
-        session,
-      );
+      return new CombatActionResponseDto({
+        success: false,
+        cost: ActionCost.ACTION,
+        errorMessage: `Spell not found: ${request.spellName}`,
+      });
     }
 
     const damageDice = spellDef.meta?.damageDice || "1d4";
@@ -291,7 +309,7 @@ export class CombatActionOrchestrator {
         await this.checkAndEndCombatIfNeeded(characterId, userId);
       }
 
-      return {
+      return new CombatActionResponseDto({
         success: true,
         cost: ActionCost.ACTION,
         hit,
@@ -299,14 +317,11 @@ export class CombatActionOrchestrator {
         description: hit
           ? `${request.spellName}: ${target.name} failed save, took ${damage} damage`
           : `${request.spellName}: ${target.name} succeeded on save`,
-        actionsRemaining: session.actionRemaining ?? 0,
-        bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-        activeEffects: session.activeEffects ?? [],
         diceResult,
         damageDiceResult,
         damageTotal: damage,
         isCrit: false,
-      };
+      });
     } else {
       // Attack roll spell (like fire bolt, ray of frost)
       const spellAttackBonus = proficiency + chaMod;
@@ -328,7 +343,7 @@ export class CombatActionOrchestrator {
         await this.checkAndEndCombatIfNeeded(characterId, userId);
       }
 
-      return {
+      return new CombatActionResponseDto({
         success: true,
         cost: ActionCost.ACTION,
         hit,
@@ -336,14 +351,11 @@ export class CombatActionOrchestrator {
         description: hit
           ? `${request.spellName}: Hit ${target.name} for ${damage} damage${isCrit ? " (CRITICAL!)" : ""}`
           : `${request.spellName}: Missed ${target.name}`,
-        actionsRemaining: session.actionRemaining ?? 0,
-        bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-        activeEffects: session.activeEffects ?? [],
         diceResult,
         damageDiceResult,
         damageTotal: damage,
         isCrit,
-      };
+      });
     }
   }
 
@@ -360,15 +372,12 @@ export class CombatActionOrchestrator {
       { $set: { "player.hp": newHp } },
     );
 
-    return {
+    return new CombatActionResponseDto({
       success: true,
       cost: ActionCost.BONUS_ACTION,
       healing,
       description: `You use Second Wind, regaining ${healing} HP`,
-      actionsRemaining: session.actionRemaining ?? 0,
-      bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-      activeEffects: session.activeEffects ?? [],
-    };
+    });
   }
 
   private async deductActionCost(
@@ -388,20 +397,5 @@ export class CombatActionOrchestrator {
         { $set: { bonusActionRemaining: Math.max(0, (session.bonusActionRemaining ?? 1) - 1) } },
       );
     }
-  }
-
-  private failureResponse(
-    cost: ActionCost,
-    errorMessage: string,
-    session: CombatSession,
-  ): CombatActionResponseDto {
-    return {
-      success: false,
-      cost,
-      errorMessage,
-      actionsRemaining: session.actionRemaining ?? 0,
-      bonusActionsRemaining: session.bonusActionRemaining ?? 0,
-      activeEffects: session.activeEffects ?? [],
-    };
   }
 }

@@ -1,7 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsBoolean, IsEnum, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
-import { CombatStateDto } from "./CombatStateDto.js";
-import { CombatEndDto } from "./CombatEndDto.js";
 import { DiceResultDto } from "./DiceResultDto.js";
 import { CombatDiceResultDto } from "./CombatDiceResultDto.js";
 
@@ -49,26 +47,6 @@ export class CombatActionResponseDto {
   @IsString()
   errorMessage?: string;
 
-  @ApiProperty({ description: "Remaining actions for current turn" })
-  @IsNumber()
-  actionsRemaining: number;
-
-  @ApiProperty({ description: "Remaining bonus actions for current turn" })
-  @IsNumber()
-  bonusActionsRemaining: number;
-
-  @ApiPropertyOptional({ description: "Active effects for current turn (dash, disengage, etc.)" })
-  @IsOptional()
-  activeEffects?: string[];
-
-  @ApiPropertyOptional({
-    description: "Full combat state after action",
-    type: () => CombatStateDto,
-  })
-  @IsOptional()
-  @IsObject()
-  combatState?: CombatStateDto;
-
   @ApiPropertyOptional({
     description: "Dice roll result (for attacks)",
     type: () => DiceResultDto,
@@ -95,18 +73,23 @@ export class CombatActionResponseDto {
   @IsBoolean()
   isCrit?: boolean;
 
-  @ApiPropertyOptional({
-    description:
-      "Combat end result if combat finished. Currently not returned by backend - " +
-      "frontend detects combat end via watchers on combatState. Reserved for future use.",
-    type: () => CombatEndDto,
-  })
-  @IsOptional()
-  @IsObject()
-  combatEnd?: CombatEndDto;
-
   @ApiPropertyOptional({ description: "Narrative text (e.g., for combat end)" })
   @IsOptional()
   @IsString()
   narrative?: string;
+
+  constructor(init?: Partial<CombatActionResponseDto>) {
+    this.cost = init?.cost ?? ActionCost.FREE;
+    this.damage = init?.damage;
+    this.damageDiceResult = init?.damageDiceResult;
+    this.damageTotal = init?.damageTotal;
+    this.description = init?.description;
+    this.diceResult = init?.diceResult;
+    this.errorMessage = init?.errorMessage;
+    this.healing = init?.healing;
+    this.hit = init?.hit;
+    this.isCrit = init?.isCrit;
+    this.narrative = init?.narrative;
+    this.success = init?.success ?? false;
+  }
 }

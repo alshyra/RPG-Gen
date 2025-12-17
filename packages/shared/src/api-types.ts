@@ -1086,6 +1086,8 @@ export interface components {
             bonusActionMax?: number;
             /** @description Active turn effects (dash, disengage, etc.) */
             activeEffects?: string[];
+            /** @description Combat end result, populated when combat ends (inCombat=false) */
+            combatEnd?: components["schemas"]["CombatEndDto"];
         };
         CombatActionRequestDto: {
             /**
@@ -1138,14 +1140,6 @@ export interface components {
             description?: string;
             /** @description Error message if action failed */
             errorMessage?: string;
-            /** @description Remaining actions for current turn */
-            actionsRemaining: number;
-            /** @description Remaining bonus actions for current turn */
-            bonusActionsRemaining: number;
-            /** @description Active effects for current turn (dash, disengage, etc.) */
-            activeEffects?: string[];
-            /** @description Full combat state after action */
-            combatState?: components["schemas"]["CombatStateDto"];
             /** @description Dice roll result (for attacks) */
             diceResult?: components["schemas"]["DiceResultDto"];
             /** @description Damage dice result details */
@@ -1154,8 +1148,6 @@ export interface components {
             damageTotal?: number;
             /** @description Whether the attack was a critical hit */
             isCrit?: boolean;
-            /** @description Combat end result if combat finished */
-            combatEnd?: components["schemas"]["CombatEndDto"];
             /** @description Narrative text (e.g., for combat end) */
             narrative?: string;
         };

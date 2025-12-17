@@ -103,6 +103,12 @@ export class CombatSession {
     default: [],
   })
   activeEffects: string[];
+
+  @Prop({
+    required: false,
+    type: String,
+  })
+  narrative?: string;
 }
 
 export const CombatSessionSchema = SchemaFactory.createForClass(CombatSession);

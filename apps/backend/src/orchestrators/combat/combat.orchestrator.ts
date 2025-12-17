@@ -3,12 +3,13 @@ import { CharacterService } from "../../domain/character/character.service.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 
+import { CombatStateDto } from "../../domain/combat/dto/index.js";
 import type {
   CombatEndResponseDto,
   CombatStartRequestDto,
-  CombatStateDto,
   EndPlayerTurnResponseDto,
 } from "../../domain/combat/dto/index.js";
+import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
 import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
@@ -166,18 +167,93 @@ export class CombatOrchestrator {
   }
 
   /**
+   * Generate combat end narrative using Gemini AI
+   */
+  private async generateCombatEndNarrative(
+    characterId: string,
+    combatEnd: CombatEndDto,
+  ): Promise<string> {
+    const combatEndInstruction = {
+      type: "combat_end",
+      combat_end: combatEnd,
+    };
+
+    const message = `Le combat vient de se terminer. Voici les détails:\n${JSON.stringify(combatEndInstruction, null, 2)}\n\nGénère une narrative épique décrivant la conclusion du combat et pose la question d'action habituelle.`;
+
+    try {
+      // Check if chat session exists before sending message
+      const chatExists = this.geminiTexteService.hasChatSession(characterId);
+      if (!chatExists) {
+        this.logger.warn(`No chat session for ${characterId}, using default narrative`);
+        return "Le combat est terminé. Que fais-tu ?";
+      }
+
+      const response = await this.geminiTexteService.sendMessage(characterId, message);
+      return response.narrative || "Le combat est terminé. Que fais-tu ?";
+    } catch (error) {
+      this.logger.error(`Failed to generate combat end narrative: ${error}`);
+      return "Le combat est terminé. Que fais-tu ?";
+    }
+  }
+
+  /**
    * Get current combat status with fresh action token.
    */
   async getStatus(userId: string, characterId: string): Promise<CombatStateDto> {
-    await this.characterService.findByCharacterId(userId, characterId);
-
     const inCombat = await this.combatAppService.isInCombat(characterId);
-    if (!inCombat) throw new BadRequestException("No combat at the moment");
+    // If not in combat, return a state with combat end info (option 2: only in /status)
+    if (!inCombat) {
+      // Get combat session to check if narrative already exists
+      const session = await this.combatAppService.getCombatSessionRaw(characterId);
+
+      let narrative = session?.narrative;
+
+      // Lazy generate narrative if not already present
+      if (!narrative) {
+        const character = await this.characterService.findByCharacterId(userId, characterId);
+        const combatEnd = new CombatEndDto({
+          victory: true,
+          xp_gained: 100,
+          player_hp: character?.hp ?? 0,
+          enemies_defeated: [],
+          fled: false,
+        });
+
+        narrative = await this.generateCombatEndNarrative(characterId, combatEnd);
+
+        // Persist narrative in session via AppService
+        await this.combatAppService.updateNarrative(characterId, narrative);
+      }
+
+      const character = await this.characterService.findByCharacterId(userId, characterId);
+      const combatEnd = new CombatEndDto({
+        victory: true,
+        xp_gained: 100,
+        player_hp: character?.hp ?? 0,
+        enemies_defeated: [],
+        fled: false,
+      });
+
+      return new CombatStateDto({
+        characterId,
+        inCombat: false,
+        combatEnd,
+        narrative,
+      });
+    }
 
     const state = await this.combatAppService.getCombatState(characterId);
     if (!state) throw new BadRequestException("No combat at the moment");
 
-    return state;
+    if (!state.enemies.every(e => e.hp !== undefined && e.hp <= 0)) {
+      return state;
+    }
+
+    // return victory state generate gemini narrative
+    return new CombatStateDto({
+      ...state,
+      inCombat: false,
+    });
   }
 
   /**

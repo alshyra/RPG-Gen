@@ -2720,6 +2720,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "combatEnd": {
+            "description": "Combat end result, populated when combat ends (inCombat=false)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatEndDto"
+              }
+            ]
           }
         },
         "required": [
@@ -2862,29 +2870,6 @@
             "type": "string",
             "description": "Error message if action failed"
           },
-          "actionsRemaining": {
-            "type": "number",
-            "description": "Remaining actions for current turn"
-          },
-          "bonusActionsRemaining": {
-            "type": "number",
-            "description": "Remaining bonus actions for current turn"
-          },
-          "activeEffects": {
-            "description": "Active effects for current turn (dash, disengage, etc.)",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "combatState": {
-            "description": "Full combat state after action",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatStateDto"
-              }
-            ]
-          },
           "diceResult": {
             "description": "Dice roll result (for attacks)",
             "allOf": [
@@ -2909,14 +2894,6 @@
             "type": "boolean",
             "description": "Whether the attack was a critical hit"
           },
-          "combatEnd": {
-            "description": "Combat end result if combat finished",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CombatEndDto"
-              }
-            ]
-          },
           "narrative": {
             "type": "string",
             "description": "Narrative text (e.g., for combat end)"
@@ -2924,9 +2901,7 @@
         },
         "required": [
           "success",
-          "cost",
-          "actionsRemaining",
-          "bonusActionsRemaining"
+          "cost"
         ]
       },
       "EnemyAttackLogDto": {

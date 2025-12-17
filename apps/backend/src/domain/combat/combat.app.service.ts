@@ -373,6 +373,20 @@ export class CombatAppService {
   }
 
   /**
+   * Get raw combat session from database (for accessing narrative, etc.)
+   */
+  async getCombatSessionRaw(characterId: string): Promise<CombatSession | null> {
+    return this.combatSessionModel.findOne({ characterId }).exec();
+  }
+
+  /**
+   * Update narrative in combat session
+   */
+  async updateNarrative(characterId: string, narrative: string): Promise<void> {
+    await this.combatSessionModel.updateOne({ characterId }, { $set: { narrative } }).exec();
+  }
+
+  /**
    * Apply damage reported by client to a named enemy and persist state.
    * Decrements action counter.
    * Returns both the updated state and optionally the endResult when combat ends.

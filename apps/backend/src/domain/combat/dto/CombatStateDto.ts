@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { CombatantDto } from "./CombatantDto.js";
+import { CombatEndDto } from "./CombatEndDto.js";
 import {
   IsString,
   IsBoolean,
@@ -94,9 +95,19 @@ export class CombatStateDto {
   @IsArray()
   activeEffects?: string[];
 
+  @ApiPropertyOptional({
+    description: "Combat end result, populated when combat ends (inCombat=false)",
+    type: () => CombatEndDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CombatEndDto)
+  combatEnd?: CombatEndDto;
+
   constructor(init?: Partial<CombatStateDto>) {
     Object.assign(this, init);
-    if (!this.player || !this.enemies || !this.turnOrder) {
+    // If combat has ended (inCombat=false), player/enemies/turnOrder are optional
+    if (this.inCombat !== false && (!this.player || !this.enemies || !this.turnOrder)) {
       throw new Error("CombatStateDto requires player, enemies, and turnOrder to be provided");
     }
     // defaults

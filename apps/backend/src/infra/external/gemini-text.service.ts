@@ -82,6 +82,10 @@ export class GeminiTextService {
     this.chatClients.set(sessionId, chat);
   }
 
+  hasChatSession(sessionId: string): boolean {
+    return this.chatClients.has(sessionId);
+  }
+
   async sendMessage(sessionId: string, message: string): Promise<ChatMessageDto> {
     const chat = this.chatClients.get(sessionId);
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);

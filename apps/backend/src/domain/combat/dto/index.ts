@@ -1,4 +1,5 @@
 export * from "./CombatantDto.js";
+export * from "./CombatEndDto.js";
 export * from "./CombatEndResponseDto.js";
 export * from "./CombatEndResultDto.js";
 export * from "./CombatStartRequestDto.js";
