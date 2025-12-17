@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "nest start --watch",
+    "start": "nest start --watch -d 9222",
     "start:prod": "node dist/main",
     "build": "nest build",
     "type-check": "tsc -p tsconfig.json",

@@ -41,5 +41,6 @@ export function useCombatInfo() {
     hasValidTarget: computed(() => (combatStatus.value?.enemies ?? []).some(e => (e.hp ?? 0) > 0)),
     canAct: computed(() => (combatStatus.value?.actionRemaining ?? 0) > 0),
     canBonusAct: computed(() => (combatStatus.value?.bonusActionRemaining ?? 0) > 0),
+    combatEnd: computed(() => combatStatus.value?.combatEnd),
   };
 }

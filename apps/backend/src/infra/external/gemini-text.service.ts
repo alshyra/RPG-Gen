@@ -91,6 +91,7 @@ export class GeminiTextService {
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
 
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
+    debugger;
     let text: string | undefined;
     try {
       const response = await chat.sendMessage({ message });
@@ -119,7 +120,7 @@ export class GeminiTextService {
               "payload" in inst &&
               typeof inst.payload === "object"
             ) {
-              // Merge payload fields into the instruction, prefer payload fields but keep type from wrapper
+              // For other instructions: merge payload fields into the instruction
               return {
                 type: inst.type,
                 ...inst.payload,

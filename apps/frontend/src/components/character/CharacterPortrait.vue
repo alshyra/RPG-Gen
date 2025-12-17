@@ -58,7 +58,7 @@ const combatStatus = computed(() => status.data.value);
 
 const hp = computed(() => {
   if (status.data.value?.inCombat && status) {
-    return `${combatStatus.value?.inCombat ?? 0}/${combatStatus.value?.player.hpMax}`;
+    return `${combatStatus.value?.player.hp ?? 0}/${combatStatus.value?.player.hpMax}`;
   }
   if (!currentCharacter) throw new Error('No current character');
   return `${currentCharacter?.value?.hp || 0}/${currentCharacter?.value?.hpMax || 12}`;

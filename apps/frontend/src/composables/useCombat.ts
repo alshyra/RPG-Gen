@@ -346,22 +346,12 @@ export function useCombat() {
   // ─────────────────────────────────────────────────────
   // Combat End Detection via Watchers
   // ─────────────────────────────────────────────────────
-  // Watcher: Detect combat end transition (inCombat: true → false)
+  // Watcher: Detect combat end via backend flag
   watch(
-    () => combatInfo.inCombat.value,
-    (inCombat, oldInCombat) => {
-      debugger
-      if (inCombat == oldInCombat) return
-
-      // Check if victory or defeat
-      const playerHp = combatInfo.player.value?.hp ?? 0;
-      const aliveEnemies = combatInfo.aliveEnemies.value;
-
-      if (playerHp <= 0) return handleCombatEnd();
-      if (aliveEnemies.length !== 0) return;
-
-      // Victory
-      return handleCombatEnd();
+    () => combatInfo.combatEnd.value,
+    async (combatEnd) => {
+      if (!combatEnd) return; // Only trigger when combatEnd is populated
+      await handleCombatEnd();
     },
   );
 
