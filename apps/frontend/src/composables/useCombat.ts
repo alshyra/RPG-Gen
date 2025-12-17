@@ -211,8 +211,7 @@ export function useCombat() {
 
     // build client-friendly AttackView so components can display consistent values
     const targetBefore = prevEnemies.find(e => e.id === target.id);
-    const targetAfter = result.combatState?.enemies?.find((e: CombatantDto) => e.id === target.id);
-
+    const targetAfter = combatInfo.enemies.value.find(e => e.id === target.id);
     const attackView = {
       attacker: prevPlayer?.name ?? "Vous",
       attackerId: prevPlayer?.id,
@@ -270,22 +269,12 @@ export function useCombat() {
   /**
    * Handle combat end instruction
    */
-  const handleCombatEnd = async (
-    victory: boolean,
-    xpGained: number,
-    enemiesDefeated: string[],
-    _narrative: string,
-  ): Promise<void> => {
-    if (!victory) {
-      gameStore.appendMessage("system", "💀 Combat terminé.");
-      combatStore.clearCombat();
-      // Navigate back to messages view
-      await router.push({
-        name: "game",
-        params: { characterId: currentCharacter?.value?.characterId },
-      });
-      return;
-    }
+  const handleCombatEnd = async (): Promise<void> => {
+    const victory = combatApi.status.data.value?.combatEnd?.victory ?? false;
+    const xpGained = combatApi.status.data.value?.combatEnd?.xp_gained ?? 0;
+    const enemiesDefeated = combatApi.status.data.value?.combatEnd?.enemies_defeated ?? [];
+    // death modal s'affiche avec une computed
+    if (!victory) return;
 
     // Victory path: show modal with narrative first
     gameStore.appendMessage("system", "🏆 Victoire!");
@@ -308,7 +297,6 @@ export function useCombat() {
     if (!c?.characterId) return;
 
     isCombatEndModalOpen.value = false;
-    isCombatEndTriggered = false; // Reset flag for next combat
     combatStore.clearCombat();
     await router.push({
       name: "game",
@@ -358,47 +346,22 @@ export function useCombat() {
   // ─────────────────────────────────────────────────────
   // Combat End Detection via Watchers
   // ─────────────────────────────────────────────────────
-  // Flag to prevent double trigger (if backend ever returns combatEnd)
-  let isCombatEndTriggered = false;
-
-  // Watcher 1: Detect Victory (all enemies defeated)
+  // Watcher: Detect combat end transition (inCombat: true → false)
   watch(
-    () => ({
-      enemyCount: combatInfo.enemies.value.length,
-      inCombat: combatInfo.inCombat.value,
-    }),
-    ({ enemyCount, inCombat }) => {
-      // Si combat actif ET plus d'ennemis vivants
-      if (inCombat && enemyCount === 0 && !isCombatEndTriggered) {
-        isCombatEndTriggered = true;
-        const defeatedNames = combatInfo.enemies.value.map((e: CombatantDto) => e.name);
-        void handleCombatEnd(
-          true, // victory
-          0, // xpGained (not available in status, would need backend change)
-          defeatedNames,
-          "Tous les ennemis ont été vaincus !",
-        );
-      }
-    },
-  );
+    () => combatInfo.inCombat.value,
+    (inCombat, oldInCombat) => {
+      debugger
+      if (inCombat == oldInCombat) return
 
-  // Watcher 2: Detect Defeat (player HP <= 0)
-  watch(
-    () => ({
-      playerHp: combatInfo.player.value?.hp ?? 0,
-      inCombat: combatInfo.inCombat.value,
-    }),
-    ({ playerHp, inCombat }) => {
-      // Si combat actif ET joueur mort
-      if (inCombat && playerHp <= 0 && !isCombatEndTriggered) {
-        isCombatEndTriggered = true;
-        void handleCombatEnd(
-          false, // victory = false
-          0,
-          [],
-          "Vous avez été vaincu...",
-        );
-      }
+      // Check if victory or defeat
+      const playerHp = combatInfo.player.value?.hp ?? 0;
+      const aliveEnemies = combatInfo.aliveEnemies.value;
+
+      if (playerHp <= 0) return handleCombatEnd();
+      if (aliveEnemies.length !== 0) return;
+
+      // Victory
+      return handleCombatEnd();
     },
   );
 

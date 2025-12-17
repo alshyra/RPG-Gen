@@ -168,8 +168,7 @@ export async function cleanupE2EDb(): Promise<{ ok: boolean }> {
  */
 export async function setupApiIntercepts(page: Page) {
   // Mock auth profile endpoint
-  await page.route("**/api/auth/profile", route => {
-    route.fulfill({
+  await page.route("**/api/auth/profile", route => route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
@@ -178,6 +177,6 @@ export async function setupApiIntercepts(page: Page) {
         email: "e2e@playwright.test",
         picture: "http://localhost/avatar.png",
       }),
-    });
-  });
+    })
+  );
 }

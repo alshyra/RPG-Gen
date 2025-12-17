@@ -13,6 +13,7 @@ import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
 import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import { ChatMessageDto } from "../../domain/chat/dto/ChatMessageDto.js";
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -166,10 +167,27 @@ export class CombatOrchestrator {
     };
   }
 
+  private initializeChatSessionIfNeeded = async (userId: string, characterId: string) => {
+    const previousChatMessages = await this.conversationService.getHistoryMessages(
+      userId,
+      characterId,
+    );
+    const character = await this.characterService.findByCharacterId(userId, characterId);
+    return this.geminiTexteService.initializeChatSession(
+      characterId,
+      this.geminiTexteService.initPrompt(
+        character,
+        this.conversationService.buildCharacterSummary(character),
+      ),
+      previousChatMessages,
+    );
+  };
+
   /**
    * Generate combat end narrative using Gemini AI
    */
   private async generateCombatEndNarrative(
+    userId: string,
     characterId: string,
     combatEnd: CombatEndDto,
   ): Promise<string> {
@@ -180,20 +198,11 @@ export class CombatOrchestrator {
 
     const message = `Le combat vient de se terminer. Voici les détails:\n${JSON.stringify(combatEndInstruction, null, 2)}\n\nGénère une narrative épique décrivant la conclusion du combat et pose la question d'action habituelle.`;
 
-    try {
-      // Check if chat session exists before sending message
-      const chatExists = this.geminiTexteService.hasChatSession(characterId);
-      if (!chatExists) {
-        this.logger.warn(`No chat session for ${characterId}, using default narrative`);
-        return "Le combat est terminé. Que fais-tu ?";
-      }
+    const chatExists = this.geminiTexteService.hasChatSession(characterId);
+    if (!chatExists) await this.initializeChatSessionIfNeeded(userId, characterId);
 
-      const response = await this.geminiTexteService.sendMessage(characterId, message);
-      return response.narrative || "Le combat est terminé. Que fais-tu ?";
-    } catch (error) {
-      this.logger.error(`Failed to generate combat end narrative: ${error}`);
-      return "Le combat est terminé. Que fais-tu ?";
-    }
+    const { narrative } = await this.geminiTexteService.sendMessage(characterId, message);
+    return narrative;
   }
 
   /**
@@ -203,6 +212,8 @@ export class CombatOrchestrator {
     const inCombat = await this.combatAppService.isInCombat(characterId);
     // If not in combat, return a state with combat end info (option 2: only in /status)
     const state = await this.combatAppService.getCombatState(characterId);
+    if (!state) throw new BadRequestException("No combat at the moment");
+
     if (!inCombat) {
       // Get combat session to check if narrative already exists
       const session = await this.combatAppService.getCombatSessionRaw(characterId);
@@ -219,7 +230,7 @@ export class CombatOrchestrator {
           fled: false,
         });
 
-        narrative = await this.generateCombatEndNarrative(characterId, combatEnd);
+        narrative = await this.generateCombatEndNarrative(userId, characterId, combatEnd);
 
         // Persist narrative in session via AppService
         await this.combatAppService.updateNarrative(characterId, narrative);
@@ -242,12 +253,6 @@ export class CombatOrchestrator {
       });
     }
 
-    if (!state) throw new BadRequestException("No combat at the moment");
-
-    if (!state.enemies.every(e => e.hp !== undefined && e.hp <= 0)) {
-      return state;
-    }
-    state.inCombat = false;
     return state;
   }
 

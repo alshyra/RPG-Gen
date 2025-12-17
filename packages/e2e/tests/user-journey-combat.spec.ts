@@ -47,11 +47,11 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       const characterId = characters[0].characterId;
       console.log(`[Journey] Selected character: ${characterId}`);
 
-      // Navigate to character's game page
-      await page.goto(`/character/${characterId}`);
+      // Navigate to character's game page (REAL UI navigation)
+      await page.goto(`/game/${characterId}/messages`);
       await page.waitForLoadState("networkidle");
 
-      // === PHASE 2: Start Combat ===
+      // === PHASE 2: Start Combat (via API to control enemy stats) ===
       console.log("[Journey] Starting combat...");
       const combatStartResponse = await page.request.post(`/api/combat/${characterId}/start`, {
         data: {
@@ -75,16 +75,15 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
         `[Journey] Combat started, enemies: ${combatStartState.enemies.map((e: any) => e.name).join(", ")}`,
       );
 
-      // === PHASE 3: Combat Rounds (Attack until victory) ===
+      // === PHASE 3: Combat Rounds (Attack until victory via API) ===
       let currentStatus = combatStartState;
       let roundCount = 0;
-      const maxRounds = 50; // Safety limit (increased for multi-round combats)
+      const maxRounds = 10;
 
       while (currentStatus.inCombat && roundCount < maxRounds) {
         roundCount++;
         console.log(`[Journey] Round ${roundCount}: Player attacking...`);
 
-        // Player attacks
         const targetEnemy = currentStatus.enemies[0];
         const actionResponse = await page.request.post(`/api/combat/${characterId}/action`, {
           data: {
@@ -98,7 +97,6 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           `[Journey] Attack result: hit=${actionResult.hit}, damage=${actionResult.damage}, desc=${actionResult.description}`,
         );
 
-        // Check if combat ended immediately (last enemy killed)
         const statusResponse = await page.request.get(`/api/combat/${characterId}/status`);
         currentStatus = await statusResponse.json();
 
@@ -107,9 +105,8 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           break;
         }
 
-        // If combat still ongoing, enemy turn happens
         const endTurnResponse = await page.request.post(
-          `/api/combat/${characterId}/end-player-turn`,
+          `/api/combat/${characterId}/end-turn`,
           {},
         );
         expect(endTurnResponse.ok()).toBe(true);
@@ -119,15 +116,13 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           `[Journey] End turn: playerDefeated=${endTurnResult.playerDefeated}, round=${endTurnResult.roundNumber}`,
         );
 
-        // Verify player didn't die
         expect(endTurnResult.playerDefeated).toBe(false);
 
-        // Fetch fresh status
         const freshStatusResponse = await page.request.get(`/api/combat/${characterId}/status`);
         currentStatus = await freshStatusResponse.json();
       }
 
-      // === PHASE 4: Victory Verification ===
+      // === PHASE 4: Victory Modal Verification (UI) ===
       expect(currentStatus.inCombat).toBe(false);
       console.log(`[Journey] Combat ended after ${roundCount} rounds`);
 
@@ -144,13 +139,36 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       expect(currentStatus.narrative.length).toBeGreaterThan(0);
       console.log(`[Journey] Combat narrative: ${currentStatus.narrative.substring(0, 100)}...`);
 
+      // Wait for the victory modal to appear in the UI
+      await page.waitForTimeout(1000); // Give time for UI to update
+      const modal = page.locator('[role="dialog"]').or(page.locator(".combat-end-modal"));
+      await expect(modal).toBeVisible({ timeout: 5000 });
+      console.log("[Journey] ✓ Victory modal is visible");
+
+      // Verify narrative is displayed in the modal
+      const narrativeText = modal.locator(".narrative-text").or(modal.locator("p"));
+      await expect(narrativeText).toBeVisible();
+      const displayedNarrative = await narrativeText.textContent();
+      expect(displayedNarrative).toContain(currentStatus.narrative.substring(0, 20));
+      console.log("[Journey] ✓ Narrative is displayed in modal");
+
+      // Click "Continuer" button to dismiss modal
+      const continueButton = modal.getByRole("button", { name: /continuer/i });
+      await expect(continueButton).toBeVisible();
+      await continueButton.click();
+      console.log("[Journey] ✓ Clicked 'Continuer' button");
+
+      // Verify we're redirected to messages page
+      await page.waitForURL(`**/game/${characterId}/messages`, { timeout: 5000 });
+      expect(page.url()).toContain("/messages");
+      console.log("[Journey] ✓ Redirected to messages page");
+
       // === PHASE 5: State Consistency ===
-      // Fetch status again - narrative should be persisted (not regenerated)
       const refetchResponse = await page.request.get(`/api/combat/${characterId}/status`);
       const refetchStatus = await refetchResponse.json();
 
       expect(refetchStatus.inCombat).toBe(false);
-      expect(refetchStatus.narrative).toBe(currentStatus.narrative); // Should be identical (no regeneration)
+      expect(refetchStatus.narrative).toBe(currentStatus.narrative);
       console.log("[Journey] ✓ State is persisted correctly (narrative consistent)");
 
       console.log("[Journey] ✓ Complete journey verified!");
@@ -221,7 +239,7 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       if (currentStatus.inCombat) {
         // End turn to allow enemies to attack
         const endTurnResponse = await page.request.post(
-          `/api/combat/${characterId}/end-player-turn`,
+          `/api/combat/${characterId}/end-turn`,
           {},
         );
 

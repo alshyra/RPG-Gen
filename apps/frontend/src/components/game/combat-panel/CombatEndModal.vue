@@ -13,7 +13,7 @@
     <div class="modal-content">
       <!-- Narrative text -->
       <div class="narrative-box">
-        <p class="narrative-text">{{ combatEndNarrative }}</p>
+        <p class="narrative-text">{{ narrative }}</p>
       </div>
     </div>
 
@@ -29,16 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { useCharacterId } from '@/composables/useCharacterId';
-import { useCombat } from '@rpg-gen/api-client';
+import { useCombatInfo } from '@/composables/useCombatStatus';
 import { UiButton, UiModal } from '@rpg-gen/ui';
-import { computed } from 'vue';
 
-const characterId = useCharacterId();
-const combatApi = useCombat(characterId);
-
-// Read narrative from the attack mutation that triggered combat end
-const combatEndNarrative = computed(() => combatApi.attack.data.value?.narrative ?? '');
+const { narrative } = useCombatInfo();
 
 withDefaults(
   defineProps<{

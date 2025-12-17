@@ -15,6 +15,7 @@ import type { RPGRequest } from "../global.types.js";
 import { CombatOrchestrator } from "../orchestrators/combat/index.js";
 import { CombatMovementOrchestrator } from "../orchestrators/combat/combat-movement.orchestrator.js";
 import { CombatActionOrchestrator } from "../orchestrators/combat/combat-action.orchestrator.js";
+import { ChatOrchestrator } from "../orchestrators/index.js";
 
 /**
  * CombatController - Thin controller that delegates to CombatOrchestrator.
@@ -37,6 +38,7 @@ export class CombatController {
     private readonly combatOrchestrator: CombatOrchestrator,
     private readonly movementOrchestrator: CombatMovementOrchestrator,
     private readonly actionOrchestrator: CombatActionOrchestrator,
+    private readonly chatOrchestrator: ChatOrchestrator,
   ) {}
 
   @Post(":characterId/start")
@@ -82,7 +84,7 @@ export class CombatController {
   })
   async getStatus(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const userId = req.user._id.toString();
-    return this.combatOrchestrator.getStatus(userId, characterId);
+    return await this.combatOrchestrator.getStatus(userId, characterId);
   }
 
   @Post(":characterId/end-turn")

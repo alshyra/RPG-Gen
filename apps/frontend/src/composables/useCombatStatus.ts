@@ -33,6 +33,7 @@ export function useCombatInfo() {
     actionMax: computed(() => combatStatus.value?.actionMax ?? 1),
     bonusActionRemaining: computed(() => combatStatus.value?.bonusActionRemaining ?? 1),
     bonusActionMax: computed(() => combatStatus.value?.bonusActionMax ?? 1),
+    narrative: computed(() => combatStatus.value?.narrative ?? null),
     aliveEnemies: computed(() => (combatStatus.value?.enemies ?? []).filter(e => (e.hp ?? 0) > 0)),
     validTargets: computed(() =>
       (combatStatus.value?.enemies ?? []).filter(e => (e.hp ?? 0) > 0).map(e => e.name),

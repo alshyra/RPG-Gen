@@ -65,7 +65,7 @@ import { useGameRolls } from "@/composables/useGameRolls";
 import { useUiStore } from "@/stores/uiStore";
 import { useCharacter, useCombat } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
@@ -85,9 +85,9 @@ const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
 const characterId = useCharacterId()
-const { isInCombat } = useCombat(currentCharacter?.value?.characterId)
+const { isInCombat, status } = useCombat(currentCharacter?.value?.characterId)
 const { pendingInstruction } = storeToRefs(gameStore);
-const showDeathModal = ref(false);
+const showDeathModal = computed(() => status.data.value?.player.hp === 0);
 
 useGameRolls();
 
@@ -133,7 +133,6 @@ const onDeathConfirm = async () => {
   await kill.mutateAsync({
     deathLocation: "In combat",
   });
-  showDeathModal.value = false;
   router.push("/");
 };
 </script>

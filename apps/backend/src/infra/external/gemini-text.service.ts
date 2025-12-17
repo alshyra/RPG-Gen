@@ -22,7 +22,7 @@ const SCENARIO_PATH =
 export class GeminiTextService {
   private readonly logger = new Logger(GeminiTextService.name);
   private client: GoogleGenAI;
-  private model = "gemini-2.5-flash";
+  private model = "gemini-2.5-pro";
   private chatClients = new Map<string, Chat>();
   private systemPrompt: string;
 
@@ -33,7 +33,7 @@ export class GeminiTextService {
       config.google.apiKey ? "***" : "no API key",
     );
     this.client = new GoogleGenAI({ apiKey: config.google.apiKey });
-    Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
+    void Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
       ([systemPrompt, scenarioPrompt]) => {
         this.systemPrompt = systemPrompt + "\n\n" + scenarioPrompt;
         this.logger.log("System prompt and scenario loaded successfully !");
@@ -95,23 +95,10 @@ export class GeminiTextService {
     try {
       const response = await chat.sendMessage({ message });
       text = response.text;
-    } catch (error) {
-      // Handle Gemini API errors (e.g., model overloaded with 503 status)
-      const geminiError = this.extractGeminiError(error);
-      if (geminiError?.status === "UNAVAILABLE" || geminiError?.code === 503) {
-        this.logger.warn("Gemini API overloaded or unavailable (503)", {
-          code: geminiError.code,
-          status: geminiError.status,
-        });
-        throw new ServiceUnavailableException(
-          "Gemini API is temporarily unavailable. Please try again in a moment.",
-        );
-      }
-      // Re-throw any other unexpected error
-      this.logger.error("Unexpected error while calling Gemini API", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
+    } catch {
+      throw new ServiceUnavailableException(
+        "Gemini API is temporarily unavailable. Please try again in a moment.",
+      );
     }
 
     this.logger.debug(`Received structured response for session ${sessionId}`, text);
@@ -166,44 +153,6 @@ export class GeminiTextService {
   clearChat(sessionId: string) {
     this.chatClients.delete(sessionId);
     this.logger.debug(`Cleared chat session ${sessionId}`);
-  }
-
-  /**
-   * Extract error details from a Gemini API error
-   * Handles nested ApiError structure: { ApiError: { error: { code, message, status } } }
-   */
-  private extractGeminiError(
-    error: unknown,
-  ): { code?: number; status?: string; message?: string } | null {
-    if (!error || typeof error !== "object") return null;
-
-    // Check if it's the outer ApiError wrapper
-    const errorObj = error as Record<string, unknown>;
-    if ("ApiError" in errorObj && errorObj.ApiError && typeof errorObj.ApiError === "object") {
-      const apiError = errorObj.ApiError as Record<string, unknown>;
-      if ("error" in apiError && apiError.error && typeof apiError.error === "object") {
-        const innerError = apiError.error as Record<string, unknown>;
-        return {
-          code: typeof innerError.code === "number" ? innerError.code : undefined,
-          status: typeof innerError.status === "string" ? innerError.status : undefined,
-          message: typeof innerError.message === "string" ? innerError.message : undefined,
-        };
-      }
-    }
-
-    // Also check direct error structure in case format changes
-    if ("error" in errorObj && typeof errorObj.error === "object") {
-      const innerError = errorObj.error as Record<string, unknown>;
-      if ("code" in innerError || "status" in innerError) {
-        return {
-          code: typeof innerError.code === "number" ? innerError.code : undefined,
-          status: typeof innerError.status === "string" ? innerError.status : undefined,
-          message: typeof innerError.message === "string" ? innerError.message : undefined,
-        };
-      }
-    }
-
-    return null;
   }
 
   public initPrompt(character: CharacterResponseDto, characterSummary: string) {
