@@ -5,6 +5,10 @@ packages/backend/.env
 packages/backend/.env.local
 packages/backend/.env.docker
 packages/frontend/.env
+apps/backend/.env.local
+apps/backend/.env.docker
+apps/frontend/.env.local
+apps/frontend/.env.docker
 
 # Cypress test reports created during instrumented runs
 packages/frontend/test-reports

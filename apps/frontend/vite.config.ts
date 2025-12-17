@@ -3,6 +3,10 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
+import { loadFrontendConfig } from "./src/config";
+
+// Load configuration based on NODE_ENV
+const config = loadFrontendConfig();
 
 export default defineConfig({
   plugins: [tailwindcss(), vue(), vueDevTools()],
@@ -15,13 +19,15 @@ export default defineConfig({
     },
   },
   server: {
-    host: "0.0.0.0",
-    port: process.env.FRONTEND_PORT ? parseInt(process.env.FRONTEND_PORT) : 5173,
-    proxy: {
-      "/api": {
-        target: process.env.BACKEND_URL || "http://localhost:3001/",
-        changeOrigin: true,
-      },
-    },
+    host: config.server.host,
+    port: config.server.port,
+    proxy: config.api.proxyEnabled
+      ? {
+          "/api": {
+            target: config.api.baseUrl,
+            changeOrigin: true,
+          },
+        }
+      : undefined,
   },
 });

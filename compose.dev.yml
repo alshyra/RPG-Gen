@@ -41,8 +41,10 @@ services:
     restart: unless-stopped
     working_dir: /app
     command: sh -c "npm --workspace @rpg-gen/frontend run dev"
+    environment:
+      - NODE_ENV=docker
     ports:
-      - "80:80"
+      - "5173:5173"
     user: "${UID}:${GID}"
     volumes:
       - ./:/app/

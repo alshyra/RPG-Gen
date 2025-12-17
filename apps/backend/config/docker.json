@@ -8,11 +8,11 @@
     "oauth": {
       "clientId": "$GOOGLE_OAUTH_CLIENT_ID",
       "clientSecret": "$GOOGLE_OAUTH_CLIENT_SECRET",
-      "callbackUrl": "http://localhost/api/auth/google/callback"
+      "callbackUrl": "http://localhost:5173/api/auth/google/callback"
     }
   },
   "frontend": {
-    "url": "http://localhost"
+    "url": "http://localhost:5173"
   },
   "features": {
     "auth": true,

@@ -1,0 +1,13 @@
+{
+  "server": {
+    "port": 5173,
+    "host": "0.0.0.0"
+  },
+  "api": {
+    "baseUrl": "http://backend:3001",
+    "proxyEnabled": true
+  },
+  "vite": {
+    "baseUrl": "/"
+  }
+}
