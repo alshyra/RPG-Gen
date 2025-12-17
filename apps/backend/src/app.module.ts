@@ -9,17 +9,16 @@ import { DiceModule } from "./modules/dice.module.js";
 import { HealthModule } from "./modules/health.module.js";
 import { ImageModule } from "./modules/image.module.js";
 import { InventoryModule } from "./modules/inventory.module.js";
+import { getConfig } from "./config.js";
+import { ConfigModule } from "./config.module.js";
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      process.env.MONGODB_URI ||
-        "mongodb://rpgadmin:rpgpass123@localhost:27017/rpggen?authSource=admin",
-      {
-        retryAttempts: 5,
-        retryDelay: 3000,
-      },
-    ),
+    MongooseModule.forRoot(getConfig().mongodb.uri, {
+      retryAttempts: 5,
+      retryDelay: 3000,
+    }),
+    ConfigModule,
     AuthModule,
     ChatModule,
     ClassesModule,

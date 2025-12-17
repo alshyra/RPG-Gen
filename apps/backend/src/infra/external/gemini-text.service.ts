@@ -12,6 +12,7 @@ import { GameInstructionDto } from "../../domain/chat/dto/GameInstructionDto.js"
 import { geminiResponseJsonSchema } from "./gemini-json-schema.js";
 import { aiResponseSchema } from "./gemini-schemas.js";
 import { CharacterResponseDto } from "../../domain/character/dto/index.js";
+import { getConfig } from "../../config.js";
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), "chat.prompt.txt");
 const SCENARIO_PATH =
@@ -26,11 +27,12 @@ export class GeminiTextService {
   private systemPrompt: string;
 
   constructor() {
+    const config = getConfig();
     this.logger.debug(
       "Initializing GeminiTextService",
-      process.env.GOOGLE_API_KEY ? "***" : "no API key",
+      config.google.apiKey ? "***" : "no API key",
     );
-    this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+    this.client = new GoogleGenAI({ apiKey: config.google.apiKey });
     Promise.all([this.loadSystemPrompt(), this.loadScenarii()]).then(
       ([systemPrompt, scenarioPrompt]) => {
         this.systemPrompt = systemPrompt + "\n\n" + scenarioPrompt;

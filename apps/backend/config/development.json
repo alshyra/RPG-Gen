@@ -1,0 +1,21 @@
+{
+  "port": 3001,
+  "mongodb": {
+    "uri": "mongodb://rpgadmin:rpgpass123@localhost:27017/rpggen?authSource=admin"
+  },
+  "google": {
+    "apiKey": "$GOOGLE_API_KEY",
+    "oauth": {
+      "clientId": "$GOOGLE_OAUTH_CLIENT_ID",
+      "clientSecret": "$GOOGLE_OAUTH_CLIENT_SECRET",
+      "callbackUrl": "http://localhost:5173/api/auth/google/callback"
+    }
+  },
+  "frontend": {
+    "url": "http://localhost:5173"
+  },
+  "features": {
+    "auth": true,
+    "e2eMode": false
+  }
+}

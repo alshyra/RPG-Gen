@@ -3,8 +3,8 @@ import { SpellDefinitionService } from "../spell-definition/spell-definition.ser
 import { ClassDefinitionService } from "../class-definition/class-definition.service.js";
 import type { LevelUpOptionsDto } from "../character/dto/LevelUpOptionsDto.js";
 import type { SpellResponseDto } from "../character/dto/SpellResponseDto.js";
-import CombatOption from "src/infra/mongo/class/CombatOption.js";
-import { ClassDefinition } from "src/infra/mongo/index.js";
+import CombatOption from "../../infra/mongo/class/CombatOption.js";
+import { ClassDefinition } from "../../infra/mongo/index.js";
 import { CombatOptionDto } from "../character/dto/CombatOptionDto.js";
 
 @Injectable()

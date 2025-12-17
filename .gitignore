@@ -2,6 +2,8 @@ node_modules
 dist
 .env
 packages/backend/.env
+packages/backend/.env.local
+packages/backend/.env.docker
 packages/frontend/.env
 
 # Cypress test reports created during instrumented runs

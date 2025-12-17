@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import type CombatOptionMeta from "../types/CombatOptionMeta.js";
-import { CombatOption } from "src/infra/mongo/class/CombatOption.js";
+import { CombatOption } from "../../../infra/mongo/class/CombatOption.js";
 
 export class CombatOptionDto {
   @ApiProperty({ description: "Option id" })

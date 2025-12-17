@@ -1,5 +1,6 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { getConfig } from "../../config.js";
 
 /**
  * GoogleAuthGuard also respects the DISABLE_AUTH_FOR_E2E flag so the OAuth
@@ -9,7 +10,7 @@ import { AuthGuard } from "@nestjs/passport";
 @Injectable()
 export class GoogleAuthGuard extends AuthGuard("google") {
   canActivate(context: ExecutionContext) {
-    if (process.env.DISABLE_AUTH_FOR_E2E === "true") {
+    if (getConfig().features.e2eMode) {
       const ctx = context.switchToHttp();
       const req = ctx.getRequest();
       // Google guard must also provide a realistic user shape for the

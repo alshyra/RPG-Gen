@@ -1,5 +1,6 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { getConfig } from "../../config.js";
 
 /**
  * JwtAuthGuard supports a testing bypass: when the environment variable
@@ -13,7 +14,7 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     // If the e2e bypass flag is enabled, accept all requests and create a
     // synthetic user on the request so downstream handlers that rely on
     // request.user keep working during tests.
-    const skip = process.env.DISABLE_AUTH_FOR_E2E === "true";
+    const skip = getConfig().features.e2eMode;
     if (skip) {
       const ctx = context.switchToHttp();
       const req = ctx.getRequest();

@@ -13,6 +13,7 @@ import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
 import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 import { CharacterService } from "../../domain/character/character.service.js";
+import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 
 /**
  * Orchestrator for unified combat actions.
@@ -27,6 +28,7 @@ export class CombatActionOrchestrator {
     private readonly diceService: DiceService,
     private readonly spellDefinitionService: SpellDefinitionService,
     private readonly characterService: CharacterService,
+    private readonly combatAppService: CombatAppService,
   ) {}
 
   /**
@@ -98,6 +100,24 @@ export class CombatActionOrchestrator {
     }
   }
 
+  /**
+   * Helper to check if all enemies are dead and end combat if so
+   */
+  private async checkAndEndCombatIfNeeded(characterId: string, userId: string): Promise<boolean> {
+    const updatedSession = await this.combatSessionModel.findOne({ characterId, userId }).exec();
+    if (updatedSession) {
+      const allEnemiesDead = updatedSession.enemies.every((e: any) => (e.hp ?? 0) <= 0);
+      if (allEnemiesDead) {
+        // End combat: set inCombat flag to false and cleanup
+        updatedSession.inCombat = false;
+        await updatedSession.save();
+        this.logger.log(`Combat ended: all enemies defeated for character ${characterId}`);
+        return true;
+      }
+    }
+    return false;
+  }
+
   private async executeAttack(
     session: CombatSession,
     request: CombatActionRequestDto,
@@ -133,6 +153,9 @@ export class CombatActionOrchestrator {
         { characterId, userId, "enemies.id": enemy.id },
         { $set: { "enemies.$.hp": enemy.hp } },
       );
+
+      // Check if all enemies are dead (combat end condition)
+      await this.checkAndEndCombatIfNeeded(characterId, userId);
     }
 
     return {
@@ -263,6 +286,9 @@ export class CombatActionOrchestrator {
           { characterId, userId, "enemies.id": target.id },
           { $set: { "enemies.$.hp": target.hp } },
         );
+
+        // Check if all enemies are dead (combat end condition)
+        await this.checkAndEndCombatIfNeeded(characterId, userId);
       }
 
       return {
@@ -297,6 +323,9 @@ export class CombatActionOrchestrator {
           { characterId, userId, "enemies.id": target.id },
           { $set: { "enemies.$.hp": target.hp } },
         );
+
+        // Check if all enemies are dead (combat end condition)
+        await this.checkAndEndCombatIfNeeded(characterId, userId);
       }
 
       return {

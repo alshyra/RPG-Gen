@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { GenerateContentResponse, GoogleGenAI } from "@google/genai";
+import { getConfig } from "../../config.js";
 
 @Injectable()
 export class GeminiImageService {
@@ -8,11 +9,12 @@ export class GeminiImageService {
   private model = "gemini-2.5-flash-image";
 
   constructor() {
+    const config = getConfig();
     this.logger.debug(
       "Initializing GeminiImageService",
-      process.env.GOOGLE_API_KEY ? "***" : "no API key",
+      config.google.apiKey ? "***" : "no API key",
     );
-    this.client = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
+    this.client = new GoogleGenAI({ apiKey: config.google.apiKey });
     this.logger.log("GeminiImageService initialized");
   }
 

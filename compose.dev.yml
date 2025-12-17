@@ -23,9 +23,7 @@ services:
     user: "${UID}:${GID}"
     command: sh -c "npm --workspace @rpg-gen/backend run start"
     environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://rpgadmin:rpgpass123@mongodb:27017/rpggen?authSource=admin
-      - FRONTEND_URL=http://localhost
+      - NODE_ENV=docker
     volumes:
       - ./:/app
     ports:
@@ -44,7 +42,7 @@ services:
     working_dir: /app
     command: sh -c "npm --workspace @rpg-gen/frontend run dev"
     ports:
-      - "5173:5173"
+      - "80:80"
     user: "${UID}:${GID}"
     volumes:
       - ./:/app/
