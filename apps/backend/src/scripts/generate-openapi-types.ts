@@ -2,11 +2,12 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync, renameSync } from "
 import openapiTS, { astToString } from "openapi-typescript";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { getConfig } from "../config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const OPENAPI_URL = process.env.OPENAPI_URL || "http://localhost:3001/docs-json";
+const OPENAPI_URL = getConfig().openApiUrl;
 
 interface OpenApiDocument {
   components?: { schemas?: Record<string, unknown> };

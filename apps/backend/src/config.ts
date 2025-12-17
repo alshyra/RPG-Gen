@@ -4,6 +4,7 @@ import { Logger } from "@nestjs/common";
 
 export interface AppConfig {
   port: number;
+  openApiUrl: string;
   mongodb: {
     uri: string;
   };
@@ -25,6 +26,7 @@ export interface AppConfig {
 
 const configSchema = Joi.object<AppConfig>({
   port: Joi.number().port().default(3001),
+  openApiUrl: Joi.string().uri().default("http://localhost:3001/docs-json"),
   mongodb: Joi.object({
     uri: Joi.string().required(),
   }).required(),

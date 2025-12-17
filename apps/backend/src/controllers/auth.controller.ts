@@ -6,6 +6,7 @@ import { AuthProfileDto } from "../domain/auth/auth.profile.dto.js";
 import { AuthService } from "../domain/auth/auth.service.js";
 import { GoogleAuthGuard } from "../domain/auth/google-auth.guard.js";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import { getConfig } from "../config.js";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -32,11 +33,11 @@ export class AuthController {
       this.logger.log(`User logged in: ${user.email}`);
 
       // Redirect to frontend with token
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:80";
+      const frontendUrl = getConfig().frontend.url;
       res.redirect(`${frontendUrl}/auth/callback?token=${loginResult.access_token}`);
     } catch (error) {
       this.logger.error("Google auth callback error", error);
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:80";
+      const frontendUrl = getConfig().frontend.url;
       res.redirect(`${frontendUrl}/auth/error`);
     }
   }

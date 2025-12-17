@@ -5,12 +5,28 @@ import type { paths } from "@rpg-gen/shared";
  * Base API client configuration
  */
 export function createApiClient(baseUrl: string) {
-  return createClient<paths>({
+  const client = createClient<paths>({
     baseUrl,
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+  // Add request interceptor to inject JWT token from localStorage
+  client.use({
+    async onRequest({ request }) {
+      // Check if we're in a browser environment
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        const token = localStorage.getItem("auth_token");
+        if (token) {
+          request.headers.set("Authorization", `Bearer ${token}`);
+        }
+      }
+      return request;
+    },
+  });
+
+  return client;
 }
 
 /**

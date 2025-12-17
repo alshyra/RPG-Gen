@@ -219,7 +219,7 @@ const saveFinalCharacter = async () => {
     currentCharacter?.value?.scores.Con
   );
   await update.mutateAsync({
-    ...currentCharacter,
+    ...currentCharacter.value,
     state: "created",
     hpMax,
     hp: hpMax,

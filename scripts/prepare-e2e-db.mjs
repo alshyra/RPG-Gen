@@ -39,7 +39,7 @@ for (let i = 0; i < argv.length; i++) {
   }
 }
 
-const API_URL = opts.url || process.env.API_URL || "http://localhost";
+const API_URL = opts.url || process.env.API_URL || "http://localhost:3001";
 const COUNT = Number.isInteger(opts.count) ? opts.count : 2;
 
 const log = (...args) => console.log("[prepare-e2e-db]", ...args);
