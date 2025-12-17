@@ -41,16 +41,6 @@ export const xpInstructionSchema = z.object({
   xp: z.number().describe("Amount of XP gained"),
 });
 
-// Spell instruction schema
-export const spellInstructionSchema = z.object({
-  type: z.literal("spell"),
-  action: z.enum(["learn", "cast", "forget"]).describe("Spell action"),
-  name: z.string().describe("Spell name"),
-  level: z.number().optional().describe("Spell level"),
-  school: z.string().optional().describe("Spell school"),
-  description: z.string().optional().describe("Spell description"),
-});
-
 // Inventory instruction schema
 export const inventoryInstructionSchema = z.object({
   type: z.literal("inventory"),
@@ -76,26 +66,13 @@ export const combatStartInstructionSchema = z.object({
     .describe("List of enemies"),
 });
 
-// Combat end instruction schema (for recognizing combat end from system)
-export const combatEndInstructionSchema = z.object({
-  type: z.literal("combat_end"),
-  combat_end: z.object({
-    victory: z.boolean().describe("Combat outcome"),
-    xp_gained: z.number().describe("XP gained from combat"),
-    player_hp: z.number().describe("Player HP after combat"),
-    enemies_defeated: z.array(z.string()).describe("List of defeated enemies"),
-  }),
-});
-
 // Combined game instruction schema (union of all instruction types)
 export const gameInstructionSchema = z.discriminatedUnion("type", [
   rollInstructionSchema,
+  combatStartInstructionSchema,
+  inventoryInstructionSchema,
   hpInstructionSchema,
   xpInstructionSchema,
-  spellInstructionSchema,
-  inventoryInstructionSchema,
-  combatStartInstructionSchema,
-  combatEndInstructionSchema,
 ]);
 
 // AI Response schema - the complete structure Gemini should return

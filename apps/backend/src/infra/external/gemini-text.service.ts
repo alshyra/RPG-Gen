@@ -91,12 +91,11 @@ export class GeminiTextService {
     if (!chat) throw new Error(`Chat session ${sessionId} not found. Call getOrCreateChat first.`);
 
     this.logger.debug(`Sending message: ${message.slice(0, 50)}...`);
-    debugger;
     let text: string | undefined;
     try {
       const response = await chat.sendMessage({ message });
       text = response.text;
-    } catch {
+    } catch (e) {
       throw new ServiceUnavailableException(
         "Gemini API is temporarily unavailable. Please try again in a moment.",
       );
@@ -108,30 +107,7 @@ export class GeminiTextService {
 
     try {
       const parsed = JSON.parse(text);
-
-      let normalized = parsed;
-      if (Array.isArray(parsed?.instructions)) {
-        normalized = {
-          ...parsed,
-          instructions: parsed.instructions.map(inst => {
-            if (
-              inst &&
-              typeof inst === "object" &&
-              "payload" in inst &&
-              typeof inst.payload === "object"
-            ) {
-              // For other instructions: merge payload fields into the instruction
-              return {
-                type: inst.type,
-                ...inst.payload,
-              };
-            }
-            return inst;
-          }),
-        };
-      }
-
-      const validated = aiResponseSchema.parse(normalized);
+      const validated = aiResponseSchema.parse(parsed);
 
       const chatMessage: ChatMessageDto = {
         role: "assistant",

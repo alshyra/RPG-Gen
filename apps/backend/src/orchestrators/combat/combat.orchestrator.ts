@@ -209,9 +209,7 @@ export class CombatOrchestrator {
    * Get current combat status with fresh action token.
    */
   async getStatus(userId: string, characterId: string): Promise<CombatStateDto> {
-    debugger
     const inCombat = await this.combatAppService.isInCombat(characterId);
-    // If not in combat, return a state with combat end info (option 2: only in /status)
     const state = await this.combatAppService.getCombatState(characterId);
     if (!state) throw new BadRequestException("No combat at the moment");
 
