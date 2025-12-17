@@ -33,10 +33,7 @@ export class ClassesService {
   /**
    * Safely access spell definitions from map-like objects from Mongoose.
    */
-  private getSpellDefinitions(
-    mapLike: unknown,
-    key: string,
-  ): { definitionId?: string }[] {
+  private getSpellDefinitions(mapLike: unknown, key: string): { definitionId?: string }[] {
     if (!mapLike) return [];
     const candidate = (mapLike as Record<PropertyKey, unknown>)[key];
     return Array.isArray(candidate) ? candidate : [];
@@ -77,9 +74,8 @@ export class ClassesService {
     const allOptions = Array.from({ length: maxLevel + 1 }, (_, i) => i)
       .flatMap(lvl => this.getCombatOptions(combatOptionsByLevel, lvl.toString()) ?? [])
       .filter(combatOption => !!combatOption);
-    
-    return Array.from(new Set(allOptions))
-      .map(combatOption => new CombatOptionDto(combatOption));
+
+    return Array.from(new Set(allOptions)).map(combatOption => new CombatOptionDto(combatOption));
   }
 
   private async fetchAllSpellsUpToLevel(level: number): Promise<SpellResponseDto[]> {
