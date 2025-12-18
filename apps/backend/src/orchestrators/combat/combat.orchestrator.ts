@@ -3,17 +3,16 @@ import { CharacterService } from "../../domain/character/character.service.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 
-import { CombatStateDto } from "../../domain/combat/dto/index.js";
+import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
 import type {
   CombatEndResponseDto,
   CombatStartRequestDto,
   EndPlayerTurnResponseDto,
 } from "../../domain/combat/dto/index.js";
-import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
+import { CombatStateDto } from "../../domain/combat/dto/index.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
 import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
-import { ChatMessageDto } from "../../domain/chat/dto/ChatMessageDto.js";
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -59,10 +58,8 @@ export class CombatOrchestrator {
       this.logger.log(
         `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
       );
-      return {
-        ...state,
-        narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-      };
+      state.narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
+      return state;
     }
 
     // If turn order begins with an enemy, simulate initial turns here
@@ -86,11 +83,8 @@ export class CombatOrchestrator {
       this.logger.log(
         `Combat initialized (and ended) for ${characterId} after initial enemy turns`,
       );
-      const narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
-      return {
-        ...state,
-        narrative,
-      };
+      state.narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
+      return state;
     }
 
     // Advance to player's activation and reset economy
@@ -107,10 +101,8 @@ export class CombatOrchestrator {
       `Combat started for character ${characterId} with ${combatStartRequest.combat_start.length} enemies`,
     );
 
-    return {
-      ...state,
-      narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-    };
+    state.narrative = (await this.combatAppService.getCombatSummary(characterId)) ?? undefined;
+    return state;
   }
 
   /**
