@@ -65,6 +65,13 @@ watch(
 );
 
 onMounted(() => {
-  // nothing for now
+  // Scroll to bottom when navigating to messages view
+  if (messagesPane.value) {
+    setTimeout(() => {
+      if (messagesPane.value) {
+        messagesPane.value.scrollTop = messagesPane.value.scrollHeight;
+      }
+    }, 100);
+  }
 });
 </script>

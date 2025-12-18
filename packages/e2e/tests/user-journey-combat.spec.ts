@@ -174,9 +174,28 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       }
 
       // === PHASE 4: Victory Modal Verification (UI) ===
-      // Refetch to ensure frontend has latest state
-      await page.evaluate(() => window.__e2eCombat?.refetch());
+      // Wait for backend to process combat end
       await page.waitForTimeout(1000);
+
+      // Poll backend API directly until combat ends
+      let backendStatus;
+      for (let i = 0; i < 10; i++) {
+        const statusResponse = await page.request.get(`/api/combat/${characterId}/status`);
+        backendStatus = await statusResponse.json();
+        if (!backendStatus.inCombat) {
+          console.log(`[Journey] Backend confirmed combat ended after ${i + 1} polls`);
+          break;
+        }
+        await page.waitForTimeout(500);
+      }
+
+      // Now refetch frontend to sync with backend
+      await page.evaluate(() => window.__e2eCombat?.refetch());
+      await page.waitForTimeout(1000); // Wait for narrative generation (Gemini API call)
+
+      // Re-refetch to get the narrative
+      await page.evaluate(() => window.__e2eCombat?.refetch());
+      await page.waitForTimeout(500);
 
       // Verify combat ended via E2E API
       const finalStatus = await page.evaluate(() => window.__e2eCombat?.getStatus());
@@ -194,7 +213,7 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
 
       // Verify narrative is displayed in modal
       const narrativeText = page.locator(".narrative-text");
-      await expect(narrativeText).toBeVisible();
+      await expect(narrativeText).toBeVisible({ timeout: 10000 }); // Longer timeout for narrative
       const textContent = await narrativeText.textContent();
       expect(textContent).toBeTruthy();
       console.log("[Journey] ✓ Narrative is displayed in modal");
@@ -211,14 +230,37 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       expect(page.url()).toContain("/messages");
       console.log("[Journey] ✓ Redirected to messages page");
 
-      // === PHASE 5: State Consistency ===
-      const refetchResponse = await page.request.get(`/api/combat/${characterId}/status`);
-      const refetchStatus = await refetchResponse.json();
+      // === PHASE 5: Verify narrative appears in messages ===
+      // Wait for messages to render
+      await page.waitForTimeout(1000);
 
-      expect(refetchStatus.inCombat).toBe(false);
-      // Narrative should exist after combat end
-      expect(refetchStatus.narrative).toBeTruthy();
-      console.log("[Journey] ✓ State is persisted correctly (narrative present)");
+      // Get the narrative from the modal that we saw earlier
+      const modalNarrative = textContent;
+
+      // Find all message blocks in the messages view
+      const messageBlocks = page.locator(".space-y-3 > div");
+      const messageCount = await messageBlocks.count();
+      expect(messageCount).toBeGreaterThan(0);
+      console.log(`[Journey] Found ${messageCount} messages in messages view`);
+
+      // Get the last message (should be the combat end narrative)
+      const lastMessage = messageBlocks.last();
+      await expect(lastMessage).toBeVisible();
+
+      // The last message should contain the narrative from combat end
+      const lastMessageText = await lastMessage.textContent();
+      expect(lastMessageText).toContain(modalNarrative);
+      console.log("[Journey] ✓ Combat end narrative appears as last message in messages view");
+
+      // Verify messages pane is scrolled to bottom
+      const isScrolledToBottom = await page.evaluate(() => {
+        const pane = document.querySelector(".flex-1.overflow-auto") as HTMLElement;
+        if (!pane) return false;
+        const threshold = 10; // Allow small margin
+        return pane.scrollHeight - pane.scrollTop - pane.clientHeight <= threshold;
+      });
+      expect(isScrolledToBottom).toBe(true);
+      console.log("[Journey] ✓ Messages view is scrolled to bottom");
 
       console.log("[Journey] ✓ Complete journey verified!");
     },

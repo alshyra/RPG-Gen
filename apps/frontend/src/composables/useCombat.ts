@@ -128,18 +128,6 @@ export function useCombat() {
     currentPlayerAttackLog.value = result;
     await new Promise(resolve => setTimeout(resolve, combatStore.PLAYER_ATTACK_DELAY_MS));
     currentPlayerAttackLog.value = null;
-
-    const targetName = target?.name || "cible inconnue";
-    const { damageTotal, isCrit } = result;
-    if (damageTotal && damageTotal > 0) {
-      const critMsg = isCrit ? " (CRITIQUE!)" : "";
-      gameStore.appendMessage(
-        "system",
-        `✅ Attaque réussie contre ${targetName}! Dégâts: ${damageTotal}${critMsg}`,
-      );
-    } else {
-      gameStore.appendMessage("system", `❌ Attaque manquée contre ${targetName}.`);
-    }
     // Combat end is now detected automatically by watchers
   };
 
@@ -196,6 +184,7 @@ export function useCombat() {
     const victory = combatApi.status.data.value?.combatEnd?.victory ?? false;
     const xpGained = combatApi.status.data.value?.combatEnd?.xp_gained ?? 0;
     const enemiesDefeated = combatApi.status.data.value?.combatEnd?.enemies_defeated ?? [];
+    const narrative = combatApi.status.data.value?.narrative ?? "";
     // death modal s'affiche avec une computed
     if (!victory) return;
 
@@ -207,6 +196,10 @@ export function useCombat() {
     if (xpGained > 0) {
       gameStore.appendMessage("system", `✨ XP gagnés: ${xpGained}`);
       await character.updateXp.mutateAsync(xpGained);
+    }
+    // Add combat end narrative to messages
+    if (narrative) {
+      gameStore.appendMessage("assistant", narrative);
     }
 
     isCombatEndModalOpen.value = true;
