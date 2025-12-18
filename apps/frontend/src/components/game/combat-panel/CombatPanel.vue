@@ -23,27 +23,21 @@
       @close="closeActionModal"
       @attack="handleAttack"
     />
-    <CombatEndModal
-      :is-open="isCombatEndModalOpen"
-      @close="closeCombatEndModal"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useCharacterId } from '@/composables/useCharacterId';
+import { useCombat } from '@/composables/useCombat';
+import type { CombatArenaApi } from '@/composables/useCombatEngine';
+import { useCombatEngine } from '@/composables/useCombatEngine';
+import { exposeE2ECombatApi, cleanupE2ECombatApi } from '@/utils/e2eHelpers';
+import { useCombat as useCombatApi } from '@rpg-gen/api-client';
 import { CombatArena } from '@rpg-gen/combat-engine';
-import { storeToRefs } from 'pinia';
+import type { CombatantDto } from '@rpg-gen/shared';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import CombatHeader from './CombatHeader.vue';
 import SpellSelector from './SpellSelector.vue';
-import CombatEndModal from './CombatEndModal.vue';
-import { useCombatEngine } from '@/composables/useCombatEngine';
-import { useCombat } from '@/composables/useCombat';
-import { useCombatApi } from '@rpg-gen/api-client';
-import { useCharacterId } from '@/composables/useCharacterId';
-import { useCombatStore } from '@/stores/combatStore';
-import type { CombatantDto } from '@rpg-gen/shared';
-import type { CombatArenaApi } from '@/composables/useCombatEngine';
 
 const {
   registerArena,
@@ -53,13 +47,12 @@ const {
   executeAttack,
   closeActionModal,
   initializeVisual,
+  endTurn,
 } = useCombatEngine();
 
-const { closeCombatEndModal } = useCombat();
-const combatStore = useCombatStore();
-const { isCombatEndModalOpen } = storeToRefs(combatStore);
 const characterId = useCharacterId();
 const combatApi = useCombatApi(characterId);
+const { isInCombat: inCombat } = combatApi;
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);
@@ -69,12 +62,33 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 
 // Register arena API when mounted
 onMounted(async () => {
+  console.log("[CombatPanel] onMounted called, inCombat:", inCombat.value);
   const arena = arenaRef.value;
   if (!arena || !('getContainer' in arena) || !('init' in arena)) return;
   registerArena(arena as CombatArenaApi);
   const container = arena.getContainer();
   if (!container) return;
   await arena.init(container);
+
+  // Expose E2E API for testing - use combatApi directly to avoid multiple useCombat instances
+  exposeE2ECombatApi({
+    executeAttack: async (target, spellName) => {
+      // Call combatApi directly instead of going through useCombatEngine -> useCombat
+      const charId = characterId.value;
+      if (!charId) return;
+      await combatApi.attack.mutateAsync({ target, spellName, characterId: charId });
+    },
+    endTurn: async () => {
+      const charId = characterId.value;
+      if (!charId) return;
+      await combatApi.endTurn.mutateAsync(charId);
+    },
+    getEnemies: () => combatApi.status.data.value?.enemies ?? [],
+    getPlayer: () => combatApi.status.data.value?.player ?? null,
+    isInCombat: () => combatApi.isInCombat.value,
+    getCombatEnd: () => combatApi.status.data.value?.combatEnd,
+    refetch: async () => { await combatApi.status.refetch(); },
+  });
 
   if (inCombat.value) {
     await initializeVisual();
@@ -98,6 +112,7 @@ watch(
 
 onUnmounted(() => {
   unregisterArena();
+  cleanupE2ECombatApi();
 });
 </script>
 

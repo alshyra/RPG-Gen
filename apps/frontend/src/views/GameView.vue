@@ -32,6 +32,12 @@
       @close="() => (showDeathModal = false)"
     />
 
+    <!-- Combat end modal (victory/defeat) -->
+    <CombatEndModal
+      :is-open="isCombatEndModalOpen"
+      @close="closeCombatEndModal"
+    />
+
     <!-- Roll confirmation modal (shows when store.showRollModal is true) -->
     <RollModal />
 
@@ -60,21 +66,25 @@
 </template>
 
 <script setup lang="ts">
+console.log("[GameView] Script setup executing");
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useGameRolls } from "@/composables/useGameRolls";
 import { useUiStore } from "@/stores/uiStore";
-import { useCharacter, useCombat } from "@rpg-gen/api-client";
+import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
 import { storeToRefs } from "pinia";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DeathModal from "../components/game/DeathModal.vue";
 import RollModal from "../components/game/RollModal.vue";
+import CombatEndModal from "../components/game/combat-panel/CombatEndModal.vue";
 import ChatBar from "../components/layout/ChatBar.vue";
 import { useGameMessages } from "../composables/useGameMessages";
 import { useGameSession } from "../composables/useGameSession";
 import { useGameStore } from "../stores/gameStore";
+import { useCombatStore } from "../stores/combatStore";
 import CharacterInfoPanel from "./game/CharacterInfoPanel.vue";
 import { useCharacterId } from "@/composables/useCharacterId";
+import { useCombat } from "@/composables/useCombat";
 
 // State
 const router = useRouter();
@@ -85,7 +95,11 @@ const ui = useUiStore();
 const { startGame } = useGameSession();
 const { sendMessage, retryLastMessage } = useGameMessages();
 const characterId = useCharacterId()
-const { isInCombat, status } = useCombat(currentCharacter?.value?.characterId)
+const { isInCombat, status } = useCombatApi(currentCharacter?.value?.characterId)
+// IMPORTANT: Call useCombat to activate combat end detection watcher
+const { closeCombatEndModal } = useCombat();
+const combatStore = useCombatStore();
+const { isCombatEndModalOpen } = storeToRefs(combatStore);
 const { pendingInstruction } = storeToRefs(gameStore);
 const showDeathModal = computed(() => status.data.value?.player.hp === 0);
 

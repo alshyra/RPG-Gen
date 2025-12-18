@@ -270,12 +270,15 @@ export function useCombat() {
   // Combat End Detection via Watchers
   // ─────────────────────────────────────────────────────
   // Watcher: Detect combat end via backend flag
+  // Watch the entire data object so Vue detects when refetch replaces it
   watch(
-    () => combatApi.status.data.value?.combatEnd,
-    async combatEnd => {
+    () => combatApi.status.data.value,
+    async data => {
+      const combatEnd = data?.combatEnd;
       if (!combatEnd) return; // Only trigger when combatEnd is populated
       await handleCombatEnd();
     },
+    { immediate: true }, // Trigger immediately if combatEnd already exists
   );
 
   return {

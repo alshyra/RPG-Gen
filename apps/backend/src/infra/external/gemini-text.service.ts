@@ -95,7 +95,7 @@ export class GeminiTextService {
     try {
       const response = await chat.sendMessage({ message });
       text = response.text;
-    } catch (e) {
+    } catch {
       throw new ServiceUnavailableException(
         "Gemini API is temporarily unavailable. Please try again in a moment.",
       );

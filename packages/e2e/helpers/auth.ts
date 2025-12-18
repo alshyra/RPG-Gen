@@ -26,7 +26,7 @@ function generateMockToken(): string {
  * Sets token in localStorage so app thinks user is authenticated
  */
 export async function mockAuthentication(page: Page) {
-  await page.goto("/");
+  await page.goto("http://localhost:5173/");
 
   const mockToken = generateMockToken();
 

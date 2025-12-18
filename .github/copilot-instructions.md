@@ -82,3 +82,76 @@ Where to look first
 If unclear: ask 1–2 clarifying questions before making changes (for example: "Do you want an API-only change or end-to-end validation?" or "Should I add unit tests, or a small integration test using Docker Compose?").
 
 Note: See `.github/agents/dev.agent.md` for our conversational/approval rules and PR checklists — follow them when proposing changes.
+
+
+## Règles pour les tests E2E avec Playwright
+
+## Principe fondamental
+Un test E2E doit simuler le comportement d'un véritable utilisateur. 
+L'utilisateur ne fait PAS d'appels API directs - il clique, tape, navigue.
+
+### Quand utiliser `page.request` (API directe)
+
+✅ **AUTORISÉ : Setup et assertions backend**
+- Préparer l'état initial (créer des données de test)
+- Vérifier l'état final du backend après actions UI
+- Nettoyer après les tests
+```javascript
+// ✅ BON : Setup
+await page.request.post('/api/combat/start', {...});
+await page.goto('/combat');
+
+// ✅ BON : Assertion backend après action UI
+await page.click('button[data-action="attack"]');
+const status = await page.request.get('/api/combat/status');
+expect(status.inCombat).toBe(false);
+```
+
+❌ **INTERDIT : Actions utilisateur**
+- Toute action qu'un utilisateur ferait via l'interface
+- Attaquer, se déplacer, cliquer sur des boutons
+- Soumettre des formulaires
+```javascript
+// ❌ MAUVAIS : Action via API
+await page.request.post('/api/combat/action', {
+  data: { actionType: "attack" }
+});
+
+// ✅ BON : Action via UI
+await page.getByRole('button', { name: 'Attaquer' }).click();
+await page.locator('[data-enemy-id="1"]').click();
+```
+
+### Structure d'un test E2E
+```javascript
+test('user journey', async ({ page }) => {
+  // 1. SETUP (API OK)
+  await page.request.post('/api/setup', {...});
+  
+  // 2. NAVIGATION (UI)
+  await page.goto('/path');
+  
+  // 3. ACTIONS (UI SEULEMENT - pas d'API)
+  await page.click('button');
+  await page.fill('input', 'value');
+  
+  // 4. ASSERTIONS (UI + optionnel: vérif backend)
+  await expect(page.locator('.result')).toBeVisible();
+  const apiState = await page.request.get('/api/state');
+  expect(apiState.data).toBe(expectedValue);
+});
+```
+
+### Tests API
+
+**Les tests API existent déjà dans les tests backend (ava).**
+Ne les duplique pas dans Playwright - Playwright est pour l'UI uniquement.
+
+### Résumé
+
+**Test E2E = Simulation utilisateur réel**
+- Setup : `page.request` ✅
+- Actions : UI uniquement (`page.click()`, etc.) ❌ **JAMAIS `page.request`**
+- Vérifications : UI + optionnel `page.request.get()` pour état backend ✅
+
+**Si tu veux tester la logique API, utilise les tests backend (ava) existants.**
