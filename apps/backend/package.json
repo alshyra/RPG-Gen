@@ -9,7 +9,7 @@
     "build": "nest build",
     "type-check": "tsc -p tsconfig.json",
     "test": "ava",
-    "generate:openapi": "ts-node ./src/scripts/generate-openapi-types.ts",
+    "generate:openapi": "node --loader ts-node/esm ./src/scripts/generate-openapi-types.ts",
     "import:spells": "ts-node ./src/scripts/import-spells.ts"
   },
   "dependencies": {
