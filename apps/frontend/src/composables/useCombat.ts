@@ -40,10 +40,6 @@ export function useCombat() {
     return response;
   };
 
-
-
-
-
   /**
    * Initialize combat from a combat_start instruction
    */
@@ -96,10 +92,6 @@ export function useCombat() {
       gameStore.appendMessage("system", `❌ Erreur de combat: ${errorMsg}`);
     }
   };
-
-
-
-
 
   const processAttackResult = async (result: CombatActionResponseDto, target: CombatantDto) => {
     if (!target?.id) {
