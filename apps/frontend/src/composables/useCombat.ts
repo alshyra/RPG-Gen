@@ -1,18 +1,15 @@
 import { useCombatStore } from "@/stores/combatStore";
 import { useCharacter, useCombat as useCombatApi } from "@rpg-gen/api-client";
-import type {
+import {
   CombatActionResponseDto,
   CombatantDto,
   CombatStartInstructionMessageDto,
-  CombatStartRequestDto,
-  CombatStateDto,
   EndPlayerTurnResponseDto,
 } from "@rpg-gen/shared";
 import { useRouter } from "vue-router";
 import { watch } from "vue";
 import { useGameStore } from "../stores/gameStore";
 import { useCharacterId } from "./useCharacterId";
-import { useCombatInfo } from "./useCombatStatus";
 import { useCurrentCharacter } from "./useCurrentCharacter";
 import { storeToRefs } from "pinia";
 
@@ -26,34 +23,10 @@ export function useCombat() {
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
   const combatApi = useCombatApi(characterId);
-  const combatInfo = useCombatInfo();
   const character = useCharacter(characterId);
   const combatStore = useCombatStore();
   const { currentPlayerAttackLog, currentAttackView, isCombatEndModalOpen } =
     storeToRefs(combatStore);
-
-  /**
-   * Start a combat session
-   * Replaces combatStore.startCombat()
-   */
-  const startCombat = async (
-    charId: string,
-    instruction: CombatStartRequestDto,
-  ): Promise<CombatStateDto> => {
-    const response = await combatApi.startCombat.mutateAsync({
-      characterId: charId,
-      data: instruction,
-    });
-    return response;
-  };
-
-  /**
-   * Fetch current combat status
-   * Replaces combatStore.fetchStatus()
-   */
-  const fetchCombatStatus = async (): Promise<void> => {
-    await combatApi.status.refetch();
-  };
 
   /**
    * End player turn and get enemy attack logs
@@ -67,44 +40,9 @@ export function useCombat() {
     return response;
   };
 
-  /**
-   * Perform an attack against a target
-   * Replaces combatStore.performAttack() - now uses executeAttack internally
-   */
-  const performAttack = async (
-    target: CombatantDto,
-    spellName?: string,
-  ): Promise<CombatActionResponseDto> => {
-    return combatApi.attack.mutateAsync({
-      characterId: characterId.value!,
-      target,
-      spellName,
-    });
-  };
 
-  /**
-   * End the current combat session
-   * Replaces combatStore.endCombatSession()
-   */
-  const endCombatSession = async (charId: string): Promise<void> => {
-    await combatApi.endCombat.mutateAsync(charId);
-    combatStore.clearCombat();
-  };
 
-  const displayCombatStartSuccess = (combatState: {
-    narrative?: string;
-    turnOrder: {
-      name: string;
-      initiative: number;
-    }[];
-  }): void => {
-    if (combatState.narrative) gameStore.appendMessage("system", combatState.narrative);
-    const initiativeOrder = combatState.turnOrder
-      .map(c => `${c.name} (${c.initiative})`)
-      .join(" → ");
-    gameStore.appendMessage("system", `📋 Ordre d'initiative: ${initiativeOrder}`);
-    gameStore.appendMessage("system", "Utilisez /attack [nom_ennemi] pour attaquer.");
-  };
+
 
   /**
    * Initialize combat from a combat_start instruction
@@ -120,7 +58,10 @@ export function useCombat() {
     try {
       const payload = { combat_start: instruction.combat_start };
       const currentHp = c.hp ?? 0;
-      const combatState = await startCombat(c.characterId, payload);
+      const combatState = await combatApi.startCombat.mutateAsync({
+        characterId: c.characterId,
+        data: payload,
+      });
 
       // Check if player took damage during initiative (enemy attacked first)
       const newHp = combatState.player?.hp ?? currentHp;
@@ -139,7 +80,12 @@ export function useCombat() {
         await character.kill.mutateAsync({ deathLocation: "Combat" });
       }
 
-      displayCombatStartSuccess(combatState);
+      if (combatState.narrative) gameStore.appendMessage("system", combatState.narrative);
+      const initiativeOrder = combatState.turnOrder
+        .map(c => `${c.name} (${c.initiative})`)
+        .join(" → ");
+      gameStore.appendMessage("system", `📋 Ordre d'initiative: ${initiativeOrder}`);
+      gameStore.appendMessage("system", "Utilisez /attack [nom_ennemi] pour attaquer.");
       // Navigate to combat arena when combat starts
       await router.push({
         name: "game-combat",
@@ -151,53 +97,9 @@ export function useCombat() {
     }
   };
 
-  const displayAttackResultMessage = (
-    target: CombatantDto,
-    result: CombatActionResponseDto,
-  ): void => {
-    const targetName = target?.name || "cible inconnue";
-    const { damageTotal, isCrit } = result;
-    if (damageTotal && damageTotal > 0) {
-      const critMsg = isCrit ? " (CRITIQUE!)" : "";
-      gameStore.appendMessage(
-        "system",
-        `✅ Attaque réussie contre ${targetName}! Dégâts: ${damageTotal}${critMsg}`,
-      );
-    } else {
-      gameStore.appendMessage("system", `❌ Attaque manquée contre ${targetName}.`);
-    }
-  };
 
-  const handleAttackError = (err: unknown): void => {
-    const message = err instanceof Error ? err.message : "Failed to attack";
-    const sessionLost =
-      message.includes("Combat session not found") ||
-      message.includes("Character is not in combat");
-    if (sessionLost) {
-      combatStore.clearCombat();
-      gameStore.appendMessage(
-        "system",
-        "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
-      );
-    } else {
-      gameStore.appendMessage("system", `❌ Erreur: ${message}`);
-    }
-  };
 
-  const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
-  const showPlayerAttackAnimation = async (result: CombatActionResponseDto): Promise<void> => {
-    currentPlayerAttackLog.value = result;
-    await delay(combatStore.PLAYER_ATTACK_DELAY_MS);
-    currentPlayerAttackLog.value = null;
-  };
-
-  /* Helpers to keep executeAttack small (reduce statement count) */
-  const beginAttack = (target: CombatantDto) => {
-    const targetName = target?.name || "cible inconnue";
-    gameStore.appendMessage("user", `J'attaque ${targetName}!`);
-    gameStore.sending = true;
-  };
 
   const processAttackResult = async (result: CombatActionResponseDto, target: CombatantDto) => {
     if (!target?.id) {
@@ -206,12 +108,14 @@ export function useCombat() {
     }
 
     // snapshot previous state (before applying server-returned state)
-    const prevEnemies = combatInfo.enemies.value.map(e => ({ ...e }));
-    const prevPlayer = combatInfo.player.value ? { ...combatInfo.player.value } : null;
+    const prevEnemies = (combatApi.status.data.value?.enemies ?? []).map(e => ({ ...e }));
+    const prevPlayer = combatApi.status.data.value?.player
+      ? { ...combatApi.status.data.value.player }
+      : null;
 
     // build client-friendly AttackView so components can display consistent values
     const targetBefore = prevEnemies.find(e => e.id === target.id);
-    const targetAfter = combatInfo.enemies.value.find(e => e.id === target.id);
+    const targetAfter = (combatApi.status.data.value?.enemies ?? []).find(e => e.id === target.id);
     const attackView = {
       attacker: prevPlayer?.name ?? "Vous",
       attackerId: prevPlayer?.id,
@@ -229,8 +133,21 @@ export function useCombat() {
 
     currentAttackView.value = attackView;
 
-    await showPlayerAttackAnimation(result);
-    displayAttackResultMessage(target, result);
+    currentPlayerAttackLog.value = result;
+    await new Promise(resolve => setTimeout(resolve, combatStore.PLAYER_ATTACK_DELAY_MS));
+    currentPlayerAttackLog.value = null;
+
+    const targetName = target?.name || "cible inconnue";
+    const { damageTotal, isCrit } = result;
+    if (damageTotal && damageTotal > 0) {
+      const critMsg = isCrit ? " (CRITIQUE!)" : "";
+      gameStore.appendMessage(
+        "system",
+        `✅ Attaque réussie contre ${targetName}! Dégâts: ${damageTotal}${critMsg}`,
+      );
+    } else {
+      gameStore.appendMessage("system", `❌ Attaque manquée contre ${targetName}.`);
+    }
     // Combat end is now detected automatically by watchers
   };
 
@@ -242,7 +159,7 @@ export function useCombat() {
     if (!c?.characterId) return;
 
     // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
-    if (!combatInfo.canAct.value) {
+    if (!combatApi.canAct.value) {
       gameStore.appendMessage("system", `⚠️ Vous n'avez plus de points d'action disponibles.`);
       return;
     }
@@ -250,7 +167,9 @@ export function useCombat() {
     // Prevent duplicate calls while a send is in progress
     if (gameStore.sending) return;
 
-    beginAttack(target);
+    const targetName = target?.name || "cible inconnue";
+    gameStore.appendMessage("user", `J'attaque ${targetName}!`);
+    gameStore.sending = true;
 
     try {
       const result = await combatApi.attack.mutateAsync({
@@ -260,7 +179,19 @@ export function useCombat() {
       });
       await processAttackResult(result, target);
     } catch (err) {
-      handleAttackError(err);
+      const message = err instanceof Error ? err.message : "Failed to attack";
+      const sessionLost =
+        message.includes("Combat session not found") ||
+        message.includes("Character is not in combat");
+      if (sessionLost) {
+        combatStore.clearCombat();
+        gameStore.appendMessage(
+          "system",
+          "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
+        );
+      } else {
+        gameStore.appendMessage("system", `❌ Erreur: ${message}`);
+      }
     } finally {
       gameStore.sending = false;
     }
@@ -331,8 +262,8 @@ export function useCombat() {
    */
   const checkCombatStatus = async (): Promise<boolean> => {
     if (!currentCharacter) return false;
-    await fetchCombatStatus();
-    const inCombat = combatInfo.inCombat.value;
+    await combatApi.status.refetch();
+    const inCombat = combatApi.isInCombat.value;
     // If player is in combat after refresh, navigate to combat arena
     if (inCombat) {
       await router.push({
@@ -348,20 +279,16 @@ export function useCombat() {
   // ─────────────────────────────────────────────────────
   // Watcher: Detect combat end via backend flag
   watch(
-    () => combatInfo.combatEnd.value,
-    async (combatEnd) => {
+    () => combatApi.status.data.value?.combatEnd,
+    async combatEnd => {
       if (!combatEnd) return; // Only trigger when combatEnd is populated
       await handleCombatEnd();
     },
   );
 
   return {
-    // Workflow functions (moved from combatStore)
-    startCombat,
-    fetchCombatStatus,
+    // Workflow functions
     endActivation,
-    performAttack,
-    endCombatSession,
 
     // Actions
     initializeCombat,

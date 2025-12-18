@@ -62,7 +62,6 @@ export class CombatOrchestrator {
       return {
         ...state,
         narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-        phase: "PLAYER_TURN" as const,
       };
     }
 
@@ -91,14 +90,12 @@ export class CombatOrchestrator {
       return {
         ...state,
         narrative,
-        phase: "PLAYER_TURN" as const,
       };
     }
 
     // Advance to player's activation and reset economy
     const finalState = await this.combatAppService.getCombatState(characterId);
     finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
-    finalState.phase = "PLAYER_TURN";
     finalState.actionRemaining = finalState.actionMax ?? 1;
     finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
     await this.combatAppService.saveCombatState(finalState);
@@ -113,7 +110,6 @@ export class CombatOrchestrator {
     return {
       ...state,
       narrative: (await this.combatAppService.getCombatSummary(characterId)) ?? undefined,
-      phase: "PLAYER_TURN" as const,
     };
   }
 
@@ -127,8 +123,6 @@ export class CombatOrchestrator {
   ): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException("combat state not found");
-
-    combatState.phase = "ENEMY_TURN";
 
     // Process enemy turns in order; collect attack logs via AppService
     const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
@@ -146,7 +140,6 @@ export class CombatOrchestrator {
     // If the enemy turn did not end the combat (player still alive), advance to next player
     // activation and persist the refreshed state.
     if (!enemyTurnResult.playerDefeated) {
-      finalState.phase = "PLAYER_TURN";
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
       finalState.actionRemaining = finalState.actionMax ?? 1;

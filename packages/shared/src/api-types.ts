@@ -1071,11 +1071,6 @@ export interface components {
             roundNumber: number;
             /** @description Narrative summary of current combat */
             narrative?: string;
-            /**
-             * @description Current combat phase
-             * @enum {string}
-             */
-            phase?: "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";
             /** @description Remaining standard actions for current activation */
             actionRemaining?: number;
             /** @description Maximum standard actions per activation */

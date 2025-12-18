@@ -29,10 +29,14 @@
 </template>
 
 <script setup lang="ts">
-import { useCombatInfo } from '@/composables/useCombatStatus';
+import { useCombat } from '@rpg-gen/api-client';
+import { useCharacterId } from '@/composables/useCharacterId';
 import { UiButton, UiModal } from '@rpg-gen/ui';
+import { computed } from 'vue';
 
-const { narrative } = useCombatInfo();
+const characterId = useCharacterId();
+const combatApi = useCombat(characterId);
+const narrative = computed(() => combatApi.status.data.value?.narrative ?? '');
 
 withDefaults(
   defineProps<{

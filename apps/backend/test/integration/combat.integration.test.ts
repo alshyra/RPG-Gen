@@ -164,9 +164,6 @@ test("initializeCombat sorts turn order by initiative descending", async t => {
       return arr[idx - 1].initiative >= arr[idx].initiative;
     });
     t.true(initiativeSorted, "Turn order should be sorted by initiative descending");
-
-    // After initialization, phase should be PLAYER_TURN indicating player can act
-    t.is(state.phase, "PLAYER_TURN", "After init, phase should be PLAYER_TURN");
   } finally {
     await closeTestApp(testCtx.ctx);
   }

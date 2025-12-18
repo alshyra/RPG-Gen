@@ -39,7 +39,8 @@ import SpellSelector from './SpellSelector.vue';
 import CombatEndModal from './CombatEndModal.vue';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@/composables/useCombat';
-import { useCombatInfo } from '@/composables/useCombatStatus';
+import { useCombatApi } from '@rpg-gen/api-client';
+import { useCharacterId } from '@/composables/useCharacterId';
 import { useCombatStore } from '@/stores/combatStore';
 import type { CombatantDto } from '@rpg-gen/shared';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
@@ -57,8 +58,8 @@ const {
 const { closeCombatEndModal } = useCombat();
 const combatStore = useCombatStore();
 const { isCombatEndModalOpen } = storeToRefs(combatStore);
-const combatInfo = useCombatInfo();
-const inCombat = combatInfo.inCombat;
+const characterId = useCharacterId();
+const combatApi = useCombatApi(characterId);
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);
@@ -86,7 +87,7 @@ onMounted(async () => {
 
 // Watch only for combat starting (inCombat changing from false to true)
 watch(
-  () => combatInfo.inCombat.value,
+  () => combatApi.isInCombat.value,
   async (inCombatNow, wasInCombat) => {
     if (!inCombatNow || wasInCombat || !arenaRef.value) return;
     // Only initialize when combat STARTS, not on every state change

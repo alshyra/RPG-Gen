@@ -11,8 +11,6 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 
-export type CombatPhase = "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";
-
 export class CombatStateDto {
   @ApiProperty({ description: "Character ID" })
   @IsString()
@@ -60,14 +58,6 @@ export class CombatStateDto {
   @IsOptional()
   @IsString()
   narrative?: string;
-
-  @ApiPropertyOptional({
-    description: "Current combat phase",
-    enum: ["PLAYER_TURN", "AWAITING_DAMAGE_ROLL", "ENEMY_TURN", "COMBAT_ENDED"],
-  })
-  @IsOptional()
-  @IsString()
-  phase?: CombatPhase;
 
   // D&D 5e Action Economy
   @ApiPropertyOptional({ description: "Remaining standard actions for current activation" })
@@ -124,7 +114,6 @@ export class CombatStateDto {
     this.inCombat = this.inCombat ?? false;
     this.currentTurnIndex = this.currentTurnIndex ?? 0;
     this.roundNumber = this.roundNumber ?? 1;
-    this.phase = this.phase ?? "PLAYER_TURN";
     this.actionRemaining = this.actionRemaining ?? 1;
     this.actionMax = this.actionMax ?? 1;
     this.bonusActionRemaining = this.bonusActionRemaining ?? 1;

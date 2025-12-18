@@ -91,14 +91,6 @@ export class CombatSession {
 
   @Prop({
     required: false,
-    type: String,
-    enum: ["PLAYER_TURN", "AWAITING_DAMAGE_ROLL", "ENEMY_TURN", "COMBAT_ENDED"],
-    default: "PLAYER_TURN",
-  })
-  phase: string;
-
-  @Prop({
-    required: false,
     type: [String],
     default: [],
   })

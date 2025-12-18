@@ -399,7 +399,11 @@ export function useCombat() {
 
   const updateUnitHealth = (unitId: string, damage: number) => {
     const unit = units.value.get(unitId);
-    if (!unit) return;
+    if (!unit) {
+      throw new Error(
+        `[updateUnitHealth] Unit not found: ${unitId}. Available units: ${Array.from(units.value.keys()).join(", ")}`,
+      );
+    }
     const newHp = Math.max(0, unit.hp - damage);
     const wasDefeated = newHp === 0;
 

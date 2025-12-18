@@ -39,7 +39,6 @@ function createMockCombatService(inCombat = false) {
       turnOrder: [],
       currentTurnIndex: 0,
       roundNumber: 1,
-      phase: "PLAYER_TURN",
       actionRemaining: 1,
       actionMax: 1,
       bonusActionRemaining: 1,

@@ -29,14 +29,6 @@
         <Star class="w-4 h-4" />
         <span>{{ bonusActionRemaining }}</span>
       </div>
-
-      <div
-        class="px-2 py-0.5 rounded text-xs font-medium"
-        data-cy="combat-phase"
-        :class="phaseClass"
-      >
-        {{ phaseLabel }}
-      </div>
     </div>
     <UiButton
       data-cy="end-turn-button"
@@ -54,7 +46,6 @@
 import { UiButton } from '@rpg-gen/ui';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCombat } from '@rpg-gen/api-client';
-import { useCombatInfo } from '@/composables/useCombatStatus';
 import { useCharacterId } from '@/composables/useCharacterId';
 import { Activity, Flag, Star } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -62,41 +53,13 @@ import { computed } from 'vue';
 const { endTurn } = useCombatEngine();
 const characterId = useCharacterId();
 const combatApi = useCombat(characterId);
-const combatInfo = useCombatInfo();
-const { roundNumber, actionRemaining, bonusActionRemaining, phase } = combatInfo;
 
-const phaseLabel = computed(() => {
-  switch (phase.value) {
-    case 'PLAYER_TURN':
-      return 'Your Turn';
-    case 'AWAITING_DAMAGE_ROLL':
-      return 'Roll Damage';
-    case 'ENEMY_TURN':
-      return 'Enemy Turn';
-    case 'COMBAT_ENDED':
-      return 'Combat Over';
-    default:
-      return 'Your Turn';
-  }
-});
+const roundNumber = computed(() => combatApi.status.data.value?.roundNumber ?? 1);
+const actionRemaining = computed(() => combatApi.status.data.value?.actionRemaining ?? 1);
+const bonusActionRemaining = computed(() => combatApi.status.data.value?.bonusActionRemaining ?? 1);
 
-const phaseClass = computed(() => {
-  switch (phase.value) {
-    case 'PLAYER_TURN':
-      return 'bg-green-600 text-white';
-    case 'AWAITING_DAMAGE_ROLL':
-      return 'bg-amber-600 text-white';
-    case 'ENEMY_TURN':
-      return 'bg-red-600 text-white';
-    case 'COMBAT_ENDED':
-      return 'bg-slate-600 text-white';
-    default:
-      return 'bg-green-600 text-white';
-  }
-});
-
-// Can end turn only during player turn
-const canEndTurn = computed(() => phase.value === 'PLAYER_TURN' && !combatApi.endTurn.isPending.value);
+// Can end turn if there are no pending mutations
+const canEndTurn = computed(() => !combatApi.endTurn.isPending.value);
 
 const endTurnButtonClass = computed(() => {
   if (!canEndTurn.value) {

@@ -2688,16 +2688,6 @@
             "type": "string",
             "description": "Narrative summary of current combat"
           },
-          "phase": {
-            "type": "string",
-            "description": "Current combat phase",
-            "enum": [
-              "PLAYER_TURN",
-              "AWAITING_DAMAGE_ROLL",
-              "ENEMY_TURN",
-              "COMBAT_ENDED"
-            ]
-          },
           "actionRemaining": {
             "type": "number",
             "description": "Remaining standard actions for current activation"

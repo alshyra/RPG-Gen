@@ -100,12 +100,6 @@ const combatApi = {
   },
 };
 
-// Query keys factory
-export const combatKeys = {
-  all: ["combat"] as const,
-  status: (characterId: string) => [...combatKeys.all, "status", characterId] as const,
-};
-
 /**
  * Vue Query wrapper for combat operations
  */
@@ -114,39 +108,30 @@ export function useCombat(
   options?: { enabled?: boolean },
 ) {
   const queryClient = useQueryClient();
-  const id = computed(() => toValue(characterId));
 
   const status = useQuery({
-    queryKey: computed(() => {
-      const charId = id.value;
-      return charId ? combatKeys.status(charId) : ["combat"];
-    }),
+    queryKey: ["combat", toValue(characterId)],
     queryFn: async () => {
-      const charId = id.value;
+      const charId = toValue(characterId);
       if (!charId) throw new Error("Character ID is required");
       return combatApi.getStatus(charId);
     },
-    enabled: computed(() => {
-      const charId = id.value;
-      return options?.enabled !== false && !!charId;
-    }),
+    enabled: computed(() => options?.enabled !== false && !!toValue(characterId)),
   });
 
   const startCombat = useMutation({
-    mutationFn: async (data: { characterId: string; data: CombatStartRequestDto }) => {
-      return combatApi.startCombat(data.characterId, data.data);
-    },
+    mutationFn: async (data: { characterId: string; data: CombatStartRequestDto }) =>
+      combatApi.startCombat(data.characterId, data.data),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });
     },
   });
 
   const executeAction = useMutation({
-    mutationFn: async (data: { characterId: string; action: CombatActionRequestDto }) => {
-      return combatApi.executeAction(data.characterId, data.action);
-    },
+    mutationFn: async (data: { characterId: string; action: CombatActionRequestDto }) =>
+      combatApi.executeAction(data.characterId, data.action),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });
     },
   });
 
@@ -156,7 +141,7 @@ export function useCombat(
       return combatApi.attack(data.characterId, data.target, data.spellName);
     },
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });
     },
   });
 
@@ -165,7 +150,7 @@ export function useCombat(
       return combatApi.endTurn(characterId);
     },
     onSuccess: async (_data, characterId) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", characterId] });
     },
   });
 
@@ -174,16 +159,15 @@ export function useCombat(
       return combatApi.flee(characterId);
     },
     onSuccess: async (_data, characterId) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", characterId] });
     },
   });
 
   const move = useMutation({
-    mutationFn: async (data: { characterId: string; movement: MovementRequestDto }) => {
-      return combatApi.move(data.characterId, data.movement);
-    },
+    mutationFn: async (data: { characterId: string; movement: MovementRequestDto }) =>
+      combatApi.move(data.characterId, data.movement),
     onSuccess: async (_data, variables) => {
-      await queryClient.invalidateQueries({ queryKey: combatKeys.status(variables.characterId) });
+      await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });
     },
   });
 
@@ -200,5 +184,13 @@ export function useCombat(
     move,
     isInCombat,
     isLoading,
+    // Filtered/computed properties only
+    aliveEnemies: computed(() => (status.data.value?.enemies ?? []).filter(e => (e.hp ?? 0) > 0)),
+    validTargets: computed(() =>
+      (status.data.value?.enemies ?? []).filter(e => (e.hp ?? 0) > 0).map(e => e.name),
+    ),
+    hasValidTarget: computed(() => (status.data.value?.enemies ?? []).some(e => (e.hp ?? 0) > 0)),
+    canAct: computed(() => (status.data.value?.actionRemaining ?? 0) > 0),
+    canBonusAct: computed(() => (status.data.value?.bonusActionRemaining ?? 0) > 0),
   };
 }

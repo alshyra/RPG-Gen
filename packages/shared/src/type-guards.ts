@@ -105,8 +105,3 @@ export function isGameInstruction(instruction: unknown): instruction is GameInst
     isCombatStartInstruction(instruction)
   );
 }
-
-/**
- * Combat phase type (matches backend CombatPhase)
- */
-export type CombatPhase = "PLAYER_TURN" | "AWAITING_DAMAGE_ROLL" | "ENEMY_TURN" | "COMBAT_ENDED";

@@ -1,12 +1,10 @@
 // packages/frontend/src/composables/useCombatEngine.ts
 import { CombatAdapter } from "@/adapters/combatAdapters";
-import { useCombat as useCombatApi } from "@rpg-gen/api-client";
+import { useCharacterId } from "@/composables/useCharacterId";
 import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useCharacterId } from "@/composables/useCharacterId";
 import { useCombatStore } from "@/stores/combatStore";
-import { useCombatInfo } from "@/composables/useCombatStatus";
-import { useGameStore } from "@/stores/gameStore";
+import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
@@ -47,12 +45,10 @@ export interface CombatArenaApi {
 export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
-  const gameStore = useGameStore();
   const { currentAttackView } = storeToRefs(combatStore);
-  const combatInfo = useCombatInfo();
-  const { enemies, player } = combatInfo;
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
+  const combat = useCombatApi(characterId);
 
   // Reference to the CombatArena component API (set via registerArena)
   const arenaApi = shallowRef<CombatArenaApi | null>(null);
@@ -60,6 +56,9 @@ export function useCombatEngine() {
   // State for the action modal
   const isActionModalOpen = ref(false);
   const selectedTarget = ref<CombatantDto | null>(null);
+
+  // Freeze UI while replaying enemy attacks animations
+  const isReplaying = ref(false);
 
   const registeredHandlers: {
     event: keyof CombatEngineEventPayload;
@@ -88,34 +87,15 @@ export function useCombatEngine() {
     arenaApi.value = null;
   };
 
-  const combat = useCombatApi(characterId);
-
   const endTurn = async () => {
     if (!currentCharacter || combat.endTurn.isPending.value) return;
 
-    try {
-      // Use the mutation to end turn and get response with attackLogs
-      const response = await combat.endTurn.mutateAsync(characterId.value!);
+    console.log("entering end turn, resolving ennemies attacks...");
+    const response = await combat.endTurn.mutateAsync(characterId.value!);
 
-      // Replay enemy attacks on visual engine (if arena is registered)
-      if (response.attackLogs?.length) {
-        await replayEnemyAttacks(response.attackLogs);
-      }
-
-      // Combat state is automatically updated via TanStack Query after endTurn
-      // No need to manually update - the query will invalidate and refetch
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      if (
-        message.includes("Combat session not found") ||
-        message.includes("No active combat found")
-      ) {
-        combatStore.clearCombat();
-        gameStore.appendMessage(
-          "system",
-          "⚠️ Combat terminé (session introuvable) — l'état a été réinitialisé.",
-        );
-      }
+    // Replay enemy attacks on visual engine (if arena is registered)
+    if (response.attackLogs?.length) {
+      await replayEnemyAttacks(response.attackLogs);
     }
   };
   /**
@@ -134,7 +114,7 @@ export function useCombatEngine() {
       }
 
       // Find the enemy in store
-      const enemy = enemies.value.find(e => e.id === payload.unitId);
+      const enemy = (combat.status.data.value?.enemies ?? []).find(e => e.id === payload.unitId);
       if (!enemy) {
         console.warn("[useCombatEngine] Enemy not found in store:", payload.unitId);
         return;
@@ -218,17 +198,23 @@ export function useCombatEngine() {
    * Replay enemy attack logs on the visual engine (after end-turn)
    */
   const replayEnemyAttacks = async (logs: EnemyAttackLogDto[]) => {
-    if (!arenaApi.value || !player.value) return;
+    isReplaying.value = true;
+    try {
+      console.log("replayEnemyAttacks", logs);
+      if (!arenaApi.value || !combat.status.data.value?.player) return;
 
-    for (const log of logs) {
-      // Animate attack (TODO: add attack animation method)
-      // For now just update health
-      if (log.hit && log.damageTotal) {
-        arenaApi.value.updateUnitHealth(log.targetId, log.damageTotal);
+      for (const log of logs) {
+        // Animate attack (TODO: add attack animation method)
+        // For now just update health
+        if (log.hit && log.damageTotal) {
+          arenaApi.value.updateUnitHealth(log.targetId, log.damageTotal);
+        }
+
+        // Small delay between attacks for visibility
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-
-      // Small delay between attacks for visibility
-      await new Promise(resolve => setTimeout(resolve, 500));
+    } finally {
+      isReplaying.value = false;
     }
   };
 
@@ -236,22 +222,21 @@ export function useCombatEngine() {
    * Initialize visual arena with current combat state
    */
   const initializeVisual = async () => {
-    if (!arenaApi.value || !combatInfo.inCombat.value) return;
+    if (!arenaApi.value || !combat.isInCombat.value) return;
 
     // Clear old units before re-initializing
     await arenaApi.value.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter?.value?.characterId ?? "",
-      inCombat: combatInfo.inCombat.value,
-      enemies: enemies.value,
-      player: player.value!,
-      turnOrder: combatInfo.turnOrder.value,
-      currentTurnIndex: combatInfo.currentTurnIndex.value,
-      roundNumber: combatInfo.roundNumber.value,
-      phase: combatInfo.phase.value,
-      actionRemaining: combatInfo.actionRemaining.value,
-      actionMax: combatInfo.actionMax.value,
+      inCombat: combat.isInCombat.value,
+      enemies: combat.status.data.value?.enemies ?? [],
+      player: combat.status.data.value?.player!,
+      turnOrder: combat.status.data.value?.turnOrder ?? [],
+      currentTurnIndex: combat.status.data.value?.currentTurnIndex ?? 0,
+      roundNumber: combat.status.data.value?.roundNumber ?? 1,
+      actionRemaining: combat.status.data.value?.actionRemaining ?? 1,
+      actionMax: combat.status.data.value?.actionMax ?? 1,
     });
 
     // Create units from config
@@ -275,11 +260,16 @@ export function useCombatEngine() {
   watch(
     () => combatStore.currentEnemyAttackLog,
     log => {
-      if (!log || !arenaApi.value || !player.value?.hp) return;
+      if (!log || !arenaApi.value || !combat.status.data.value?.player?.hp) return;
 
       // Enemy attacks player - update player HP (use damage from log)
-      if (log.hit && log.damageTotal && arenaApi.value.updateUnitHealth && player.value) {
-        arenaApi.value.updateUnitHealth(player.value.id, log.damageTotal);
+      if (
+        log.hit &&
+        log.damageTotal &&
+        arenaApi.value.updateUnitHealth &&
+        combat.status.data.value?.player
+      ) {
+        arenaApi.value.updateUnitHealth(combat.status.data.value.player.id, log.damageTotal);
         console.log(
           "[useCombatEngine] Updated player HP after enemy attack, damage:",
           log.damageTotal,
@@ -321,6 +311,7 @@ export function useCombatEngine() {
     // Modal state
     isActionModalOpen,
     selectedTarget,
+    isReplaying,
 
     // Actions
     executeAttack,
