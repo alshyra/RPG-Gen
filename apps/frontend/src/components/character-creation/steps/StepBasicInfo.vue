@@ -11,19 +11,13 @@
       />
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block font-medium mb-2">Genre</label>
-        <UiButtonToggle
-          :options="genderOptions"
-          :model-value="currentCharacter?.gender"
-          @update:model-value="onUpdateGender($event as (typeof GENDERS)[number])"
-        />
-      </div>
-    </div>
     <div>
-      <label class="block font-medium mb-2">Race</label>
-      <RacePicker />
+      <label class="block font-medium mb-2">Genre</label>
+      <UiButtonToggle
+        :options="genderOptions"
+        :model-value="currentCharacter?.gender"
+        @update:model-value="onUpdateGender($event as (typeof GENDERS)[number])"
+      />
     </div>
   </div>
 </template>
@@ -33,7 +27,6 @@ import { UiButtonToggle, UiInputText } from '@rpg-gen/ui';
 import { GENDERS } from '@/services/dndRulesService';
 import { useDebounceFn } from '@vueuse/core';
 import { computed } from 'vue';
-import RacePicker from '../RacePicker.vue';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { useCharacter } from '@rpg-gen/api-client';
 import { useCharacterId } from '@/composables/useCharacterId';

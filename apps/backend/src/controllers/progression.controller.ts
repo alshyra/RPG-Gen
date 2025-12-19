@@ -2,20 +2,13 @@ import { Controller, Post, Get, Body, Param, UseGuards, Request } from "@nestjs/
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import { ProgressionService } from "../domain/progression/progression.service.js";
-
-// DTOs
-class SelectClassDto {
-  className: string;
-}
-
-class SelectRaceDto {
-  raceId: string;
-}
-
-class UnlockRankDto {
-  voieId: string;
-  rank: number;
-}
+import { 
+  SelectClassDto, 
+  SelectRaceDto, 
+  UnlockRankDto,
+  ClassMetadataDto,
+  RaceMetadataDto 
+} from "../domain/progression/dto/index.js";
 
 @ApiTags("progression")
 @Controller("progression")
@@ -26,15 +19,14 @@ export class ProgressionController {
 
   @Get("classes")
   @ApiOperation({ summary: "Get available classes for character creation" })
-  @ApiResponse({ status: 200, description: "List of available classes with metadata" })
-  @ApiResponse({type: })
+  @ApiResponse({ status: 200, description: "List of available classes with metadata", type: [ClassMetadataDto] })
   getAvailableClasses() {
     return this.progressionService.getAvailableClasses();
   }
 
   @Get("races")
   @ApiOperation({ summary: "Get available races for character creation" })
-  @ApiResponse({ status: 200, description: "List of available races with bonuses and traits" })
+  @ApiResponse({ status: 200, description: "List of available races with bonuses and traits", type: [RaceMetadataDto] })
   async getAvailableRaces() {
     return this.progressionService.getAvailableRaces();
   }

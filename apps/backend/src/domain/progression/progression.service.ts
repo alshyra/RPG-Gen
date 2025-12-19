@@ -143,7 +143,8 @@ export class ProgressionService {
     character.level = 1;
 
     // Also set legacy fields for backward compatibility
-    character.classes = [{ name: this.capitalizeClass(normalizedClass), level: 1 }];
+    // No need to update classes in new system - className is used instead
+    // character.classes = [{ name: this.capitalizeClass(normalizedClass), level: 1 }];
 
     await character.save();
     this.logger.log(

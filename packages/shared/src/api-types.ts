@@ -191,23 +191,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/characters/{characterId}/levelup/{className}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Apply level-up choices for a character class */
-        post: operations["CharacterController_applyLevelUp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/characters/{characterId}/inventory/equip": {
         parameters: {
             query?: never;
@@ -1168,14 +1151,6 @@ export interface components {
             /** @description Arbitrary item meta */
             meta?: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"] | components["schemas"]["GenericMeta"];
         };
-        LevelUpApplyDto: {
-            /** @description List of spell definitionIds to add to the character */
-            newSpellIds?: string[];
-            /** @description Ability score increases, e.g. [{ ability: "Str", inc: 1 }] */
-            abilityIncreases?: string[];
-            /** @description Selected combat proficiency IDs for the new level (e.g., "sneak-attack", "cunning-strike") */
-            selectedCombatProficiencies?: string[];
-        };
         EquipInventoryDto: {
             /**
              * @description Definition id of the item to equip
@@ -1440,6 +1415,79 @@ export interface components {
             expr: string;
             advantage?: string;
         };
+        BaseStatsDto: {
+            /**
+             * @description Base HP
+             * @example 12
+             */
+            hp_base: number;
+            /**
+             * @description Base PA (action points)
+             * @example 6
+             */
+            pa: number;
+            /**
+             * @description Base PM (movement points)
+             * @example 4
+             */
+            pm: number;
+        };
+        ClassDefinitionResponseDto: {
+            /**
+             * @description Class name
+             * @example guerrier
+             */
+            name: string;
+            /** @description Base stats for this class */
+            baseStats: components["schemas"]["BaseStatsDto"];
+            /**
+             * @description Proficiencies (finesse, vigueur, etc.)
+             * @example [
+             *       "vigueur",
+             *       "finesse"
+             *     ]
+             */
+            proficiencies: string[];
+            /**
+             * @description Starting aptitude IDs
+             * @example [
+             *       "frappe_simple",
+             *       "posture_defensive"
+             *     ]
+             */
+            startingAptitudes: string[];
+        };
+        TalentRankDto: {
+            /**
+             * @description Rank number (1-5)
+             * @example 1
+             */
+            rank: number;
+            /**
+             * @description Aptitude ID to unlock at this rank
+             * @example frappe_puissante
+             */
+            aptitudeId: string;
+            /**
+             * @description Talent points cost to unlock this rank
+             * @example 1
+             */
+            pointCost: number;
+        };
+        TalentTreeDto: {
+            /**
+             * @description Talent tree (voie) ID
+             * @example voie_guerrier_defense
+             */
+            id: string;
+            /**
+             * @description Talent tree name
+             * @example Voie de la Défense
+             */
+            name: string;
+            /** @description Ranks in this talent tree */
+            ranks: components["schemas"]["TalentRankDto"][];
+        };
         ImageRequestDto: {
             /** @description API token (optional) */
             token?: string;
@@ -1476,9 +1524,164 @@ export interface components {
             /** @description Human-readable result message */
             message: string;
         };
-        SelectClassDto: Record<string, never>;
-        SelectRaceDto: Record<string, never>;
-        UnlockRankDto: Record<string, never>;
+        CharacterStatsDto: {
+            /**
+             * @description Vigor stat
+             * @example 3
+             */
+            vigor: number;
+            /**
+             * @description Finesse stat
+             * @example 1
+             */
+            finesse: number;
+            /**
+             * @description Mind stat
+             * @example 0
+             */
+            mind: number;
+            /**
+             * @description Survival stat
+             * @example 2
+             */
+            survival: number;
+        };
+        ClassBaseStatsDto: {
+            /**
+             * @description Base HP
+             * @example 12
+             */
+            hp: number;
+            /**
+             * @description Base PA (action points)
+             * @example 6
+             */
+            pa: number;
+            /**
+             * @description Base PM (movement points)
+             * @example 4
+             */
+            pm: number;
+            /** @description Base character stats */
+            stats: components["schemas"]["CharacterStatsDto"];
+        };
+        ClassMetadataDto: {
+            /**
+             * @description Class ID
+             * @example guerrier
+             */
+            id: string;
+            /**
+             * @description Internal class name
+             * @example guerrier
+             */
+            name: string;
+            /**
+             * @description Display name for UI
+             * @example Guerrier
+             */
+            displayName: string;
+            /**
+             * @description Class description
+             * @example Maître du combat rapproché, le Guerrier excelle en défense et en puissance brute.
+             */
+            description: string;
+            /** @description Base stats for the class */
+            baseStats: components["schemas"]["ClassBaseStatsDto"];
+            /**
+             * @description Color for UI (hex)
+             * @example #dc2626
+             */
+            color: string;
+            /**
+             * @description Icon emoji
+             * @example ⚔️
+             */
+            icon: string;
+        };
+        RaceBonusesDto: {
+            /**
+             * @description Vigor bonus
+             * @example 1
+             */
+            vigor?: number;
+            /**
+             * @description Finesse bonus
+             * @example 0
+             */
+            finesse?: number;
+            /**
+             * @description Mind bonus
+             * @example 0
+             */
+            mind?: number;
+            /**
+             * @description Survival bonus
+             * @example 1
+             */
+            survival?: number;
+        };
+        RaceMetadataDto: {
+            /**
+             * @description Race ID
+             * @example humain
+             */
+            id: string;
+            /**
+             * @description Race name
+             * @example Humain
+             */
+            name: string;
+            /**
+             * @description Special trait name
+             * @example Polyvalent
+             */
+            trait: string;
+            /**
+             * @description Trait effect description
+             * @example +1 à toutes les compétences
+             */
+            traitEffect: string;
+            /** @description Stat bonuses */
+            bonuses: components["schemas"]["RaceBonusesDto"];
+            /**
+             * @description Color for UI (hex)
+             * @example #3b82f6
+             */
+            color: string;
+            /**
+             * @description Icon emoji
+             * @example 👤
+             */
+            icon: string;
+        };
+        SelectClassDto: {
+            /**
+             * @description Class name to select
+             * @example guerrier
+             * @enum {string}
+             */
+            className: "guerrier" | "rogue" | "mage";
+        };
+        SelectRaceDto: {
+            /**
+             * @description Race ID to select
+             * @example humain
+             */
+            raceId: string;
+        };
+        UnlockRankDto: {
+            /**
+             * @description Talent tree (voie) ID
+             * @example voie_guerrier_defense
+             */
+            voieId: string;
+            /**
+             * @description Rank to unlock (1-5)
+             * @example 1
+             */
+            rank: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -1858,33 +2061,6 @@ export interface operations {
             };
         };
     };
-    CharacterController_applyLevelUp: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-                className: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LevelUpApplyDto"];
-            };
-        };
-        responses: {
-            /** @description Updated character after levelup */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
-                };
-            };
-        };
-    };
     CharacterController_equipInventory: {
         parameters: {
             query?: never;
@@ -2239,7 +2415,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ClassDefinitionResponseDto"][];
+                };
             };
         };
     };
@@ -2260,7 +2438,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ClassDefinitionResponseDto"];
+                };
             };
         };
     };
@@ -2281,7 +2461,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TalentTreeDto"][];
+                };
             };
         };
     };
@@ -2302,7 +2484,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": string[];
+                };
             };
         };
     };
@@ -2424,7 +2608,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ClassMetadataDto"][];
+                };
             };
         };
     };
@@ -2442,7 +2628,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RaceMetadataDto"][];
+                };
             };
         };
     };
@@ -2574,7 +2762,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RaceMetadataDto"][];
+                };
             };
         };
     };
@@ -2595,7 +2785,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RaceMetadataDto"];
+                };
             };
         };
     };

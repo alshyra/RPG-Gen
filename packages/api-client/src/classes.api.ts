@@ -1,51 +1,87 @@
-import type { LevelUpOptionsDto } from "@rpg-gen/shared";
 import { useQuery } from "@tanstack/vue-query";
 import type { MaybeRefOrGetter } from "vue";
 import { computed, toValue } from "vue";
-import { apiClient, getData } from "./index.js";
+import { apiClient } from "./index.js";
 
 const classesApi = {
-  async getLevelOptions(className: string, level: number): Promise<LevelUpOptionsDto> {
-    const response = await apiClient.GET("/api/classes/{className}/levels/{level}", {
-      params: { path: { className, level } },
+  async getAllClasses() {
+    const response = await apiClient.GET("/api/classes");
+    return response.data;
+  },
+  async getClass(className: string) {
+    const response = await apiClient.GET("/api/classes/{className}", {
+      params: { path: { className } },
     });
-    return getData(response);
+    return response.data;
+  },
+  async getTalentTrees(className: string) {
+    const response = await apiClient.GET("/api/classes/{className}/voies", {
+      params: { path: { className } },
+    });
+    return response.data;
+  },
+  async getStartingAptitudes(className: string) {
+    const response = await apiClient.GET("/api/classes/{className}/starting-aptitudes", {
+      params: { path: { className } },
+    });
+    return response.data;
   },
 };
 
 const classesKeys = {
-  levelOptions: (className: string, level: number) =>
-    ["classes", className, "levels", level] as const,
+  all: () => ["classes"] as const,
+  byName: (className: string) => ["classes", className] as const,
+  voies: (className: string) => ["classes", className, "voies"] as const,
+  aptitudes: (className: string) => ["classes", className, "aptitudes"] as const,
 };
 
 export function useClasses(
-  className: MaybeRefOrGetter<string | undefined>,
-  level: MaybeRefOrGetter<number | undefined>,
+  className?: MaybeRefOrGetter<string | undefined>,
   options?: { enabled?: boolean },
 ) {
   const computedClassName = computed(() => toValue(className));
-  const currentLevelValue = computed(() => toValue(level));
 
-  const levelOptions = useQuery({
+  const allClasses = useQuery({
+    queryKey: classesKeys.all(),
+    queryFn: classesApi.getAllClasses,
+    enabled: computed(() => options?.enabled !== false),
+  });
+
+  const classDetails = useQuery({
     queryKey: computed(() => {
       const c = computedClassName.value;
-      const l = currentLevelValue.value;
-      return c && l ? classesKeys.levelOptions(c, l) : ["classes"];
+      return c ? classesKeys.byName(c) : ["classes"];
     }),
     queryFn: async () => {
       const c = computedClassName.value;
-      const l = currentLevelValue.value;
-      if (!c || !l) throw new Error("Class name and level are required");
-      return classesApi.getLevelOptions(c, l);
+      if (!c) throw new Error("Class name is required");
+      return classesApi.getClass(c);
     },
     enabled: computed(() => {
       const c = computedClassName.value;
-      const l = currentLevelValue.value;
-      return options?.enabled !== false && !!c && !!l;
+      return options?.enabled !== false && !!c;
+    }),
+  });
+
+  const talentTrees = useQuery({
+    queryKey: computed(() => {
+      const c = computedClassName.value;
+      return c ? classesKeys.voies(c) : ["classes"];
+    }),
+    queryFn: async () => {
+      const c = computedClassName.value;
+      if (!c) throw new Error("Class name is required");
+      return classesApi.getTalentTrees(c);
+    },
+    enabled: computed(() => {
+      const c = computedClassName.value;
+      return options?.enabled !== false && !!c;
     }),
   });
 
   return {
-    levelOptions,
+    allClasses,
+    classDetails,
+    talentTrees,
   };
 }

@@ -1,36 +1,44 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
-import { computed } from "vue";
+import { computed, MaybeRef, toValue } from "vue";
 import { apiClient } from "./client.js";
+import { ClassMetadataDto, RaceMetadataDto, SelectClassDto, SelectRaceDto, UnlockRankDto } from "@rpg-gen/shared";
+
+type ClassName = SelectClassDto['className'];
 
 // API functions
-async function getAvailableClasses() {
+async function getAvailableClasses(): Promise<ClassMetadataDto[]> {
   const res = await apiClient.GET("/api/progression/classes");
+  if (!res.data) throw new Error("No data received for available classes");
   return res.data;
 }
 
-async function getAvailableRaces() {
+async function getAvailableRaces(): Promise<RaceMetadataDto[]> {
   const res = await apiClient.GET("/api/progression/races");
+  if (!res.data) throw new Error("No data received for available races");
   return res.data;
 }
 
-async function getTalentTrees(className: string) {
-  const res = await apiClient.GET(`/api/classes/{className}/voies`, {
+async function getTalentTrees(className: ClassName) {
+  const res = await apiClient.GET("/api/classes/{className}/voies", {
     params: {
-      query: {
-        className,
-      }
-    }
+      path: { className },
+    },
   });
+  if (!res.data) throw new Error("No data received for talent trees");
   return res.data;
 }
 
 async function selectClass(
   characterId: string,
-  className: string,
+  className: ClassName,
 ) {
-  const res = await apiClient.POST(`/api/progression/{characterId}/select-class`, {
-    params: { characterId },
-    body: { className},
+  const res = await apiClient.POST("/api/progression/{characterId}/select-class", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      className,
+    },
   });
   return res.data;
 }
@@ -39,10 +47,15 @@ async function unlockRank(
   characterId: string,
   voieId: string,
   rank: number,
-): Promise<unknown> {
-  const res = await apiClient.post(`/progression/${characterId}/unlock-rank`, {
-    voieId,
-    rank,
+) {
+  const res = await apiClient.POST("/api/progression/{characterId}/unlock-rank", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      voieId,
+      rank,
+    },
   });
   return res.data;
 }
@@ -50,9 +63,14 @@ async function unlockRank(
 async function selectRace(
   characterId: string,
   raceId: string,
-): Promise<unknown> {
-  const res = await apiClient.post(`/progression/${characterId}/select-race`, {
-    raceId,
+) {
+  const res = await apiClient.POST("/api/progression/{characterId}/select-race", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      raceId,
+    },
   });
   return res.data;
 }
@@ -74,51 +92,53 @@ export function useAvailableRaces() {
   });
 }
 
-export function useTalentTrees(classNameOrRef: string | { value: string }) {
-  const getClassName = () => {
-    if (typeof classNameOrRef === 'string') return classNameOrRef;
-    return classNameOrRef.value;
-  };
+export function useTalentTrees(classNameOrRef: MaybeRef<ClassName>) {
+  const className = toValue(classNameOrRef);
   
   return useQuery({
-    queryKey: computed(() => ["classes", getClassName(), "voies"]),
-    queryFn: () => getTalentTrees(getClassName()),
-    enabled: computed(() => !!getClassName()),
+    queryKey: computed(() => ["classes", className, "voies"]),
+    queryFn: () => getTalentTrees(className),
+    enabled: computed(() => !!className),
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 }
 
-export function useSelectClass(characterId: string) {
+export function useSelectClass(characterIdOrRef: MaybeRef<string>) {
+  const characterId = toValue(characterIdOrRef);
+  
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (className: string) => selectClass(characterId, className),
+    mutationFn: (className: ClassName) => selectClass(characterId, className),
     onSuccess: () => {
-      // Invalidate character query to refresh data
-      queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }
 
-export function useSelectRace(characterId: string) {
+export function useSelectRace(characterIdOrRef: MaybeRef<string>) {
+  const characterId = toValue(characterIdOrRef);
+  
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (raceId: string) => selectRace(characterId, raceId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }
 
-export function useUnlockRank(characterId: string) {
+export function useUnlockRank(characterIdOrRef: MaybeRef<string>) {
+  const characterId = toValue(characterIdOrRef);
+  
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ voieId, rank }: { voieId: string; rank: number }) =>
-      unlockRank(characterId, voieId, rank),
+      unlockRank(characterId || '', voieId, rank),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }

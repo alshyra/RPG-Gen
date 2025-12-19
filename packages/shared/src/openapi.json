@@ -483,60 +483,6 @@
         ]
       }
     },
-    "/api/characters/{characterId}/levelup/{className}": {
-      "post": {
-        "operationId": "CharacterController_applyLevelUp",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "className",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LevelUpApplyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Updated character after levelup",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CharacterResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Apply level-up choices for a character class",
-        "tags": [
-          "characters"
-        ]
-      }
-    },
     "/api/characters/{characterId}/inventory/equip": {
       "post": {
         "operationId": "CharacterController_equipInventory",
@@ -1076,7 +1022,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of all classes"
+            "description": "List of all classes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassDefinitionResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get all available classes",
@@ -1101,7 +1057,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Class details"
+            "description": "Class details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassDefinitionResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get a class by name",
@@ -1126,7 +1089,17 @@
         ],
         "responses": {
           "200": {
-            "description": "List of talent trees with their ranks"
+            "description": "List of talent trees with their ranks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TalentTreeDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get talent trees (voies) for a class",
@@ -1151,7 +1124,17 @@
         ],
         "responses": {
           "200": {
-            "description": "List of starting aptitude IDs"
+            "description": "List of starting aptitude IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get starting aptitudes for a class",
@@ -1295,7 +1278,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of available classes with metadata"
+            "description": "List of available classes with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassMetadataDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1315,7 +1308,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of available races with bonuses and traits"
+            "description": "List of available races with bonuses and traits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RaceMetadataDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1470,7 +1473,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of all races with bonuses and traits"
+            "description": "List of all races with bonuses and traits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RaceMetadataDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get all available races",
@@ -1495,7 +1508,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Race details"
+            "description": "Race details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RaceMetadataDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get a race by ID",
@@ -2733,32 +2753,6 @@
           "definitionId"
         ]
       },
-      "LevelUpApplyDto": {
-        "type": "object",
-        "properties": {
-          "newSpellIds": {
-            "description": "List of spell definitionIds to add to the character",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "abilityIncreases": {
-            "description": "Ability score increases, e.g. [{ ability: \"Str\", inc: 1 }] ",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "selectedCombatProficiencies": {
-            "description": "Selected combat proficiency IDs for the new level (e.g., \"sneak-attack\", \"cunning-strike\")",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "EquipInventoryDto": {
         "type": "object",
         "properties": {
@@ -3412,6 +3406,129 @@
           "expr"
         ]
       },
+      "BaseStatsDto": {
+        "type": "object",
+        "properties": {
+          "hp_base": {
+            "type": "number",
+            "description": "Base HP",
+            "example": 12
+          },
+          "pa": {
+            "type": "number",
+            "description": "Base PA (action points)",
+            "example": 6
+          },
+          "pm": {
+            "type": "number",
+            "description": "Base PM (movement points)",
+            "example": 4
+          }
+        },
+        "required": [
+          "hp_base",
+          "pa",
+          "pm"
+        ]
+      },
+      "ClassDefinitionResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Class name",
+            "example": "guerrier"
+          },
+          "baseStats": {
+            "description": "Base stats for this class",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseStatsDto"
+              }
+            ]
+          },
+          "proficiencies": {
+            "description": "Proficiencies (finesse, vigueur, etc.)",
+            "example": [
+              "vigueur",
+              "finesse"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startingAptitudes": {
+            "description": "Starting aptitude IDs",
+            "example": [
+              "frappe_simple",
+              "posture_defensive"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "baseStats",
+          "proficiencies",
+          "startingAptitudes"
+        ]
+      },
+      "TalentRankDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "description": "Rank number (1-5)",
+            "example": 1
+          },
+          "aptitudeId": {
+            "type": "string",
+            "description": "Aptitude ID to unlock at this rank",
+            "example": "frappe_puissante"
+          },
+          "pointCost": {
+            "type": "number",
+            "description": "Talent points cost to unlock this rank",
+            "example": 1
+          }
+        },
+        "required": [
+          "rank",
+          "aptitudeId",
+          "pointCost"
+        ]
+      },
+      "TalentTreeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Talent tree (voie) ID",
+            "example": "voie_guerrier_defense"
+          },
+          "name": {
+            "type": "string",
+            "description": "Talent tree name",
+            "example": "Voie de la Défense"
+          },
+          "ranks": {
+            "description": "Ranks in this talent tree",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TalentRankDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "ranks"
+        ]
+      },
       "ImageRequestDto": {
         "type": "object",
         "properties": {
@@ -3510,17 +3627,251 @@
           "message"
         ]
       },
+      "CharacterStatsDto": {
+        "type": "object",
+        "properties": {
+          "vigor": {
+            "type": "number",
+            "description": "Vigor stat",
+            "example": 3
+          },
+          "finesse": {
+            "type": "number",
+            "description": "Finesse stat",
+            "example": 1
+          },
+          "mind": {
+            "type": "number",
+            "description": "Mind stat",
+            "example": 0
+          },
+          "survival": {
+            "type": "number",
+            "description": "Survival stat",
+            "example": 2
+          }
+        },
+        "required": [
+          "vigor",
+          "finesse",
+          "mind",
+          "survival"
+        ]
+      },
+      "ClassBaseStatsDto": {
+        "type": "object",
+        "properties": {
+          "hp": {
+            "type": "number",
+            "description": "Base HP",
+            "example": 12
+          },
+          "pa": {
+            "type": "number",
+            "description": "Base PA (action points)",
+            "example": 6
+          },
+          "pm": {
+            "type": "number",
+            "description": "Base PM (movement points)",
+            "example": 4
+          },
+          "stats": {
+            "description": "Base character stats",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CharacterStatsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "hp",
+          "pa",
+          "pm",
+          "stats"
+        ]
+      },
+      "ClassMetadataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Class ID",
+            "example": "guerrier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal class name",
+            "example": "guerrier"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name for UI",
+            "example": "Guerrier"
+          },
+          "description": {
+            "type": "string",
+            "description": "Class description",
+            "example": "Maître du combat rapproché, le Guerrier excelle en défense et en puissance brute."
+          },
+          "baseStats": {
+            "description": "Base stats for the class",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClassBaseStatsDto"
+              }
+            ]
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for UI (hex)",
+            "example": "#dc2626"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon emoji",
+            "example": "⚔️"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "displayName",
+          "description",
+          "baseStats",
+          "color",
+          "icon"
+        ]
+      },
+      "RaceBonusesDto": {
+        "type": "object",
+        "properties": {
+          "vigor": {
+            "type": "number",
+            "description": "Vigor bonus",
+            "example": 1
+          },
+          "finesse": {
+            "type": "number",
+            "description": "Finesse bonus",
+            "example": 0
+          },
+          "mind": {
+            "type": "number",
+            "description": "Mind bonus",
+            "example": 0
+          },
+          "survival": {
+            "type": "number",
+            "description": "Survival bonus",
+            "example": 1
+          }
+        }
+      },
+      "RaceMetadataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Race ID",
+            "example": "humain"
+          },
+          "name": {
+            "type": "string",
+            "description": "Race name",
+            "example": "Humain"
+          },
+          "trait": {
+            "type": "string",
+            "description": "Special trait name",
+            "example": "Polyvalent"
+          },
+          "traitEffect": {
+            "type": "string",
+            "description": "Trait effect description",
+            "example": "+1 à toutes les compétences"
+          },
+          "bonuses": {
+            "description": "Stat bonuses",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceBonusesDto"
+              }
+            ]
+          },
+          "color": {
+            "type": "string",
+            "description": "Color for UI (hex)",
+            "example": "#3b82f6"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon emoji",
+            "example": "👤"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "trait",
+          "traitEffect",
+          "bonuses",
+          "color",
+          "icon"
+        ]
+      },
       "SelectClassDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "Class name to select",
+            "example": "guerrier",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
+          }
+        },
+        "required": [
+          "className"
+        ]
       },
       "SelectRaceDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "raceId": {
+            "type": "string",
+            "description": "Race ID to select",
+            "example": "humain"
+          }
+        },
+        "required": [
+          "raceId"
+        ]
       },
       "UnlockRankDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "voieId": {
+            "type": "string",
+            "description": "Talent tree (voie) ID",
+            "example": "voie_guerrier_defense"
+          },
+          "rank": {
+            "type": "number",
+            "description": "Rank to unlock (1-5)",
+            "example": 1,
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "required": [
+          "voieId",
+          "rank"
+        ]
       }
     }
   }

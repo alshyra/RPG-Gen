@@ -1,11 +1,6 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 import { Schema as MongooseSchema, Document } from "mongoose";
-import { Race } from "./Race.js";
-import { CharacterClass } from "./CharacterClass.js";
-import { AbilityScores } from "./AbilityScores.js";
-import { Skill } from "./Skill.js";
 import { Item } from "../item/Item.js";
-import { Spell } from "../spell/Spell.js";
 
 // Simplified stats for the new talent system
 export interface CharacterStats {
@@ -127,20 +122,6 @@ export class Character {
   })
   aptitudes: CharacterAptitude[];
 
-  // LEGACY: Keep for migration, will be deprecated
-  @Prop({
-    type: Race,
-    required: false,
-  })
-  race: Race;
-
-  // LEGACY: D&D ability scores - will be deprecated
-  @Prop({
-    type: AbilityScores,
-    required: false,
-  })
-  scores: AbilityScores;
-
   @Prop({
     required: false,
     type: Number,
@@ -160,20 +141,6 @@ export class Character {
   })
   totalXp: number;
 
-  // LEGACY: D&D multiclass - will be deprecated
-  @Prop({
-    type: [CharacterClass],
-    required: false,
-  })
-  classes: CharacterClass[];
-
-  // LEGACY: D&D skills - will be deprecated
-  @Prop({
-    type: [Skill],
-    required: false,
-  })
-  skills: Skill[];
-
   @Prop({
     required: true,
     type: String,
@@ -188,14 +155,6 @@ export class Character {
     type: String,
   })
   gender: string;
-
-  // LEGACY: D&D proficiency - will be deprecated
-  @Prop({
-    required: false,
-    default: 2,
-    type: Number,
-  })
-  proficiency: number;
 
   @Prop({
     required: false,
@@ -229,22 +188,6 @@ export class Character {
     default: [],
   })
   inventory: Item[];
-
-  // LEGACY: D&D spells - will be replaced by aptitudes
-  @Prop({
-    type: [Spell],
-    required: false,
-    default: [],
-  })
-  spells: Spell[];
-
-  // LEGACY: D&D combat proficiencies - will be deprecated
-  @Prop({
-    type: [String],
-    required: false,
-    default: [],
-  })
-  selectedCombatProficiencies: string[];
 
   // Character level (1-20, simplified progression)
   @Prop({

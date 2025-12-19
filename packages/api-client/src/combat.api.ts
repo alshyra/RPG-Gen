@@ -190,7 +190,7 @@ export function useCombat(
       (status.data.value?.enemies ?? []).filter(e => (e.hp ?? 0) > 0).map(e => e.name),
     ),
     hasValidTarget: computed(() => (status.data.value?.enemies ?? []).some(e => (e.hp ?? 0) > 0)),
-    canAct: computed(() => (status.data.value?.actionRemaining ?? 0) > 0),
-    canBonusAct: computed(() => (status.data.value?.bonusActionRemaining ?? 0) > 0),
+    canAct: computed(() => status.data.value?.inCombat ?? false),
+    canBonusAct: computed(() => false),
   };
 }

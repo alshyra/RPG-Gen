@@ -42,7 +42,6 @@ export class CharacterService {
       userId,
       characterId: this.generateCharacterId(),
       totalXp: 0,
-      proficiency: 2,
       world,
       state: "draft",
       isDeceased: false,
@@ -92,7 +91,6 @@ export class CharacterService {
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
     if (updates.totalXp !== undefined) updateDoc.totalXp = updates.totalXp;
-    if (updates.skills !== undefined) updateDoc.skills = updates.skills;
     if (updates.portrait !== undefined) updateDoc.portrait = updates.portrait;
     if (updates.name !== undefined) updateDoc.name = updates.name;
     if (updates.race !== undefined) updateDoc.race = updates.race;
@@ -408,18 +406,15 @@ export class CharacterService {
     return {
       characterId: doc.characterId,
       name: doc.name,
-      race: doc.race,
       hp: doc.hp,
       hpMax: doc.hpMax,
       totalXp: doc.totalXp,
-      skills: doc.skills,
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender,
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
       inventory: doc.inventory,
-      spells: doc.spells,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,

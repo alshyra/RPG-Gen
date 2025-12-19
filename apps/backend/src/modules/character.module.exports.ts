@@ -5,7 +5,6 @@
  *
  * PUBLIC SERVICES (exported in module):
  * - CharacterService: Character CRUD and management
- * - LevelUpService: Leveling and progression logic
  * - ItemDefinitionService: Item definitions and catalog
  * - SpellDefinitionService: Spell definitions and catalog
  *
@@ -15,6 +14,5 @@
  */
 
 export { CharacterService } from "../domain/character/character.service.js";
-export { LevelUpService } from "../domain/character/levelup.service.js";
 export { ItemDefinitionService } from "../domain/item-definition/item-definition.service.js";
 export { SpellDefinitionService } from "../domain/spell-definition/spell-definition.service.js";

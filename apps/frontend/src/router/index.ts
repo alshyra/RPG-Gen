@@ -9,7 +9,6 @@ import SpellsView from "../views/game/SpellsView.vue";
 import TalentsView from "../views/game/TalentsView.vue";
 import QuestView from "../views/game/QuestView.vue";
 import CharacterCreatorView from "../views/CharacterCreatorView.vue";
-import CharacterLevelupView from "../views/CharacterLevelupView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import LoginView from "../views/LoginView.vue";
 import AuthCallbackView from "../views/AuthCallbackView.vue";
@@ -90,11 +89,6 @@ const routes = [
     path: "/character/:characterId/step/:step",
     name: "character-step",
     component: CharacterCreatorView,
-  },
-  {
-    path: "/levelup/:world?",
-    name: "levelup",
-    component: CharacterLevelupView,
   },
   {
     path: "/:pathMatch(.*)*",

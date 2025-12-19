@@ -101,7 +101,7 @@ const characterId = useCharacterId();
 
 // API calls
 const { data: classes, isLoading, error } = useAvailableClasses();
-const selectClassMutation = useSelectClass(characterId.value);
+const selectClassMutation = useSelectClass(characterId);
 
 // Local state
 const selectedClass = ref<string | null>(null);

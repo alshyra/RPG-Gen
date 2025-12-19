@@ -1,6 +1,7 @@
 import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { RaceService } from "../domain/race/race.service.js";
+import { RaceMetadataDto } from "../domain/progression/dto/index.js";
 
 @ApiTags("races")
 @Controller("races")
@@ -14,6 +15,7 @@ export class RacesController {
   @ApiResponse({
     status: 200,
     description: "List of all races with bonuses and traits",
+    type: [RaceMetadataDto],
   })
   async getAllRaces() {
     return this.raceService.getAllRaces();
@@ -28,6 +30,7 @@ export class RacesController {
   @ApiResponse({
     status: 200,
     description: "Race details",
+    type: RaceMetadataDto,
   })
   async getRace(@Param("raceId") raceId: string) {
     return this.raceService.getRaceById(raceId);

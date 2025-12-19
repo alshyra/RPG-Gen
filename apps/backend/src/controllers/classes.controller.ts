@@ -1,6 +1,7 @@
 import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ClassesService } from "../domain/classes/classes.service.js";
+import { ClassDefinitionResponseDto, TalentTreeDto } from "../domain/classes/dto/index.js";
 
 @ApiTags("classes")
 @Controller("classes")
@@ -14,6 +15,7 @@ export class ClassesController {
   @ApiResponse({
     status: 200,
     description: "List of all classes",
+    type: [ClassDefinitionResponseDto],
   })
   async getAllClasses() {
     return this.classesService.getAllClasses();
@@ -28,6 +30,7 @@ export class ClassesController {
   @ApiResponse({
     status: 200,
     description: "Class details",
+    type: ClassDefinitionResponseDto,
   })
   async getClass(@Param("className") className: string) {
     return this.classesService.getClassByName(className);
@@ -42,6 +45,7 @@ export class ClassesController {
   @ApiResponse({
     status: 200,
     description: "List of talent trees with their ranks",
+    type: [TalentTreeDto],
   })
   async getTalentTrees(@Param("className") className: string) {
     return this.classesService.getTalentTrees(className);
@@ -56,6 +60,7 @@ export class ClassesController {
   @ApiResponse({
     status: 200,
     description: "List of starting aptitude IDs",
+    type: [String],
   })
   async getStartingAptitudes(@Param("className") className: string) {
     return this.classesService.getStartingAptitudes(className);

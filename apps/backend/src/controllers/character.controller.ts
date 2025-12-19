@@ -23,7 +23,6 @@ import {
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../global.types.js";
 import { CharacterService } from "../domain/character/character.service.js";
-import { LevelUpService } from "../domain/character/levelup.service.js";
 import { CreateInventoryItemDto } from "../domain/character/dto/CreateInventoryItemDto.js";
 import { EquipInventoryDto } from "../domain/character/dto/EquipInventoryDto.js";
 import {
@@ -35,7 +34,6 @@ import {
   KillCharacterBodyDto,
   RemoveInventoryBodyDto,
   UpdateCharacterRequestDto,
-  LevelUpApplyDto,
 } from "../domain/character/dto/index.js";
 
 @ApiTags("characters")
@@ -47,7 +45,6 @@ export class CharacterController {
 
   constructor(
     private characterService: CharacterService,
-    private levelUpService: LevelUpService,
   ) {}
 
   @Post()
@@ -218,25 +215,6 @@ export class CharacterController {
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
     return this.characterService.toCharacterDto(character);
-  }
-
-  @Post(":characterId/levelup/:className")
-  @ApiOperation({ summary: "Apply level-up choices for a character class" })
-  @ApiBody({ type: LevelUpApplyDto })
-  @ApiResponse({
-    status: 200,
-    description: "Updated character after levelup",
-    type: CharacterResponseDto,
-  })
-  async applyLevelUp(
-    @Req() req: RPGRequest,
-    @Param("characterId") characterId: string,
-    @Param("className") className: string,
-    @Body() body: LevelUpApplyDto,
-  ) {
-    const userId = req.user._id.toString();
-    const updated = await this.levelUpService.applyLevelUp(userId, characterId, className, body);
-    return updated;
   }
 
   @Post(":characterId/inventory/equip")

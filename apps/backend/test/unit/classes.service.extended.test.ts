@@ -1,70 +1,36 @@
 import test from "ava";
 import { ClassesService } from "../../src/domain/classes/classes.service.js";
 
-// Mock SpellDefinitionService
-function makeMockSpellDefService() {
-  return {
-    findByLevel: async (_level: number) => {
-      // Return empty array for mock
-      return [];
-    },
-  } as any;
-}
-
 // Mock ClassDefinitionService
 function makeMockClassDefService() {
   return {
     findByName: async (_name: string) => null,
+    findByNameOrThrow: async (_name: string) => {
+      throw new Error("Not found");
+    },
+    findAll: async () => [],
   } as any;
 }
 
-test("ClassesService.loadClassData should load Barbarian", async t => {
-  const spellDefService = makeMockSpellDefService();
+test("ClassesService.getAllClasses returns empty array with mock", async t => {
   const classDefService = makeMockClassDefService();
-  const service = new ClassesService(spellDefService, classDefService);
+  const service = new ClassesService(classDefService);
 
-  try {
-    // This will attempt to load from the actual seed file
-    const data = await (service as any).loadClassData("Barbarian");
-    t.truthy(data);
-    t.is(data.className, "Barbarian");
-    t.truthy(data.levels);
-    t.true(data.levels.length > 0);
-  } catch {
-    // Expected to fail in test environment without proper file structure
-    t.pass("ClassesService attempts to load class data (expected behavior)");
-  }
+  const classes = await service.getAllClasses();
+  t.deepEqual(classes, []);
 });
 
-test("All 12 D&D 5e classes are defined with levels", async t => {
-  const expectedClasses = [
-    "Barbarian",
-    "Bard",
-    "Cleric",
-    "Druid",
-    "Fighter",
-    "Monk",
-    "Paladin",
-    "Ranger",
-    "Rogue",
-    "Sorcerer",
-    "Warlock",
-    "Wizard",
-  ];
+test("ClassesService.getTalentTrees returns empty array when class has no trees", async t => {
+  const classDefService = {
+    findByNameOrThrow: async (_name: string) => ({
+      name: "Guerrier",
+      baseStats: { hp_base: 12, pa: 6, pm: 4 },
+      talentTrees: null,
+    }),
+    findAll: async () => [],
+  } as any;
 
-  t.is(expectedClasses.length, 12, "Should have 12 classes defined");
-  t.deepEqual(expectedClasses, [
-    "Barbarian",
-    "Bard",
-    "Cleric",
-    "Druid",
-    "Fighter",
-    "Monk",
-    "Paladin",
-    "Ranger",
-    "Rogue",
-    "Sorcerer",
-    "Warlock",
-    "Wizard",
-  ]);
+  const service = new ClassesService(classDefService);
+  const trees = await service.getTalentTrees("Guerrier");
+  t.deepEqual(trees, []);
 });

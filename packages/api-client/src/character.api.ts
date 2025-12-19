@@ -8,7 +8,6 @@ import type {
   RemoveInventoryBodyDto,
   GrantInspirationBodyDto,
   InspirationResponseDto,
-  LevelUpApplyDto,
   DeceasedCharacterResponseDto,
 } from "@rpg-gen/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
@@ -132,18 +131,6 @@ const characterApi = {
   async spendInspiration(characterId: string): Promise<InspirationResponseDto> {
     const response = await apiClient.POST("/api/characters/{characterId}/inspiration/spend", {
       params: { path: { characterId } },
-    });
-    return getData(response);
-  },
-
-  async applyLevelUp(
-    characterId: string,
-    className: string,
-    body: LevelUpApplyDto,
-  ): Promise<CharacterResponseDto> {
-    const response = await apiClient.POST("/api/characters/{characterId}/levelup/{className}", {
-      params: { path: { characterId, className } },
-      body,
     });
     return getData(response);
   },
@@ -367,19 +354,6 @@ export function useCharacter(
     },
   });
 
-  // Mutation: Apply level up
-  const applyLevelUp = useMutation({
-    mutationFn: async ({ className, body }: { className: string; body: LevelUpApplyDto }) => {
-      if (!id.value) throw new Error("Character ID is required");
-      return characterApi.applyLevelUp(id.value, className, body);
-    },
-    onSuccess: data => {
-      if (!id.value) return;
-      queryClient.setQueryData(characterKeys.detail(id.value), data);
-      queryClient.invalidateQueries({ queryKey: characterKeys.detail(id.value) });
-    },
-  });
-
   return {
     // Query object (access data via character.data.value)
     character,
@@ -397,7 +371,6 @@ export function useCharacter(
     grantInspiration,
     spendInspiration,
     kill,
-    applyLevelUp,
 
     // Helpers
     isLoading: computed(() => character.isLoading.value),

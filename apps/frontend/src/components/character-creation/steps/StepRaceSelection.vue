@@ -118,7 +118,7 @@ const characterId = useCharacterId();
 
 // API calls
 const { data: races, isLoading, error } = useAvailableRaces();
-const selectRaceMutation = useSelectRace(characterId.value);
+const selectRaceMutation = useSelectRace(characterId);
 
 // Local state
 const selectedRace = ref<string | null>(null);
