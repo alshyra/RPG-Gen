@@ -29,6 +29,10 @@ export interface E2ECombatApi {
    * Refresh combat state from backend
    */
   refetch: () => Promise<void>;
+  /**
+   * Initialize visual units on the PIXI canvas (call after refetch when combat starts)
+   */
+  initializeVisual: () => Promise<void>;
 }
 
 declare global {
@@ -50,6 +54,7 @@ export function exposeE2ECombatApi(api: {
   isInCombat: () => boolean;
   getCombatEnd: () => unknown;
   refetch: () => Promise<void>;
+  initializeVisual: () => Promise<void>;
 }) {
   if (import.meta.env.DEV || import.meta.env.MODE === "test") {
     window.__e2eCombat = {
@@ -75,6 +80,7 @@ export function exposeE2ECombatApi(api: {
         };
       },
       refetch: api.refetch,
+      initializeVisual: api.initializeVisual,
     };
     console.log("[E2E] Combat API exposed on window.__e2eCombat");
   }

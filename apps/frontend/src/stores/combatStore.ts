@@ -1,10 +1,43 @@
 import type { AttackQueueItem, AttackView } from "@/interfaces";
 import type { CombatActionResponseDto, EnemyAttackLogDto } from "@rpg-gen/shared";
+import type { CombatEngineEventPayload } from "@rpg-gen/combat-engine";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, shallowRef } from "vue";
 
 const ENEMY_ATTACK_DELAY_MS = 800;
 const PLAYER_ATTACK_DELAY_MS = 1500;
+
+// Type for the exposed arena API from CombatArena.vue
+export interface CombatArenaApi {
+  init: (container?: HTMLDivElement) => Promise<void>;
+  createUnit: (
+    unitId: string,
+    gridX: number,
+    gridY: number,
+    maxMoveRange: number,
+    characterKey: string,
+    hp: number,
+    maxHp: number,
+    isPlayer: boolean,
+  ) => Promise<unknown>;
+  clearAllUnits: () => Promise<void>;
+  updateUnitHealth: (unitId: string, damage: number) => void;
+  moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
+  setupDragEvents: () => void;
+  on: <T extends keyof CombatEngineEventPayload>(
+    event: T,
+    handler: (payload: CombatEngineEventPayload[T]) => void,
+  ) => void;
+  off: <T extends keyof CombatEngineEventPayload>(
+    event: T,
+    handler: (payload: CombatEngineEventPayload[T]) => void,
+  ) => void;
+  emit: <T extends keyof CombatEngineEventPayload>(
+    event: T,
+    payload: CombatEngineEventPayload[T],
+  ) => void;
+  getContainer: () => HTMLDivElement | null;
+}
 
 /**
  * Combat Store - UI state only
@@ -21,6 +54,10 @@ export const useCombatStore = defineStore("combatStore", () => {
   const currentPlayerAttackLog = ref<CombatActionResponseDto | null>(null);
   const isCombatEndModalOpen = ref(false);
   const currentAttackView = ref<AttackView | null>(null);
+  const hasHandledCurrentCombatEnd = ref(false);
+
+  // Arena API reference - stored in Pinia to ensure singleton across all module instances
+  const arenaApi = shallowRef<CombatArenaApi | null>(null);
 
   // --- Helpers ---
   const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
@@ -46,6 +83,7 @@ export const useCombatStore = defineStore("combatStore", () => {
     attackResultQueue.value = [];
     isProcessingEnemyTurn.value = false;
     currentEnemyAttackLog.value = null;
+    hasHandledCurrentCombatEnd.value = false;
   };
 
   const clearCombat = (): void => resetModalState();
@@ -59,6 +97,8 @@ export const useCombatStore = defineStore("combatStore", () => {
     currentPlayerAttackLog,
     currentAttackView,
     isCombatEndModalOpen,
+    hasHandledCurrentCombatEnd,
+    arenaApi,
 
     // Constants
     PLAYER_ATTACK_DELAY_MS,

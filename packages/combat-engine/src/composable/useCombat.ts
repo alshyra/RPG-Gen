@@ -74,9 +74,16 @@ export function useCombat() {
       damage: number;
       isCrit?: boolean;
     }) => {
-      if (!combatPixiInstance.value?.stage) return;
+      console.log("[CombatEngine] Received unit:attacked event", payload);
+      if (!combatPixiInstance.value?.stage) {
+        console.warn("[CombatEngine] No PIXI stage available");
+        return;
+      }
       const u = units.value.get(payload.targetId);
-      if (!u || !u.sprite) return;
+      if (!u || !u.sprite) {
+        console.warn("[CombatEngine] Unit not found for damage display:", payload.targetId);
+        return;
+      }
 
       const x = u.sprite.x;
       const y = (u.healthBar?.container?.y ?? u.sprite.y) - 20;

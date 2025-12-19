@@ -135,17 +135,20 @@ export function useCombat() {
    * Execute an attack against a target
    */
   const executeAttack = async (target: CombatantDto, spellName?: string): Promise<void> => {
-    const c = currentCharacter.value;
-    if (!c?.characterId) return;
-
-    // Guard: prevent executing an attack when player cannot act or it's not the player's turn.
-    if (!combatApi.canAct.value) {
-      gameStore.appendMessage("system", `⚠️ Vous n'avez plus de points d'action disponibles.`);
+    const charIdValue = characterId.value;
+    if (!charIdValue) {
+      console.warn("[useCombat] No characterId, aborting attack");
       return;
     }
 
+    // Note: Removed canAct guard - backend validates action points.
+    // The frontend query cache may be stale when attacks are triggered rapidly.
+
     // Prevent duplicate calls while a send is in progress
-    if (gameStore.sending) return;
+    if (gameStore.sending) {
+      console.warn("[useCombat] Already sending, aborting attack");
+      return;
+    }
 
     const targetName = target?.name || "cible inconnue";
     gameStore.appendMessage("user", `J'attaque ${targetName}!`);
@@ -155,7 +158,7 @@ export function useCombat() {
       const result = await combatApi.attack.mutateAsync({
         spellName,
         target,
-        characterId: c.characterId,
+        characterId: charIdValue,
       });
       await processAttackResult(result, target);
     } catch (err) {
@@ -181,12 +184,22 @@ export function useCombat() {
    * Handle combat end instruction
    */
   const handleCombatEnd = async (): Promise<void> => {
+    // Prevent duplicate handling when useCombat is called from multiple places
+    if (combatStore.hasHandledCurrentCombatEnd) {
+      console.log("[useCombat] Combat end already handled, skipping");
+      return;
+    }
+    
     const victory = combatApi.status.data.value?.combatEnd?.victory ?? false;
     const xpGained = combatApi.status.data.value?.combatEnd?.xp_gained ?? 0;
     const enemiesDefeated = combatApi.status.data.value?.combatEnd?.enemies_defeated ?? [];
     const narrative = combatApi.status.data.value?.narrative ?? "";
     // death modal s'affiche avec une computed
     if (!victory) return;
+
+    // Mark as handled before processing to prevent other instances from duplicating
+    combatStore.hasHandledCurrentCombatEnd = true;
+    console.log("[useCombat] Handling combat end (victory)");
 
     // Victory path: show modal with narrative first
     gameStore.appendMessage("system", "🏆 Victoire!");

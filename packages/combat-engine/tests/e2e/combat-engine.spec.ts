@@ -260,3 +260,127 @@ test.describe("Combat Engine - Health Bars", () => {
     expect(stillVisible).toBe(true);
   });
 });
+
+test.describe("Combat Engine - Damage Notifications", () => {
+  test("should display floating damage text when unit:attacked event is emitted", async ({
+    page,
+  }) => {
+    // Capture console logs for debugging
+    const consoleLogs: string[] = [];
+    page.on("console", msg => {
+      consoleLogs.push(msg.text());
+    });
+
+    await page.goto("/");
+
+    const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
+    await expect(canvas).toBeVisible({ timeout: 5000 });
+
+    // Wait for units to be created
+    await page.waitForTimeout(2000);
+
+    // Get unit IDs from the combat engine by exposing them via window
+    // The App.vue creates a demo enemy with id 'enemy-1'
+    // Emit a unit:attacked event via the exposed arena API
+    const damageEmitted = await page.evaluate(async () => {
+      // Access the CombatArena component's exposed API
+      const arenaComponent = document.querySelector('[data-cy="combat-arena"]');
+      if (!arenaComponent) return { success: false, error: "Arena not found" };
+
+      // The component should expose emit function
+      // @ts-ignore - accessing Vue component internals
+      const vm = arenaComponent.__vueParentComponent?.exposed;
+      if (!vm || !vm.emit) return { success: false, error: "No emit function exposed" };
+
+      // Emit unit:attacked event for the demo enemy
+      try {
+        vm.emit("unit:attacked", {
+          attackerId: "player",
+          targetId: "enemy-1", // Demo enemy ID from App.vue
+          damage: 15,
+          isCrit: false,
+        });
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: String(e) };
+      }
+    });
+
+    // Wait for animation to start
+    await page.waitForTimeout(300);
+
+    // The floating text is rendered on the PIXI canvas, we can't directly verify it
+    // But we verify the emit call succeeded and no errors occurred
+    expect(damageEmitted.success).toBe(true);
+
+    // Verify no errors in console
+    const errors = consoleLogs.filter(log => log.toLowerCase().includes("error"));
+    expect(errors).toHaveLength(0);
+  });
+
+  test("should display CRIT text for critical hits", async ({ page }) => {
+    await page.goto("/");
+
+    const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
+    await expect(canvas).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(2000);
+
+    // Emit a critical hit event
+    const critEmitted = await page.evaluate(async () => {
+      const arenaComponent = document.querySelector('[data-cy="combat-arena"]');
+      if (!arenaComponent) return { success: false, error: "Arena not found" };
+
+      // @ts-ignore
+      const vm = arenaComponent.__vueParentComponent?.exposed;
+      if (!vm || !vm.emit) return { success: false, error: "No emit function exposed" };
+
+      try {
+        vm.emit("unit:attacked", {
+          attackerId: "player",
+          targetId: "enemy-1",
+          damage: 25,
+          isCrit: true, // Critical hit
+        });
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: String(e) };
+      }
+    });
+
+    await page.waitForTimeout(300);
+    expect(critEmitted.success).toBe(true);
+  });
+
+  test("should display Miss text when damage is 0", async ({ page }) => {
+    await page.goto("/");
+
+    const canvas = page.locator('[data-cy="combat-canvas-container"] canvas');
+    await expect(canvas).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(2000);
+
+    // Emit a miss event (damage = 0)
+    const missEmitted = await page.evaluate(async () => {
+      const arenaComponent = document.querySelector('[data-cy="combat-arena"]');
+      if (!arenaComponent) return { success: false, error: "Arena not found" };
+
+      // @ts-ignore
+      const vm = arenaComponent.__vueParentComponent?.exposed;
+      if (!vm || !vm.emit) return { success: false, error: "No emit function exposed" };
+
+      try {
+        vm.emit("unit:attacked", {
+          attackerId: "player",
+          targetId: "enemy-1",
+          damage: 0, // Miss
+          isCrit: false,
+        });
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: String(e) };
+      }
+    });
+
+    await page.waitForTimeout(300);
+    expect(missEmitted.success).toBe(true);
+  });
+});

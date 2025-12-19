@@ -43,15 +43,13 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
       // === PHASE 1: Setup & Navigation ===
       await mockAuthentication(page);
 
-      // Capture browser console logs
+      // Capture browser console logs - including damage display logs
+      const damageDisplayLogs: string[] = [];
       page.on("console", msg => {
         const text = msg.text();
-        if (
-          text.includes("[E2E]") ||
-          text.includes("[useCombat") ||
-          text.includes("executeAttack")
-        ) {
-          console.log(`  [Browser] ${text}`);
+        // Capture damage display related logs for verification
+        if (text.includes("unit:attacked") || text.includes("[CombatEngine]")) {
+          damageDisplayLogs.push(text);
         }
       });
 
@@ -104,7 +102,22 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
 
       // Force frontend to refresh combat state after API start
       await page.evaluate(() => window.__e2eCombat?.refetch());
-      await page.waitForTimeout(1000);
+
+      // Wait for isInCombat to be true in the E2E API
+      await page.waitForFunction(
+        () => {
+          const status = window.__e2eCombat?.getStatus();
+          return status?.inCombat === true;
+        },
+        { timeout: 5000 },
+      );
+      console.log("[Journey] ✓ Combat state refreshed and active");
+
+      // Initialize visual units on PIXI canvas (replaces demo units with real combat units)
+      console.log("[Journey] Initializing visual combat units...");
+      await page.evaluate(() => window.__e2eCombat?.initializeVisual());
+      await page.waitForTimeout(500);
+      console.log("[Journey] ✓ Visual combat units initialized");
 
       // Verify combat is active via E2E API
       const initialStatus = await page.evaluate(() => window.__e2eCombat?.getStatus());
@@ -171,6 +184,21 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
         await page.waitForTimeout(500);
 
         console.log(`[Journey] ✓ Attack and end turn completed`);
+      }
+
+      // === PHASE 3b: Verify damage display events were emitted ===
+      // The damage display chain should have emitted logs for each attack
+      console.log(`[Journey] Damage display logs captured: ${damageDisplayLogs.length}`);
+
+      // We should have at least one unit:attacked reception log (emitted by updateUnitHealth and received by handleUnitAttackedRef)
+      const receptionLogs = damageDisplayLogs.filter(log => log.includes("Received unit:attacked"));
+
+      console.log(`[Journey] Reception logs: ${receptionLogs.length}`);
+
+      // At least one attack should have triggered the damage display chain
+      if (roundCount > 0) {
+        expect(receptionLogs.length).toBeGreaterThan(0);
+        console.log("[Journey] ✓ Damage display events were received by combat engine");
       }
 
       // === PHASE 4: Victory Modal Verification (UI) ===

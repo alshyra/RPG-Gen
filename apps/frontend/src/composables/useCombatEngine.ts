@@ -3,55 +3,32 @@ import { CombatAdapter } from "@/adapters/combatAdapters";
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useCombatStore } from "@/stores/combatStore";
+import { useCombatStore, type CombatArenaApi } from "@/stores/combatStore";
 import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
-import { onUnmounted, ref, shallowRef, watch } from "vue";
+import { onUnmounted, ref, watch } from "vue";
 
-// Type for the exposed arena API from CombatArena.vue
-export interface CombatArenaApi {
-  init: (container?: HTMLDivElement) => Promise<void>;
-  createUnit: (
-    unitId: string,
-    gridX: number,
-    gridY: number,
-    maxMoveRange: number,
-    characterKey: string,
-    hp: number,
-    maxHp: number,
-    isPlayer: boolean,
-  ) => Promise<unknown>;
-  clearAllUnits: () => Promise<void>;
-  updateUnitHealth: (unitId: string, damage: number) => void;
-  moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
-  setupDragEvents: () => void;
-  on: <T extends keyof CombatEngineEventPayload>(
-    event: T,
-    handler: (payload: CombatEngineEventPayload[T]) => void,
-  ) => void;
-  off: <T extends keyof CombatEngineEventPayload>(
-    event: T,
-    handler: (payload: CombatEngineEventPayload[T]) => void,
-  ) => void;
-  emit: <T extends keyof CombatEngineEventPayload>(
-    event: T,
-    payload: CombatEngineEventPayload[T],
-  ) => void;
-  getContainer: () => HTMLDivElement | null;
-}
+// Re-export the type from store for backwards compatibility
+export type { CombatArenaApi } from "@/stores/combatStore";
 
 export function useCombatEngine() {
   const backendCombat = useBackendCombat();
   const combatStore = useCombatStore();
-  const { currentAttackView } = storeToRefs(combatStore);
+  const { currentAttackView, currentEnemyAttackLog } = storeToRefs(combatStore);
   const currentCharacter = useCurrentCharacter();
   const characterId = useCharacterId();
   const combat = useCombatApi(characterId);
 
-  // Reference to the CombatArena component API (set via registerArena)
-  const arenaApi = shallowRef<CombatArenaApi | null>(null);
+  // Use window as global storage to survive Vite module reloading
+  // This ensures arenaApi is truly singleton even when module is loaded multiple times
+  const getArenaApi = (): CombatArenaApi | null => {
+    return (window as { __arenaApi?: CombatArenaApi | null }).__arenaApi ?? null;
+  };
+  const setArenaApi = (api: CombatArenaApi | null) => {
+    (window as { __arenaApi?: CombatArenaApi | null }).__arenaApi = api;
+  };
 
   // State for the action modal
   const isActionModalOpen = ref(false);
@@ -70,21 +47,23 @@ export function useCombatEngine() {
    * Should be called from CombatPanel.vue after mounting
    */
   const registerArena = (api: CombatArenaApi) => {
-    arenaApi.value = api;
+    setArenaApi(api);
     subscribeToEvents();
   };
 
   /**
    * Unregister arena and cleanup handlers
+   * Note: We don't clear the arenaApi from window to allow late-binding
+   * in case the component is remounted during navigation
    */
   const unregisterArena = () => {
-    if (arenaApi.value) {
-      registeredHandlers.forEach(({ event, handler }) => {
-        arenaApi.value?.off(event, handler);
-      });
-      registeredHandlers.length = 0;
-    }
-    arenaApi.value = null;
+    // Only cleanup event handlers, but don't clear the arenaApi
+    // This allows executeAttack to still work during component transitions
+    registeredHandlers.forEach(({ event, handler }) => {
+      getArenaApi()?.off(event, handler);
+    });
+    registeredHandlers.length = 0;
+    // Don't set arenaApi to null - keep it for late-bound calls
   };
 
   const endTurn = async () => {
@@ -102,7 +81,7 @@ export function useCombatEngine() {
    * Subscribe to visual engine events
    */
   const subscribeToEvents = () => {
-    if (!arenaApi.value) return;
+    if (!getArenaApi()) return;
 
     const handleUnitClicked = (payload: UnitClickedPayload) => {
       console.log("[useCombatEngine] unit:clicked", payload);
@@ -125,7 +104,7 @@ export function useCombatEngine() {
       isActionModalOpen.value = true;
     };
 
-    arenaApi.value.on("unit:clicked", handleUnitClicked);
+    getArenaApi().on("unit:clicked", handleUnitClicked);
     registeredHandlers.push({
       event: "unit:clicked",
       handler: handleUnitClicked as (...args: unknown[]) => void,
@@ -134,13 +113,15 @@ export function useCombatEngine() {
 
   // Watch for player's attack results coming from the combat store and trigger visual indicators
   // The store sets `currentAttackView` when an attack is processed (see useCombat.processAttackResult)
+  // Note: The actual emission happens via updateUnitHealth in executeAttack, not via this watcher
+  // This watcher is kept as a fallback for cases where updateUnitHealth is not called directly
   watch(
-    () => (typeof currentAttackView === "undefined" ? null : currentAttackView.value),
+    () => currentAttackView?.value ?? null,
     attackView => {
-      if (!attackView || !arenaApi.value || !attackView.targetId) return;
+      if (!attackView || !getArenaApi() || !attackView.targetId) return;
       // Emit engine event so the visual engine can display hit/miss/crit and damage
       try {
-        arenaApi.value.emit("unit:attacked", {
+        getArenaApi().emit("unit:attacked", {
           attackerId: attackView.attackerId ?? "player",
           targetId: attackView.targetId,
           damage: attackView.totalDamage ?? 0,
@@ -162,7 +143,9 @@ export function useCombatEngine() {
       return;
     }
 
-    if (!arenaApi.value) {
+    console.log("[useCombatEngine] executeAttack called, arenaApi:", !!getArenaApi());
+
+    if (!getArenaApi()) {
       console.warn("[useCombatEngine] No arena registered, skipping visual");
     }
 
@@ -174,11 +157,11 @@ export function useCombatEngine() {
       await backendCombat.executeAttack(target, spellName);
 
       // Update visual with damage from attack result
-      if (!arenaApi.value) return;
+      if (!getArenaApi()) return;
 
       const damage = currentAttackView.value?.totalDamage ?? 0;
       if (damage > 0) {
-        arenaApi.value.updateUnitHealth(target.id, damage);
+        getArenaApi().updateUnitHealth(target.id, damage);
       }
     } catch (err) {
       console.error("[useCombatEngine] Attack failed:", err);
@@ -201,13 +184,13 @@ export function useCombatEngine() {
     isReplaying.value = true;
     try {
       console.log("replayEnemyAttacks", logs);
-      if (!arenaApi.value || !combat.status.data.value?.player) return;
+      if (!getArenaApi() || !combat.status.data.value?.player) return;
 
       for (const log of logs) {
         // Animate attack (TODO: add attack animation method)
         // For now just update health
         if (log.hit && log.damageTotal) {
-          arenaApi.value.updateUnitHealth(log.targetId, log.damageTotal);
+          getArenaApi().updateUnitHealth(log.targetId, log.damageTotal);
         }
 
         // Small delay between attacks for visibility
@@ -222,10 +205,15 @@ export function useCombatEngine() {
    * Initialize visual arena with current combat state
    */
   const initializeVisual = async () => {
-    if (!arenaApi.value || !combat.isInCombat.value) return;
+    if (!getArenaApi()) return;
+
+    // Force refetch to ensure we have fresh combat state
+    await combat.status.refetch();
+
+    if (!combat.isInCombat.value) return;
 
     // Clear old units before re-initializing
-    await arenaApi.value.clearAllUnits();
+    await getArenaApi().clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter?.value?.characterId ?? "",
@@ -241,7 +229,7 @@ export function useCombatEngine() {
 
     // Create units from config
     for (const unit of config.units) {
-      await arenaApi.value.createUnit(
+      await getArenaApi().createUnit(
         unit.id,
         unit.position.gridX,
         unit.position.gridY,
@@ -253,30 +241,49 @@ export function useCombatEngine() {
       );
     }
 
-    arenaApi.value.setupDragEvents();
+    getArenaApi().setupDragEvents();
   };
 
   // Watch for enemy attack logs and update visual HP
-  watch(
-    () => combatStore.currentEnemyAttackLog,
-    log => {
-      if (!log || !arenaApi.value || !combat.status.data.value?.player?.hp) return;
+  watch(currentEnemyAttackLog, log => {
+    console.log(
+      "[useCombatEngine] Enemy attack watcher triggered, log:",
+      log,
+      "arenaApi:",
+      !!getArenaApi(),
+      "player:",
+      combat.status.data.value?.player?.id,
+    );
+    if (!log || !getArenaApi() || !combat.status.data.value?.player?.hp) {
+      console.log("[useCombatEngine] Enemy attack watcher skipped - missing requirement");
+      return;
+    }
 
-      // Enemy attacks player - update player HP (use damage from log)
-      if (
-        log.hit &&
-        log.damageTotal &&
-        arenaApi.value.updateUnitHealth &&
-        combat.status.data.value?.player
-      ) {
-        arenaApi.value.updateUnitHealth(combat.status.data.value.player.id, log.damageTotal);
-        console.log(
-          "[useCombatEngine] Updated player HP after enemy attack, damage:",
-          log.damageTotal,
-        );
-      }
-    },
-  );
+    // Enemy attacks player - update player HP (use damage from log)
+    if (
+      log.hit &&
+      log.damageTotal &&
+      getArenaApi().updateUnitHealth &&
+      combat.status.data.value?.player
+    ) {
+      console.log(
+        "[useCombatEngine] Calling updateUnitHealth for player, damage:",
+        log.damageTotal,
+      );
+      getArenaApi().updateUnitHealth(combat.status.data.value.player.id, log.damageTotal);
+      console.log(
+        "[useCombatEngine] Updated player HP after enemy attack, damage:",
+        log.damageTotal,
+      );
+    } else {
+      console.log(
+        "[useCombatEngine] Enemy attack did not meet conditions - hit:",
+        log.hit,
+        "damage:",
+        log.damageTotal,
+      );
+    }
+  });
 
   /**
    * Handle attack selection from overlay

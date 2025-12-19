@@ -28,7 +28,6 @@
 
 <script setup lang="ts">
 import { useCharacterId } from '@/composables/useCharacterId';
-import { useCombat } from '@/composables/useCombat';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { exposeE2ECombatApi, cleanupE2ECombatApi } from '@/utils/e2eHelpers';
@@ -62,7 +61,6 @@ const handleAttack = async (target: CombatantDto, spellName?: string) => {
 
 // Register arena API when mounted
 onMounted(async () => {
-  console.log("[CombatPanel] onMounted called, inCombat:", inCombat.value);
   const arena = arenaRef.value;
   if (!arena || !('getContainer' in arena) || !('init' in arena)) return;
   registerArena(arena as CombatArenaApi);
@@ -70,24 +68,23 @@ onMounted(async () => {
   if (!container) return;
   await arena.init(container);
 
-  // Expose E2E API for testing - use combatApi directly to avoid multiple useCombat instances
+  // Expose E2E API for testing - use executeAttack to go through proper visual update chain
   exposeE2ECombatApi({
     executeAttack: async (target, spellName) => {
-      // Call combatApi directly instead of going through useCombatEngine -> useCombat
-      const charId = characterId.value;
-      if (!charId) return;
-      await combatApi.attack.mutateAsync({ target, spellName, characterId: charId });
+      // Use executeAttack from useCombatEngine which properly updates currentAttackView
+      // This triggers the watcher that emits unit:attacked for visual damage display
+      await executeAttack(target, spellName);
     },
     endTurn: async () => {
-      const charId = characterId.value;
-      if (!charId) return;
-      await combatApi.endTurn.mutateAsync(charId);
+      // Use endTurn from useCombatEngine to properly process enemy attack logs
+      await endTurn();
     },
     getEnemies: () => combatApi.status.data.value?.enemies ?? [],
     getPlayer: () => combatApi.status.data.value?.player ?? null,
     isInCombat: () => combatApi.isInCombat.value,
     getCombatEnd: () => combatApi.status.data.value?.combatEnd,
     refetch: async () => { await combatApi.status.refetch(); },
+    initializeVisual: async () => { await initializeVisual(); },
   });
 
   if (inCombat.value) {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useCombatEngine } from "@/composables/useCombatEngine";
 import type { CombatArenaApi } from "@/composables/useCombatEngine";
 import type { CombatantDto } from "@rpg-gen/shared";
@@ -12,6 +12,46 @@ vi.mock("@/composables/useCombat", () => ({
     isCombatEndModalOpen: ref(false),
     combatEndNarrative: ref(""),
     closeCombatEndModal: vi.fn(),
+  }),
+}));
+
+vi.mock("@/composables/useCurrentCharacter", () => ({
+  useCurrentCharacter: () =>
+    computed(() => ({
+      characterId: "char-1",
+      name: "Hero",
+      hp: 10,
+      hpMax: 10,
+    })),
+}));
+
+vi.mock("@/composables/useCharacterId", () => ({
+  useCharacterId: () => ref("char-1"),
+}));
+
+vi.mock("@rpg-gen/api-client", () => ({
+  useCombat: () => ({
+    isInCombat: computed(() => true),
+    status: {
+      data: ref({
+        inCombat: true,
+        enemies: [{ id: "enemy-1", name: "Goblin", hp: 5 }],
+        player: { id: "player-1", name: "Hero", hp: 10 },
+        turnOrder: [],
+        currentTurnIndex: 0,
+        roundNumber: 1,
+        actionRemaining: 1,
+        actionMax: 1,
+      }),
+      refetch: vi.fn().mockResolvedValue(undefined),
+    },
+    canAct: computed(() => true),
+    endTurn: { mutateAsync: vi.fn().mockResolvedValue({}) },
+    attack: { mutateAsync: vi.fn().mockResolvedValue({}) },
+    startCombat: { mutateAsync: vi.fn().mockResolvedValue({}) },
+  }),
+  useCharacter: () => ({
+    character: { data: ref({ characterId: "char-1", name: "Hero" }) },
   }),
 }));
 
