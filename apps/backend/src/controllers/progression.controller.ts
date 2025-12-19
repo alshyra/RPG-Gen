@@ -20,7 +20,8 @@ export class ProgressionController {
 
   @Get("classes")
   @ApiOperation({ summary: "Get available classes for character creation" })
-  @ApiResponse({ status: 200, description: "List of available classes with metadata", type: [ClassMetadataDto] })
+  @ApiResponse({ status: 200, description: "List of available classes with metadata" })
+  @ApiResponse({type: [ClassMetadataDto]})
   getAvailableClasses() {
     return this.progressionService.getAvailableClasses();
   }
