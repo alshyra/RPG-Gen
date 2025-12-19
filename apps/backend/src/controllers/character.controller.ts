@@ -55,11 +55,11 @@ export class CharacterController {
     description: "Character created successfully",
     type: CharacterResponseDto,
   })
-  async create(@Req() req: RPGRequest, @Body("world") world: string) {
+  async create(@Req() req: RPGRequest) {
     const { user } = req;
 
     const userId = user._id.toString();
-    const character = await this.characterService.create(userId, world);
+    const character = await this.characterService.create(userId);
     return this.characterService.toCharacterDto(character);
   }
 

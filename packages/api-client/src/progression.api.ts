@@ -1,7 +1,7 @@
+import { ClassMetadataDto, RaceMetadataDto, SelectClassDto } from "@rpg-gen/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
-import { computed, MaybeRef, toValue } from "vue";
+import { computed, MaybeRefOrGetter, toValue } from "vue";
 import { apiClient } from "./client.js";
-import { ClassMetadataDto, RaceMetadataDto, SelectClassDto, SelectRaceDto, UnlockRankDto } from "@rpg-gen/shared";
 
 type ClassName = SelectClassDto['className'];
 
@@ -92,7 +92,7 @@ export function useAvailableRaces() {
   });
 }
 
-export function useTalentTrees(classNameOrRef: MaybeRef<ClassName>) {
+export function useTalentTrees(classNameOrRef: MaybeRefOrGetter<ClassName>) {
   const className = toValue(classNameOrRef);
   
   return useQuery({
@@ -103,7 +103,7 @@ export function useTalentTrees(classNameOrRef: MaybeRef<ClassName>) {
   });
 }
 
-export function useSelectClass(characterIdOrRef: MaybeRef<string>) {
+export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string>) {
   const characterId = toValue(characterIdOrRef);
   
   const queryClient = useQueryClient();
@@ -116,8 +116,11 @@ export function useSelectClass(characterIdOrRef: MaybeRef<string>) {
   });
 }
 
-export function useSelectRace(characterIdOrRef: MaybeRef<string>) {
+export function useSelectRace(characterIdOrRef: MaybeRefOrGetter<string | undefined>) {
   const characterId = toValue(characterIdOrRef);
+  if(!characterId) {
+    throw new Error("characterIdOrRef is required");
+  }
   
   const queryClient = useQueryClient();
 
@@ -129,7 +132,7 @@ export function useSelectRace(characterIdOrRef: MaybeRef<string>) {
   });
 }
 
-export function useUnlockRank(characterIdOrRef: MaybeRef<string>) {
+export function useUnlockRank(characterIdOrRef: MaybeRefOrGetter<string>) {
   const characterId = toValue(characterIdOrRef);
   
   const queryClient = useQueryClient();

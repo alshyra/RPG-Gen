@@ -19,12 +19,7 @@ import {
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
   private readonly DEFAULT_BASE_SCORES = {
-    Str: 15,
-    Dex: 14,
-    Con: 13,
-    Int: 12,
-    Wis: 10,
-    Cha: 8,
+
   };
 
   constructor(
@@ -37,12 +32,11 @@ export class CharacterService {
     return crypto.randomUUID();
   }
 
-  async create(userId: string, world: string): Promise<CharacterDocument> {
+  async create(userId: string): Promise<CharacterDocument> {
     const character = new this.characterModel({
       userId,
       characterId: this.generateCharacterId(),
       totalXp: 0,
-      world,
       state: "draft",
       isDeceased: false,
       inventory: [],

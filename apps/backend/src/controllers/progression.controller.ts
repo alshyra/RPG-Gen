@@ -9,6 +9,7 @@ import {
   ClassMetadataDto,
   RaceMetadataDto 
 } from "../domain/progression/dto/index.js";
+import { type RPGRequest } from "../global.types.js";
 
 @ApiTags("progression")
 @Controller("progression")
@@ -37,11 +38,14 @@ export class ProgressionController {
   @ApiResponse({ status: 400, description: "Invalid class name" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async selectClass(
-    @Request() req: { user: { sub: string } },
+    @Request() req: RPGRequest,
     @Param("characterId") characterId: string,
-    @Body() dto: SelectClassDto,
+    @Body("className") className: string,
   ) {
-    return this.progressionService.selectClass(req.user.sub, characterId, dto.className);
+    const { user } = req;
+
+    const userId = user._id.toString();
+    return this.progressionService.selectClass(userId, characterId, className);
   }
 
   @Post(":characterId/select-race")
@@ -50,11 +54,14 @@ export class ProgressionController {
   @ApiResponse({ status: 400, description: "Invalid race ID" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async selectRace(
-    @Request() req: { user: { sub: string } },
+    @Request() req: RPGRequest,
     @Param("characterId") characterId: string,
-    @Body() dto: SelectRaceDto,
+    @Body("raceId") raceId: string,
   ) {
-    return this.progressionService.selectRace(req.user.sub, characterId, dto.raceId);
+    const { user } = req;
+
+    const userId = user._id.toString();
+    return this.progressionService.selectRace(userId, characterId, raceId);
   }
 
   @Post(":characterId/unlock-rank")
@@ -63,7 +70,7 @@ export class ProgressionController {
   @ApiResponse({ status: 400, description: "Not enough talent points or invalid rank" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async unlockRank(
-    @Request() req: { user: { sub: string } },
+    @Request() req: RPGRequest,
     @Param("characterId") characterId: string,
     @Body() dto: UnlockRankDto,
   ) {
