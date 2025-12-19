@@ -1,7 +1,6 @@
 import { SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 import { Character } from "./character/Character.js";
-export { AbilityScores } from "./character/AbilityScores.js";
 export { CharacterClass } from "./character/CharacterClass.js";
 export { Item } from "./item/Item.js";
 export { ItemDefinition, ItemDefinitionSchema, type ItemSlot, type ItemBonuses } from "./item/ItemDefinition.js";

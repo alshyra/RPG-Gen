@@ -4,7 +4,7 @@ import { Model } from "mongoose";
 import { ItemDefinition } from "../../infra/mongo/item/ItemDefinition.js";
 import { ItemDefinitionService } from "../item-definition/item-definition.service.js";
 import { SpellDefinitionService } from "../spell-definition/spell-definition.service.js";
-import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
+import { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
 import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
@@ -403,13 +403,12 @@ export class CharacterService {
 
   // Convert MongoDB document to frontend CharacterDto format
   toCharacterDto(doc: CharacterDocument): CharacterResponseDto {
-    return {
+    return new CharacterResponseDto({
       characterId: doc.characterId,
       name: doc.name,
       hp: doc.hp,
       hpMax: doc.hpMax,
       totalXp: doc.totalXp,
-      world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender,
       inspirationPoints: doc.inspirationPoints,
@@ -428,7 +427,7 @@ export class CharacterService {
       paMax: doc.paMax,
       pm: doc.pm,
       pmMax: doc.pmMax,
-    };
+    });
   }
 
   /**

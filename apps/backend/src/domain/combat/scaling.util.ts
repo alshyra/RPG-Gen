@@ -5,7 +5,7 @@
  * Zero RNG on level up - all calculations are deterministic.
  */
 
-import type { CharacterStats } from "../../infra/mongo/character/Character.js";
+import type { CharacterStats } from "../../infra/mongo/character/CharacterStats.js";
 
 // Class base stats configuration
 export interface ClassBaseStats {

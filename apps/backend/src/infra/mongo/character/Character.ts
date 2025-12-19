@@ -1,14 +1,7 @@
 import { Prop, Schema } from "@nestjs/mongoose";
 import { Schema as MongooseSchema, Document } from "mongoose";
 import { Item } from "../item/Item.js";
-
-// Simplified stats for the new talent system
-export interface CharacterStats {
-  vigor: number; // Physical power, HP bonus
-  finesse: number; // Crit, dodge
-  mind: number; // Spell power, PM regen
-  survival: number; // Healing, status resistance
-}
+import { CharacterStats } from "./CharacterStats.js";
 
 // Unlocked talent rank in a voie
 export interface UnlockedRank {
@@ -140,12 +133,6 @@ export class Character {
     type: Number,
   })
   totalXp: number;
-
-  @Prop({
-    required: true,
-    type: String,
-  })
-  world: string;
 
   @Prop({ type: String })
   portrait: string;

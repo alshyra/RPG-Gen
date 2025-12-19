@@ -49,9 +49,6 @@ export class BaseCharacterResponseDto {
   })
   skills?: SkillResponseDto[];
 
-  @ApiProperty({ description: "Game world (e.g., tactical, fantasy)" })
-  world: string;
-
   @ApiProperty({ description: "Character portrait URL or base64" })
   portrait: string;
 
