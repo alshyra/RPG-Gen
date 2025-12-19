@@ -8,10 +8,7 @@ import {
 import { InjectModel } from "@nestjs/mongoose";
 import type { Model } from "mongoose";
 import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
-import { calculateArmorClass, getDexModifier } from "../character/armor-class.util.js";
-import type { CharacterResponseDto, InventoryItemDto, WeaponMeta } from "../character/dto/index.js";
-import { isWeaponMeta } from "../character/dto/InventoryItemMeta.js";
-import { DiceService } from "../dice/dice.service.js";
+import type { CharacterResponseDto } from "../character/dto/index.js";
 import { CombatantDto } from "./dto/CombatantDto.js";
 import { CombatEndDto } from "./dto/CombatEndDto.js";
 import { CombatStartRequestDto } from "./dto/CombatStartRequestDto.js";
@@ -21,10 +18,16 @@ import { ActionEconomyService } from "./services/action-economy.service.js";
 import { InitService } from "./services/init.service.js";
 import { TurnOrderService } from "./services/turn-order.service.js";
 import { EnemyTurnService } from "./enemy-turn.service.js";
+import { calculateMaxHP, CLASS_STATS } from "./scaling.util.js";
 
 /**
- * Service managing combat state and mechanics.
- * Simplified to expose only methods consumed by the orchestrator.
+ * CombatAppService - Combat state management for the new tactical system
+ * 
+ * Key changes from D&D:
+ * - No attack rolls, AC, or proficiency
+ * - Uses PA/PM resource system
+ * - Damage calculated via scaling formula
+ * - HP calculated via class-based formula
  */
 @Injectable()
 export class CombatAppService {
@@ -38,142 +41,76 @@ export class CombatAppService {
     private readonly enemyTurnService: EnemyTurnService,
   ) {}
 
+  /**
+   * Consume PA for an action
+   */
+  public consumePA(state: CombatStateDto, cost: number = 1): CombatStateDto {
+    return this.actionEconomyService.consumePA(state, cost);
+  }
+
+  /**
+   * @deprecated Use consumePA instead
+   */
   public decrementAction(state: CombatStateDto): CombatStateDto {
     return this.actionEconomyService.decrementAction(state);
   }
 
   /**
-   * Get ability modifier for attack calculations
+   * Build player combat stats using the new scaling system
    */
-  private getStrModifier(character: CharacterResponseDto): number {
-    const strScore = character.scores?.Str ?? 10;
-    return Math.floor((strScore - 10) / 2);
-  }
+  private buildPlayerStats(character: CharacterResponseDto): CombatantDto {
+    const className = (character.className ?? "guerrier").toLowerCase();
+    const classStats = CLASS_STATS[className] ?? CLASS_STATS.guerrier;
+    const level = character.level ?? 1;
+    const survival = character.stats?.survival ?? 0;
 
-  /**
-   * Calculate attack bonus based on character stats
-   */
-  private calculatePlayerAttackBonus(character: CharacterResponseDto): number {
-    const strMod = this.getStrModifier(character);
-    const proficiency = character.proficiency ?? 2;
-    return strMod + proficiency;
-  }
+    // Calculate HP using the new formula
+    const hpMax = calculateMaxHP(className, level, survival);
+    const hp = character.hp ?? hpMax;
 
-  /**
-   * Calculate damage bonus (STR modifier by default)
-   */
-  private calculatePlayerDamageBonus(character: CharacterResponseDto): number {
-    return this.getStrModifier(character);
-  }
-
-  /**
-   * Get the player's main weapon damage dice
-   */
-  private getPlayerDamageDice(character: CharacterResponseDto): string {
-    // Prefer equipped item with a definitionId and lookup its definition for damage
-    const equipped = character.inventory?.find(i => i.equipped && i.definitionId);
-    if (equipped?.meta && isWeaponMeta(equipped.meta)) {
-      return equipped.meta.damage || "1d6";
-    }
-    return "1d6";
-  }
-
-  /**
-   * Build base player combat stats
-   */
-  private buildBasePlayerStats(character: CharacterResponseDto): CombatantDto {
     return new CombatantDto({
       id: character.characterId,
       isPlayer: true,
       name: character.name ?? "Hero",
-      hp: character.hp ?? character.hpMax ?? 10,
-      hpMax: character.hpMax ?? 10,
-      ac: calculateArmorClass(character),
+      hp,
+      hpMax,
       initiative: 0,
-      attackBonus: this.calculatePlayerAttackBonus(character),
-      damageDice: this.getPlayerDamageDice(character),
-      damageBonus: this.calculatePlayerDamageBonus(character),
+      // New tactical system fields
+      pa: classStats.pa,
+      paMax: classStats.pa,
+      pm: classStats.pm,
+      pmMax: classStats.pm,
+      level,
+      className,
+      basePower: 5, // Default player base power
+      scalingAttribute: classStats.main_stat,
+      stats: {
+        vigor: character.stats?.vigor ?? 0,
+        finesse: character.stats?.finesse ?? 0,
+        mind: character.stats?.mind ?? 0,
+        survival: character.stats?.survival ?? 0,
+      },
+      side: "player",
     });
   }
 
   /**
-   * Find equipped weapon from inventory
+   * Roll initiative (finesse-based in new system)
    */
-  private findEquippedWeapon(inventory: InventoryItemDto[]) {
-    const equipped = inventory.find(
-      i => i?.equipped && i.meta && (i.meta as { type?: string }).type === "weapon",
-    );
-    if (equipped) return equipped;
-
-    return inventory.find(
-      i =>
-        i?.equipped && typeof i.definitionId === "string" && i.definitionId.startsWith("weapon-"),
-    );
+  private rollInitiative(finesse: number = 0): number {
+    const baseRoll = Math.floor(Math.random() * 20) + 1;
+    return baseRoll + finesse;
   }
 
   /**
-   * Check if weapon uses DEX for attack/damage
+   * Build enemies list with stats for the new system
    */
-  private weaponUsesDex(meta: WeaponMeta): boolean {
-    const properties: string[] = Array.isArray(meta.properties) ? meta.properties : [];
-    const lowerProps = properties.map(p => (p || "").toLowerCase());
-    const classStr = (meta.class || "").toString().toLowerCase();
-    const hasAmmunition = lowerProps.some(p => p.includes("ammunition"));
-    const hasFinesse = lowerProps.includes("finesse");
-    const isRangedClass = classStr.includes("ranged");
-    return hasFinesse || hasAmmunition || isRangedClass;
-  }
-
-  /**
-   * Extract damage dice from weapon meta
-   */
-  private extractDamageDice(meta: WeaponMeta): string | undefined {
-    if (meta.damage && typeof meta.damage === "string") {
-      const parts = meta.damage.trim().split(/\s+/);
-      if (parts.length > 0 && /^\d+d\d+/i.test(parts[0])) {
-        return parts[0];
-      }
-    }
-    return undefined;
-  }
-
-  /**
-   * Update player stats based on equipped weapon
-   */
-  private updatePlayerWeaponStats(player: CombatantDto, character: CharacterResponseDto): void {
-    if (!character.inventory) return;
-    const equipped = this.findEquippedWeapon(character.inventory);
-    if (!equipped) return;
-    const { meta } = equipped;
-    if (!isWeaponMeta(meta)) return;
-    const damageDice = this.extractDamageDice(meta);
-    if (damageDice) player.damageDice = damageDice;
-
-    const usesDex = this.weaponUsesDex(meta);
-    const abilityMod = usesDex ? getDexModifier(character) : this.getStrModifier(character);
-    const proficiency = character.proficiency ?? 2;
-    player.attackBonus = abilityMod + proficiency;
-    player.damageBonus = abilityMod;
-  }
-
-  /**
-   * Local d20 roll for initiatives.
-   * CombatService must not call other domain services.
-   */
-  private rollD20(): number {
-    return Math.floor(Math.random() * 20) + 1;
-  }
-
-  /**
-   * Build enemies list with rolled initiatives (no external services)
-   */
-  private buildEnemies(combatStart: CombatStartRequestDto) {
-    // move to InitService
+  private buildEnemies(combatStart: CombatStartRequestDto): CombatantDto[] {
     return this.initService.buildEnemies(combatStart);
   }
 
   /**
-   * Initialize combat state from combat_start instruction (no initial activations)
+   * Initialize combat state
    */
   async initializeCombat(
     character: CharacterResponseDto,
@@ -183,38 +120,31 @@ export class CombatAppService {
     const { characterId } = character;
     const state = this.buildInitialState(character, combatStart);
 
-    // Persist initial state (do NOT perform dice/attack resolution here)
     await this.persistSessionWithUser(state, userId);
     this.logger.log(`Combat initialized for ${characterId} with ${state.enemies.length} enemies`);
     return state;
   }
 
   /**
-   * Build initial combat state.
+   * Build initial combat state with the new system
    */
   private buildInitialState(
     character: CharacterResponseDto,
     combatStart: CombatStartRequestDto,
   ): CombatStateDto {
     const { characterId } = character;
-    const player = this.buildBasePlayerStats(character);
+    const player = this.buildPlayerStats(character);
 
-    // Roll player initiative
-    const playerInitRoll = this.rollD20();
-    player.initiative = playerInitRoll + getDexModifier(character);
-
-    // Update player stats based on equipped weapon
-    try {
-      this.updatePlayerWeaponStats(player, character);
-    } catch (err) {
-      this.logger.warn(`Failed to derive weapon stats from inventory: ${err}`);
-    }
+    // Roll initiative based on finesse
+    const finesse = character.stats?.finesse ?? 0;
+    player.initiative = this.rollInitiative(finesse);
 
     const enemies = this.buildEnemies(combatStart);
     const turnOrder = this.turnOrderService.buildTurnOrder(characterId, player, enemies);
 
-    const actionMax = 1;
-    const bonusActionMax = 1;
+    // Use class-based PA/PM
+    const className = (character.className ?? "guerrier").toLowerCase();
+    const classStats = CLASS_STATS[className] ?? CLASS_STATS.guerrier;
 
     return new CombatStateDto({
       characterId,
@@ -224,33 +154,22 @@ export class CombatAppService {
       turnOrder,
       currentTurnIndex: 0,
       roundNumber: 1,
-      actionRemaining: actionMax,
-      actionMax,
-      bonusActionRemaining: bonusActionMax,
-      bonusActionMax,
     });
   }
 
   /**
-   * Persist state and attach userId (used during initialization)
+   * Persist state with userId
    */
   private async persistSessionWithUser(state: CombatStateDto, userId: string): Promise<void> {
     await this.combatSessionModel.findOneAndUpdate(
       { characterId: state.characterId },
-      {
-        userId,
-        ...state,
-      },
-      {
-        upsert: true,
-        new: true,
-      },
+      { userId, ...state },
+      { upsert: true, new: true },
     );
   }
 
   /**
-   * Apply damage from an enemy to the player and persist state.
-   * This method deliberately does not roll dice and does not handle attack logic.
+   * Apply damage to player
    */
   async applyEnemyDamage(
     characterId: string,
@@ -262,81 +181,67 @@ export class CombatAppService {
     const state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException("No active combat found for character.");
 
-    // Reduce player HP
     state.player.hp = Math.max(0, (state.player.hp ?? 0) - Math.max(0, Math.floor(damageTotal)));
-
-    // Persist state
     await this.saveCombatState(state);
 
-    // If player dies, finalize combat cleanup
     if (state.player.hp <= 0) {
       state.inCombat = false;
       const endResult = await this.endCombat(characterId);
-      return {
-        state,
-        endResult,
-      };
+      return { state, endResult };
     }
 
     return { state };
   }
 
   /**
-   * Apply healing to the player and persist state.
-   * Used when player uses a healing potion or receives healing.
+   * Apply healing to player
    */
   async applyPlayerHeal(characterId: string, healAmount: number): Promise<CombatStateDto> {
     const state = await this.getCombatState(characterId);
     if (!state) throw new BadRequestException("No active combat found for character.");
 
-    // Increase player HP, capped at max
     const currentHp = state.player.hp ?? 0;
     const maxHp = state.player.hpMax ?? currentHp;
     state.player.hp = Math.min(currentHp + Math.max(0, Math.floor(healAmount)), maxHp);
-    state.bonusActionRemaining = Math.max(0, (state.bonusActionRemaining ?? 0) - 1);
-    // Persist state
+    
+    // Consume PA for healing action
+    state.player.pa = Math.max(0, (state.player.pa ?? 0) - 1);
+    
     await this.saveCombatState(state);
-
     this.logger.log(`Player healed for ${healAmount} HP, now at ${state.player.hp}/${maxHp}`);
     return state;
   }
 
   /**
-   * Save combat state to database
+   * Save combat state
    */
   public async saveCombatState(state: CombatStateDto): Promise<void> {
     await this.combatSessionModel.findOneAndUpdate(
       { characterId: state.characterId },
       {
         inCombat: state.inCombat,
-        enemies: state.enemies, // unified CombatantDto[]
+        enemies: state.enemies,
         player: state.player,
         turnOrder: state.turnOrder,
         currentTurnIndex: state.currentTurnIndex,
         roundNumber: state.roundNumber,
-        actionRemaining: state.actionRemaining,
-        actionMax: state.actionMax,
-        bonusActionRemaining: state.bonusActionRemaining,
-        bonusActionMax: state.bonusActionMax,
+        activeEffects: state.activeEffects,
       },
     );
   }
 
   /**
-   * Retrieve the current combat state from the database
+   * Get combat state
    */
   async getCombatState(characterId: string): Promise<CombatStateDto> {
     const doc = await this.combatSessionModel.findOne({ characterId }).lean().exec();
     if (!doc) throw new NotFoundException("Combat session not found");
     if (!doc.player) throw new NotFoundException("Combat session malformed: missing player");
-    // Convert raw DB objects into class instances for consistent runtime behavior
+
     const enemies = Array.isArray(doc.enemies) ? doc.enemies.map(e => new CombatantDto(e)) : [];
     const player = doc.player
       ? new CombatantDto(doc.player)
-      : new CombatantDto({
-          id: characterId,
-          isPlayer: true,
-        });
+      : new CombatantDto({ id: characterId, isPlayer: true });
     const turnOrder = Array.isArray(doc.turnOrder)
       ? doc.turnOrder.map(t => new CombatantDto(t))
       : [];
@@ -349,44 +254,38 @@ export class CombatAppService {
       turnOrder,
       currentTurnIndex: doc.currentTurnIndex ?? 0,
       roundNumber: doc.roundNumber ?? 1,
-      actionRemaining: doc.actionRemaining ?? 1,
-      actionMax: doc.actionMax ?? 1,
-      bonusActionRemaining: doc.bonusActionRemaining ?? 1,
-      bonusActionMax: doc.bonusActionMax ?? 1,
+      activeEffects: doc.activeEffects ?? [],
     });
   }
 
   /**
-   * Quick check whether a character currently has an active combat
+   * Check if in combat
    */
   async isInCombat(characterId: string): Promise<boolean> {
     try {
       const state = await this.getCombatState(characterId);
       return !!state && state.inCombat === true;
     } catch {
-      // No combat session found
       return false;
     }
   }
 
   /**
-   * Get raw combat session from database (for accessing narrative, etc.)
+   * Get raw combat session
    */
   async getCombatSessionRaw(characterId: string): Promise<CombatSession | null> {
     return this.combatSessionModel.findOne({ characterId }).exec();
   }
 
   /**
-   * Update narrative in combat session
+   * Update narrative
    */
   async updateNarrative(characterId: string, narrative: string): Promise<void> {
     await this.combatSessionModel.updateOne({ characterId }, { $set: { narrative } }).exec();
   }
 
   /**
-   * Apply damage reported by client to a named enemy and persist state.
-   * Decrements action counter.
-   * Returns both the updated state and optionally the endResult when combat ends.
+   * Apply player damage to enemy
    */
   async applyPlayerDamage(
     characterId: string,
@@ -404,57 +303,51 @@ export class CombatAppService {
 
     target.hp = Math.max(0, (target.hp ?? 0) - damageTotal);
 
-    // Consume a player action BEFORE saving
-    state = this.actionEconomyService.decrementAction(state);
-    // Update enemies with the modified target
+    // Consume PA
+    state = this.actionEconomyService.consumePA(state, 1);
     state.enemies = state.enemies.map(e => (e.id === target.id ? target : e));
 
     await this.saveCombatState(state);
 
-    // Finalize combat if needed (all enemies dead)
     const anyAlive = state.enemies.some(enemy => enemy.hp > 0);
     if (!anyAlive) {
-      // persist and cleanup - capture the endResult before deleting the session
       const endResult = await this.endCombat(characterId);
       state.inCombat = false;
-      return {
-        state,
-        endResult,
-      };
+      return { state, endResult };
     }
 
     return { state };
   }
 
   /**
-   * Get combat status summary
+   * Get combat summary
    */
   async getCombatSummary(characterId: string): Promise<string | null> {
     const state = await this.getCombatState(characterId);
-    if (!state || !state.inCombat) {
-      return null;
-    }
+    if (!state || !state.inCombat) return null;
 
     const aliveEnemies = state.enemies.filter(e => e.hp > 0);
     const enemyList = aliveEnemies.map(e => `${e.name} (PV: ${e.hp}/${e.hpMax})`).join(", ");
 
     return (
       `Combat en cours - Round ${state.roundNumber}\n` +
-      `Vos PV: ${state.player.hp}/${state.player.hpMax}\n` +
-      `Ennemis: ${enemyList}\n` +
-      `Utilisez /attack [nom_ennemi] pour attaquer.`
+      `Vos PV: ${state.player.hp}/${state.player.hpMax} | PA: ${state.player.pa}/${state.player.paMax} | PM: ${state.player.pm}/${state.player.pmMax}\n` +
+      `Ennemis: ${enemyList}`
     );
   }
 
   /**
-   * Calculate XP reward for defeated enemies
+   * Calculate XP reward
    */
   calculateXpReward(enemies: CombatantDto[]): number {
-    return enemies.reduce((total, enemy) => total + (enemy.hpMax ?? 0) * 10, 0);
+    return enemies.reduce((total, enemy) => {
+      const level = enemy.level ?? 1;
+      return total + level * 50; // 50 XP per enemy level
+    }, 0);
   }
 
   /**
-   * End combat and generate final result (cleanup)
+   * End combat
    */
   async endCombat(
     characterId: string,
@@ -462,7 +355,6 @@ export class CombatAppService {
     const state = await this.getCombatState(characterId);
     if (!state) throw new InternalServerErrorException("Combat session not found during cleanup");
 
-    // Enemies with hp <= 0 are defeated
     const defeatedEnemies = state.enemies.filter(e => (e.hp ?? 0) <= 0);
     const xpGained = this.calculateXpReward(defeatedEnemies);
 
@@ -476,32 +368,18 @@ export class CombatAppService {
   }
 
   /**
-   * Process enemy turns (e.g., before first player activation or after player turn).
-   * Delegates to EnemyTurnService which handles attack rolls and damage.
-   *
-   * @param characterId The player character ID
-   * @param state Current combat state
-   * @param enemies Enemies to process in order
-   * @param diceService DiceService to pass to EnemyTurnService
-   * @param userId User ID for potential logging/messaging
-   * @returns Updated state, attack logs, total damage, and defeat flag
+   * Process enemy turns using the new scaling system
    */
   async processEnemyTurns(
     characterId: string,
     state: CombatStateDto,
     enemies: CombatantDto[],
-    diceService: DiceService,
   ): Promise<{
     state: CombatStateDto;
     attackLogs: EnemyAttackLogDto[];
     totalDamage: number;
     playerDefeated: boolean;
   }> {
-    return this.enemyTurnService.executeEnemyTurnsSequence(
-      characterId,
-      state,
-      enemies,
-      diceService,
-    );
+    return this.enemyTurnService.executeEnemyTurnsSequence(characterId, state, enemies);
   }
 }

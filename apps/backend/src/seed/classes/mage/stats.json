@@ -1,0 +1,14 @@
+{
+  "name": "mage",
+  "displayName": "Mage",
+  "description": "Maître des arcanes, le Mage manipule les forces magiques pour détruire ou protéger.",
+  "hp_base": 8,
+  "hp_gain": 4,
+  "pa": 5,
+  "pm": 5,
+  "main_stat": "mind",
+  "proficiencies": ["mind", "survival"],
+  "startingAptitudes": ["projectile_arcanique", "bouclier_magique"],
+  "color": "#7c3aed",
+  "icon": "🔮"
+}

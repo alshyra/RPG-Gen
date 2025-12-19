@@ -3,11 +3,9 @@ export * from './api-types'
 export * from './type-guards'
 
 // Auto-generated type aliases from OpenAPI components.schemas
-export type AbilityScoresResponseDto = import('./api-types').components['schemas']['AbilityScoresResponseDto'];
 export type ArmorMeta = import('./api-types').components['schemas']['ArmorMeta'];
 export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
 export type AvatarResponseDto = import('./api-types').components['schemas']['AvatarResponseDto'];
-export type CharacterClassResponseDto = import('./api-types').components['schemas']['CharacterClassResponseDto'];
 export type CharacterIdBodyDto = import('./api-types').components['schemas']['CharacterIdBodyDto'];
 export type CharacterResponseDto = import('./api-types').components['schemas']['CharacterResponseDto'];
 export type ChatMessageDto = import('./api-types').components['schemas']['ChatMessageDto'];
@@ -18,7 +16,6 @@ export type CombatEndDto = import('./api-types').components['schemas']['CombatEn
 export type CombatEndInstructionMessageDto = import('./api-types').components['schemas']['CombatEndInstructionMessageDto'];
 export type CombatEndResponseDto = import('./api-types').components['schemas']['CombatEndResponseDto'];
 export type CombatEndResultDto = import('./api-types').components['schemas']['CombatEndResultDto'];
-export type CombatOptionDto = import('./api-types').components['schemas']['CombatOptionDto'];
 export type CombatStartEntryDto = import('./api-types').components['schemas']['CombatStartEntryDto'];
 export type CombatStartInstructionMessageDto = import('./api-types').components['schemas']['CombatStartInstructionMessageDto'];
 export type CombatStartRequestDto = import('./api-types').components['schemas']['CombatStartRequestDto'];
@@ -44,7 +41,6 @@ export type InventoryInstructionMessageDto = import('./api-types').components['s
 export type InventoryItemDto = import('./api-types').components['schemas']['InventoryItemDto'];
 export type KillCharacterBodyDto = import('./api-types').components['schemas']['KillCharacterBodyDto'];
 export type LevelUpApplyDto = import('./api-types').components['schemas']['LevelUpApplyDto'];
-export type LevelUpOptionsDto = import('./api-types').components['schemas']['LevelUpOptionsDto'];
 export type MovementEventDto = import('./api-types').components['schemas']['MovementEventDto'];
 export type MovementRequestDto = import('./api-types').components['schemas']['MovementRequestDto'];
 export type MovementResponseDto = import('./api-types').components['schemas']['MovementResponseDto'];
@@ -53,11 +49,14 @@ export type RaceResponseDto = import('./api-types').components['schemas']['RaceR
 export type RemoveInventoryBodyDto = import('./api-types').components['schemas']['RemoveInventoryBodyDto'];
 export type RollInstructionMessageDto = import('./api-types').components['schemas']['RollInstructionMessageDto'];
 export type RollMetaDto = import('./api-types').components['schemas']['RollMetaDto'];
+export type SelectClassDto = import('./api-types').components['schemas']['SelectClassDto'];
+export type SelectRaceDto = import('./api-types').components['schemas']['SelectRaceDto'];
 export type SkillResponseDto = import('./api-types').components['schemas']['SkillResponseDto'];
 export type SpellInstructionMessageDto = import('./api-types').components['schemas']['SpellInstructionMessageDto'];
 export type SpellMetaDto = import('./api-types').components['schemas']['SpellMetaDto'];
 export type SpellResponseDto = import('./api-types').components['schemas']['SpellResponseDto'];
 export type ToolMeta = import('./api-types').components['schemas']['ToolMeta'];
+export type UnlockRankDto = import('./api-types').components['schemas']['UnlockRankDto'];
 export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];
 export type UseItemRequestDto = import('./api-types').components['schemas']['UseItemRequestDto'];
 export type UseItemResponseDto = import('./api-types').components['schemas']['UseItemResponseDto'];

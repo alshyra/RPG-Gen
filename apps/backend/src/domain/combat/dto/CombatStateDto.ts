@@ -11,6 +11,12 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 
+/**
+ * CombatStateDto - Combat state for the tactical system
+ * 
+ * Uses PA/PM resource economy (stored on CombatantDto)
+ * No attack rolls, AC, or bonus actions
+ */
 export class CombatStateDto {
   @ApiProperty({ description: "Character ID" })
   @IsString()
@@ -59,28 +65,7 @@ export class CombatStateDto {
   @IsString()
   narrative?: string;
 
-  // D&D 5e Action Economy
-  @ApiPropertyOptional({ description: "Remaining standard actions for current activation" })
-  @IsOptional()
-  @IsNumber()
-  actionRemaining?: number;
-
-  @ApiPropertyOptional({ description: "Maximum standard actions per activation" })
-  @IsOptional()
-  @IsNumber()
-  actionMax?: number;
-
-  @ApiPropertyOptional({ description: "Remaining bonus actions for current activation" })
-  @IsOptional()
-  @IsNumber()
-  bonusActionRemaining?: number;
-
-  @ApiPropertyOptional({ description: "Maximum bonus actions per activation" })
-  @IsOptional()
-  @IsNumber()
-  bonusActionMax?: number;
-
-  @ApiPropertyOptional({ description: "Active turn effects (dash, disengage, etc.)" })
+  @ApiPropertyOptional({ description: "Active status effects (stunned, burning, etc.)" })
   @IsOptional()
   @IsArray()
   activeEffects?: string[];
@@ -114,10 +99,6 @@ export class CombatStateDto {
     this.inCombat = this.inCombat ?? false;
     this.currentTurnIndex = this.currentTurnIndex ?? 0;
     this.roundNumber = this.roundNumber ?? 1;
-    this.actionRemaining = this.actionRemaining ?? 1;
-    this.actionMax = this.actionMax ?? 1;
-    this.bonusActionRemaining = this.bonusActionRemaining ?? 1;
-    this.bonusActionMax = this.bonusActionMax ?? 1;
     this.activeEffects = this.activeEffects ?? [];
   }
 }

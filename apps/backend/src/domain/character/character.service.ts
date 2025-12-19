@@ -8,6 +8,12 @@ import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
 import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
+import { 
+  getComputedStats as computeStats, 
+  type ComputedCharacterStats,
+  calculateDamage,
+  calculateHealing,
+} from "../combat/scaling.util.js";
 
 @Injectable()
 export class CharacterService {
@@ -82,24 +88,30 @@ export class CharacterService {
   ): Promise<CharacterDocument> {
     const updateDoc: { [key in keyof UpdateCharacterRequestDto]?: UpdateCharacterRequestDto[key] } =
       {};
-    // Build update document
+    // Build update document - tactical system fields
     if (updates.hp !== undefined) updateDoc.hp = updates.hp;
     if (updates.hpMax !== undefined) updateDoc.hpMax = updates.hpMax;
     if (updates.totalXp !== undefined) updateDoc.totalXp = updates.totalXp;
-    if (updates.classes !== undefined) updateDoc.classes = updates.classes;
     if (updates.skills !== undefined) updateDoc.skills = updates.skills;
     if (updates.portrait !== undefined) updateDoc.portrait = updates.portrait;
-    if (updates.scores !== undefined) updateDoc.scores = updates.scores;
     if (updates.name !== undefined) updateDoc.name = updates.name;
     if (updates.race !== undefined) updateDoc.race = updates.race;
     if (updates.gender !== undefined) updateDoc.gender = updates.gender;
-    if (updates.proficiency !== undefined) updateDoc.proficiency = updates.proficiency;
     if (updates.inspirationPoints !== undefined)
       updateDoc.inspirationPoints = updates.inspirationPoints;
     if (updates.physicalDescription !== undefined)
       updateDoc.physicalDescription = updates.physicalDescription;
     if (updates.state !== undefined) updateDoc.state = updates.state;
     if (updates.inventory !== undefined) updateDoc.inventory = updates.inventory;
+    // New tactical system fields
+    if (updates.className !== undefined) updateDoc.className = updates.className;
+    if (updates.level !== undefined) updateDoc.level = updates.level;
+    if (updates.raceId !== undefined) updateDoc.raceId = updates.raceId;
+    if (updates.stats !== undefined) updateDoc.stats = updates.stats;
+    if (updates.pa !== undefined) updateDoc.pa = updates.pa;
+    if (updates.paMax !== undefined) updateDoc.paMax = updates.paMax;
+    if (updates.pm !== undefined) updateDoc.pm = updates.pm;
+    if (updates.pmMax !== undefined) updateDoc.pmMax = updates.pmMax;
     if (updates.spells !== undefined) {
       // Strict validation: spells must be an array of fully-formed spell objects
       if (!Array.isArray(updates.spells)) throw new BadRequestException("spells must be an array");
@@ -123,20 +135,6 @@ export class CharacterService {
       }
 
       updateDoc.spells = updates.spells;
-    }
-
-    if (updates.selectedCombatProficiencies !== undefined) {
-      // Validate selectedCombatProficiencies is an array of strings
-      if (!Array.isArray(updates.selectedCombatProficiencies)) {
-        throw new BadRequestException("selectedCombatProficiencies must be an array");
-      }
-
-      const hasInvalid = updates.selectedCombatProficiencies.some(id => typeof id !== "string");
-      if (hasInvalid) {
-        throw new BadRequestException("all selectedCombatProficiencies entries must be strings");
-      }
-
-      updateDoc.selectedCombatProficiencies = updates.selectedCombatProficiencies;
     }
 
     const character = await this.characterModel.findOneAndUpdate(
@@ -411,26 +409,132 @@ export class CharacterService {
       characterId: doc.characterId,
       name: doc.name,
       race: doc.race,
-      scores: doc.scores,
       hp: doc.hp,
       hpMax: doc.hpMax,
       totalXp: doc.totalXp,
-      classes: doc.classes,
       skills: doc.skills,
       world: doc.world,
       portrait: doc.portrait,
       gender: doc.gender,
-      proficiency: doc.proficiency,
       inspirationPoints: doc.inspirationPoints,
       isDeceased: doc.isDeceased || false,
       inventory: doc.inventory,
-      // Include spells so the API returns the currently known spells for the character
       spells: doc.spells,
-      selectedCombatProficiencies: doc.selectedCombatProficiencies,
       diedAt: doc.diedAt?.toISOString(),
       deathLocation: doc.deathLocation,
       physicalDescription: doc.physicalDescription,
       state: doc.state,
+      // Tactical system fields
+      className: doc.className,
+      level: doc.level,
+      raceId: doc.raceId,
+      stats: doc.stats,
+      pa: doc.pa,
+      paMax: doc.paMax,
+      pm: doc.pm,
+      pmMax: doc.pmMax,
     };
+  }
+
+  /**
+   * Get computed stats for a character (Base + Level + Equipment bonuses)
+   * Uses the new Talent Tree scaling system with zero RNG
+   */
+  async getComputedStats(userId: string, characterId: string): Promise<ComputedCharacterStats> {
+    const character = await this.characterModel.findOne({ userId, characterId }).exec();
+    if (!character) {
+      throw new NotFoundException(`Character ${characterId} not found`);
+    }
+
+    if (!character.className) {
+      throw new BadRequestException("Character has no class selected");
+    }
+
+    // Calculate equipment bonuses from inventory
+    const equipmentBonuses = await this.calculateEquipmentBonuses(character.inventory || []);
+
+    // Get base stats from character
+    const baseStats = character.stats || { vigor: 0, finesse: 0, mind: 0, survival: 0 };
+
+    // Compute final stats
+    return computeStats(
+      character.className,
+      character.level || 1,
+      baseStats,
+      equipmentBonuses,
+    );
+  }
+
+  /**
+   * Calculate aptitude damage using the scaling formula
+   */
+  calculateAptitudeDamage(
+    basePower: number,
+    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    characterStats: { vigor?: number; finesse?: number; mind?: number; survival?: number },
+    level: number,
+  ): number {
+    return calculateDamage(
+      basePower,
+      scalingAttribute,
+      { vigor: characterStats.vigor || 0, finesse: characterStats.finesse || 0, mind: characterStats.mind || 0, survival: characterStats.survival || 0 },
+      level,
+    );
+  }
+
+  /**
+   * Calculate healing using the scaling formula
+   */
+  calculateAptitudeHealing(
+    basePower: number,
+    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    characterStats: { vigor?: number; finesse?: number; mind?: number; survival?: number },
+    level: number,
+  ): number {
+    return calculateHealing(
+      basePower,
+      scalingAttribute,
+      { vigor: characterStats.vigor || 0, finesse: characterStats.finesse || 0, mind: characterStats.mind || 0, survival: characterStats.survival || 0 },
+      level,
+    );
+  }
+
+  /**
+   * Calculate equipment bonuses from equipped inventory items
+   */
+  private async calculateEquipmentBonuses(inventory: Item[]): Promise<{
+    pa?: number;
+    pm?: number;
+    vigor?: number;
+    finesse?: number;
+    mind?: number;
+    survival?: number;
+  }> {
+    const bonuses: { pa: number; pm: number; vigor: number; finesse: number; mind: number; survival: number } = {
+      pa: 0,
+      pm: 0,
+      vigor: 0,
+      finesse: 0,
+      mind: 0,
+      survival: 0,
+    };
+
+    const equippedItems = inventory.filter(item => item.equipped);
+    
+    for (const item of equippedItems) {
+      if (!item.definitionId) continue;
+      
+      const definition = await this.itemDefinitionService.findByDefinitionId(item.definitionId);
+      if (definition?.bonuses) {
+        bonuses.pa += definition.bonuses.pa || 0;
+        bonuses.pm += definition.bonuses.pm || 0;
+        bonuses.vigor += definition.bonuses.vigor || 0;
+        bonuses.finesse += definition.bonuses.finesse || 0;
+        bonuses.mind += definition.bonuses.mind || 0;
+        bonuses.survival += definition.bonuses.survival || 0;
+      }
+    }
+
+    return bonuses;
   }
 }

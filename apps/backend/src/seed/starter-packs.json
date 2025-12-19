@@ -1,0 +1,128 @@
+[
+  {
+    "definitionId": "weapon_warrior_sword",
+    "name": "Épée Longue de Garde",
+    "description": "Une épée robuste, équilibrée pour la défense comme l'attaque.",
+    "slot": "weapon",
+    "bonuses": { "vigor": 1 },
+    "tacticalEffect": "Chance de parade : bloque 1 dégât sur critique défensif",
+    "descriptionForAi": "Une lame d'acier bien entretenue, son pommeau arbore l'emblème d'un bouclier. Elle inspire confiance à son porteur.",
+    "meta": { "type": "weapon", "damage": "1d8", "damageType": "slashing" }
+  },
+  {
+    "definitionId": "armor_warrior_chainmail",
+    "name": "Cotte de Mailles Lourde",
+    "description": "Armure solide offrant une excellente protection au prix de la mobilité.",
+    "slot": "body",
+    "bonuses": { "pm": -1 },
+    "tacticalEffect": "Réduction de dégâts : 2 (ignore les 2 premiers points de dégâts)",
+    "descriptionForAi": "Une cotte de mailles aux anneaux serrés, elle cliquète doucement à chaque mouvement. Lourde mais rassurante.",
+    "meta": { "type": "armor", "armorClass": 16 }
+  },
+  {
+    "definitionId": "consumable_warrior_vigor",
+    "name": "Flasque de Vigueur",
+    "description": "Potion revigorante qui restaure la santé.",
+    "slot": "consumable",
+    "bonuses": {},
+    "tacticalEffect": "Restaure 10 PV (action: 1 PA)",
+    "descriptionForAi": "Une fiole en cuir contenant un liquide ambré et épais. Son odeur évoque le miel et les herbes de montagne.",
+    "meta": { "type": "consumable", "usable": true, "combatUsable": true, "healAmount": 10 }
+  },
+  {
+    "definitionId": "weapon_rogue_daggers",
+    "name": "Dagues Jumelles",
+    "description": "Paire de dagues légères, parfaites pour les attaques rapides.",
+    "slot": "weapon",
+    "bonuses": { "finesse": 1 },
+    "tacticalEffect": "+10% chance de critique",
+    "descriptionForAi": "Deux lames identiques, fines comme des aiguilles. Leurs manches sont enveloppés de cuir noir usé par l'usage.",
+    "meta": { "type": "weapon", "damage": "1d4+1d4", "damageType": "piercing" }
+  },
+  {
+    "definitionId": "armor_rogue_leather",
+    "name": "Plastron de Cuir Souple",
+    "description": "Armure légère favorisant la discrétion et l'agilité.",
+    "slot": "body",
+    "bonuses": { "pm": 1 },
+    "tacticalEffect": "Discrétion améliorée : +2 aux jets de furtivité",
+    "descriptionForAi": "Un plastron de cuir tanné, souple et silencieux. Des poches discrètes sont cousues à l'intérieur.",
+    "meta": { "type": "armor", "armorClass": 12 }
+  },
+  {
+    "definitionId": "consumable_rogue_smoke",
+    "name": "Fumigène",
+    "description": "Bombe fumigène permettant de disparaître temporairement.",
+    "slot": "consumable",
+    "bonuses": {},
+    "tacticalEffect": "Invisible pendant 1 tour (coût: 1 PA)",
+    "descriptionForAi": "Une petite bille grise qui tient dans la paume. Une légère odeur de soufre s'en dégage.",
+    "meta": { "type": "consumable", "usable": true, "combatUsable": true, "grantsInvisibility": true, "duration": 1 }
+  },
+  {
+    "definitionId": "weapon_mage_staff",
+    "name": "Bâton en Bois de Fer",
+    "description": "Bâton magique amplifiant la portée des sorts.",
+    "slot": "weapon",
+    "bonuses": { "mind": 1 },
+    "tacticalEffect": "Portée des sorts +1 case",
+    "descriptionForAi": "Un bâton noueux d'un bois presque noir. Des runes à peine visibles luisent faiblement le long de sa surface.",
+    "meta": { "type": "weapon", "damage": "1d6", "damageType": "bludgeoning", "spellFocus": true }
+  },
+  {
+    "definitionId": "armor_mage_robe",
+    "name": "Robe d'Apprenti",
+    "description": "Robe enchantée qui régénère lentement l'énergie magique.",
+    "slot": "body",
+    "bonuses": {},
+    "tacticalEffect": "Régénère 1 PA tous les 3 tours",
+    "descriptionForAi": "Une robe de lin bleu nuit, brodée de fils d'argent formant des constellations. Elle semble onduler même sans vent.",
+    "meta": { "type": "armor", "armorClass": 10, "paRegenRate": 3 }
+  },
+  {
+    "definitionId": "consumable_mage_elixir",
+    "name": "Élixir de Lucidité",
+    "description": "Potion magique qui restaure instantanément de l'énergie.",
+    "slot": "consumable",
+    "bonuses": {},
+    "tacticalEffect": "Restaure 2 PA immédiatement",
+    "descriptionForAi": "Une fiole de cristal contenant un liquide bleu luminescent. Il crépite doucement comme de l'électricité liquide.",
+    "meta": { "type": "consumable", "usable": true, "combatUsable": true, "paRestore": 2 }
+  },
+  {
+    "definitionId": "pack-backpack",
+    "name": "Sac à dos",
+    "description": "Contient divers petits outils et rations",
+    "slot": "accessory",
+    "bonuses": {},
+    "tacticalEffect": "",
+    "descriptionForAi": "Un sac de voyage en toile robuste, avec de nombreuses poches et sangles.",
+    "meta": { "type": "pack" }
+  },
+  {
+    "definitionId": "generic-torch",
+    "name": "Torche",
+    "description": "Éclairage temporaire",
+    "slot": "consumable",
+    "bonuses": {},
+    "tacticalEffect": "Illumine la zone, révèle les ennemis cachés",
+    "descriptionForAi": "Une torche en bois avec un tissu huilé enroulé au sommet.",
+    "meta": { "type": "consumable" }
+  },
+  {
+    "definitionId": "potion-health",
+    "name": "Potion de soin",
+    "description": "Soigne 2d4+2 PV",
+    "slot": "consumable",
+    "bonuses": {},
+    "tacticalEffect": "Restaure 2d4+2 PV (action: 1 PA)",
+    "descriptionForAi": "Une fiole rouge rubis au liquide épais et sirupeux.",
+    "meta": {
+      "type": "consumable",
+      "usable": true,
+      "combatUsable": true,
+      "restUsable": false,
+      "healDice": "2d4+2"
+    }
+  }
+]

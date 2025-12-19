@@ -1,7 +1,6 @@
-import { Controller, Get, Logger, Param, ParseIntPipe } from "@nestjs/common";
+import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ClassesService } from "../domain/classes/classes.service.js";
-import { LevelUpOptionsDto } from "../domain/character/dto/LevelUpOptionsDto.js";
 
 @ApiTags("classes")
 @Controller("classes")
@@ -10,26 +9,55 @@ export class ClassesController {
 
   constructor(private classesService: ClassesService) {}
 
-  @Get(":className/levels/:level")
-  @ApiOperation({ summary: "Get class-level options for a specific level" })
+  @Get()
+  @ApiOperation({ summary: "Get all available classes" })
+  @ApiResponse({
+    status: 200,
+    description: "List of all classes",
+  })
+  async getAllClasses() {
+    return this.classesService.getAllClasses();
+  }
+
+  @Get(":className")
+  @ApiOperation({ summary: "Get a class by name" })
   @ApiParam({
     name: "className",
-    description: "Name of the class (e.g., Bard, Cleric)",
-  })
-  @ApiParam({
-    name: "level",
-    description: "Level number (1-20)",
-    type: Number,
+    description: "Name of the class (e.g., guerrier, rogue, mage)",
   })
   @ApiResponse({
     status: 200,
-    description: "Class-level options",
-    type: LevelUpOptionsDto,
+    description: "Class details",
   })
-  async getLevelOptions(
-    @Param("className") className: string,
-    @Param("level", ParseIntPipe) level: number,
-  ): Promise<LevelUpOptionsDto> {
-    return this.classesService.getOptionsForLevel(className, level);
+  async getClass(@Param("className") className: string) {
+    return this.classesService.getClassByName(className);
+  }
+
+  @Get(":className/voies")
+  @ApiOperation({ summary: "Get talent trees (voies) for a class" })
+  @ApiParam({
+    name: "className",
+    description: "Name of the class",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "List of talent trees with their ranks",
+  })
+  async getTalentTrees(@Param("className") className: string) {
+    return this.classesService.getTalentTrees(className);
+  }
+
+  @Get(":className/starting-aptitudes")
+  @ApiOperation({ summary: "Get starting aptitudes for a class" })
+  @ApiParam({
+    name: "className",
+    description: "Name of the class",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "List of starting aptitude IDs",
+  })
+  async getStartingAptitudes(@Param("className") className: string) {
+    return this.classesService.getStartingAptitudes(className);
   }
 }

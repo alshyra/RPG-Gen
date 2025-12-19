@@ -1,0 +1,14 @@
+{
+  "name": "rogue",
+  "displayName": "Rogue",
+  "description": "Furtif et agile, le Rogue frappe vite et disparaît dans l'ombre.",
+  "hp_base": 10,
+  "hp_gain": 6,
+  "pa": 5,
+  "pm": 6,
+  "main_stat": "finesse",
+  "proficiencies": ["finesse", "mind"],
+  "startingAptitudes": ["attaque_sournoise", "esquive"],
+  "color": "#16a34a",
+  "icon": "🗡️"
+}

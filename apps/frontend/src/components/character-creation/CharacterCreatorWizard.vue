@@ -49,29 +49,24 @@
       <UiLoader />
     </div>
 
-    <!-- Steps -->
+    <!-- Steps - Simplified 4-step flow -->
     <div class="flex-1 overflow-auto">
       <div class="h-full">
+        <!-- Step 1: Basic Info (name, gender) -->
         <div class="h-full">
           <StepBasicInfo v-if="currentStep === 0" />
         </div>
+        <!-- Step 2: Race Selection -->
         <div class="h-full">
-          <StepAbilityScores v-if="currentStep === 1" />
+          <StepRaceSelection v-if="currentStep === 1" />
         </div>
+        <!-- Step 3: Class Selection (visual cards with auto inventory) -->
         <div class="h-full">
-          <StepSkills v-if="currentStep === 2" />
+          <StepClassSelection v-if="currentStep === 2" />
         </div>
+        <!-- Step 4: Avatar -->
         <div class="h-full">
-          <StepSpells v-if="currentStep === 3" />
-        </div>
-        <div class="h-full">
-          <StepCombat v-if="currentStep === 4" />
-        </div>
-        <div class="h-full">
-          <StepInventory v-if="currentStep === 5" />
-        </div>
-        <div class="h-full">
-          <StepAvatar v-if="currentStep === 6" />
+          <StepAvatar v-if="currentStep === 3" />
         </div>
       </div>
     </div>
@@ -113,18 +108,14 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { DnDRulesService } from "@/services/dndRulesService";
 import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
 import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import StepAbilityScores from "./steps/StepAbilityScores.vue";
 import StepAvatar from "./steps/StepAvatar.vue";
 import StepBasicInfo from "./steps/StepBasicInfo.vue";
-import StepCombat from "./steps/StepCombat.vue";
-import StepInventory from "./steps/StepInventory.vue";
-import StepSkills from "./steps/StepSkills.vue";
-import StepSpells from "./steps/StepSpells.vue";
+import StepRaceSelection from "./steps/StepRaceSelection.vue";
+import StepClassSelection from "./steps/StepClassSelection.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -132,13 +123,12 @@ const route = useRoute();
 const isLoading = ref(false);
 const loadingTitle = ref("");
 const loadingSubtitle = ref("");
+
+// Simplified 4-step flow (Info -> Race -> Class -> Avatar)
 const steps = [
   "Informations",
-  "Classe et Capacités",
-  "Compétences",
-  "Sorts",
-  "Combat",
-  "Inventaire",
+  "Race",
+  "Classe",
   "Avatar",
 ];
 
@@ -147,10 +137,6 @@ const characterId = useCharacterId();
 const chat = useChat(characterId.value, { enabled: false }); // Disable history query during creation
 const image = useImage();
 const { update, character } = useCharacter(characterId);
-
-const skillsToChoose = computed(() =>
-  DnDRulesService.getSkillChoicesForClass(currentCharacter?.value?.classes?.[0]?.name || "")
-);
 
 // Get current step from route, or from draft if no route param
 const currentStep = computed({
@@ -172,23 +158,19 @@ const currentStep = computed({
   },
 });
 
-const chosenSkills = computed(
-  () => (currentCharacter?.value?.skills || []).filter((skill) => !!skill.proficient).length || 0
-);
-
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
+      // Step 1: Name is required
       return currentCharacter?.value?.name?.trim();
     case 1:
-      return currentCharacter?.value?.race && currentCharacter?.value?.classes?.[0];
+      // Step 2: Race must be selected
+      return !!currentCharacter?.value?.raceId;
     case 2:
-      return chosenSkills.value === skillsToChoose.value;
+      // Step 3: Class must be selected
+      return !!currentCharacter?.value?.className;
     case 3:
-      return true;
-    case 4:
-      return true;
-    case 5:
+      // Step 4: Avatar - always can proceed
       return true;
     default:
       return false;
@@ -208,24 +190,13 @@ const previousStep = () => {
 // --- helper functions extracted from finishCreation for readability ---
 const saveFinalCharacter = async () => {
   console.log("Finishing character creation for", currentCharacter);
-  if (
-    !currentCharacter||
-    !currentCharacter?.value?.classes?.[0].name ||
-    !currentCharacter?.value?.scores?.Con
-  )
-    return;
-  const hpMax = DnDRulesService.calculateHpForLevel1(
-    currentCharacter?.value?.classes[0].name,
-    currentCharacter?.value?.scores.Con
-  );
+  if (!currentCharacter || !currentCharacter?.value?.className) return;
+  
+  // In the new system, HP is already set by selectClass API
+  // We just need to mark the character as created
   await update.mutateAsync({
     ...currentCharacter.value,
     state: "created",
-    hpMax,
-    hp: hpMax,
-    skills: currentCharacter?.value?.skills,
-    spells: currentCharacter?.value?.spells,
-    ...(currentCharacter?.value?.inventory ? { inventory: currentCharacter?.value?.inventory } : {}),
   });
 };
 
@@ -261,12 +232,7 @@ const navigateToGame = async () => {
 };
 
 const finishCreation = async () => {
-  if (
-    !currentCharacter||
-    !currentCharacter?.value?.classes?.[0].name ||
-    !currentCharacter?.value?.scores?.Con
-  )
-    return;
+  if (!currentCharacter || !currentCharacter?.value?.className) return;
 
   isLoading.value = true;
   loadingTitle.value = "Invocation de votre avatar...";

@@ -1,12 +1,37 @@
-import type { DiceResultDto, RollInstructionMessageDto } from "@rpg-gen/shared";
+import type { DiceResultDto, RollInstructionMessageDto, CharacterDto } from "@rpg-gen/shared";
 import { isRollInstruction } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
 import { useChat } from "@rpg-gen/api-client";
-import { getSkillBonus } from "../services/skillService";
 import { useCharacterId } from "./useCharacterId";
 import { useCurrentCharacter } from "./useCurrentCharacter";
 import { useGameStore } from "../stores/gameStore";
+
+/**
+ * Get stat bonus for a character based on stat name
+ * New simplified system uses vigor, finesse, mind, survival
+ */
+function getStatBonus(character: CharacterDto | null, statName: string): number {
+  if (!character?.stats) return 0;
+  const normalizedName = statName.toLowerCase();
+  const stats = character.stats;
+  
+  switch (normalizedName) {
+    case "vigor":
+    case "vigueur":
+      return stats.vigor ?? 0;
+    case "finesse":
+      return stats.finesse ?? 0;
+    case "mind":
+    case "esprit":
+      return stats.mind ?? 0;
+    case "survival":
+    case "survie":
+      return stats.survival ?? 0;
+    default:
+      return 0;
+  }
+}
 
 export function useGameRolls() {
   const gameStore = useGameStore();
@@ -42,7 +67,7 @@ export function useGameRolls() {
     if (!pending || !isRollInstruction(pending)) return;
     const skillName = pending.modifierLabel ?? "Roll";
     const skillBonus = pending.modifierLabel
-      ? getSkillBonus(currentCharacter.value ?? null, skillName)
+      ? getStatBonus(currentCharacter.value ?? null, skillName)
       : (pending.modifierValue ?? 0);
     gameStore.rollData = buildRollData(rollResult, pending, skillName, skillBonus);
     gameStore.showRollModal = true;

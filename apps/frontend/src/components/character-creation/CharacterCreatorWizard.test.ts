@@ -6,18 +6,19 @@ import { ref } from "vue";
 // Route/mock helpers come from test/setup.ts vi.mock('vue-router')
 import { useRoute } from "vue-router";
 
-// Mock character store and api
+// Mock character store and api - updated for new system
 const currentCharacter = ref({
   characterId: "c1",
-  classes: [
-    {
-      name: "Fighter",
-      level: 1,
-    },
-  ],
-  scores: { Con: 12 },
+  className: "guerrier",
   name: "Hero",
+  hp: 12,
+  hpMax: 12,
+  pa: 6,
+  paMax: 6,
+  pm: 4,
+  pmMax: 4,
   inventory: [],
+  aptitudes: [],
 });
 
 vi.mock("@/stores/characterStore", () => ({
@@ -37,30 +38,22 @@ vi.mock("@/apis/characterApi", async () => ({
   },
 }));
 
-vi.mock("@/services/dndRulesService", () => ({
-  DnDRulesService: { calculateHpForLevel1: () => 10 },
-}));
-
 vi.mock("@/apis/chatApi", async () => ({
   chatApi: { startGame: vi.fn(async () => []) },
 }));
 
 describe.skip("CharacterCreatorWizard finish flow", () => {
   it("generates avatar, refreshes store and navigates to game", async () => {
-    // ensure we are on last step
+    // ensure we are on last step (step 3 = Avatar in new 3-step flow)
     const route = useRoute();
-    route.params.step = "7";
+    route.params.step = "3";
     route.params.characterId = "c1";
 
     const wrapper = mount((await import("./CharacterCreatorWizard.vue")).default, {
       global: {
         stubs: [
           "StepBasicInfo",
-          "StepRaceClass",
-          "StepAbilityScores",
-          "StepSkills",
-          "StepSpells",
-          "StepInventory",
+          "StepClassSelection",
           "StepAvatar",
           "UiLoader",
           "UiButton",
@@ -77,7 +70,7 @@ describe.skip("CharacterCreatorWizard finish flow", () => {
 
   it("shows full page loader while avatar and first prompt are prepared", async () => {
     const route = useRoute() as any;
-    route.params.step = "7";
+    route.params.step = "3";
     route.params.characterId = "c1";
 
     // Override mocks to return pending promises so we can assert the loader is visible
@@ -99,11 +92,7 @@ describe.skip("CharacterCreatorWizard finish flow", () => {
       global: {
         stubs: [
           "StepBasicInfo",
-          "StepRaceClass",
-          "StepAbilityScores",
-          "StepSkills",
-          "StepSpells",
-          "StepInventory",
+          "StepClassSelection",
           "StepAvatar",
           "UiLoader",
           "UiButton",

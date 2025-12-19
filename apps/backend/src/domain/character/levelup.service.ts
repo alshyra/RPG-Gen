@@ -5,16 +5,20 @@ import type { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import type { LevelUpOptionsDto } from "./dto/LevelUpOptionsDto.js";
 import type { LevelUpApplyDto } from "./dto/LevelUpApplyDto.js";
 import type { SpellResponseDto } from "./dto/SpellResponseDto.js";
-import type { CharacterClassResponseDto } from "./dto/CharacterClassResponseDto.js";
-import type { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
+import { calculateMaxHP, CLASS_STATS } from "../combat/scaling.util.js";
 
+/**
+ * LevelUpService - Tactical system level progression
+ * 
+ * New system:
+ * - Single class per character (guerrier, rogue, mage)
+ * - Simple level progression (1-20)
+ * - HP calculated via class formula
+ * - No ASI system, stats come from race/equipment
+ */
 @Injectable()
 export class LevelUpService {
   private readonly logger = new Logger(LevelUpService.name);
-
-  // Level numbers (D&D 5e typical progression) for ASI and proficiency increases
-  private ASI_LEVELS = [4, 8, 12, 16, 19];
-  private PROFICIENCY_INCREASE_LEVELS = [5, 9, 13, 17];
 
   constructor(
     private readonly characterService: CharacterService,
@@ -25,16 +29,12 @@ export class LevelUpService {
     character: CharacterResponseDto,
     className: string,
   ): Promise<LevelUpOptionsDto> {
-    const classRecord = (character.classes || []).find(
-      c => String(c.name).toLowerCase() === String(className).toLowerCase(),
-    );
-    const currentLevel = classRecord?.level ?? 0;
+    const currentLevel = character.level ?? 1;
     const nextLevel = currentLevel + 1;
 
-    // For MVP: unlocked spells are all spells with level === nextLevel
+    // For tactical system: unlocked aptitudes/spells at next level
     const unlocked = await this.spellDefService.findByLevel(nextLevel);
 
-    // Map SpellDefinition -> SpellResponseDto to keep DTO contract (now including definitionId)
     const unlockedSpells: SpellResponseDto[] = (unlocked || []).map(s => ({
       definitionId: s.definitionId,
       name: s.name,
@@ -44,55 +44,17 @@ export class LevelUpService {
     }));
 
     const options: LevelUpOptionsDto = {
-      className,
+      className: character.className ?? className,
       currentLevel,
       nextLevel,
       unlockedSpells,
-      asiAvailable: this.ASI_LEVELS.includes(nextLevel),
-      proficiencyIncrease: this.PROFICIENCY_INCREASE_LEVELS.includes(nextLevel),
-      cantripsKnown: 0, // Legacy method - not class-data-driven, set to 0
-      spellsKnown: 0, // Legacy method - not class-data-driven, set to 0
+      asiAvailable: false, // No ASI in tactical system
+      proficiencyIncrease: false, // No proficiency in tactical system
+      cantripsKnown: 0,
+      spellsKnown: 0,
     };
 
     return options;
-  }
-
-  private async saveCharacterUpdates(
-    userId: string,
-    characterId: string,
-    updates: UpdateCharacterRequestDto,
-  ) {
-    return this.characterService.update(userId, characterId, updates);
-  }
-
-  private getClassLevelInfo(character: CharacterResponseDto, className: string) {
-    const idx = (character.classes || []).findIndex(
-      c => String(c.name).toLowerCase() === String(className).toLowerCase(),
-    );
-    const classRecord = idx >= 0 ? character.classes![idx] : undefined;
-    const currentLevel = classRecord?.level ?? 0;
-    const nextLevel = currentLevel + 1;
-    return {
-      idx,
-      currentLevel,
-      nextLevel,
-    };
-  }
-
-  private ensureClassLevel(
-    character: CharacterResponseDto,
-    idx: number,
-    className: string,
-    nextLevel: number,
-  ) {
-    if (idx >= 0) character.classes![idx].level = nextLevel;
-    else {
-      const newClass: CharacterClassResponseDto = {
-        name: className,
-        level: nextLevel,
-      };
-      character.classes = [...(character.classes || []), newClass];
-    }
   }
 
   async applyLevelUp(
@@ -104,9 +66,10 @@ export class LevelUpService {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     if (!character) throw new BadRequestException("character not found");
 
-    const { idx, nextLevel } = this.getClassLevelInfo(character, className);
+    const currentLevel = character.level ?? 1;
+    const nextLevel = currentLevel + 1;
 
-    // Validate selected spells levels
+    // Validate selected spells/aptitudes
     const addSpells = payload.newSpellIds ?? [];
     if (addSpells.length > 0) {
       const invalid = await this.validateSelectedSpells(addSpells, nextLevel);
@@ -116,36 +79,30 @@ export class LevelUpService {
         );
     }
 
-    // Apply changes: increment class level
-    this.ensureClassLevel(character, idx, className, nextLevel);
-
-    // Add spells to character.spells (SpellResponseDto)
+    // Add spells to character
     const newSpells = await this.buildSpellResponses(addSpells, character.spells || []);
     const updatedSpells = [...(character.spells || []), ...newSpells];
 
-    // Apply ability increases if any
-    const updatedScores = this.applyAbilityIncreases(
-      character.scores as Record<string, unknown> | undefined,
-      payload.abilityIncreases ?? [],
-    );
+    // Calculate new HP max using tactical formula
+    const charClassName = character.className ?? className;
+    const survival = character.stats?.survival ?? 0;
+    const newHpMax = calculateMaxHP(charClassName, nextLevel, survival);
 
-    // Handle selected combat proficiencies: append new selections to existing ones
-    const newCombatProficiencies = payload.selectedCombatProficiencies ?? [];
-    const existingCombatProficiencies = character.selectedCombatProficiencies ?? [];
-    const combinedCombatProficiencies = [...existingCombatProficiencies, ...newCombatProficiencies];
-    // Remove duplicates while preserving order
-    const uniqueCombatProficiencies = Array.from(new Set(combinedCombatProficiencies));
+    // Get class PA/PM
+    const classStats = CLASS_STATS[charClassName.toLowerCase()] ?? CLASS_STATS.guerrier;
 
-    // persist
+    // Persist updates
     const updates = {
-      classes: character.classes,
+      level: nextLevel,
       spells: updatedSpells,
-      scores: updatedScores,
-      selectedCombatProficiencies: uniqueCombatProficiencies,
+      hpMax: newHpMax,
+      hp: newHpMax, // Full heal on level up
+      paMax: classStats.pa,
+      pmMax: classStats.pm,
     };
 
-    const saved = await this.saveCharacterUpdates(userId, characterId, updates);
-    this.logger.log(`Applied level-up for ${characterId} / ${className} => ${nextLevel}`);
+    const saved = await this.characterService.update(userId, characterId, updates);
+    this.logger.log(`Applied level-up for ${characterId} => level ${nextLevel}`);
     return this.characterService.toCharacterDto(saved);
   }
 
@@ -153,14 +110,10 @@ export class LevelUpService {
     newSpellIds: string[],
     nextLevel: number,
   ): Promise<string[]> {
-    // Perform validation in parallel to avoid banned loop constructs.
     const checks = await Promise.all(
       newSpellIds.map(async defId => {
         const def = await this.spellDefService.findByDefinitionId(defId);
-        return {
-          defId,
-          def,
-        };
+        return { defId, def };
       }),
     );
 
@@ -190,22 +143,5 @@ export class LevelUpService {
           meta: r.meta ?? {},
         }) as SpellResponseDto,
     );
-  }
-
-  private applyAbilityIncreases(
-    scores: Record<string, unknown> | undefined,
-    abilityIncreases: {
-      ability: string;
-      inc: number;
-    }[],
-  ): Record<string, number> {
-    const updatedScores = { ...(scores as Record<string, number>) } as Record<string, number>;
-    (abilityIncreases || []).forEach(asi => {
-      if (!asi || !asi.ability) return;
-      const key = asi.ability;
-      const old = updatedScores[key] ?? 10;
-      updatedScores[key] = old + (asi.inc ?? 0);
-    });
-    return updatedScores;
   }
 }

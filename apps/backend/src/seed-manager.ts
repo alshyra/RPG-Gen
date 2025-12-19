@@ -1,99 +1,174 @@
 import { INestApplication, Logger } from "@nestjs/common";
 import { ItemDefinitionService } from "./domain/item-definition/item-definition.service.js";
-import { SpellDefinitionService } from "./domain/spell-definition/spell-definition.service.js";
 import { ClassDefinitionService } from "./domain/class-definition/class-definition.service.js";
+import { AptitudeService } from "./domain/aptitude/aptitude.service.js";
+import { RaceService } from "./domain/race/race.service.js";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// Get the directory of this file for relative paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// New simplified system - starter packs and aptitudes
+import starterPackItems from "./seed/starter-packs.json" with { type: "json" };
+import aptitudesData from "./seed/aptitudes.json" with { type: "json" };
+import racesData from "./seed/races.json" with { type: "json" };
+
+// Legacy items (still useful for the game)
 import weaponsDefinitions from "./seed/weapons-definitions.json" with { type: "json" };
 import itemsDefinitions from "./seed/item-definitions.json" with { type: "json" };
 import armorDefinitions from "./seed/armor-definitions.json" with { type: "json" };
-import spellsDefinitions from "./seed/spells.json" with { type: "json" };
-import barbarianDefinitions from "./seed/classes/barbarian/levels.json" with { type: "json" };
-import bardDefinitions from "./seed/classes/bard/levels.json" with { type: "json" };
-import clericDefinitions from "./seed/classes/cleric/levels.json" with { type: "json" };
-import druidDefinitions from "./seed/classes/druid/levels.json" with { type: "json" };
-import fighterDefinitions from "./seed/classes/fighter/levels.json" with { type: "json" };
-import monkDefinitions from "./seed/classes/monk/levels.json" with { type: "json" };
-import paladinDefinitions from "./seed/classes/paladin/levels.json" with { type: "json" };
-import rangerDefinitions from "./seed/classes/ranger/levels.json" with { type: "json" };
-import rogueDefinitions from "./seed/classes/rogue/levels.json" with { type: "json" };
-import sorcererDefinitions from "./seed/classes/sorcerer/levels.json" with { type: "json" };
-import warlockDefinitions from "./seed/classes/warlock/levels.json" with { type: "json" };
-import wizardDefinitions from "./seed/classes/wizard/levels.json" with { type: "json" };
 
-// Import spell allowedSpellsByLevel from full.json (contains name + definitionId)
-import barbarianSpells from "./seed/classes/barbarian/allowed-spells.full.json" with { type: "json" };
-import bardSpells from "./seed/classes/bard/allowed-spells.full.json" with { type: "json" };
-import clericSpells from "./seed/classes/cleric/allowed-spells.full.json" with { type: "json" };
-import druidSpells from "./seed/classes/druid/allowed-spells.full.json" with { type: "json" };
-import fighterSpells from "./seed/classes/fighter/allowed-spells.full.json" with { type: "json" };
-import monkSpells from "./seed/classes/monk/allowed-spells.full.json" with { type: "json" };
-import paladinSpells from "./seed/classes/paladin/allowed-spells.full.json" with { type: "json" };
-import rangerSpells from "./seed/classes/ranger/allowed-spells.full.json" with { type: "json" };
-import rogueSpells from "./seed/classes/rogue/allowed-spells.full.json" with { type: "json" };
-import sorcererSpells from "./seed/classes/sorcerer/allowed-spells.full.json" with { type: "json" };
-import warlockSpells from "./seed/classes/warlock/allowed-spells.full.json" with { type: "json" };
-import wizardSpells from "./seed/classes/wizard/allowed-spells.full.json" with { type: "json" };
+// Class seed files from organized structure
+import guerrierStats from "./seed/classes/guerrier/stats.json" with { type: "json" };
+import guerrierVoies from "./seed/classes/guerrier/voies.json" with { type: "json" };
+import rogueStats from "./seed/classes/rogue/stats.json" with { type: "json" };
+import rogueVoies from "./seed/classes/rogue/voies.json" with { type: "json" };
+import mageStats from "./seed/classes/mage/stats.json" with { type: "json" };
+import mageVoies from "./seed/classes/mage/voies.json" with { type: "json" };
 
 const seedItemDefinitions = async (app: INestApplication, logger: Logger) => {
   try {
     const itemDefService = app.get(ItemDefinitionService);
-    const allDefs = [...weaponsDefinitions, ...itemsDefinitions, ...armorDefinitions];
+    // Combine starter pack items with legacy items
+    // Cast to ensure TypeScript accepts the slot type
+    const allDefs = [
+      ...starterPackItems.map(item => ({
+        ...item,
+        slot: item.slot as "head" | "body" | "weapon" | "accessory" | "consumable" | undefined,
+      })),
+      ...weaponsDefinitions,
+      ...itemsDefinitions,
+      ...armorDefinitions,
+    ];
     await Promise.all(allDefs.map(def => itemDefService.upsert(def)));
-    logger.log("Seeded item definitions at startup");
+    logger.log(`Seeded ${allDefs.length} item definitions at startup`);
   } catch (e) {
     logger.warn("Seeding item definitions failed", e);
   }
 };
 
-const seedSpellDefinitions = async (app: INestApplication, logger: Logger) => {
+const seedAptitudes = async (app: INestApplication, logger: Logger) => {
   try {
-    const spellDefService = app.get(SpellDefinitionService);
-    await spellDefService.seedFromJson(spellsDefinitions);
-    logger.log("Seeded spell definitions at startup");
+    const aptitudeService = app.get(AptitudeService);
+    // Cast the JSON data - seedFromJson handles any extra/missing fields gracefully
+    await aptitudeService.seedFromJson(aptitudesData as Parameters<AptitudeService['seedFromJson']>[0]);
+    logger.log(`Seeded ${aptitudesData.length} aptitudes at startup`);
   } catch (e) {
-    logger.warn("Seeding spell definitions failed", e);
+    logger.warn("Seeding aptitudes failed", e);
   }
 };
+
+// Type for seed data compatible with ClassDefinition
+interface ClassSeedData {
+  name: string;
+  displayName?: string;
+  description?: string;
+  baseStats: { hp_base: number; hp_gain?: number; pa: number; pm: number };
+  proficiencies: string[];
+  startingAptitudes: string[];
+  talentTrees: Record<string, { name: string; description?: string; ranks: { rank: number; aptitudeId: string; pointCost: number }[] }>;
+  color?: string;
+  icon?: string;
+  main_stat?: string;
+}
+
+// Types for the JSON file imports
+interface StatsJson {
+  name: string;
+  displayName: string;
+  description: string;
+  hp_base: number;
+  hp_gain: number;
+  pa: number;
+  pm: number;
+  main_stat: string;
+  proficiencies: string[];
+  startingAptitudes: string[];
+  color: string;
+  icon: string;
+}
+
+interface VoiesJson {
+  voies: Record<string, {
+    name: string;
+    description?: string;
+    ranks: Array<{ rank: number; aptitudeId: string; pointCost: number }>;
+  }>;
+}
+
+/**
+ * Build class definition from stats.json and voies.json files
+ */
+function buildClassDefinition(stats: StatsJson, voies: VoiesJson): ClassSeedData {
+  return {
+    name: stats.name,
+    displayName: stats.displayName,
+    description: stats.description,
+    baseStats: {
+      hp_base: stats.hp_base,
+      hp_gain: stats.hp_gain,
+      pa: stats.pa,
+      pm: stats.pm,
+    },
+    proficiencies: stats.proficiencies,
+    startingAptitudes: stats.startingAptitudes,
+    talentTrees: voies.voies,
+    color: stats.color,
+    icon: stats.icon,
+    main_stat: stats.main_stat,
+  };
+}
 
 const seedClassDefinitions = async (app: INestApplication, logger: Logger) => {
   try {
     const classDefService = app.get(ClassDefinitionService);
 
-    // Map class definitions with their allowed spells
-    const classSpellMap = [
-      { def: barbarianDefinitions, spells: barbarianSpells },
-      { def: bardDefinitions, spells: bardSpells },
-      { def: clericDefinitions, spells: clericSpells },
-      { def: druidDefinitions, spells: druidSpells },
-      { def: fighterDefinitions, spells: fighterSpells },
-      { def: monkDefinitions, spells: monkSpells },
-      { def: paladinDefinitions, spells: paladinSpells },
-      { def: rangerDefinitions, spells: rangerSpells },
-      { def: rogueDefinitions, spells: rogueSpells },
-      { def: sorcererDefinitions, spells: sorcererSpells },
-      { def: warlockDefinitions, spells: warlockSpells },
-      { def: wizardDefinitions, spells: wizardSpells },
+    // Build class definitions from organized JSON files
+    const classDefinitions: ClassSeedData[] = [
+      buildClassDefinition(guerrierStats, guerrierVoies),
+      buildClassDefinition(rogueStats, rogueVoies),
+      buildClassDefinition(mageStats, mageVoies),
     ];
 
-    // Merge spell data with class definitions
-    const classDataArray = classSpellMap.map(({ def, spells }) => ({
-      ...def,
-      allowedSpellsByLevel: spells.allowedSpellsByLevel || {},
-    }));
+    // Seed new class definitions
+    await Promise.all(
+      classDefinitions.map(async classData => {
+        try {
+          await classDefService.upsert(classData);
+          logger.log(`Seeded class: ${classData.name}`);
+        } catch (err) {
+          logger.warn(`Failed to seed class ${classData.name}: ${(err as Error).message}`);
+        }
+      }),
+    );
 
-    await classDefService.seedFromJson(classDataArray);
     logger.log("Seeded class definitions at startup");
   } catch (e) {
     logger.warn("Seeding class definitions failed", e);
   }
 };
 
+const seedRaces = async (app: INestApplication, logger: Logger) => {
+  try {
+    const raceService = app.get(RaceService);
+    await raceService.seedFromJson(racesData);
+    logger.log(`Seeded ${racesData.length} races at startup`);
+  } catch (e) {
+    logger.warn("Seeding races failed", e);
+  }
+};
+
 /**
- * Seed all application data (items, spells, classes, etc.)
+ * Seed all application data (items, aptitudes, classes, races)
  */
 export const seedAllData = async (app: INestApplication, logger: Logger) => {
   return Promise.all([
     seedItemDefinitions(app, logger),
-    seedSpellDefinitions(app, logger),
+    seedAptitudes(app, logger),
     seedClassDefinitions(app, logger),
+    seedRaces(app, logger),
   ]);
 };

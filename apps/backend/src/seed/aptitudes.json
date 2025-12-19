@@ -1,0 +1,236 @@
+[
+  {
+    "id": "com_frappe_basique",
+    "name": "Estocade",
+    "paCost": 2,
+    "cooldown": 0,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 5,
+    "scaling": "vigor",
+    "descriptionForAi": "Une attaque de base au corps à corps sans fioritures."
+  },
+
+  /* --- GUERRIER : LUMIÈRE (Protecteur) --- */
+  {
+    "id": "war_aura_devotion",
+    "name": "Aura de Dévotion",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "self",
+    "range": 0,
+    "area": "circle_3",
+    "effectType": "buff",
+    "descriptionForAi": "Crée une zone protectrice qui réduit les dégâts reçus par les alliés proches."
+  },
+  {
+    "id": "war_intervention",
+    "name": "Intervention",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "ally",
+    "range": 4,
+    "moveType": "dash",
+    "descriptionForAi": "Se jette aux côtés d'un allié pour encaisser le prochain coup à sa place."
+  },
+  {
+    "id": "war_eclat_sacre",
+    "name": "Éclat Sacré",
+    "paCost": 2,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 1,
+    "area": "circle_1",
+    "basePower": 4,
+    "scaling": "vigor",
+    "descriptionForAi": "Une explosion de lumière qui blesse les ennemis et soigne légèrement le lanceur."
+  },
+
+  /* --- GUERRIER : SANG (Berserk) --- */
+  {
+    "id": "war_saignee",
+    "name": "Saignée",
+    "paCost": 2,
+    "cooldown": 0,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 6,
+    "scaling": "vigor",
+    "status": "bleed",
+    "descriptionForAi": "Une frappe brutale qui inflige un saignement persistant."
+  },
+  {
+    "id": "war_fureur_enragee",
+    "name": "Fureur Enragée",
+    "paCost": 1,
+    "cooldown": 3,
+    "targetType": "self",
+    "descriptionForAi": "Sacrifie quelques PV pour gagner immédiatement 2 PA."
+  },
+  {
+    "id": "war_bond_sanglant",
+    "name": "Bond Sanglant",
+    "paCost": 2,
+    "cooldown": 2,
+    "range": 3,
+    "moveType": "jump",
+    "area": "circle_1",
+    "basePower": 3,
+    "descriptionForAi": "Saute dans la mêlée, infligeant des dégâts à l'atterrissage."
+  },
+
+  /* --- GUERRIER : TACTIQUE (Commandant) --- */
+  {
+    "id": "war_cri_ralliement",
+    "name": "Cri de Ralliement",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "area",
+    "range": 5,
+    "effectType": "pull",
+    "descriptionForAi": "Hurle un ordre qui attire les alliés vers le guerrier pour resserrer les rangs."
+  },
+  {
+    "id": "war_charge_tactique",
+    "name": "Élan d'Acier",
+    "paCost": 2,
+    "cooldown": 2,
+    "range": 4,
+    "moveType": "dash",
+    "effectType": "push",
+    "descriptionForAi": "Charge une cible et la repousse de 2 cases à l'impact."
+  },
+
+  /* --- ROGUE : OMBRE (Assassin) --- */
+  {
+    "id": "rog_pas_de_cote",
+    "name": "Pas de Côté",
+    "paCost": 1,
+    "cooldown": 1,
+    "range": 2,
+    "moveType": "dash",
+    "ignoreTackle": true,
+    "descriptionForAi": "Un mouvement rapide et fluide pour se repositionner sans danger."
+  },
+  {
+    "id": "rog_manteau_ombres",
+    "name": "Manteau d'Ombres",
+    "paCost": 2,
+    "cooldown": 4,
+    "status": "stealth",
+    "descriptionForAi": "Se fond dans l'obscurité pour devenir invisible pendant 2 tours."
+  },
+  {
+    "id": "rog_dague_venimeuse",
+    "name": "Dague Venimeuse",
+    "paCost": 2,
+    "range": 1,
+    "basePower": 4,
+    "scaling": "finesse",
+    "status": "poison",
+    "descriptionForAi": "Frappe avec une lame enduite d'une toxine affaiblissante."
+  },
+
+  /* --- ROGUE : NATURE (Traqueur) --- */
+  {
+    "id": "rog_appel_familier",
+    "name": "Appel de la Meute",
+    "paCost": 3,
+    "cooldown": 5,
+    "effectType": "summon",
+    "descriptionForAi": "Invoque un compagnon animal pour combattre à vos côtés."
+  },
+  {
+    "id": "rog_fleche_entravante",
+    "name": "Entrave de lianes",
+    "paCost": 2,
+    "range": 6,
+    "status": "rooted",
+    "descriptionForAi": "Un tir qui paralyse les jambes de la cible, l'empêchant de bouger."
+  },
+
+  /* --- ROGUE : CHARISME (Duelliste) --- */
+  {
+    "id": "rog_feinte_audacieuse",
+    "name": "Feinte Audacieuse",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 1,
+    "effectType": "debuff",
+    "descriptionForAi": "Distrait l'adversaire, le forçant à rater sa prochaine attaque."
+  },
+  {
+    "id": "rog_transposition",
+    "name": "Permutation",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "ally",
+    "range": 5,
+    "moveType": "swap",
+    "descriptionForAi": "Échange instantanément votre position avec celle d'un allié ou de votre familier."
+  },
+
+  /* --- MAGE : LUMIÈRE (Prêtre) --- */
+  {
+    "id": "mag_souffle_vie",
+    "name": "Souffle de Vie",
+    "paCost": 2,
+    "range": 5,
+    "basePower": 6,
+    "scaling": "mind",
+    "effectType": "heal",
+    "descriptionForAi": "Une onde de lumière qui soigne les blessures d'un allié."
+  },
+  {
+    "id": "mag_rempart_lumineux",
+    "name": "Rempart Lumineux",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "ally",
+    "range": 4,
+    "status": "shield",
+    "descriptionForAi": "Enveloppe un allié d'un bouclier de force pure."
+  },
+
+  /* --- MAGE : ABYSSE (Nécro) --- */
+  {
+    "id": "mag_eveil_osseux",
+    "name": "Éveil Osseux",
+    "paCost": 3,
+    "cooldown": 4,
+    "effectType": "summon",
+    "descriptionForAi": "Relève un serviteur squelette depuis le sol."
+  },
+  {
+    "id": "mag_fleau_mental",
+    "name": "Fléau Mental",
+    "paCost": 2,
+    "range": 6,
+    "basePower": 5,
+    "scaling": "mind",
+    "status": "weakness",
+    "descriptionForAi": "Une décharge d'énergie sombre qui réduit la puissance d'attaque de la cible."
+  },
+
+  /* --- MAGE : NATURE (Druide) --- */
+  {
+    "id": "mag_colere_terre",
+    "name": "Colère de la Terre",
+    "paCost": 3,
+    "cooldown": 2,
+    "area": "line_4",
+    "basePower": 7,
+    "scaling": "mind",
+    "descriptionForAi": "Fait jaillir des rochers du sol sur une ligne droite."
+  },
+  {
+    "id": "mag_brume_apaisante",
+    "name": "Brume Épaisse",
+    "paCost": 2,
+    "cooldown": 3,
+    "area": "circle_3",
+    "status": "obscured",
+    "descriptionForAi": "Invoque un brouillard dense qui réduit la vision et la portée des ennemis dans la zone."
+  }
+]

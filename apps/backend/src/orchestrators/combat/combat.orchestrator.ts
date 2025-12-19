@@ -67,12 +67,11 @@ export class CombatOrchestrator {
     const enemyTurnsBeforeFirstPlayer =
       playerIndex >= 0 ? state.turnOrder.slice(0, playerIndex) : state.turnOrder.slice();
 
-    // Process sequentially — stop if the player dies
+    // Process sequentially — stop if the player dies (no dice service needed in new system)
     const { state: processedState, playerDefeated } = await this.combatAppService.processEnemyTurns(
       characterId,
       state,
       enemyTurnsBeforeFirstPlayer,
-      this.diceService,
     );
 
     // Update to processed state
@@ -90,8 +89,6 @@ export class CombatOrchestrator {
     // Advance to player's activation and reset economy
     const finalState = await this.combatAppService.getCombatState(characterId);
     finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
-    finalState.actionRemaining = finalState.actionMax ?? 1;
-    finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
     await this.combatAppService.saveCombatState(finalState);
 
     // Use freshest state for return
@@ -116,13 +113,12 @@ export class CombatOrchestrator {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException("combat state not found");
 
-    // Process enemy turns in order; collect attack logs via AppService
+    // Process enemy turns in order (no dice service needed in new system)
     const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
     const enemyTurnResult = await this.combatAppService.processEnemyTurns(
       characterId,
       combatState,
       aliveEnemies,
-      this.diceService,
     );
 
     const finalState = enemyTurnResult.state;
@@ -134,8 +130,6 @@ export class CombatOrchestrator {
     if (!enemyTurnResult.playerDefeated) {
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
-      finalState.actionRemaining = finalState.actionMax ?? 1;
-      finalState.bonusActionRemaining = finalState.bonusActionMax ?? 1;
       await this.combatAppService.saveCombatState(finalState);
     } else {
       // If player died, the session may have been cleaned up by endCombat; ensure finalState

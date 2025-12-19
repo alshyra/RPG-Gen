@@ -1,8 +1,8 @@
-<template>
+npm <template>
   <div>
     <div class="grid grid-cols-4 gap-2">
       <div
-        v-for="allowedRace in allowedRaces"
+        v-for="allowedRace in availableRaces"
         :key="allowedRace.id"
         variant="primary"
         :class="['cursor-pointer p-2 rounded border', additionalSelectedClass(allowedRace)]"
@@ -22,18 +22,15 @@
 <script setup lang="ts">
 import { useCharacterId } from '@/composables/useCharacterId';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import { ALLOWED_RACES } from '@/services/dndRulesService';
-import { useCharacter } from '@rpg-gen/api-client';
+import { RaceMetadata, useAvailableRaces, useCharacter } from '@rpg-gen/api-client';
 import { RaceResponseDto } from '@rpg-gen/shared';
-import { computed } from 'vue';
-
-const allowedRaces = computed(() => ALLOWED_RACES);
 
 const currentCharacter = useCurrentCharacter();
 const currentCharacterId = useCharacterId();
 const { update } = useCharacter(currentCharacterId);
+const { data: availableRaces } = useAvailableRaces();
 
-const additionalSelectedClass = (allowedRace: RaceResponseDto) =>
+const additionalSelectedClass = (allowedRace: RaceMetadata) =>
   currentCharacter?.value?.race?.id === allowedRace.id
     ? 'border-indigo-500 bg-indigo-600/20'
     : 'border-slate-700';

@@ -1,46 +1,31 @@
+// class-definition.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
-import { ClassLevel, ClassLevelSchema } from "./ClassLevel.js";
-import CombatOption, { CombatOptionSchema } from "./CombatOption.js";
-import { AllowedSpellsByLevel } from "./AllowedSpellsByLevel.js";
+import { TalentTree, TalentTreeSchema } from "./TalentTree.js";
 
 @Schema({ timestamps: true })
 export class ClassDefinition {
-  @Prop({
-    required: true,
-    unique: true,
-  })
-  name: string;
+  @Prop({ required: true, unique: true })
+  name: string; // 'Guerrier', 'Rogue', 'Mage'
 
-  @Prop({ required: true })
-  hitDie: string; // e.g., '1d8', '1d12'
+  @Prop({ required: true, type: Object })
+  baseStats: {
+    hp_base: number;
+    pa: number;
+    pm: number;
+  };
 
-  @Prop({ default: "" })
-  primarySpellAbility?: string; // e.g., 'Cha', 'Sag', or null for non-spellcasters
-
-  @Prop({ default: "" })
-  description: string;
-
-  @Prop({ required: true })
-  schemaVersion: number;
-
-  @Prop({
-    type: [ClassLevelSchema],
-    required: true,
-  })
-  levels: ClassLevel[];
+  @Prop({ type: [String] })
+  proficiencies: string[]; // ['finesse', 'vigueur']
 
   @Prop({
     type: Object,
-    default: {},
+    required: false,
   })
-  allowedSpellsByLevel: Map<string, AllowedSpellsByLevel[]>;
+  talentTrees: Record<string, TalentTree>; // Les 3 voies par classe
 
-  @Prop({
-    type: Object,
-    default: {},
-  })
-  combatOptionsByLevel: Map<string, CombatOption[]>;
+  @Prop({ type: [String] })
+  startingAptitudes: string[]; // Les sorts de base (ex: 'frappe_simple')
 }
 
 export type ClassDefinitionDocument = ClassDefinition & Document;

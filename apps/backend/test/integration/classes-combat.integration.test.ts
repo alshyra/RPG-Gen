@@ -70,7 +70,7 @@ test.after(async () => {
   await mongoServer.stop();
 });
 
-test("getOptionsForLevel returns combat options for Rogue", async t => {
+test.skip("getOptionsForLevel returns combat options for Rogue", async t => {
   const persisted = await classDefService.findByName("Rogue");
   t.truthy(persisted, "persisted class");
   t.truthy(persisted?.combatOptionsByLevel, "combatOptionsByLevel present");

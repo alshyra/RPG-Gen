@@ -2,13 +2,21 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ValidateNested, IsArray } from "class-validator";
 import { Type } from "class-transformer";
 import { RaceResponseDto } from "./RaceResponseDto.js";
-import { AbilityScoresResponseDto } from "./AbilityScoresResponseDto.js";
-import { CharacterClassResponseDto } from "./CharacterClassResponseDto.js";
 import { SkillResponseDto } from "./SkillResponseDto.js";
 import { InventoryItemDto } from "./InventoryItemDto.js";
 import { SpellResponseDto } from "./SpellResponseDto.js";
 
 export type CharacterState = "draft" | "created";
+
+/**
+ * Tactical system stats (Vigor, Finesse, Mind, Survival)
+ */
+export interface TacticalStats {
+  vigor: number;
+  finesse: number;
+  mind: number;
+  survival: number;
+}
 
 export class BaseCharacterResponseDto {
   @ApiProperty({ description: "Unique character ID (UUID)" })
@@ -21,16 +29,10 @@ export class BaseCharacterResponseDto {
   physicalDescription?: string;
 
   @ApiPropertyOptional({
-    description: "Character race",
+    description: "Character race (new system)",
     type: RaceResponseDto,
   })
   race?: RaceResponseDto;
-
-  @ApiPropertyOptional({
-    description: "Ability scores",
-    type: AbilityScoresResponseDto,
-  })
-  scores?: AbilityScoresResponseDto;
 
   @ApiPropertyOptional({ description: "Current hit points" })
   hp?: number;
@@ -42,18 +44,12 @@ export class BaseCharacterResponseDto {
   totalXp?: number;
 
   @ApiPropertyOptional({
-    description: "Character classes",
-    type: [CharacterClassResponseDto],
-  })
-  classes?: CharacterClassResponseDto[];
-
-  @ApiPropertyOptional({
     description: "Character skills",
     type: [SkillResponseDto],
   })
   skills?: SkillResponseDto[];
 
-  @ApiProperty({ description: "Game world (e.g., dnd, vtm)" })
+  @ApiProperty({ description: "Game world (e.g., tactical, fantasy)" })
   world: string;
 
   @ApiProperty({ description: "Character portrait URL or base64" })
@@ -62,16 +58,12 @@ export class BaseCharacterResponseDto {
   @ApiPropertyOptional({ description: "Character gender" })
   gender?: string;
 
-  @ApiPropertyOptional({ description: "Proficiency bonus" })
-  proficiency?: number;
-
   @ApiPropertyOptional({ description: "Inspiration points" })
   inspirationPoints?: number;
 
   @ApiProperty({ description: "Whether character is deceased" })
   isDeceased: boolean;
 
-  // Standardize dates to ISO strings for responses
   @ApiPropertyOptional({ description: "Date of death (ISO string)" })
   diedAt?: string;
 
@@ -91,7 +83,7 @@ export class BaseCharacterResponseDto {
   inventory?: InventoryItemDto[];
 
   @ApiPropertyOptional({
-    description: "Character spells",
+    description: "Character spells/aptitudes",
     type: [SpellResponseDto],
   })
   @ValidateNested({ each: true })
@@ -99,9 +91,29 @@ export class BaseCharacterResponseDto {
   @IsArray()
   spells?: SpellResponseDto[];
 
-  @ApiPropertyOptional({
-    description: 'Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike")',
-    type: [String],
-  })
-  selectedCombatProficiencies?: string[];
+  // === Tactical System Fields ===
+
+  @ApiPropertyOptional({ description: "Character class (guerrier, rogue, mage)" })
+  className?: string;
+
+  @ApiPropertyOptional({ description: "Character level (1-20)" })
+  level?: number;
+
+  @ApiPropertyOptional({ description: "Race ID (humain, nain, elfe, orc)" })
+  raceId?: string;
+
+  @ApiPropertyOptional({ description: "Tactical stats (vigor, finesse, mind, survival)" })
+  stats?: TacticalStats;
+
+  @ApiPropertyOptional({ description: "Current action points" })
+  pa?: number;
+
+  @ApiPropertyOptional({ description: "Maximum action points" })
+  paMax?: number;
+
+  @ApiPropertyOptional({ description: "Current movement points" })
+  pm?: number;
+
+  @ApiPropertyOptional({ description: "Maximum movement points" })
+  pmMax?: number;
 }

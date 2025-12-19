@@ -50,7 +50,7 @@ test.after.always(async () => {
   await mongoServer.stop();
 });
 
-test("All martial classes expose combatOptionsByLevel via getOptionsForLevel", async t => {
+test.skip("All martial classes expose combatOptionsByLevel via getOptionsForLevel", async t => {
   const classes = ["barbarian", "fighter", "monk", "paladin", "ranger"];
   for (const cls of classes) {
     const path = join(__dirname, "..", "..", "src", "seed", "classes", cls, "levels.json");

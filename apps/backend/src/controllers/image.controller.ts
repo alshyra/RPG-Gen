@@ -114,15 +114,11 @@ export class ImageController {
     if (character.name) characterContext.push(`Name: ${character.name}`);
     if (character.gender) characterContext.push(`Gender: ${character.gender}`);
     if (character.race?.name) characterContext.push(`Race: ${character.race.name}`);
-    if (character.classes?.length) {
-      const classNames = character.classes
-        .map(c => c.name)
-        .filter(Boolean)
-        .join(", ");
-      if (classNames) characterContext.push(`Classes: ${classNames}`);
+    if (character.className) {
+      characterContext.push(`Class: ${character.className}`);
     }
 
     const contextStr = characterContext.length ? `\n${characterContext.join("\n")}` : "";
-    return `Generate a D&D character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description. The image should be suitable for a D&D game character sheet.`;
+    return `Generate a fantasy character portrait based on this description:${contextStr}\n\nPhysical Description: ${character.physicalDescription}\n\nCreate a fantasy-style character portrait that matches this description.`;
   }
 }

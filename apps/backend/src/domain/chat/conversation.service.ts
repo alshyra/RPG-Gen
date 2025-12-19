@@ -2,12 +2,11 @@ import { Content } from "@google/genai";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Schema } from "mongoose";
-import { AbilityScoresResponseDto } from "../character/dto/AbilityScoresResponseDto.js";
-import { calculateArmorClass } from "../character/armor-class.util.js";
 import type { CharacterResponseDto } from "../character/dto/CharacterResponseDto.js";
 import type { ChatMessageDto } from "./dto/ChatMessageDto.js";
 import type { GameInstructionDto } from "./dto/GameInstructionDto.js";
 import { ChatHistory, ChatHistoryDocument } from "../../infra/mongo/chat/ChatHistory.js";
+import { CLASS_STATS } from "../combat/scaling.util.js";
 
 @Injectable()
 export class ConversationService {
@@ -47,29 +46,27 @@ export class ConversationService {
     }));
   }
 
-  getAbilityScore(character: CharacterResponseDto, key: keyof AbilityScoresResponseDto): number {
-    return character.scores?.[key] || 0;
-  }
-
   buildCharacterSummary(character: CharacterResponseDto): string {
-    const armorClass = calculateArmorClass(character);
+    const className = character.className ?? "guerrier";
+    const classStats = CLASS_STATS[className.toLowerCase()] ?? CLASS_STATS.guerrier;
+    const stats = character.stats ?? { vigor: 0, finesse: 0, mind: 0, survival: 0 };
+
     let summary = `
     Character Information:
     - Name: ${character.name || "Unknown"}
     - Race: ${typeof character.race === "object" ? character.race?.name : character.race || "Unknown"}
-    - Classes: ${character.classes?.map(c => `${c.name} (Lvl ${c.level})`).join(", ") || "None"}
+    - Class: ${className}
+    - Level: ${character.level ?? 1}
     - Gender: ${character.gender || "Unknown"}
-    - HP: ${character.hp || character.hpMax || "Unknown"}/${character.hpMax || "Unknown"}
-    - AC: ${armorClass}
+    - HP: ${character.hp ?? character.hpMax ?? "Unknown"}/${character.hpMax ?? "Unknown"}
+    - PA: ${character.pa ?? classStats.pa}/${character.paMax ?? classStats.pa}
+    - PM: ${character.pm ?? classStats.pm}/${character.pmMax ?? classStats.pm}
     - XP: ${character.totalXp || 0}
-    - Level: 1
     - Stats:
-      * STR ${this.getAbilityScore(character, "Str")}
-      * DEX ${this.getAbilityScore(character, "Dex")}
-      * CON ${this.getAbilityScore(character, "Con")}
-      * INT ${this.getAbilityScore(character, "Int")}
-      * WIS ${this.getAbilityScore(character, "Wis")}
-      * CHA ${this.getAbilityScore(character, "Cha")}
+      * Vigueur: ${stats.vigor}
+      * Finesse: ${stats.finesse}
+      * Esprit: ${stats.mind}
+      * Survie: ${stats.survival}
     `;
 
     if (character.spells && character.spells.length > 0) {

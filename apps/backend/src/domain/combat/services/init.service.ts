@@ -23,11 +23,7 @@ export class InitService {
         name: enemy.name,
         hp: enemy.hp,
         hpMax: enemy.hp,
-        ac: enemy.ac,
         initiative: initRoll,
-        attackBonus: enemy.attack_bonus ?? 3,
-        damageDice: enemy.damage_dice ?? "1d6",
-        damageBonus: enemy.damage_bonus ?? 1,
       });
     });
   }

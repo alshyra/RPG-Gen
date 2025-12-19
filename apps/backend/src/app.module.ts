@@ -9,6 +9,9 @@ import { DiceModule } from "./modules/dice.module.js";
 import { HealthModule } from "./modules/health.module.js";
 import { ImageModule } from "./modules/image.module.js";
 import { InventoryModule } from "./modules/inventory.module.js";
+import { ProgressionModule } from "./modules/progression.module.js";
+import { RacesModule } from "./modules/races.module.js";
+import { AptitudeModule } from "./domain/aptitude/aptitude.module.js";
 import { getConfig } from "./config.js";
 import { ConfigModule } from "./config.module.js";
 
@@ -19,6 +22,7 @@ import { ConfigModule } from "./config.module.js";
       retryDelay: 3000,
     }),
     ConfigModule,
+    AptitudeModule,
     AuthModule,
     ChatModule,
     ClassesModule,
@@ -28,6 +32,8 @@ import { ConfigModule } from "./config.module.js";
     HealthModule,
     CharacterModule,
     InventoryModule,
+    ProgressionModule,
+    RacesModule,
   ],
 })
 export class AppModule {}

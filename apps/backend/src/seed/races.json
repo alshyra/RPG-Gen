@@ -1,0 +1,42 @@
+[
+  {
+    "id": "humain",
+    "name": "Humain",
+    "bonuses": { "vigor": 1, "finesse": 1 },
+    "trait": "Adaptabilité",
+    "traitEffect": "+1 PA au tour 1",
+    "descriptionForAi": "Polyvalent, s'adapte à toutes les situations de combat.",
+    "icon": "👤",
+    "color": "#f59e0b"
+  },
+  {
+    "id": "nain",
+    "name": "Nain",
+    "bonuses": { "vigor": 2 },
+    "trait": "Robustesse",
+    "traitEffect": "-1 dégât physique reçu (permanent)",
+    "descriptionForAi": "Solide comme le roc, encaisse les coups sans broncher.",
+    "icon": "⛏️",
+    "color": "#78716c"
+  },
+  {
+    "id": "elfe",
+    "name": "Elfe",
+    "bonuses": { "finesse": 2 },
+    "trait": "Agilité",
+    "traitEffect": "+1 PM permanent",
+    "descriptionForAi": "Gracieux et rapide, se déplace avec une aisance surnaturelle.",
+    "icon": "🧝",
+    "color": "#22c55e"
+  },
+  {
+    "id": "orc",
+    "name": "Orc",
+    "bonuses": { "vigor": 1, "survival": 1 },
+    "trait": "Rage",
+    "traitEffect": "+2 dégâts si HP < 50%",
+    "descriptionForAi": "Féroce et tenace, gagne en puissance quand il est blessé.",
+    "icon": "👹",
+    "color": "#16a34a"
+  }
+]

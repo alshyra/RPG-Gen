@@ -1,0 +1,37 @@
+{
+  "voies": {
+    "war_lumiere": {
+      "name": "Voie de la Lumière",
+      "description": "Le protecteur divin, gardien des alliés",
+      "ranks": [
+        { "rank": 1, "aptitudeId": "war_aura_protectrice", "pointCost": 1 },
+        { "rank": 2, "aptitudeId": "war_benediction", "pointCost": 1 },
+        { "rank": 3, "aptitudeId": "war_bouclier_sacre", "pointCost": 1 },
+        { "rank": 4, "aptitudeId": "war_riposte_divine", "pointCost": 1 },
+        { "rank": 5, "aptitudeId": "war_avatar_lumiere", "pointCost": 1 }
+      ]
+    },
+    "war_sang": {
+      "name": "Voie du Sang",
+      "description": "Le berserker implacable, alimenté par la rage",
+      "ranks": [
+        { "rank": 1, "aptitudeId": "war_frappe_puissante", "pointCost": 1 },
+        { "rank": 2, "aptitudeId": "war_charge_devastatrice", "pointCost": 1 },
+        { "rank": 3, "aptitudeId": "war_tourbillon", "pointCost": 1 },
+        { "rank": 4, "aptitudeId": "war_execution", "pointCost": 1 },
+        { "rank": 5, "aptitudeId": "war_avatar_sang", "pointCost": 1 }
+      ]
+    },
+    "war_tactique": {
+      "name": "Voie Tactique",
+      "description": "Le commandant stratège, inspirant ses alliés",
+      "ranks": [
+        { "rank": 1, "aptitudeId": "war_commandement", "pointCost": 1 },
+        { "rank": 2, "aptitudeId": "war_ralliment", "pointCost": 1 },
+        { "rank": 3, "aptitudeId": "war_strategie", "pointCost": 1 },
+        { "rank": 4, "aptitudeId": "war_inspiration", "pointCost": 1 },
+        { "rank": 5, "aptitudeId": "war_avatar_tactique", "pointCost": 1 }
+      ]
+    }
+  }
+}

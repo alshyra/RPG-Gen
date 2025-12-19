@@ -1,21 +1,15 @@
 <template>
   <div class="space-y-2">
-    <div class="font-bold text-sm text-slate-300">Compétences</div>
+    <div class="font-bold text-sm text-slate-300">Statistiques</div>
     <div class="grid grid-cols-2 gap-2 text-sm">
       <div
-        v-for="skill in skills"
-        :key="skill.name"
-        :class="[
-          'px-2 py-1 rounded',
-          skill.proficient ? 'bg-indigo-900 text-indigo-100' : 'bg-slate-800 text-slate-300',
-        ]"
+        v-for="stat in stats"
+        :key="stat.name"
+        class="px-2 py-1 rounded bg-slate-800 text-slate-300 flex justify-between"
       >
-        <span :class="skill.proficient ? 'font-semibold' : ''">{{ skill.name }}</span>
-        <span
-          class="text-xs ml-1"
-          :class="skill.proficient ? 'text-indigo-200' : 'text-slate-400'"
-        >
-          {{ skill.modifier > 0 ? '+' : '' }}{{ skill.modifier }}
+        <span class="font-medium">{{ stat.label }}</span>
+        <span class="text-indigo-300 font-semibold">
+          {{ stat.value > 0 ? '+' : '' }}{{ stat.value }}
         </span>
       </div>
     </div>
@@ -25,26 +19,18 @@
 <script setup lang="ts">
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
 import { computed } from 'vue';
-import { DnDRulesService } from '../../services/dndRulesService';
 
-const currentCharacter = useCurrentCharacter()
+const currentCharacter = useCurrentCharacter();
 
-const skills = computed(() => {
-  if (
-    !currentCharacter.value ||
-    !currentCharacter.value?.scores ||
-    !currentCharacter.value?.skills?.length
-  )
-    return [];
+const stats = computed(() => {
+  const character = currentCharacter.value;
+  if (!character?.stats) return [];
 
-  return currentCharacter.value?.skills.map(skill => ({
-    ...skill,
-    modifier: DnDRulesService.calculateSkillModifier(
-      skill.name!,
-      currentCharacter.value!.scores!,
-      currentCharacter.value!.proficiency!,
-      skill.proficient!,
-    ),
-  }));
+  return [
+    { name: 'vigor', label: 'Vigueur', value: character.stats.vigor ?? 0 },
+    { name: 'finesse', label: 'Finesse', value: character.stats.finesse ?? 0 },
+    { name: 'mind', label: 'Esprit', value: character.stats.mind ?? 0 },
+    { name: 'survival', label: 'Survie', value: character.stats.survival ?? 0 },
+  ];
 });
 </script>

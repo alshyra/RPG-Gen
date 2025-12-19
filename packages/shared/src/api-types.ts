@@ -396,15 +396,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/classes/{className}/levels/{level}": {
+    "/api/classes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get class-level options for a specific level */
-        get: operations["ClassesController_getLevelOptions"];
+        /** Get all available classes */
+        get: operations["ClassesController_getAllClasses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classes/{className}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a class by name */
+        get: operations["ClassesController_getClass"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classes/{className}/voies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get talent trees (voies) for a class */
+        get: operations["ClassesController_getTalentTrees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classes/{className}/starting-aptitudes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get starting aptitudes for a class */
+        get: operations["ClassesController_getStartingAptitudes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -474,6 +525,125 @@ export interface paths {
         put?: never;
         /** Use an item from inventory */
         post: operations["InventoryController_useItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/progression/classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get available classes for character creation */
+        get: operations["ProgressionController_getAvailableClasses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/progression/races": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get available races for character creation */
+        get: operations["ProgressionController_getAvailableRaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/progression/{characterId}/select-class": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Select a class for a character and assign starter pack */
+        post: operations["ProgressionController_selectClass"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/progression/{characterId}/select-race": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Select a race for a character and apply bonuses */
+        post: operations["ProgressionController_selectRace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/progression/{characterId}/unlock-rank": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unlock a rank in a talent tree (voie) */
+        post: operations["ProgressionController_unlockRank"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/races": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all available races */
+        get: operations["RacesController_getAllRaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/races/{raceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a race by ID */
+        get: operations["RacesController_getRace"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -663,26 +833,6 @@ export interface components {
                 [key: string]: number;
             };
         };
-        AbilityScoresResponseDto: {
-            /** @description Strength score */
-            Str?: number;
-            /** @description Dexterity score */
-            Dex?: number;
-            /** @description Constitution score */
-            Con?: number;
-            /** @description Intelligence score */
-            Int?: number;
-            /** @description Wisdom score */
-            Wis?: number;
-            /** @description Charisma score */
-            Cha?: number;
-        };
-        CharacterClassResponseDto: {
-            /** @description Class name */
-            name?: string;
-            /** @description Class level */
-            level?: number;
-        };
         SkillResponseDto: {
             /** @description Skill name */
             name?: string;
@@ -745,28 +895,22 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race */
+            /** @description Character race (new system) */
             race?: components["schemas"]["RaceResponseDto"];
-            /** @description Ability scores */
-            scores?: components["schemas"]["AbilityScoresResponseDto"];
             /** @description Current hit points */
             hp?: number;
             /** @description Maximum hit points */
             hpMax?: number;
             /** @description Total experience points */
             totalXp?: number;
-            /** @description Character classes */
-            classes?: components["schemas"]["CharacterClassResponseDto"][];
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., dnd, vtm) */
+            /** @description Game world (e.g., tactical, fantasy) */
             world: string;
             /** @description Character portrait URL or base64 */
             portrait: string;
             /** @description Character gender */
             gender?: string;
-            /** @description Proficiency bonus */
-            proficiency?: number;
             /** @description Inspiration points */
             inspirationPoints?: number;
             /** @description Whether character is deceased */
@@ -782,10 +926,24 @@ export interface components {
             state: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells */
+            /** @description Character spells/aptitudes */
             spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
-            selectedCombatProficiencies?: string[];
+            /** @description Character class (guerrier, rogue, mage) */
+            className?: string;
+            /** @description Character level (1-20) */
+            level?: number;
+            /** @description Race ID (humain, nain, elfe, orc) */
+            raceId?: string;
+            /** @description Tactical stats (vigor, finesse, mind, survival) */
+            stats?: Record<string, never>;
+            /** @description Current action points */
+            pa?: number;
+            /** @description Maximum action points */
+            paMax?: number;
+            /** @description Current movement points */
+            pm?: number;
+            /** @description Maximum movement points */
+            pmMax?: number;
         };
         DeceasedCharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -794,28 +952,22 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race */
+            /** @description Character race (new system) */
             race?: components["schemas"]["RaceResponseDto"];
-            /** @description Ability scores */
-            scores?: components["schemas"]["AbilityScoresResponseDto"];
             /** @description Current hit points */
             hp?: number;
             /** @description Maximum hit points */
             hpMax?: number;
             /** @description Total experience points */
             totalXp?: number;
-            /** @description Character classes */
-            classes?: components["schemas"]["CharacterClassResponseDto"][];
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., dnd, vtm) */
+            /** @description Game world (e.g., tactical, fantasy) */
             world: string;
             /** @description Character portrait URL or base64 */
             portrait: string;
             /** @description Character gender */
             gender?: string;
-            /** @description Proficiency bonus */
-            proficiency?: number;
             /** @description Inspiration points */
             inspirationPoints?: number;
             /** @description Whether character is deceased */
@@ -831,38 +983,46 @@ export interface components {
             state: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells */
+            /** @description Character spells/aptitudes */
             spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
-            selectedCombatProficiencies?: string[];
+            /** @description Character class (guerrier, rogue, mage) */
+            className?: string;
+            /** @description Character level (1-20) */
+            level?: number;
+            /** @description Race ID (humain, nain, elfe, orc) */
+            raceId?: string;
+            /** @description Tactical stats (vigor, finesse, mind, survival) */
+            stats?: Record<string, never>;
+            /** @description Current action points */
+            pa?: number;
+            /** @description Maximum action points */
+            paMax?: number;
+            /** @description Current movement points */
+            pm?: number;
+            /** @description Maximum movement points */
+            pmMax?: number;
         };
         UpdateCharacterRequestDto: {
             /** @description Character name */
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race */
+            /** @description Character race (new system) */
             race?: components["schemas"]["RaceResponseDto"];
-            /** @description Ability scores */
-            scores?: components["schemas"]["AbilityScoresResponseDto"];
             /** @description Current hit points */
             hp?: number;
             /** @description Maximum hit points */
             hpMax?: number;
             /** @description Total experience points */
             totalXp?: number;
-            /** @description Character classes */
-            classes?: components["schemas"]["CharacterClassResponseDto"][];
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., dnd, vtm) */
+            /** @description Game world (e.g., tactical, fantasy) */
             world?: string;
             /** @description Character portrait URL or base64 */
             portrait?: string;
             /** @description Character gender */
             gender?: string;
-            /** @description Proficiency bonus */
-            proficiency?: number;
             /** @description Inspiration points */
             inspirationPoints?: number;
             /**
@@ -872,10 +1032,24 @@ export interface components {
             state?: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells */
+            /** @description Character spells/aptitudes */
             spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Selected combat proficiency IDs (e.g., "sneak-attack", "cunning-strike") */
-            selectedCombatProficiencies?: string[];
+            /** @description Character class (guerrier, rogue, mage) */
+            className?: string;
+            /** @description Character level (1-20) */
+            level?: number;
+            /** @description Race ID (humain, nain, elfe, orc) */
+            raceId?: string;
+            /** @description Tactical stats (vigor, finesse, mind, survival) */
+            stats?: Record<string, never>;
+            /** @description Current action points */
+            pa?: number;
+            /** @description Maximum action points */
+            paMax?: number;
+            /** @description Current movement points */
+            pm?: number;
+            /** @description Maximum movement points */
+            pmMax?: number;
         };
         KillCharacterBodyDto: {
             /** @description Location where character died */
@@ -1037,22 +1211,36 @@ export interface components {
             id: string;
             /** @description Combatant name */
             name: string;
-            /** @description Initiative order value */
+            /** @description Initiative order value (finesse-based) */
             initiative: number;
             /** @description Whether combatant is player character */
             isPlayer: boolean;
-            /** @description Current hit points (enemies only) */
+            /** @description Current hit points */
             hp?: number;
-            /** @description Maximum hit points (enemies only) */
+            /** @description Maximum hit points */
             hpMax?: number;
-            /** @description Armor class (enemies only) */
-            ac?: number;
-            /** @description Enemy attack bonus (enemies only) */
-            attackBonus?: number;
-            /** @description Enemy damage dice expression (enemies only), e.g. "1d6" */
-            damageDice?: string;
-            /** @description Enemy damage bonus (enemies only) */
-            damageBonus?: number;
+            /** @description Current action points (PA) */
+            pa?: number;
+            /** @description Maximum action points (PA) */
+            paMax?: number;
+            /** @description Current movement points (PM) */
+            pm?: number;
+            /** @description Maximum movement points (PM) */
+            pmMax?: number;
+            /** @description Combatant level (1-20) */
+            level?: number;
+            /** @description Class name (guerrier, rogue, mage) */
+            className?: string;
+            /** @description Base power for attacks (used in damage formula) */
+            basePower?: number;
+            /** @description Which attribute scales damage (vigor, finesse, mind, survival) */
+            scalingAttribute?: string;
+            /** @description Combat stats (vigor, finesse, mind, survival) */
+            stats?: Record<string, never>;
+            /** @description Combat side (player or enemy) */
+            side?: string;
+            /** @description Grid position for tactical combat */
+            position?: Record<string, never>;
         };
         CombatStateDto: {
             /** @description Character ID */
@@ -1071,15 +1259,7 @@ export interface components {
             roundNumber: number;
             /** @description Narrative summary of current combat */
             narrative?: string;
-            /** @description Remaining standard actions for current activation */
-            actionRemaining?: number;
-            /** @description Maximum standard actions per activation */
-            actionMax?: number;
-            /** @description Remaining bonus actions for current activation */
-            bonusActionRemaining?: number;
-            /** @description Maximum bonus actions per activation */
-            bonusActionMax?: number;
-            /** @description Active turn effects (dash, disengage, etc.) */
+            /** @description Active status effects (stunned, burning, etc.) */
             activeEffects?: string[];
             /** @description Combat end result, populated when combat ends (inCombat=false) */
             combatEnd?: components["schemas"]["CombatEndDto"];
@@ -1260,36 +1440,6 @@ export interface components {
             expr: string;
             advantage?: string;
         };
-        CombatOptionDto: {
-            /** @description Option id */
-            id: string;
-            /** @description Display name */
-            name: string;
-            /** @description Description */
-            description: string;
-            /** @description Additional metadata (typed) */
-            meta: Record<string, never>;
-        };
-        LevelUpOptionsDto: {
-            /** @description Class name */
-            className: string;
-            /** @description Current level in class */
-            currentLevel: number;
-            /** @description Next level number (current + 1) */
-            nextLevel: number;
-            /** @description List of unlocked spells available at that level */
-            unlockedSpells: components["schemas"]["SpellResponseDto"][];
-            /** @description Combat-related options available at that level */
-            combatOptions: components["schemas"]["CombatOptionDto"][];
-            /** @description Whether an Ability Score Improvement (or feat) is available at this level */
-            asiAvailable: boolean;
-            /** @description Whether proficiency bonus increases at this level */
-            proficiencyIncrease: boolean;
-            /** @description Number of cantrips (level 0 spells) the character can know at this level */
-            cantripsKnown: number;
-            /** @description Number of spells (level 1+) the character can know at this level */
-            spellsKnown: number;
-        };
         ImageRequestDto: {
             /** @description API token (optional) */
             token?: string;
@@ -1326,6 +1476,9 @@ export interface components {
             /** @description Human-readable result message */
             message: string;
         };
+        SelectClassDto: Record<string, never>;
+        SelectRaceDto: Record<string, never>;
+        UnlockRankDto: Record<string, never>;
     };
     responses: never;
     parameters: never;
@@ -2072,28 +2225,84 @@ export interface operations {
             };
         };
     };
-    ClassesController_getLevelOptions: {
+    ClassesController_getAllClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all classes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_getClass: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Name of the class (e.g., Bard, Cleric) */
+                /** @description Name of the class (e.g., guerrier, rogue, mage) */
                 className: string;
-                /** @description Level number (1-20) */
-                level: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Class-level options */
+            /** @description Class details */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["LevelUpOptionsDto"];
+                content?: never;
+            };
+        };
+    };
+    ClassesController_getTalentTrees: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Name of the class */
+                className: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of talent trees with their ranks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
+            };
+        };
+    };
+    ClassesController_getStartingAptitudes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Name of the class */
+                className: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of starting aptitude IDs */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2194,6 +2403,195 @@ export interface operations {
             };
             /** @description Bad request (item not found, wrong context, etc.) */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_getAvailableClasses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of available classes with metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_getAvailableRaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of available races with bonuses and traits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_selectClass: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectClassDto"];
+            };
+        };
+        responses: {
+            /** @description Class selected and starter pack assigned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid class name */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Character not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_selectRace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectRaceDto"];
+            };
+        };
+        responses: {
+            /** @description Race selected and bonuses applied */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid race ID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Character not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_unlockRank: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnlockRankDto"];
+            };
+        };
+        responses: {
+            /** @description Rank unlocked successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not enough talent points or invalid rank */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Character not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RacesController_getAllRaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all races with bonuses and traits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RacesController_getRace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Race identifier (humain, nain, elfe, orc) */
+                raceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Race details */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

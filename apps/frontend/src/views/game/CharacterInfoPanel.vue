@@ -48,6 +48,13 @@
             Sorts
           </AppRouterButton>
           <AppRouterButton
+            variant="ghost"
+            :to="{ name: 'game-talents', params: { characterId: currentCharacter.characterId } }"
+            class="w-full text-left px-3 py-2"
+          >
+            ⭐ Talents
+          </AppRouterButton>
+          <AppRouterButton
             :disabled="!isInCombat"
             variant="ghost"
             :to="

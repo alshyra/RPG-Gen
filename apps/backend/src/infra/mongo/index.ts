@@ -4,7 +4,7 @@ import { Character } from "./character/Character.js";
 export { AbilityScores } from "./character/AbilityScores.js";
 export { CharacterClass } from "./character/CharacterClass.js";
 export { Item } from "./item/Item.js";
-export { ItemDefinition } from "./item/ItemDefinition.js";
+export { ItemDefinition, ItemDefinitionSchema, type ItemSlot, type ItemBonuses } from "./item/ItemDefinition.js";
 export { Race } from "./character/Race.js";
 export { Skill } from "./character/Skill.js";
 export { Spell } from "./spell/Spell.js";
@@ -20,6 +20,7 @@ export {
   ClassLevelChoice,
   ClassLevelChoiceSchema,
 } from "./class/index.js";
+export { Aptitude, AptitudeSchema, type AptitudeTargetType, type AptitudeCategory, type AptitudeScaling } from "./aptitude/index.js";
 export { CombatEnd } from "./combat/CombatEnd.js";
 export { CombatStartEntry } from "./combat/CombatStartEntry.js";
 export { Combatant, CombatantSchema } from "./combat/Combatant.js";

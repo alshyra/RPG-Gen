@@ -1,0 +1,14 @@
+{
+  "name": "guerrier",
+  "displayName": "Guerrier",
+  "description": "Maître du combat rapproché, le Guerrier excelle en défense et en puissance brute.",
+  "hp_base": 12,
+  "hp_gain": 8,
+  "pa": 6,
+  "pm": 4,
+  "main_stat": "vigor",
+  "proficiencies": ["vigor", "survival"],
+  "startingAptitudes": ["frappe_simple", "posture_defensive"],
+  "color": "#dc2626",
+  "icon": "⚔️"
+}

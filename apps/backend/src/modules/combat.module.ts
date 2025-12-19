@@ -8,9 +8,11 @@ import { TurnOrderService } from "../domain/combat/services/turn-order.service.j
 import { ActionEconomyService } from "../domain/combat/services/action-economy.service.js";
 import { CombatGridService } from "../domain/combat/services/combat-grid.service.js";
 import { OpportunityAttackResolver } from "../domain/combat/services/opportunity-attack.service.js";
+import { CombatActionService } from "../domain/combat/services/combat-action.service.js";
 import { CharacterModule } from "./character.module.js";
 import { ChatModule } from "./chat.module.js";
 import { DiceModule } from "./dice.module.js";
+import { AptitudeModule } from "../domain/aptitude/aptitude.module.js";
 import { CombatSession, CombatSessionSchema } from "../infra/mongo/combat/CombatSession.js";
 import { CombatOrchestrator } from "../orchestrators/combat/index.js";
 import { CombatMovementOrchestrator } from "../orchestrators/combat/combat-movement.orchestrator.js";
@@ -21,6 +23,7 @@ import { GeminiTextService } from "../infra/external/gemini-text.service.js";
   imports: [
     CharacterModule,
     DiceModule,
+    AptitudeModule,
     forwardRef(() => ChatModule),
     MongooseModule.forFeature([
       {
@@ -37,6 +40,7 @@ import { GeminiTextService } from "../infra/external/gemini-text.service.js";
     ActionEconomyService,
     CombatGridService,
     OpportunityAttackResolver,
+    CombatActionService,
     GeminiTextService,
     EnemyTurnService,
     // App service facade
@@ -47,6 +51,6 @@ import { GeminiTextService } from "../infra/external/gemini-text.service.js";
     CombatMovementOrchestrator,
     CombatActionOrchestrator,
   ],
-  exports: [CombatAppService, CombatOrchestrator, CombatGridService],
+  exports: [CombatAppService, CombatOrchestrator, CombatGridService, CombatActionService],
 })
 export class CombatModule {}

@@ -1,69 +1,61 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { DiceService } from "../dice/dice.service.js";
 import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
 import type { EnemyAttackLogDto } from "./dto/EnemyAttackLogDto.js";
 import type { CombatStateDto, CombatantDto } from "./dto/index.js";
+import { calculateDamage } from "./scaling.util.js";
 
 /**
- * Domain service for enemy turn mechanics.
- * Pure combat logic: no cross-domain calls, no orchestrator dependency.
- * DiceService is passed as a parameter to remain testable and decoupled.
+ * EnemyTurnService - Manages enemy turns in the new tactical system
+ * 
+ * Key changes from D&D:
+ * - NO attack rolls (hits are automatic)
+ * - Damage is calculated using: (basePower + Attribut) * (1 + (Level - 1) * 0.15)
+ * - Enemies have PA/PM like players
+ * - All damage is deterministic (no RNG)
  */
 @Injectable()
 export class EnemyTurnService {
+  private readonly logger = new Logger(EnemyTurnService.name);
+
   constructor(
     @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
   ) {}
 
   /**
-   * Execute a single enemy attack against the player.
-   * Returns attack log with damage applied to combat state.
+   * Execute a single enemy attack against the player using the new scaling system.
+   * No attack rolls - damage is calculated directly from stats.
    *
+   * @param characterId Player character ID
    * @param enemy The attacking enemy
-   * @param playerAC Target's AC
-   * @param diceService Injected by caller to maintain separation of concerns
    * @returns Attack log entry, damage dealt, and whether player was defeated
    */
   async executeEnemyAttack(
     characterId: string,
     enemy: CombatantDto,
-    playerAC: number,
-    diceService: DiceService,
   ): Promise<{
     log: EnemyAttackLogDto;
     damage: number;
     playerDefeated: boolean;
   }> {
-    // Roll attack
-    const attackRoll = diceService.rollAttack(enemy.attackBonus ?? 0, playerAC);
+    // Calculate damage using the new scaling formula
+    // Formula: (basePower + Attribut_Scaling) * (1 + (Level - 1) * 0.15)
+    const basePower = enemy.basePower ?? 5; // Default base power for enemies
+    const scalingAttribute = enemy.scalingAttribute ?? "vigor";
+    const stats = enemy.stats ?? { vigor: 2, finesse: 2, mind: 2, survival: 2 };
+    const level = enemy.level ?? 1;
+
+    const damage = calculateDamage(basePower, scalingAttribute, stats, level);
 
     const attackLog: EnemyAttackLogDto = {
       attackerId: enemy.id,
       attackerName: enemy.name,
       targetId: characterId,
-      hit: attackRoll.hit,
-      attackRoll: attackRoll.diceResult,
-      isCrit: attackRoll.isCrit,
+      hit: true, // Always hits in new system
+      isCrit: false, // No crits in base system
+      damageTotal: damage,
     };
-
-    if (!attackRoll.hit) {
-      return {
-        log: attackLog,
-        damage: 0,
-        playerDefeated: false,
-      };
-    }
-
-    // Roll damage if hit
-    const damageResult = diceService.rollDamage(
-      enemy.damageDice ?? "1d6",
-      attackRoll.isCrit,
-      enemy.damageBonus ?? 0,
-    );
-    attackLog.damageRoll = damageResult;
-    attackLog.damageTotal = damageResult.damageTotal;
 
     // Apply damage to player via persistence
     const session = await this.combatSessionModel.findOne({ characterId });
@@ -71,70 +63,77 @@ export class EnemyTurnService {
       throw new Error(`Combat session not found for character ${characterId}`);
     }
 
-    session.player.hp = Math.max(0, (session.player.hp ?? 0) - damageResult.damageTotal);
+    const previousHp = session.player.hp ?? 0;
+    session.player.hp = Math.max(0, previousHp - damage);
     await session.save();
+
+    this.logger.debug(
+      `${enemy.name} attacks player for ${damage} damage (${previousHp} -> ${session.player.hp})`,
+    );
 
     return {
       log: attackLog,
-      damage: damageResult.damageTotal,
+      damage,
       playerDefeated: session.player.hp <= 0,
     };
   }
 
   /**
    * Execute a sequence of enemy attacks in turn order.
-   * Stops if player is defeated.
+   * Each enemy spends PA to attack (if they have enough).
    *
    * @param characterId Character being attacked
    * @param state Current combat state
    * @param enemies List of enemies to attack in sequence
-   * @param diceService Injected by caller
    * @returns Updated state, attack logs, total damage, and defeat status
    */
   async executeEnemyTurnsSequence(
     characterId: string,
     state: CombatStateDto,
     enemies: CombatantDto[],
-    diceService: DiceService,
   ): Promise<{
     state: CombatStateDto;
     attackLogs: EnemyAttackLogDto[];
     totalDamage: number;
     playerDefeated: boolean;
   }> {
-    const result = await enemies.reduce(
-      async (accPromise, enemy) => {
-        const acc = await accPromise;
-        if (acc.playerDefeated || (enemy.hp ?? 0) <= 0) return acc;
+    const attackLogs: EnemyAttackLogDto[] = [];
+    let totalDamage = 0;
+    let playerDefeated = false;
 
-        const attackResult = await this.executeEnemyAttack(
-          characterId,
-          enemy,
-          acc.state.player.ac,
-          diceService,
-        );
+    for (const enemy of enemies) {
+      // Skip dead enemies
+      if ((enemy.hp ?? 0) <= 0) continue;
+      
+      // Stop if player is already defeated
+      if (playerDefeated) break;
 
-        // Fetch fresh state after attack to reflect HP changes
-        const freshSession = await this.combatSessionModel.findOne({ characterId });
-        if (freshSession && freshSession.player.hp) {
-          acc.state.player.hp = freshSession.player.hp;
-        }
+      // Check if enemy has PA to attack (default 1 PA cost per attack)
+      const enemyPA = enemy.pa ?? 1;
+      if (enemyPA <= 0) continue;
 
-        return {
-          state: acc.state,
-          attackLogs: [...acc.attackLogs, attackResult.log],
-          totalDamage: acc.totalDamage + attackResult.damage,
-          playerDefeated: attackResult.playerDefeated,
-        };
-      },
-      Promise.resolve({
-        state,
-        attackLogs: [] as EnemyAttackLogDto[],
-        totalDamage: 0,
-        playerDefeated: false,
-      }),
-    );
+      // Execute attack
+      const attackResult = await this.executeEnemyAttack(characterId, enemy);
+      
+      attackLogs.push(attackResult.log);
+      totalDamage += attackResult.damage;
+      playerDefeated = attackResult.playerDefeated;
 
-    return result;
+      // Deduct PA from enemy (for future multi-attack support)
+      enemy.pa = enemyPA - 1;
+    }
+
+    // Fetch fresh state to reflect HP changes
+    const freshSession = await this.combatSessionModel.findOne({ characterId });
+    if (freshSession?.player) {
+      state.player.hp = freshSession.player.hp ?? 0;
+    }
+
+    return {
+      state,
+      attackLogs,
+      totalDamage,
+      playerDefeated,
+    };
   }
 }

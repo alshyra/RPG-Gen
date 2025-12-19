@@ -6,6 +6,7 @@ import MessagesView from "../views/game/MessagesView.vue";
 import InventoryView from "../views/game/InventoryView.vue";
 import SkillsView from "../views/game/SkillsView.vue";
 import SpellsView from "../views/game/SpellsView.vue";
+import TalentsView from "../views/game/TalentsView.vue";
 import QuestView from "../views/game/QuestView.vue";
 import CharacterCreatorView from "../views/CharacterCreatorView.vue";
 import CharacterLevelupView from "../views/CharacterLevelupView.vue";
@@ -67,6 +68,11 @@ const routes = [
         path: "spells",
         name: "game-spells",
         component: SpellsView,
+      },
+      {
+        path: "talents",
+        name: "game-talents",
+        component: TalentsView,
       },
       {
         path: "quest",
