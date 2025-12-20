@@ -1,5 +1,6 @@
 export * from "./RaceResponseDto.js";
 export * from "./AbilityScoresResponseDto.js";
+export * from "./StatsResponseDto.js";
 export * from "./CharacterClassResponseDto.js";
 export * from "./SkillResponseDto.js";
 export * from "./InventoryItemDto.js";

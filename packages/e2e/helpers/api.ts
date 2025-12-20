@@ -51,7 +51,7 @@ export async function prepareE2EDb(options: PrepareDbOptions = {}): Promise<{ ok
           hp: 12,
           hpMax: 12,
           proficiency: 2,
-          scores: { Str: 14, Dex: 14, Con: 12, Int: 10, Wis: 10, Cha: 10 },
+          stats: { vigor: 1, finesse: 1, mind: 1, survival: 1 },
           portrait: "/images/portraits/default.png",
           world: "dnd",
           state: "created",

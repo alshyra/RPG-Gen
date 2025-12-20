@@ -11,9 +11,6 @@ import {
 } from "../../domain/combat/dto/CombatActionResponseDto.js";
 import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
-import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
-import { CharacterService } from "../../domain/character/character.service.js";
-import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 
 /**
  * Orchestrator for unified combat actions.
@@ -26,9 +23,6 @@ export class CombatActionOrchestrator {
   constructor(
     @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
     private readonly diceService: DiceService,
-    private readonly spellDefinitionService: SpellDefinitionService,
-    private readonly characterService: CharacterService,
-    private readonly combatAppService: CombatAppService,
   ) {}
 
   /**

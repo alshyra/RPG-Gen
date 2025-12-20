@@ -51,23 +51,24 @@ export class ClassDefinitionService {
         rawClassData.map(async classData => {
           try {
             const validated = {
-              name: classData.className,
-              hitDie: classData.hitDie,
-              primarySpellAbility: classData.primarySpellAbility || "",
-              description: classData.description || "",
-              schemaVersion: classData.schemaVersion || 1,
-              levels: classData.levels || [],
-              allowedSpellsByLevel: classData.allowedSpellsByLevel || {},
-              combatOptionsByLevel: classData.combatOptionsByLevel || {},
+              name: classData.name,
+              displayName: classData.displayName,
+              description: classData.description,
+              baseStats: classData.baseStats,
+              talentTrees: classData.talentTrees,
+              startingAptitudes: classData.startingAptitudes,
+              color: classData.color,
+              icon: classData.icon,
+              main_stat: classData.main_stat,
             };
 
             await this.upsert(validated);
-            return { status: "imported", name: classData.className };
+            return { status: "imported", name: classData.name };
           } catch (err) {
             this.logger.warn(
-              `Failed to seed class ${classData.className}: ${(err as Error).message}`,
+              `Failed to seed class ${classData.name}: ${(err as Error).message}`,
             );
-            return { status: "error", name: classData.className };
+            return { status: "error", name: classData.name };
           }
         }),
       );

@@ -1,23 +1,22 @@
 <template>
   <div>
-    <div class="font-bold text-sm text-slate-300">Caractéristiques</div>
-    <div class="mt-2 grid grid-cols-3 gap-1 text-xs">
+    <div class="font-bold text-sm text-slate-300">Statistiques</div>
+    <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
       <div
-        v-for="(ability, key) in abilities"
+        v-for="(stat, key) in stats"
         :key="key"
         class="text-center"
       >
         <div class="text-slate-400">
-          {{ ability.short }}
+          {{ stat.short }}
         </div>
-        <div :class="['font-bold', ability.color]">
+        <div :class="['font-bold', stat.color]">
           <span>
-            {{ getAbilityScore(key) }}
+            {{ getStatValue(key) }}
           </span>
-          <span class="text-xs text-slate-500 mt-0.5">
-            ({{ getModifier(getAbilityScore(key)) > 0 ? '+' : ''
-            }}{{ getModifier(getAbilityScore(key)) }})
-          </span>
+        </div>
+        <div class="text-slate-500 text-xs mt-0.5">
+          {{ stat.name }}
         </div>
       </div>
     </div>
@@ -26,48 +25,39 @@
 
 <script setup lang="ts">
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import type { AbilityScoresResponseDto } from '@rpg-gen/shared';
+import type { StatsResponseDto } from '@rpg-gen/shared';
 
-type AbilityKey = 'Str' | 'Dex' | 'Con' | 'Int' | 'Wis' | 'Cha';
+type StatKey = 'vigor' | 'finesse' | 'mind' | 'survival';
 
 const currentCharacter = useCurrentCharacter();
 
-const abilities = {
-  str: {
-    short: 'STR',
+const stats = {
+  vigor: {
+    short: 'VIG',
+    name: 'Vigueur',
     color: 'text-amber-400',
   },
-  dex: {
-    short: 'DEX',
+  finesse: {
+    short: 'FIN',
+    name: 'Finesse',
     color: 'text-amber-400',
   },
-  con: {
-    short: 'CON',
-    color: 'text-amber-400',
-  },
-  int: {
-    short: 'INT',
+  mind: {
+    short: 'ESP',
+    name: 'Esprit',
     color: 'text-blue-400',
   },
-  wis: {
-    short: 'WIS',
+  survival: {
+    short: 'SUR',
+    name: 'Survie',
     color: 'text-green-400',
   },
-  cha: {
-    short: 'CHA',
-    color: 'text-pink-400',
-  },
 };
 
-const getAbilityScore = (key: string): number => {
-  if (!currentCharacter?.value?.scores) return 10;
+const getStatValue = (key: string): number => {
+  if (!currentCharacter?.value?.stats) return 0;
 
-  // Convert to capitalized format (Str, Dex, etc.)
-  const capitalized = (key.charAt(0).toUpperCase() + key.slice(1)) as AbilityKey;
-  const scores: AbilityScoresResponseDto = currentCharacter?.value?.scores;
-
-  return scores[capitalized] ?? 10;
+  const stats: StatsResponseDto = currentCharacter?.value?.stats;
+  return stats[key as StatKey] ?? 0;
 };
-
-const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 </script>

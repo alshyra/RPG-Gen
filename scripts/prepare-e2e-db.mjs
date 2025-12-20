@@ -119,12 +119,12 @@ async function main() {
       const name = `e2e-${new Date().toISOString().replace(/[:.]/g, "")}-${i}`;
       const updateBody = { name };
 
-      // If --ready provided, set typical D&D starter stats and HP, equip a starter weapon
+      // If --ready provided, set starter stats and HP, equip a starter weapon
       if (opts.ready) {
         updateBody.hp = 12;
         updateBody.hpMax = 12;
         updateBody.proficiency = 2;
-        updateBody.scores = { Str: 14, Dex: 14, Con: 12, Int: 10, Wis: 10, Cha: 10 };
+        updateBody.stats = { vigor: 1, finesse: 1, mind: 1, survival: 1 };
         updateBody.portrait = "/images/portraits/default.png";
         updateBody.world = "dnd";
         updateBody.state = "created";

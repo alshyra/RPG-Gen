@@ -91,18 +91,19 @@ function extractDamageType(description: string): string | undefined {
 }
 
 // Extract save type from description (JdS de Sag., JdS de Con., etc.)
+// Maps D&D saves to new stat system (VIG/FIN/ESP/SUR)
 function extractSaveType(description: string): string | undefined {
   if (!description) return undefined;
   const saveMatch = description.match(/JdS de (Sag\.|Con\.|Dex\.|For\.|Int\.|Cha\.)/);
   if (!saveMatch) return undefined;
 
   const saveMap: Record<string, string> = {
-    "Sag.": "wisdom",
-    "Con.": "constitution",
-    "Dex.": "dexterity",
-    "For.": "strength",
-    "Int.": "intelligence",
-    "Cha.": "charisma",
+    "Sag.": "survival", // Wisdom -> Survival
+    "Con.": "vigor", // Constitution -> Vigor
+    "Dex.": "finesse", // Dexterity -> Finesse
+    "For.": "vigor", // Strength -> Vigor
+    "Int.": "mind", // Intelligence -> Mind
+    "Cha.": "mind", // Charisma -> Mind
   };
 
   return saveMap[saveMatch[1]] || undefined;

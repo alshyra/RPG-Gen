@@ -6,18 +6,9 @@ export { Item } from "./item/Item.js";
 export { ItemDefinition, ItemDefinitionSchema, type ItemSlot, type ItemBonuses } from "./item/ItemDefinition.js";
 export { Race } from "./character/Race.js";
 export { Skill } from "./character/Skill.js";
-export { Spell } from "./spell/Spell.js";
-export { SpellDefinition } from "./spell/SpellDefinition.js";
-export { SpellMeta } from "./spell/SpellMeta.js";
 export {
   ClassDefinition,
   ClassDefinitionSchema,
-  ClassLevel,
-  ClassLevelSchema,
-  ClassLevelFeature,
-  ClassLevelFeatureSchema,
-  ClassLevelChoice,
-  ClassLevelChoiceSchema,
 } from "./class/index.js";
 export { Aptitude, AptitudeSchema, type AptitudeTargetType, type AptitudeCategory, type AptitudeScaling } from "./aptitude/index.js";
 export { CombatEnd } from "./combat/CombatEnd.js";
@@ -30,7 +21,6 @@ export { ChatMessage } from "./chat/ChatMessage.js";
 export { GameInstruction } from "./instruction/GameInstruction.js";
 export { RollInstruction } from "./instruction/RollInstruction.js";
 export { InventoryInstruction } from "./instruction/InventoryInstruction.js";
-export { SpellInstruction } from "./instruction/SpellInstruction.js";
 
 export type CharacterDocument = Character & Document;
 

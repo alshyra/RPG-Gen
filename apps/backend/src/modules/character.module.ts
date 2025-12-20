@@ -1,9 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ItemDefinition, ItemDefinitionSchema } from "../infra/mongo/item/ItemDefinition.js";
-import { SpellDefinition, SpellDefinitionSchema } from "../infra/mongo/spell/SpellDefinition.js";
 import { ItemDefinitionService } from "../domain/item-definition/item-definition.service.js";
-import { SpellDefinitionService } from "../domain/spell-definition/spell-definition.service.js";
 import { CharacterController } from "../controllers/character.controller.js";
 import { CharacterService } from "../domain/character/character.service.js";
 import { Character, CharacterSchema } from "../infra/mongo/index.js";
@@ -19,14 +17,10 @@ import { Character, CharacterSchema } from "../infra/mongo/index.js";
         name: ItemDefinition.name,
         schema: ItemDefinitionSchema,
       },
-      {
-        name: SpellDefinition.name,
-        schema: SpellDefinitionSchema,
-      },
     ]),
   ],
   controllers: [CharacterController],
-  providers: [CharacterService, ItemDefinitionService, SpellDefinitionService],
-  exports: [CharacterService, ItemDefinitionService, SpellDefinitionService],
+  providers: [CharacterService, ItemDefinitionService ],
+  exports: [CharacterService, ItemDefinitionService],
 })
 export class CharacterModule {}

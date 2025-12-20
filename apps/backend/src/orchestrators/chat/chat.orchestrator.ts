@@ -12,7 +12,6 @@ import type {
 } from "../../domain/chat/dto/index.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
-import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.
@@ -32,7 +31,6 @@ export class ChatOrchestrator {
     private readonly combatService: CombatAppService,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
-    private readonly spellDefinitionService: SpellDefinitionService,
   ) {}
 
   public async getGMResponse(userId: string, characterId: string, userText: string) {
@@ -72,8 +70,6 @@ export class ChatOrchestrator {
       xp: instr =>
         this.handleXp(userId, characterId, characterDto, instr as XpInstructionMessageDto),
       // inventory: instr => this.handleInventory(userId, characterId, instr as InventoryInstructionMessageDto),
-      spell: instr =>
-        this.handleSpell(userId, characterId, characterDto, instr as SpellInstructionMessageDto),
       combat_start: instr =>
         this.handleCombatStart(
           userId,
@@ -131,34 +127,6 @@ export class ChatOrchestrator {
     await this.characterService.update(userId, characterId, { totalXp: newXp });
     this.logger.log(`Applied XP instruction: +${xp} to ${characterId} => ${newXp}`);
   }
-
-  private async handleSpell(
-    userId: string,
-    characterId: string,
-    characterDto: CharacterResponseDto,
-    instr: SpellInstructionMessageDto,
-  ): Promise<void> {
-    try {
-      if (instr.action === "learn") {
-        const existing = characterDto?.spells || [];
-        const newSpell = await this.spellDefinitionService.findByDefinitionId(instr.definitionId);
-        const spells = [...existing, newSpell];
-        await this.characterService.update(userId, characterId, { spells });
-        this.logger.log(`Spell learned for ${characterId}: ${instr.name}`);
-      } else if (instr.action === "forget") {
-        const spells = (characterDto?.spells || []).filter(
-          (sp: { name: string }) => sp.name !== instr.name,
-        );
-        await this.characterService.update(userId, characterId, { spells });
-        this.logger.log(`Spell forgotten for ${characterId}: ${instr.name}`);
-      } else if (instr.action === "cast") {
-        this.logger.log(`Spell cast by ${characterId}: ${instr.name}`);
-      }
-    } catch (e) {
-      this.logger.warn(`Spell instruction failed for ${characterId}: ${(e as Error)?.message}`);
-    }
-  }
-
   private async handleCombatStart(
     userId: string,
     characterId: string,

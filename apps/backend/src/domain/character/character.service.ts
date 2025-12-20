@@ -3,7 +3,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ItemDefinition } from "../../infra/mongo/item/ItemDefinition.js";
 import { ItemDefinitionService } from "../item-definition/item-definition.service.js";
-import { SpellDefinitionService } from "../spell-definition/spell-definition.service.js";
 import { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
 import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
@@ -18,14 +17,16 @@ import {
 @Injectable()
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
-  private readonly DEFAULT_BASE_SCORES = {
-
+  private readonly DEFAULT_BASE_STATS = {
+    vigor: 1,
+    finesse: 1,
+    mind: 1,
+    survival: 1,
   };
 
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
     private itemDefinitionService: ItemDefinitionService,
-    private spellDefinitionService: SpellDefinitionService,
   ) {}
 
   generateCharacterId(): string {
@@ -40,7 +41,7 @@ export class CharacterService {
       state: "draft",
       isDeceased: false,
       inventory: [],
-      scores: this.DEFAULT_BASE_SCORES,
+      stats: this.DEFAULT_BASE_STATS,
     });
 
     const saved = await character.save();

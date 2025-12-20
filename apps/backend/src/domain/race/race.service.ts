@@ -1,14 +1,8 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { Race, RaceDocument } from "../../infra/mongo/race/index.js";
-
-export interface TraitEffect {
-  type: string;
-  value: number;
-  condition?: string;
-  subType?: string;
-}
+import { Race } from "../../infra/mongo/race/index.js";
+import type { RaceDocument, TraitEffectData } from "../../infra/mongo/race/index.js";
 
 export interface RaceMetadata {
   id: string;
@@ -20,7 +14,7 @@ export interface RaceMetadata {
     survival?: number;
   };
   trait: string;
-  traitEffect: string | TraitEffect;
+  traitEffect: TraitEffectData;
   descriptionForAi?: string;
   icon?: string;
   color?: string;
@@ -89,7 +83,7 @@ export class RaceService {
     name: string;
     bonuses: { vigor?: number; finesse?: number; mind?: number; survival?: number, '*'?: number};
     trait: string;
-    traitEffect: string | TraitEffect;
+    traitEffect: TraitEffectData;
     descriptionForAi?: string;
     icon?: string;
     color?: string;
@@ -103,7 +97,7 @@ export class RaceService {
             name: race.name,
             bonuses: race.bonuses,
             trait: race.trait,
-            traitEffect: typeof race.traitEffect === 'string' ? race.traitEffect : JSON.stringify(race.traitEffect),
+            traitEffect: race.traitEffect,
             descriptionForAi: race.descriptionForAi,
             icon: race.icon,
             color: race.color,
@@ -125,7 +119,7 @@ export class RaceService {
     name: string;
     bonuses: { vigor?: number; finesse?: number; mind?: number; survival?: number };
     trait: string;
-    traitEffect: string | TraitEffect;
+    traitEffect: TraitEffectData;
     descriptionForAi?: string;
     icon?: string;
     color?: string;
@@ -138,7 +132,7 @@ export class RaceService {
           name: raceData.name,
           bonuses: raceData.bonuses,
           trait: raceData.trait,
-          traitEffect: typeof raceData.traitEffect === 'string' ? raceData.traitEffect : JSON.stringify(raceData.traitEffect),
+          traitEffect: raceData.traitEffect,
           descriptionForAi: raceData.descriptionForAi,
           icon: raceData.icon,
           color: raceData.color,

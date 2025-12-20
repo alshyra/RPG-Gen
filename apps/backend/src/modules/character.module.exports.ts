@@ -15,4 +15,3 @@
 
 export { CharacterService } from "../domain/character/character.service.js";
 export { ItemDefinitionService } from "../domain/item-definition/item-definition.service.js";
-export { SpellDefinitionService } from "../domain/spell-definition/spell-definition.service.js";

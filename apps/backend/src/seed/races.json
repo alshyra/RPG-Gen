@@ -12,7 +12,7 @@
   {
     "id": "nain",
     "name": "Nain",
-    "bonuses": { "viguor": 1 },
+    "bonuses": { "vigor": 1 },
     "trait": "Robustesse",
     "traitEffect": { "type": "DAMAGE_REDUCTION", "value": 1, "subType": "physical" },
     "descriptionForAi": "Robuste et endurant (+1 vigor). Réduit les dégâts physiques de 1.",

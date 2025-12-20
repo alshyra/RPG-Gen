@@ -34,13 +34,11 @@ test("getOptionsForClass returns next level and available spells", async t => {
       },
     ],
     spells: [],
-    scores: {
-      Str: 12,
-      Dex: 12,
-      Con: 12,
-      Int: 14,
-      Wis: 10,
-      Cha: 8,
+    stats: {
+      vigor: 1,
+      finesse: 1,
+      mind: 2,
+      survival: 1,
     },
     proficiency: 2,
   };
@@ -79,13 +77,11 @@ test("applyLevelUp increments class level and adds spells and ASI", async t => {
       },
     ],
     spells: [],
-    scores: {
-      Str: 10,
-      Dex: 10,
-      Con: 10,
-      Int: 10,
-      Wis: 12,
-      Cha: 10,
+    stats: {
+      vigor: 1,
+      finesse: 1,
+      mind: 1,
+      survival: 2,
     },
     proficiency: 2,
     userId: "u1",

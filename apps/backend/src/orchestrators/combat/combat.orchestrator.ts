@@ -11,7 +11,6 @@ import type {
 } from "../../domain/combat/dto/index.js";
 import { CombatStateDto } from "../../domain/combat/dto/index.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
-import { SpellDefinitionService } from "../../domain/spell-definition/spell-definition.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
 
 /**
@@ -31,8 +30,6 @@ export class CombatOrchestrator {
   constructor(
     private readonly combatAppService: CombatAppService,
     private readonly characterService: CharacterService,
-    private readonly diceService: DiceService,
-    private readonly spellDefinitionService: SpellDefinitionService,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
   ) {}

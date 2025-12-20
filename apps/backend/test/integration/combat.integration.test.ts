@@ -49,13 +49,11 @@ function createTestCharacter(overrides: Partial<CharacterResponseDto> = {}): Cha
     state: "created",
     hp: 20,
     hpMax: 20,
-    scores: {
-      Str: 16,
-      Dex: 14,
-      Con: 14,
-      Int: 10,
-      Wis: 12,
-      Cha: 8,
+    stats: {
+      vigor: 2,
+      finesse: 1,
+      mind: 1,
+      survival: 1,
     },
     proficiency: 2,
     inventory: [],
@@ -616,13 +614,11 @@ test.skip("processAttack returns combatEnd when killing last enemy", async t => 
     await characterService.update(TEST_USER_ID, charDoc.characterId, {
       hp: 20,
       hpMax: 20,
-      scores: {
-        Str: 16,
-        Dex: 14,
-        Con: 14,
-        Int: 10,
-        Wis: 12,
-        Cha: 8,
+      stats: {
+        vigor: 2,
+        finesse: 1,
+        mind: 1,
+        survival: 1,
       },
     });
 

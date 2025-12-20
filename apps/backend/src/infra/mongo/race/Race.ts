@@ -1,24 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, HydratedDocument } from "mongoose";
+import { RaceBonuses } from "./RaceBonuses.js";
 
 export type RaceDocument = HydratedDocument<Race>;
 
-/**
- * Race bonuses applied to character stats
- */
-export class RaceBonuses {
-  @Prop({ default: 0 })
-  vigor?: number;
-
-  @Prop({ default: 0 })
-  finesse?: number;
-
-  @Prop({ default: 0 })
-  mind?: number;
-
-  @Prop({ default: 0 })
-  survival?: number;
-}
+import type { TraitEffectData } from "./TraitEffect.js";
 
 /**
  * Race schema - simplified system with 4 races
@@ -38,8 +24,8 @@ export class Race extends Document {
   @Prop({ required: true })
   trait!: string;
 
-  @Prop({ required: true })
-  traitEffect!: string;
+  @Prop({ type: Object, required: true })
+  traitEffect!: TraitEffectData;
 
   @Prop()
   descriptionForAi?: string;

@@ -1,0 +1,128 @@
+{
+  "statistics": {
+    "VIG": {
+      "name": "Vigueur",
+      "description": "Force physique, endurance et robustesse."
+    },
+    "FIN": {
+      "name": "Finesse",
+      "description": "Agilité, précision et rapidité d'exécution."
+    },
+    "ESP": {
+      "name": "Esprit",
+      "description": "Intelligence, charisme et force mentale."
+    },
+    "SUR": {
+      "name": "Survie",
+      "description": "Instinct, perception et connaissance du milieu."
+    }
+  },
+  "proficiencyPaliers": [
+    { "levelMin": 1, "levelMax": 3, "bonus": 3 },
+    { "levelMin": 4, "levelMax": 6, "bonus": 5 },
+    { "levelMin": 7, "levelMax": 9, "bonus": 7 },
+    { "levelMin": 10, "levelMax": 100, "bonus": 10 }
+  ],
+  "skills": {
+    "common": [
+      {
+        "id": "athletisme",
+        "name": "Athlétisme",
+        "stat": "VIG",
+        "description": "Courir, sauter, grimper."
+      },
+      {
+        "id": "intimidation",
+        "name": "Intimidation",
+        "stat": "VIG",
+        "description": "Forcer la volonté par la peur ou la carrure."
+      },
+      {
+        "id": "dexterite",
+        "name": "Dextérité",
+        "stat": "FIN",
+        "description": "Escamotage, jonglage, rapidité manuelle."
+      },
+      {
+        "id": "persuasion",
+        "name": "Persuasion",
+        "stat": "ESP",
+        "description": "Diplomatie et charme social."
+      },
+      {
+        "id": "savoir",
+        "name": "Savoir",
+        "stat": "ESP",
+        "description": "Connaissances historiques et logique."
+      },
+      {
+        "id": "intuition",
+        "name": "Intuition",
+        "stat": "SUR",
+        "description": "Lire les intentions et détecter le mensonge."
+      },
+      {
+        "id": "observation",
+        "name": "Observation",
+        "stat": "SUR",
+        "description": "Trouver des détails cachés ou des pièges."
+      }
+    ],
+    "specializations": [
+      {
+        "id": "tactique",
+        "name": "Tactique",
+        "stat": "VIG",
+        "voies": ["war_sang", "war_tactique"]
+      },
+      {
+        "id": "vigilance",
+        "name": "Vigilance",
+        "stat": "SUR",
+        "voies": ["war_lumiere"]
+      },
+      {
+        "id": "medecine",
+        "name": "Médecine",
+        "stat": "ESP",
+        "voies": ["mag_lumiere"]
+      },
+      {
+        "id": "arcanes",
+        "name": "Arcanes",
+        "stat": "ESP",
+        "voies": ["mag_abysse"]
+      },
+      {
+        "id": "nature",
+        "name": "Nature",
+        "stat": "SUR",
+        "voies": ["mag_nature"]
+      },
+      {
+        "id": "discretion",
+        "name": "Discrétion",
+        "stat": "FIN",
+        "voies": ["rog_ombre"]
+      },
+      {
+        "id": "pistage",
+        "name": "Pistage",
+        "stat": "SUR",
+        "voies": ["rog_nature"]
+      },
+      {
+        "id": "performance",
+        "name": "Performance",
+        "stat": "ESP",
+        "voies": ["rog_charisme"]
+      },
+      {
+        "id": "infiltration",
+        "name": "Infiltration",
+        "stat": "FIN",
+        "voies": ["rog_ombre", "rog_nature"]
+      }
+    ]
+  }
+}

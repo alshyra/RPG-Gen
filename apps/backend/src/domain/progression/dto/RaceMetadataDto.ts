@@ -14,6 +14,20 @@ class RaceBonusesDto {
   survival?: number;
 }
 
+class TraitEffectDto {
+  @ApiProperty({ description: "Type of effect", example: "PA_BONUS" })
+  type: string;
+
+  @ApiProperty({ description: "Numeric value of the effect", example: 1 })
+  value: number;
+
+  @ApiProperty({ description: "Optional condition for the effect", example: "turn_1", required: false })
+  condition?: string;
+
+  @ApiProperty({ description: "Optional sub-type (e.g., physical)", required: false })
+  subType?: string;
+}
+
 export class RaceMetadataDto {
   @ApiProperty({ description: "Race ID", example: "humain" })
   id: string;
@@ -24,11 +38,11 @@ export class RaceMetadataDto {
   @ApiProperty({ description: "Special trait name", example: "Polyvalent" })
   trait: string;
 
-  @ApiProperty({ 
-    description: "Trait effect description", 
-    example: "+1 à toutes les compétences" 
+  @ApiProperty({
+    description: "Trait effect (structured)",
+    type: TraitEffectDto,
   })
-  traitEffect: string;
+  traitEffect: TraitEffectDto;
 
   @ApiProperty({ description: "Stat bonuses", type: RaceBonusesDto })
   bonuses: RaceBonusesDto;
