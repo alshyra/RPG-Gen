@@ -90,4 +90,34 @@ export class AptitudeResponseDto {
 
   @ApiPropertyOptional({ description: "Is this a starting aptitude?" })
   isStarting?: boolean;
+
+  constructor(init?: Partial<AptitudeResponseDto>) {
+    // Validate required fields
+    if (!init?.aptitudeId) {
+      throw new Error("AptitudeResponseDto: missing required field 'aptitudeId'");
+    }
+    if (!init?.name) {
+      throw new Error("AptitudeResponseDto: missing required field 'name'");
+    }
+    if (!init?.description) {
+      throw new Error("AptitudeResponseDto: missing required field 'description'");
+    }
+    if (init?.paCost === undefined) {
+      throw new Error("AptitudeResponseDto: missing required field 'paCost'");
+    }
+    if (init?.cooldown === undefined) {
+      throw new Error("AptitudeResponseDto: missing required field 'cooldown'");
+    }
+    if (!init?.targetType) {
+      throw new Error("AptitudeResponseDto: missing required field 'targetType'");
+    }
+    if (init?.range === undefined) {
+      throw new Error("AptitudeResponseDto: missing required field 'range'");
+    }
+    if (!init?.category) {
+      throw new Error("AptitudeResponseDto: missing required field 'category'");
+    }
+
+    Object.assign(this, init);
+  }
 }

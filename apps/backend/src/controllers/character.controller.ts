@@ -90,11 +90,14 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.getDeceasedCharacters(userId);
-    return characters.map(c => ({
-      ...this.characterService.toCharacterDto(c),
-      diedAt: c.diedAt?.toISOString(),
-      deathLocation: c.deathLocation,
-    }));
+    return characters.map(c => {
+      const baseDto = this.characterService.toCharacterDto(c);
+      return new DeceasedCharacterResponseDto({
+        ...baseDto,
+        diedAt: c.diedAt?.toISOString(),
+        deathLocation: c.deathLocation,
+      });
+    });
   }
 
   @Get(":characterId")

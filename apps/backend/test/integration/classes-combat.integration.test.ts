@@ -10,11 +10,10 @@ import {
   ClassDefinition,
   ClassDefinitionSchema,
 } from "../../src/infra/mongo/class/ClassDefinition.js";
-import type { SneakAttackMeta } from "../../src/domain/character/types/CombatOptionMeta.js";
 
 let mongoServer: MongoMemoryServer;
 let app: any;
-let classesService: ClassesService;
+let _classesService: ClassesService;
 let classDefService: ClassDefinitionService;
 
 test.before(async () => {
@@ -36,7 +35,7 @@ test.before(async () => {
   app = moduleRef.createNestApplication();
   await app.init();
 
-  classesService = moduleRef.get<ClassesService>(ClassesService);
+  _classesService = moduleRef.get<ClassesService>(ClassesService);
   classDefService = moduleRef.get<ClassDefinitionService>(ClassDefinitionService);
 
   // Seed a Rogue with combat options

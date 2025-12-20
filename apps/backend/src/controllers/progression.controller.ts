@@ -2,9 +2,8 @@ import { Controller, Post, Get, Body, Param, UseGuards, Request } from "@nestjs/
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import { ProgressionService } from "../domain/progression/progression.service.js";
+import { CharacterResponseDto } from "../domain/character/dto/index.js";
 import { 
-  SelectClassDto, 
-  SelectRaceDto, 
   UnlockRankDto,
   ClassMetadataDto,
   RaceMetadataDto 
@@ -16,7 +15,9 @@ import { type RPGRequest } from "../global.types.js";
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class ProgressionController {
-  constructor(private readonly progressionService: ProgressionService) {}
+  constructor(
+    private readonly progressionService: ProgressionService,
+  ) {}
 
   @Get("classes")
   @ApiOperation({ summary: "Get available classes for character creation" })
@@ -35,7 +36,7 @@ export class ProgressionController {
 
   @Post(":characterId/select-class")
   @ApiOperation({ summary: "Select a class for a character and assign starter pack" })
-  @ApiResponse({ status: 200, description: "Class selected and starter pack assigned" })
+  @ApiResponse({ status: 200, description: "Class selected and starter pack assigned", type: CharacterResponseDto })
   @ApiResponse({ status: 400, description: "Invalid class name" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async selectClass(
@@ -46,12 +47,13 @@ export class ProgressionController {
     const { user } = req;
 
     const userId = user._id.toString();
-    return this.progressionService.selectClass(userId, characterId, className);
+    const character = await this.progressionService.selectClass(userId, characterId, className);
+    return new CharacterResponseDto(character);
   }
 
   @Post(":characterId/select-race")
   @ApiOperation({ summary: "Select a race for a character and apply bonuses" })
-  @ApiResponse({ status: 200, description: "Race selected and bonuses applied" })
+  @ApiResponse({ status: 200, description: "Race selected and bonuses applied", type: CharacterResponseDto })
   @ApiResponse({ status: 400, description: "Invalid race ID" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async selectRace(
@@ -62,12 +64,13 @@ export class ProgressionController {
     const { user } = req;
 
     const userId = user._id.toString();
-    return this.progressionService.selectRace(userId, characterId, raceId);
+    const character = await this.progressionService.selectRace(userId, characterId, raceId);
+    return new CharacterResponseDto(character);
   }
 
   @Post(":characterId/unlock-rank")
   @ApiOperation({ summary: "Unlock a rank in a talent tree (voie)" })
-  @ApiResponse({ status: 200, description: "Rank unlocked successfully" })
+  @ApiResponse({ status: 200, description: "Rank unlocked successfully", type: CharacterResponseDto })
   @ApiResponse({ status: 400, description: "Not enough talent points or invalid rank" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async unlockRank(
@@ -75,11 +78,12 @@ export class ProgressionController {
     @Param("characterId") characterId: string,
     @Body() dto: UnlockRankDto,
   ) {
-    return this.progressionService.unlockRank(
+    const character = await this.progressionService.unlockRank(
       req.user.sub,
       characterId,
       dto.voieId,
       dto.rank,
     );
+    return new CharacterResponseDto(character);
   }
 }

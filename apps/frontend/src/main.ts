@@ -15,5 +15,5 @@ app.mount("#app");
 
 // Expose query client for E2E tests
 if (import.meta.env.DEV || import.meta.env.MODE === "test") {
-  (window as any).__vueQueryClient = queryClient;
+  (window as unknown as Record<string, unknown>).__vueQueryClient = queryClient;
 }

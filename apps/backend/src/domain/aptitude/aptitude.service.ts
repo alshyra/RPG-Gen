@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Aptitude, AptitudeDocument } from "../../infra/mongo/aptitude/Aptitude.js";
+import { AptitudeResponseDto } from "../character/dto/AptitudeResponseDto.js";
 
 @Injectable()
 export class AptitudeService {
@@ -119,9 +120,10 @@ export class AptitudeService {
 
   /**
    * Convert Aptitude entity to response DTO
+   * The DTO constructor handles validation of required fields
    */
-  toResponseDto(aptitude: Partial<Aptitude>): any {
-    return {
+  toResponseDto(aptitude: Partial<Aptitude>): AptitudeResponseDto {
+    return new AptitudeResponseDto({
       aptitudeId: aptitude.aptitudeId,
       name: aptitude.name,
       description: aptitude.description,
@@ -141,6 +143,6 @@ export class AptitudeService {
       voieId: aptitude.voieId,
       rankRequired: aptitude.rankRequired,
       isStarting: aptitude.isStarting,
-    };
+    });
   }
 }

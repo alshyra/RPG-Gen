@@ -10,7 +10,6 @@ import type {
   EndPlayerTurnResponseDto,
 } from "../../domain/combat/dto/index.js";
 import { CombatStateDto } from "../../domain/combat/dto/index.js";
-import { DiceService } from "../../domain/dice/dice.service.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
 
 /**

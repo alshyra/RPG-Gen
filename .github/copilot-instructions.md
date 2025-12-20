@@ -61,6 +61,23 @@ Tests & CI
 
 Patterns & conventions to respect
 
+- **DTO validation pattern**: DTOs own validation, services do not. Every DTO must provide a constructor that validates required fields and throws descriptive errors on missing/invalid data. Services should instantiate DTOs and trust constructor validation—do not add validation logic to service methods. Example:
+  ```ts
+  // DTO constructor validates
+  export class AptitudeResponseDto {
+    constructor(init?: Partial<AptitudeResponseDto>) {
+      if (!init?.aptitudeId) throw new Error("AptitudeResponseDto: missing required field 'aptitudeId'");
+      if (!init?.name) throw new Error("AptitudeResponseDto: missing required field 'name'");
+      // ... validate other required fields
+      Object.assign(this, init);
+    }
+  }
+  // Service simply passes data and relies on constructor
+  toResponseDto(aptitude: Partial<Aptitude>): AptitudeResponseDto {
+    return new AptitudeResponseDto({...aptitude});
+  }
+  ```
+
 - DTO generation: backend schemas ➜ generator script at `packages/backend/src/scripts/generate-dtos.ts`. Do not hand-edit generated files in `packages/shared/src/generated`. If schema changes are needed run `npm --workspace @rpg-gen/backend run generate:dtos` and commit the result.
 - Chat / Gemini integration: `packages/backend/src/external/text/gemini-text.service.ts` — robust extraction/parsing of Gemini responses is central. Tests often mock or avoid non-deterministic AI outputs — prefer making Gemini interactions injectable/mocked in tests.
 - Narrative parsing conventions: game instructions are embedded as JSON in narrative text and parsed by `packages/backend/src/external/game-parser.util.ts`. Tests expect specific JSON extraction and cleaning behavior.

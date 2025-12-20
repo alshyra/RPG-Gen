@@ -1,6 +1,7 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ClassDefinitionService } from "../class-definition/class-definition.service.js";
 import { ClassDefinition } from "../../infra/mongo/index.js";
+import { ClassDefinitionResponseDto, TalentTreeDto } from "./dto/index.js";
 
 /**
  * Service for the new simplified Talent Tree system.
@@ -15,42 +16,27 @@ export class ClassesService {
   ) {}
 
   /**
-   * Get all available classes
+   * Convert ClassDefinition model to ClassDefinitionResponseDto
    */
-  async getAllClasses(): Promise<ClassDefinition[]> {
-    return this.classDefService.findAll();
+  private toClassDefinitionDto(classDef: ClassDefinition): ClassDefinitionResponseDto {
+    return {
+      name: classDef.name,
+      baseStats: classDef.baseStats,
+      startingAptitudes: classDef.startingAptitudes,
+    };
   }
 
   /**
-   * Get a class by name
+   * Convert ClassDefinition to TalentTreeDto array
    */
-  async getClassByName(name: string): Promise<ClassDefinition> {
-    return this.classDefService.findByNameOrThrow(name);
-  }
-
-  /**
-   * Get talent trees (voies) for a class
-   */
-  async getTalentTrees(className: string) {
-    const classData = await this.classDefService.findByNameOrThrow(className);
-    
-    if (!classData.talentTrees) {
+  private toTalentTreeDtos(classDef: ClassDefinition): TalentTreeDto[] {
+    if (!classDef.talentTrees) {
       return [];
     }
 
-    // Convert Map to array of voies
-    const voies: Array<{
-      id: string;
-      name: string;
-      ranks: Array<{
-        rank: number;
-        aptitudeId: string;
-        pointCost: number;
-      }>;
-    }> = [];
-
-    // Handle both Map and plain object (from Mongoose)
-    const trees = classData.talentTrees;
+    const voies: TalentTreeDto[] = [];
+    const trees = classDef.talentTrees;
+    
     if (trees instanceof Map) {
       trees.forEach((tree, key) => {
         voies.push({
@@ -70,6 +56,30 @@ export class ClassesService {
     }
 
     return voies;
+  }
+
+  /**
+   * Get all available classes
+   */
+  async getAllClasses(): Promise<ClassDefinitionResponseDto[]> {
+    const classes = await this.classDefService.findAll();
+    return classes.map(c => this.toClassDefinitionDto(c));
+  }
+
+  /**
+   * Get a class by name
+   */
+  async getClassByName(name: string): Promise<ClassDefinitionResponseDto> {
+    const classDef = await this.classDefService.findByNameOrThrow(name);
+    return this.toClassDefinitionDto(classDef);
+  }
+
+  /**
+   * Get talent trees (voies) for a class
+   */
+  async getTalentTrees(className: string): Promise<TalentTreeDto[]> {
+    const classData = await this.classDefService.findByNameOrThrow(className);
+    return this.toTalentTreeDtos(classData);
   }
 
   /**

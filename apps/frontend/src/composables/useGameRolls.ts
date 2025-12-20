@@ -1,4 +1,4 @@
-import type { DiceResultDto, RollInstructionMessageDto, CharacterDto } from "@rpg-gen/shared";
+import type { DiceResultDto, RollInstructionMessageDto } from "@rpg-gen/shared";
 import { isRollInstruction } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
@@ -11,10 +11,11 @@ import { useGameStore } from "../stores/gameStore";
  * Get stat bonus for a character based on stat name
  * New simplified system uses vigor, finesse, mind, survival
  */
-function getStatBonus(character: CharacterDto | null, statName: string): number {
-  if (!character?.stats) return 0;
+function getStatBonus(character: unknown, statName: string): number {
+  const char = character as Record<string, unknown>;
+  if (!char?.stats) return 0;
   const normalizedName = statName.toLowerCase();
-  const stats = character.stats;
+  const stats = char.stats;
   
   switch (normalizedName) {
     case "vigor":

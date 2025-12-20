@@ -43,7 +43,6 @@ function createTestCharacter(overrides: Partial<CharacterResponseDto> = {}): Cha
   return {
     characterId: "test-char-1",
     name: "Test Hero",
-    world: "test-world",
     portrait: "",
     isDeceased: false,
     state: "created",
@@ -609,7 +608,7 @@ test.skip("processAttack returns combatEnd when killing last enemy", async t => 
 
   try {
     // Create a real character in the database
-    const charDoc = await characterService.create(TEST_USER_ID, "test-world");
+    const charDoc = await characterService.create(TEST_USER_ID);
     // Update the character with combat-ready stats
     await characterService.update(TEST_USER_ID, charDoc.characterId, {
       hp: 20,

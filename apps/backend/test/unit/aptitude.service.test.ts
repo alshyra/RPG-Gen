@@ -5,10 +5,10 @@ import { AptitudeService } from "../../src/domain/aptitude/aptitude.service.js";
 const createMockAptitudeModel = () => {
   const mockDocs: any[] = [];
   return {
-    findOne: (filter: any) => ({
-      exec: async () => mockDocs.find(d => d.aptitudeId === filter.aptitudeId) || null,
+    findOne: (_filter: any) => ({
+      exec: async () => mockDocs.find(d => d.aptitudeId === _filter.aptitudeId) || null,
     }),
-    find: (filter: any) => ({
+    find: (_filter: any) => ({
       exec: async () => mockDocs,
     }),
     findOneAndUpdate: async (filter: any, update: any) => {

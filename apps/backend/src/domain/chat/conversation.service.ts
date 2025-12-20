@@ -77,7 +77,7 @@ export class ConversationService {
 
     if (character.inventory && character.inventory.length > 0) {
       summary += `- Inventory: ${character.inventory
-        .map(item => `${item.name} (x${item.qty || 1}) ${item.meta}`)
+        .map(item => `${item.name} (x${item.qty || 1}) ${JSON.stringify(item.meta)}`)
         .join(", ")}\n`;
     }
 

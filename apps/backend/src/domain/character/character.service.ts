@@ -239,20 +239,18 @@ export class CharacterService {
     }
 
     // Ensure only the targeted weapon is equipped (no for loop)
-    character.inventory = (character.inventory || []).map(it => {
-      try {
-        const type = (it?.meta?.type || "").toString().toLowerCase();
-        if (type === "weapon") {
-          return {
-            ...it,
-            equipped: it.definitionId === definitionId,
-          };
+    if (character.inventory) {
+      for (const item of character.inventory) {
+        try {
+          const type = (item?.meta?.type || "").toString().toLowerCase();
+          if (type === "weapon") {
+            item.equipped = item.definitionId === definitionId;
+          }
+        } catch {
+          // Continue if item processing fails
         }
-        return it;
-      } catch {
-        return it;
       }
-    });
+    }
 
     // Rebind `item` to the updated inventory entry so subsequent mutation targets the array item
     item = (character.inventory || []).find(i => i.definitionId === definitionId) || item;
@@ -293,10 +291,7 @@ export class CharacterService {
       qty: item.qty || 1,
       description: item.description ?? itemDefinition?.description,
       equipped: item.equipped || false,
-      meta: {
-        ...itemDefinition?.meta,
-        ...item.meta,
-      },
+      meta: Object.assign({}, itemDefinition?.meta || {}, item.meta || {}),
     };
     character.inventory = character.inventory || [];
     character.inventory.push(newItem);
@@ -375,31 +370,7 @@ export class CharacterService {
 
   // Convert MongoDB document to frontend CharacterDto format
   toCharacterDto(doc: CharacterDocument): CharacterResponseDto {
-    return new CharacterResponseDto({
-      characterId: doc.characterId,
-      name: doc.name,
-      hp: doc.hp,
-      hpMax: doc.hpMax,
-      totalXp: doc.totalXp,
-      portrait: doc.portrait,
-      gender: doc.gender,
-      inspirationPoints: doc.inspirationPoints,
-      isDeceased: doc.isDeceased || false,
-      inventory: doc.inventory,
-      diedAt: doc.diedAt?.toISOString(),
-      deathLocation: doc.deathLocation,
-      physicalDescription: doc.physicalDescription,
-      state: doc.state,
-      // Tactical system fields
-      className: doc.className,
-      level: doc.level,
-      raceId: doc.raceId,
-      stats: doc.stats,
-      pa: doc.pa,
-      paMax: doc.paMax,
-      pm: doc.pm,
-      pmMax: doc.pmMax,
-    });
+    return new CharacterResponseDto(doc);
   }
 
   /**

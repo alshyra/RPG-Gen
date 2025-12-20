@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useAvailableRaces, useCharacter, useSelectRace } from "@rpg-gen/api-client";
+import { useAvailableRaces, useSelectRace } from "@rpg-gen/api-client";
 import { RaceMetadataDto } from "@rpg-gen/shared";
 import { UiLoader } from "@rpg-gen/ui";
 import { computed, ref, watch } from "vue";

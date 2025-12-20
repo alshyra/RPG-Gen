@@ -111,7 +111,7 @@ export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string>) {
   return useMutation({
     mutationFn: (className: ClassName) => selectClass(characterId, className),
     onSuccess: () => {
-      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }
@@ -127,7 +127,7 @@ export function useSelectRace(characterIdOrRef: MaybeRefOrGetter<string | undefi
   return useMutation({
     mutationFn: (raceId: string) => selectRace(characterId, raceId),
     onSuccess: () => {
-      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }
@@ -141,7 +141,7 @@ export function useUnlockRank(characterIdOrRef: MaybeRefOrGetter<string>) {
     mutationFn: ({ voieId, rank }: { voieId: string; rank: number }) =>
       unlockRank(characterId || '', voieId, rank),
     onSuccess: () => {
-      if (characterId) queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
   });
 }

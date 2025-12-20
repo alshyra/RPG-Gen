@@ -219,7 +219,7 @@ export function useCombatEngine() {
       characterId: currentCharacter?.value?.characterId ?? "",
       inCombat: combat.isInCombat.value,
       enemies: combat.status.data.value?.enemies ?? [],
-      player: combat.status.data.value?.player!,
+      player: combat.status.data.value?.player ?? null,
       turnOrder: combat.status.data.value?.turnOrder ?? [],
       currentTurnIndex: combat.status.data.value?.currentTurnIndex ?? 0,
       roundNumber: combat.status.data.value?.roundNumber ?? 1,

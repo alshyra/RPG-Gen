@@ -7,7 +7,6 @@ import type {
   GameInstructionDto,
   HpInstructionMessageDto,
   RollInstructionMessageDto,
-  SpellInstructionMessageDto,
   XpInstructionMessageDto,
 } from "../../domain/chat/dto/index.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
