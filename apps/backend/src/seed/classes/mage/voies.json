@@ -5,10 +5,10 @@
       "description": "Le soigneur sacré, protecteur des âmes",
       "ranks": [
         { "rank": 1, "aptitudeId": "mag_soin_mineur", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "mag_purification", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "mag_barriere_sacree", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "mag_resurrection", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "mag_avatar_lumiere", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "mag_purification", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "mag_barriere_sacree", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "mag_resurrection", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "mag_avatar_lumiere", "pointCost": 5 }
       ]
     },
     "mag_abysse": {
@@ -16,10 +16,10 @@
       "description": "Le destructeur arcanique, maître du feu et de la foudre",
       "ranks": [
         { "rank": 1, "aptitudeId": "mag_boule_de_feu", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "mag_eclair", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "mag_tempete_arcanique", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "mag_desintegration", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "mag_avatar_abysse", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "mag_eclair", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "mag_tempete_arcanique", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "mag_desintegration", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "mag_avatar_abysse", "pointCost": 5 }
       ]
     },
     "mag_nature": {
@@ -27,10 +27,10 @@
       "description": "Le druide élémentaire, en communion avec les forces naturelles",
       "ranks": [
         { "rank": 1, "aptitudeId": "mag_racines", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "mag_regeneration", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "mag_invocation_elementaire", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "mag_metamorphose", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "mag_avatar_nature", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "mag_regeneration", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "mag_invocation_elementaire", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "mag_metamorphose", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "mag_avatar_nature", "pointCost": 5 }
       ]
     }
   }

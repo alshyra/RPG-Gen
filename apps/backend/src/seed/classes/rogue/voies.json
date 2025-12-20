@@ -5,10 +5,10 @@
       "description": "L'assassin silencieux, maître de la furtivité",
       "ranks": [
         { "rank": 1, "aptitudeId": "rog_furtivite", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "rog_pas_ombre", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "rog_disparition", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "rog_assassinat", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "rog_avatar_ombre", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "rog_pas_ombre", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "rog_disparition", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "rog_assassinat", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "rog_avatar_ombre", "pointCost": 5 }
       ]
     },
     "rog_nature": {
@@ -16,10 +16,10 @@
       "description": "Le rôdeur sauvage, en harmonie avec la nature",
       "ranks": [
         { "rank": 1, "aptitudeId": "rog_pistage", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "rog_piege", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "rog_poison", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "rog_embuscade", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "rog_avatar_nature", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "rog_piege", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "rog_poison", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "rog_embuscade", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "rog_avatar_nature", "pointCost": 5   }
       ]
     },
     "rog_charisme": {
@@ -27,10 +27,10 @@
       "description": "Le manipulateur charismatique, maître de la tromperie",
       "ranks": [
         { "rank": 1, "aptitudeId": "rog_feinte", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "rog_diversion", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "rog_intimidation", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "rog_inspiration_sombre", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "rog_avatar_charisme", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "rog_diversion", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "rog_intimidation", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "rog_inspiration_sombre", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "rog_avatar_charisme", "pointCost": 5 }
       ]
     }
   }

@@ -6,7 +6,6 @@
  * PUBLIC SERVICES (exported in module):
  * - CharacterService: Character CRUD and management
  * - ItemDefinitionService: Item definitions and catalog
- * - SpellDefinitionService: Spell definitions and catalog
  *
  * INTERNAL SERVICES (not exported, module-private):
  * - Repository services, domain-specific validators

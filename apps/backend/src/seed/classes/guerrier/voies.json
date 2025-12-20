@@ -5,10 +5,10 @@
       "description": "Le protecteur divin, gardien des alliés",
       "ranks": [
         { "rank": 1, "aptitudeId": "war_aura_protectrice", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "war_benediction", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "war_bouclier_sacre", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "war_riposte_divine", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "war_avatar_lumiere", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "war_benediction", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "war_bouclier_sacre", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "war_riposte_divine", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "war_avatar_lumiere", "pointCost": 5 }
       ]
     },
     "war_sang": {
@@ -16,10 +16,10 @@
       "description": "Le berserker implacable, alimenté par la rage",
       "ranks": [
         { "rank": 1, "aptitudeId": "war_frappe_puissante", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "war_charge_devastatrice", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "war_tourbillon", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "war_execution", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "war_avatar_sang", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "war_charge_devastatrice", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "war_tourbillon", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "war_execution", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "war_avatar_sang", "pointCost": 5 }
       ]
     },
     "war_tactique": {
@@ -27,10 +27,10 @@
       "description": "Le commandant stratège, inspirant ses alliés",
       "ranks": [
         { "rank": 1, "aptitudeId": "war_commandement", "pointCost": 1 },
-        { "rank": 2, "aptitudeId": "war_ralliment", "pointCost": 1 },
-        { "rank": 3, "aptitudeId": "war_strategie", "pointCost": 1 },
-        { "rank": 4, "aptitudeId": "war_inspiration", "pointCost": 1 },
-        { "rank": 5, "aptitudeId": "war_avatar_tactique", "pointCost": 1 }
+        { "rank": 2, "aptitudeId": "war_ralliment", "pointCost": 2 },
+        { "rank": 3, "aptitudeId": "war_strategie", "pointCost": 3 },
+        { "rank": 4, "aptitudeId": "war_inspiration", "pointCost": 4 },
+        { "rank": 5, "aptitudeId": "war_avatar_tactique", "pointCost": 5 }
       ]
     }
   }

@@ -214,5 +214,458 @@
     "area": "circle_3",
     "status": "obscured",
     "descriptionForAi": "Invoque un brouillard dense qui réduit la vision et la portée des ennemis dans la zone."
+  },
+  {
+    "id": "war_aura_protectrice",
+    "name": "Aura Protectrice",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "area",
+    "range": 3,
+    "effectType": "buff",
+    "descriptionForAi": "Projette une aura protectrice qui réduit les dégâts reçus par les alliés à proximité."
+  },
+  {
+    "id": "war_benediction",
+    "name": "Bénédiction",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "ally",
+    "range": 4,
+    "effectType": "buff",
+    "descriptionForAi": "Bénit un allié pour renforcer sa résilience contre le mal."
+  },
+  {
+    "id": "war_bouclier_sacre",
+    "name": "Bouclier Sacré",
+    "paCost": 2,
+    "cooldown": 4,
+    "targetType": "self",
+    "effectType": "shield",
+    "descriptionForAi": "Crée un bouclier magique temporaire qui absorbe les dégâts entrants."
+  },
+  {
+    "id": "war_riposte_divine",
+    "name": "Riposte Divine",
+    "paCost": 2,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 5,
+    "scaling": "vigor",
+    "descriptionForAi": "Contre-attaque automatique après avoir bloqué une attaque ennemie."
+  },
+  {
+    "id": "war_avatar_lumiere",
+    "name": "Avatar de Lumière",
+    "paCost": 4,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 8,
+    "scaling": "vigor",
+    "descriptionForAi": "Se transforme temporairement en être de pur lumière, augmentant tous les dégâts infligés."
+  },
+  {
+    "id": "war_frappe_puissante",
+    "name": "Frappe Puissante",
+    "paCost": 2,
+    "cooldown": 1,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 7,
+    "scaling": "vigor",
+    "descriptionForAi": "Un coup brutal qui canalise toute la rage du guerrier."
+  },
+  {
+    "id": "war_charge_devastatrice",
+    "name": "Charge Dévastratrice",
+    "paCost": 3,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 4,
+    "moveType": "dash",
+    "basePower": 6,
+    "scaling": "vigor",
+    "descriptionForAi": "Charge violemment l'ennemi et le projette en arrière."
+  },
+  {
+    "id": "war_tourbillon",
+    "name": "Tourbillon",
+    "paCost": 3,
+    "cooldown": 3,
+    "targetType": "area",
+    "area": "circle_2",
+    "basePower": 5,
+    "scaling": "vigor",
+    "descriptionForAi": "Tourbillonne sur place, infligeant des dégâts à tous les ennemis adjacents."
+  },
+  {
+    "id": "war_execution",
+    "name": "Exécution",
+    "paCost": 3,
+    "cooldown": 4,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 10,
+    "scaling": "vigor",
+    "descriptionForAi": "Ultime tentative de défaite pour achever un adversaire affaibli."
+  },
+  {
+    "id": "war_avatar_sang",
+    "name": "Avatar de Sang",
+    "paCost": 3,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 9,
+    "scaling": "vigor",
+    "descriptionForAi": "Se transforme en guerrier berserk, sacrifiant la défense pour une puissance destructrice."
+  },
+  {
+    "id": "war_commandement",
+    "name": "Commandement",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 5,
+    "effectType": "buff",
+    "descriptionForAi": "Émet un ordre qui améliore l'initiative et la précision des alliés."
+  },
+  {
+    "id": "war_ralliment",
+    "name": "Ralliment",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "area",
+    "range": 4,
+    "effectType": "buff",
+    "descriptionForAi": "Appelle les alliés à se regrouper, renforçant leur moral et leur efficacité."
+  },
+  {
+    "id": "war_strategie",
+    "name": "Stratégie",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 5,
+    "effectType": "buff",
+    "descriptionForAi": "Analyse tactique qui améliore la réaction et la coordination des alliés."
+  },
+  {
+    "id": "war_inspiration",
+    "name": "Inspiration",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "ally",
+    "range": 5,
+    "effectType": "buff",
+    "descriptionForAi": "Inspire un allié, lui donnant un surplus de courage et d'énergie."
+  },
+  {
+    "id": "war_avatar_tactique",
+    "name": "Avatar Tactique",
+    "paCost": 3,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "descriptionForAi": "Devient le commandant suprême, améliorant tous les buffs affectant les alliés."
+  },
+  {
+    "id": "rog_assassinat",
+    "name": "Assassinat",
+    "paCost": 3,
+    "cooldown": 3,
+    "targetType": "enemy",
+    "range": 5,
+    "basePower": 8,
+    "scaling": "finesse",
+    "status": "critical",
+    "descriptionForAi": "Attaque de précision maximale, capable de décider d'un combat en un coup."
+  },
+  {
+    "id": "rog_avatar_charisme",
+    "name": "Avatar de Charisme",
+    "paCost": 3,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "descriptionForAi": "Le charisme incarné, contrôlant les esprits des ennemis."
+  },
+  {
+    "id": "rog_avatar_nature",
+    "name": "Avatar de Nature",
+    "paCost": 3,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 6,
+    "scaling": "finesse",
+    "descriptionForAi": "Fusionne avec la nature sauvage pour combats agiles et féroces."
+  },
+  {
+    "id": "rog_disparition",
+    "name": "Disparition",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "self",
+    "status": "stealth",
+    "descriptionForAi": "S'évapore en ombres fugaces, devenant invisible à tous les sens."
+  },
+  {
+    "id": "rog_diversion",
+    "name": "Diversion",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 4,
+    "effectType": "crowd_control",
+    "descriptionForAi": "Attire l'attention des ennemis de manière déceptive."
+  },
+  {
+    "id": "rog_embuscade",
+    "name": "Embuscade",
+    "paCost": 2,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 3,
+    "basePower": 6,
+    "scaling": "finesse",
+    "descriptionForAi": "Surgit de l'ombre pour frapper un ennemi surpris."
+  },
+  {
+    "id": "rog_feinte",
+    "name": "Feinte",
+    "paCost": 1,
+    "cooldown": 1,
+    "targetType": "self",
+    "effectType": "defensive",
+    "descriptionForAi": "Une manœuvre rapide pour éviter les attaques entrantes."
+  },
+  {
+    "id": "rog_furtivite",
+    "name": "Furtivité",
+    "paCost": 1,
+    "cooldown": 1,
+    "targetType": "self",
+    "status": "hidden",
+    "descriptionForAi": "Se dissimule en silence, prêt à frapper."
+  },
+  {
+    "id": "rog_inspiration_sombre",
+    "name": "Inspiration Sombre",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 5,
+    "effectType": "buff",
+    "descriptionForAi": "Partage une énergie mystérieuse avec les alliés présents."
+  },
+  {
+    "id": "rog_intimidation",
+    "name": "Intimidation",
+    "paCost": 1,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 3,
+    "effectType": "crowd_control",
+    "descriptionForAi": "Terrifie l'ennemi avec un regard glacial et des menaces."
+  },
+  {
+    "id": "rog_pas_ombre",
+    "name": "Pas d'Ombre",
+    "paCost": 1,
+    "cooldown": 1,
+    "targetType": "self",
+    "moveType": "dash",
+    "descriptionForAi": "Se déplace rapidement dans les ombres sans laisser de trace."
+  },
+  {
+    "id": "rog_piege",
+    "name": "Piège",
+    "paCost": 2,
+    "cooldown": 4,
+    "targetType": "area",
+    "range": 5,
+    "effectType": "trap",
+    "descriptionForAi": "Place un piège invisible qui déclenche quand un ennemi approche."
+  },
+  {
+    "id": "rog_pistage",
+    "name": "Pistage",
+    "paCost": 1,
+    "cooldown": 0,
+    "targetType": "enemy",
+    "range": 10,
+    "descriptionForAi": "Suit les traces d'une cible avec une précision surnaturelle."
+  },
+  {
+    "id": "rog_poison",
+    "name": "Poison",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "enemy",
+    "range": 2,
+    "basePower": 3,
+    "scaling": "finesse",
+    "status": "poison",
+    "descriptionForAi": "Applique un venin mortel qui ronge la cible au fil du temps."
+  },
+  {
+    "id": "mag_avatar_abysse",
+    "name": "Avatar de l'Abysse",
+    "paCost": 4,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 10,
+    "scaling": "mind",
+    "descriptionForAi": "Se transforme en créature d'un autre monde, invoquant le chaos."
+  },
+  {
+    "id": "mag_avatar_lumiere",
+    "name": "Avatar de Lumière Arcanique",
+    "paCost": 4,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 8,
+    "scaling": "mind",
+    "descriptionForAi": "Brille avec une lumière magique écrasante."
+  },
+  {
+    "id": "mag_avatar_nature",
+    "name": "Avatar de Nature",
+    "paCost": 4,
+    "cooldown": 5,
+    "targetType": "self",
+    "effectType": "transformation",
+    "basePower": 8,
+    "scaling": "mind",
+    "descriptionForAi": "Fusionne avec les forces primales de la nature."
+  },
+  {
+    "id": "mag_barriere_sacree",
+    "name": "Barrière Sacrée",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "ally",
+    "range": 4,
+    "effectType": "shield",
+    "descriptionForAi": "Crée une barrière magique autour d'un allié pour le protéger."
+  },
+  {
+    "id": "mag_desintegration",
+    "name": "Désintégration",
+    "paCost": 3,
+    "cooldown": 3,
+    "targetType": "enemy",
+    "range": 5,
+    "basePower": 8,
+    "scaling": "mind",
+    "descriptionForAi": "Réduit la matière en poussière avec une explosion arcanique."
+  },
+  {
+    "id": "mag_invocation_elementaire",
+    "name": "Invocation Élémentaire",
+    "paCost": 3,
+    "cooldown": 4,
+    "targetType": "area",
+    "range": 5,
+    "basePower": 6,
+    "scaling": "mind",
+    "descriptionForAi": "Invoque un esprit élémental pour attaquer les ennemis."
+  },
+  {
+    "id": "mag_metamorphose",
+    "name": "Métamorphose",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "self",
+    "effectType": "transformation",
+    "descriptionForAi": "Change de forme temporairement pour s'adapter à la situation."
+  },
+  {
+    "id": "mag_purification",
+    "name": "Purification",
+    "paCost": 2,
+    "cooldown": 2,
+    "targetType": "area",
+    "range": 4,
+    "effectType": "healing",
+    "descriptionForAi": "Purifie la zone de toute malveillance magique."
+  },
+  {
+    "id": "mag_racines",
+    "name": "Racines Tenaces",
+    "paCost": 2,
+    "cooldown": 2,
+    "targetType": "enemy",
+    "range": 4,
+    "effectType": "crowd_control",
+    "status": "root",
+    "descriptionForAi": "Immobilise l'ennemi avec des racines magiques."
+  },
+  {
+    "id": "mag_regeneration",
+    "name": "Régénération",
+    "paCost": 2,
+    "cooldown": 3,
+    "targetType": "ally",
+    "range": 5,
+    "effectType": "healing",
+    "descriptionForAi": "Restaure la vie d'un allié et le régénère au fil du temps."
+  },
+  {
+    "id": "mag_resurrection",
+    "name": "Résurrection",
+    "paCost": 4,
+    "cooldown": 6,
+    "targetType": "ally",
+    "range": 3,
+    "effectType": "resurrection",
+    "descriptionForAi": "Ramène à la vie un allié mort, au coût d'une grande énergie magique."
+  },
+  {
+    "id": "mag_soin_mineur",
+    "name": "Soin Mineur",
+    "paCost": 1,
+    "cooldown": 1,
+    "targetType": "ally",
+    "range": 4,
+    "effectType": "healing",
+    "basePower": 2,
+    "descriptionForAi": "Guérit une plaie mineure avec de la magie bienveillante."
+  },
+  {
+    "id": "mag_tempete_arcanique",
+    "name": "Tempête Arcanique",
+    "paCost": 4,
+    "cooldown": 4,
+    "targetType": "area",
+    "area": "circle_3",
+    "basePower": 7,
+    "scaling": "mind",
+    "descriptionForAi": "Déchaîne une tempête de magie brute qui consume tous les ennemis."
+  },
+  {
+    "id": "frappe_simple",
+    "name": "Frappe Simple",
+    "paCost": 1,
+    "cooldown": 0,
+    "targetType": "enemy",
+    "range": 1,
+    "basePower": 3,
+    "scaling": "vigor",
+    "descriptionForAi": "Une attaque classique sans coûts addidtionnels."
+  },
+  {
+    "id": "posture_defensive",
+    "name": "Posture Défensive",
+    "paCost": 1,
+    "cooldown": 1,
+    "targetType": "self",
+    "effectType": "defensive",
+    "descriptionForAi": "Adopter une position défensive pour réduire les dégâts reçus."
   }
 ]
