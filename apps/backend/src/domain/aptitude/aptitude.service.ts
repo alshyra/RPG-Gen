@@ -12,6 +12,26 @@ export class AptitudeService {
   ) {}
 
   /**
+   * Calculate scaled power based on character level using proficiency paliers
+   * Paliers: 1-3 (+3), 4-6 (+5), 7-9 (+7), 10+ (+10)
+   */
+  calculateScaledPower(basePower: number, level: number): number {
+    let proficiencyBonus: number;
+
+    if (level >= 10) {
+      proficiencyBonus = 10;
+    } else if (level >= 7) {
+      proficiencyBonus = 7;
+    } else if (level >= 4) {
+      proficiencyBonus = 5;
+    } else {
+      proficiencyBonus = 3; // levels 1-3
+    }
+
+    return basePower + proficiencyBonus;
+  }
+
+  /**
    * Find all aptitudes
    */
   async findAll(): Promise<Aptitude[]> {
@@ -95,5 +115,32 @@ export class AptitudeService {
 
     await this.aptitudeModel.bulkWrite(operations);
     this.logger.log(`Seeded ${aptitudes.length} aptitudes`);
+  }
+
+  /**
+   * Convert Aptitude entity to response DTO
+   */
+  toResponseDto(aptitude: Partial<Aptitude>): any {
+    return {
+      aptitudeId: aptitude.aptitudeId,
+      name: aptitude.name,
+      description: aptitude.description,
+      descriptionForAi: aptitude.descriptionForAi,
+      paCost: aptitude.paCost,
+      pmCost: aptitude.pmCost,
+      cooldown: aptitude.cooldown,
+      targetType: aptitude.targetType,
+      range: aptitude.range,
+      areaOfEffect: aptitude.areaOfEffect,
+      category: aptitude.category,
+      basePower: aptitude.basePower,
+      scaling: aptitude.scaling,
+      appliesStatus: aptitude.appliesStatus,
+      statusDuration: aptitude.statusDuration,
+      classRestriction: aptitude.classRestriction,
+      voieId: aptitude.voieId,
+      rankRequired: aptitude.rankRequired,
+      isStarting: aptitude.isStarting,
+    };
   }
 }

@@ -14,6 +14,7 @@ import {
 
 import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
 import { ClassesService } from "../../src/domain/classes/classes.service.js";
+import { AptitudeService } from "../../src/domain/aptitude/aptitude.service.js";
 
 let mongoServer: MongoMemoryServer;
 let classesService: ClassesService;
@@ -32,9 +33,8 @@ test.before(async () => {
       ClassesService,
       ClassDefinitionService,
       {
-        provide: (await import("../../src/domain/spell-definition/spell-definition.service.js"))
-          .SpellDefinitionService,
-        useValue: { findByLevel: async () => [] },
+        provide: AptitudeService,
+        useValue: { getByIds: async () => [] },
       },
     ],
   }).compile();
