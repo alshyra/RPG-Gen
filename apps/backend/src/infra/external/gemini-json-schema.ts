@@ -65,10 +65,6 @@ export const geminiResponseJsonSchema = {
           },
           name: { type: "string", description: "Item or spell name" },
           quantity: { type: "number", description: "Item quantity" },
-          // Spell-specific fields
-          level: { type: "number", description: "Spell level" },
-          school: { type: "string", description: "Spell school" },
-          definitionId: { type: "string", description: "Definition ID" },
         },
         required: ["type"],
         additionalProperties: true,

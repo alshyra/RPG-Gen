@@ -2,40 +2,50 @@
   {
     "id": "humain",
     "name": "Humain",
-    "bonuses": { "vigor": 1, "finesse": 1 },
+    "bonuses": { "*": 1 },
     "trait": "Adaptabilité",
-    "traitEffect": "+1 PA au tour 1",
-    "descriptionForAi": "Polyvalent, s'adapte à toutes les situations de combat.",
+    "traitEffect": { "type": "PA_BONUS", "value": 1, "condition": "turn_1" },
+    "descriptionForAi": "Polyvalent, gagne +1 PA au premier tour. Et un point de stats en plus.",
     "icon": "👤",
     "color": "#f59e0b"
   },
   {
     "id": "nain",
     "name": "Nain",
-    "bonuses": { "vigor": 2 },
+    "bonuses": { "viguor": 1 },
     "trait": "Robustesse",
-    "traitEffect": "-1 dégât physique reçu (permanent)",
-    "descriptionForAi": "Solide comme le roc, encaisse les coups sans broncher.",
+    "traitEffect": { "type": "DAMAGE_REDUCTION", "value": 1, "subType": "physical" },
+    "descriptionForAi": "Robuste et endurant (+1 vigor). Réduit les dégâts physiques de 1.",
     "icon": "⛏️",
     "color": "#78716c"
   },
   {
     "id": "elfe",
-    "name": "Elfe",
-    "bonuses": { "finesse": 2 },
+    "name": "Elfe des bois",
+    "bonuses": { "finesse": 1 },
     "trait": "Agilité",
-    "traitEffect": "+1 PM permanent",
-    "descriptionForAi": "Gracieux et rapide, se déplace avec une aisance surnaturelle.",
+    "traitEffect": { "type": "PM_BONUS", "value": 1, "condition": "permanent" },
+    "descriptionForAi": "Agile (+1 finesse). Possède +1 PM permanent.",
     "icon": "🧝",
     "color": "#22c55e"
   },
   {
+    "id": "dark_elfe",
+    "name": "Elfe noir",
+    "bonuses": { "mind": 1 },
+    "trait": "Intelligence supérieure",
+    "traitEffect": { "type": "DAMAGE_BOOST", "value": 2, "condition": "all_abilities" },
+    "descriptionForAi": "Particulièrement Intelligent (+1 mind). Augmente les dégâts des sorts.",
+    "icon": "🧙",
+    "color": "#a855f7"
+  },
+  {
     "id": "orc",
     "name": "Orc",
-    "bonuses": { "vigor": 1, "survival": 1 },
+    "bonuses": { "vigor": 1 },
     "trait": "Rage",
-    "traitEffect": "+2 dégâts si HP < 50%",
-    "descriptionForAi": "Féroce et tenace, gagne en puissance quand il est blessé.",
+    "traitEffect": { "type": "DAMAGE_BOOST", "value": 2, "condition": "hp_below_50" },
+    "descriptionForAi": "Puissant et sauvage (+1 vigor). +2 dégâts quand blessé.",
     "icon": "👹",
     "color": "#16a34a"
   }

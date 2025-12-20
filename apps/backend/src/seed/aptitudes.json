@@ -10,8 +10,6 @@
     "scaling": "vigor",
     "descriptionForAi": "Une attaque de base au corps à corps sans fioritures."
   },
-
-  /* --- GUERRIER : LUMIÈRE (Protecteur) --- */
   {
     "id": "war_aura_devotion",
     "name": "Aura de Dévotion",
@@ -45,8 +43,6 @@
     "scaling": "vigor",
     "descriptionForAi": "Une explosion de lumière qui blesse les ennemis et soigne légèrement le lanceur."
   },
-
-  /* --- GUERRIER : SANG (Berserk) --- */
   {
     "id": "war_saignee",
     "name": "Saignée",
@@ -78,8 +74,6 @@
     "basePower": 3,
     "descriptionForAi": "Saute dans la mêlée, infligeant des dégâts à l'atterrissage."
   },
-
-  /* --- GUERRIER : TACTIQUE (Commandant) --- */
   {
     "id": "war_cri_ralliement",
     "name": "Cri de Ralliement",
@@ -100,8 +94,6 @@
     "effectType": "push",
     "descriptionForAi": "Charge une cible et la repousse de 2 cases à l'impact."
   },
-
-  /* --- ROGUE : OMBRE (Assassin) --- */
   {
     "id": "rog_pas_de_cote",
     "name": "Pas de Côté",
@@ -130,8 +122,6 @@
     "status": "poison",
     "descriptionForAi": "Frappe avec une lame enduite d'une toxine affaiblissante."
   },
-
-  /* --- ROGUE : NATURE (Traqueur) --- */
   {
     "id": "rog_appel_familier",
     "name": "Appel de la Meute",
@@ -148,8 +138,6 @@
     "status": "rooted",
     "descriptionForAi": "Un tir qui paralyse les jambes de la cible, l'empêchant de bouger."
   },
-
-  /* --- ROGUE : CHARISME (Duelliste) --- */
   {
     "id": "rog_feinte_audacieuse",
     "name": "Feinte Audacieuse",
@@ -170,8 +158,6 @@
     "moveType": "swap",
     "descriptionForAi": "Échange instantanément votre position avec celle d'un allié ou de votre familier."
   },
-
-  /* --- MAGE : LUMIÈRE (Prêtre) --- */
   {
     "id": "mag_souffle_vie",
     "name": "Souffle de Vie",
@@ -192,8 +178,6 @@
     "status": "shield",
     "descriptionForAi": "Enveloppe un allié d'un bouclier de force pure."
   },
-
-  /* --- MAGE : ABYSSE (Nécro) --- */
   {
     "id": "mag_eveil_osseux",
     "name": "Éveil Osseux",
@@ -212,8 +196,6 @@
     "status": "weakness",
     "descriptionForAi": "Une décharge d'énergie sombre qui réduit la puissance d'attaque de la cible."
   },
-
-  /* --- MAGE : NATURE (Druide) --- */
   {
     "id": "mag_colere_terre",
     "name": "Colère de la Terre",

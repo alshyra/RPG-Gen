@@ -1,33 +1,32 @@
 import { INestApplication, Logger } from "@nestjs/common";
-import { ItemDefinitionService } from "./domain/item-definition/item-definition.service.js";
-import { ClassDefinitionService } from "./domain/class-definition/class-definition.service.js";
-import { AptitudeService } from "./domain/aptitude/aptitude.service.js";
-import { RaceService } from "./domain/race/race.service.js";
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
+import { dirname } from "path";
 import { fileURLToPath } from "url";
+import { AptitudeService } from "./domain/aptitude/aptitude.service.js";
+import { ClassDefinitionService } from "./domain/class-definition/class-definition.service.js";
+import { ItemDefinitionService } from "./domain/item-definition/item-definition.service.js";
+import { RaceService } from "./domain/race/race.service.js";
 
 // Get the directory of this file for relative paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // New simplified system - starter packs and aptitudes
-import starterPackItems from "./seed/starter-packs.json" with { type: "json" };
 import aptitudesData from "./seed/aptitudes.json" with { type: "json" };
 import racesData from "./seed/races.json" with { type: "json" };
+import starterPackItems from "./seed/starter-packs.json" with { type: "json" };
 
 // Legacy items (still useful for the game)
-import weaponsDefinitions from "./seed/weapons-definitions.json" with { type: "json" };
-import itemsDefinitions from "./seed/item-definitions.json" with { type: "json" };
 import armorDefinitions from "./seed/armor-definitions.json" with { type: "json" };
+import itemsDefinitions from "./seed/item-definitions.json" with { type: "json" };
+import weaponsDefinitions from "./seed/weapons-definitions.json" with { type: "json" };
 
 // Class seed files from organized structure
 import guerrierStats from "./seed/classes/guerrier/stats.json" with { type: "json" };
 import guerrierVoies from "./seed/classes/guerrier/voies.json" with { type: "json" };
-import rogueStats from "./seed/classes/rogue/stats.json" with { type: "json" };
-import rogueVoies from "./seed/classes/rogue/voies.json" with { type: "json" };
 import mageStats from "./seed/classes/mage/stats.json" with { type: "json" };
 import mageVoies from "./seed/classes/mage/voies.json" with { type: "json" };
+import rogueStats from "./seed/classes/rogue/stats.json" with { type: "json" };
+import rogueVoies from "./seed/classes/rogue/voies.json" with { type: "json" };
 
 const seedItemDefinitions = async (app: INestApplication, logger: Logger) => {
   try {

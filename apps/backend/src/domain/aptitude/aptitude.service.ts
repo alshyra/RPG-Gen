@@ -65,15 +65,9 @@ export class AptitudeService {
     cooldown: number;
     targetType: string;
     range: number;
-    basePower?: number;
-    scaling?: string | null;
+    basePower: number;
+    scaling: string | null;
     descriptionForAi: string;
-    // Additional optional fields
-    area?: string;
-    effectType?: string;
-    moveType?: string;
-    status?: string;
-    ignoreTackle?: boolean;
   }>): Promise<void> {
     const operations = aptitudes.map(apt => ({
       updateOne: {
@@ -88,17 +82,11 @@ export class AptitudeService {
             cooldown: apt.cooldown,
             targetType: apt.targetType,
             range: apt.range,
-            basePower: apt.basePower || 0,
+            basePower: apt.basePower,
             scaling: apt.scaling ? {
               attribute: apt.scaling,
               scalingDivisor: 5,
             } : undefined,
-            // Additional tactical fields
-            area: apt.area,
-            effectType: apt.effectType,
-            moveType: apt.moveType,
-            status: apt.status,
-            ignoreTackle: apt.ignoreTackle,
           },
         },
         upsert: true,
