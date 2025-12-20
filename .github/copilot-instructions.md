@@ -78,6 +78,33 @@ Patterns & conventions to respect
   }
   ```
 
+- **Strict enum typing for DTO fields**: When a DTO property accepts only specific literal values (e.g., `className: 'guerrier' | 'rogue' | 'mage'`), the constructor must validate the input using type guards (type predicates). Never use `as` casting. Example:
+  ```ts
+  // Type guard (type predicate) - validates AND narrows type
+  const isValidClassName = (value: unknown): value is 'guerrier' | 'rogue' | 'mage' => {
+    return ['guerrier', 'rogue', 'mage'].includes(value as string);
+  };
+
+  export class CharacterResponseDto extends BaseCharacterResponseDto {
+    constructor(init?: Partial<CharacterResponseDto> | CharacterDocument) {
+      if (!init) throw new Error("...");
+      // Validate enum values before use
+      if (init.className && !isValidClassName(init.className)) {
+        throw new InternalServerErrorException(`Invalid className: ${init.className}`);
+      }
+      if (init.raceId && !isValidRaceId(init.raceId)) {
+        throw new InternalServerErrorException(`Invalid raceId: ${init.raceId}`);
+      }
+      super();
+      // Type guard narrows type - no casting needed
+      this.className = init.className && isValidClassName(init.className) ? init.className : undefined;
+      this.raceId = init.raceId && isValidRaceId(init.raceId) ? init.raceId : undefined;
+    }
+  }
+  ```
+
+- **Always verify TypeScript compilation before generating OpenAPI types**: Run `npm run type-check` in the backend folder before executing `npm run generate:openapi`. This ensures the backend compiles successfully and the OpenAPI spec accurately reflects your DTOs.
+
 - DTO generation: backend schemas ➜ generator script at `packages/backend/src/scripts/generate-dtos.ts`. Do not hand-edit generated files in `packages/shared/src/generated`. If schema changes are needed run `npm --workspace @rpg-gen/backend run generate:dtos` and commit the result.
 - Chat / Gemini integration: `packages/backend/src/external/text/gemini-text.service.ts` — robust extraction/parsing of Gemini responses is central. Tests often mock or avoid non-deterministic AI outputs — prefer making Gemini interactions injectable/mocked in tests.
 - Narrative parsing conventions: game instructions are embedded as JSON in narrative text and parsed by `packages/backend/src/external/game-parser.util.ts`. Tests expect specific JSON extraction and cleaning behavior.

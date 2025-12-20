@@ -14,11 +14,10 @@
     </section>
 
     <div class="max-w-2xl w-full mx-auto mt-8 text-center">
-      <p class="text-slate-300 mb-3">Créer un nouveau personnage — uniquement pour D&D.</p>
       <UiButton
         variant="primary"
         :is-loading="creating"
-        @click="createDndCharacter"
+        @click="createCharacter"
       >
         Créer un personnage (D&D)
       </UiButton>
@@ -38,10 +37,10 @@ const creating = ref(false);
 
 const character = useCharacter(undefined);
 
-const createDndCharacter = async () => {
+const createCharacter = async () => {
   creating.value = true;
   try {
-    const newChar = await character.create.mutateAsync({ world: "dnd" });
+    const newChar = await character.create.mutateAsync();
     if (newChar && newChar.characterId) {
       // Navigate to character creation step 1 for the new character
       router.push({

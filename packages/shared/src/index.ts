@@ -3,6 +3,8 @@ export * from './api-types'
 export * from './type-guards'
 
 // Auto-generated type aliases from OpenAPI components.schemas
+export type AptitudeResponseDto = import('./api-types').components['schemas']['AptitudeResponseDto'];
+export type AptitudeScalingDto = import('./api-types').components['schemas']['AptitudeScalingDto'];
 export type ArmorMeta = import('./api-types').components['schemas']['ArmorMeta'];
 export type AuthProfileDto = import('./api-types').components['schemas']['AuthProfileDto'];
 export type AvatarResponseDto = import('./api-types').components['schemas']['AvatarResponseDto'];
@@ -26,12 +28,13 @@ export type CombatStartInstructionMessageDto = import('./api-types').components[
 export type CombatStartRequestDto = import('./api-types').components['schemas']['CombatStartRequestDto'];
 export type CombatStateDto = import('./api-types').components['schemas']['CombatStateDto'];
 export type CombatantDto = import('./api-types').components['schemas']['CombatantDto'];
+export type CombatantStats = import('./api-types').components['schemas']['CombatantStats'];
 export type ConsumableMeta = import('./api-types').components['schemas']['ConsumableMeta'];
-export type CreateCharacterBodyDto = import('./api-types').components['schemas']['CreateCharacterBodyDto'];
 export type CreateInventoryItemDto = import('./api-types').components['schemas']['CreateInventoryItemDto'];
 export type DeceasedCharacterResponseDto = import('./api-types').components['schemas']['DeceasedCharacterResponseDto'];
 export type DiceRequestDto = import('./api-types').components['schemas']['DiceRequestDto'];
 export type DiceResultDto = import('./api-types').components['schemas']['DiceResultDto'];
+export type DraftCharacterResponseDto = import('./api-types').components['schemas']['DraftCharacterResponseDto'];
 export type EndPlayerTurnResponseDto = import('./api-types').components['schemas']['EndPlayerTurnResponseDto'];
 export type EnemyAttackLogDto = import('./api-types').components['schemas']['EnemyAttackLogDto'];
 export type EquipInventoryDto = import('./api-types').components['schemas']['EquipInventoryDto'];
@@ -55,18 +58,17 @@ export type RaceResponseDto = import('./api-types').components['schemas']['RaceR
 export type RemoveInventoryBodyDto = import('./api-types').components['schemas']['RemoveInventoryBodyDto'];
 export type RollInstructionMessageDto = import('./api-types').components['schemas']['RollInstructionMessageDto'];
 export type RollMetaDto = import('./api-types').components['schemas']['RollMetaDto'];
-export type SelectClassDto = import('./api-types').components['schemas']['SelectClassDto'];
-export type SelectRaceDto = import('./api-types').components['schemas']['SelectRaceDto'];
 export type SkillResponseDto = import('./api-types').components['schemas']['SkillResponseDto'];
 export type SpellInstructionMessageDto = import('./api-types').components['schemas']['SpellInstructionMessageDto'];
-export type SpellMetaDto = import('./api-types').components['schemas']['SpellMetaDto'];
-export type SpellResponseDto = import('./api-types').components['schemas']['SpellResponseDto'];
+export type TacticalStats = import('./api-types').components['schemas']['TacticalStats'];
 export type TalentRankDto = import('./api-types').components['schemas']['TalentRankDto'];
 export type TalentTreeDto = import('./api-types').components['schemas']['TalentTreeDto'];
 export type ToolMeta = import('./api-types').components['schemas']['ToolMeta'];
+export type TraitEffectDto = import('./api-types').components['schemas']['TraitEffectDto'];
 export type UnlockRankDto = import('./api-types').components['schemas']['UnlockRankDto'];
 export type UpdateCharacterRequestDto = import('./api-types').components['schemas']['UpdateCharacterRequestDto'];
 export type UseItemRequestDto = import('./api-types').components['schemas']['UseItemRequestDto'];
 export type UseItemResponseDto = import('./api-types').components['schemas']['UseItemResponseDto'];
+export type VoieProgressDto = import('./api-types').components['schemas']['VoieProgressDto'];
 export type WeaponMeta = import('./api-types').components['schemas']['WeaponMeta'];
 export type XpInstructionMessageDto = import('./api-types').components['schemas']['XpInstructionMessageDto'];

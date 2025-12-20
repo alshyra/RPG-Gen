@@ -169,23 +169,13 @@
       "post": {
         "operationId": "CharacterController_create",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCharacterBodyDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": "Character created successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CharacterResponseDto"
+                  "$ref": "#/components/schemas/DraftCharacterResponseDto"
                 }
               }
             }
@@ -1278,7 +1268,10 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of available classes with metadata",
+            "description": "List of available classes with metadata"
+          },
+          "default": {
+            "description": "",
             "content": {
               "application/json": {
                 "schema": {
@@ -1345,19 +1338,16 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SelectClassDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Class selected and starter pack assigned"
+            "description": "Class selected and starter pack assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid class name"
@@ -1390,19 +1380,16 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SelectRaceDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Race selected and bonuses applied"
+            "description": "Race selected and bonuses applied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid race ID"
@@ -1447,7 +1434,14 @@
         },
         "responses": {
           "200": {
-            "description": "Rank unlocked successfully"
+            "description": "Rank unlocked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Not enough talent points or invalid rank"
@@ -1944,18 +1938,6 @@
           "narrative"
         ]
       },
-      "CreateCharacterBodyDto": {
-        "type": "object",
-        "properties": {
-          "world": {
-            "type": "string",
-            "description": "Game world (e.g., dnd, vtm)"
-          }
-        },
-        "required": [
-          "world"
-        ]
-      },
       "RaceResponseDto": {
         "type": "object",
         "properties": {
@@ -2052,77 +2034,337 @@
           "meta"
         ]
       },
-      "SpellMetaDto": {
+      "AptitudeScalingDto": {
         "type": "object",
         "properties": {
-          "damageDice": {
+          "attribute": {
             "type": "string",
-            "description": "Damage dice notation (e.g., \"1d6\")"
+            "description": "Stat used for scaling (vigor, finesse, mind, survival)"
           },
-          "damageType": {
-            "type": "string",
-            "description": "Type of damage (fire, cold, etc.)"
-          },
-          "saveType": {
-            "type": "string",
-            "description": "Saving throw type (DEX, CON, etc.)"
-          },
-          "attackType": {
-            "type": "string",
-            "description": "Attack type",
-            "enum": [
-              "melee",
-              "ranged",
-              "spell"
-            ]
-          },
-          "school": {
-            "type": "string",
-            "description": "School of magic"
-          },
-          "areaOfEffect": {
-            "type": "string",
-            "description": "Area of effect description"
-          },
-          "scaling": {
-            "type": "string",
-            "description": "Scaling description"
-          }
-        }
-      },
-      "SpellResponseDto": {
-        "type": "object",
-        "properties": {
-          "definitionId": {
-            "type": "string",
-            "description": "Canonical spell definition ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Spell name"
-          },
-          "level": {
+          "scalingDivisor": {
             "type": "number",
-            "description": "Spell level"
-          },
-          "description": {
-            "type": "string",
-            "description": "Spell description"
-          },
-          "meta": {
-            "description": "Spell metadata",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SpellMetaDto"
-              }
-            ]
+            "description": "Scaling divisor (e.g., 5 = +1 every 5 levels)"
           }
         },
         "required": [
-          "definitionId",
+          "scalingDivisor"
+        ]
+      },
+      "AptitudeResponseDto": {
+        "type": "object",
+        "properties": {
+          "aptitudeId": {
+            "type": "string",
+            "description": "Unique aptitude ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mechanical description"
+          },
+          "descriptionForAi": {
+            "type": "string",
+            "description": "Narrative description for AI"
+          },
+          "paCost": {
+            "type": "number",
+            "description": "Action points cost"
+          },
+          "pmCost": {
+            "type": "number",
+            "description": "Movement points cost"
+          },
+          "cooldown": {
+            "type": "number",
+            "description": "Cooldown in turns"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "Target type (self, enemy, ally, zone, all_enemies, all_allies)"
+          },
+          "range": {
+            "type": "number",
+            "description": "Range in tiles (1 = melee)"
+          },
+          "areaOfEffect": {
+            "type": "number",
+            "description": "Area of effect radius in tiles (0 = single target)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category (attack, defense, support, movement, utility)"
+          },
+          "basePower": {
+            "type": "number",
+            "description": "Base power value"
+          },
+          "scaling": {
+            "description": "Scaling configuration",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AptitudeScalingDto"
+              }
+            ]
+          },
+          "appliesStatus": {
+            "description": "Status effects applied",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusDuration": {
+            "type": "number",
+            "description": "Duration of applied status effects"
+          },
+          "classRestriction": {
+            "type": "string",
+            "description": "Class restriction (guerrier, rogue, mage) or undefined for universal"
+          },
+          "voieId": {
+            "type": "string",
+            "description": "Voie ID this aptitude belongs to"
+          },
+          "rankRequired": {
+            "type": "number",
+            "description": "Minimum rank required to unlock (1-5)"
+          },
+          "isStarting": {
+            "type": "boolean",
+            "description": "Is this a starting aptitude?"
+          }
+        },
+        "required": [
+          "aptitudeId",
           "name",
-          "level",
-          "meta"
+          "description",
+          "paCost",
+          "cooldown",
+          "targetType",
+          "range",
+          "category"
+        ]
+      },
+      "TacticalStats": {
+        "type": "object",
+        "properties": {
+          "vigor": {
+            "type": "number",
+            "description": "Vigor stat"
+          },
+          "finesse": {
+            "type": "number",
+            "description": "Finesse stat"
+          },
+          "mind": {
+            "type": "number",
+            "description": "Mind stat"
+          },
+          "survival": {
+            "type": "number",
+            "description": "Survival stat"
+          }
+        },
+        "required": [
+          "vigor",
+          "finesse",
+          "mind",
+          "survival"
+        ]
+      },
+      "VoieProgressDto": {
+        "type": "object",
+        "properties": {
+          "voieId": {
+            "type": "string",
+            "description": "Talent tree ID"
+          },
+          "voieName": {
+            "type": "string",
+            "description": "Talent tree display name (e.g., 'Voie de l'Ombre')"
+          },
+          "className": {
+            "type": "string",
+            "description": "Parent class name (guerrier, rogue, mage)"
+          },
+          "currentRank": {
+            "type": "number",
+            "description": "Current rank unlocked (0-5, where 0 = not started)"
+          },
+          "requiredTalentPoints": {
+            "type": "number",
+            "description": "Talent points required to unlock next rank"
+          },
+          "unlockedAptitudes": {
+            "description": "IDs of aptitudes unlocked in this voie",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "voieId",
+          "voieName",
+          "className",
+          "currentRank"
+        ]
+      },
+      "DraftCharacterResponseDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "Unique character ID (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Character name"
+          },
+          "physicalDescription": {
+            "type": "string",
+            "description": "Physical description of the character"
+          },
+          "race": {
+            "description": "Character race (new system)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceResponseDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "totalXp": {
+            "type": "number",
+            "description": "Total experience points"
+          },
+          "skills": {
+            "description": "Character skills",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponseDto"
+            }
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Character portrait URL or base64"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character gender"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Inspiration points"
+          },
+          "isDeceased": {
+            "type": "boolean",
+            "description": "Whether character is deceased"
+          },
+          "diedAt": {
+            "type": "string",
+            "description": "Date of death (ISO string)"
+          },
+          "deathLocation": {
+            "type": "string",
+            "description": "Location where character died"
+          },
+          "state": {
+            "type": "string",
+            "description": "Character state",
+            "enum": [
+              "draft",
+              "created"
+            ]
+          },
+          "inventory": {
+            "description": "Character inventory",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryItemDto"
+            }
+          },
+          "aptitudes": {
+            "description": "Character aptitudes (learned abilities)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AptitudeResponseDto"
+            }
+          },
+          "className": {
+            "type": "string",
+            "description": "Character class (guerrier, rogue, mage)",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
+          },
+          "level": {
+            "type": "number",
+            "description": "Character level (1-20)"
+          },
+          "raceId": {
+            "type": "string",
+            "description": "Race ID (humain, nain, elfe, orc)",
+            "enum": [
+              "humain",
+              "nain",
+              "elfe",
+              "orc"
+            ]
+          },
+          "stats": {
+            "description": "Tactical stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TacticalStats"
+              }
+            ]
+          },
+          "pa": {
+            "type": "number",
+            "description": "Current action points"
+          },
+          "paMax": {
+            "type": "number",
+            "description": "Maximum action points"
+          },
+          "pm": {
+            "type": "number",
+            "description": "Current movement points"
+          },
+          "pmMax": {
+            "type": "number",
+            "description": "Maximum movement points"
+          },
+          "talentPoints": {
+            "type": "number",
+            "description": "Unspent talent points"
+          },
+          "voies": {
+            "description": "Talent tree progression",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoieProgressDto"
+            }
+          }
+        },
+        "required": [
+          "characterId",
+          "portrait",
+          "isDeceased",
+          "state"
         ]
       },
       "CharacterResponseDto": {
@@ -2167,10 +2409,6 @@
               "$ref": "#/components/schemas/SkillResponseDto"
             }
           },
-          "world": {
-            "type": "string",
-            "description": "Game world (e.g., tactical, fantasy)"
-          },
           "portrait": {
             "type": "string",
             "description": "Character portrait URL or base64"
@@ -2210,16 +2448,21 @@
               "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
-          "spells": {
-            "description": "Character spells/aptitudes",
+          "aptitudes": {
+            "description": "Character aptitudes (learned abilities)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpellResponseDto"
+              "$ref": "#/components/schemas/AptitudeResponseDto"
             }
           },
           "className": {
             "type": "string",
-            "description": "Character class (guerrier, rogue, mage)"
+            "description": "Character class (guerrier, rogue, mage)",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
           },
           "level": {
             "type": "number",
@@ -2227,11 +2470,21 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)"
+            "description": "Race ID (humain, nain, elfe, orc)",
+            "enum": [
+              "humain",
+              "nain",
+              "elfe",
+              "orc"
+            ]
           },
           "stats": {
-            "type": "object",
-            "description": "Tactical stats (vigor, finesse, mind, survival)"
+            "description": "Tactical stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TacticalStats"
+              }
+            ]
           },
           "pa": {
             "type": "number",
@@ -2248,11 +2501,21 @@
           "pmMax": {
             "type": "number",
             "description": "Maximum movement points"
+          },
+          "talentPoints": {
+            "type": "number",
+            "description": "Unspent talent points"
+          },
+          "voies": {
+            "description": "Talent tree progression",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoieProgressDto"
+            }
           }
         },
         "required": [
           "characterId",
-          "world",
           "portrait",
           "isDeceased",
           "state"
@@ -2300,10 +2563,6 @@
               "$ref": "#/components/schemas/SkillResponseDto"
             }
           },
-          "world": {
-            "type": "string",
-            "description": "Game world (e.g., tactical, fantasy)"
-          },
           "portrait": {
             "type": "string",
             "description": "Character portrait URL or base64"
@@ -2343,16 +2602,21 @@
               "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
-          "spells": {
-            "description": "Character spells/aptitudes",
+          "aptitudes": {
+            "description": "Character aptitudes (learned abilities)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpellResponseDto"
+              "$ref": "#/components/schemas/AptitudeResponseDto"
             }
           },
           "className": {
             "type": "string",
-            "description": "Character class (guerrier, rogue, mage)"
+            "description": "Character class (guerrier, rogue, mage)",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
           },
           "level": {
             "type": "number",
@@ -2360,11 +2624,21 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)"
+            "description": "Race ID (humain, nain, elfe, orc)",
+            "enum": [
+              "humain",
+              "nain",
+              "elfe",
+              "orc"
+            ]
           },
           "stats": {
-            "type": "object",
-            "description": "Tactical stats (vigor, finesse, mind, survival)"
+            "description": "Tactical stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TacticalStats"
+              }
+            ]
           },
           "pa": {
             "type": "number",
@@ -2381,11 +2655,21 @@
           "pmMax": {
             "type": "number",
             "description": "Maximum movement points"
+          },
+          "talentPoints": {
+            "type": "number",
+            "description": "Unspent talent points"
+          },
+          "voies": {
+            "description": "Talent tree progression",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoieProgressDto"
+            }
           }
         },
         "required": [
           "characterId",
-          "world",
           "portrait",
           "isDeceased",
           "state"
@@ -2429,10 +2713,6 @@
               "$ref": "#/components/schemas/SkillResponseDto"
             }
           },
-          "world": {
-            "type": "string",
-            "description": "Game world (e.g., tactical, fantasy)"
-          },
           "portrait": {
             "type": "string",
             "description": "Character portrait URL or base64"
@@ -2460,16 +2740,21 @@
               "$ref": "#/components/schemas/InventoryItemDto"
             }
           },
-          "spells": {
-            "description": "Character spells/aptitudes",
+          "aptitudes": {
+            "description": "Character aptitudes (learned abilities)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpellResponseDto"
+              "$ref": "#/components/schemas/AptitudeResponseDto"
             }
           },
           "className": {
             "type": "string",
-            "description": "Character class (guerrier, rogue, mage)"
+            "description": "Character class (guerrier, rogue, mage)",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
           },
           "level": {
             "type": "number",
@@ -2477,11 +2762,21 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)"
+            "description": "Race ID (humain, nain, elfe, orc)",
+            "enum": [
+              "humain",
+              "nain",
+              "elfe",
+              "orc"
+            ]
           },
           "stats": {
-            "type": "object",
-            "description": "Tactical stats (vigor, finesse, mind, survival)"
+            "description": "Tactical stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TacticalStats"
+              }
+            ]
           },
           "pa": {
             "type": "number",
@@ -2498,6 +2793,17 @@
           "pmMax": {
             "type": "number",
             "description": "Maximum movement points"
+          },
+          "talentPoints": {
+            "type": "number",
+            "description": "Unspent talent points"
+          },
+          "voies": {
+            "description": "Talent tree progression",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoieProgressDto"
+            }
           }
         }
       },
@@ -2826,6 +3132,33 @@
           "combat_start"
         ]
       },
+      "CombatantStats": {
+        "type": "object",
+        "properties": {
+          "vigor": {
+            "type": "number",
+            "description": "Vigor stat"
+          },
+          "finesse": {
+            "type": "number",
+            "description": "Finesse stat"
+          },
+          "mind": {
+            "type": "number",
+            "description": "Mind stat"
+          },
+          "survival": {
+            "type": "number",
+            "description": "Survival stat"
+          }
+        },
+        "required": [
+          "vigor",
+          "finesse",
+          "mind",
+          "survival"
+        ]
+      },
       "CombatantDto": {
         "type": "object",
         "properties": {
@@ -2886,8 +3219,12 @@
             "description": "Which attribute scales damage (vigor, finesse, mind, survival)"
           },
           "stats": {
-            "type": "object",
-            "description": "Combat stats (vigor, finesse, mind, survival)"
+            "description": "Combat stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CombatantStats"
+              }
+            ]
           },
           "side": {
             "type": "string",
@@ -3744,6 +4081,34 @@
           "icon"
         ]
       },
+      "TraitEffectDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of effect",
+            "example": "PA_BONUS"
+          },
+          "value": {
+            "type": "number",
+            "description": "Numeric value of the effect",
+            "example": 1
+          },
+          "condition": {
+            "type": "string",
+            "description": "Optional condition for the effect",
+            "example": "turn_1"
+          },
+          "subType": {
+            "type": "string",
+            "description": "Optional sub-type (e.g., physical)"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
       "RaceBonusesDto": {
         "type": "object",
         "properties": {
@@ -3788,9 +4153,12 @@
             "example": "Polyvalent"
           },
           "traitEffect": {
-            "type": "string",
-            "description": "Trait effect description",
-            "example": "+1 à toutes les compétences"
+            "description": "Trait effect (structured)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TraitEffectDto"
+              }
+            ]
           },
           "bonuses": {
             "description": "Stat bonuses",
@@ -3819,37 +4187,6 @@
           "bonuses",
           "color",
           "icon"
-        ]
-      },
-      "SelectClassDto": {
-        "type": "object",
-        "properties": {
-          "className": {
-            "type": "string",
-            "description": "Class name to select",
-            "example": "guerrier",
-            "enum": [
-              "guerrier",
-              "rogue",
-              "mage"
-            ]
-          }
-        },
-        "required": [
-          "className"
-        ]
-      },
-      "SelectRaceDto": {
-        "type": "object",
-        "properties": {
-          "raceId": {
-            "type": "string",
-            "description": "Race ID to select",
-            "example": "humain"
-          }
-        },
-        "required": [
-          "raceId"
         ]
       },
       "UnlockRankDto": {

@@ -802,10 +802,6 @@ export interface components {
             /** @description Game instructions (for assistant messages) */
             instructions?: (components["schemas"]["RollInstructionMessageDto"] | components["schemas"]["HpInstructionMessageDto"] | components["schemas"]["XpInstructionMessageDto"] | components["schemas"]["SpellInstructionMessageDto"] | components["schemas"]["InventoryInstructionMessageDto"] | components["schemas"]["CombatStartInstructionMessageDto"])[];
         };
-        CreateCharacterBodyDto: {
-            /** @description Game world (e.g., dnd, vtm) */
-            world: string;
-        };
         RaceResponseDto: {
             /** @description Race ID */
             id?: string;
@@ -840,36 +836,140 @@ export interface components {
             /** @description Arbitrary item meta */
             meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
-        SpellMetaDto: {
-            /** @description Damage dice notation (e.g., "1d6") */
-            damageDice?: string;
-            /** @description Type of damage (fire, cold, etc.) */
-            damageType?: string;
-            /** @description Saving throw type (DEX, CON, etc.) */
-            saveType?: string;
+        AptitudeScalingDto: {
+            /** @description Stat used for scaling (vigor, finesse, mind, survival) */
+            attribute?: string;
+            /** @description Scaling divisor (e.g., 5 = +1 every 5 levels) */
+            scalingDivisor: number;
+        };
+        AptitudeResponseDto: {
+            /** @description Unique aptitude ID */
+            aptitudeId: string;
+            /** @description Display name */
+            name: string;
+            /** @description Mechanical description */
+            description: string;
+            /** @description Narrative description for AI */
+            descriptionForAi?: string;
+            /** @description Action points cost */
+            paCost: number;
+            /** @description Movement points cost */
+            pmCost?: number;
+            /** @description Cooldown in turns */
+            cooldown: number;
+            /** @description Target type (self, enemy, ally, zone, all_enemies, all_allies) */
+            targetType: string;
+            /** @description Range in tiles (1 = melee) */
+            range: number;
+            /** @description Area of effect radius in tiles (0 = single target) */
+            areaOfEffect?: number;
+            /** @description Category (attack, defense, support, movement, utility) */
+            category: string;
+            /** @description Base power value */
+            basePower?: number;
+            /** @description Scaling configuration */
+            scaling?: components["schemas"]["AptitudeScalingDto"];
+            /** @description Status effects applied */
+            appliesStatus?: string[];
+            /** @description Duration of applied status effects */
+            statusDuration?: number;
+            /** @description Class restriction (guerrier, rogue, mage) or undefined for universal */
+            classRestriction?: string;
+            /** @description Voie ID this aptitude belongs to */
+            voieId?: string;
+            /** @description Minimum rank required to unlock (1-5) */
+            rankRequired?: number;
+            /** @description Is this a starting aptitude? */
+            isStarting?: boolean;
+        };
+        TacticalStats: {
+            /** @description Vigor stat */
+            vigor: number;
+            /** @description Finesse stat */
+            finesse: number;
+            /** @description Mind stat */
+            mind: number;
+            /** @description Survival stat */
+            survival: number;
+        };
+        VoieProgressDto: {
+            /** @description Talent tree ID */
+            voieId: string;
+            /** @description Talent tree display name (e.g., 'Voie de l'Ombre') */
+            voieName: string;
+            /** @description Parent class name (guerrier, rogue, mage) */
+            className: string;
+            /** @description Current rank unlocked (0-5, where 0 = not started) */
+            currentRank: number;
+            /** @description Talent points required to unlock next rank */
+            requiredTalentPoints?: number;
+            /** @description IDs of aptitudes unlocked in this voie */
+            unlockedAptitudes?: string[];
+        };
+        DraftCharacterResponseDto: {
+            /** @description Unique character ID (UUID) */
+            characterId: string;
+            /** @description Character name */
+            name?: string;
+            /** @description Physical description of the character */
+            physicalDescription?: string;
+            /** @description Character race (new system) */
+            race?: components["schemas"]["RaceResponseDto"];
+            /** @description Current hit points */
+            hp?: number;
+            /** @description Maximum hit points */
+            hpMax?: number;
+            /** @description Total experience points */
+            totalXp?: number;
+            /** @description Character skills */
+            skills?: components["schemas"]["SkillResponseDto"][];
+            /** @description Character portrait URL or base64 */
+            portrait: string;
+            /** @description Character gender */
+            gender?: string;
+            /** @description Inspiration points */
+            inspirationPoints?: number;
+            /** @description Whether character is deceased */
+            isDeceased: boolean;
+            /** @description Date of death (ISO string) */
+            diedAt?: string;
+            /** @description Location where character died */
+            deathLocation?: string;
             /**
-             * @description Attack type
+             * @description Character state
              * @enum {string}
              */
-            attackType?: "melee" | "ranged" | "spell";
-            /** @description School of magic */
-            school?: string;
-            /** @description Area of effect description */
-            areaOfEffect?: string;
-            /** @description Scaling description */
-            scaling?: string;
-        };
-        SpellResponseDto: {
-            /** @description Canonical spell definition ID */
-            definitionId: string;
-            /** @description Spell name */
-            name: string;
-            /** @description Spell level */
-            level: number;
-            /** @description Spell description */
-            description?: string;
-            /** @description Spell metadata */
-            meta: components["schemas"]["SpellMetaDto"];
+            state: "draft" | "created";
+            /** @description Character inventory */
+            inventory?: components["schemas"]["InventoryItemDto"][];
+            /** @description Character aptitudes (learned abilities) */
+            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
+            /**
+             * @description Character class (guerrier, rogue, mage)
+             * @enum {string}
+             */
+            className?: "guerrier" | "rogue" | "mage";
+            /** @description Character level (1-20) */
+            level?: number;
+            /**
+             * @description Race ID (humain, nain, elfe, orc)
+             * @enum {string}
+             */
+            raceId?: "humain" | "nain" | "elfe" | "orc";
+            /** @description Tactical stats (vigor, finesse, mind, survival) */
+            stats?: components["schemas"]["TacticalStats"];
+            /** @description Current action points */
+            pa?: number;
+            /** @description Maximum action points */
+            paMax?: number;
+            /** @description Current movement points */
+            pm?: number;
+            /** @description Maximum movement points */
+            pmMax?: number;
+            /** @description Unspent talent points */
+            talentPoints?: number;
+            /** @description Talent tree progression */
+            voies?: components["schemas"]["VoieProgressDto"][];
         };
         CharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -888,8 +988,6 @@ export interface components {
             totalXp?: number;
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., tactical, fantasy) */
-            world: string;
             /** @description Character portrait URL or base64 */
             portrait: string;
             /** @description Character gender */
@@ -909,16 +1007,22 @@ export interface components {
             state: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells/aptitudes */
-            spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Character class (guerrier, rogue, mage) */
-            className?: string;
+            /** @description Character aptitudes (learned abilities) */
+            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
+            /**
+             * @description Character class (guerrier, rogue, mage)
+             * @enum {string}
+             */
+            className?: "guerrier" | "rogue" | "mage";
             /** @description Character level (1-20) */
             level?: number;
-            /** @description Race ID (humain, nain, elfe, orc) */
-            raceId?: string;
+            /**
+             * @description Race ID (humain, nain, elfe, orc)
+             * @enum {string}
+             */
+            raceId?: "humain" | "nain" | "elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
-            stats?: Record<string, never>;
+            stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
             pa?: number;
             /** @description Maximum action points */
@@ -927,6 +1031,10 @@ export interface components {
             pm?: number;
             /** @description Maximum movement points */
             pmMax?: number;
+            /** @description Unspent talent points */
+            talentPoints?: number;
+            /** @description Talent tree progression */
+            voies?: components["schemas"]["VoieProgressDto"][];
         };
         DeceasedCharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -945,8 +1053,6 @@ export interface components {
             totalXp?: number;
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., tactical, fantasy) */
-            world: string;
             /** @description Character portrait URL or base64 */
             portrait: string;
             /** @description Character gender */
@@ -966,16 +1072,22 @@ export interface components {
             state: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells/aptitudes */
-            spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Character class (guerrier, rogue, mage) */
-            className?: string;
+            /** @description Character aptitudes (learned abilities) */
+            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
+            /**
+             * @description Character class (guerrier, rogue, mage)
+             * @enum {string}
+             */
+            className?: "guerrier" | "rogue" | "mage";
             /** @description Character level (1-20) */
             level?: number;
-            /** @description Race ID (humain, nain, elfe, orc) */
-            raceId?: string;
+            /**
+             * @description Race ID (humain, nain, elfe, orc)
+             * @enum {string}
+             */
+            raceId?: "humain" | "nain" | "elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
-            stats?: Record<string, never>;
+            stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
             pa?: number;
             /** @description Maximum action points */
@@ -984,6 +1096,10 @@ export interface components {
             pm?: number;
             /** @description Maximum movement points */
             pmMax?: number;
+            /** @description Unspent talent points */
+            talentPoints?: number;
+            /** @description Talent tree progression */
+            voies?: components["schemas"]["VoieProgressDto"][];
         };
         UpdateCharacterRequestDto: {
             /** @description Character name */
@@ -1000,8 +1116,6 @@ export interface components {
             totalXp?: number;
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Game world (e.g., tactical, fantasy) */
-            world?: string;
             /** @description Character portrait URL or base64 */
             portrait?: string;
             /** @description Character gender */
@@ -1015,16 +1129,22 @@ export interface components {
             state?: "draft" | "created";
             /** @description Character inventory */
             inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character spells/aptitudes */
-            spells?: components["schemas"]["SpellResponseDto"][];
-            /** @description Character class (guerrier, rogue, mage) */
-            className?: string;
+            /** @description Character aptitudes (learned abilities) */
+            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
+            /**
+             * @description Character class (guerrier, rogue, mage)
+             * @enum {string}
+             */
+            className?: "guerrier" | "rogue" | "mage";
             /** @description Character level (1-20) */
             level?: number;
-            /** @description Race ID (humain, nain, elfe, orc) */
-            raceId?: string;
+            /**
+             * @description Race ID (humain, nain, elfe, orc)
+             * @enum {string}
+             */
+            raceId?: "humain" | "nain" | "elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
-            stats?: Record<string, never>;
+            stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
             pa?: number;
             /** @description Maximum action points */
@@ -1033,6 +1153,10 @@ export interface components {
             pm?: number;
             /** @description Maximum movement points */
             pmMax?: number;
+            /** @description Unspent talent points */
+            talentPoints?: number;
+            /** @description Talent tree progression */
+            voies?: components["schemas"]["VoieProgressDto"][];
         };
         KillCharacterBodyDto: {
             /** @description Location where character died */
@@ -1181,6 +1305,16 @@ export interface components {
             /** @description Array of enemies to initialize combat with */
             combat_start: components["schemas"]["CombatStartEntryDto"][];
         };
+        CombatantStats: {
+            /** @description Vigor stat */
+            vigor: number;
+            /** @description Finesse stat */
+            finesse: number;
+            /** @description Mind stat */
+            mind: number;
+            /** @description Survival stat */
+            survival: number;
+        };
         CombatantDto: {
             /** @description ID of the combatant (player character or enemy) */
             id: string;
@@ -1211,7 +1345,7 @@ export interface components {
             /** @description Which attribute scales damage (vigor, finesse, mind, survival) */
             scalingAttribute?: string;
             /** @description Combat stats (vigor, finesse, mind, survival) */
-            stats?: Record<string, never>;
+            stats?: components["schemas"]["CombatantStats"];
             /** @description Combat side (player or enemy) */
             side?: string;
             /** @description Grid position for tactical combat */
@@ -1599,6 +1733,25 @@ export interface components {
              */
             icon: string;
         };
+        TraitEffectDto: {
+            /**
+             * @description Type of effect
+             * @example PA_BONUS
+             */
+            type: string;
+            /**
+             * @description Numeric value of the effect
+             * @example 1
+             */
+            value: number;
+            /**
+             * @description Optional condition for the effect
+             * @example turn_1
+             */
+            condition?: string;
+            /** @description Optional sub-type (e.g., physical) */
+            subType?: string;
+        };
         RaceBonusesDto: {
             /**
              * @description Vigor bonus
@@ -1637,11 +1790,8 @@ export interface components {
              * @example Polyvalent
              */
             trait: string;
-            /**
-             * @description Trait effect description
-             * @example +1 à toutes les compétences
-             */
-            traitEffect: string;
+            /** @description Trait effect (structured) */
+            traitEffect: components["schemas"]["TraitEffectDto"];
             /** @description Stat bonuses */
             bonuses: components["schemas"]["RaceBonusesDto"];
             /**
@@ -1654,21 +1804,6 @@ export interface components {
              * @example 👤
              */
             icon: string;
-        };
-        SelectClassDto: {
-            /**
-             * @description Class name to select
-             * @example guerrier
-             * @enum {string}
-             */
-            className: "guerrier" | "rogue" | "mage";
-        };
-        SelectRaceDto: {
-            /**
-             * @description Race ID to select
-             * @example humain
-             */
-            raceId: string;
         };
         UnlockRankDto: {
             /**
@@ -1865,11 +2000,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCharacterBodyDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Character created successfully */
             201: {
@@ -1877,7 +2008,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
+                    "application/json": components["schemas"]["DraftCharacterResponseDto"];
                 };
             };
         };
@@ -2608,6 +2739,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
+                content?: never;
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ClassMetadataDto"][];
                 };
@@ -2643,18 +2780,16 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectClassDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Class selected and starter pack assigned */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
             /** @description Invalid class name */
             400: {
@@ -2681,18 +2816,16 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectRaceDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Race selected and bonuses applied */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
             /** @description Invalid race ID */
             400: {
@@ -2730,7 +2863,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
             };
             /** @description Not enough talent points or invalid rank */
             400: {

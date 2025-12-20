@@ -1,6 +1,5 @@
 import type {
   CharacterResponseDto,
-  CreateCharacterBodyDto,
   UpdateCharacterRequestDto,
   KillCharacterBodyDto,
   CreateInventoryItemDto,
@@ -26,8 +25,8 @@ export const characterKeys = {
 
 // Internal API functions (private - use useCharacter() hook)
 const characterApi = {
-  async create(body: CreateCharacterBodyDto): Promise<CharacterResponseDto> {
-    const response = await apiClient.POST("/api/characters", { body });
+  async create(): Promise<CharacterResponseDto> {
+    const response = await apiClient.POST("/api/characters");
     return getData(response);
   },
 
@@ -164,7 +163,7 @@ export function useCharacter(
 
   // Mutation: Create character
   const create = useMutation({
-    mutationFn: async (data: CreateCharacterBodyDto) => characterApi.create(data),
+    mutationFn: async () => characterApi.create(),
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: characterKeys.all });
       if (data.characterId) {

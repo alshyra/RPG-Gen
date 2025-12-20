@@ -1,13 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * Combat Stats for the new scaling system
  */
-export interface CombatantStats {
+export class CombatantStats {
+  @ApiProperty({ description: "Vigor stat" })
   vigor: number;
+
+  @ApiProperty({ description: "Finesse stat" })
   finesse: number;
+
+  @ApiProperty({ description: "Mind stat" })
   mind: number;
+
+  @ApiProperty({ description: "Survival stat" })
   survival: number;
 }
 
@@ -86,8 +94,13 @@ export class CombatantDto {
   @IsString()
   scalingAttribute?: "vigor" | "finesse" | "mind" | "survival";
 
-  @ApiPropertyOptional({ description: "Combat stats (vigor, finesse, mind, survival)" })
+  @ApiPropertyOptional({
+    description: "Combat stats (vigor, finesse, mind, survival)",
+    type: CombatantStats,
+  })
   @IsOptional()
+  @ValidateNested()
+  @Type(() => CombatantStats)
   stats?: CombatantStats;
 
   @ApiPropertyOptional({ description: "Combat side (player or enemy)" })

@@ -12,10 +12,17 @@ export type CharacterState = "draft" | "created";
 /**
  * Tactical system stats (Vigor, Finesse, Mind, Survival)
  */
-export interface TacticalStats {
+export class TacticalStats {
+  @ApiProperty({ description: "Vigor stat" })
   vigor: number;
+
+  @ApiProperty({ description: "Finesse stat" })
   finesse: number;
+
+  @ApiProperty({ description: "Mind stat" })
   mind: number;
+
+  @ApiProperty({ description: "Survival stat" })
   survival: number;
 }
 
@@ -91,16 +98,27 @@ export class BaseCharacterResponseDto {
 
   // === Tactical System Fields ===
 
-  @ApiPropertyOptional({ description: "Character class (guerrier, rogue, mage)" })
-  className?: string;
+  @ApiPropertyOptional({
+    description: "Character class (guerrier, rogue, mage)",
+    enum: ["guerrier", "rogue", "mage"],
+  })
+  className?: "guerrier" | "rogue" | "mage";
 
   @ApiPropertyOptional({ description: "Character level (1-20)" })
   level?: number;
 
-  @ApiPropertyOptional({ description: "Race ID (humain, nain, elfe, orc)" })
-  raceId?: string;
+  @ApiPropertyOptional({
+    description: "Race ID (humain, nain, elfe, dark_elfe, orc)",
+    enum: ["humain", "nain", "elfe", "dark_elfe", "orc"],
+  })
+  raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
 
-  @ApiPropertyOptional({ description: "Tactical stats (vigor, finesse, mind, survival)" })
+  @ApiPropertyOptional({
+    description: "Tactical stats (vigor, finesse, mind, survival)",
+    type: TacticalStats,
+  })
+  @ValidateNested()
+  @Type(() => TacticalStats)
   stats?: TacticalStats;
 
   @ApiPropertyOptional({ description: "Current action points" })

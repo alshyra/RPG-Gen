@@ -25,7 +25,6 @@
 
 <script setup lang="ts">
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import type { StatsResponseDto } from '@rpg-gen/shared';
 
 type StatKey = 'vigor' | 'finesse' | 'mind' | 'survival';
 
@@ -57,7 +56,7 @@ const stats = {
 const getStatValue = (key: string): number => {
   if (!currentCharacter?.value?.stats) return 0;
 
-  const stats: StatsResponseDto = currentCharacter?.value?.stats;
+  const stats = currentCharacter?.value?.stats;
   return stats[key as StatKey] ?? 0;
 };
 </script>

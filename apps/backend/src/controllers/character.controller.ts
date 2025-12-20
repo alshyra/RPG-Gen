@@ -26,8 +26,9 @@ import { CharacterService } from "../domain/character/character.service.js";
 import { CreateInventoryItemDto } from "../domain/character/dto/CreateInventoryItemDto.js";
 import { EquipInventoryDto } from "../domain/character/dto/EquipInventoryDto.js";
 import {
+  BaseCharacterResponseDto,
   CharacterResponseDto,
-  CreateCharacterBodyDto,
+  DraftCharacterResponseDto,
   DeceasedCharacterResponseDto,
   GrantInspirationBodyDto,
   InspirationResponseDto,
@@ -49,18 +50,17 @@ export class CharacterController {
 
   @Post()
   @ApiOperation({ summary: "Create a new character" })
-  @ApiBody({ type: CreateCharacterBodyDto })
   @ApiResponse({
     status: 201,
     description: "Character created successfully",
-    type: CharacterResponseDto,
+    type: DraftCharacterResponseDto,
   })
   async create(@Req() req: RPGRequest) {
     const { user } = req;
 
     const userId = user._id.toString();
     const character = await this.characterService.create(userId);
-    return this.characterService.toCharacterDto(character);
+    return new DraftCharacterResponseDto(character);
   }
 
   @Get()
