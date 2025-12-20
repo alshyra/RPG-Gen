@@ -69,9 +69,9 @@ export class ConversationService {
       * Survie: ${stats.survival}
     `;
 
-    if (character.spells && character.spells.length > 0) {
-      summary += `- Spells Known: ${character.spells
-        .map(s => `${s.name} (Lvl ${s.level})`)
+    if (character.aptitudes && character.aptitudes.length > 0) {
+      summary += `- Aptitudes Learned: ${character.aptitudes
+        .map(a => `${a.name}`)
         .join(", ")}\n`;
     }
 

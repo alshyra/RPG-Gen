@@ -1,7 +1,7 @@
 // class-definition.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
-import { TalentTree, TalentTreeSchema } from "./TalentTree.js";
+import { TalentTree } from "./TalentTree.js";
 
 @Schema({ timestamps: true })
 export class ClassDefinition {

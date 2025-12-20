@@ -1,0 +1,93 @@
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNumber, IsString, ValidateNested, IsArray, IsEnum } from "class-validator";
+import { Type } from "class-transformer";
+
+export type AptitudeTargetType = "self" | "enemy" | "ally" | "zone" | "all_enemies" | "all_allies";
+export type AptitudeCategory = "attack" | "defense" | "support" | "movement" | "utility";
+
+export class AptitudeScalingDto {
+  @ApiPropertyOptional({ description: "Stat used for scaling (vigor, finesse, mind, survival)" })
+  attribute?: "vigor" | "finesse" | "mind" | "survival";
+
+  @ApiProperty({ description: "Scaling divisor (e.g., 5 = +1 every 5 levels)" })
+  scalingDivisor: number = 5;
+}
+
+export class AptitudeResponseDto {
+  @ApiProperty({ description: "Unique aptitude ID" })
+  @IsString()
+  aptitudeId: string;
+
+  @ApiProperty({ description: "Display name" })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ description: "Mechanical description" })
+  @IsString()
+  description: string;
+
+  @ApiPropertyOptional({ description: "Narrative description for AI" })
+  @IsString()
+  descriptionForAi?: string;
+
+  @ApiProperty({ description: "Action points cost" })
+  @IsNumber()
+  paCost: number;
+
+  @ApiPropertyOptional({ description: "Movement points cost" })
+  @IsNumber()
+  pmCost?: number;
+
+  @ApiProperty({ description: "Cooldown in turns" })
+  @IsNumber()
+  cooldown: number;
+
+  @ApiProperty({ description: "Target type (self, enemy, ally, zone, all_enemies, all_allies)" })
+  @IsEnum(["self", "enemy", "ally", "zone", "all_enemies", "all_allies"])
+  targetType: AptitudeTargetType;
+
+  @ApiProperty({ description: "Range in tiles (1 = melee)" })
+  @IsNumber()
+  range: number;
+
+  @ApiPropertyOptional({ description: "Area of effect radius in tiles (0 = single target)" })
+  @IsNumber()
+  areaOfEffect?: number;
+
+  @ApiProperty({ description: "Category (attack, defense, support, movement, utility)" })
+  @IsEnum(["attack", "defense", "support", "movement", "utility"])
+  category: AptitudeCategory;
+
+  @ApiPropertyOptional({ description: "Base power value" })
+  @IsNumber()
+  basePower?: number;
+
+  @ApiPropertyOptional({ description: "Scaling configuration" })
+  @ValidateNested()
+  @Type(() => AptitudeScalingDto)
+  scaling?: AptitudeScalingDto;
+
+  @ApiPropertyOptional({ description: "Status effects applied" })
+  @IsArray()
+  @IsString({ each: true })
+  appliesStatus?: string[];
+
+  @ApiPropertyOptional({ description: "Duration of applied status effects" })
+  @IsNumber()
+  statusDuration?: number;
+
+  @ApiPropertyOptional({ description: "Class restriction (guerrier, rogue, mage) or undefined for universal" })
+  @IsString()
+  classRestriction?: string;
+
+  @ApiPropertyOptional({ description: "Voie ID this aptitude belongs to" })
+  @IsString()
+  voieId?: string;
+
+  @ApiPropertyOptional({ description: "Minimum rank required to unlock (1-5)" })
+  @IsNumber()
+  rankRequired?: number;
+
+  @ApiPropertyOptional({ description: "Is this a starting aptitude?" })
+  isStarting?: boolean;
+}

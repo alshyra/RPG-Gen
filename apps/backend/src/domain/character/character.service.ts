@@ -105,30 +105,7 @@ export class CharacterService {
     if (updates.paMax !== undefined) updateDoc.paMax = updates.paMax;
     if (updates.pm !== undefined) updateDoc.pm = updates.pm;
     if (updates.pmMax !== undefined) updateDoc.pmMax = updates.pmMax;
-    if (updates.spells !== undefined) {
-      // Strict validation: spells must be an array of fully-formed spell objects
-      if (!Array.isArray(updates.spells)) throw new BadRequestException("spells must be an array");
-
-      // Validate all entries using functional style to comply with lint rules (avoid 'for')
-      const hasInvalid = updates.spells.some(
-        s =>
-          !s ||
-          typeof s.definitionId !== "string" ||
-          typeof s.name !== "string" ||
-          typeof s.level !== "number" ||
-          s.meta === undefined ||
-          s.meta === null ||
-          typeof s.meta !== "object",
-      );
-
-      if (hasInvalid) {
-        throw new BadRequestException(
-          "spells entries must include definitionId:string, name:string, level:number and meta:object",
-        );
-      }
-
-      updateDoc.spells = updates.spells;
-    }
+    if (updates.talentPoints !== undefined) updateDoc.talentPoints = updates.talentPoints;
 
     const character = await this.characterModel.findOneAndUpdate(
       {

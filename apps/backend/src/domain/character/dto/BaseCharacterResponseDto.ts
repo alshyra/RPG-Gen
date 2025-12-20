@@ -4,7 +4,8 @@ import { Type } from "class-transformer";
 import { RaceResponseDto } from "./RaceResponseDto.js";
 import { SkillResponseDto } from "./SkillResponseDto.js";
 import { InventoryItemDto } from "./InventoryItemDto.js";
-import { SpellResponseDto } from "./SpellResponseDto.js";
+import { AptitudeResponseDto } from "./AptitudeResponseDto.js";
+import { VoieProgressDto } from "./VoieProgressDto.js";
 
 export type CharacterState = "draft" | "created";
 
@@ -80,13 +81,13 @@ export class BaseCharacterResponseDto {
   inventory?: InventoryItemDto[];
 
   @ApiPropertyOptional({
-    description: "Character spells/aptitudes",
-    type: [SpellResponseDto],
+    description: "Character aptitudes (learned abilities)",
+    type: [AptitudeResponseDto],
   })
   @ValidateNested({ each: true })
-  @Type(() => SpellResponseDto)
+  @Type(() => AptitudeResponseDto)
   @IsArray()
-  spells?: SpellResponseDto[];
+  aptitudes?: AptitudeResponseDto[];
 
   // === Tactical System Fields ===
 
@@ -113,4 +114,16 @@ export class BaseCharacterResponseDto {
 
   @ApiPropertyOptional({ description: "Maximum movement points" })
   pmMax?: number;
+
+  @ApiPropertyOptional({ description: "Unspent talent points" })
+  talentPoints?: number;
+
+  @ApiPropertyOptional({
+    description: "Talent tree progression",
+    type: [VoieProgressDto],
+  })
+  @ValidateNested({ each: true })
+  @Type(() => VoieProgressDto)
+  @IsArray()
+  voies?: VoieProgressDto[];
 }
