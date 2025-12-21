@@ -18,6 +18,7 @@ import {
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
 import { CharacterService } from "../../domain/character/character.service.js";
+import { toCharacterResponse } from "./character-response.util.js";
 import {
   CharacterResponseDto,
   GrantInspirationBodyDto,
@@ -75,7 +76,7 @@ export class CharacterInspirationController {
     return {
       ok: true,
       inspirationPoints: updated.inspirationPoints,
-      character: new CharacterResponseDto(updated),
+      character: toCharacterResponse(updated),
     };
   }
 
@@ -111,7 +112,7 @@ export class CharacterInspirationController {
     return {
       ok: true,
       inspirationPoints: updated.inspirationPoints,
-      character: new CharacterResponseDto(updated),
+      character: toCharacterResponse(updated),
     };
   }
 }

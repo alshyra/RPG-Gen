@@ -39,15 +39,17 @@ test.describe("Navigation", () => {
     // Prepare a character
     await prepareE2EDb({ count: 1 });
 
-    // Go to home and get first character
+    // Go to home and wait for page to load
     await page.goto("/home");
-    await page.waitForResponse("**/api/characters");
+    await page.waitForLoadState("networkidle");
 
-    const resumeButton = page.getByRole("button", { name: /Reprendre/i }).first();
-    const resumeCount = await resumeButton.count();
+    // Look for character cards (they have clickable area but no explicit "Reprendre" button)
+    const characterCards = page.locator('.bg-slate-800\\/50.rounded-lg[role="button"]');
+    const cardCount = await characterCards.count();
 
-    if (resumeCount > 0) {
-      await resumeButton.click();
+    if (cardCount > 0) {
+      // Click first character card to resume
+      await characterCards.first().click();
 
       // Wait for navigation
       await page.waitForURL(/\/(game|character)\/[^/]+/);

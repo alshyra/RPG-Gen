@@ -238,8 +238,10 @@ const finishCreation = async () => {
   loadingTitle.value = "Invocation de votre avatar...";
   loadingSubtitle.value = "Génération de l'image et préparation du monde de jeu...";
 
-  await saveFinalCharacter();
+  // Generate avatar BEFORE finalizing character state
+  // CharacterResponseDto requires a portrait, so we must set it first
   await generateAndApplyAvatar();
+  await saveFinalCharacter();
   await initConversationForCharacter();
   await navigateToGame();
 

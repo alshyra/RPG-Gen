@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useAvailableRaces, useSelectRace } from "@rpg-gen/api-client";
+import { useAvailableRaces, useSelectRace, useCharacter } from "@rpg-gen/api-client";
 import { RaceMetadataDto } from "@rpg-gen/shared";
 import { UiLoader } from "@rpg-gen/ui";
 import { computed, ref, watch } from "vue";
@@ -120,6 +120,7 @@ const characterId = useCharacterId();
 // API calls
 const { data: races, isLoading, error } = useAvailableRaces();
 const selectRaceMutation = useSelectRace(characterId);
+const { character } = useCharacter(characterId);
 
 // Local state
 const selectedRace = ref<string | null>(null);
@@ -148,6 +149,8 @@ async function selectRace(raceId: string) {
   // Call API to select race
   try {
     await selectRaceMutation.mutateAsync(raceId);
+    // Refetch character data explicitly to ensure UI updates immediately
+    await character.refetch();
   } catch (e) {
     console.error("Failed to select race:", e);
     // Reset selection on error

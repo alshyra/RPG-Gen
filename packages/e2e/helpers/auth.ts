@@ -26,7 +26,12 @@ function generateMockToken(): string {
  * Sets token in localStorage so app thinks user is authenticated
  */
 export async function mockAuthentication(page: Page) {
-  await page.goto("http://localhost:5173/");
+  // Use the page's current baseURL instead of hardcoded localhost:5173
+  const baseURL = page.context().browser()?.browserType().name() === 'chromium' 
+    ? (process.env.CI ? "http://localhost" : "http://localhost:5173")
+    : "http://localhost:5173";
+    
+  await page.goto(baseURL);
 
   const mockToken = generateMockToken();
 

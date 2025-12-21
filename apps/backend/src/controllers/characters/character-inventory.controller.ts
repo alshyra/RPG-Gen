@@ -21,6 +21,7 @@ import type { RPGRequest } from "../../global.types.js";
 import { CharacterService } from "../../domain/character/character.service.js";
 import { CreateInventoryItemDto } from "../../domain/character/dto/CreateInventoryItemDto.js";
 import { EquipInventoryDto } from "../../domain/character/dto/EquipInventoryDto.js";
+import { toCharacterResponse } from "./character-response.util.js";
 import {
   CharacterResponseDto,
   RemoveInventoryBodyDto,
@@ -57,7 +58,7 @@ export class CharacterInventoryController {
     const userId = user._id.toString();
 
     const character = await this.characterService.addInventoryItem(userId, characterId, item);
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Post("equip")
@@ -80,7 +81,7 @@ export class CharacterInventoryController {
       characterId,
       body.definitionId,
     );
-    return new CharacterResponseDto(character);
+    return character;
   }
 
   @Patch(":itemId")
@@ -110,7 +111,7 @@ export class CharacterInventoryController {
       itemId,
       updates,
     );
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Delete(":itemId")
@@ -140,6 +141,6 @@ export class CharacterInventoryController {
       itemId,
       body.qty,
     );
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 }

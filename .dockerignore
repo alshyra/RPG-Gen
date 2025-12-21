@@ -5,11 +5,13 @@
 !apps/backend/chat.prompt.txt
 !apps/backend/src/**
 !apps/backend/scripts/**
+!apps/backend/config/**
 !apps/backend/package.json
 !apps/backend/package-lock.json
 !apps/backend/tsconfig*.json
 !packages/shared/**
 !packages/ui/**
+!packages/api-client/**
 !packages/combat-engine/**
 !apps/frontend/src/**
 !apps/frontend/public/**
@@ -18,5 +20,6 @@
 !apps/frontend/tsconfig*.json
 !apps/frontend/vite.config.ts
 !apps/frontend/tailwind.config.ts
+!apps/frontend/config/**
 !apps/frontend/nginx
 !apps/frontend/index.html

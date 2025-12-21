@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useAvailableClasses, useSelectClass, type ClassMetadata } from "@rpg-gen/api-client";
+import { useAvailableClasses, useSelectClass, useCharacter, type ClassMetadata } from "@rpg-gen/api-client";
 import { UiLoader } from "@rpg-gen/ui";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCharacterId } from "@/composables/useCharacterId";
@@ -102,6 +102,7 @@ const characterId = useCharacterId();
 // API calls
 const { data: classes, isLoading, error } = useAvailableClasses();
 const selectClassMutation = useSelectClass(characterId);
+const { character } = useCharacter(characterId);
 
 // Local state
 const selectedClass = ref<string | null>(null);
@@ -130,6 +131,8 @@ async function selectClass(classId: string) {
   // Call API to select class and assign starter pack
   try {
     await selectClassMutation.mutateAsync(classId);
+    // Refetch character data explicitly to ensure UI updates immediately
+    await character.refetch();
   } catch (e) {
     console.error("Failed to select class:", e);
     // Reset selection on error

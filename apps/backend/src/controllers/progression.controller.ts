@@ -9,6 +9,7 @@ import {
 } from "../domain/progression/dto/index.js";
 import { ProgressionService } from "../domain/progression/progression.service.js";
 import { type RPGRequest } from "../global.types.js";
+import { toCharacterResponse } from "./characters/character-response.util.js";
 
 @ApiTags("progression")
 @Controller("progression")
@@ -48,7 +49,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectClass(userId, characterId, className);
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Post(":characterId/select-race")
@@ -65,7 +66,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectRace(userId, characterId, raceId);
-    return new DraftCharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Post(":characterId/unlock-rank")
@@ -84,6 +85,6 @@ export class ProgressionController {
       dto.voieId,
       dto.rank,
     );
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 }

@@ -21,6 +21,7 @@ import {
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
 import { CharacterService } from "../../domain/character/character.service.js";
+import { toCharacterResponse } from "./character-response.util.js";
 import {
   BaseCharacterResponseDto,
   CharacterResponseDto,
@@ -102,7 +103,7 @@ export class CharacterController {
     const characters = await this.characterService.findByUserId(userId);
     return characters
       .filter(c => c.state === 'created')
-      .map(c => new CharacterResponseDto(c));
+      .map(c => toCharacterResponse(c));
   }
 
   @Get(":characterId")
@@ -123,10 +124,7 @@ export class CharacterController {
     const character = await this.characterService.findByCharacterId(userId, characterId);
     
     this.logger.log('character state', character.state)
-    if (character.state === 'draft') {
-      return new DraftCharacterResponseDto(character);
-    }
-    return new CharacterResponseDto(character);
+    return character;
   }
 
   @Put(":characterId")
@@ -158,10 +156,7 @@ export class CharacterController {
 
     const character = await this.characterService.update(userId, characterId, updates);
     this.logger.log('character state', character.state)
-    if (character.state == 'draft') {
-      return new DraftCharacterResponseDto(character);
-    }
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Delete(":characterId")
@@ -208,7 +203,7 @@ export class CharacterController {
       characterId,
       body.deathLocation,
     );
-    return new CharacterResponseDto(character);
+    return toCharacterResponse(character);
   }
 
   @Get("deceased")
