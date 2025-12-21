@@ -13,24 +13,27 @@ const isValidRaceId = (value: unknown): value is 'humain' | 'nain' | 'elfe' | 'd
 
 /**
  * DTO for characters in draft state
- * Draft characters are newly created and have minimal required fields
+ * Draft characters are newly created and have minimal required fields.
+ * Portrait and raceId are set in subsequent steps.
  */
 export class DraftCharacterResponseDto extends BaseCharacterResponseDto {
   constructor(init?: Partial<DraftCharacterResponseDto> | CharacterDocument) {
     if (!init) throw new InternalServerErrorException("DraftCharacterResponseDto initialized without data");
     if (!init.characterId) throw new InternalServerErrorException("DraftCharacterResponseDto: missing required field 'characterId'");
-    if (!init.portrait) throw new InternalServerErrorException("DraftCharacterResponseDto: missing required field 'portrait'");
     if (init.state !== "draft") throw new InternalServerErrorException("DraftCharacterResponseDto: state must be 'draft'");
-    if(!init.raceId || !isValidRaceId(init.raceId)) throw new InternalServerErrorException("DraftCharacterResponseDto: missing or invalid required field 'raceId'");
-    if (init.className && !isValidClassName(init.className)) {
-      throw new InternalServerErrorException(`DraftCharacterResponseDto: invalid className '${init.className}'`);
-    }
-    super();
+
+    super(init);
     this.characterId = init.characterId;
     this.state = init.state;
-    this.portrait = init.portrait;
+    if (init.portrait) {
+      this.portrait = init.portrait;
+    } 
     this.isDeceased = false;
     this.totalXp = init.totalXp || 0;
+    this.state = 'draft';
+    this.isDeceased = false;
+    this.inventory = [];
+    this.stats = init.stats;
     this.inventory = init.inventory || [];
     this.stats = init.stats;
     
@@ -43,7 +46,10 @@ export class DraftCharacterResponseDto extends BaseCharacterResponseDto {
     this.physicalDescription = init.physicalDescription;
     this.className = init.className && isValidClassName(init.className) ? init.className : undefined;
     this.level = init.level;
-    this.raceId = init.raceId;
+    if(init.raceId) {
+      if(!isValidRaceId(init.raceId)) throw new InternalServerErrorException("DraftCharacterResponseDto: state must be 'draft'");
+      this.raceId = init.raceId;
+    }
     this.pa = init.pa;
     this.paMax = init.paMax;
     this.pm = init.pm;

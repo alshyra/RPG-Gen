@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "composite": true,
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -22,5 +23,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "types": ["ava"]
-  }
+  },
+  "include": ["src/**/*.ts","src/**/*.json","config/*.json", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

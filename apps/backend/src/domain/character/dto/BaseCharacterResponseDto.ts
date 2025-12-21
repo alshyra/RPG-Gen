@@ -6,6 +6,17 @@ import { SkillResponseDto } from "./SkillResponseDto.js";
 import { InventoryItemDto } from "./InventoryItemDto.js";
 import { AptitudeResponseDto } from "./AptitudeResponseDto.js";
 import { VoieProgressDto } from "./VoieProgressDto.js";
+import { CharacterDocument } from "../../../infra/mongo/index.js";
+import { InternalServerErrorException } from "@nestjs/common";
+
+// Type guards for enum values
+const isValidClassName = (value: unknown): value is 'guerrier' | 'rogue' | 'mage' => {
+  return ['guerrier', 'rogue', 'mage'].includes(value as string);
+};
+
+const isValidRaceId = (value: unknown): value is 'humain' | 'nain' | 'elfe' | 'dark_elfe' | 'orc' => {
+  return ['humain', 'nain', 'elfe', 'dark_elfe', 'orc'].includes(value as string);
+};
 
 export type CharacterState = "draft" | "created";
 
@@ -58,7 +69,7 @@ export class BaseCharacterResponseDto {
   skills?: SkillResponseDto[];
 
   @ApiProperty({ description: "Character portrait URL or base64" })
-  portrait: string;
+  portrait?: string;
 
   @ApiPropertyOptional({ description: "Character gender" })
   gender?: string;
@@ -67,7 +78,7 @@ export class BaseCharacterResponseDto {
   inspirationPoints?: number;
 
   @ApiProperty({ description: "Whether character is deceased" })
-  isDeceased: boolean;
+  isDeceased?: boolean;
 
   @ApiPropertyOptional({ description: "Date of death (ISO string)" })
   diedAt?: string;
@@ -144,4 +155,44 @@ export class BaseCharacterResponseDto {
   @Type(() => VoieProgressDto)
   @IsArray()
   voies?: VoieProgressDto[];
+  constructor(character: Partial<BaseCharacterResponseDto> | CharacterDocument) {
+    if (!character) throw new InternalServerErrorException("CharacterResponseDto initialized without data");
+    if (!character.characterId) throw new InternalServerErrorException("CharacterResponseDto initialized without characterId")
+    
+    this.characterId = character.characterId;
+    this.name = character.name;
+    this.hp = character.hp;
+    this.hpMax = character.hpMax;
+    this.totalXp = character.totalXp;
+    
+    if (character.portrait) {
+      this.portrait = character.portrait;
+    }
+    if (character.state) {
+      this.state = character.state as CharacterState;
+    }
+    
+    this.gender = character.gender;
+    this.inspirationPoints = character.inspirationPoints;
+    this.isDeceased = character.isDeceased || false;
+    this.inventory = character.inventory;
+    this.diedAt = typeof character.diedAt == 'string' ? character.diedAt : character.diedAt?.toISOString();
+    this.deathLocation = character.deathLocation;
+    this.physicalDescription = character.physicalDescription;
+    // Tactical system fields - validate enum values
+    if (character.className && !isValidClassName(character.className)) {
+      throw new InternalServerErrorException(`Invalid className: ${character.className}`);
+    }
+    if (character.raceId && !isValidRaceId(character.raceId)) {
+      throw new InternalServerErrorException(`Invalid raceId: ${character.raceId}`);
+    }
+    this.className = character.className && isValidClassName(character.className) ? character.className : undefined;
+    this.level = character.level;
+    this.raceId = character.raceId && isValidRaceId(character.raceId) ? character.raceId : undefined;
+    this.stats = character.stats;
+    this.pa = character.pa;
+    this.paMax = character.paMax;
+    this.pm = character.pm;
+    this.pmMax = character.pmMax;
+  }
 }

@@ -18,10 +18,10 @@ import {
 export class CharacterService {
   private readonly logger = new Logger(CharacterService.name);
   private readonly DEFAULT_BASE_STATS = {
-    vigor: 1,
-    finesse: 1,
-    mind: 1,
-    survival: 1,
+    vigor: 0,
+    finesse: 0,
+    mind: 0,
+    survival: 0,
   };
 
   constructor(

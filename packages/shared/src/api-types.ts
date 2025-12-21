@@ -952,10 +952,10 @@ export interface components {
             /** @description Character level (1-20) */
             level?: number;
             /**
-             * @description Race ID (humain, nain, elfe, orc)
+             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
              * @enum {string}
              */
-            raceId?: "humain" | "nain" | "elfe" | "orc";
+            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
             stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
@@ -1017,10 +1017,10 @@ export interface components {
             /** @description Character level (1-20) */
             level?: number;
             /**
-             * @description Race ID (humain, nain, elfe, orc)
+             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
              * @enum {string}
              */
-            raceId?: "humain" | "nain" | "elfe" | "orc";
+            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
             stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
@@ -1082,10 +1082,10 @@ export interface components {
             /** @description Character level (1-20) */
             level?: number;
             /**
-             * @description Race ID (humain, nain, elfe, orc)
+             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
              * @enum {string}
              */
-            raceId?: "humain" | "nain" | "elfe" | "orc";
+            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
             stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */
@@ -1139,10 +1139,10 @@ export interface components {
             /** @description Character level (1-20) */
             level?: number;
             /**
-             * @description Race ID (humain, nain, elfe, orc)
+             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
              * @enum {string}
              */
-            raceId?: "humain" | "nain" | "elfe" | "orc";
+            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
             /** @description Tactical stats (vigor, finesse, mind, survival) */
             stats?: components["schemas"]["TacticalStats"];
             /** @description Current action points */

@@ -2,7 +2,11 @@ import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ItemDefinition, ItemDefinitionSchema } from "../infra/mongo/item/ItemDefinition.js";
 import { ItemDefinitionService } from "../domain/item-definition/item-definition.service.js";
-import { CharacterController } from "../controllers/character.controller.js";
+import {
+  CharacterController,
+  CharacterInventoryController,
+  CharacterInspirationController,
+} from "../controllers/characters/index.js";
 import { CharacterService } from "../domain/character/character.service.js";
 import { Character, CharacterSchema } from "../infra/mongo/index.js";
 
@@ -19,7 +23,11 @@ import { Character, CharacterSchema } from "../infra/mongo/index.js";
       },
     ]),
   ],
-  controllers: [CharacterController],
+  controllers: [
+    CharacterController,
+    CharacterInventoryController,
+    CharacterInspirationController,
+  ],
   providers: [CharacterService, ItemDefinitionService ],
   exports: [CharacterService, ItemDefinitionService],
 })

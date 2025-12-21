@@ -2316,11 +2316,12 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)",
+            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
             "enum": [
               "humain",
               "nain",
               "elfe",
+              "dark_elfe",
               "orc"
             ]
           },
@@ -2470,11 +2471,12 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)",
+            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
             "enum": [
               "humain",
               "nain",
               "elfe",
+              "dark_elfe",
               "orc"
             ]
           },
@@ -2624,11 +2626,12 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)",
+            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
             "enum": [
               "humain",
               "nain",
               "elfe",
+              "dark_elfe",
               "orc"
             ]
           },
@@ -2762,11 +2765,12 @@
           },
           "raceId": {
             "type": "string",
-            "description": "Race ID (humain, nain, elfe, orc)",
+            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
             "enum": [
               "humain",
               "nain",
               "elfe",
+              "dark_elfe",
               "orc"
             ]
           },
