@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 flex flex-col justify-between min-h-[50vh] mt-28">
+  <div class="p-6 flex flex-col justify-between min-h-[50vh]">
     <section class="text-center w-full mx-auto">
       <p class="text-slate-300 max-w-2xl mx-auto mb-6">
         Un moteur d'aventure assisté par Gemini — génère scènes, PNJ, et images. Choisis ton univers

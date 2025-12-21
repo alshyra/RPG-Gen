@@ -1,15 +1,12 @@
 <template>
   <div>
     <div class="font-bold text-sm text-slate-300">Statistiques</div>
-    <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+    <div class="mt-2 grid grid-cols-4 gap-2 text-xs">
       <div
         v-for="(stat, key) in stats"
         :key="key"
         class="text-center"
       >
-        <div class="text-slate-400">
-          {{ stat.short }}
-        </div>
         <div :class="['font-bold', stat.color]">
           <span>
             {{ getStatValue(key) }}
