@@ -4,7 +4,8 @@
     "typescript/no-unused-vars": "warn",
     "unicorn/no-for-loop": "error",
     "unicorn/prefer-array-flat-map": "error",
-    "unicorn/prefer-array-some": "error"
+    "unicorn/prefer-array-some": "error",
+    "eslint/max-classes-per-file": ["error", 1]
   },
   "env": {
     "browser": true,

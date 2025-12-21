@@ -22,14 +22,15 @@ export interface TestAppContext {
 /**
  * Create a test application with in-memory MongoDB.
  * @param imports - NestJS modules to import (e.g., CombatModule)
- * @param overrides - Optional provider overrides for mocking services
+ * @param overrides - Optional provider overrides for mocking services (support both useValue and useClass)
  */
 export async function createTestApp(
   imports: Parameters<typeof Test.createTestingModule>[0]["imports"],
-  overrides?: {
+  overrides?: Array<{
     provide: unknown;
-    useValue: unknown;
-  }[],
+    useValue?: unknown;
+    useClass?: unknown;
+  }>,
 ): Promise<TestAppContext> {
   // Start in-memory MongoDB
   // Use a unique download/cache directory per test run to avoid lockfile collisions
@@ -46,10 +47,14 @@ export async function createTestApp(
     imports: [MongooseModule.forRoot(mongoUri), ...(imports ?? [])],
   });
 
-  // Apply provider overrides (e.g., mock DiceService)
+  // Apply provider overrides (e.g., mock DiceService or JWT guard)
   if (overrides) {
     overrides.forEach(override => {
-      moduleBuilder = moduleBuilder.overrideProvider(override.provide).useValue(override.useValue);
+      if (override.useClass) {
+        moduleBuilder = moduleBuilder.overrideProvider(override.provide).useClass(override.useClass);
+      } else if (override.useValue !== undefined) {
+        moduleBuilder = moduleBuilder.overrideProvider(override.provide).useValue(override.useValue);
+      }
     });
   }
 

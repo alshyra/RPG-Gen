@@ -68,7 +68,7 @@ export class BaseCharacterResponseDto {
   })
   skills?: SkillResponseDto[];
 
-  @ApiProperty({ description: "Character portrait URL or base64" })
+  @ApiPropertyOptional({ description: "Character portrait URL or base64" })
   portrait?: string;
 
   @ApiPropertyOptional({ description: "Character gender" })

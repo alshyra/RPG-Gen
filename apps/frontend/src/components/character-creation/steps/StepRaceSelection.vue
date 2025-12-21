@@ -48,7 +48,7 @@
         
         <!-- Trait effect -->
         <p class="text-xs text-slate-400 mb-3">
-          {{ race.traitEffect }}
+          {{ race.descriptionForAi }}
         </p>
 
         <!-- Stat bonuses -->

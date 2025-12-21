@@ -121,7 +121,8 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
-    // Return appropriate DTO based on character state
+    
+    this.logger.log('character state', character.state)
     if (character.state === 'draft') {
       return new DraftCharacterResponseDto(character);
     }

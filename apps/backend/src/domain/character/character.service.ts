@@ -1,18 +1,19 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
+import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
 import { ItemDefinition } from "../../infra/mongo/item/ItemDefinition.js";
+import {
+  calculateDamage,
+  calculateHealing,
+  getComputedStats as computeStats,
+  type ComputedCharacterStats,
+} from "../combat/scaling.util.js";
 import { ItemDefinitionService } from "../item-definition/item-definition.service.js";
+import { BaseCharacterResponseDto } from "./dto/BaseCharacterResponseDto.js";
 import { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
 import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
-import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
-import { 
-  getComputedStats as computeStats, 
-  type ComputedCharacterStats,
-  calculateDamage,
-  calculateHealing,
-} from "../combat/scaling.util.js";
 
 @Injectable()
 export class CharacterService {
@@ -369,8 +370,8 @@ export class CharacterService {
   }
 
   // Convert MongoDB document to frontend CharacterDto format
-  toCharacterDto(doc: CharacterDocument): CharacterResponseDto {
-    return new CharacterResponseDto(doc);
+  toCharacterDto(doc: CharacterDocument): BaseCharacterResponseDto {
+    return new BaseCharacterResponseDto(doc);
   }
 
   /**

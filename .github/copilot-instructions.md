@@ -13,6 +13,8 @@ Core rules
 - Keep PRs atomic: one feature/fix per PR, include motivation, files touched and tests added/updated.
 - No unnecessary comments: remove dead code, consolidate duplicates, and refactor into shared utilities.
 
+- **One class per file**: Each TypeScript class/DTO must be in its own file. Helper classes, nested types, or utility classes (e.g., used only internally by one DTO) may share a file, but primary exported classes must be isolated. This improves organization, testability, and makes imports/exports explicit.
+
 - Controllers must remain strict and explicit about request shapes. Do NOT try to accept multiple payload shapes in a controller method (e.g. both `expr` and `dices`). Validation/normalization belongs to DTOs, pipes, middleware, or higher-level adapters (e.g. the Gemini adapter). Add tests that assert strict behavior.
 
 - Avoid `any`: Do not use the `any` type in production code. Prefer concrete types, DTOs or interfaces from `packages/shared` (generated `ItemDto`, `CharacterDto`, etc.). In tests or quick prototypes you may use `any` if absolutely necessary.

@@ -1,32 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-
-class CharacterStatsDto {
-  @ApiProperty({ description: "Vigor stat", example: 3 })
-  vigor: number;
-
-  @ApiProperty({ description: "Finesse stat", example: 1 })
-  finesse: number;
-
-  @ApiProperty({ description: "Mind stat", example: 0 })
-  mind: number;
-
-  @ApiProperty({ description: "Survival stat", example: 2 })
-  survival: number;
-}
-
-class ClassBaseStatsDto {
-  @ApiProperty({ description: "Base HP", example: 12 })
-  hp: number;
-
-  @ApiProperty({ description: "Base PA (action points)", example: 6 })
-  pa: number;
-
-  @ApiProperty({ description: "Base PM (movement points)", example: 4 })
-  pm: number;
-
-  @ApiProperty({ description: "Base character stats", type: CharacterStatsDto })
-  stats: CharacterStatsDto;
-}
+import { CharacterStatsDto } from "./CharacterStatsDto.js";
+import { ClassBaseStatsDto } from "./ClassBaseStatsDto.js";
 
 export class ClassMetadataDto {
   @ApiProperty({ description: "Class ID", example: "guerrier" })
