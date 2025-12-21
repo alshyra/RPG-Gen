@@ -21,7 +21,8 @@ interface ConsumableMetaWithHeal {
 
 function isConsumableWithHeal(meta: unknown): meta is ConsumableMetaWithHeal {
   if (!meta || typeof meta !== "object") return false;
-  return (meta as Record<string, unknown>).type === "consumable";
+  const obj = meta as Record<string, unknown>;
+  return obj.type === "consumable";
 }
 
 export interface UseItemResult {

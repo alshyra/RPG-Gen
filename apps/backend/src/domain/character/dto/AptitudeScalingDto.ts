@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsNumber, IsOptional } from "class-validator";
-import { StatAttribute } from "./StatAttribute.js";
+import { type StatAttribute } from "./StatAttribute.js";
 
 export class AptitudeScalingDto {
   @ApiPropertyOptional({ description: "Stat used for scaling (vigor, finesse, mind, survival)" })

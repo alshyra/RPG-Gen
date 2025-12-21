@@ -3,6 +3,11 @@ import { ClassDefinitionService } from "../class-definition/class-definition.ser
 import { ClassDefinition } from "../../infra/mongo/index.js";
 import { ClassDefinitionResponseDto, TalentTreeDto } from "./dto/index.js";
 
+// Type guard for tree objects
+const isTalentTree = (value: unknown): value is { name: string; ranks?: Array<{ rank: number; aptitudeId: string; pointCost: number }> } => {
+  return typeof value === "object" && value !== null && typeof (value as Record<string, unknown>).name === "string";
+};
+
 /**
  * Service for the new simplified Talent Tree system.
  * Replaces the old D&D-based class progression.
@@ -47,11 +52,13 @@ export class ClassesService {
       });
     } else if (typeof trees === "object") {
       Object.entries(trees).forEach(([key, tree]) => {
-        voies.push({
-          id: key,
-          name: (tree as { name: string }).name,
-          ranks: (tree as { ranks: Array<{ rank: number; aptitudeId: string; pointCost: number }> }).ranks || [],
-        });
+        if (isTalentTree(tree)) {
+          voies.push({
+            id: key,
+            name: tree.name,
+            ranks: tree.ranks || [],
+          });
+        }
       });
     }
 

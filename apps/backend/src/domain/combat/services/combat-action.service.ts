@@ -5,6 +5,7 @@ import {
   calculateMaxHP,
 } from "../scaling.util.js";
 import { type StatAttribute } from "../../character/dto/StatAttribute.js";
+import type { CharacterStats } from "../../../infra/mongo/character/CharacterStats.js";
 
 export interface CombatAction {
   characterId: string;
@@ -45,10 +46,10 @@ export class CombatActionService {
   calculateAptitudeDamage(
     basePower: number,
     scalingAttribute: StatAttribute | null,
-    characterStats: Record<string, number>,
+    characterStats: CharacterStats | Record<string, number>,
     level: number,
   ): number {
-    return calculateDamage(basePower, scalingAttribute, characterStats as any, level);
+    return calculateDamage(basePower, scalingAttribute, characterStats as CharacterStats, level);
   }
 
   /**
@@ -58,10 +59,10 @@ export class CombatActionService {
   calculateAptitudeHealing(
     basePower: number,
     scalingAttribute: StatAttribute | null,
-    characterStats: Record<string, number>,
+    characterStats: CharacterStats | Record<string, number>,
     level: number,
   ): number {
-    return calculateHealing(basePower, scalingAttribute, characterStats as any, level);
+    return calculateHealing(basePower, scalingAttribute, characterStats as CharacterStats, level);
   }
 
   /**
@@ -78,7 +79,7 @@ export class CombatActionService {
   calculateActionEffect(
     basePower: number,
     scalingAttribute: StatAttribute | null,
-    characterStats: any,
+    characterStats: CharacterStats | Record<string, number>,
     level: number,
     isHealing: boolean = false,
   ): number {

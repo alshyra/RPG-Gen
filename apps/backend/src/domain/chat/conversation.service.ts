@@ -99,7 +99,7 @@ export class ConversationService {
     });
     if (!history) {
       const chatHistory = new ChatHistory({
-        userId: userId as unknown as Schema.Types.ObjectId,
+        userId: new Schema.Types.ObjectId(userId),
         characterId,
         messages: [
           {

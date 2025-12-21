@@ -1,13 +1,13 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
-import { ProgressionService } from "../domain/progression/progression.service.js";
-import { CharacterResponseDto } from "../domain/character/dto/index.js";
-import { 
-  UnlockRankDto,
+import { CharacterResponseDto, DraftCharacterResponseDto } from "../domain/character/dto/index.js";
+import {
   ClassMetadataDto,
-  RaceMetadataDto 
+  RaceMetadataDto,
+  UnlockRankDto
 } from "../domain/progression/dto/index.js";
+import { ProgressionService } from "../domain/progression/progression.service.js";
 import { type RPGRequest } from "../global.types.js";
 
 @ApiTags("progression")
@@ -53,7 +53,7 @@ export class ProgressionController {
 
   @Post(":characterId/select-race")
   @ApiOperation({ summary: "Select a race for a character and apply bonuses" })
-  @ApiResponse({ status: 200, description: "Race selected and bonuses applied", type: CharacterResponseDto })
+  @ApiResponse({ status: 200, description: "Race selected and bonuses applied", type: DraftCharacterResponseDto })
   @ApiResponse({ status: 400, description: "Invalid race ID" })
   @ApiResponse({ status: 404, description: "Character not found" })
   async selectRace(
@@ -65,7 +65,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectRace(userId, characterId, raceId);
-    return new CharacterResponseDto(character);
+    return new DraftCharacterResponseDto(character);
   }
 
   @Post(":characterId/unlock-rank")
