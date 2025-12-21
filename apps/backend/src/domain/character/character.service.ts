@@ -14,6 +14,7 @@ import { BaseCharacterResponseDto } from "./dto/BaseCharacterResponseDto.js";
 import { CharacterResponseDto } from "./dto/CharacterResponseDto.js";
 import { CreateInventoryItemDto } from "./dto/CreateInventoryItemDto.js";
 import { UpdateCharacterRequestDto } from "./dto/UpdateCharacterRequestDto.js";
+import { type StatAttribute } from "./dto/StatAttribute.js";
 
 @Injectable()
 export class CharacterService {
@@ -408,7 +409,7 @@ export class CharacterService {
    */
   calculateAptitudeDamage(
     basePower: number,
-    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    scalingAttribute: StatAttribute | null,
     characterStats: { vigor?: number; finesse?: number; mind?: number; survival?: number },
     level: number,
   ): number {
@@ -425,7 +426,7 @@ export class CharacterService {
    */
   calculateAptitudeHealing(
     basePower: number,
-    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    scalingAttribute: StatAttribute | null,
     characterStats: { vigor?: number; finesse?: number; mind?: number; survival?: number },
     level: number,
   ): number {

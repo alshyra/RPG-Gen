@@ -1,23 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
-
-/**
- * Combat Stats for the new scaling system
- */
-export class CombatantStats {
-  @ApiProperty({ description: "Vigor stat" })
-  vigor: number;
-
-  @ApiProperty({ description: "Finesse stat" })
-  finesse: number;
-
-  @ApiProperty({ description: "Mind stat" })
-  mind: number;
-
-  @ApiProperty({ description: "Survival stat" })
-  survival: number;
-}
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { type StatAttribute } from "../../character/dto/StatAttribute.js";
+import { TacticalStats } from "../../character/dto/TacticalStats.js";
 
 /**
  * CombatantDto - Unified combatant representation for the new tactical system
@@ -92,16 +77,16 @@ export class CombatantDto {
   @ApiPropertyOptional({ description: "Which attribute scales damage (vigor, finesse, mind, survival)" })
   @IsOptional()
   @IsString()
-  scalingAttribute?: "vigor" | "finesse" | "mind" | "survival";
+  scalingAttribute?: StatAttribute;
 
   @ApiPropertyOptional({
     description: "Combat stats (vigor, finesse, mind, survival)",
-    type: CombatantStats,
+    type: TacticalStats,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => CombatantStats)
-  stats?: CombatantStats;
+  @Type(() => TacticalStats)
+  stats?: TacticalStats;
 
   @ApiPropertyOptional({ description: "Combat side (player or enemy)" })
   @IsOptional()

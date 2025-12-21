@@ -6,6 +6,7 @@
  */
 
 import type { CharacterStats } from "../../infra/mongo/character/CharacterStats.js";
+import { type StatAttribute } from "../character/dto/StatAttribute.js";
 
 // Class base stats configuration
 export interface ClassBaseStats {
@@ -80,7 +81,7 @@ export function calculateMaxHP(
  */
 export function calculateDamage(
   basePower: number,
-  scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+  scalingAttribute: StatAttribute | null,
   characterStats: CharacterStats,
   level: number,
 ): number {
@@ -105,7 +106,7 @@ export function calculateDamage(
  */
 export function calculateHealing(
   basePower: number,
-  scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+  scalingAttribute: StatAttribute | null,
   characterStats: CharacterStats,
   level: number,
 ): number {

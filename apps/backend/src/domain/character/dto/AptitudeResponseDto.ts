@@ -1,17 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNumber, IsString, ValidateNested, IsArray, IsEnum } from "class-validator";
 import { Type } from "class-transformer";
+import { AptitudeScalingDto } from "./AptitudeScalingDto.js";
 
 export type AptitudeTargetType = "self" | "enemy" | "ally" | "zone" | "all_enemies" | "all_allies";
 export type AptitudeCategory = "attack" | "defense" | "support" | "movement" | "utility";
-
-export class AptitudeScalingDto {
-  @ApiPropertyOptional({ description: "Stat used for scaling (vigor, finesse, mind, survival)" })
-  attribute?: "vigor" | "finesse" | "mind" | "survival";
-
-  @ApiProperty({ description: "Scaling divisor (e.g., 5 = +1 every 5 levels)" })
-  scalingDivisor: number = 5;
-}
 
 export class AptitudeResponseDto {
   @ApiProperty({ description: "Unique aptitude ID" })

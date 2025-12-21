@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
+import { type StatAttribute } from "../../../domain/character/dto/StatAttribute.js";
 
 // Target types for aptitudes
 export type AptitudeTargetType = "self" | "enemy" | "ally" | "zone" | "all_enemies" | "all_allies";
@@ -10,7 +11,7 @@ export type AptitudeCategory = "attack" | "defense" | "support" | "movement" | "
 // Scaling configuration
 export interface AptitudeScaling {
   // Attribute that affects power (vigor, finesse, mind, survival)
-  attribute?: "vigor" | "finesse" | "mind" | "survival";
+  attribute?: StatAttribute;
   // Base formula: value = base + floor(level / scalingDivisor)
   scalingDivisor: number; // Default 5 means +1 every 5 levels
 }

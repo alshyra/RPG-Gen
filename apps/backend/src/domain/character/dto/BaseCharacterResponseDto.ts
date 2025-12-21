@@ -6,6 +6,7 @@ import { SkillResponseDto } from "./SkillResponseDto.js";
 import { InventoryItemDto } from "./InventoryItemDto.js";
 import { AptitudeResponseDto } from "./AptitudeResponseDto.js";
 import { VoieProgressDto } from "./VoieProgressDto.js";
+import { TacticalStats } from "./TacticalStats.js";
 import { CharacterDocument } from "../../../infra/mongo/index.js";
 import { InternalServerErrorException } from "@nestjs/common";
 
@@ -23,20 +24,6 @@ export type CharacterState = "draft" | "created";
 /**
  * Tactical system stats (Vigor, Finesse, Mind, Survival)
  */
-export class TacticalStats {
-  @ApiProperty({ description: "Vigor stat" })
-  vigor: number;
-
-  @ApiProperty({ description: "Finesse stat" })
-  finesse: number;
-
-  @ApiProperty({ description: "Mind stat" })
-  mind: number;
-
-  @ApiProperty({ description: "Survival stat" })
-  survival: number;
-}
-
 export class BaseCharacterResponseDto {
   @ApiProperty({ description: "Unique character ID (UUID)" })
   characterId: string;

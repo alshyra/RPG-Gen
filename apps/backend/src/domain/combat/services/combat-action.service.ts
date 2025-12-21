@@ -4,6 +4,7 @@ import {
   calculateHealing,
   calculateMaxHP,
 } from "../scaling.util.js";
+import { type StatAttribute } from "../../character/dto/StatAttribute.js";
 
 export interface CombatAction {
   characterId: string;
@@ -43,7 +44,7 @@ export class CombatActionService {
    */
   calculateAptitudeDamage(
     basePower: number,
-    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    scalingAttribute: StatAttribute | null,
     characterStats: Record<string, number>,
     level: number,
   ): number {
@@ -56,7 +57,7 @@ export class CombatActionService {
    */
   calculateAptitudeHealing(
     basePower: number,
-    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    scalingAttribute: StatAttribute | null,
     characterStats: Record<string, number>,
     level: number,
   ): number {
@@ -76,7 +77,7 @@ export class CombatActionService {
    */
   calculateActionEffect(
     basePower: number,
-    scalingAttribute: "vigor" | "finesse" | "mind" | "survival" | null,
+    scalingAttribute: StatAttribute | null,
     characterStats: any,
     level: number,
     isHealing: boolean = false,
