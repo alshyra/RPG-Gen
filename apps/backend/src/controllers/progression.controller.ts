@@ -1,15 +1,17 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import { CharacterResponseDto, DraftCharacterResponseDto } from "../domain/character/dto/index.js";
+import { CharacterResponseMapper } from "../domain/character/character-response.mapper.js";
 import {
   ClassMetadataDto,
   RaceMetadataDto,
+  SelectClassDto,
+  SelectFirstTalentDto,
   UnlockRankDto
 } from "../domain/progression/dto/index.js";
 import { ProgressionService } from "../domain/progression/progression.service.js";
 import { type RPGRequest } from "../global.types.js";
-import { toCharacterResponse } from "./characters/character-response.util.js";
 
 @ApiTags("progression")
 @Controller("progression")
@@ -18,6 +20,7 @@ import { toCharacterResponse } from "./characters/character-response.util.js";
 export class ProgressionController {
   constructor(
     private readonly progressionService: ProgressionService,
+    private readonly responseMapper: CharacterResponseMapper,
   ) {}
 
   @Get("classes")
@@ -37,6 +40,7 @@ export class ProgressionController {
 
   @Post(":characterId/select-class")
   @ApiOperation({ summary: "Select a class for a character and assign starter pack" })
+  @ApiBody({ type: SelectClassDto })
   @ApiResponse({ status: 200, description: "Class selected and starter pack assigned", type: CharacterResponseDto })
   @ApiResponse({ status: 400, description: "Invalid class name" })
   @ApiResponse({ status: 404, description: "Character not found" })
@@ -49,11 +53,12 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectClass(userId, characterId, className);
-    return toCharacterResponse(character);
+    return this.responseMapper.toEnrichedResponse(character);
   }
 
   @Post(":characterId/select-race")
   @ApiOperation({ summary: "Select a race for a character and apply bonuses" })
+  @ApiBody({ schema: { properties: { raceId: { type: "string" } } } })
   @ApiResponse({ status: 200, description: "Race selected and bonuses applied", type: DraftCharacterResponseDto })
   @ApiResponse({ status: 400, description: "Invalid race ID" })
   @ApiResponse({ status: 404, description: "Character not found" })
@@ -66,7 +71,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectRace(userId, characterId, raceId);
-    return toCharacterResponse(character);
+    return this.responseMapper.toEnrichedResponse(character);
   }
 
   @Post(":characterId/unlock-rank")
@@ -85,6 +90,29 @@ export class ProgressionController {
       dto.voieId,
       dto.rank,
     );
-    return toCharacterResponse(character);
+    return this.responseMapper.toEnrichedResponse(character);
+  }
+
+  @Post(":characterId/first-talent")
+  @ApiOperation({ summary: "Select first talent during character creation (unlock rank 1 + stat bonus)" })
+  @ApiResponse({ status: 200, description: "First talent selected successfully", type: CharacterResponseDto })
+  @ApiResponse({ status: 400, description: "Invalid voie name or stat" })
+  @ApiResponse({ status: 404, description: "Character not found" })
+  async selectFirstTalent(
+    @Request() req: RPGRequest,
+    @Param("characterId") characterId: string,
+    @Body() dto: SelectFirstTalentDto,
+  ) {
+    const { user } = req;
+    const userId = user._id.toString();
+    
+    const character = await this.progressionService.selectFirstTalent(
+      userId,
+      characterId,
+      dto.voieName,
+      dto.statBonus,
+    );
+    
+    return this.responseMapper.toEnrichedResponse(character);
   }
 }

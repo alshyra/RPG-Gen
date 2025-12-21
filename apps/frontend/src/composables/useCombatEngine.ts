@@ -5,7 +5,11 @@ import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCombatStore, type CombatArenaApi } from "@/stores/combatStore";
 import { useCombat as useCombatApi } from "@rpg-gen/api-client";
-import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
+import type {
+  CombatEngineEventPayload,
+  UnitClickedPayload,
+  UnitMovedPayload,
+} from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { onUnmounted, ref, watch } from "vue";
@@ -108,6 +112,39 @@ export function useCombatEngine() {
     registeredHandlers.push({
       event: "unit:clicked",
       handler: handleUnitClicked as (...args: unknown[]) => void,
+    });
+
+    // Handle movement completion - sync with backend
+    const handleUnitMoved = async (payload: UnitMovedPayload) => {
+      console.log("[useCombatEngine] unit:moved", payload);
+
+      // Only sync player movement to backend
+      // Enemy movements are controlled by backend and don't need to be re-sent
+      const isPlayerUnit = combat.status.data.value?.combatant?.id === payload.unitId;
+      if (!isPlayerUnit) {
+        console.log("[useCombatEngine] Enemy unit moved, no backend sync needed");
+        return;
+      }
+
+      // Call backend to register movement and consume PM
+      try {
+        await combat.move.mutateAsync({
+          characterId: characterId.value!,
+          movement: {
+            combatantId: payload.unitId,
+            path: [{ gridX: payload.gridX, gridY: payload.gridY }],
+          },
+        });
+        console.log("[useCombatEngine] Movement synced with backend, PM consumed:", payload.pmCost);
+      } catch (err) {
+        console.error("[useCombatEngine] Failed to sync movement with backend:", err);
+      }
+    };
+
+    getArenaApi().on("unit:moved", handleUnitMoved);
+    registeredHandlers.push({
+      event: "unit:moved",
+      handler: handleUnitMoved as (...args: unknown[]) => void,
     });
   };
 

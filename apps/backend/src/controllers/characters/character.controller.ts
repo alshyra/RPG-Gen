@@ -21,6 +21,7 @@ import {
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
 import { CharacterService } from "../../domain/character/character.service.js";
+import { CharacterResponseMapper } from "../../domain/character/character-response.mapper.js";
 import { toCharacterResponse } from "./character-response.util.js";
 import {
   BaseCharacterResponseDto,
@@ -40,6 +41,7 @@ export class CharacterController {
 
   constructor(
     private characterService: CharacterService,
+    private responseMapper: CharacterResponseMapper,
   ) {}
 
   @Post()
@@ -101,9 +103,8 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const characters = await this.characterService.findByUserId(userId);
-    return characters
-      .filter(c => c.state === 'created')
-      .map(c => toCharacterResponse(c));
+    const created = characters.filter(c => c.state === 'created');
+    return Promise.all(created.map(c => this.responseMapper.toEnrichedResponse(c)));
   }
 
   @Get(":characterId")
@@ -121,10 +122,10 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const character = await this.characterService.getDocument(userId, characterId);
     
     this.logger.log('character state', character.state)
-    return character;
+    return this.responseMapper.toEnrichedResponse(character);
   }
 
   @Put(":characterId")
@@ -156,7 +157,7 @@ export class CharacterController {
 
     const character = await this.characterService.update(userId, characterId, updates);
     this.logger.log('character state', character.state)
-    return toCharacterResponse(character);
+    return this.responseMapper.toEnrichedResponse(character);
   }
 
   @Delete(":characterId")

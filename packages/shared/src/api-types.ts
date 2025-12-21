@@ -616,6 +616,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/progression/{characterId}/first-talent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Select first talent during character creation (unlock rank 1 + stat bonus) */
+        post: operations["ProgressionController_selectFirstTalent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/races": {
         parameters: {
             query?: never;
@@ -1790,6 +1807,14 @@ export interface components {
              */
             icon: string;
         };
+        SelectClassDto: {
+            /**
+             * @description Class name to select
+             * @example guerrier
+             * @enum {string}
+             */
+            className: "guerrier" | "rogue" | "mage";
+        };
         UnlockRankDto: {
             /**
              * @description Talent tree (voie) ID
@@ -1801,6 +1826,19 @@ export interface components {
              * @example 1
              */
             rank: number;
+        };
+        SelectFirstTalentDto: {
+            /**
+             * @description Name of the talent voie (path) to select
+             * @example Voie du guerrier sacré
+             */
+            voieName: string;
+            /**
+             * @description Stat to receive +1 bonus
+             * @example vigor
+             * @enum {string}
+             */
+            statBonus: "vigor" | "finesse" | "mind" | "survival";
         };
     };
     responses: never;
@@ -2771,7 +2809,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectClassDto"];
+            };
+        };
         responses: {
             /** @description Class selected and starter pack assigned */
             200: {
@@ -2807,7 +2849,13 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    raceId?: string;
+                };
+            };
+        };
         responses: {
             /** @description Race selected and bonuses applied */
             200: {
@@ -2859,6 +2907,46 @@ export interface operations {
                 };
             };
             /** @description Not enough talent points or invalid rank */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Character not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressionController_selectFirstTalent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectFirstTalentDto"];
+            };
+        };
+        responses: {
+            /** @description First talent selected successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"];
+                };
+            };
+            /** @description Invalid voie name or stat */
             400: {
                 headers: {
                     [name: string]: unknown;

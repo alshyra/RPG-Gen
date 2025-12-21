@@ -275,6 +275,90 @@ export class ProgressionService {
   }
 
   /**
+   * Select first talent during character creation.
+   * Unlocks rank 1 of chosen voie and applies +1 stat bonus.
+   * This does NOT consume talent points (first talent is free).
+   */
+  async selectFirstTalent(
+    userId: string,
+    characterId: string,
+    voieName: string,
+    statBonus: "vigor" | "finesse" | "mind" | "survival",
+  ): Promise<CharacterDocument> {
+    const character = await this.characterModel.findOne({ userId, characterId });
+    if (!character) {
+      throw new NotFoundException(`Character ${characterId} not found`);
+    }
+
+    if (!character.className) {
+      throw new BadRequestException("Character has no class selected");
+    }
+
+    // Get class definition to find voie
+    const classDef = await this.classDefinitionService.findByName(character.className);
+    if (!classDef) {
+      throw new NotFoundException(`Class definition ${character.className} not found`);
+    }
+
+    // Find voie by name (case insensitive match)
+    const voieEntry = Object.entries(classDef.talentTrees || {}).find(
+      ([_, tree]) => tree.name.toLowerCase() === voieName.toLowerCase(),
+    );
+
+    if (!voieEntry) {
+      throw new BadRequestException(`Talent tree ${voieName} not found in class ${character.className}`);
+    }
+
+    const [voieId, talentTree] = voieEntry;
+    const rank1 = talentTree.ranks?.find(r => r.rank === 1);
+    
+    if (!rank1) {
+      throw new BadRequestException(`Rank 1 not found in talent tree ${voieName}`);
+    }
+
+    // Check if rank 1 is already unlocked
+    const alreadyUnlocked = (character.unlockedRanks || []).some(
+      r => r.voieId === voieId && r.rank === 1,
+    );
+    
+    if (alreadyUnlocked) {
+      throw new BadRequestException(`First talent already selected`);
+    }
+
+    // Unlock rank 1 (free - no talent point cost)
+    const newRank: UnlockedRank = { voieId, rank: 1 };
+    character.unlockedRanks = [...(character.unlockedRanks || []), newRank];
+
+    // Add aptitude from rank 1
+    const newAptitude: CharacterAptitude = {
+      aptitudeId: rank1.aptitudeId,
+      currentCooldown: 0,
+    };
+
+    const alreadyLearned = (character.aptitudes || []).some(
+      a => a.aptitudeId === rank1.aptitudeId,
+    );
+
+    if (!alreadyLearned) {
+      character.aptitudes = [...(character.aptitudes || []), newAptitude];
+    }
+
+    // Apply +1 stat bonus
+    if (!character.stats) {
+      throw new BadRequestException("Character has no stats initialized");
+    }
+
+    character.stats[statBonus] = (character.stats[statBonus] || 0) + 1;
+
+    await character.save();
+    this.logger.log(
+      `First talent selected for ${characterId}: ${voieName} (rank 1) + ${statBonus} +1`,
+    );
+
+    return character;
+  }
+
+  /**
    * Get available classes with their metadata for the selection UI.
    */
   getAvailableClasses(): Array<{

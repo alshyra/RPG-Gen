@@ -111,8 +111,11 @@ export interface UnitClickedPayload {
 
 export interface UnitMovedPayload {
   unitId: string;
+  fromGridX: number;
+  fromGridY: number;
   gridX: number;
   gridY: number;
+  pmCost: number; // Movement points consumed
 }
 
 export interface UnitAttackedPayload {

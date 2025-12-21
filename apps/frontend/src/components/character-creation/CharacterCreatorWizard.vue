@@ -64,9 +64,17 @@
         <div class="h-full">
           <StepClassSelection v-if="currentStep === 2" />
         </div>
-        <!-- Step 4: Avatar -->
+        <!-- Step 4: Talent Selection (first voie + stat bonus) -->
         <div class="h-full">
-          <StepAvatar v-if="currentStep === 3" />
+          <StepTalentSelection 
+            v-if="currentStep === 3" 
+            @update:is-valid="talentSelectionValid = $event"
+            @update:selections="talentSelection = $event"
+          />
+        </div>
+        <!-- Step 5: Avatar -->
+        <div class="h-full">
+          <StepAvatar v-if="currentStep === 4" />
         </div>
       </div>
     </div>
@@ -108,7 +116,7 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useCharacter, useChat, useImage } from "@rpg-gen/api-client";
+import { useCharacter, useChat, useImage, useSelectFirstTalent } from "@rpg-gen/api-client";
 import { FullPageLoader, UiButton, UiLoader } from "@rpg-gen/ui";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -116,6 +124,7 @@ import StepAvatar from "./steps/StepAvatar.vue";
 import StepBasicInfo from "./steps/StepBasicInfo.vue";
 import StepRaceSelection from "./steps/StepRaceSelection.vue";
 import StepClassSelection from "./steps/StepClassSelection.vue";
+import StepTalentSelection from "./steps/StepTalentSelection.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -124,11 +133,16 @@ const isLoading = ref(false);
 const loadingTitle = ref("");
 const loadingSubtitle = ref("");
 
-// Simplified 4-step flow (Info -> Race -> Class -> Avatar)
+// Talent selection state (reactive)
+const talentSelectionValid = ref(false);
+const talentSelection = ref<{ voieIndex: number; voieName: string; statBonus: string } | null>(null);
+
+// 5-step flow (Info -> Race -> Class -> Talent -> Avatar)
 const steps = [
   "Informations",
   "Race",
   "Classe",
+  "Talent",
   "Avatar",
 ];
 
@@ -137,6 +151,7 @@ const characterId = useCharacterId();
 const chat = useChat(characterId.value, { enabled: false }); // Disable history query during creation
 const image = useImage();
 const { update, character } = useCharacter(characterId);
+const selectFirstTalentMutation = useSelectFirstTalent(characterId);
 
 // Get current step from route, or from draft if no route param
 const currentStep = computed({
@@ -170,7 +185,10 @@ const canProceed = computed(() => {
       // Step 3: Class must be selected
       return !!currentCharacter.value?.className;
     case 3:
-      // Step 4: Avatar - always can proceed
+      // Step 4: Talent must be selected
+      return talentSelectionValid.value;
+    case 4:
+      // Step 5: Avatar - always can proceed
       return true;
     default:
       return false;
@@ -192,10 +210,9 @@ const saveFinalCharacter = async () => {
   console.log("Finishing character creation for", currentCharacter);
   if (!currentCharacter || !currentCharacter?.value?.className) return;
   
-  // In the new system, HP is already set by selectClass API
-  // We just need to mark the character as created
+  // Only update the state - don't spread entire character to avoid corrupting data
   await update.mutateAsync({
-    ...currentCharacter.value,
+    characterId: currentCharacter.value.characterId,
     state: "created",
   });
 };
@@ -235,16 +252,30 @@ const finishCreation = async () => {
   if (!currentCharacter || !currentCharacter?.value?.className) return;
 
   isLoading.value = true;
-  loadingTitle.value = "Invocation de votre avatar...";
-  loadingSubtitle.value = "Génération de l'image et préparation du monde de jeu...";
+  loadingTitle.value = "Finalisation du personnage...";
+  loadingSubtitle.value = "Application des choix de talents et stats...";
 
-  // Generate avatar BEFORE finalizing character state
-  // CharacterResponseDto requires a portrait, so we must set it first
-  await generateAndApplyAvatar();
-  await saveFinalCharacter();
-  await initConversationForCharacter();
-  await navigateToGame();
+  try {
+    // Apply first talent selection
+    if (talentSelection.value) {
+      await selectFirstTalentMutation.mutateAsync({
+        voieName: talentSelection.value.voieName,
+        statBonus: talentSelection.value.statBonus as "vigor" | "finesse" | "mind" | "survival",
+      });
+    }
 
-  isLoading.value = false;
+    // Generate avatar BEFORE finalizing character state
+    // CharacterResponseDto requires a portrait, so we must set it first
+    loadingTitle.value = "Invocation de votre avatar...";
+    loadingSubtitle.value = "Génération de l'image et préparation du monde de jeu...";
+    await generateAndApplyAvatar();
+    await saveFinalCharacter();
+    await initConversationForCharacter();
+    await navigateToGame();
+  } catch (e) {
+    console.error("Failed to finish character creation", e);
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>

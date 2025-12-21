@@ -299,8 +299,12 @@ export function useCombat() {
     const unit = units.value.get(unitId);
     if (!unit || !combatPixiInstance.value) return;
 
+    // Store starting position for event payload
+    const fromGridX = unit.gridX;
+    const fromGridY = unit.gridY;
+
     // Validate that target is within movement range (Manhattan distance)
-    const distance = Math.abs(targetGridX - unit.gridX) + Math.abs(targetGridY - unit.gridY);
+    const distance = Math.abs(targetGridX - fromGridX) + Math.abs(targetGridY - fromGridY);
     if (distance > unit.maxMoveRange) {
       console.warn(
         `[useCombat] Move rejected: distance ${distance} exceeds max range ${unit.maxMoveRange} for unit ${unitId}`,
@@ -309,13 +313,9 @@ export function useCombat() {
     }
 
     // Get the path as waypoints (no diagonals)
-    const path = findManhattanPath(unit.gridX, unit.gridY, targetGridX, targetGridY);
+    const path = findManhattanPath(fromGridX, fromGridY, targetGridX, targetGridY);
 
     if (path.length === 0) return;
-
-    // Store starting position for direction calculation
-    const startGridX = unit.gridX;
-    const startGridY = unit.gridY;
 
     // Animate each segment sequentially
     for (const waypoint of path) {
@@ -327,9 +327,9 @@ export function useCombat() {
     // Final idle animation facing last direction
     const lastStep = path[path.length - 1];
     const prevStep =
-      path.length > 1 ? path[path.length - 2] : { gridX: startGridX, gridY: startGridY };
-    const finalDx = (lastStep?.gridX ?? targetGridX) - (prevStep?.gridX ?? startGridX);
-    const finalDy = (lastStep?.gridY ?? targetGridY) - (prevStep?.gridY ?? startGridY);
+      path.length > 1 ? path[path.length - 2] : { gridX: fromGridX, gridY: fromGridY };
+    const finalDx = (lastStep?.gridX ?? targetGridX) - (prevStep?.gridX ?? fromGridX);
+    const finalDy = (lastStep?.gridY ?? targetGridY) - (prevStep?.gridY ?? fromGridY);
     const finalDir = getDirectionFromDelta(finalDx, finalDy);
 
     const idleKey = `idle_${finalDir}` as const;
@@ -342,6 +342,16 @@ export function useCombat() {
       unit.sprite.loop = true;
       unit.sprite.play();
     }
+
+    // Emit movement completed event with PM cost (1 PM per tile = path length)
+    emit("unit:moved", {
+      unitId,
+      fromGridX,
+      fromGridY,
+      gridX: targetGridX,
+      gridY: targetGridY,
+      pmCost: path.length,
+    });
 
     emit("turn:ended", { roundNumber: 0 });
   };

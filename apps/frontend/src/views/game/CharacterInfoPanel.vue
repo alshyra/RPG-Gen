@@ -61,13 +61,6 @@
           </AppRouterButton>
           <AppRouterButton
             variant="ghost"
-            :to="{ name: 'game-aptitudes', params: { characterId: currentCharacter.characterId } }"
-            class="w-full text-left px-3 py-2"
-          >
-            ⚡ Aptitudes
-          </AppRouterButton>
-          <AppRouterButton
-            variant="ghost"
             :to="{ name: 'game-talents', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >

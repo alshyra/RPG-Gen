@@ -26,4 +26,28 @@ export class VoieProgressDto {
   @IsArray()
   @IsString({ each: true })
   unlockedAptitudes?: string[];
+
+  constructor(init?: Partial<VoieProgressDto>) {
+    if (!init) {
+      throw new Error("VoieProgressDto: missing required fields");
+    }
+    if (!init.voieId) {
+      throw new Error("VoieProgressDto: missing required field 'voieId'");
+    }
+    if (!init.voieName) {
+      throw new Error("VoieProgressDto: missing required field 'voieName'");
+    }
+    if (!init.className) {
+      throw new Error("VoieProgressDto: missing required field 'className'");
+    }
+    if (init.currentRank === undefined) {
+      throw new Error("VoieProgressDto: missing required field 'currentRank'");
+    }
+    this.voieId = init.voieId;
+    this.voieName = init.voieName;
+    this.className = init.className;
+    this.currentRank = init.currentRank;
+    this.requiredTalentPoints = init.requiredTalentPoints;
+    this.unlockedAptitudes = init.unlockedAptitudes;
+  }
 }

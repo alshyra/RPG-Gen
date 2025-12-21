@@ -89,11 +89,19 @@ test("AptitudeService - toResponseDto mappe correctement les champs", t => {
   const entity = {
     aptitudeId: "slash",
     name: "Entaille",
+    description: "Une attaque tranchante de base",
     paCost: 2,
+    cooldown: 0,
+    targetType: "enemy",
+    range: 1,
+    category: "attack",
     basePower: 5
   };
   
   const dto = service.toResponseDto(entity as any);
   t.is(dto.aptitudeId, "slash");
   t.is(dto.paCost, 2);
+  t.is(dto.description, "Une attaque tranchante de base");
+  t.is(dto.cooldown, 0);
+  t.is(dto.targetType, "enemy");
 });

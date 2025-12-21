@@ -1348,6 +1348,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectClassDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Class selected and starter pack assigned",
@@ -1390,6 +1400,20 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "raceId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Race selected and bonuses applied",
@@ -1466,6 +1490,58 @@
           }
         ],
         "summary": "Unlock a rank in a talent tree (voie)",
+        "tags": [
+          "progression"
+        ]
+      }
+    },
+    "/api/progression/{characterId}/first-talent": {
+      "post": {
+        "operationId": "ProgressionController_selectFirstTalent",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectFirstTalentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "First talent selected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid voie name or stat"
+          },
+          "404": {
+            "description": "Character not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Select first talent during character creation (unlock rank 1 + stat bonus)",
         "tags": [
           "progression"
         ]
@@ -4107,6 +4183,24 @@
           "icon"
         ]
       },
+      "SelectClassDto": {
+        "type": "object",
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "Class name to select",
+            "example": "guerrier",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
+          }
+        },
+        "required": [
+          "className"
+        ]
+      },
       "UnlockRankDto": {
         "type": "object",
         "properties": {
@@ -4126,6 +4220,31 @@
         "required": [
           "voieId",
           "rank"
+        ]
+      },
+      "SelectFirstTalentDto": {
+        "type": "object",
+        "properties": {
+          "voieName": {
+            "type": "string",
+            "description": "Name of the talent voie (path) to select",
+            "example": "Voie du guerrier sacré"
+          },
+          "statBonus": {
+            "type": "string",
+            "description": "Stat to receive +1 bonus",
+            "enum": [
+              "vigor",
+              "finesse",
+              "mind",
+              "survival"
+            ],
+            "example": "vigor"
+          }
+        },
+        "required": [
+          "voieName",
+          "statBonus"
         ]
       }
     }

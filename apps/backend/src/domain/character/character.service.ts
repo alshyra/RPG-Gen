@@ -64,6 +64,14 @@ export class CharacterService {
   }
 
   async findByCharacterId(userId: string, characterId: string): Promise<CharacterResponseDto> {
+    const doc = await this.getDocument(userId, characterId);
+    return this.toCharacterDto(doc);
+  }
+
+  /**
+   * Get the raw CharacterDocument (for use by CharacterResponseMapper).
+   */
+  async getDocument(userId: string, characterId: string): Promise<CharacterDocument> {
     const doc = await this.characterModel
       .findOne({
         userId,
@@ -73,7 +81,7 @@ export class CharacterService {
     if (!doc) {
       throw new NotFoundException(`Character ${characterId} not found`);
     }
-    return this.toCharacterDto(doc);
+    return doc;
   }
 
   // eslint-disable-next-line max-statements

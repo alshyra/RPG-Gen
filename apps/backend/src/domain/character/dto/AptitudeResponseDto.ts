@@ -84,6 +84,14 @@ export class AptitudeResponseDto {
   @ApiPropertyOptional({ description: "Is this a starting aptitude?" })
   isStarting?: boolean;
 
+  @ApiPropertyOptional({ description: "Damage type (physical, magical, fire, ice, etc.)" })
+  @IsString()
+  damageType?: string;
+
+  @ApiPropertyOptional({ description: "Current cooldown turns remaining (0 = ready)" })
+  @IsNumber()
+  currentCooldown?: number;
+
   constructor(init?: Partial<AptitudeResponseDto>) {
     // Validate required fields
     if (!init?.aptitudeId) {

@@ -5,6 +5,9 @@ import { apiClient } from "./client.js";
 
 type ClassName = SelectClassDto['className'];
 
+// Export types for components
+export type ClassMetadata = ClassMetadataDto;
+
 // API functions
 async function getAvailableClasses(): Promise<ClassMetadataDto[]> {
   const res = await apiClient.GET("/api/progression/classes");
@@ -74,6 +77,23 @@ async function selectRace(
   });
   return res.data;
 }
+// Select first talent endpoint (with requestBody)
+async function selectFirstTalent(
+  characterId: string,
+  voieName: string,
+  statBonus: "vigor" | "finesse" | "mind" | "survival",
+) {
+  const res = await apiClient.POST("/api/progression/{characterId}/first-talent", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      voieName,
+      statBonus,
+    },
+  });
+  return res.data;
+}
 
 // Vue Query hooks
 export function useAvailableClasses() {
@@ -103,13 +123,13 @@ export function useTalentTrees(classNameOrRef: MaybeRefOrGetter<ClassName>) {
   });
 }
 
-export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string>) {
+export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string | undefined>) {
   const characterId = toValue(characterIdOrRef);
   
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (className: ClassName) => selectClass(characterId, className),
+    mutationFn: (className: ClassName) => selectClass(characterId || '', className),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
@@ -140,6 +160,19 @@ export function useUnlockRank(characterIdOrRef: MaybeRefOrGetter<string>) {
   return useMutation({
     mutationFn: ({ voieId, rank }: { voieId: string; rank: number }) =>
       unlockRank(characterId || '', voieId, rank),
+    onSuccess: () => {
+      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+    },
+  });
+}
+
+export function useSelectFirstTalent(characterIdOrRef: MaybeRefOrGetter<string | undefined>) {
+  const characterId = toValue(characterIdOrRef);
+  
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ voieName, statBonus }: { voieName: string; statBonus: "vigor" | "finesse" | "mind" | "survival" }) => selectFirstTalent(characterId || '', voieName, statBonus),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
