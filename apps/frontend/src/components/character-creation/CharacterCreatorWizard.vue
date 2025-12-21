@@ -162,13 +162,13 @@ const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
       // Step 1: Name is required
-      return currentCharacter?.value?.name?.trim();
+      return currentCharacter.value?.name?.trim();
     case 1:
       // Step 2: Race must be selected
-      return !!currentCharacter?.value?.raceId;
+      return !!currentCharacter.value?.raceId;
     case 2:
       // Step 3: Class must be selected
-      return !!currentCharacter?.value?.className;
+      return !!currentCharacter.value?.className;
     case 3:
       // Step 4: Avatar - always can proceed
       return true;

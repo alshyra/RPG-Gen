@@ -9,15 +9,14 @@ config/
 ├── default.json      # Configuration de base (valeurs par défaut)
 ├── development.json  # Config pour npm start local
 ├── docker.json       # Config pour Docker Compose
-.env.local           # Variables d'env locales (npm start) - GIT IGNORED
-.env.docker          # Variables d'env Docker - GIT IGNORED
+.env                  # Secrets locaux (non versionnés)
 ```
 
 ## Configuration locale (npm start)
 
 1. **Copie le fichier exemple:**
 ```bash
-cp apps/backend/.env.local.example apps/backend/.env.local
+cp apps/backend/.env.example apps/backend/.env
 ```
 
 2. **Remplir les variables Google API:**
@@ -25,7 +24,6 @@ cp apps/backend/.env.local.example apps/backend/.env.local
 GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY_HERE
 GOOGLE_OAUTH_CLIENT_ID=YOUR_OAUTH_CLIENT_ID_HERE
 GOOGLE_OAUTH_CLIENT_SECRET=YOUR_OAUTH_CLIENT_SECRET_HERE
-DISABLE_AUTH_FOR_E2E=true
 ```
 
 3. **Démarrer le backend avec MongoDB en Docker:**
@@ -52,7 +50,6 @@ cp apps/backend/.env.docker.example apps/backend/.env.docker
 GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY_HERE
 GOOGLE_OAUTH_CLIENT_ID=YOUR_OAUTH_CLIENT_ID_HERE
 GOOGLE_OAUTH_CLIENT_SECRET=YOUR_OAUTH_CLIENT_SECRET_HERE
-DISABLE_AUTH_FOR_E2E=true
 ```
 
 3. **Démarrer tout avec Docker Compose:**

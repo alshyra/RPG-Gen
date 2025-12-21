@@ -1,7 +1,7 @@
 import { Content } from "@google/genai";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Schema } from "mongoose";
+import { Model } from "mongoose";
 import type { CharacterResponseDto } from "../character/dto/CharacterResponseDto.js";
 import type { ChatMessageDto } from "./dto/ChatMessageDto.js";
 import type { GameInstructionDto } from "./dto/GameInstructionDto.js";
@@ -93,13 +93,14 @@ export class ConversationService {
 
   async append(userId: string, characterId: string, msg: ChatMessageDto) {
     if (!msg.narrative) throw new InternalServerErrorException("Message narrative is required");
+    
     const history = await this.chatHistoryModel.findOne({
       userId,
       characterId,
     });
     if (!history) {
       const chatHistory = new ChatHistory({
-        userId: new Schema.Types.ObjectId(userId),
+        userId,
         characterId,
         messages: [
           {

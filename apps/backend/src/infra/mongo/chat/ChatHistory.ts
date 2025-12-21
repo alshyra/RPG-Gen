@@ -11,7 +11,7 @@ export class ChatHistory {
     type: MongooseSchema.Types.ObjectId,
     ref: "User",
   })
-  userId: MongooseSchema.Types.ObjectId;
+  userId: MongooseSchema.Types.ObjectId | string;
 
   @Prop({
     required: true,

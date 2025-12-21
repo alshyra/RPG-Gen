@@ -105,3 +105,26 @@ test("Conversation Integration append without narrative throws", async t => {
     await closeTestApp(ctx);
   }
 });
+
+// Test: append with invalid userId format should handle gracefully
+test("Conversation Integration append with various userId formats", async t => {
+  const { ctx, convService } = await setup();
+  
+  // Test 1: Normal hex string (should work)
+  await convService.append("507f1f77bcf86cd799439011", "char-1", {
+    role: "user",
+    narrative: "Test message 1",
+    instructions: [],
+  });
+  t.pass("Hex string userId works");
+  
+  // Test 2: Hex string without toString (should work)
+  await convService.append(TEST_USER_ID, "char-2", {
+    role: "user",
+    narrative: "Test message 2",
+    instructions: [],
+  });
+  t.pass("TEST_USER_ID works");
+  
+  await closeTestApp(ctx);
+});
