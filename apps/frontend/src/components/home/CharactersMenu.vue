@@ -1,57 +1,49 @@
 <template>
-  <div>
-    <!-- Loading skeletons -->
-    <div
-      v-if="isLoading"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+  <div class="space-y-8">
+    <!-- Draft Characters Section -->
+    <CharacterSection
+      title="Reprendre l'édition"
+      :characters="drafts"
+      :is-loading="isDraftLoading"
+      @deleted="onCharacterDeleted"
     >
-      <div
-        v-for="i in 3"
-        :key="i"
-        class="bg-slate-800/50 rounded-lg overflow-hidden flex flex-col animate-pulse"
-      >
-        <div class="w-full h-40 bg-slate-700/20" />
-        <div class="p-4 flex-1">
-          <div class="h-4 bg-slate-700 rounded w-3/4 mb-3" />
-          <div class="h-3 bg-slate-700 rounded w-1/2 mb-2" />
-          <div class="h-3 bg-slate-700 rounded w-1/3" />
-        </div>
-      </div>
-    </div>
+      <template #empty-state>
+        Aucun brouillon. Crée un nouveau personnage pour commencer!
+      </template>
+    </CharacterSection>
 
-    <div
-      v-else-if="characters && characters.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+    <!-- Created Characters Section -->
+    <CharacterSection
+      title="✅ Personnages créés (prêts à jouer)"
+      :characters="created"
+      :is-loading="isCreatedLoading"
+      @deleted="onCharacterDeleted"
+      v-if="created.length > 0"
     >
-      <CharacterMenu
-        v-for="character in characters"
-        :key="character.characterId"
-        :character="character"
-        @deleted="onCharacterDeleted"
-      />
-    </div>
-
-    <div
-      v-else
-      class="mt-6 p-4 bg-slate-800/30 rounded-lg text-slate-400"
-    >
-      Aucun personnage trouvé.
-    </div>
+      <template #empty-state>
+        Aucun personnage créé. Termine un brouillon pour le rendre jouable!
+      </template>
+    </CharacterSection>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useCharactersList } from "@rpg-gen/api-client";
-import CharacterMenu from "./CharacterMenu.vue";
+import { useDraftCharacters, useCreatedCharacters } from "@rpg-gen/api-client";
+import CharacterSection from "./CharacterSection.vue";
 import { computed } from "vue";
 
-const charactersList = useCharactersList();
-const characters = computed(() => charactersList.data.value || []);
-const isLoading = computed(() => charactersList.isLoading.value);
+const draftsList = useDraftCharacters();
+const createdList = useCreatedCharacters();
+
+const drafts = computed(() => draftsList.data.value || []);
+const created = computed(() => createdList.data.value || []);
+const isDraftLoading = computed(() => draftsList.isLoading.value);
+const isCreatedLoading = computed(() => createdList.isLoading.value);
 
 const onCharacterDeleted = () => {
-  // Refetch the list after deletion
-  charactersList.refetch();
+  // Refetch both lists after deletion
+  draftsList.refetch();
+  createdList.refetch();
 };
 </script>
 

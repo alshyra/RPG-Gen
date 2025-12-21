@@ -1,15 +1,16 @@
 <template>
   <div class="p-6 flex flex-col justify-between min-h-[50vh] mt-28">
-    <section class="text-center w-3/4 mx-auto mt-10">
-      <p class="text-slate-300">
+    <section class="text-center w-full mx-auto">
+      <p class="text-slate-300 max-w-2xl mx-auto mb-6">
         Un moteur d'aventure assisté par Gemini — génère scènes, PNJ, et images. Choisis ton univers
         et commence immédiatement.
       </p>
 
-      <!-- Characters list handled by CharactersMenu component -->
-      <div class="mt-6">
-        <h3 class="text-lg font-semibold mb-4 text-slate-200">Mes personnages</h3>
-        <CharactersMenu />
+      <div class="max-w-4xl w-full mx-auto">
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-6 text-slate-100">Mes personnages</h2>
+          <CharactersMenu />
+        </div>
       </div>
     </section>
 
@@ -19,7 +20,7 @@
         :is-loading="creating"
         @click="createCharacter"
       >
-        Créer un personnage (D&D)
+        + Créer un nouveau personnage
       </UiButton>
     </div>
   </div>

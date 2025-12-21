@@ -220,19 +220,19 @@
         ]
       }
     },
-    "/api/characters/deceased": {
+    "/api/characters/drafts/list": {
       "get": {
-        "operationId": "CharacterController_getDeceased",
+        "operationId": "CharacterController_findDrafts",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of deceased characters",
+            "description": "List of draft characters",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/DeceasedCharacterResponseDto"
+                    "$ref": "#/components/schemas/DraftCharacterResponseDto"
                   }
                 }
               }
@@ -244,7 +244,37 @@
             "bearer": []
           }
         ],
-        "summary": "Get all deceased characters",
+        "summary": "Get all draft (unfinished) characters for the current user",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
+    "/api/characters/created/list": {
+      "get": {
+        "operationId": "CharacterController_findCreated",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of finished characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all finished characters for the current user",
         "tags": [
           "characters"
         ]
@@ -424,9 +454,39 @@
         ]
       }
     },
+    "/api/characters/deceased": {
+      "get": {
+        "operationId": "CharacterController_getDeceased",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of deceased characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeceasedCharacterResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all deceased characters",
+        "tags": [
+          "characters"
+        ]
+      }
+    },
     "/api/characters/{characterId}/inventory": {
       "post": {
-        "operationId": "CharacterController_addInventory",
+        "operationId": "CharacterInventoryController_addItem",
         "parameters": [
           {
             "name": "characterId",
@@ -469,13 +529,13 @@
         ],
         "summary": "Add an item to character's inventory",
         "tags": [
-          "characters"
+          "character-inventory"
         ]
       }
     },
     "/api/characters/{characterId}/inventory/equip": {
       "post": {
-        "operationId": "CharacterController_equipInventory",
+        "operationId": "CharacterInventoryController_equipItem",
         "parameters": [
           {
             "name": "characterId",
@@ -515,13 +575,13 @@
         ],
         "summary": "Equip an item by definitionId (weapon only)",
         "tags": [
-          "characters"
+          "character-inventory"
         ]
       }
     },
     "/api/characters/{characterId}/inventory/{itemId}": {
       "patch": {
-        "operationId": "CharacterController_updateInventory",
+        "operationId": "CharacterInventoryController_updateItem",
         "parameters": [
           {
             "name": "characterId",
@@ -572,11 +632,11 @@
         ],
         "summary": "Update an item in character's inventory",
         "tags": [
-          "characters"
+          "character-inventory"
         ]
       },
       "delete": {
-        "operationId": "CharacterController_removeInventory",
+        "operationId": "CharacterInventoryController_removeItem",
         "parameters": [
           {
             "name": "characterId",
@@ -627,13 +687,13 @@
         ],
         "summary": "Remove an item from character's inventory",
         "tags": [
-          "characters"
+          "character-inventory"
         ]
       }
     },
     "/api/characters/{characterId}/inspiration/grant": {
       "post": {
-        "operationId": "CharacterController_grantInspiration",
+        "operationId": "CharacterInspirationController_grant",
         "parameters": [
           {
             "name": "characterId",
@@ -679,13 +739,13 @@
         ],
         "summary": "Grant inspiration point(s) to a character",
         "tags": [
-          "characters"
+          "character-inspiration"
         ]
       }
     },
     "/api/characters/{characterId}/inspiration/spend": {
       "post": {
-        "operationId": "CharacterController_spendInspiration",
+        "operationId": "CharacterInspirationController_spend",
         "parameters": [
           {
             "name": "characterId",
@@ -721,7 +781,7 @@
         ],
         "summary": "Spend an inspiration point",
         "tags": [
-          "characters"
+          "character-inspiration"
         ]
       }
     },
@@ -1209,56 +1269,6 @@
         },
         "tags": [
           "Health"
-        ]
-      }
-    },
-    "/api/characters/{characterId}/inventory/use": {
-      "post": {
-        "operationId": "InventoryController_useItem",
-        "parameters": [
-          {
-            "name": "characterId",
-            "required": true,
-            "in": "path",
-            "description": "Character ID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UseItemRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Item used successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UseItemResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request (item not found, wrong context, etc.)"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Use an item from inventory",
-        "tags": [
-          "inventory"
         ]
       }
     },
@@ -2523,6 +2533,148 @@
           "state"
         ]
       },
+      "UpdateCharacterRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Character name"
+          },
+          "physicalDescription": {
+            "type": "string",
+            "description": "Physical description of the character"
+          },
+          "race": {
+            "description": "Character race (new system)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RaceResponseDto"
+              }
+            ]
+          },
+          "hp": {
+            "type": "number",
+            "description": "Current hit points"
+          },
+          "hpMax": {
+            "type": "number",
+            "description": "Maximum hit points"
+          },
+          "totalXp": {
+            "type": "number",
+            "description": "Total experience points"
+          },
+          "skills": {
+            "description": "Character skills",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillResponseDto"
+            }
+          },
+          "portrait": {
+            "type": "string",
+            "description": "Character portrait URL or base64"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Character gender"
+          },
+          "inspirationPoints": {
+            "type": "number",
+            "description": "Inspiration points"
+          },
+          "state": {
+            "type": "string",
+            "description": "Character state",
+            "enum": [
+              "draft",
+              "created"
+            ]
+          },
+          "inventory": {
+            "description": "Character inventory",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryItemDto"
+            }
+          },
+          "aptitudes": {
+            "description": "Character aptitudes (learned abilities)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AptitudeResponseDto"
+            }
+          },
+          "className": {
+            "type": "string",
+            "description": "Character class (guerrier, rogue, mage)",
+            "enum": [
+              "guerrier",
+              "rogue",
+              "mage"
+            ]
+          },
+          "level": {
+            "type": "number",
+            "description": "Character level (1-20)"
+          },
+          "raceId": {
+            "type": "string",
+            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
+            "enum": [
+              "humain",
+              "nain",
+              "elfe",
+              "dark_elfe",
+              "orc"
+            ]
+          },
+          "stats": {
+            "description": "Tactical stats (vigor, finesse, mind, survival)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TacticalStats"
+              }
+            ]
+          },
+          "pa": {
+            "type": "number",
+            "description": "Current action points"
+          },
+          "paMax": {
+            "type": "number",
+            "description": "Maximum action points"
+          },
+          "pm": {
+            "type": "number",
+            "description": "Current movement points"
+          },
+          "pmMax": {
+            "type": "number",
+            "description": "Maximum movement points"
+          },
+          "talentPoints": {
+            "type": "number",
+            "description": "Unspent talent points"
+          },
+          "voies": {
+            "description": "Talent tree progression",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VoieProgressDto"
+            }
+          }
+        }
+      },
+      "KillCharacterBodyDto": {
+        "type": "object",
+        "properties": {
+          "deathLocation": {
+            "type": "string",
+            "description": "Location where character died"
+          }
+        }
+      },
       "DeceasedCharacterResponseDto": {
         "type": "object",
         "properties": {
@@ -2677,148 +2829,6 @@
           "isDeceased",
           "state"
         ]
-      },
-      "UpdateCharacterRequestDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Character name"
-          },
-          "physicalDescription": {
-            "type": "string",
-            "description": "Physical description of the character"
-          },
-          "race": {
-            "description": "Character race (new system)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RaceResponseDto"
-              }
-            ]
-          },
-          "hp": {
-            "type": "number",
-            "description": "Current hit points"
-          },
-          "hpMax": {
-            "type": "number",
-            "description": "Maximum hit points"
-          },
-          "totalXp": {
-            "type": "number",
-            "description": "Total experience points"
-          },
-          "skills": {
-            "description": "Character skills",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SkillResponseDto"
-            }
-          },
-          "portrait": {
-            "type": "string",
-            "description": "Character portrait URL or base64"
-          },
-          "gender": {
-            "type": "string",
-            "description": "Character gender"
-          },
-          "inspirationPoints": {
-            "type": "number",
-            "description": "Inspiration points"
-          },
-          "state": {
-            "type": "string",
-            "description": "Character state",
-            "enum": [
-              "draft",
-              "created"
-            ]
-          },
-          "inventory": {
-            "description": "Character inventory",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InventoryItemDto"
-            }
-          },
-          "aptitudes": {
-            "description": "Character aptitudes (learned abilities)",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AptitudeResponseDto"
-            }
-          },
-          "className": {
-            "type": "string",
-            "description": "Character class (guerrier, rogue, mage)",
-            "enum": [
-              "guerrier",
-              "rogue",
-              "mage"
-            ]
-          },
-          "level": {
-            "type": "number",
-            "description": "Character level (1-20)"
-          },
-          "raceId": {
-            "type": "string",
-            "description": "Race ID (humain, nain, elfe, dark_elfe, orc)",
-            "enum": [
-              "humain",
-              "nain",
-              "elfe",
-              "dark_elfe",
-              "orc"
-            ]
-          },
-          "stats": {
-            "description": "Tactical stats (vigor, finesse, mind, survival)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TacticalStats"
-              }
-            ]
-          },
-          "pa": {
-            "type": "number",
-            "description": "Current action points"
-          },
-          "paMax": {
-            "type": "number",
-            "description": "Maximum action points"
-          },
-          "pm": {
-            "type": "number",
-            "description": "Current movement points"
-          },
-          "pmMax": {
-            "type": "number",
-            "description": "Maximum movement points"
-          },
-          "talentPoints": {
-            "type": "number",
-            "description": "Unspent talent points"
-          },
-          "voies": {
-            "description": "Talent tree progression",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VoieProgressDto"
-            }
-          }
-        }
-      },
-      "KillCharacterBodyDto": {
-        "type": "object",
-        "properties": {
-          "deathLocation": {
-            "type": "string",
-            "description": "Location where character died"
-          }
-        }
       },
       "WeaponMeta": {
         "type": "object",
@@ -3912,60 +3922,6 @@
         },
         "required": [
           "imageUrl"
-        ]
-      },
-      "UseItemRequestDto": {
-        "type": "object",
-        "properties": {
-          "itemId": {
-            "type": "string",
-            "description": "The inventory item _id to use",
-            "example": "abc123-def456"
-          }
-        },
-        "required": [
-          "itemId"
-        ]
-      },
-      "Function": {
-        "type": "object",
-        "properties": {}
-      },
-      "UseItemResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Whether the item was successfully used"
-          },
-          "healAmount": {
-            "type": "number",
-            "description": "Amount healed (if applicable)"
-          },
-          "combatState": {
-            "description": "Updated combat state (if in combat)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Function"
-              }
-            ]
-          },
-          "character": {
-            "description": "Updated character (if not in combat)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Function"
-              }
-            ]
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable result message"
-          }
-        },
-        "required": [
-          "success",
-          "message"
         ]
       },
       "CharacterStatsDto": {

@@ -8,7 +8,6 @@ import { CombatModule } from "./modules/combat.module.js";
 import { DiceModule } from "./modules/dice.module.js";
 import { HealthModule } from "./modules/health.module.js";
 import { ImageModule } from "./modules/image.module.js";
-import { InventoryModule } from "./modules/inventory.module.js";
 import { ProgressionModule } from "./modules/progression.module.js";
 import { RacesModule } from "./modules/races.module.js";
 import { AptitudeModule } from "./domain/aptitude/aptitude.module.js";
@@ -31,7 +30,6 @@ import { ConfigModule } from "./config.module.js";
     ImageModule,
     HealthModule,
     CharacterModule,
-    InventoryModule,
     ProgressionModule,
     RacesModule,
   ],

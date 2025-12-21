@@ -35,6 +35,16 @@ const characterApi = {
     return getData(response);
   },
 
+  async findDrafts(): Promise<CharacterResponseDto[]> {
+    const response = await apiClient.GET("/api/characters/drafts/list");
+    return getData(response);
+  },
+
+  async findCreated(): Promise<CharacterResponseDto[]> {
+    const response = await apiClient.GET("/api/characters/created/list");
+    return getData(response);
+  },
+
   async getDeceased(): Promise<DeceasedCharacterResponseDto[]> {
     const response = await apiClient.GET("/api/characters/deceased");
     return getData(response);
@@ -396,6 +406,28 @@ export function useDeceasedCharacters() {
   return useQuery({
     queryKey: characterKeys.deceased(),
     queryFn: () => characterApi.getDeceased(),
+    staleTime: 1000 * 60, // 1 minute
+  });
+}
+
+/**
+ * Query for draft characters (unfinished)
+ */
+export function useDraftCharacters() {
+  return useQuery({
+    queryKey: [...characterKeys.lists(), 'drafts'],
+    queryFn: () => characterApi.findDrafts(),
+    staleTime: 1000 * 60, // 1 minute
+  });
+}
+
+/**
+ * Query for created characters (finished)
+ */
+export function useCreatedCharacters() {
+  return useQuery({
+    queryKey: [...characterKeys.lists(), 'created'],
+    queryFn: () => characterApi.findCreated(),
     staleTime: 1000 * 60, // 1 minute
   });
 }

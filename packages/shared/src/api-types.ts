@@ -121,15 +121,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/characters/deceased": {
+    "/api/characters/drafts/list": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get all deceased characters */
-        get: operations["CharacterController_getDeceased"];
+        /** Get all draft (unfinished) characters for the current user */
+        get: operations["CharacterController_findDrafts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/characters/created/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all finished characters for the current user */
+        get: operations["CharacterController_findCreated"];
         put?: never;
         post?: never;
         delete?: never;
@@ -174,6 +191,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/characters/deceased": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all deceased characters */
+        get: operations["CharacterController_getDeceased"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters/{characterId}/inventory": {
         parameters: {
             query?: never;
@@ -184,7 +218,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Add an item to character's inventory */
-        post: operations["CharacterController_addInventory"];
+        post: operations["CharacterInventoryController_addItem"];
         delete?: never;
         options?: never;
         head?: never;
@@ -201,7 +235,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Equip an item by definitionId (weapon only) */
-        post: operations["CharacterController_equipInventory"];
+        post: operations["CharacterInventoryController_equipItem"];
         delete?: never;
         options?: never;
         head?: never;
@@ -219,11 +253,11 @@ export interface paths {
         put?: never;
         post?: never;
         /** Remove an item from character's inventory */
-        delete: operations["CharacterController_removeInventory"];
+        delete: operations["CharacterInventoryController_removeItem"];
         options?: never;
         head?: never;
         /** Update an item in character's inventory */
-        patch: operations["CharacterController_updateInventory"];
+        patch: operations["CharacterInventoryController_updateItem"];
         trace?: never;
     };
     "/api/characters/{characterId}/inspiration/grant": {
@@ -236,7 +270,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Grant inspiration point(s) to a character */
-        post: operations["CharacterController_grantInspiration"];
+        post: operations["CharacterInspirationController_grant"];
         delete?: never;
         options?: never;
         head?: never;
@@ -253,7 +287,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Spend an inspiration point */
-        post: operations["CharacterController_spendInspiration"];
+        post: operations["CharacterInspirationController_spend"];
         delete?: never;
         options?: never;
         head?: never;
@@ -491,23 +525,6 @@ export interface paths {
         get: operations["HealthController_getHealth"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/characters/{characterId}/inventory/use": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Use an item from inventory */
-        post: operations["InventoryController_useItem"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1036,6 +1053,67 @@ export interface components {
             /** @description Talent tree progression */
             voies?: components["schemas"]["VoieProgressDto"][];
         };
+        UpdateCharacterRequestDto: {
+            /** @description Character name */
+            name?: string;
+            /** @description Physical description of the character */
+            physicalDescription?: string;
+            /** @description Character race (new system) */
+            race?: components["schemas"]["RaceResponseDto"];
+            /** @description Current hit points */
+            hp?: number;
+            /** @description Maximum hit points */
+            hpMax?: number;
+            /** @description Total experience points */
+            totalXp?: number;
+            /** @description Character skills */
+            skills?: components["schemas"]["SkillResponseDto"][];
+            /** @description Character portrait URL or base64 */
+            portrait?: string;
+            /** @description Character gender */
+            gender?: string;
+            /** @description Inspiration points */
+            inspirationPoints?: number;
+            /**
+             * @description Character state
+             * @enum {string}
+             */
+            state?: "draft" | "created";
+            /** @description Character inventory */
+            inventory?: components["schemas"]["InventoryItemDto"][];
+            /** @description Character aptitudes (learned abilities) */
+            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
+            /**
+             * @description Character class (guerrier, rogue, mage)
+             * @enum {string}
+             */
+            className?: "guerrier" | "rogue" | "mage";
+            /** @description Character level (1-20) */
+            level?: number;
+            /**
+             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
+             * @enum {string}
+             */
+            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
+            /** @description Tactical stats (vigor, finesse, mind, survival) */
+            stats?: components["schemas"]["TacticalStats"];
+            /** @description Current action points */
+            pa?: number;
+            /** @description Maximum action points */
+            paMax?: number;
+            /** @description Current movement points */
+            pm?: number;
+            /** @description Maximum movement points */
+            pmMax?: number;
+            /** @description Unspent talent points */
+            talentPoints?: number;
+            /** @description Talent tree progression */
+            voies?: components["schemas"]["VoieProgressDto"][];
+        };
+        KillCharacterBodyDto: {
+            /** @description Location where character died */
+            deathLocation?: string;
+        };
         DeceasedCharacterResponseDto: {
             /** @description Unique character ID (UUID) */
             characterId: string;
@@ -1100,67 +1178,6 @@ export interface components {
             talentPoints?: number;
             /** @description Talent tree progression */
             voies?: components["schemas"]["VoieProgressDto"][];
-        };
-        UpdateCharacterRequestDto: {
-            /** @description Character name */
-            name?: string;
-            /** @description Physical description of the character */
-            physicalDescription?: string;
-            /** @description Character race (new system) */
-            race?: components["schemas"]["RaceResponseDto"];
-            /** @description Current hit points */
-            hp?: number;
-            /** @description Maximum hit points */
-            hpMax?: number;
-            /** @description Total experience points */
-            totalXp?: number;
-            /** @description Character skills */
-            skills?: components["schemas"]["SkillResponseDto"][];
-            /** @description Character portrait URL or base64 */
-            portrait?: string;
-            /** @description Character gender */
-            gender?: string;
-            /** @description Inspiration points */
-            inspirationPoints?: number;
-            /**
-             * @description Character state
-             * @enum {string}
-             */
-            state?: "draft" | "created";
-            /** @description Character inventory */
-            inventory?: components["schemas"]["InventoryItemDto"][];
-            /** @description Character aptitudes (learned abilities) */
-            aptitudes?: components["schemas"]["AptitudeResponseDto"][];
-            /**
-             * @description Character class (guerrier, rogue, mage)
-             * @enum {string}
-             */
-            className?: "guerrier" | "rogue" | "mage";
-            /** @description Character level (1-20) */
-            level?: number;
-            /**
-             * @description Race ID (humain, nain, elfe, dark_elfe, orc)
-             * @enum {string}
-             */
-            raceId?: "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
-            /** @description Tactical stats (vigor, finesse, mind, survival) */
-            stats?: components["schemas"]["TacticalStats"];
-            /** @description Current action points */
-            pa?: number;
-            /** @description Maximum action points */
-            paMax?: number;
-            /** @description Current movement points */
-            pm?: number;
-            /** @description Maximum movement points */
-            pmMax?: number;
-            /** @description Unspent talent points */
-            talentPoints?: number;
-            /** @description Talent tree progression */
-            voies?: components["schemas"]["VoieProgressDto"][];
-        };
-        KillCharacterBodyDto: {
-            /** @description Location where character died */
-            deathLocation?: string;
         };
         WeaponMeta: {
             /**
@@ -1638,26 +1655,6 @@ export interface components {
             /** @description Generated avatar image URL or base64 data */
             imageUrl: string;
         };
-        UseItemRequestDto: {
-            /**
-             * @description The inventory item _id to use
-             * @example abc123-def456
-             */
-            itemId: string;
-        };
-        Function: Record<string, never>;
-        UseItemResponseDto: {
-            /** @description Whether the item was successfully used */
-            success: boolean;
-            /** @description Amount healed (if applicable) */
-            healAmount?: number;
-            /** @description Updated combat state (if in combat) */
-            combatState?: components["schemas"]["Function"];
-            /** @description Updated character (if not in combat) */
-            character?: components["schemas"]["Function"];
-            /** @description Human-readable result message */
-            message: string;
-        };
         CharacterStatsDto: {
             /**
              * @description Vigor stat
@@ -2013,7 +2010,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_getDeceased: {
+    CharacterController_findDrafts: {
         parameters: {
             query?: never;
             header?: never;
@@ -2022,13 +2019,33 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of deceased characters */
+            /** @description List of draft characters */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeceasedCharacterResponseDto"][];
+                    "application/json": components["schemas"]["DraftCharacterResponseDto"][];
+                };
+            };
+        };
+    };
+    CharacterController_findCreated: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of finished characters */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterResponseDto"][];
                 };
             };
         };
@@ -2159,7 +2176,27 @@ export interface operations {
             };
         };
     };
-    CharacterController_addInventory: {
+    CharacterController_getDeceased: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of deceased characters */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeceasedCharacterResponseDto"][];
+                };
+            };
+        };
+    };
+    CharacterInventoryController_addItem: {
         parameters: {
             query?: never;
             header?: never;
@@ -2192,7 +2229,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_equipInventory: {
+    CharacterInventoryController_equipItem: {
         parameters: {
             query?: never;
             header?: never;
@@ -2218,7 +2255,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_removeInventory: {
+    CharacterInventoryController_removeItem: {
         parameters: {
             query?: never;
             header?: never;
@@ -2252,7 +2289,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_updateInventory: {
+    CharacterInventoryController_updateItem: {
         parameters: {
             query?: never;
             header?: never;
@@ -2286,7 +2323,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_grantInspiration: {
+    CharacterInspirationController_grant: {
         parameters: {
             query?: never;
             header?: never;
@@ -2326,7 +2363,7 @@ export interface operations {
             };
         };
     };
-    CharacterController_spendInspiration: {
+    CharacterInspirationController_spend: {
         parameters: {
             query?: never;
             header?: never;
@@ -2684,40 +2721,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    InventoryController_useItem: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Character ID */
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UseItemRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Item used successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UseItemResponseDto"];
-                };
-            };
-            /** @description Bad request (item not found, wrong context, etc.) */
-            400: {
                 headers: {
                     [name: string]: unknown;
                 };

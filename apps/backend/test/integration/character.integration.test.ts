@@ -128,7 +128,7 @@ function assertIsDeceasedCharacterDto(obj: any): void {
 
 // ========== Character CRUD Operations ==========
 
-test.serial("Creates a new character in draft state", async t => {
+test("Creates a new character in draft state", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -142,7 +142,7 @@ test.serial("Creates a new character in draft state", async t => {
   }
 });
 
-test.serial("Finds all characters for a user", async t => {
+test("Finds all characters for a user", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -162,7 +162,7 @@ test.serial("Finds all characters for a user", async t => {
   }
 });
 
-test.serial("Finds a single character by ID", async t => {
+test("Finds a single character by ID", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -187,7 +187,34 @@ test.serial("Finds a single character by ID", async t => {
   }
 });
 
-test.serial("Updates a character and returns proper DTO", async t => {
+test("Finds a draft character by ID (unfinished)", async t => {
+  const context = await setupCharacterTest();
+
+  try {
+    // Create a character but keep it in draft state
+    const created = await context.characterService.create(context.userId);
+    const characterId = created.characterId;
+
+    // Update partially without portrait - stays in draft state
+    await context.characterService.update(context.userId, characterId, {
+      name: "Unfinished Hero",
+      gender: "male",
+      className: "guerrier",
+    });
+
+    const character = await context.characterService.findByCharacterId(context.userId, characterId);
+
+    // Should return DraftCharacterResponseDto, not CharacterResponseDto
+    assertIsDraftCharacterDto(character);
+    t.is(character.characterId, characterId, "Should return correct character");
+    t.is(character.state, "draft", "Should still be in draft state");
+    t.is(character.name, "Unfinished Hero", "Name should be updated");
+  } finally {
+    await teardownCharacterTest(context);
+  }
+});
+
+test("Updates a character and returns proper DTO", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -207,7 +234,7 @@ test.serial("Updates a character and returns proper DTO", async t => {
   }
 });
 
-test.serial("Deletes a character", async t => {
+test("Deletes a character", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -229,7 +256,7 @@ test.serial("Deletes a character", async t => {
 
 // ========== Character Death & Deceased ==========
 
-test.serial("Marks a character as deceased with death location", async t => {
+test("Marks a character as deceased with death location", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -259,7 +286,7 @@ test.serial("Marks a character as deceased with death location", async t => {
   }
 });
 
-test.serial("Retrieves all deceased characters for a user", async t => {
+test("Retrieves all deceased characters for a user", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -291,7 +318,7 @@ test.serial("Retrieves all deceased characters for a user", async t => {
 
 // ========== Inventory Management ==========
 
-test.serial("Adds item to character inventory", async t => {
+test("Adds item to character inventory", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -327,7 +354,7 @@ test.serial("Adds item to character inventory", async t => {
   }
 });
 
-test.serial("Updates an inventory item quantity", async t => {
+test("Updates an inventory item quantity", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -369,7 +396,7 @@ test.serial("Updates an inventory item quantity", async t => {
   }
 });
 
-test.serial("Removes items from inventory", async t => {
+test("Removes items from inventory", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -406,7 +433,7 @@ test.serial("Removes items from inventory", async t => {
   }
 });
 
-test.serial("Equips a weapon from inventory", async t => {
+test("Equips a weapon from inventory", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -444,7 +471,7 @@ test.serial("Equips a weapon from inventory", async t => {
 
 // ========== Inspiration Management ==========
 
-test.serial("Grants inspiration points to character", async t => {
+test("Grants inspiration points to character", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -471,7 +498,7 @@ test.serial("Grants inspiration points to character", async t => {
   }
 });
 
-test.serial("Caps inspiration at 5 points (D&D 5e rule)", async t => {
+test("Caps inspiration at 5 points (D&D 5e rule)", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -499,7 +526,7 @@ test.serial("Caps inspiration at 5 points (D&D 5e rule)", async t => {
   }
 });
 
-test.serial("Spends inspiration points", async t => {
+test("Spends inspiration points", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -529,7 +556,7 @@ test.serial("Spends inspiration points", async t => {
 
 // ========== Error Handling ==========
 
-test.serial("Throws error for non-existent character", async t => {
+test("Throws error for non-existent character", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -542,7 +569,7 @@ test.serial("Throws error for non-existent character", async t => {
   }
 });
 
-test.serial("Throws error when deleting non-existent character", async t => {
+test("Throws error when deleting non-existent character", async t => {
   const context = await setupCharacterTest();
 
   try {
@@ -550,6 +577,46 @@ test.serial("Throws error when deleting non-existent character", async t => {
     t.fail("Should throw error for non-existent character");
   } catch (error) {
     t.pass("Should throw error when deleting non-existent character");
+  } finally {
+    await teardownCharacterTest(context);
+  }
+});
+// ========== Draft vs Created Character Separation ==========
+
+test("Filters draft characters from list", async t => {
+  const context = await setupCharacterTest();
+
+  try {
+    // Create 1 draft character
+    const draft = await context.characterService.create(context.userId);
+    await context.characterService.update(context.userId, draft.characterId, {
+      name: "Unfinished",
+      className: "guerrier",
+    });
+
+    // Create 1 finished character
+    const finished = await context.characterService.create(context.userId);
+    await context.characterService.update(context.userId, finished.characterId, {
+      name: "Finished Hero",
+      className: "mage",
+      raceId: "humain",
+      portrait: "portrait-url.png",
+      state: "created",
+    });
+
+    // Get all characters
+    const allChars = await context.characterService.findByUserId(context.userId);
+    t.is(allChars.length, 2, "Should have 2 total characters");
+
+    // Filter drafts
+    const drafts = allChars.filter(c => c.state === 'draft');
+    t.is(drafts.length, 1, "Should have 1 draft character");
+    t.is(drafts[0].name, "Unfinished", "Draft should have correct name");
+
+    // Filter finished
+    const finished_chars = allChars.filter(c => c.state === 'created');
+    t.is(finished_chars.length, 1, "Should have 1 finished character");
+    t.is(finished_chars[0].name, "Finished Hero", "Finished should have correct name");
   } finally {
     await teardownCharacterTest(context);
   }

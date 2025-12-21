@@ -71,6 +71,40 @@ export class CharacterController {
     return characters.map(c => new BaseCharacterResponseDto(c));
   }
 
+  @Get("drafts/list")
+  @ApiOperation({ summary: "Get all draft (unfinished) characters for the current user" })
+  @ApiResponse({
+    status: 200,
+    description: "List of draft characters",
+    type: [DraftCharacterResponseDto],
+  })
+  async findDrafts(@Req() req: RPGRequest) {
+    const { user } = req;
+    const userId = user._id.toString();
+
+    const characters = await this.characterService.findByUserId(userId);
+    return characters
+      .filter(c => c.state === 'draft')
+      .map(c => new DraftCharacterResponseDto(c));
+  }
+
+  @Get("created/list")
+  @ApiOperation({ summary: "Get all finished characters for the current user" })
+  @ApiResponse({
+    status: 200,
+    description: "List of finished characters",
+    type: [CharacterResponseDto],
+  })
+  async findCreated(@Req() req: RPGRequest) {
+    const { user } = req;
+    const userId = user._id.toString();
+
+    const characters = await this.characterService.findByUserId(userId);
+    return characters
+      .filter(c => c.state === 'created')
+      .map(c => new CharacterResponseDto(c));
+  }
+
   @Get(":characterId")
   @ApiOperation({ summary: "Get a specific character by ID" })
   @ApiResponse({
@@ -87,6 +121,10 @@ export class CharacterController {
     const userId = user._id.toString();
 
     const character = await this.characterService.findByCharacterId(userId, characterId);
+    // Return appropriate DTO based on character state
+    if (character.state === 'draft') {
+      return new DraftCharacterResponseDto(character);
+    }
     return new CharacterResponseDto(character);
   }
 
