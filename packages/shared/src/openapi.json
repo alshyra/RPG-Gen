@@ -1396,7 +1396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CharacterResponseDto"
+                  "$ref": "#/components/schemas/DraftCharacterResponseDto"
                 }
               }
             }
@@ -2373,7 +2373,6 @@
         },
         "required": [
           "characterId",
-          "portrait",
           "isDeceased",
           "state"
         ]
@@ -2528,7 +2527,6 @@
         },
         "required": [
           "characterId",
-          "portrait",
           "isDeceased",
           "state"
         ]
@@ -2825,7 +2823,6 @@
         },
         "required": [
           "characterId",
-          "portrait",
           "isDeceased",
           "state"
         ]
@@ -3146,33 +3143,6 @@
           "combat_start"
         ]
       },
-      "CombatantStats": {
-        "type": "object",
-        "properties": {
-          "vigor": {
-            "type": "number",
-            "description": "Vigor stat"
-          },
-          "finesse": {
-            "type": "number",
-            "description": "Finesse stat"
-          },
-          "mind": {
-            "type": "number",
-            "description": "Mind stat"
-          },
-          "survival": {
-            "type": "number",
-            "description": "Survival stat"
-          }
-        },
-        "required": [
-          "vigor",
-          "finesse",
-          "mind",
-          "survival"
-        ]
-      },
       "CombatantDto": {
         "type": "object",
         "properties": {
@@ -3236,7 +3206,7 @@
             "description": "Combat stats (vigor, finesse, mind, survival)",
             "allOf": [
               {
-                "$ref": "#/components/schemas/CombatantStats"
+                "$ref": "#/components/schemas/TacticalStats"
               }
             ]
           },
@@ -3330,34 +3300,17 @@
       "CombatActionRequestDto": {
         "type": "object",
         "properties": {
-          "actionType": {
+          "aptitudeId": {
             "type": "string",
-            "description": "Type of action to perform",
-            "enum": [
-              "attack",
-              "dash",
-              "disengage",
-              "cast-spell",
-              "second-wind",
-              "rage",
-              "cunning-action"
-            ]
+            "description": "Aptitude ID to use (including basic attack, dash, etc.)"
           },
           "targetId": {
             "type": "string",
-            "description": "Target combatant ID (for attacks/spells targeting enemies)"
-          },
-          "spellName": {
-            "type": "string",
-            "description": "Spell name (for cast-spell actions)"
-          },
-          "featureId": {
-            "type": "string",
-            "description": "Feature/ability ID (for class features)"
+            "description": "Target combatant ID (for aptitudes targeting enemies)"
           }
         },
         "required": [
-          "actionType"
+          "aptitudeId"
         ]
       },
       "DiceResultDto": {
@@ -4127,6 +4080,11 @@
                 "$ref": "#/components/schemas/RaceBonusesDto"
               }
             ]
+          },
+          "descriptionForAi": {
+            "type": "string",
+            "description": "Description for AI usage",
+            "example": "Polyvalent, gagne +1 PA au premier tour."
           },
           "color": {
             "type": "string",

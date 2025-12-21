@@ -28,7 +28,6 @@ export type CombatStartInstructionMessageDto = import('./api-types').components[
 export type CombatStartRequestDto = import('./api-types').components['schemas']['CombatStartRequestDto'];
 export type CombatStateDto = import('./api-types').components['schemas']['CombatStateDto'];
 export type CombatantDto = import('./api-types').components['schemas']['CombatantDto'];
-export type CombatantStats = import('./api-types').components['schemas']['CombatantStats'];
 export type ConsumableMeta = import('./api-types').components['schemas']['ConsumableMeta'];
 export type CreateInventoryItemDto = import('./api-types').components['schemas']['CreateInventoryItemDto'];
 export type DeceasedCharacterResponseDto = import('./api-types').components['schemas']['DeceasedCharacterResponseDto'];

@@ -12,7 +12,7 @@ export class InitService {
   }
 
   /**
-   * Create enemy CombatantDto objects with rolled initiatives.
+   * Create enemy CombatantDto objects with rolled initiatives and positions.
    */
   buildEnemies(combatStart: CombatStartRequestDto): CombatantDto[] {
     return combatStart.combat_start.map((enemy, idx) => {
@@ -24,6 +24,7 @@ export class InitService {
         hp: enemy.hp,
         hpMax: enemy.hp,
         initiative: initRoll,
+        position: { x: 10, y: 3 + idx },  // Enemies on right side, staggered vertically
       });
     });
   }

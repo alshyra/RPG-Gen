@@ -45,12 +45,6 @@ export class Combatant {
     required: false,
     type: Number,
   })
-  ac?: number;
-
-  @Prop({
-    required: false,
-    type: Number,
-  })
   attackBonus?: number;
 
   @Prop({
@@ -64,6 +58,36 @@ export class Combatant {
     type: Number,
   })
   damageBonus?: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  pa?: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  paMax?: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  pm?: number;
+
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  pmMax?: number;
+
+  @Prop({
+    required: false,
+    type: Object,
+  })
+  position?: { x: number; y: number };
 }
 
 export const CombatantSchema = SchemaFactory.createForClass(Combatant);

@@ -1,39 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
-export enum CombatActionType {
-  ATTACK = "attack",
-  DASH = "dash",
-  DISENGAGE = "disengage",
-  CAST_SPELL = "cast-spell",
-  SECOND_WIND = "second-wind",
-  RAGE = "rage",
-  CUNNING_ACTION = "cunning-action",
-  // Add more as needed
-}
-
+/**
+ * Combat action request - all actions are now aptitudes.
+ * Even basic melee attack is an aptitude with PA cost.
+ */
 export class CombatActionRequestDto {
   @ApiProperty({
-    description: "Type of action to perform",
-    enum: CombatActionType,
+    description: "Aptitude ID to use (including basic attack, dash, etc.)",
   })
-  @IsEnum(CombatActionType)
-  actionType: CombatActionType;
+  @IsString()
+  aptitudeId: string;
 
   @ApiPropertyOptional({
-    description: "Target combatant ID (for attacks/spells targeting enemies)",
+    description: "Target combatant ID (for aptitudes targeting enemies)",
   })
   @IsOptional()
   @IsString()
   targetId?: string;
-
-  @ApiPropertyOptional({ description: "Spell name (for cast-spell actions)" })
-  @IsOptional()
-  @IsString()
-  spellName?: string;
-
-  @ApiPropertyOptional({ description: "Feature/ability ID (for class features)" })
-  @IsOptional()
-  @IsString()
-  featureId?: string;
 }

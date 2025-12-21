@@ -22,6 +22,11 @@ export interface UnitStats {
   defense: number;
   moveRange: number;
   attackRange: number;
+  // New tactical system resources
+  pa?: number; // Current action points
+  paMax?: number; // Maximum action points
+  pm?: number; // Current movement points
+  pmMax?: number; // Maximum movement points
 }
 
 export interface CombatConfig {

@@ -80,6 +80,7 @@ export class CombatAppService {
       paMax: classStats.pa,
       pm: classStats.pm,
       pmMax: classStats.pm,
+      position: { x: 1, y: 5 },  // Player starts on left side
       level,
       className,
       basePower: 5, // Default player base power

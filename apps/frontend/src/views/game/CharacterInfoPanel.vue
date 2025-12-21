@@ -17,6 +17,25 @@
       <CharacterPortrait class="shrink-0" />
       <div class="card flex-1 overflow-auto min-h-0">
         <AbilityScores class="mt-3" />
+        
+        <!-- PA/PM Resources -->
+        <div class="border-t border-slate-600 mt-3 pt-3 px-3">
+          <div class="flex gap-4 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-yellow-400">⚡</span>
+              <span class="font-semibold">
+                {{ currentCharacter.pa ?? 0 }} / {{ currentCharacter.paMax ?? 0 }} PA
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-blue-400">👟</span>
+              <span class="font-semibold">
+                {{ currentCharacter.pm ?? 0 }} / {{ currentCharacter.pmMax ?? 0 }} PM
+              </span>
+            </div>
+          </div>
+        </div>
+        
         <div class="border-t border-slate-600 mt-3" />
         <nav class="p-3 space-y-2">
           <AppRouterButton
@@ -42,10 +61,10 @@
           </AppRouterButton>
           <AppRouterButton
             variant="ghost"
-            :to="{ name: 'game-spells', params: { characterId: currentCharacter.characterId } }"
+            :to="{ name: 'game-aptitudes', params: { characterId: currentCharacter.characterId } }"
             class="w-full text-left px-3 py-2"
           >
-            Sorts
+            ⚡ Aptitudes
           </AppRouterButton>
           <AppRouterButton
             variant="ghost"

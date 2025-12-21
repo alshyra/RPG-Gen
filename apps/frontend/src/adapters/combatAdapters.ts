@@ -21,6 +21,11 @@ export class CombatAdapter {
           defense: 0,
           moveRange: 3,
           attackRange: 1,
+          // Tactical system resources
+          pa: state.player.pa,
+          paMax: state.player.paMax,
+          pm: state.player.pm,
+          pmMax: state.player.pmMax,
         },
         team: "player",
         isPlayer: true,
@@ -39,6 +44,11 @@ export class CombatAdapter {
             defense: 0,
             moveRange: 2,
             attackRange: 1,
+            // Tactical system resources
+            pa: enemy.pa,
+            paMax: enemy.paMax,
+            pm: enemy.pm,
+            pmMax: enemy.pmMax,
           },
           team: "enemy",
           isPlayer: false,

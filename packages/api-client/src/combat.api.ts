@@ -29,7 +29,7 @@ const combatApi = {
   },
 
   /**
-   * Execute a combat action (attack, spell, dash, etc.)
+   * Execute a combat action - all actions are aptitudes now
    */
   async executeAction(
     characterId: string,
@@ -43,19 +43,29 @@ const combatApi = {
   },
 
   /**
-   * Attack a target (convenience wrapper)
+   * Use an aptitude (all combat actions are aptitudes)
+   */
+  async useAptitude(
+    characterId: string,
+    aptitudeId: string,
+    targetId?: string,
+  ): Promise<CombatActionResponseDto> {
+    return this.executeAction(characterId, {
+      aptitudeId,
+      ...(targetId && { targetId }),
+    });
+  },
+
+  /**
+   * Attack a target (uses basic attack aptitude)
+   * @deprecated Use useAptitude with "com_frappe_basique" aptitudeId instead
    */
   async attack(
     characterId: string,
     target: CombatantDto,
-    spellName?: string,
   ): Promise<CombatActionResponseDto> {
-    const actionType = spellName ? "cast-spell" : "attack";
-    return this.executeAction(characterId, {
-      actionType,
-      targetId: target.id,
-      ...(spellName && { spellName }),
-    });
+    // Use the seeded basic attack aptitude
+    return this.useAptitude(characterId, "com_frappe_basique", target.id);
   },
 
   /**
@@ -145,6 +155,17 @@ export function useCombat(
     },
   });
 
+  const useAptitude = useMutation({
+    mutationFn: async (data: { characterId: string; aptitudeId: string; targetId?: string }) => {
+      return combatApi.useAptitude(data.characterId, data.aptitudeId, data.targetId);
+    },
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });
+      // Also invalidate character to update PA/PM
+      await queryClient.invalidateQueries({ queryKey: ["character", variables.characterId] });
+    },
+  });
+
   const endTurn = useMutation({
     mutationFn: async (characterId: string) => {
       return combatApi.endTurn(characterId);
@@ -179,6 +200,7 @@ export function useCombat(
     startCombat,
     executeAction,
     attack,
+    useAptitude,
     endTurn,
     endCombat,
     move,

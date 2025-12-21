@@ -101,6 +101,21 @@ export class CombatSession {
     type: String,
   })
   narrative?: string;
+
+  @Prop({
+    required: false,
+    type: Map,
+    of: Number,
+    default: {},
+  })
+  aptitudeCooldowns?: Map<string, number>;
+
+  @Prop({
+    required: false,
+    type: Number,
+    default: 1,
+  })
+  currentTurn?: number;
 }
 
 export const CombatSessionSchema = SchemaFactory.createForClass(CombatSession);

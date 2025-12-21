@@ -941,7 +941,7 @@ export interface components {
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
             /** @description Character portrait URL or base64 */
-            portrait: string;
+            portrait?: string;
             /** @description Character gender */
             gender?: string;
             /** @description Inspiration points */
@@ -1006,7 +1006,7 @@ export interface components {
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
             /** @description Character portrait URL or base64 */
-            portrait: string;
+            portrait?: string;
             /** @description Character gender */
             gender?: string;
             /** @description Inspiration points */
@@ -1132,7 +1132,7 @@ export interface components {
             /** @description Character skills */
             skills?: components["schemas"]["SkillResponseDto"][];
             /** @description Character portrait URL or base64 */
-            portrait: string;
+            portrait?: string;
             /** @description Character gender */
             gender?: string;
             /** @description Inspiration points */
@@ -1322,16 +1322,6 @@ export interface components {
             /** @description Array of enemies to initialize combat with */
             combat_start: components["schemas"]["CombatStartEntryDto"][];
         };
-        CombatantStats: {
-            /** @description Vigor stat */
-            vigor: number;
-            /** @description Finesse stat */
-            finesse: number;
-            /** @description Mind stat */
-            mind: number;
-            /** @description Survival stat */
-            survival: number;
-        };
         CombatantDto: {
             /** @description ID of the combatant (player character or enemy) */
             id: string;
@@ -1362,7 +1352,7 @@ export interface components {
             /** @description Which attribute scales damage (vigor, finesse, mind, survival) */
             scalingAttribute?: string;
             /** @description Combat stats (vigor, finesse, mind, survival) */
-            stats?: components["schemas"]["CombatantStats"];
+            stats?: components["schemas"]["TacticalStats"];
             /** @description Combat side (player or enemy) */
             side?: string;
             /** @description Grid position for tactical combat */
@@ -1391,17 +1381,10 @@ export interface components {
             combatEnd?: components["schemas"]["CombatEndDto"];
         };
         CombatActionRequestDto: {
-            /**
-             * @description Type of action to perform
-             * @enum {string}
-             */
-            actionType: "attack" | "dash" | "disengage" | "cast-spell" | "second-wind" | "rage" | "cunning-action";
-            /** @description Target combatant ID (for attacks/spells targeting enemies) */
+            /** @description Aptitude ID to use (including basic attack, dash, etc.) */
+            aptitudeId: string;
+            /** @description Target combatant ID (for aptitudes targeting enemies) */
             targetId?: string;
-            /** @description Spell name (for cast-spell actions) */
-            spellName?: string;
-            /** @description Feature/ability ID (for class features) */
-            featureId?: string;
         };
         DiceResultDto: {
             /** @description Individual dice roll results */
@@ -1791,6 +1774,11 @@ export interface components {
             traitEffect: components["schemas"]["TraitEffectDto"];
             /** @description Stat bonuses */
             bonuses: components["schemas"]["RaceBonusesDto"];
+            /**
+             * @description Description for AI usage
+             * @example Polyvalent, gagne +1 PA au premier tour.
+             */
+            descriptionForAi?: string;
             /**
              * @description Color for UI (hex)
              * @example #3b82f6
@@ -2827,7 +2815,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
+                    "application/json": components["schemas"]["DraftCharacterResponseDto"];
                 };
             };
             /** @description Invalid race ID */
