@@ -2,7 +2,7 @@ import test from "ava";
 import util from "util";
 import { DiceService } from "../../src/domain/dice/dice.service.js";
 import { CombatDiceResultDto } from "../../src/domain/dice/dto/CombatDiceResultDto.js";
-import { CombatModule } from "../../src/modules/combat.module.js";
+import { CombatModule } from "../../src/bounded-contexts/combat/combat.module.js";
 import { closeTestApp, createTestApp } from "../helpers/test-app.js";
 
 // Helper to convert simple roll arrays into DiceResultDto objects (matching expected output)

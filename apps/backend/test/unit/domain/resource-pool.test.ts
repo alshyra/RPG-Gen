@@ -1,5 +1,5 @@
 import test from "ava";
-import { ResourcePool } from "../../../src/domain/character/value-objects/ResourcePool.js";
+import { ResourcePool } from "../../../src/bounded-contexts/character/domain/value-objects/ResourcePool.js";
 
 test("ResourcePool - creates with valid values", t => {
   const pool = new ResourcePool(5, 10);

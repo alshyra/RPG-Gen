@@ -1,5 +1,5 @@
 import test from "ava";
-import { TalentRank } from "../../../src/domain/character/value-objects/TalentRank.js";
+import { TalentRank } from "../../../src/bounded-contexts/character/domain/value-objects/TalentRank.js";
 
 test("TalentRank - creates with valid values", t => {
   const rank = new TalentRank("voie_protection", 3);

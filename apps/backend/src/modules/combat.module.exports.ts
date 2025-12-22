@@ -14,6 +14,6 @@
  * - These are implementation details and should not be imported directly
  */
 
-export { CombatAppService } from "../domain/combat/combat.app.service.js";
+export { CombatAppService } from "../bounded-contexts/combat/application/services/CombatAppService.js";
 export { CombatOrchestrator } from "../orchestrators/combat/index.js";
-export { CombatGridService } from "../domain/combat/services/combat-grid.service.js";
+export { CombatGridService } from "../bounded-contexts/combat/domain/services/combat-grid.service.js";

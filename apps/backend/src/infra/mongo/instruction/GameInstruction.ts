@@ -1,6 +1,6 @@
 import { Prop, Schema } from "@nestjs/mongoose";
-import { CombatStartEntry } from "../combat/CombatStartEntry.js";
-import { CombatEnd } from "../combat/CombatEnd.js";
+import { CombatStartEntry } from "../../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatStartEntry.js";
+import { CombatEnd } from "../../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatEnd.js";
 
 @Schema({ _id: false })
 export class GameInstruction {

@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { CharacterAppService } from "../../application/character/CharacterAppService.js";
-import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
+import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
-import { CombatAppService } from "../../domain/combat/combat.app.service.js";
+import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 
-import { CombatEndDto } from "../../domain/combat/dto/CombatEndDto.js";
+import { CombatEndDto } from "../../bounded-contexts/combat/api/dto/response/CombatEndDto.js";
 import type {
   CombatEndResponseDto,
   CombatStartRequestDto,
   EndPlayerTurnResponseDto,
-} from "../../domain/combat/dto/index.js";
-import { CombatStateDto } from "../../domain/combat/dto/index.js";
+} from "../../bounded-contexts/combat/api/dto/response/index.js";
+import { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/index.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
 import type { CharacterResponseDto } from "../../domain/character/dto/index.js";
 

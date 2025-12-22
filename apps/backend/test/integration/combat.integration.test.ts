@@ -12,12 +12,12 @@
  * - Turn order rebuild after enemy death
  */
 import test from "ava";
-import { CombatModule } from "../../src/modules/combat.module.js";
-import { CombatAppService } from "../../src/domain/combat/combat.app.service.js";
-import { CharacterService } from "../../src/domain/character/character.service.js";
+import { CombatModule } from "../../src/bounded-contexts/combat/combat.module.js";
+import { CombatAppService } from "../../src/bounded-contexts/combat/application/services/CombatAppService.js";
+import { CharacterAppService } from "../../src/bounded-contexts/character/application/services/CharacterAppService.js";
 import { DiceService } from "../../src/domain/dice/dice.service.js";
 import type { CharacterResponseDto } from "../../src/domain/character/dto/index.js";
-import { CombatActionType, type CombatStartRequestDto } from "../../src/domain/combat/dto/index.js";
+import { type CombatStartRequestDto } from "../../src/bounded-contexts/combat/api/dto/response/index.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../helpers/test-app.js";
 import { createMockDiceService } from "../mocks/dice.mock.js";
 import util from "util";

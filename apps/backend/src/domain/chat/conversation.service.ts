@@ -2,11 +2,11 @@ import { Content } from "@google/genai";
 import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import type { CharacterResponseDto } from "../character/dto/CharacterResponseDto.js";
+import type { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/response/CharacterResponseDto.js";
 import type { ChatMessageDto } from "./dto/ChatMessageDto.js";
 import type { GameInstructionDto } from "./dto/GameInstructionDto.js";
 import { ChatHistory, ChatHistoryDocument } from "../../infra/mongo/chat/ChatHistory.js";
-import { CLASS_STATS } from "../combat/scaling.util.js";
+import { CLASS_STATS } from "../../bounded-contexts/combat/domain/scaling.util.js";
 
 @Injectable()
 export class ConversationService {

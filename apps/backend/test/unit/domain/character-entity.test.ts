@@ -1,6 +1,6 @@
 import test from "ava";
-import { CharacterEntity } from "../../../src/domain/character/entities/CharacterEntity.js";
-import { CharacterStatsVO } from "../../../src/domain/character/value-objects/CharacterStatsVO.js";
+import { CharacterEntity } from "../../../src/bounded-contexts/character/domain/entities/CharacterEntity.js";
+import { CharacterStatsVO } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStatsVO.js";
 
 // ===========================
 // Factory Methods

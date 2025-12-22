@@ -1,3 +1,4 @@
-export { CharacterController } from "./character.controller.js";
-export { CharacterInventoryController } from "./character-inventory.controller.js";
-export { CharacterInspirationController } from "./character-inspiration.controller.js";
+// Re-export from new bounded-context location
+export { CharacterController } from "../../bounded-contexts/character/api/controllers/CharacterController.js";
+export { CharacterInventoryController } from "../../bounded-contexts/character/api/controllers/CharacterInventoryController.js";
+export { CharacterInspirationController } from "../../bounded-contexts/character/api/controllers/CharacterInspirationController.js";

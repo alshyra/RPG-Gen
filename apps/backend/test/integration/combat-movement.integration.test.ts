@@ -8,12 +8,12 @@
  * - Active effects: 'disengaged' prevents OAs, 'dashed' doubles movement
  */
 import test from "ava";
-import { CombatModule } from "../../src/modules/combat.module.js";
-import { CombatGridService } from "../../src/domain/combat/services/combat-grid.service.js";
-import { OpportunityAttackResolver } from "../../src/domain/combat/services/opportunity-attack.service.js";
+import { CombatModule } from "../../src/bounded-contexts/combat/combat.module.js";
+import { CombatGridService } from "../../src/bounded-contexts/combat/domain/services/combat-grid.service.js";
+import { OpportunityAttackResolver } from "../../src/bounded-contexts/combat/domain/services/opportunity-attack.service.js";
 import { DiceService } from "../../src/domain/dice/dice.service.js";
-import { GridPositionDto } from "../../src/domain/combat/dto/GridPositionDto.js";
-import { MovementEventType } from "../../src/domain/combat/dto/MovementEventDto.js";
+import { GridPositionDto } from "../../src/bounded-contexts/combat/api/dto/response/GridPositionDto.js";
+import { MovementEventType } from "../../src/bounded-contexts/combat/api/dto/response/MovementEventDto.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../helpers/test-app.js";
 import { createMockDiceService } from "../mocks/dice.mock.js";
 

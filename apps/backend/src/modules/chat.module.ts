@@ -1,7 +1,7 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { CharacterModule } from "./character.module.js";
-import { CombatModule } from "./combat.module.js";
+import { CharacterModule } from "../bounded-contexts/character/character.module.js";
+import { CombatModule } from "../bounded-contexts/combat/combat.module.js";
 import { GeminiTextService } from "../infra/external/gemini-text.service.js";
 import { ChatOrchestrator } from "../orchestrators/chat/index.js";
 import { ChatController } from "../controllers/chat.controller.js";

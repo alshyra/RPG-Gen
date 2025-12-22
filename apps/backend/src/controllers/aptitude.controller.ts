@@ -1,7 +1,7 @@
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AptitudeService } from "../domain/aptitude/aptitude.service.js";
-import { AptitudeResponseDto } from "../domain/character/dto/AptitudeResponseDto.js";
+import { AptitudeResponseDto } from "../bounded-contexts/character/api/dto/response/AptitudeResponseDto.js";
 
 @ApiTags("aptitudes")
 @Controller("aptitudes")

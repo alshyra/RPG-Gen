@@ -1,5 +1,5 @@
-import { CharacterResponseDto } from '../../domain/character/dto/CharacterResponseDto.js';
-import { DraftCharacterResponseDto } from '../../domain/character/dto/DraftCharacterResponseDto.js';
+import { CharacterResponseDto } from '../../bounded-contexts/character/api/dto/response/CharacterResponseDto.js';
+import { DraftCharacterResponseDto } from '../../bounded-contexts/character/api/dto/response/DraftCharacterResponseDto.js';
 import type { CharacterDocument } from '../../infra/mongo/index.js';
 
 /**

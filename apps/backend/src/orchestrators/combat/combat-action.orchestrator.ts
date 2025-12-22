@@ -1,13 +1,13 @@
 import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { CombatActionRequestDto } from "../../domain/combat/dto/CombatActionRequestDto.js";
+import { CombatActionRequestDto } from "../../bounded-contexts/combat/api/dto/response/CombatActionRequestDto.js";
 import {
   CombatActionResponseDto,
   ActionCost,
-} from "../../domain/combat/dto/CombatActionResponseDto.js";
-import { CombatSession } from "../../infra/mongo/combat/CombatSession.js";
-import { Combatant } from "../../infra/mongo/combat/Combatant.js";
+} from "../../bounded-contexts/combat/api/dto/response/CombatActionResponseDto.js";
+import { CombatSession } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.js";
+import { Combatant } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.js";
 import { Aptitude } from "../../infra/mongo/aptitude/Aptitude.js";
 import { AptitudeService } from "../../domain/aptitude/aptitude.service.js";
 

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import type { CombatStateDto } from "../../combat/dto/CombatStateDto.js";
-import type { CharacterResponseDto } from "../../character/dto/CharacterResponseDto.js";
+import type { CombatStateDto } from "../../../bounded-contexts/combat/api/dto/response/CombatStateDto.js";
+import type { CharacterResponseDto } from "../../../bounded-contexts/character/api/dto/response/CharacterResponseDto.js";
 
 export class UseItemResponseDto {
   @ApiProperty({ description: "Whether the item was successfully used" })

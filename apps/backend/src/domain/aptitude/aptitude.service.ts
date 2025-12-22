@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Aptitude, AptitudeDocument } from "../../infra/mongo/aptitude/Aptitude.js";
-import { AptitudeResponseDto } from "../character/dto/AptitudeResponseDto.js";
+import { AptitudeResponseDto } from "../../bounded-contexts/character/api/dto/response/AptitudeResponseDto.js";
 
 @Injectable()
 export class AptitudeService {

@@ -1,25 +1,5 @@
-export * from "./RaceResponseDto.js";
-export * from "./StatsResponseDto.js";
-export * from "./SkillResponseDto.js";
-export * from "./InventoryItemDto.js";
-export * from "./AptitudeResponseDto.js";
-export * from "./AptitudeScalingDto.js";
-export * from "./VoieProgressDto.js";
-export * from "./TalentPointRewardDto.js";
-export * from "./UnlockRankDto.js";
-export * from "./TacticalStats.js";
-export * from "./StatAttribute.js";
-export * from "./BaseCharacterResponseDto.js";
-export * from "./CharacterResponseDto.js";
-export * from "./DraftCharacterResponseDto.js";
-export * from "./DeceasedCharacterResponseDto.js";
-export * from "./InspirationResponseDto.js";
-export * from "./KillCharacterBodyDto.js";
-export * from "./RemoveInventoryBodyDto.js";
-export * from "./GrantInspirationBodyDto.js";
-export * from "./UpdateCharacterRequestDto.js";
-export * from "./InventoryItemMeta.js";
-export * from "./CreateInventoryItemDto.js";
-export * from "./EquipInventoryDto.js";
+// Re-export from new bounded-context location
+export * from "../../../bounded-contexts/character/api/dto/response/index.js";
+export * from "../../../bounded-contexts/character/api/dto/request/index.js";
 
 

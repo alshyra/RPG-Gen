@@ -10,7 +10,7 @@ import {
   getComputedStats,
   validateAptitudeCost,
   CLASS_STATS,
-} from "../../src/domain/combat/scaling.util.js";
+} from "../../src/bounded-contexts/combat/domain/scaling.util.js";
 
 // =========================
 // Class Stats Constants

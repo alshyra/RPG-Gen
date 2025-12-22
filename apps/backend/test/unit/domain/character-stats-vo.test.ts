@@ -1,5 +1,5 @@
 import test from "ava";
-import { CharacterStatsVO } from "../../../src/domain/character/value-objects/CharacterStatsVO.js";
+import { CharacterStatsVO } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStatsVO.js";
 
 test("CharacterStatsVO - creates with valid stats", t => {
   const stats = new CharacterStatsVO({

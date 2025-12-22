@@ -10,9 +10,9 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import Joi from "joi";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
-import { CharacterAppService } from "../application/character/CharacterAppService.js";
-import { CharacterDtoMapper } from "../api/character/dto/mappers/CharacterDtoMapper.js";
-import type { CharacterResponseDto } from "../domain/character/dto/CharacterResponseDto.js";
+import { CharacterAppService } from "../bounded-contexts/character/application/services/CharacterAppService.js";
+import { CharacterDtoMapper } from "../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
+import type { CharacterResponseDto } from "../bounded-contexts/character/api/dto/response/CharacterResponseDto.js";
 import { GeminiImageService } from "../infra/external/gemini-image.service.js";
 import {
   AvatarResponseDto,

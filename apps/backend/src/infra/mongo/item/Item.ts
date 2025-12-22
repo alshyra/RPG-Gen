@@ -1,5 +1,5 @@
 import { Prop, Schema } from "@nestjs/mongoose";
-import type { InventoryItemMeta } from "../../../domain/character/dto/InventoryItemMeta.js";
+import type { InventoryItemMeta } from "../../../bounded-contexts/character/api/dto/response/InventoryItemMeta.js";
 import { Document } from "mongoose";
 
 @Schema({ _id: false })

@@ -1,0 +1,31 @@
+import { Injectable } from "@nestjs/common";
+import type { CombatStartRequestDto } from "../../api/dto/response/CombatStartRequestDto.js";
+import { CombatantDto } from "../../api/dto/response/CombatantDto.js";
+
+@Injectable()
+export class InitService {
+  /**
+   * Local d20 roll for initiatives.
+   */
+  private rollD20(): number {
+    return Math.floor(Math.random() * 20) + 1;
+  }
+
+  /**
+   * Create enemy CombatantDto objects with rolled initiatives and positions.
+   */
+  buildEnemies(combatStart: CombatStartRequestDto): CombatantDto[] {
+    return combatStart.combat_start.map((enemy, idx) => {
+      const initRoll = this.rollD20();
+      return new CombatantDto({
+        id: `enemy-${idx + 1}`,
+        isPlayer: false,
+        name: enemy.name,
+        hp: enemy.hp,
+        hpMax: enemy.hp,
+        initiative: initRoll,
+        position: { x: 10, y: 3 + idx },  // Enemies on right side, staggered vertically
+      });
+    });
+  }
+}

@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { ItemDefinitionDto } from "../../domain/item-definition/item-definition.dto.js";
-import { CharacterAppService } from "../../application/character/CharacterAppService.js";
-import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
+import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import {
   CreateInventoryItemDto,
   type CharacterResponseDto,
 } from "../../domain/character/dto/index.js";
 import type { InventoryInstructionMessageDto } from "../../domain/chat/dto/index.js";
-import { CombatAppService } from "../../domain/combat/combat.app.service.js";
-import type { CombatStateDto } from "../../domain/combat/dto/CombatStateDto.js";
+import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
+import type { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/CombatStateDto.js";
 import { DiceService } from "../../domain/dice/dice.service.js";
 import { ItemDefinitionService } from "../../domain/item-definition/item-definition.service.js";
 

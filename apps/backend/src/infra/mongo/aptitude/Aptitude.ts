@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
-import { type StatAttribute } from "../../../domain/character/dto/StatAttribute.js";
+import { type StatAttribute } from "../../../bounded-contexts/character/api/dto/response/StatAttribute.js";
 
 // Target types for aptitudes
 export type AptitudeTargetType = "self" | "enemy" | "ally" | "zone" | "all_enemies" | "all_allies";
