@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { ItemDefinitionDto } from "../../domain/item-definition/item-definition.dto.js";
-import { CharacterService } from "../../domain/character/character.service.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
 import {
   CreateInventoryItemDto,
   type CharacterResponseDto,
@@ -45,7 +46,8 @@ export class ItemOrchestrator {
   private readonly logger = new Logger(ItemOrchestrator.name);
 
   constructor(
-    private readonly characterService: CharacterService,
+    private readonly characterAppService: CharacterAppService,
+    private readonly dtoMapper: CharacterDtoMapper,
     private readonly combatService: CombatAppService,
     private readonly diceService: DiceService,
     private readonly itemDefinitionService: ItemDefinitionService,
@@ -62,10 +64,10 @@ export class ItemOrchestrator {
       const item = await this.itemDefinitionService.findByDefinitionId(instr.itemId);
       if (!item) throw new BadRequestException(`Item definition ${instr.itemId} not found`);
       const newInventoryItem = new CreateInventoryItemDto(item);
-      return this.characterService.addInventoryItem(userId, characterId, newInventoryItem);
+      return this.characterAppService.addInventoryItem(userId, characterId, newInventoryItem);
     }
     if (instr.action === "remove") {
-      return this.characterService.removeInventoryItem(
+      return this.characterAppService.removeInventoryItem(
         userId,
         characterId,
         instr.itemId,
@@ -117,20 +119,21 @@ export class ItemOrchestrator {
   private async applyHealOutOfCombat(
     userId: string,
     characterId: string,
-    character: CharacterResponseDto,
+    characterDto: CharacterResponseDto,
     healAmount: number,
     itemName: string,
   ): Promise<UseItemResult> {
-    const currentHp = character.hp ?? 0;
-    const maxHp = character.hpMax ?? currentHp;
+    const currentHp = characterDto.hp ?? 0;
+    const maxHp = characterDto.hpMax ?? currentHp;
     const newHp = Math.min(currentHp + healAmount, maxHp);
-    await this.characterService.update(userId, characterId, { hp: newHp });
-    const updatedCharacter = await this.characterService.findByCharacterId(userId, characterId);
+    await this.characterAppService.update(userId, characterId, { hp: newHp });
+    const updatedEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const updatedDto = await this.dtoMapper.toEnrichedDto(updatedEntity) as CharacterResponseDto;
     this.logger.log(`Healed ${healAmount} HP for ${characterId} outside combat`);
     return {
       success: true,
       healAmount,
-      character: updatedCharacter,
+      character: updatedDto,
       message: `${itemName} used. Healed ${healAmount} HP.`,
     };
   }
@@ -139,7 +142,8 @@ export class ItemOrchestrator {
    * Use an item from the character's inventory.
    */
   async useItem(userId: string, characterId: string, itemId: string): Promise<UseItemResult> {
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
 
     const itemDefinition = await this.itemDefinitionService.findByDefinitionId(itemId);
     if (!itemDefinition) throw new BadRequestException(`Item definition ${itemId} not found`);
@@ -152,7 +156,7 @@ export class ItemOrchestrator {
     this.validateContext(itemDefinition, meta, inCombat);
 
     const healAmount = meta.healDice ? this.diceService.rollDiceExpr(meta.healDice).total : 0;
-    await this.characterService.removeInventoryItem(userId, characterId, itemId, 1);
+    await this.characterAppService.removeInventoryItem(userId, characterId, itemId, 1);
     this.logger.log(`Item ${itemDefinition.name} consumed by character ${characterId}`);
 
     if (healAmount > 0 && inCombat)
@@ -161,15 +165,16 @@ export class ItemOrchestrator {
       return this.applyHealOutOfCombat(
         userId,
         characterId,
-        character,
+        characterDto,
         healAmount,
         itemDefinition.name ?? "Item",
       );
 
-    const updatedCharacter = await this.characterService.findByCharacterId(userId, characterId);
+    const updatedEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const updatedDto = await this.dtoMapper.toEnrichedDto(updatedEntity) as CharacterResponseDto;
     return {
       success: true,
-      character: updatedCharacter,
+      character: updatedDto,
       message: `${itemDefinition.name} used.`,
     };
   }

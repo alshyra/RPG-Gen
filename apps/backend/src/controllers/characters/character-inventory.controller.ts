@@ -18,10 +18,10 @@ import {
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
-import { CharacterService } from "../../domain/character/character.service.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
 import { CreateInventoryItemDto } from "../../domain/character/dto/CreateInventoryItemDto.js";
 import { EquipInventoryDto } from "../../domain/character/dto/EquipInventoryDto.js";
-import { toCharacterResponse } from "./character-response.util.js";
 import {
   CharacterResponseDto,
   RemoveInventoryBodyDto,
@@ -35,7 +35,8 @@ export class CharacterInventoryController {
   private readonly logger = new Logger(CharacterInventoryController.name);
 
   constructor(
-    private characterService: CharacterService,
+    private characterAppService: CharacterAppService,
+    private dtoMapper: CharacterDtoMapper,
   ) {}
 
   @Post()
@@ -57,8 +58,8 @@ export class CharacterInventoryController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.addInventoryItem(userId, characterId, item);
-    return toCharacterResponse(character);
+    const character = await this.characterAppService.addInventoryItem(userId, characterId, item);
+    return this.dtoMapper.toEnrichedDto(character);
   }
 
   @Post("equip")
@@ -76,12 +77,12 @@ export class CharacterInventoryController {
   ) {
     const { user } = req;
     const userId = user._id.toString();
-    const character = await this.characterService.equipInventoryItem(
+    const character = await this.characterAppService.equipItem(
       userId,
       characterId,
       body.definitionId,
     );
-    return character;
+    return this.dtoMapper.toEnrichedDto(character);
   }
 
   @Patch(":itemId")
@@ -105,13 +106,13 @@ export class CharacterInventoryController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.updateInventoryItem(
+    const character = await this.characterAppService.updateInventoryItem(
       userId,
       characterId,
       itemId,
       updates,
     );
-    return toCharacterResponse(character);
+    return this.dtoMapper.toEnrichedDto(character);
   }
 
   @Delete(":itemId")
@@ -135,12 +136,12 @@ export class CharacterInventoryController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.removeInventoryItem(
+    const character = await this.characterAppService.removeInventoryItem(
       userId,
       characterId,
       itemId,
       body.qty,
     );
-    return toCharacterResponse(character);
+    return this.dtoMapper.toEnrichedDto(character);
   }
 }

@@ -5,8 +5,8 @@ import { ItemDefinitionModule } from "../item-definition/item-definition.module.
 import { ClassDefinitionModule } from "../class-definition/class-definition.module.js";
 import { RaceModule } from "../race/race.module.js";
 import { AptitudeModule } from "../aptitude/aptitude.module.js";
+import { CharacterModule } from "../../modules/character.module.js";
 import { ProgressionService } from "./progression.service.js";
-import { CharacterResponseMapper } from "../character/character-response.mapper.js";
 
 @Module({
   imports: [
@@ -15,8 +15,9 @@ import { CharacterResponseMapper } from "../character/character-response.mapper.
     ClassDefinitionModule,
     RaceModule,
     forwardRef(() => AptitudeModule),
+    forwardRef(() => CharacterModule),
   ],
-  providers: [ProgressionService, CharacterResponseMapper],
-  exports: [ProgressionService, CharacterResponseMapper],
+  providers: [ProgressionService],
+  exports: [ProgressionService],
 })
 export class ProgressionModule {}

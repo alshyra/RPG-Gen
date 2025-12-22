@@ -1,0 +1,309 @@
+.
+├── api
+│   ├── character
+│   │   ├── dto
+│   │   │   ├── index.ts
+│   │   │   └── mappers
+│   │   │       ├── CharacterDtoMapper.ts
+│   │   │       └── index.ts
+│   │   └── index.ts
+│   └── index.ts
+├── app.module.ts
+├── application
+│   ├── character
+│   │   ├── CharacterAppService.ts
+│   │   └── index.ts
+│   └── index.ts
+├── config.module.ts
+├── config.ts
+├── controllers
+│   ├── aptitude.controller.ts
+│   ├── auth.controller.ts
+│   ├── characters
+│   │   ├── character-inspiration.controller.ts
+│   │   ├── character-inventory.controller.ts
+│   │   ├── character-response.util.ts
+│   │   ├── character.controller.ts
+│   │   └── index.ts
+│   ├── chat.controller.ts
+│   ├── classes.controller.ts
+│   ├── combat.controller.ts
+│   ├── dice.controller.ts
+│   ├── health.controller.ts
+│   ├── image.controller.ts
+│   ├── progression.controller.ts
+│   └── races.controller.ts
+├── domain
+│   ├── aptitude
+│   │   ├── aptitude.module.ts
+│   │   ├── aptitude.service.ts
+│   │   └── index.ts
+│   ├── auth
+│   │   ├── auth.profile.dto.ts
+│   │   ├── auth.service.ts
+│   │   ├── google-auth.guard.ts
+│   │   ├── google.strategy.ts
+│   │   ├── jwt-auth.guard.ts
+│   │   └── jwt.strategy.ts
+│   ├── character
+│   │   ├── character-response.mapper.ts
+│   │   ├── character.service.ts
+│   │   ├── dto
+│   │   │   ├── AptitudeResponseDto.ts
+│   │   │   ├── AptitudeScalingDto.ts
+│   │   │   ├── ArmorMeta.ts
+│   │   │   ├── BaseCharacterResponseDto.ts
+│   │   │   ├── BaseMeta.ts
+│   │   │   ├── CharacterClassResponseDto.ts
+│   │   │   ├── CharacterResponseDto.ts
+│   │   │   ├── ConsumableMeta.ts
+│   │   │   ├── CreateInventoryItemDto.ts
+│   │   │   ├── DeceasedCharacterResponseDto.ts
+│   │   │   ├── DraftCharacterResponseDto.ts
+│   │   │   ├── EquipInventoryDto.ts
+│   │   │   ├── GenericMeta.ts
+│   │   │   ├── GrantInspirationBodyDto.ts
+│   │   │   ├── InspirationResponseDto.ts
+│   │   │   ├── InventoryItemDto.ts
+│   │   │   ├── InventoryItemMeta.ts
+│   │   │   ├── KillCharacterBodyDto.ts
+│   │   │   ├── PackMeta.ts
+│   │   │   ├── RaceResponseDto.ts
+│   │   │   ├── RemoveInventoryBodyDto.ts
+│   │   │   ├── SkillResponseDto.ts
+│   │   │   ├── StatAttribute.ts
+│   │   │   ├── StatsResponseDto.ts
+│   │   │   ├── TacticalStats.ts
+│   │   │   ├── TalentPointRewardDto.ts
+│   │   │   ├── TalentRankDto.ts
+│   │   │   ├── ToolMeta.ts
+│   │   │   ├── UnlockRankDto.ts
+│   │   │   ├── UpdateCharacterRequestDto.ts
+│   │   │   ├── VoieProgressDto.ts
+│   │   │   ├── WeaponMeta.ts
+│   │   │   └── index.ts
+│   │   ├── entities
+│   │   │   ├── CharacterEntity.ts
+│   │   │   └── index.ts
+│   │   ├── repositories
+│   │   │   ├── ICharacterRepository.ts
+│   │   │   └── index.ts
+│   │   └── value-objects
+│   │       ├── CharacterStatsVO.ts
+│   │       ├── ResourcePool.ts
+│   │       ├── TalentRank.ts
+│   │       └── index.ts
+│   ├── chat
+│   │   ├── conversation.service.ts
+│   │   └── dto
+│   │       ├── ChatMessageDto.ts
+│   │       ├── CombatEndInstructionMessageDto.ts
+│   │       ├── CombatStartInstructionMessageDto.ts
+│   │       ├── GameInstructionDto.ts
+│   │       ├── HpInstructionMessageDto.ts
+│   │       ├── InventoryInstructionMessageDto.ts
+│   │       ├── RollInstructionMessageDto.ts
+│   │       ├── RolllMetaDto.ts
+│   │       ├── SpellInstructionMessageDto.ts
+│   │       ├── SubmitRollDto.ts
+│   │       ├── XpInstructionMessageDto.ts
+│   │       └── index.ts
+│   ├── class-definition
+│   │   ├── class-definition.module.ts
+│   │   └── class-definition.service.ts
+│   ├── classes
+│   │   ├── classes.service.ts
+│   │   ├── dto
+│   │   │   ├── ClassDefinitionResponseDto.ts
+│   │   │   ├── TalentRankDto.ts
+│   │   │   ├── TalentTreeDto.ts
+│   │   │   └── index.ts
+│   │   └── dtos
+│   │       └── ClasseDTO.ts
+│   ├── combat
+│   │   ├── combat.app.service.ts
+│   │   ├── dto
+│   │   │   ├── CombatActionRequestDto.ts
+│   │   │   ├── CombatActionResponseDto.ts
+│   │   │   ├── CombatDiceResultDto.ts
+│   │   │   ├── CombatEndDto.ts
+│   │   │   ├── CombatEndResponseDto.ts
+│   │   │   ├── CombatEndResultDto.ts
+│   │   │   ├── CombatStartEntryDto.ts
+│   │   │   ├── CombatStartRequestDto.ts
+│   │   │   ├── CombatStateDto.ts
+│   │   │   ├── CombatantDto.ts
+│   │   │   ├── DiceResultDto.ts
+│   │   │   ├── EndPlayerTurnResponseDto.ts
+│   │   │   ├── EnemyAttackLogDto.ts
+│   │   │   ├── GridPositionDto.ts
+│   │   │   ├── MovementEventDto.ts
+│   │   │   ├── MovementRequestDto.ts
+│   │   │   ├── MovementResponseDto.ts
+│   │   │   └── index.ts
+│   │   ├── enemy-turn.service.ts
+│   │   ├── scaling.util.ts
+│   │   └── services
+│   │       ├── action-economy.service.ts
+│   │       ├── combat-action.service.ts
+│   │       ├── combat-grid.service.ts
+│   │       ├── index.ts
+│   │       ├── init.service.ts
+│   │       ├── opportunity-attack.service.ts
+│   │       └── turn-order.service.ts
+│   ├── dice
+│   │   ├── dice.service.ts
+│   │   └── dto
+│   │       ├── CombatDiceResultDto.ts
+│   │       ├── DiceRequestDto.ts
+│   │       ├── DiceResultDto.ts
+│   │       └── dice.d.ts
+│   ├── image
+│   │   ├── dto
+│   │   │   ├── AvatarResponseDto.ts
+│   │   │   ├── CharacterIdBodyDto.ts
+│   │   │   ├── ImageRequestDto.ts
+│   │   │   └── image-response.dto.ts
+│   │   ├── image.service.ts
+│   │   └── image.util.ts
+│   ├── item-definition
+│   │   ├── dto
+│   │   │   ├── UseItemRequestDto.ts
+│   │   │   ├── UseItemResponseDto.ts
+│   │   │   └── index.ts
+│   │   ├── item-definition.dto.ts
+│   │   ├── item-definition.module.ts
+│   │   └── item-definition.service.ts
+│   ├── progression
+│   │   ├── dto
+│   │   │   ├── CharacterStatsDto.ts
+│   │   │   ├── ClassBaseStatsDto.ts
+│   │   │   ├── ClassMetadataDto.ts
+│   │   │   ├── RaceBonusesDto.ts
+│   │   │   ├── RaceMetadataDto.ts
+│   │   │   ├── SelectClassDto.ts
+│   │   │   ├── SelectFirstTalentDto.ts
+│   │   │   ├── SelectRaceDto.ts
+│   │   │   ├── TraitEffectDto.ts
+│   │   │   ├── UnlockRankDto.ts
+│   │   │   └── index.ts
+│   │   ├── index.ts
+│   │   ├── progression.module.ts
+│   │   └── progression.service.ts
+│   ├── race
+│   │   ├── index.ts
+│   │   ├── race.module.ts
+│   │   └── race.service.ts
+│   └── talent-tree
+│       ├── index.ts
+│       ├── talent-tree.module.ts
+│       └── talent-tree.service.ts
+├── env-loader.ts
+├── global.types.d.ts
+├── infra
+│   ├── external
+│   │   ├── gemini-image.service.ts
+│   │   ├── gemini-json-schema.ts
+│   │   ├── gemini-schemas.ts
+│   │   └── gemini-text.service.ts
+│   ├── mongo
+│   │   ├── User.ts
+│   │   ├── aptitude
+│   │   │   ├── Aptitude.ts
+│   │   │   └── index.ts
+│   │   ├── character
+│   │   │   ├── Character.ts
+│   │   │   ├── CharacterClass.ts
+│   │   │   ├── CharacterStats.ts
+│   │   │   ├── Race.ts
+│   │   │   └── Skill.ts
+│   │   ├── chat
+│   │   │   ├── ChatHistory.ts
+│   │   │   └── ChatMessage.ts
+│   │   ├── class
+│   │   │   ├── ClassDefinition.ts
+│   │   │   ├── TalentRank.ts
+│   │   │   ├── TalentTree.ts
+│   │   │   └── index.ts
+│   │   ├── combat
+│   │   │   ├── CombatEnd.ts
+│   │   │   ├── CombatSession.ts
+│   │   │   ├── CombatStartEntry.ts
+│   │   │   └── Combatant.ts
+│   │   ├── index.ts
+│   │   ├── instruction
+│   │   │   ├── GameInstruction.ts
+│   │   │   ├── InventoryInstruction.ts
+│   │   │   └── RollInstruction.ts
+│   │   ├── item
+│   │   │   ├── Item.ts
+│   │   │   └── ItemDefinition.ts
+│   │   └── race
+│   │       ├── Race.ts
+│   │       ├── RaceBonuses.ts
+│   │       ├── TraitEffect.ts
+│   │       └── index.ts
+│   └── persistence
+│       ├── index.ts
+│       └── mongo
+│           ├── index.ts
+│           ├── mappers
+│           │   ├── CharacterMapper.ts
+│           │   └── index.ts
+│           └── repositories
+│               ├── MongoCharacterRepository.ts
+│               └── index.ts
+├── main.ts
+├── modules
+│   ├── auth.module.ts
+│   ├── character.module.exports.ts
+│   ├── character.module.ts
+│   ├── chat.module.exports.ts
+│   ├── chat.module.ts
+│   ├── classes.module.ts
+│   ├── combat.module.exports.md
+│   ├── combat.module.exports.ts
+│   ├── combat.module.ts
+│   ├── dice.module.ts
+│   ├── health.module.ts
+│   ├── image.module.ts
+│   ├── progression.module.ts
+│   └── races.module.ts
+├── orchestrators
+│   ├── chat
+│   │   ├── chat.orchestrator.ts
+│   │   └── index.ts
+│   ├── combat
+│   │   ├── combat-action.orchestrator.ts
+│   │   ├── combat-movement.orchestrator.ts
+│   │   ├── combat.orchestrator.ts
+│   │   └── index.ts
+│   ├── index.ts
+│   └── item
+│       ├── index.ts
+│       └── item.orchestrator.ts
+├── scripts
+│   └── generate-openapi-types.ts
+├── seed
+│   ├── aptitudes.json
+│   ├── armor-definitions.json
+│   ├── classes
+│   │   ├── guerrier
+│   │   │   ├── stats.json
+│   │   │   └── voies.json
+│   │   ├── mage
+│   │   │   ├── stats.json
+│   │   │   └── voies.json
+│   │   └── rogue
+│   │       ├── stats.json
+│   │       └── voies.json
+│   ├── enemies.json
+│   ├── item-definitions.json
+│   ├── races.json
+│   ├── spells.json
+│   ├── starter-packs.json
+│   ├── stats-and-skills.json
+│   └── weapons-definitions.json
+└── seed-manager.ts
+
+62 directories, 245 files

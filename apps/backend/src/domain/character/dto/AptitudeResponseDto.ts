@@ -140,5 +140,6 @@ export class AptitudeResponseDto {
     this.rankRequired = init.rankRequired;
     this.isStarting = init.isStarting;
     this.damageType = init.damageType;
+    this.currentCooldown = init.currentCooldown;
   }
 }

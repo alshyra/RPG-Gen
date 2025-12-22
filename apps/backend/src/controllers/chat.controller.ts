@@ -2,12 +2,14 @@ import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from "@nes
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
-import { CharacterService } from "../domain/character/character.service.js";
+import { CharacterAppService } from "../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../api/character/dto/mappers/CharacterDtoMapper.js";
 import { ConversationService } from "../domain/chat/conversation.service.js";
 import { ChatMessageDto } from "../domain/chat/dto/index.js";
 import type { RPGRequest } from "../global.types.js";
 import { GeminiTextService } from "../infra/external/gemini-text.service.js";
 import { ChatOrchestrator } from "../orchestrators/index.js";
+import type { CharacterResponseDto } from "../domain/character/dto/index.js";
 
 @ApiTags("chat")
 @Controller("chat")
@@ -18,7 +20,8 @@ export class ChatController {
   constructor(
     private readonly geminiTexteService: GeminiTextService,
     private readonly conversationService: ConversationService,
-    private readonly characterService: CharacterService,
+    private readonly characterAppService: CharacterAppService,
+    private readonly dtoMapper: CharacterDtoMapper,
     private readonly chatOrchestrator: ChatOrchestrator,
   ) {}
 
@@ -54,12 +57,13 @@ export class ChatController {
       userId,
       characterId,
     );
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
     this.geminiTexteService.initializeChatSession(
       characterId,
       this.geminiTexteService.initPrompt(
-        character,
-        this.conversationService.buildCharacterSummary(character),
+        characterDto,
+        this.conversationService.buildCharacterSummary(characterDto),
       ),
       previousChatMessages,
     );
@@ -115,12 +119,13 @@ export class ChatController {
     characterId: string,
     previousChatMessages: ChatMessageDto[] | undefined,
   ): Promise<void> {
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
     this.geminiTexteService.initializeChatSession(
       characterId,
       this.geminiTexteService.initPrompt(
-        character,
-        this.conversationService.buildCharacterSummary(character),
+        characterDto,
+        this.conversationService.buildCharacterSummary(characterDto),
       ),
       previousChatMessages ?? [],
     );

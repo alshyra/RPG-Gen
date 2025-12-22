@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { CharacterService } from "../../domain/character/character.service.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import { CombatAppService } from "../../domain/combat/combat.app.service.js";
 
@@ -11,6 +12,7 @@ import type {
 } from "../../domain/combat/dto/index.js";
 import { CombatStateDto } from "../../domain/combat/dto/index.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import type { CharacterResponseDto } from "../../domain/character/dto/index.js";
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -28,7 +30,8 @@ export class CombatOrchestrator {
 
   constructor(
     private readonly combatAppService: CombatAppService,
-    private readonly characterService: CharacterService,
+    private readonly characterAppService: CharacterAppService,
+    private readonly dtoMapper: CharacterDtoMapper,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
   ) {}
@@ -42,7 +45,8 @@ export class CombatOrchestrator {
     characterId: string,
     combatStartRequest: CombatStartRequestDto,
   ): Promise<CombatStateDto> {
-    const characterDto = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
     let state = await this.combatAppService.initializeCombat(
       characterDto,
       combatStartRequest,
@@ -147,12 +151,13 @@ export class CombatOrchestrator {
       userId,
       characterId,
     );
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
     return this.geminiTexteService.initializeChatSession(
       characterId,
       this.geminiTexteService.initPrompt(
-        character,
-        this.conversationService.buildCharacterSummary(character),
+        characterDto,
+        this.conversationService.buildCharacterSummary(characterDto),
       ),
       previousChatMessages,
     );
@@ -195,11 +200,12 @@ export class CombatOrchestrator {
 
       // Lazy generate narrative if not already present
       if (!narrative) {
-        const character = await this.characterService.findByCharacterId(userId, characterId);
+        const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+        const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
         const combatEnd = new CombatEndDto({
           victory: true,
           xp_gained: 100,
-          player_hp: character?.hp ?? 0,
+          player_hp: characterDto?.hp ?? 0,
           enemies_defeated: state.enemies.map(e => e.name),
           fled: false,
         });
@@ -210,11 +216,12 @@ export class CombatOrchestrator {
         await this.combatAppService.updateNarrative(characterId, narrative);
       }
 
-      const character = await this.characterService.findByCharacterId(userId, characterId);
+      const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+      const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
       const combatEnd = new CombatEndDto({
         victory: true,
         xp_gained: 100,
-        player_hp: character?.hp ?? 0,
+        player_hp: characterDto?.hp ?? 0,
         enemies_defeated: state.enemies.map(e => e.name),
         fled: false,
       });
@@ -234,8 +241,8 @@ export class CombatOrchestrator {
    * Force end combat (flee).
    */
   async endCombat(userId: string, characterId: string): Promise<CombatEndResponseDto> {
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    if (!character) {
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    if (!characterEntity) {
       throw new BadRequestException("Character not found");
     }
 
@@ -257,7 +264,7 @@ export class CombatOrchestrator {
           combat_end: {
             victory: false,
             xp_gained: 0,
-            player_hp: character.hp!,
+            player_hp: characterEntity.hp,
             enemies_defeated: [],
             fled: true,
           },

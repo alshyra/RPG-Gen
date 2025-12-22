@@ -20,9 +20,8 @@ import {
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
-import { CharacterService } from "../../domain/character/character.service.js";
-import { CharacterResponseMapper } from "../../domain/character/character-response.mapper.js";
-import { toCharacterResponse } from "./character-response.util.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
 import {
   BaseCharacterResponseDto,
   CharacterResponseDto,
@@ -40,8 +39,8 @@ export class CharacterController {
   private readonly logger = new Logger(CharacterController.name);
 
   constructor(
-    private characterService: CharacterService,
-    private responseMapper: CharacterResponseMapper,
+    private characterAppService: CharacterAppService,
+    private dtoMapper: CharacterDtoMapper,
   ) {}
 
   @Post()
@@ -55,8 +54,9 @@ export class CharacterController {
     const { user } = req;
 
     const userId = user._id.toString();
-    const character = await this.characterService.create(userId);
-    return new DraftCharacterResponseDto(character);
+    const characterId = this.characterAppService.generateCharacterId();
+    const character = await this.characterAppService.createDraft({ characterId, userId });
+    return CharacterDtoMapper.toDto(character);
   }
 
   @Get()
@@ -70,8 +70,8 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const characters = await this.characterService.findByUserId(userId);
-    return characters.map(c => new BaseCharacterResponseDto(c));
+    const characters = await this.characterAppService.findByUserId(userId);
+    return characters.map(c => CharacterDtoMapper.toDto(c));
   }
 
   @Get("drafts/list")
@@ -85,10 +85,8 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const characters = await this.characterService.findByUserId(userId);
-    return characters
-      .filter(c => c.state === 'draft')
-      .map(c => new DraftCharacterResponseDto(c));
+    const characters = await this.characterAppService.findDraftsByUserId(userId);
+    return characters.map(c => CharacterDtoMapper.toDto(c));
   }
 
   @Get("created/list")
@@ -102,9 +100,8 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const characters = await this.characterService.findByUserId(userId);
-    const created = characters.filter(c => c.state === 'created');
-    return Promise.all(created.map(c => this.responseMapper.toEnrichedResponse(c)));
+    const characters = await this.characterAppService.findCompletedByUserId(userId);
+    return Promise.all(characters.map(c => this.dtoMapper.toEnrichedDto(c)));
   }
 
   @Get(":characterId")
@@ -122,10 +119,10 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.getDocument(userId, characterId);
+    const character = await this.characterAppService.findByUserAndId(userId, characterId);
     
     this.logger.log('character state', character.state)
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDto(character);
   }
 
   @Put(":characterId")
@@ -155,9 +152,9 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.update(userId, characterId, updates);
+    const character = await this.characterAppService.update(userId, characterId, updates);
     this.logger.log('character state', character.state)
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDto(character);
   }
 
   @Delete(":characterId")
@@ -175,7 +172,7 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    await this.characterService.delete(userId, characterId);
+    await this.characterAppService.delete(userId, characterId);
     return { ok: true };
   }
 
@@ -199,12 +196,12 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.markAsDeceased(
+    const character = await this.characterAppService.markAsDeceased(
       userId,
       characterId,
       body.deathLocation,
     );
-    return toCharacterResponse(character);
+    return CharacterDtoMapper.toDto(character);
   }
 
   @Get("deceased")
@@ -218,9 +215,9 @@ export class CharacterController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const characters = await this.characterService.getDeceasedCharacters(userId);
+    const characters = await this.characterAppService.findDeceasedByUserId(userId);
     return characters.map(c => {
-      const baseDto = this.characterService.toCharacterDto(c);
+      const baseDto = CharacterDtoMapper.toDto(c);
       return new DeceasedCharacterResponseDto({
         ...baseDto,
         diedAt: c.diedAt?.toISOString(),

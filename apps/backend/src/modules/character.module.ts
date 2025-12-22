@@ -7,11 +7,15 @@ import {
   CharacterInventoryController,
   CharacterInspirationController,
 } from "../controllers/characters/index.js";
-import { CharacterService } from "../domain/character/character.service.js";
-import { CharacterResponseMapper } from "../domain/character/character-response.mapper.js";
 import { Character, CharacterSchema } from "../infra/mongo/index.js";
 import { AptitudeModule } from "../domain/aptitude/aptitude.module.js";
 import { ClassDefinitionModule } from "../domain/class-definition/class-definition.module.js";
+
+// Clean Architecture imports
+import { CharacterAppService } from "../application/character/CharacterAppService.js";
+import { ICharacterRepository } from "../domain/character/repositories/ICharacterRepository.js";
+import { MongoCharacterRepository } from "../infra/persistence/mongo/repositories/MongoCharacterRepository.js";
+import { CharacterDtoMapper } from "../api/character/dto/mappers/CharacterDtoMapper.js";
 
 @Module({
   imports: [
@@ -33,7 +37,22 @@ import { ClassDefinitionModule } from "../domain/class-definition/class-definiti
     CharacterInventoryController,
     CharacterInspirationController,
   ],
-  providers: [CharacterService, ItemDefinitionService, CharacterResponseMapper],
-  exports: [CharacterService, ItemDefinitionService, CharacterResponseMapper],
+  providers: [
+    ItemDefinitionService,
+    // Clean Architecture providers
+    CharacterAppService,
+    CharacterDtoMapper,
+    {
+      provide: ICharacterRepository,
+      useClass: MongoCharacterRepository,
+    },
+  ],
+  exports: [
+    ItemDefinitionService,
+    // Clean Architecture exports
+    CharacterAppService,
+    CharacterDtoMapper,
+    ICharacterRepository,
+  ],
 })
 export class CharacterModule {}

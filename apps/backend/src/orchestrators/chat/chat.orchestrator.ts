@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { CharacterService } from "../../domain/character/character.service.js";
-import type { CharacterResponseDto } from "../../domain/character/dto/index.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
+import type { CharacterResponseDto, DraftCharacterResponseDto } from "../../domain/character/dto/index.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import type {
   CombatStartInstructionMessageDto,
@@ -18,7 +19,7 @@ import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
  *
  * Responsibilities:
  * - Process game instructions (hp, xp, inventory, spells, combat_start, combat_end)
- * - Coordinate between CharacterService and CombatService
+ * - Coordinate between CharacterAppService and CombatService
  * - Return pending rolls that require client action
  */
 @Injectable()
@@ -26,7 +27,8 @@ export class ChatOrchestrator {
   private readonly logger = new Logger(ChatOrchestrator.name);
 
   constructor(
-    private readonly characterService: CharacterService,
+    private readonly characterAppService: CharacterAppService,
+    private readonly dtoMapper: CharacterDtoMapper,
     private readonly combatService: CombatAppService,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
@@ -61,7 +63,9 @@ export class ChatOrchestrator {
     instructions: GameInstructionDto[],
   ): Promise<{ pendingRolls: RollInstructionMessageDto[] }> {
     const pendingRolls: RollInstructionMessageDto[] = [];
-    const characterDto = await this.characterService.findByCharacterId(userId, characterId);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
+    
     const handlerMap: Record<string, (instr: GameInstructionDto) => Promise<void>> = {
       roll: instr => this.handleRoll(pendingRolls, instr as RollInstructionMessageDto),
       hp: instr =>
@@ -105,10 +109,10 @@ export class ChatOrchestrator {
 
     const newHp = (characterDto.hp || 0) + hp;
     if (newHp <= 0) {
-      await this.characterService.markAsDeceased(userId, characterId);
+      await this.characterAppService.markAsDeceased(userId, characterId);
       this.logger.log(`Applied HP instruction: character ${characterId} deceased`);
     } else {
-      await this.characterService.update(userId, characterId, { hp: newHp });
+      await this.characterAppService.update(userId, characterId, { hp: newHp });
       this.logger.log(`Applied HP instruction: ${hp} to ${characterId} => ${newHp}`);
     }
   }
@@ -123,7 +127,7 @@ export class ChatOrchestrator {
     if (!characterDto || typeof xp !== "number") return;
 
     const newXp = (characterDto?.totalXp || 0) + xp;
-    await this.characterService.update(userId, characterId, { totalXp: newXp });
+    await this.characterAppService.update(userId, characterId, { totalXp: newXp });
     this.logger.log(`Applied XP instruction: +${xp} to ${characterId} => ${newXp}`);
   }
   private async handleCombatStart(

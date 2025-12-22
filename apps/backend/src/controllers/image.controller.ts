@@ -10,7 +10,8 @@ import {
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import Joi from "joi";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
-import { CharacterService } from "../domain/character/character.service.js";
+import { CharacterAppService } from "../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../api/character/dto/mappers/CharacterDtoMapper.js";
 import type { CharacterResponseDto } from "../domain/character/dto/CharacterResponseDto.js";
 import { GeminiImageService } from "../infra/external/gemini-image.service.js";
 import {
@@ -35,7 +36,8 @@ export class ImageController {
   constructor(
     private readonly geminiImage: GeminiImageService,
     private readonly imageService: ImageService,
-    private readonly characterService: CharacterService,
+    private readonly characterAppService: CharacterAppService,
+    private readonly dtoMapper: CharacterDtoMapper,
   ) {}
 
   @Post()
@@ -74,8 +76,9 @@ export class ImageController {
 
     const { user } = req;
     const userId = user._id.toString();
-    const character = await this.characterService.findByCharacterId(userId, characterId);
-    return await this.handleGenerateAvatar(userId, character);
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
+    return await this.handleGenerateAvatar(userId, characterDto);
   }
 
   private async handleGenerateAvatar(userId: string, character: CharacterResponseDto) {
@@ -105,7 +108,7 @@ export class ImageController {
     characterId: string,
     compressedImage: string,
   ) {
-    await this.characterService.update(userId, characterId, { portrait: compressedImage });
+    await this.characterAppService.update(userId, characterId, { portrait: compressedImage });
     this.logger.log(`Avatar saved to character ${characterId} for user ${userId}`);
   }
 

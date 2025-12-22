@@ -17,8 +17,8 @@ import {
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../domain/auth/jwt-auth.guard.js";
 import type { RPGRequest } from "../../global.types.js";
-import { CharacterService } from "../../domain/character/character.service.js";
-import { toCharacterResponse } from "./character-response.util.js";
+import { CharacterAppService } from "../../application/character/CharacterAppService.js";
+import { CharacterDtoMapper } from "../../api/character/dto/mappers/CharacterDtoMapper.js";
 import {
   CharacterResponseDto,
   GrantInspirationBodyDto,
@@ -33,7 +33,8 @@ export class CharacterInspirationController {
   private readonly logger = new Logger(CharacterInspirationController.name);
 
   constructor(
-    private characterService: CharacterService,
+    private characterAppService: CharacterAppService,
+    private dtoMapper: CharacterDtoMapper,
   ) {}
 
   @Post("grant")
@@ -65,18 +66,18 @@ export class CharacterInspirationController {
       throw new BadRequestException("Amount must be a positive number between 1 and 5");
     }
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const character = await this.characterAppService.findByUserAndId(userId, characterId);
     // Cap inspiration points at 5 (D&D 5e rule)
     const currentPoints = character.inspirationPoints || 0;
     const newPoints = Math.min(currentPoints + amount, 5);
-    const updated = await this.characterService.update(userId, characterId, {
+    const updated = await this.characterAppService.update(userId, characterId, {
       inspirationPoints: newPoints,
     });
 
     return {
       ok: true,
       inspirationPoints: updated.inspirationPoints,
-      character: toCharacterResponse(updated),
+      character: CharacterDtoMapper.toDto(updated),
     };
   }
 
@@ -99,20 +100,20 @@ export class CharacterInspirationController {
     const { user } = req;
     const userId = user._id.toString();
 
-    const character = await this.characterService.findByCharacterId(userId, characterId);
+    const character = await this.characterAppService.findByUserAndId(userId, characterId);
     const currentPoints = character.inspirationPoints || 0;
     if (currentPoints <= 0) {
       throw new BadRequestException("No inspiration points available");
     }
 
-    const updated = await this.characterService.update(userId, characterId, {
+    const updated = await this.characterAppService.update(userId, characterId, {
       inspirationPoints: currentPoints - 1,
     });
 
     return {
       ok: true,
       inspirationPoints: updated.inspirationPoints,
-      character: toCharacterResponse(updated),
+      character: CharacterDtoMapper.toDto(updated),
     };
   }
 }

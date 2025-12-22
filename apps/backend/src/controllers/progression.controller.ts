@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
 import { CharacterResponseDto, DraftCharacterResponseDto } from "../domain/character/dto/index.js";
-import { CharacterResponseMapper } from "../domain/character/character-response.mapper.js";
+import { CharacterDtoMapper } from "../api/character/dto/mappers/CharacterDtoMapper.js";
 import {
   ClassMetadataDto,
   RaceMetadataDto,
@@ -20,7 +20,7 @@ import { type RPGRequest } from "../global.types.js";
 export class ProgressionController {
   constructor(
     private readonly progressionService: ProgressionService,
-    private readonly responseMapper: CharacterResponseMapper,
+    private readonly dtoMapper: CharacterDtoMapper,
   ) {}
 
   @Get("classes")
@@ -53,7 +53,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectClass(userId, characterId, className);
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDtoFromDocument(character);
   }
 
   @Post(":characterId/select-race")
@@ -71,7 +71,7 @@ export class ProgressionController {
 
     const userId = user._id.toString();
     const character = await this.progressionService.selectRace(userId, characterId, raceId);
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDtoFromDocument(character);
   }
 
   @Post(":characterId/unlock-rank")
@@ -90,7 +90,7 @@ export class ProgressionController {
       dto.voieId,
       dto.rank,
     );
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDtoFromDocument(character);
   }
 
   @Post(":characterId/first-talent")
@@ -113,6 +113,6 @@ export class ProgressionController {
       dto.statBonus,
     );
     
-    return this.responseMapper.toEnrichedResponse(character);
+    return this.dtoMapper.toEnrichedDtoFromDocument(character);
   }
 }
