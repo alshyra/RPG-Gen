@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DiceController } from "../controllers/dice.controller.js";
-import { DiceService } from "../domain/dice/dice.service.js";
+import { DiceService } from "../bounded-contexts/dice/domain/services/DiceService.js";
 
 @Module({
   controllers: [DiceController],

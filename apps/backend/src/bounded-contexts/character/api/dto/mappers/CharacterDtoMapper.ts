@@ -8,7 +8,7 @@ import { AptitudeResponseDto } from "../response/AptitudeResponseDto.js";
 import { VoieProgressDto } from "../response/VoieProgressDto.js";
 import type { InventoryItemDto } from "../response/InventoryItemDto.js";
 import type { TacticalStats } from "../response/TacticalStats.js";
-import { AptitudeService } from "../../../../../domain/aptitude/aptitude.service.js";
+import { AptitudeService } from "../../../../spell/domain/services/AptitudeService.js";
 import { ClassDefinitionService } from "../../../../../domain/class-definition/class-definition.service.js";
 import { CharacterMapper } from "../../../infrastructure/persistence/mongo/mappers/CharacterMapper.js";
 import type { CharacterDocument } from "../../../infrastructure/persistence/mongo/schemas/CharacterDocument.js";

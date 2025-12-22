@@ -1,14 +1,14 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { ItemDefinition, ItemDefinitionSchema } from "../../infra/mongo/item/ItemDefinition.js";
-import { ItemDefinitionService } from "../../domain/item-definition/item-definition.service.js";
+import { ItemDefinition, ItemDefinitionSchema } from "../item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
+import { ItemDefinitionService } from "../item/domain/services/ItemDefinitionService.js";
 import {
   CharacterController,
   CharacterInventoryController,
   CharacterInspirationController,
 } from "./api/controllers/index.js";
 import { Character, CharacterSchema } from "./infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import { AptitudeModule } from "../../domain/aptitude/aptitude.module.js";
+import { AptitudeModule } from "../spell/spell.module.js";
 import { ClassDefinitionModule } from "../../domain/class-definition/class-definition.module.js";
 
 // Clean Architecture imports

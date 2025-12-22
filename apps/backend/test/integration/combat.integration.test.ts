@@ -15,13 +15,13 @@ import test from "ava";
 import { CombatModule } from "../../src/bounded-contexts/combat/combat.module.js";
 import { CombatAppService } from "../../src/bounded-contexts/combat/application/services/CombatAppService.js";
 import { CharacterAppService } from "../../src/bounded-contexts/character/application/services/CharacterAppService.js";
-import { DiceService } from "../../src/domain/dice/dice.service.js";
-import type { CharacterResponseDto } from "../../src/domain/character/dto/index.js";
+import { DiceService } from "../../src/bounded-contexts/dice/domain/services/DiceService.js";
+import type { CharacterResponseDto } from "../../src/bounded-contexts/character/api/dto/index.js";
 import { type CombatStartRequestDto } from "../../src/bounded-contexts/combat/api/dto/response/index.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../helpers/test-app.js";
 import { createMockDiceService } from "../mocks/dice.mock.js";
 import util from "util";
-import { CombatActionOrchestrator } from "../../src/orchestrators/combat/combat-action.orchestrator.js";
+import { CombatActionOrchestrator } from "../../src/workflows/combat-gameplay/CombatActionWorkflow.js";
 
 // ============= Test Context =============
 

@@ -7,10 +7,10 @@ import { ClassesModule } from "./modules/classes.module.js";
 import { CombatModule } from "./bounded-contexts/combat/combat.module.js";
 import { DiceModule } from "./modules/dice.module.js";
 import { HealthModule } from "./modules/health.module.js";
-import { ImageModule } from "./modules/image.module.js";
+import { ImageModule } from "./bounded-contexts/media/media.module.js";
 import { ProgressionModule } from "./modules/progression.module.js";
 import { RacesModule } from "./modules/races.module.js";
-import { AptitudeModule } from "./domain/aptitude/aptitude.module.js";
+import { AptitudeModule } from "./bounded-contexts/spell/spell.module.js";
 import { getConfig } from "./config.js";
 import { ConfigModule } from "./config.module.js";
 

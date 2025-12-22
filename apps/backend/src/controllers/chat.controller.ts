@@ -9,7 +9,7 @@ import { ChatMessageDto } from "../domain/chat/dto/index.js";
 import type { RPGRequest } from "../global.types.js";
 import { GeminiTextService } from "../infra/external/gemini-text.service.js";
 import { ChatOrchestrator } from "../orchestrators/index.js";
-import type { CharacterResponseDto } from "../domain/character/dto/index.js";
+import type { CharacterResponseDto } from "../bounded-contexts/character/api/dto/index.js";
 
 @ApiTags("chat")
 @Controller("chat")

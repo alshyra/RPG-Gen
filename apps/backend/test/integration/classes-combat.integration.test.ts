@@ -4,7 +4,7 @@ import { Test } from "@nestjs/testing";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { ClassesService } from "../../src/domain/classes/classes.service.js";
 import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
-import { AptitudeService } from "../../src/domain/aptitude/aptitude.service.js";
+import { AptitudeService } from "../../src/bounded-contexts/spell/domain/services/AptitudeService.js";
 import { MongooseModule } from "@nestjs/mongoose";
 import {
   ClassDefinition,

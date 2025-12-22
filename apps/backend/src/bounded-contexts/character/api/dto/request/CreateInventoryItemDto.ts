@@ -17,7 +17,7 @@ import {
   GenericMeta,
   type InventoryItemMeta,
 } from "../response/InventoryItemMeta.js";
-import { ItemDefinition } from "../../../../../infra/mongo/item/ItemDefinition.js";
+import { ItemDefinition } from "../../../../item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
 
 @ApiExtraModels(WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta)
 export class CreateInventoryItemDto {

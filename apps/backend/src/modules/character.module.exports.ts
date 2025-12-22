@@ -16,5 +16,5 @@
 
 export { CharacterAppService } from "../bounded-contexts/character/application/services/CharacterAppService.js";
 export { CharacterDtoMapper } from "../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
-export { ItemDefinitionService } from "../domain/item-definition/item-definition.service.js";
+export { ItemDefinitionService } from "../bounded-contexts/item/domain/services/ItemDefinitionService.js";
 export { ICharacterRepository } from "../bounded-contexts/character/domain/repositories/ICharacterRepository.js";

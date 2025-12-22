@@ -1,2 +1,3 @@
-export * from "./mappers/index.js";
-export * from "./repositories/index.js";
+// Re-export from bounded contexts
+export * from "../../../bounded-contexts/character/infrastructure/persistence/mongo/mappers/index.js";
+export * from "../../../bounded-contexts/character/infrastructure/persistence/mongo/repositories/index.js";

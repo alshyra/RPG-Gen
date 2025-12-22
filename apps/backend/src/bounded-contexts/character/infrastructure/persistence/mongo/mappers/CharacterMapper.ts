@@ -11,7 +11,7 @@ import { CharacterStatsVO } from "../../../../domain/value-objects/CharacterStat
 import { ResourcePool } from "../../../../domain/value-objects/ResourcePool.js";
 import { TalentRank } from "../../../../domain/value-objects/TalentRank.js";
 import { CharacterDocument, type UnlockedRank, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
-import type { Item } from "../../../../../../infra/mongo/item/Item.js";
+import type { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
 
 /**
  * Mapper for converting between CharacterDocument (MongoDB) and CharacterEntity (Domain).

@@ -1,9 +1,9 @@
 import { BadRequestException, Body, Controller, Post } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { DiceService } from "../domain/dice/dice.service.js";
-import { type AdvantageType } from "../domain/dice/dto/dice.js";
-import { DiceRequestDto } from "../domain/dice/dto/DiceRequestDto.js";
-import { DiceResultDto } from "../domain/dice/dto/DiceResultDto.js";
+import { DiceService } from "../bounded-contexts/dice/domain/services/DiceService.js";
+import { type AdvantageType } from "../bounded-contexts/dice/api/dto/dice.js";
+import { DiceRequestDto } from "../bounded-contexts/dice/api/dto/DiceRequestDto.js";
+import { DiceResultDto } from "../bounded-contexts/dice/api/dto/DiceResultDto.js";
 
 @ApiTags("dice")
 @Controller("dice")

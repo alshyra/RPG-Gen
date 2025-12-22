@@ -2,11 +2,11 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from "@nes
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
-import { ItemDefinitionService } from "../item-definition/item-definition.service.js";
+import { ItemDefinitionService } from "../../bounded-contexts/item/domain/services/ItemDefinitionService.js";
 import { ClassDefinitionService } from "../class-definition/class-definition.service.js";
 import { RaceService, RaceMetadata } from "../race/race.service.js";
 import type { UnlockedRank, CharacterAptitude } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import type { ItemBonuses } from "../../infra/mongo/item/ItemDefinition.js";
+import type { ItemBonuses } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
 import { CharacterStats } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterStats.js";
 
 // Starter pack configuration per class

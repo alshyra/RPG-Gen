@@ -14,7 +14,7 @@ import {
 
 import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
 import { ClassesService } from "../../src/domain/classes/classes.service.js";
-import { AptitudeService } from "../../src/domain/aptitude/aptitude.service.js";
+import { AptitudeService } from "../../src/bounded-contexts/spell/domain/services/AptitudeService.js";
 
 let mongoServer: MongoMemoryServer;
 let classesService: ClassesService;

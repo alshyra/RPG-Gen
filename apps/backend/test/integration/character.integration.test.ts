@@ -16,7 +16,7 @@
  */
 
 import test from "ava";
-import { CharacterService } from "../../src/domain/character/character.service.js";
+import { CharacterAppService } from "../../src/bounded-contexts/character/application/services/CharacterAppService.js";
 import { CharacterModule } from "../../src/modules/character.module.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../helpers/test-app.js";
 import {
@@ -25,7 +25,7 @@ import {
   DraftCharacterResponseDto,
   DeceasedCharacterResponseDto,
   CreateInventoryItemDto,
-} from "../../src/domain/character/dto/index.js";
+} from "../../src/bounded-contexts/character/api/dto/index.js";
 
 // ============= Test Context =============
 

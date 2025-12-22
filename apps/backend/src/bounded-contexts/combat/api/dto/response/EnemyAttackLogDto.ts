@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { DiceResultDto } from "../../../../../domain/dice/dto/DiceResultDto.js";
-import { CombatDiceResultDto } from "../../../../../domain/dice/dto/CombatDiceResultDto.js";
+import { DiceResultDto } from "../../../../dice/api/dto/DiceResultDto.js";
+import { CombatDiceResultDto } from "../../../../dice/api/dto/CombatDiceResultDto.js";
 
 /**
  * Represents a single enemy attack action during enemy turn.

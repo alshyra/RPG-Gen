@@ -12,9 +12,7 @@ import {
   MovementResponseDto,
 } from "../dto/response/index.js";
 import type { RPGRequest } from "../../../../global.types.js";
-import { CombatOrchestrator } from "../../../../orchestrators/combat/index.js";
-import { CombatMovementOrchestrator } from "../../../../orchestrators/combat/combat-movement.orchestrator.js";
-import { CombatActionOrchestrator } from "../../../../orchestrators/combat/combat-action.orchestrator.js";
+import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../../../orchestrators/combat/index.js";
 import { ChatOrchestrator } from "../../../../orchestrators/index.js";
 
 /**

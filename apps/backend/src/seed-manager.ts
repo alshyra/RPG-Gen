@@ -1,9 +1,9 @@
 import { INestApplication, Logger } from "@nestjs/common";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { AptitudeService } from "./domain/aptitude/aptitude.service.js";
+import { AptitudeService } from "./bounded-contexts/spell/domain/services/AptitudeService.js";
 import { ClassDefinitionService } from "./domain/class-definition/class-definition.service.js";
-import { ItemDefinitionService } from "./domain/item-definition/item-definition.service.js";
+import { ItemDefinitionService } from "./bounded-contexts/item/domain/services/ItemDefinitionService.js";
 import { RaceService } from "./domain/race/race.service.js";
 
 // Get the directory of this file for relative paths

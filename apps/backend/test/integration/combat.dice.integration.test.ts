@@ -1,7 +1,7 @@
 import test from "ava";
 import util from "util";
-import { DiceService } from "../../src/domain/dice/dice.service.js";
-import { CombatDiceResultDto } from "../../src/domain/dice/dto/CombatDiceResultDto.js";
+import { DiceService } from "../../src/bounded-contexts/dice/domain/services/DiceService.js";
+import { CombatDiceResultDto } from "../../src/bounded-contexts/dice/api/dto/CombatDiceResultDto.js";
 import { CombatModule } from "../../src/bounded-contexts/combat/combat.module.js";
 import { closeTestApp, createTestApp } from "../helpers/test-app.js";
 

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Schema as MongooseSchema, Document } from "mongoose";
-import { Item } from "../../../../../../infra/mongo/item/Item.js";
+import { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
 import { CharacterStats } from "./CharacterStats.js";
 
 // Unlocked talent rank in a voie
