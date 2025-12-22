@@ -16,8 +16,7 @@ export class CombatAdapter {
         stats: {
           hp: state.player.hp ?? 0,
           maxHp: state.player.hpMax ?? 0,
-          ac: state.player.ac ?? 10,
-          attack: 0, // À calculer depuis character
+          attack: (state.player.basePower ?? 0) + (state.player.level ?? 1),
           defense: 0,
           moveRange: 3,
           attackRange: 1,
@@ -39,8 +38,7 @@ export class CombatAdapter {
           stats: {
             hp: enemy.hp ?? 0,
             maxHp: enemy.hpMax ?? 0,
-            ac: enemy.ac ?? 10,
-            attack: enemy.attackBonus ?? 0,
+            attack: (enemy.basePower ?? 0) + (enemy.level ?? 1),
             defense: 0,
             moveRange: 2,
             attackRange: 1,

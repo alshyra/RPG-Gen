@@ -12,22 +12,25 @@
     </div>
 
     <div class="ml-auto flex items-center gap-3 text-sm">
+      <!-- PA (Points d'Action) -->
       <div
         class="flex items-center gap-1"
         data-cy="action-counter"
         :class="actionRemaining > 0 ? 'text-green-400' : 'text-slate-500'"
       >
         <Activity class="w-4 h-4" />
-        <span>{{ actionRemaining }}</span>
+        <span>{{ actionRemaining }} PA</span>
       </div>
 
+      <!-- PM (Points de Mouvement) -->
       <div
         class="flex items-center gap-1"
-        data-cy="bonus-action-counter"
-        :class="bonusActionRemaining > 0 ? 'text-amber-400' : 'text-slate-500'"
+        data-cy="movement-counter"
+        :class="movementRemaining > 0 ? 'text-blue-400' : 'text-slate-500'"
+        :title="`Points de Mouvement: ${movementRemaining}/${movementMax}`"
       >
         <Star class="w-4 h-4" />
-        <span>{{ bonusActionRemaining }}</span>
+        <span>{{ movementRemaining }} PM</span>
       </div>
     </div>
     <UiButton
@@ -55,8 +58,9 @@ const characterId = useCharacterId();
 const combatApi = useCombat(characterId);
 
 const roundNumber = computed(() => combatApi.status.data.value?.roundNumber ?? 1);
-const actionRemaining = computed(() => combatApi.status.data.value?.actionRemaining ?? 1);
-const bonusActionRemaining = computed(() => combatApi.status.data.value?.bonusActionRemaining ?? 1);
+const actionRemaining = computed(() => combatApi.status.data.value?.player?.pa ?? 0);
+const movementRemaining = computed(() => combatApi.status.data.value?.player?.pm ?? 0);
+const movementMax = computed(() => combatApi.status.data.value?.player?.pmMax ?? 6);
 
 // Can end turn if there are no pending mutations
 const canEndTurn = computed(() => !combatApi.endTurn.isPending.value);

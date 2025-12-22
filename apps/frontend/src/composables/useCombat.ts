@@ -131,38 +131,36 @@ export function useCombat() {
     // Combat end is now detected automatically by watchers
   };
 
+
   /**
-   * Execute an attack against a target
+   * Execute an aptitude against a target (new unified system)
    */
-  const executeAttack = async (target: CombatantDto, spellName?: string): Promise<void> => {
+  const executeAptitude = async (target: CombatantDto, aptitudeId: string): Promise<void> => {
     const charIdValue = characterId.value;
     if (!charIdValue) {
-      console.warn("[useCombat] No characterId, aborting attack");
+      console.warn("[useCombat] No characterId, aborting aptitude");
       return;
     }
 
-    // Note: Removed canAct guard - backend validates action points.
-    // The frontend query cache may be stale when attacks are triggered rapidly.
-
     // Prevent duplicate calls while a send is in progress
     if (gameStore.sending) {
-      console.warn("[useCombat] Already sending, aborting attack");
+      console.warn("[useCombat] Already sending, aborting aptitude");
       return;
     }
 
     const targetName = target?.name || "cible inconnue";
-    gameStore.appendMessage("user", `J'attaque ${targetName}!`);
+    gameStore.appendMessage("user", `J'utilise une aptitude sur ${targetName}!`);
     gameStore.sending = true;
 
     try {
-      const result = await combatApi.attack.mutateAsync({
-        spellName,
-        target,
+      const result = await combatApi.useAptitude.mutateAsync({
         characterId: charIdValue,
+        aptitudeId,
+        targetId: target.id,
       });
       await processAttackResult(result, target);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to attack";
+      const message = err instanceof Error ? err.message : "Failed to use aptitude";
       const sessionLost =
         message.includes("Combat session not found") ||
         message.includes("Character is not in combat");
@@ -293,7 +291,7 @@ export function useCombat() {
 
     // Actions
     initializeCombat,
-    executeAttack,
+    executeAptitude,
     fleeCombat,
     checkCombatStatus,
 

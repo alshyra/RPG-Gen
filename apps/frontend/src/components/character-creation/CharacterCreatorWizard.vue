@@ -212,7 +212,6 @@ const saveFinalCharacter = async () => {
   
   // Only update the state - don't spread entire character to avoid corrupting data
   await update.mutateAsync({
-    characterId: currentCharacter.value.characterId,
     state: "created",
   });
 };

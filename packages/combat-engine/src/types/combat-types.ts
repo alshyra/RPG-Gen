@@ -1,10 +1,27 @@
 import * as PIXI from "pixi.js";
+import type { components } from "@rpg-gen/shared";
 
+// ===== Re-export backend DTOs as base types =====
+export type CombatantDto = components["schemas"]["CombatantDto"];
+export type GridPositionDto = components["schemas"]["GridPositionDto"];
+export type MovementResponseDto = components["schemas"]["MovementResponseDto"];
+export type MovementEventDto = components["schemas"]["MovementEventDto"];
+
+// ===== Engine-specific extensions (for runtime PIXI needs) =====
+
+/**
+ * GridPosition with engine-friendly naming (gridX/gridY).
+ * Maps to backend GridPositionDto (x/y).
+ */
 export interface GridPosition {
   gridX: number;
   gridY: number;
 }
 
+/**
+ * UnitConfig for engine initialization - extends backend CombatantDto
+ * with engine-specific fields (characterKey for asset loading).
+ */
 export interface UnitConfig {
   id: string;
   characterKey: string;
@@ -14,10 +31,12 @@ export interface UnitConfig {
   isPlayer?: boolean;
 }
 
+/**
+ * UnitStats for the engine - subset of CombatantDto fields.
+ */
 export interface UnitStats {
   hp: number;
   maxHp: number;
-  ac: number;
   attack: number;
   defense: number;
   moveRange: number;
@@ -39,6 +58,10 @@ export interface CombatConfig {
   turnBased: boolean;
 }
 
+/**
+ * Internal combat events (for engine state management).
+ * These are different from backend MovementEventDto / combat events.
+ */
 export type CombatEvent =
   | { type: "unit:moved"; unitId: string; from: GridPosition; to: GridPosition }
   | { type: "unit:attacked"; attackerId: string; targetId: string; damage: number }
@@ -57,7 +80,10 @@ export type availableCharacterKeys =
   | "Warrior-Blue"
   | "Warrior-Red";
 
-// Interface pour stocker les données d'unité
+/**
+ * Runtime unit data (PIXI-specific, not from backend).
+ * Contains sprite references and visual state.
+ */
 export interface UnitData {
   sprite: PIXI.AnimatedSprite;
   animations: Record<string, PIXI.Texture[]>;

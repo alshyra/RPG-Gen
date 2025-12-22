@@ -15,20 +15,20 @@ function getStatBonus(character: unknown, statName: string): number {
   const char = character as Record<string, unknown>;
   if (!char?.stats) return 0;
   const normalizedName = statName.toLowerCase();
-  const stats = char.stats;
+  const stats = char.stats as Record<string, number>;
   
   switch (normalizedName) {
     case "vigor":
     case "vigueur":
-      return stats.vigor ?? 0;
+      return stats?.vigor ?? 0;
     case "finesse":
-      return stats.finesse ?? 0;
+      return stats?.finesse ?? 0;
     case "mind":
     case "esprit":
-      return stats.mind ?? 0;
+      return stats?.mind ?? 0;
     case "survival":
     case "survie":
-      return stats.survival ?? 0;
+      return stats?.survival ?? 0;
     default:
       return 0;
   }

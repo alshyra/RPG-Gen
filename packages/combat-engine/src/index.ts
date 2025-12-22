@@ -12,7 +12,7 @@ export type {
   UnitAttackedPayload,
 } from "./types/combat-types";
 
-// Types
+// Types (engine-specific)
 export type {
   GridPosition,
   UnitConfig,
@@ -20,3 +20,19 @@ export type {
   CombatConfig,
   CombatEvent,
 } from "./types/combat-types";
+
+// Re-export backend DTOs for convenience
+export type {
+  CombatantDto,
+  GridPositionDto,
+  MovementResponseDto,
+  MovementEventDto,
+} from "./types/combat-types";
+
+// Adapters (for converting backend ↔ engine formats)
+export {
+  toEnginePosition,
+  toBackendPosition,
+  toEnginePositions,
+  toBackendPositions,
+} from "./adapters/position-adapter";

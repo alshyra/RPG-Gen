@@ -32,8 +32,7 @@
           {{ getCharSummary(character) }}
         </div>
         <div class="text-xs text-slate-500 mt-1">
-          {{ character.world }} • HP: {{ character.hp }}/{{ character.hpMax }} • XP:
-          {{ character.totalXp || 0 }}
+          HP: {{ character.hp }}/{{ character.hpMax }} • XP: {{ character.totalXp || 0 }}
         </div>
       </div>
 
@@ -106,11 +105,9 @@ const onDelete = async (character: CharacterResponseDto) => {
 };
 
 const getCharSummary = (character: Partial<CharacterResponseDto>): string => {
-  const classes = character.classes || [];
-  return classes
-    .map((c) => (c?.name ? `${c.name} Niveau ${c.level}` : ""))
-    .filter(Boolean)
-    .join(", ");
+  const className = character.className || 'Unknown';
+  const level = character.level || 1;
+  return `${className} Niveau ${level}`;
 };
 </script>
 

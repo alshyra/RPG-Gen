@@ -148,7 +148,8 @@ export function useCombat(
   const attack = useMutation({
     mutationFn: async (data: { characterId: string; target: CombatantDto; spellName?: string }) => {
       if (!data.target) throw new Error(`Target not found`);
-      return combatApi.attack(data.characterId, data.target, data.spellName);
+      // Deprecated: use useAptitude.mutateAsync instead
+      return combatApi.attack(data.characterId, data.target);
     },
     onSuccess: async (_data, variables) => {
       await queryClient.invalidateQueries({ queryKey: ["combat", variables.characterId] });

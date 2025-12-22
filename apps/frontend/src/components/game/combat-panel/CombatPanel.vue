@@ -21,13 +21,14 @@
       :is-open="isActionModalOpen"
       :target="selectedTarget"
       @close="closeActionModal"
-      @attack="handleAttack"
+      @attack="handleUseAptitude"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useCharacterId } from '@/composables/useCharacterId';
+import { useCombat } from '@/composables/useCombat';
 import type { CombatArenaApi } from '@/composables/useCombatEngine';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { exposeE2ECombatApi, cleanupE2ECombatApi } from '@/utils/e2eHelpers';
@@ -37,6 +38,9 @@ import type { CombatantDto } from '@rpg-gen/shared';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import CombatHeader from './CombatHeader.vue';
 import SpellSelector from './SpellSelector.vue';
+
+const characterId = useCharacterId();
+const { executeAptitude } = useCombat();
 
 const {
   registerArena,
@@ -49,14 +53,14 @@ const {
   endTurn,
 } = useCombatEngine();
 
-const characterId = useCharacterId();
 const combatApi = useCombatApi(characterId);
 const { isInCombat: inCombat } = combatApi;
 
 // Reference to arena component
 const arenaRef = ref<InstanceType<typeof CombatArena> | null>(null);
-const handleAttack = async (target: CombatantDto, spellName?: string) => {
-  await executeAttack(target, spellName);
+
+const handleUseAptitude = async (aptitudeId: string, target: CombatantDto) => {
+  await executeAptitude(target, aptitudeId);
 };
 
 // Register arena API when mounted

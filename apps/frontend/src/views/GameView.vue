@@ -15,7 +15,7 @@
       <!-- Desktop : fixed/sticky left panel so it doesn't scroll with the main content -->
       <CharacterInfoPanel />
       <!-- Center: messages (or detail views via child routes) -->
-      <main class="lg:col-span-9 flex flex-col min-h-0 overflow-hidden">
+      <main class="lg:col-span-9 flex flex-col min-h-0 overflow-hidden items-start">
         <!-- Only this inner area scrolls; header/other siblings stay fixed -->
         <div
           class="flex-1 min-h-0 overflow-auto"

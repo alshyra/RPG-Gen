@@ -8,7 +8,6 @@ import { useCombat as useCombatApi } from "@rpg-gen/api-client";
 import type {
   CombatEngineEventPayload,
   UnitClickedPayload,
-  UnitMovedPayload,
 } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
@@ -85,8 +84,8 @@ export function useCombatEngine() {
    * Subscribe to visual engine events
    */
   const subscribeToEvents = () => {
-    if (!getArenaApi()) return;
-
+    const arenaApi = getArenaApi();
+    if (!arenaApi) return;
     const handleUnitClicked = (payload: UnitClickedPayload) => {
       console.log("[useCombatEngine] unit:clicked", payload);
 
@@ -108,40 +107,73 @@ export function useCombatEngine() {
       isActionModalOpen.value = true;
     };
 
-    getArenaApi().on("unit:clicked", handleUnitClicked);
+    arenaApi.on("unit:clicked", handleUnitClicked);
     registeredHandlers.push({
       event: "unit:clicked",
       handler: handleUnitClicked as (...args: unknown[]) => void,
     });
 
-    // Handle movement completion - sync with backend
-    const handleUnitMoved = async (payload: UnitMovedPayload) => {
+    // Handle unit movement with PM validation
+    const handleUnitMoved = async (payload: {
+      unitId: string;
+      fromGridX: number;
+      fromGridY: number;
+      gridX: number;
+      gridY: number;
+      pmCost: number;
+    }) => {
       console.log("[useCombatEngine] unit:moved", payload);
 
-      // Only sync player movement to backend
-      // Enemy movements are controlled by backend and don't need to be re-sent
-      const isPlayerUnit = combat.status.data.value?.combatant?.id === payload.unitId;
-      if (!isPlayerUnit) {
-        console.log("[useCombatEngine] Enemy unit moved, no backend sync needed");
+      // Only validate and sync player movements
+      const playerUnit = combat.status.data.value?.player;
+      if (!playerUnit || payload.unitId !== playerUnit.id) {
+        console.log("[useCombatEngine] Enemy movement, no sync needed");
         return;
       }
 
-      // Call backend to register movement and consume PM
+      // Check if player has enough PM
+      const currentPM = playerUnit.pm ?? 0;
+      if (currentPM < payload.pmCost) {
+        console.warn(`[useCombatEngine] Insufficient PM: ${currentPM} < ${payload.pmCost}`);
+        // TODO: Show error message to user and revert movement
+        return;
+      }
+
+      // Sync movement with backend to consume PM
       try {
-        await combat.move.mutateAsync({
+        const result = await combat.move.mutateAsync({
           characterId: characterId.value!,
           movement: {
             combatantId: payload.unitId,
-            path: [{ gridX: payload.gridX, gridY: payload.gridY }],
+            path: [
+              { x: payload.fromGridX, y: payload.fromGridY },
+              { x: payload.gridX, y: payload.gridY },
+            ],
           },
         });
-        console.log("[useCombatEngine] Movement synced with backend, PM consumed:", payload.pmCost);
+        
+        console.log("[useCombatEngine] Movement synced, PM consumed:", result.remainingMovement);
+        
+        // Handle movement events (opportunity attacks, etc.)
+        if (result.events && result.events.length > 0) {
+          for (const event of result.events) {
+            if (event.type === "opportunity-attack" && event.damage) {
+              console.log("[useCombatEngine] Opportunity attack:", event);
+              // Update visual HP
+              const arenaApi = getArenaApi();
+              if (arenaApi && event.targetId) {
+                arenaApi.updateUnitHealth(event.targetId, event.damage);
+              }
+            }
+          }
+        }
       } catch (err) {
-        console.error("[useCombatEngine] Failed to sync movement with backend:", err);
+        console.error("[useCombatEngine] Failed to sync movement:", err);
+        // TODO: Revert movement in visual
       }
     };
 
-    getArenaApi().on("unit:moved", handleUnitMoved);
+    arenaApi.on("unit:moved", handleUnitMoved);
     registeredHandlers.push({
       event: "unit:moved",
       handler: handleUnitMoved as (...args: unknown[]) => void,
@@ -155,10 +187,11 @@ export function useCombatEngine() {
   watch(
     () => currentAttackView?.value ?? null,
     attackView => {
-      if (!attackView || !getArenaApi() || !attackView.targetId) return;
+      const arenaApi = getArenaApi();
+      if (!attackView || !arenaApi || !attackView.targetId) return;
       // Emit engine event so the visual engine can display hit/miss/crit and damage
       try {
-        getArenaApi().emit("unit:attacked", {
+        arenaApi.emit("unit:attacked", {
           attackerId: attackView.attackerId ?? "player",
           targetId: attackView.targetId,
           damage: attackView.totalDamage ?? 0,
@@ -190,15 +223,17 @@ export function useCombatEngine() {
     isActionModalOpen.value = false;
 
     try {
-      // Call backend
-      await backendCombat.executeAttack(target, spellName);
+      // Call backend - use basic attack if no spell specified
+      const aptitudeId = spellName || "com_frappe_basique";
+      await backendCombat.executeAptitude(target, aptitudeId);
 
       // Update visual with damage from attack result
-      if (!getArenaApi()) return;
+      const arenaApi = getArenaApi();
+      if (!arenaApi) return;
 
       const damage = currentAttackView.value?.totalDamage ?? 0;
       if (damage > 0) {
-        getArenaApi().updateUnitHealth(target.id, damage);
+        arenaApi.updateUnitHealth(target.id, damage);
       }
     } catch (err) {
       console.error("[useCombatEngine] Attack failed:", err);
@@ -226,8 +261,11 @@ export function useCombatEngine() {
       for (const log of logs) {
         // Animate attack (TODO: add attack animation method)
         // For now just update health
-        if (log.hit && log.damageTotal) {
-          getArenaApi().updateUnitHealth(log.targetId, log.damageTotal);
+        if (log.hit && log.damageTotal && log.targetId) {
+          const arenaApi = getArenaApi();
+          if (arenaApi) {
+            arenaApi.updateUnitHealth(log.targetId, log.damageTotal);
+          }
         }
 
         // Small delay between attacks for visibility
@@ -250,23 +288,32 @@ export function useCombatEngine() {
     if (!combat.isInCombat.value) return;
 
     // Clear old units before re-initializing
-    await getArenaApi().clearAllUnits();
+    const arenaApi = getArenaApi();
+    if (!arenaApi) {
+      console.error("[initializeVisual] Arena API not available");
+      return;
+    }
+
+    await arenaApi.clearAllUnits();
 
     const config = CombatAdapter.toCombatConfig({
       characterId: currentCharacter?.value?.characterId ?? "",
       inCombat: combat.isInCombat.value,
       enemies: combat.status.data.value?.enemies ?? [],
-      player: combat.status.data.value?.player ?? null,
+      player: combat.status.data.value?.player ?? {
+        id: "player-unknown",
+        name: "Player",
+        initiative: 0,
+        isPlayer: true,
+      },
       turnOrder: combat.status.data.value?.turnOrder ?? [],
       currentTurnIndex: combat.status.data.value?.currentTurnIndex ?? 0,
       roundNumber: combat.status.data.value?.roundNumber ?? 1,
-      actionRemaining: combat.status.data.value?.actionRemaining ?? 1,
-      actionMax: combat.status.data.value?.actionMax ?? 1,
     });
 
     // Create units from config
     for (const unit of config.units) {
-      await getArenaApi().createUnit(
+      await arenaApi.createUnit(
         unit.id,
         unit.position.gridX,
         unit.position.gridY,
@@ -278,7 +325,7 @@ export function useCombatEngine() {
       );
     }
 
-    getArenaApi().setupDragEvents();
+    arenaApi.setupDragEvents();
   };
 
   // Watch for enemy attack logs and update visual HP
@@ -291,7 +338,8 @@ export function useCombatEngine() {
       "player:",
       combat.status.data.value?.player?.id,
     );
-    if (!log || !getArenaApi() || !combat.status.data.value?.player?.hp) {
+    const arenaApi = getArenaApi();
+    if (!log || !arenaApi || !combat.status.data.value?.player?.hp) {
       console.log("[useCombatEngine] Enemy attack watcher skipped - missing requirement");
       return;
     }
@@ -300,14 +348,13 @@ export function useCombatEngine() {
     if (
       log.hit &&
       log.damageTotal &&
-      getArenaApi().updateUnitHealth &&
       combat.status.data.value?.player
     ) {
       console.log(
         "[useCombatEngine] Calling updateUnitHealth for player, damage:",
         log.damageTotal,
       );
-      getArenaApi().updateUnitHealth(combat.status.data.value.player.id, log.damageTotal);
+      arenaApi.updateUnitHealth(combat.status.data.value.player.id, log.damageTotal);
       console.log(
         "[useCombatEngine] Updated player HP after enemy attack, damage:",
         log.damageTotal,

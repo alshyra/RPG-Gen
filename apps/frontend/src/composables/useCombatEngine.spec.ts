@@ -65,7 +65,6 @@ vi.mock("@/stores/combatStore", () => ({
         name: "Goblin",
         hp: 5,
         hpMax: 7,
-        ac: 12,
         isPlayer: false,
       },
     ]),
@@ -74,7 +73,6 @@ vi.mock("@/stores/combatStore", () => ({
       name: "Hero",
       hp: 10,
       hpMax: 10,
-      ac: 14,
       isPlayer: true,
     }),
     inCombat: ref(true),
@@ -144,7 +142,6 @@ describe("useCombatEngine - Attack Visual Updates", () => {
       name: "Goblin",
       hp: 7, // HP BEFORE attack
       hpMax: 7,
-      ac: 12,
       isPlayer: false,
       initiative: 5,
     };
@@ -169,7 +166,6 @@ describe("useCombatEngine - Attack Visual Updates", () => {
       name: "Goblin",
       hp: 7,
       hpMax: 7,
-      ac: 12,
       isPlayer: false,
       initiative: 5,
     };
@@ -193,7 +189,6 @@ describe("useCombatEngine - Attack Visual Updates", () => {
       name: "Goblin",
       hp: 2, // Had 2 HP
       hpMax: 7,
-      ac: 12,
       isPlayer: false,
       initiative: 5,
     };

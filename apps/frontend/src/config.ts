@@ -33,7 +33,7 @@ export function loadFrontendConfig(): FrontendConfig {
   try {
     const envConfigPath = resolve(configDir, `${env}.json`);
     envConfig = JSON.parse(readFileSync(envConfigPath, "utf-8"));
-  } catch (err) {
+  } catch {
     console.warn(`No config file for environment: ${env}, using default`);
   }
 

@@ -8,47 +8,50 @@
       <h3 class="text-lg font-semibold text-slate-100 mb-4">Choisir une action</h3>
 
       <div class="text-xs text-slate-400 mb-4">
-        Actions: {{ actionRemaining }} / {{ actionMax }}
+        PA: {{ actionRemaining }} / {{ actionMax }}
       </div>
 
       <div class="space-y-2 mb-4">
+        <!-- Basic attack aptitude -->
         <UiButton
           class="w-full"
-          :disabled="!canAct"
-          :variant="canAct ? 'secondary' : 'ghost'"
-          @click="attackWithWeapon"
+          :disabled="!canUseBasicAttack"
+          :variant="canUseBasicAttack ? 'secondary' : 'ghost'"
+          @click="useBasicAttack"
         >
-          ⚔️ Attaque à l'arme
+          ⚔️ Attaque de base ({{ BASIC_ATTACK_COST }} PA)
         </UiButton>
 
+        <!-- Available aptitudes -->
         <div
-          v-if="availableSpells.length > 0"
+          v-if="availableAptitudes.length > 0"
           class="space-y-2"
         >
-          <p class="text-sm text-slate-400 mt-3 mb-2">Sorts disponibles:</p>
+          <p class="text-sm text-slate-400 mt-3 mb-2">Aptitudes disponibles:</p>
           <UiButton
-            v-for="spell in availableSpells"
-            :key="spell.name"
-            :disabled="!canAct"
-            :variant="canAct ? 'secondary' : 'ghost'"
-            class="w-full"
-            @click="castSpell(spell.name)"
+            v-for="aptitude in availableAptitudes"
+            :key="aptitude.aptitudeId"
+            :disabled="!canUseAptitude(aptitude)"
+            :variant="canUseAptitude(aptitude) ? 'secondary' : 'ghost'"
+            class="w-full text-left"
+            @click="useAptitude(aptitude)"
           >
-            <div class="flex items-center justify-between">
-              <span>✨ {{ spell.name }}</span>
-              <span
-                class="text-xs"
-                :class="canAct ? 'text-purple-200' : 'text-slate-500'"
-                >Niv. {{ spell.level }}</span
-              >
-            </div>
-            <div
-              v-if="spell.description"
-              class="text-xs mt-1"
-              :class="canAct ? 'text-purple-200' : 'text-slate-500'"
-            >
-              {{ spell.description.substring(0, 60)
-              }}{{ spell.description.length > 60 ? '...' : '' }}
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="font-medium">{{ getCategoryIcon(aptitude.category) }} {{ aptitude.name }}</span>
+                <span
+                  class="text-xs px-2 py-0.5 rounded"
+                  :class="canUseAptitude(aptitude) ? 'bg-purple-500/20 text-purple-200' : 'bg-slate-700 text-slate-500'"
+                >
+                  {{ aptitude.paCost }} PA
+                </span>
+              </div>
+              <div class="text-xs text-slate-400">
+                {{ aptitude.description }}
+              </div>
+              <div v-if="aptitude.cooldown > 0" class="text-xs text-amber-400">
+                Cooldown: {{ aptitude.cooldown }} tours
+              </div>
             </div>
           </UiButton>
         </div>
@@ -57,9 +60,10 @@
           v-else
           class="text-sm text-slate-500 italic mt-3"
         >
-          Aucun sort disponible
+          Aucune aptitude apprise
         </p>
       </div>
+
       <UiButton
         class="w-full px-4 py-2 mb-2"
         variant="primary"
@@ -67,6 +71,7 @@
       >
         Fin de tour
       </UiButton>
+      
       <UiButton
         class="w-full px-4 py-2"
         :variant="'ghost'"
@@ -83,7 +88,7 @@ import { useCharacterId } from '@/composables/useCharacterId';
 import { useCombat } from '@/composables/useCombat';
 import { useCombatEngine } from '@/composables/useCombatEngine';
 import { useCurrentCharacter } from '@/composables/useCurrentCharacter';
-import type { CombatantDto } from '@rpg-gen/shared';
+import type { CombatantDto, AptitudeResponseDto } from '@rpg-gen/shared';
 import { useCombat as useCombatApi } from '@rpg-gen/api-client';
 import { UiButton } from '@rpg-gen/ui';
 import { computed } from 'vue';
@@ -92,45 +97,80 @@ const props = defineProps<{
   isOpen: boolean;
   target: CombatantDto | null;
 }>();
+
 const characterId = useCharacterId();
 const currentCharacter = useCurrentCharacter();
 const { endTurn } = useCombatEngine();
-const { executeAttack } = useCombat();
+const { executeAptitude } = useCombat();
 
 const { status } = useCombatApi(characterId);
 
-const actionRemaining = computed(() => status.data.value?.actionRemaining ?? 0);
-const actionMax = computed(() => status.data.value?.actionMax ?? 0);
+const actionRemaining = computed(() => status.data.value?.player?.pa ?? 0);
+const actionMax = computed(() => status.data.value?.player?.paMax ?? 6);
 
 const emit = defineEmits<{
   close: [];
-  attack: [target: CombatantDto, spellName?: string];
+  attack: [aptitudeId: string, target: CombatantDto];
 }>();
 
-// Filter to only damaging spells (require meta.damageDice). Keep cantrips/low-level for UI where appropriate.
-const availableSpells = computed(() => {
-  if (!currentCharacter?.value?.spells) return [];
-
-  return currentCharacter?.value?.spells.filter(spell => !!(spell.meta && spell.meta.damageDice));
+// Get character aptitudes
+const characterAptitudes = computed<AptitudeResponseDto[]>(() => {
+  return currentCharacter?.value?.aptitudes || [];
 });
+
+// Filter to combat-usable aptitudes (attack, defense, support categories)
+const availableAptitudes = computed(() => {
+  return characterAptitudes.value.filter(apt => 
+    apt.category === 'attack' || 
+    apt.category === 'defense' || 
+    apt.category === 'support'
+  );
+});
+
+// Basic attack constants
+const BASIC_ATTACK_ID = 'com_frappe_basique';
+const BASIC_ATTACK_COST = 2; // Standard PA cost for basic attack
 
 // Check if player can still act
 const canAct = computed(() => (actionRemaining.value ?? 0) > 0);
+
+// Check if basic attack is available
+const canUseBasicAttack = computed(() => (actionRemaining.value ?? 0) >= BASIC_ATTACK_COST);
+
+// Check if aptitude can be used
+const canUseAptitude = (aptitude: AptitudeResponseDto): boolean => {
+  return canAct.value && (actionRemaining.value ?? 0) >= aptitude.paCost;
+};
+
+// Get icon for aptitude category
+const getCategoryIcon = (category: string): string => {
+  const icons: Record<string, string> = {
+    attack: '⚔️',
+    defense: '🛡️',
+    support: '✨',
+    movement: '🏃',
+    utility: '🔧',
+  };
+  return icons[category] || '•';
+};
 
 const close = () => {
   emit('close');
 };
 
-const attackWithWeapon = () => {
-  if (props.target && canAct.value) {
-    emit('attack', props.target);
-  }
+const useBasicAttack = async () => {
+  if (!props.target || !canUseBasicAttack.value) return;
+  
+  await executeAptitude(props.target, BASIC_ATTACK_ID);
+  emit('attack', BASIC_ATTACK_ID, props.target);
   close();
 };
 
-const castSpell = async (spellName: string) => {
-  if (!props.target || !canAct.value) throw new Error('No target or cannot act');
-  await executeAttack(props.target, spellName);
+const useAptitude = async (aptitude: AptitudeResponseDto) => {
+  if (!props.target || !canUseAptitude(aptitude)) return;
+  
+  await executeAptitude(props.target, aptitude.aptitudeId);
+  emit('attack', aptitude.aptitudeId, props.target);
   close();
 };
 

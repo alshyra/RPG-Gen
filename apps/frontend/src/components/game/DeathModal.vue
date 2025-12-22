@@ -58,8 +58,9 @@ const currentCharacter = useCurrentCharacter();
 
 const characterName = computed(() => currentCharacter?.value?.name || 'Unknown');
 const characterClass = computed(() => {
-  const classes = currentCharacter?.value?.classes || [];
-  return classes.map(c => `${c.name} ${c.level}`).join(', ') || '';
+  const className = currentCharacter?.value?.className || 'Unknown';
+  const level = currentCharacter?.value?.level || 1;
+  return `${className} ${level}`;
 });
 const characterXp = computed(() => currentCharacter?.value?.totalXp || 0);
 const characterLevel = computed(() => getCurrentLevel(currentCharacter?.value?.totalXp || 0).level);

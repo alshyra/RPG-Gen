@@ -17,12 +17,6 @@
         >
           {{ title }}
         </div>
-        <div
-          v-if="ac != '-'"
-          class="text-[10px] text-slate-200"
-        >
-          AC: {{ ac ?? '-' }}
-        </div>
       </div>
 
       <div class="absolute inset-y-2 right-1 flex items-center pointer-events-none">
@@ -64,8 +58,7 @@ const combatPlayer = computed(() => status.data.value?.player);
 const title = computed(() =>
   isPlayer ? (currentCharacter?.value?.name ?? 'You') : (fighter?.name ?? 'Enemy'),
 );
-// For player, get AC from combat state player (calculated server-side); for enemies, use fighter.ac
-const ac = computed(() => (isPlayer ? (combatPlayer.value?.ac ?? '-') : (fighter?.ac ?? '-')));
+
 const fighterDisplayHp = computed(() => {
   if (isPlayer && isInCombat.value && combatPlayer.value) return combatPlayer.value.hp ?? 0;
   if (isPlayer) return currentCharacter?.value?.hp ?? 0;
