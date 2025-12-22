@@ -63,53 +63,7 @@ Tests & CI
 
 Patterns & conventions to respect
 
-- **DTO validation pattern**: DTOs own validation, services do not. Every DTO must provide a constructor that validates required fields and throws descriptive errors on missing/invalid data. Services should instantiate DTOs and trust constructor validation—do not add validation logic to service methods. Example:
-  ```ts
-  // DTO constructor validates
-  export class AptitudeResponseDto {
-    constructor(init?: Partial<AptitudeResponseDto>) {
-      if (!init?.aptitudeId) throw new Error("AptitudeResponseDto: missing required field 'aptitudeId'");
-      if (!init?.name) throw new Error("AptitudeResponseDto: missing required field 'name'");
-      // ... validate other required fields
-      Object.assign(this, init);
-    }
-  }
-  // Service simply passes data and relies on constructor
-  toResponseDto(aptitude: Partial<Aptitude>): AptitudeResponseDto {
-    return new AptitudeResponseDto({...aptitude});
-  }
-  ```
 
-- **Strict enum typing for DTO fields**: When a DTO property accepts only specific literal values (e.g., `className: 'guerrier' | 'rogue' | 'mage'`), the constructor must validate the input using type guards (type predicates). Never use `as` casting. Example:
-  ```ts
-  // Type guard (type predicate) - validates AND narrows type
-  const isValidClassName = (value: unknown): value is 'guerrier' | 'rogue' | 'mage' => {
-    return ['guerrier', 'rogue', 'mage'].includes(value as string);
-  };
-
-  export class CharacterResponseDto extends BaseCharacterResponseDto {
-    constructor(init?: Partial<CharacterResponseDto> | CharacterDocument) {
-      if (!init) throw new Error("...");
-      // Validate enum values before use
-      if (init.className && !isValidClassName(init.className)) {
-        throw new InternalServerErrorException(`Invalid className: ${init.className}`);
-      }
-      if (init.raceId && !isValidRaceId(init.raceId)) {
-        throw new InternalServerErrorException(`Invalid raceId: ${init.raceId}`);
-      }
-      super();
-      // Type guard narrows type - no casting needed
-      this.className = init.className && isValidClassName(init.className) ? init.className : undefined;
-      this.raceId = init.raceId && isValidRaceId(init.raceId) ? init.raceId : undefined;
-    }
-  }
-  ```
-
-- **Always verify TypeScript compilation before generating OpenAPI types**: Run `npm run type-check` in the backend folder before executing `npm run generate:openapi`. This ensures the backend compiles successfully and the OpenAPI spec accurately reflects your DTOs.
-
-- DTO generation: backend schemas ➜ generator script at `packages/backend/src/scripts/generate-dtos.ts`. Do not hand-edit generated files in `packages/shared/src/generated`. If schema changes are needed run `npm --workspace @rpg-gen/backend run generate:dtos` and commit the result.
-- Chat / Gemini integration: `packages/backend/src/external/text/gemini-text.service.ts` — robust extraction/parsing of Gemini responses is central. Tests often mock or avoid non-deterministic AI outputs — prefer making Gemini interactions injectable/mocked in tests.
-- Narrative parsing conventions: game instructions are embedded as JSON in narrative text and parsed by `packages/backend/src/external/game-parser.util.ts`. Tests expect specific JSON extraction and cleaning behavior.
 
 Security / Deployment
 
@@ -123,81 +77,37 @@ Where to look first
 - `packages/shared/src` — generated DTOs and public API shapes
 - `packages/ui` — shared Vue 3 components and styles
 - `packages/api-client` — TypeScript API client for frontend-backend communication wrapped in vuequery
+- `packages/combat-engine` — PixiJS combat engine, frontend core game logic
 - `.github/workflows` — CI steps, test orchestration, node versions and docker compose usage
 
 If unclear: ask 1–2 clarifying questions before making changes (for example: "Do you want an API-only change or end-to-end validation?" or "Should I add unit tests, or a small integration test using Docker Compose?").
 
 Note: See `.github/agents/dev.agent.md` for our conversational/approval rules and PR checklists — follow them when proposing changes.
 
+<instructions>
+<instruction>
+<file>\.github/instructions/backend-seeds.instructions.md</file>
+<applyTo>apps/backend/src/seed/**/*.json, apps/backend/src/seed-manager.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/combat-engine.instructions.md</file>
+<applyTo>packages/combat-engine/src/**/*.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/dto-generation.instructions.md</file>
+<applyTo>apps/backend/src/scripts/generate-dtos.ts, packages/shared/src/generated/**/*.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/e2e-playwright-tests.instructions.md</file>
+<applyTo>packages/e2e/tests/**/*.spec.ts, packages/combat-engine/tests/**/*.spec.ts, apps/frontend/src/**/*.spec.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/game-narrative-parsing.instructions.md</file>
+<applyTo>apps/backend/src/external/game-parser.util.ts, apps/backend/src/orchestrators/**/*.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/gemini-chat.instructions.md</file>
+<applyTo>apps/backend/src/external/text/gemini-text.service.ts, apps/backend/src/modules/chat/**/*.ts, apps/backend/src/controllers/chat.controller.ts</applyTo>
+</instruction>
+</instructions>
 
-## Règles pour les tests E2E avec Playwright
-
-## Principe fondamental
-Un test E2E doit simuler le comportement d'un véritable utilisateur. 
-L'utilisateur ne fait PAS d'appels API directs - il clique, tape, navigue.
-
-### Quand utiliser `page.request` (API directe)
-
-✅ **AUTORISÉ : Setup et assertions backend**
-- Préparer l'état initial (créer des données de test)
-- Vérifier l'état final du backend après actions UI
-- Nettoyer après les tests
-```javascript
-// ✅ BON : Setup
-await page.request.post('/api/combat/start', {...});
-await page.goto('/combat');
-
-// ✅ BON : Assertion backend après action UI
-await page.click('button[data-action="attack"]');
-const status = await page.request.get('/api/combat/status');
-expect(status.inCombat).toBe(false);
-```
-
-❌ **INTERDIT : Actions utilisateur**
-- Toute action qu'un utilisateur ferait via l'interface
-- Attaquer, se déplacer, cliquer sur des boutons
-- Soumettre des formulaires
-```javascript
-// ❌ MAUVAIS : Action via API
-await page.request.post('/api/combat/action', {
-  data: { actionType: "attack" }
-});
-
-// ✅ BON : Action via UI
-await page.getByRole('button', { name: 'Attaquer' }).click();
-await page.locator('[data-enemy-id="1"]').click();
-```
-
-### Structure d'un test E2E
-```javascript
-test('user journey', async ({ page }) => {
-  // 1. SETUP (API OK)
-  await page.request.post('/api/setup', {...});
-  
-  // 2. NAVIGATION (UI)
-  await page.goto('/path');
-  
-  // 3. ACTIONS (UI SEULEMENT - pas d'API)
-  await page.click('button');
-  await page.fill('input', 'value');
-  
-  // 4. ASSERTIONS (UI + optionnel: vérif backend)
-  await expect(page.locator('.result')).toBeVisible();
-  const apiState = await page.request.get('/api/state');
-  expect(apiState.data).toBe(expectedValue);
-});
-```
-
-### Tests API
-
-**Les tests API existent déjà dans les tests backend (ava).**
-Ne les duplique pas dans Playwright - Playwright est pour l'UI uniquement.
-
-### Résumé
-
-**Test E2E = Simulation utilisateur réel**
-- Setup : `page.request` ✅
-- Actions : UI uniquement (`page.click()`, etc.) ❌ **JAMAIS `page.request`**
-- Vérifications : UI + optionnel `page.request.get()` pour état backend ✅
-
-**Si tu veux tester la logique API, utilise les tests backend (ava) existants.**
