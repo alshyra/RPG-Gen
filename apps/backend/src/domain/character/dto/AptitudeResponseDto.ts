@@ -119,6 +119,26 @@ export class AptitudeResponseDto {
       throw new Error("AptitudeResponseDto: missing required field 'category'");
     }
 
-    Object.assign(this, init);
+    // Explicitly assign only the DTO properties (avoid Mongoose internals)
+    this.aptitudeId = init.aptitudeId;
+    this.name = init.name;
+    this.description = init.description;
+    this.descriptionForAi = init.descriptionForAi;
+    this.paCost = init.paCost;
+    this.pmCost = init.pmCost;
+    this.cooldown = init.cooldown;
+    this.targetType = init.targetType;
+    this.range = init.range;
+    this.areaOfEffect = init.areaOfEffect;
+    this.category = init.category;
+    this.basePower = init.basePower;
+    this.scaling = init.scaling;
+    this.appliesStatus = init.appliesStatus;
+    this.statusDuration = init.statusDuration;
+    this.classRestriction = init.classRestriction;
+    this.voieId = init.voieId;
+    this.rankRequired = init.rankRequired;
+    this.isStarting = init.isStarting;
+    this.damageType = init.damageType;
   }
 }

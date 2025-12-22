@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsString, IsNumber, IsArray } from "class-validator";
+import { TalentRankDto } from "./TalentRankDto.js";
 
 export class VoieProgressDto {
   @ApiProperty({ description: "Talent tree ID" })
@@ -27,6 +28,10 @@ export class VoieProgressDto {
   @IsString({ each: true })
   unlockedAptitudes?: string[];
 
+  @ApiProperty({ description: "All available ranks in this voie with their aptitudes", type: [TalentRankDto] })
+  @IsArray()
+  ranks: TalentRankDto[];
+
   constructor(init?: Partial<VoieProgressDto>) {
     if (!init) {
       throw new Error("VoieProgressDto: missing required fields");
@@ -43,11 +48,15 @@ export class VoieProgressDto {
     if (init.currentRank === undefined) {
       throw new Error("VoieProgressDto: missing required field 'currentRank'");
     }
+    if (!init.ranks) {
+      throw new Error("VoieProgressDto: missing required field 'ranks'");
+    }
     this.voieId = init.voieId;
     this.voieName = init.voieName;
     this.className = init.className;
     this.currentRank = init.currentRank;
     this.requiredTalentPoints = init.requiredTalentPoints;
     this.unlockedAptitudes = init.unlockedAptitudes;
+    this.ranks = init.ranks;
   }
 }

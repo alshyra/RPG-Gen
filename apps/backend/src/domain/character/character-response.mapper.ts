@@ -121,13 +121,21 @@ export class CharacterResponseMapper {
         }
       }
 
+      // Map all ranks to TalentRankDto
+      const ranks = (tree.ranks || []).map(rank => ({
+        rank: rank.rank,
+        aptitudeId: rank.aptitudeId,
+        pointCost: rank.pointCost,
+      }));
+
       return new VoieProgressDto({
         voieId,
         voieName: tree.name,
         className: character.className!,
         currentRank,
-        requiredTalentPoints: currentRank < 5 ? 1 : undefined, // All ranks cost 1 TP except max
+        requiredTalentPoints: currentRank < 5 ? 1 : undefined,
         unlockedAptitudes,
+        ranks,
       });
     });
   }

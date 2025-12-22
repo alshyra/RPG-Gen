@@ -8,6 +8,7 @@
 export * from "./client";
 
 // Re-export all API modules with Vue Query wrappers
+export * from "./aptitudes.api";
 export * from "./auth.api";
 export * from "./character.api";
 export * from "./chat.api";

@@ -11,7 +11,7 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="isLoadingTalentTrees" class="flex items-center justify-center py-8">
+    <div v-if="isLoading" class="flex items-center justify-center py-8">
       <UiLoader />
     </div>
 
@@ -23,30 +23,30 @@
     <!-- Talent Trees Grid -->
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
       <div
-        v-for="voie in talentTrees"
-        :key="voie.id"
+        v-for="voie in voies"
+        :key="voie.voieId"
         class="voie-card bg-slate-800/50 rounded-xl p-4 border border-slate-700"
       >
         <!-- Voie Header -->
         <div class="text-center mb-4">
-          <h4 class="text-lg font-bold text-indigo-400">{{ voie.name }}</h4>
+          <h4 class="text-lg font-bold text-indigo-400">{{ voie.voieName }}</h4>
           <div class="text-xs text-slate-500 mt-1">
-            {{ getUnlockedRanksCount(voie.id) }}/5 rangs débloqués
+            {{ voie.currentRank }}/5 rangs débloqués
           </div>
         </div>
 
         <!-- Ranks -->
         <div class="space-y-3">
           <button
-            v-for="rank in voie.ranks"
-            :key="rank.rank"
+            v-for="rank in 5"
+            :key="rank"
             type="button"
-            :disabled="!canUnlockRank(voie.id, rank.rank)"
+            :disabled="!canUnlockRank(voie, rank)"
             :class="[
               'w-full p-3 rounded-lg transition-all duration-200 text-left',
-              getRankButtonClasses(voie.id, rank.rank),
+              getRankButtonClasses(voie, rank),
             ]"
-            @click="handleUnlockRank(voie.id, rank.rank)"
+            @click="handleUnlockRank(voie.voieId, rank)"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -54,29 +54,32 @@
                 <div
                   :class="[
                     'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold',
-                    isRankUnlocked(voie.id, rank.rank)
+                    isRankUnlocked(voie, rank)
                       ? 'bg-green-500 text-white'
-                      : canUnlockRank(voie.id, rank.rank)
+                      : canUnlockRank(voie, rank)
                         ? 'bg-yellow-500 text-black'
                         : 'bg-slate-700 text-slate-500',
                   ]"
                 >
-                  {{ rank.rank }}
+                  {{ rank }}
                 </div>
                 <!-- Aptitude info -->
-                <div>
+                <div class="flex-1">
                   <div class="text-sm font-medium text-white">
-                    {{ getAptitudeName(rank.aptitudeId) }}
+                    {{ getAptitudeName(getAptitudeIdForRank(voie, rank)) }}
                   </div>
-                  <div class="text-xs text-slate-500">
-                    {{ rank.pointCost }} point{{ rank.pointCost > 1 ? 's' : '' }}
+                  <div v-if="getAptitudeDescription(getAptitudeIdForRank(voie, rank))" class="text-xs text-slate-400 mt-0.5">
+                    {{ getAptitudeDescription(getAptitudeIdForRank(voie, rank)) }}
+                  </div>
+                  <div class="text-xs text-slate-500 mt-1">
+                    {{ voie.ranks?.find(r => r.rank === rank)?.pointCost || 1 }} point{{ (voie.ranks?.find(r => r.rank === rank)?.pointCost || 1) > 1 ? 's' : '' }}
                   </div>
                 </div>
               </div>
               <!-- Status icon -->
               <div>
-                <span v-if="isRankUnlocked(voie.id, rank.rank)" class="text-green-400">✓</span>
-                <span v-else-if="canUnlockRank(voie.id, rank.rank)" class="text-yellow-400">⭐</span>
+                <span v-if="isRankUnlocked(voie, rank)" class="text-green-400">✓</span>
+                <span v-else-if="canUnlockRank(voie, rank)" class="text-yellow-400">⭐</span>
                 <span v-else class="text-slate-600">🔒</span>
               </div>
             </div>
@@ -99,146 +102,85 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useUnlockRank } from "@rpg-gen/api-client";
+import { computed } from "vue";
+import { useUnlockRank, useAptitudes } from "@rpg-gen/api-client";
 import { UiLoader } from "@rpg-gen/ui";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCharacterId } from "@/composables/useCharacterId";
 
-// Props
-interface TalentRank {
-  rank: number;
-  aptitudeId: string;
-  pointCost: number;
-}
-
-interface TalentTree {
-  id: string;
-  name: string;
-  ranks: TalentRank[];
-}
-
-const props = defineProps<{
-  talentTrees?: TalentTree[];
-  isLoadingTalentTrees?: boolean;
-}>();
-
-// Character data
+// Character data from backend
 const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
-const unlockMutation = useUnlockRank(characterId.value);
+const unlockMutation = useUnlockRank(characterId.value!);
 
-// Computed
+// Computed state
 const className = computed(() => currentCharacter.value?.className);
 const talentPoints = computed(() => currentCharacter.value?.talentPoints || 0);
-const unlockedRanks = computed(() => currentCharacter.value?.unlockedRanks || []);
+const voies = computed(() => currentCharacter.value?.voies || []);
+const isLoading = computed(() => !currentCharacter.value);
 
-const talentTrees = computed<TalentTree[]>(() => {
-  if (props.talentTrees) return props.talentTrees;
-  
-  // Default empty state if no talent trees provided
-  return [];
-});
+// Fetch aptitudes from API
+const { data: aptitudesData } = useAptitudes();
 
-// Aptitude names cache (in real app, fetch from API)
-const aptitudeNames = ref<Record<string, string>>({
-  // Guerrier - Protection
-  bouclier_heroique: "Bouclier Héroïque",
-  mur_de_fer: "Mur de Fer",
-  bastion: "Bastion",
-  forteresse: "Forteresse",
-  avatar_protection: "Avatar de la Protection",
-  // Guerrier - Destruction
-  frappe_puissante: "Frappe Puissante",
-  charge_devastatrice: "Charge Dévastatrice",
-  tourbillon: "Tourbillon",
-  execution: "Exécution",
-  avatar_destruction: "Avatar de la Destruction",
-  // Guerrier - Tactique
-  commandement: "Commandement",
-  ralliment: "Ralliement",
-  strategie: "Stratégie",
-  inspiration: "Inspiration",
-  avatar_tactique: "Avatar Tactique",
-  // Rogue - Ombre
-  furtivite: "Furtivité",
-  pas_ombre: "Pas de l'Ombre",
-  disparition: "Disparition",
-  assassinat: "Assassinat",
-  avatar_ombre: "Avatar de l'Ombre",
-  // Rogue - Précision
-  visee: "Visée",
-  point_faible: "Point Faible",
-  coup_critique: "Coup Critique",
-  perforation: "Perforation",
-  avatar_precision: "Avatar de la Précision",
-  // Rogue - Ruse
-  feinte: "Feinte",
-  diversion: "Diversion",
-  poison: "Poison",
-  piege: "Piège",
-  avatar_ruse: "Avatar de la Ruse",
-  // Mage - Destruction
-  boule_de_feu: "Boule de Feu",
-  eclair: "Éclair",
-  tempete_arcanique: "Tempête Arcanique",
-  desintegration: "Désintégration",
-  avatar_destruction_magique: "Avatar de la Destruction",
-  // Mage - Protection
-  armure_magique: "Armure Magique",
-  barriere: "Barrière",
-  contresort: "Contresort",
-  immunite: "Immunité",
-  avatar_protection_magique: "Avatar de la Protection",
-  // Mage - Manipulation
-  ralentissement: "Ralentissement",
-  telekinesie: "Télékinésie",
-  controle_mental: "Contrôle Mental",
-  metamorphose: "Métamorphose",
-  avatar_manipulation: "Avatar de la Manipulation",
+// Build aptitude map for quick lookup
+const aptitudeMap = computed(() => {
+  const map = new Map<string, { name: string; description?: string }>();
+  const aptitudes = aptitudesData.value;
+  if (Array.isArray(aptitudes)) {
+    aptitudes.forEach((apt) => {
+      map.set(apt.aptitudeId, { name: apt.name, description: apt.description });
+    });
+  }
+  return map;
 });
 
 // Methods
-function getAptitudeName(aptitudeId: string): string {
-  return aptitudeNames.value[aptitudeId] || aptitudeId;
+function getAptitudeName(aptitudeId: string | undefined): string {
+  if (!aptitudeId) return "À débloquer";
+  return aptitudeMap.value.get(aptitudeId)?.name || aptitudeId;
 }
 
-function isRankUnlocked(voieId: string, rank: number): boolean {
-  return unlockedRanks.value.some(
-    (r) => r.voieId === voieId && r.rank === rank
-  );
+function getAptitudeDescription(aptitudeId: string | undefined): string {
+  if (!aptitudeId) return "";
+  return aptitudeMap.value.get(aptitudeId)?.description || "";
 }
 
-function canUnlockRank(voieId: string, rank: number): boolean {
+function getAptitudeIdForRank(voie: { ranks?: Array<{ rank: number; aptitudeId: string }> }, rank: number): string | undefined {
+  return voie.ranks?.find(r => r.rank === rank)?.aptitudeId;
+}
+
+function isRankUnlocked(voie: { currentRank: number }, rank: number): boolean {
+  return voie.currentRank >= rank;
+}
+
+function canUnlockRank(voie: { currentRank: number; requiredTalentPoints?: number }, rank: number): boolean {
   // Already unlocked?
-  if (isRankUnlocked(voieId, rank)) return false;
+  if (isRankUnlocked(voie, rank)) return false;
   
   // Not enough points?
-  if (talentPoints.value < 1) return false;
+  const cost = voie.requiredTalentPoints ?? 1;
+  if (talentPoints.value < cost) return false;
   
   // Rank 1 can always be unlocked (if points available)
   if (rank === 1) return true;
   
   // Higher ranks need previous rank unlocked
-  return isRankUnlocked(voieId, rank - 1);
+  return voie.currentRank === rank - 1;
 }
 
-function getUnlockedRanksCount(voieId: string): number {
-  return unlockedRanks.value.filter((r) => r.voieId === voieId).length;
-}
-
-function getRankButtonClasses(voieId: string, rank: number): string {
-  if (isRankUnlocked(voieId, rank)) {
+function getRankButtonClasses(voie: { currentRank: number; requiredTalentPoints?: number }, rank: number): string {
+  if (isRankUnlocked(voie, rank)) {
     return "bg-green-500/20 border border-green-500/50 cursor-default";
   }
-  if (canUnlockRank(voieId, rank)) {
+  if (canUnlockRank(voie, rank)) {
     return "bg-yellow-500/10 border border-yellow-500/50 hover:bg-yellow-500/20 cursor-pointer";
   }
   return "bg-slate-700/30 border border-slate-600/30 cursor-not-allowed opacity-60";
 }
 
 async function handleUnlockRank(voieId: string, rank: number) {
-  if (!canUnlockRank(voieId, rank)) return;
+  const voie = voies.value.find((v) => v.voieId === voieId);
+  if (!voie || !canUnlockRank(voie, rank)) return;
   
   try {
     await unlockMutation.mutateAsync({ voieId, rank });

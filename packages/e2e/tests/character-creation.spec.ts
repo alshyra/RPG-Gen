@@ -124,20 +124,20 @@ test.describe("Character creation wizard flow (5-step)", () => {
     
     // Verify stats are set (Guerrier should have vigor as main stat)
     expect(character.stats).toBeDefined();
-    expect(character.stats.vigor).toBeGreaterThan(0);
-    expect(character.stats.finesse).toBeGreaterThan(0);
-    expect(character.stats.mind).toBeGreaterThan(0);
-    expect(character.stats.survival).toBeGreaterThan(0);
+    expect(character.stats.vigor).toBe(4);
+    expect(character.stats.finesse).toBe(1);
+    expect(character.stats.mind).toBe(0);
+    expect(character.stats.survival).toBe(2);
     
     // Verify PA/PM are set
-    expect(character.pa).toBeDefined();
-    expect(character.pa.current).toBeGreaterThan(0);
-    expect(character.pm).toBeDefined();
-    expect(character.pm.current).toBeGreaterThan(0);
+    expect(character.pa).toBe(6);
+    expect(character.pa).toBe(character.paMax);
+    expect(character.pm).toBe(3);
+    expect(character.pm).toBe(character.pmMax);
     
     // Verify voies are populated (should have at least one voie with rank >= 1)
     expect(character.voies).toBeDefined();
-    expect(character.voies.length).toBeGreaterThan(0);
+    expect(character.voies.length).toBe(3);
     
     const unlockedVoie = character.voies.find((v: { currentRank: number }) => v.currentRank >= 1);
     expect(unlockedVoie).toBeTruthy();
@@ -145,7 +145,7 @@ test.describe("Character creation wizard flow (5-step)", () => {
     
     // Verify aptitudes are populated (at least one from the unlocked voie)
     expect(character.aptitudes).toBeDefined();
-    expect(character.aptitudes.length).toBeGreaterThan(0);
+    expect(character.aptitudes.length).toBe(3);
     
     // Verify first aptitude has required fields
     const firstAptitude = character.aptitudes[0];

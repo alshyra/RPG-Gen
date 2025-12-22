@@ -13,6 +13,8 @@ Core rules
 - Keep PRs atomic: one feature/fix per PR, include motivation, files touched and tests added/updated.
 - No unnecessary comments: remove dead code, consolidate duplicates, and refactor into shared utilities.
 
+- Avoid for loops: prefer array methods (`map`, `filter`, `reduce`, `forEach`) and functional patterns. Use `for...of` only when async/await is needed or for early exits.
+
 - **One class per file**: Each TypeScript class/DTO must be in its own file. Helper classes, nested types, or utility classes (e.g., used only internally by one DTO) may share a file, but primary exported classes must be isolated. This improves organization, testability, and makes imports/exports explicit.
 
 - Controllers must remain strict and explicit about request shapes. Do NOT try to accept multiple payload shapes in a controller method (e.g. both `expr` and `dices`). Validation/normalization belongs to DTOs, pipes, middleware, or higher-level adapters (e.g. the Gemini adapter). Add tests that assert strict behavior.
@@ -63,8 +65,6 @@ Tests & CI
 
 Patterns & conventions to respect
 
-
-
 Security / Deployment
 
 - Secrets & tokens are never checked in. CI and Cloud Run rely on GitHub Secrets (see `.github/workflows/build-and-deploy.yml`). FRONTEND_URL and GOOGLE keys must be set for OAuth and AI calls.
@@ -85,6 +85,14 @@ If unclear: ask 1–2 clarifying questions before making changes (for example: "
 Note: See `.github/agents/dev.agent.md` for our conversational/approval rules and PR checklists — follow them when proposing changes.
 
 <instructions>
+<instruction>
+<file>\.github/instructions/api-client-usage.instructions.md</file>
+<applyTo>packages/api-client/src/**/*.ts, apps/frontend/src/services/**/*.ts, apps/frontend/src/composables/**/*.ts</applyTo>
+</instruction>
+<instruction>
+<file>\.github/instructions/backend-controllers.instructions.md</file>
+<applyTo>apps/backend/src/controllers/**/*.controller.ts</applyTo>
+</instruction>
 <instruction>
 <file>\.github/instructions/backend-seeds.instructions.md</file>
 <applyTo>apps/backend/src/seed/**/*.json, apps/backend/src/seed-manager.ts</applyTo>

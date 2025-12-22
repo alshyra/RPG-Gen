@@ -1,6 +1,23 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
 
 export interface paths {
+    "/api/aptitudes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all aptitudes definitions */
+        get: operations["AptitudeController_getAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/google": {
         parameters: {
             query?: never;
@@ -671,6 +688,56 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AptitudeScalingDto: {
+            /** @description Stat used for scaling (vigor, finesse, mind, survival) */
+            attribute?: string;
+            /** @description Scaling divisor (e.g., 5 = +1 every 5 levels) */
+            scalingDivisor: number;
+        };
+        AptitudeResponseDto: {
+            /** @description Unique aptitude ID */
+            aptitudeId: string;
+            /** @description Display name */
+            name: string;
+            /** @description Mechanical description */
+            description: string;
+            /** @description Narrative description for AI */
+            descriptionForAi?: string;
+            /** @description Action points cost */
+            paCost: number;
+            /** @description Movement points cost */
+            pmCost?: number;
+            /** @description Cooldown in turns */
+            cooldown: number;
+            /** @description Target type (self, enemy, ally, zone, all_enemies, all_allies) */
+            targetType: string;
+            /** @description Range in tiles (1 = melee) */
+            range: number;
+            /** @description Area of effect radius in tiles (0 = single target) */
+            areaOfEffect?: number;
+            /** @description Category (attack, defense, support, movement, utility) */
+            category: string;
+            /** @description Base power value */
+            basePower?: number;
+            /** @description Scaling configuration */
+            scaling?: components["schemas"]["AptitudeScalingDto"];
+            /** @description Status effects applied */
+            appliesStatus?: string[];
+            /** @description Duration of applied status effects */
+            statusDuration?: number;
+            /** @description Class restriction (guerrier, rogue, mage) or undefined for universal */
+            classRestriction?: string;
+            /** @description Voie ID this aptitude belongs to */
+            voieId?: string;
+            /** @description Minimum rank required to unlock (1-5) */
+            rankRequired?: number;
+            /** @description Is this a starting aptitude? */
+            isStarting?: boolean;
+            /** @description Damage type (physical, magical, fire, ice, etc.) */
+            damageType?: string;
+            /** @description Current cooldown turns remaining (0 = ready) */
+            currentCooldown?: number;
+        };
         AuthProfileDto: {
             /** @description Id de l'utilisateur */
             id: string;
@@ -870,52 +937,6 @@ export interface components {
             /** @description Arbitrary item meta */
             meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
-        AptitudeScalingDto: {
-            /** @description Stat used for scaling (vigor, finesse, mind, survival) */
-            attribute?: string;
-            /** @description Scaling divisor (e.g., 5 = +1 every 5 levels) */
-            scalingDivisor: number;
-        };
-        AptitudeResponseDto: {
-            /** @description Unique aptitude ID */
-            aptitudeId: string;
-            /** @description Display name */
-            name: string;
-            /** @description Mechanical description */
-            description: string;
-            /** @description Narrative description for AI */
-            descriptionForAi?: string;
-            /** @description Action points cost */
-            paCost: number;
-            /** @description Movement points cost */
-            pmCost?: number;
-            /** @description Cooldown in turns */
-            cooldown: number;
-            /** @description Target type (self, enemy, ally, zone, all_enemies, all_allies) */
-            targetType: string;
-            /** @description Range in tiles (1 = melee) */
-            range: number;
-            /** @description Area of effect radius in tiles (0 = single target) */
-            areaOfEffect?: number;
-            /** @description Category (attack, defense, support, movement, utility) */
-            category: string;
-            /** @description Base power value */
-            basePower?: number;
-            /** @description Scaling configuration */
-            scaling?: components["schemas"]["AptitudeScalingDto"];
-            /** @description Status effects applied */
-            appliesStatus?: string[];
-            /** @description Duration of applied status effects */
-            statusDuration?: number;
-            /** @description Class restriction (guerrier, rogue, mage) or undefined for universal */
-            classRestriction?: string;
-            /** @description Voie ID this aptitude belongs to */
-            voieId?: string;
-            /** @description Minimum rank required to unlock (1-5) */
-            rankRequired?: number;
-            /** @description Is this a starting aptitude? */
-            isStarting?: boolean;
-        };
         TacticalStats: {
             /** @description Vigor stat */
             vigor: number;
@@ -925,6 +946,23 @@ export interface components {
             mind: number;
             /** @description Survival stat */
             survival: number;
+        };
+        TalentRankDto: {
+            /**
+             * @description Rank number (1-5)
+             * @example 1
+             */
+            rank: number;
+            /**
+             * @description Aptitude ID to unlock at this rank
+             * @example frappe_puissante
+             */
+            aptitudeId: string;
+            /**
+             * @description Talent points cost to unlock this rank
+             * @example 1
+             */
+            pointCost: number;
         };
         VoieProgressDto: {
             /** @description Talent tree ID */
@@ -939,6 +977,8 @@ export interface components {
             requiredTalentPoints?: number;
             /** @description IDs of aptitudes unlocked in this voie */
             unlockedAptitudes?: string[];
+            /** @description All available ranks in this voie with their aptitudes */
+            ranks: components["schemas"]["TalentRankDto"][];
         };
         DraftCharacterResponseDto: {
             /** @description Unique character ID (UUID) */
@@ -1608,23 +1648,6 @@ export interface components {
              */
             startingAptitudes: string[];
         };
-        TalentRankDto: {
-            /**
-             * @description Rank number (1-5)
-             * @example 1
-             */
-            rank: number;
-            /**
-             * @description Aptitude ID to unlock at this rank
-             * @example frappe_puissante
-             */
-            aptitudeId: string;
-            /**
-             * @description Talent points cost to unlock this rank
-             * @example 1
-             */
-            pointCost: number;
-        };
         TalentTreeDto: {
             /**
              * @description Talent tree (voie) ID
@@ -1849,6 +1872,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    AptitudeController_getAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all aptitudes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AptitudeResponseDto"][];
+                };
+            };
+        };
+    };
     AuthController_googleAuth: {
         parameters: {
             query?: never;

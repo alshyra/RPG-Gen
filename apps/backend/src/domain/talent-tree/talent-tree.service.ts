@@ -82,6 +82,11 @@ export class TalentTreeService {
       currentRank: 0, // Default unstarted
       requiredTalentPoints: this.calculateTalentPointsForRank(voie, 1),
       unlockedAptitudes: [],
+      ranks: (voie.ranks || []).map(rank => ({
+        rank: rank.rank,
+        aptitudeId: rank.aptitudeId,
+        pointCost: rank.pointCost,
+      })),
     }));
   }
 

@@ -1,6 +1,31 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/aptitudes": {
+      "get": {
+        "operationId": "AptitudeController_getAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all aptitudes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AptitudeResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all aptitudes definitions",
+        "tags": [
+          "aptitudes"
+        ]
+      }
+    },
     "/api/auth/google": {
       "get": {
         "operationId": "AuthController_googleAuth",
@@ -1622,6 +1647,128 @@
       }
     },
     "schemas": {
+      "AptitudeScalingDto": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Stat used for scaling (vigor, finesse, mind, survival)"
+          },
+          "scalingDivisor": {
+            "type": "number",
+            "description": "Scaling divisor (e.g., 5 = +1 every 5 levels)"
+          }
+        },
+        "required": [
+          "scalingDivisor"
+        ]
+      },
+      "AptitudeResponseDto": {
+        "type": "object",
+        "properties": {
+          "aptitudeId": {
+            "type": "string",
+            "description": "Unique aptitude ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mechanical description"
+          },
+          "descriptionForAi": {
+            "type": "string",
+            "description": "Narrative description for AI"
+          },
+          "paCost": {
+            "type": "number",
+            "description": "Action points cost"
+          },
+          "pmCost": {
+            "type": "number",
+            "description": "Movement points cost"
+          },
+          "cooldown": {
+            "type": "number",
+            "description": "Cooldown in turns"
+          },
+          "targetType": {
+            "type": "string",
+            "description": "Target type (self, enemy, ally, zone, all_enemies, all_allies)"
+          },
+          "range": {
+            "type": "number",
+            "description": "Range in tiles (1 = melee)"
+          },
+          "areaOfEffect": {
+            "type": "number",
+            "description": "Area of effect radius in tiles (0 = single target)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category (attack, defense, support, movement, utility)"
+          },
+          "basePower": {
+            "type": "number",
+            "description": "Base power value"
+          },
+          "scaling": {
+            "description": "Scaling configuration",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AptitudeScalingDto"
+              }
+            ]
+          },
+          "appliesStatus": {
+            "description": "Status effects applied",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statusDuration": {
+            "type": "number",
+            "description": "Duration of applied status effects"
+          },
+          "classRestriction": {
+            "type": "string",
+            "description": "Class restriction (guerrier, rogue, mage) or undefined for universal"
+          },
+          "voieId": {
+            "type": "string",
+            "description": "Voie ID this aptitude belongs to"
+          },
+          "rankRequired": {
+            "type": "number",
+            "description": "Minimum rank required to unlock (1-5)"
+          },
+          "isStarting": {
+            "type": "boolean",
+            "description": "Is this a starting aptitude?"
+          },
+          "damageType": {
+            "type": "string",
+            "description": "Damage type (physical, magical, fire, ice, etc.)"
+          },
+          "currentCooldown": {
+            "type": "number",
+            "description": "Current cooldown turns remaining (0 = ready)"
+          }
+        },
+        "required": [
+          "aptitudeId",
+          "name",
+          "description",
+          "paCost",
+          "cooldown",
+          "targetType",
+          "range",
+          "category"
+        ]
+      },
       "AuthProfileDto": {
         "type": "object",
         "properties": {
@@ -2120,120 +2267,6 @@
           "meta"
         ]
       },
-      "AptitudeScalingDto": {
-        "type": "object",
-        "properties": {
-          "attribute": {
-            "type": "string",
-            "description": "Stat used for scaling (vigor, finesse, mind, survival)"
-          },
-          "scalingDivisor": {
-            "type": "number",
-            "description": "Scaling divisor (e.g., 5 = +1 every 5 levels)"
-          }
-        },
-        "required": [
-          "scalingDivisor"
-        ]
-      },
-      "AptitudeResponseDto": {
-        "type": "object",
-        "properties": {
-          "aptitudeId": {
-            "type": "string",
-            "description": "Unique aptitude ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name"
-          },
-          "description": {
-            "type": "string",
-            "description": "Mechanical description"
-          },
-          "descriptionForAi": {
-            "type": "string",
-            "description": "Narrative description for AI"
-          },
-          "paCost": {
-            "type": "number",
-            "description": "Action points cost"
-          },
-          "pmCost": {
-            "type": "number",
-            "description": "Movement points cost"
-          },
-          "cooldown": {
-            "type": "number",
-            "description": "Cooldown in turns"
-          },
-          "targetType": {
-            "type": "string",
-            "description": "Target type (self, enemy, ally, zone, all_enemies, all_allies)"
-          },
-          "range": {
-            "type": "number",
-            "description": "Range in tiles (1 = melee)"
-          },
-          "areaOfEffect": {
-            "type": "number",
-            "description": "Area of effect radius in tiles (0 = single target)"
-          },
-          "category": {
-            "type": "string",
-            "description": "Category (attack, defense, support, movement, utility)"
-          },
-          "basePower": {
-            "type": "number",
-            "description": "Base power value"
-          },
-          "scaling": {
-            "description": "Scaling configuration",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AptitudeScalingDto"
-              }
-            ]
-          },
-          "appliesStatus": {
-            "description": "Status effects applied",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "statusDuration": {
-            "type": "number",
-            "description": "Duration of applied status effects"
-          },
-          "classRestriction": {
-            "type": "string",
-            "description": "Class restriction (guerrier, rogue, mage) or undefined for universal"
-          },
-          "voieId": {
-            "type": "string",
-            "description": "Voie ID this aptitude belongs to"
-          },
-          "rankRequired": {
-            "type": "number",
-            "description": "Minimum rank required to unlock (1-5)"
-          },
-          "isStarting": {
-            "type": "boolean",
-            "description": "Is this a starting aptitude?"
-          }
-        },
-        "required": [
-          "aptitudeId",
-          "name",
-          "description",
-          "paCost",
-          "cooldown",
-          "targetType",
-          "range",
-          "category"
-        ]
-      },
       "TacticalStats": {
         "type": "object",
         "properties": {
@@ -2259,6 +2292,31 @@
           "finesse",
           "mind",
           "survival"
+        ]
+      },
+      "TalentRankDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "description": "Rank number (1-5)",
+            "example": 1
+          },
+          "aptitudeId": {
+            "type": "string",
+            "description": "Aptitude ID to unlock at this rank",
+            "example": "frappe_puissante"
+          },
+          "pointCost": {
+            "type": "number",
+            "description": "Talent points cost to unlock this rank",
+            "example": 1
+          }
+        },
+        "required": [
+          "rank",
+          "aptitudeId",
+          "pointCost"
         ]
       },
       "VoieProgressDto": {
@@ -2290,13 +2348,21 @@
             "items": {
               "type": "string"
             }
+          },
+          "ranks": {
+            "description": "All available ranks in this voie with their aptitudes",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TalentRankDto"
+            }
           }
         },
         "required": [
           "voieId",
           "voieName",
           "className",
-          "currentRank"
+          "currentRank",
+          "ranks"
         ]
       },
       "DraftCharacterResponseDto": {
@@ -3855,31 +3921,6 @@
           "baseStats",
           "proficiencies",
           "startingAptitudes"
-        ]
-      },
-      "TalentRankDto": {
-        "type": "object",
-        "properties": {
-          "rank": {
-            "type": "number",
-            "description": "Rank number (1-5)",
-            "example": 1
-          },
-          "aptitudeId": {
-            "type": "string",
-            "description": "Aptitude ID to unlock at this rank",
-            "example": "frappe_puissante"
-          },
-          "pointCost": {
-            "type": "number",
-            "description": "Talent points cost to unlock this rank",
-            "example": 1
-          }
-        },
-        "required": [
-          "rank",
-          "aptitudeId",
-          "pointCost"
         ]
       },
       "TalentTreeDto": {
