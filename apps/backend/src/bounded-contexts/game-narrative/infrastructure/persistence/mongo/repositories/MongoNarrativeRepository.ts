@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Narrative } from '../../../domain/narrative/entities/Narrative.js';
-import { INarrativeRepository } from '../../../domain/narrative/repositories/INarrativeRepository.js';
 import { NarrativeDocument, type NarrativeDocumentType } from '../schemas/NarrativeDocument.js';
 import { NarrativeMapper } from '../mappers/NarrativeMapper.js';
+import { INarrativeRepository, Narrative } from '../../../../domain/narrative/index.js';
 
 /**
  * MongoDB implementation of INarrativeRepository

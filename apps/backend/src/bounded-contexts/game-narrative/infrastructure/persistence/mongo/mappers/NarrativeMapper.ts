@@ -1,8 +1,6 @@
-import { Narrative } from '../../../domain/narrative/entities/Narrative.js';
-import { Message, MessageRole, type CharacterContextData } from '../../../domain/narrative/value-objects/Message.js';
-import { Context } from '../../../domain/narrative/value-objects/Context.js';
 import { NarrativeDocument } from '../schemas/NarrativeDocument.js';
-import type { GameInstructionDto } from '../../../api/dto/response/GameInstructionDto.js';
+import { CharacterContextData, Context, Message, MessageRole, Narrative } from '../../../../domain/narrative/index.js';
+import { GameInstructionDto } from '../../../../api/dto/index.js';
 
 /**
  * Maps between Narrative domain entity and Mongoose document
