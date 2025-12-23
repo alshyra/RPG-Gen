@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../auth/domain/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../auth/infrastructure/auth/guards/JwtAuthGuard.js";
 import { CharacterResponseDto, DraftCharacterResponseDto } from "../character/api/dto/index.js";
 import { CharacterDtoMapper } from "../character/api/dto/mappers/CharacterDtoMapper.js";
 import {

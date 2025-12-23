@@ -1,12 +1,16 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { getConfig } from "../../../config.js";
+import { getConfig } from "../../../../../config.js";
 
 /**
- * JwtAuthGuard supports a testing bypass: when the environment variable
- * DISABLE_AUTH_FOR_E2E is set to 'true', the guard will skip auth checks and
- * inject a lightweight test user on the request. This makes it possible to
- * run full e2e tests against a live backend without mocking external APIs.
+ * JwtAuthGuard
+ * 
+ * Guard to protect routes with JWT authentication.
+ * Supports a testing bypass: when E2E mode is enabled, the guard will skip
+ * auth checks and inject a lightweight test user on the request.
+ * 
+ * @infrastructure
+ * NestJS-specific guard using Passport.js
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {

@@ -1,0 +1,637 @@
+{
+  "app.module.ts": [
+    "bounded-contexts/aptitude/aptitude.module.ts",
+    "bounded-contexts/archetype/archetype.module.ts",
+    "bounded-contexts/auth/auth.module.ts",
+    "bounded-contexts/character/character.module.ts",
+    "bounded-contexts/chat/chat.module.ts",
+    "bounded-contexts/combat/combat.module.ts",
+    "bounded-contexts/dice/dice.module.ts",
+    "bounded-contexts/health/health.module.ts",
+    "bounded-contexts/media/media.module.ts",
+    "bounded-contexts/race/races.module.ts",
+    "config.module.ts",
+    "config.ts"
+  ],
+  "bounded-contexts/aptitude/api/controllers/AptitudeController.ts": [
+    "bounded-contexts/aptitude/application/services/AptitudeService.ts",
+    "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts"
+  ],
+  "bounded-contexts/aptitude/application/services/AptitudeService.ts": [
+    "bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.ts",
+    "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts"
+  ],
+  "bounded-contexts/aptitude/aptitude.module.ts": [
+    "bounded-contexts/aptitude/api/controllers/AptitudeController.ts",
+    "bounded-contexts/aptitude/application/services/AptitudeService.ts",
+    "bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.ts"
+  ],
+  "bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.ts": [
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts"
+  ],
+  "bounded-contexts/archetype/api/controllers/archetypes.controller.ts": [
+    "bounded-contexts/archetype/api/dto/index.ts",
+    "bounded-contexts/archetype/application/services/ArchetypeAppService.ts"
+  ],
+  "bounded-contexts/archetype/api/dto/BaseClassDto.ts": [],
+  "bounded-contexts/archetype/api/dto/ClassDefinitionResponseDto.ts": [
+    "bounded-contexts/archetype/api/dto/BaseClassDto.ts"
+  ],
+  "bounded-contexts/archetype/api/dto/TalentRankDto.ts": [],
+  "bounded-contexts/archetype/api/dto/TalentTreeDto.ts": [
+    "bounded-contexts/archetype/api/dto/TalentRankDto.ts"
+  ],
+  "bounded-contexts/archetype/api/dto/index.ts": [
+    "bounded-contexts/archetype/api/dto/ClassDefinitionResponseDto.ts",
+    "bounded-contexts/archetype/api/dto/TalentRankDto.ts",
+    "bounded-contexts/archetype/api/dto/TalentTreeDto.ts"
+  ],
+  "bounded-contexts/archetype/application/services/ArchetypeAppService.ts": [
+    "bounded-contexts/archetype/api/dto/index.ts",
+    "bounded-contexts/archetype/domain/entities/Archetype.ts",
+    "bounded-contexts/archetype/domain/repositories/IArchetypeRepository.ts",
+    "bounded-contexts/archetype/domain/value-objects/TalentRank.ts",
+    "bounded-contexts/archetype/domain/value-objects/TalentTree.ts",
+    "bounded-contexts/character/api/dto/response/VoieProgressDto.ts"
+  ],
+  "bounded-contexts/archetype/archetype.module.ts": [
+    "bounded-contexts/archetype/api/controllers/archetypes.controller.ts",
+    "bounded-contexts/archetype/application/services/ArchetypeAppService.ts",
+    "bounded-contexts/archetype/domain/repositories/IArchetypeRepository.ts",
+    "bounded-contexts/archetype/infrastructure/persistence/mongo/repositories/MongoArchetypeRepository.ts",
+    "bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.ts"
+  ],
+  "bounded-contexts/archetype/domain/entities/Archetype.ts": [
+    "bounded-contexts/archetype/domain/value-objects/ArchetypeStats.ts",
+    "bounded-contexts/archetype/domain/value-objects/TalentTree.ts"
+  ],
+  "bounded-contexts/archetype/domain/repositories/IArchetypeRepository.ts": [
+    "bounded-contexts/archetype/domain/entities/Archetype.ts"
+  ],
+  "bounded-contexts/archetype/domain/value-objects/ArchetypeStats.ts": [],
+  "bounded-contexts/archetype/domain/value-objects/TalentRank.ts": [],
+  "bounded-contexts/archetype/domain/value-objects/TalentTree.ts": [
+    "bounded-contexts/archetype/domain/value-objects/TalentRank.ts"
+  ],
+  "bounded-contexts/archetype/infrastructure/persistence/mongo/mappers/ArchetypeMapper.ts": [
+    "bounded-contexts/archetype/domain/entities/Archetype.ts",
+    "bounded-contexts/archetype/domain/value-objects/ArchetypeStats.ts",
+    "bounded-contexts/archetype/domain/value-objects/TalentRank.ts",
+    "bounded-contexts/archetype/domain/value-objects/TalentTree.ts",
+    "bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.ts"
+  ],
+  "bounded-contexts/archetype/infrastructure/persistence/mongo/repositories/MongoArchetypeRepository.ts": [
+    "bounded-contexts/archetype/infrastructure/persistence/mongo/mappers/ArchetypeMapper.ts",
+    "bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.ts"
+  ],
+  "bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.ts": [],
+  "bounded-contexts/auth/api/controllers/auth.controller.ts": [
+    "bounded-contexts/auth/domain/auth.profile.dto.ts",
+    "bounded-contexts/auth/domain/auth.service.ts",
+    "bounded-contexts/auth/domain/google-auth.guard.ts",
+    "bounded-contexts/auth/domain/jwt-auth.guard.ts",
+    "config.ts",
+    "global.types.d.ts"
+  ],
+  "bounded-contexts/auth/auth.module.ts": [
+    "bounded-contexts/auth/api/controllers/auth.controller.ts",
+    "bounded-contexts/auth/domain/auth.service.ts",
+    "bounded-contexts/auth/domain/google.strategy.ts",
+    "bounded-contexts/auth/domain/jwt.strategy.ts",
+    "infra/mongo/User.ts"
+  ],
+  "bounded-contexts/auth/domain/auth.profile.dto.ts": [],
+  "bounded-contexts/auth/domain/auth.service.ts": [
+    "infra/mongo/User.ts"
+  ],
+  "bounded-contexts/auth/domain/google-auth.guard.ts": [
+    "config.ts"
+  ],
+  "bounded-contexts/auth/domain/google.strategy.ts": [
+    "config.ts",
+    "infra/mongo/User.ts"
+  ],
+  "bounded-contexts/auth/domain/jwt-auth.guard.ts": [
+    "config.ts"
+  ],
+  "bounded-contexts/auth/domain/jwt.strategy.ts": [
+    "infra/mongo/User.ts"
+  ],
+  "bounded-contexts/character/api/controllers/CharacterController.ts": [
+    "bounded-contexts/auth/domain/jwt-auth.guard.ts",
+    "bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.ts",
+    "bounded-contexts/character/api/dto/request/index.ts",
+    "bounded-contexts/character/api/dto/response/index.ts",
+    "bounded-contexts/character/application/services/CharacterAppService.ts",
+    "global.types.d.ts"
+  ],
+  "bounded-contexts/character/api/dto/index.ts": [
+    "bounded-contexts/character/api/dto/request/index.ts",
+    "bounded-contexts/character/api/dto/response/index.ts"
+  ],
+  "bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.ts": [
+    "bounded-contexts/aptitude/application/services/AptitudeService.ts",
+    "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/CharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/DeceasedCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/DraftCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/InventoryItemDto.ts",
+    "bounded-contexts/character/api/dto/response/TacticalStats.ts",
+    "bounded-contexts/character/api/dto/response/VoieProgressDto.ts",
+    "bounded-contexts/character/domain/entities/CharacterEntity.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/mappers/CharacterMapper.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts"
+  ],
+  "bounded-contexts/character/api/dto/request/CreateInventoryItemDto.ts": [
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts",
+    "bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.ts"
+  ],
+  "bounded-contexts/character/api/dto/request/EquipInventoryDto.ts": [],
+  "bounded-contexts/character/api/dto/request/GrantInspirationBodyDto.ts": [],
+  "bounded-contexts/character/api/dto/request/KillCharacterBodyDto.ts": [],
+  "bounded-contexts/character/api/dto/request/RemoveInventoryBodyDto.ts": [],
+  "bounded-contexts/character/api/dto/request/UnlockRankDto.ts": [],
+  "bounded-contexts/character/api/dto/request/UpdateCharacterRequestDto.ts": [
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/request/index.ts": [
+    "bounded-contexts/character/api/dto/request/CreateInventoryItemDto.ts",
+    "bounded-contexts/character/api/dto/request/EquipInventoryDto.ts",
+    "bounded-contexts/character/api/dto/request/GrantInspirationBodyDto.ts",
+    "bounded-contexts/character/api/dto/request/KillCharacterBodyDto.ts",
+    "bounded-contexts/character/api/dto/request/RemoveInventoryBodyDto.ts",
+    "bounded-contexts/character/api/dto/request/UnlockRankDto.ts",
+    "bounded-contexts/character/api/dto/request/UpdateCharacterRequestDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/AptitudeScalingDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/AptitudeScalingDto.ts": [
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/ArmorMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/InventoryItemDto.ts",
+    "bounded-contexts/character/api/dto/response/RaceResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/SkillResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/TacticalStats.ts",
+    "bounded-contexts/character/api/dto/response/VoieProgressDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/BaseMeta.ts": [],
+  "bounded-contexts/character/api/dto/response/CharacterClassResponseDto.ts": [],
+  "bounded-contexts/character/api/dto/response/CharacterResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/ConsumableMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/DeceasedCharacterResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/DraftCharacterResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/GenericMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/InspirationResponseDto.ts": [
+    "bounded-contexts/character/api/dto/response/CharacterResponseDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/InventoryItemDto.ts": [
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts": [
+    "bounded-contexts/character/api/dto/response/ArmorMeta.ts",
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts",
+    "bounded-contexts/character/api/dto/response/ConsumableMeta.ts",
+    "bounded-contexts/character/api/dto/response/GenericMeta.ts",
+    "bounded-contexts/character/api/dto/response/PackMeta.ts",
+    "bounded-contexts/character/api/dto/response/ToolMeta.ts",
+    "bounded-contexts/character/api/dto/response/WeaponMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/PackMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/RaceResponseDto.ts": [],
+  "bounded-contexts/character/api/dto/response/SkillResponseDto.ts": [],
+  "bounded-contexts/character/api/dto/response/StatAttribute.ts": [],
+  "bounded-contexts/character/api/dto/response/StatsResponseDto.ts": [],
+  "bounded-contexts/character/api/dto/response/TacticalStats.ts": [],
+  "bounded-contexts/character/api/dto/response/TalentPointRewardDto.ts": [],
+  "bounded-contexts/character/api/dto/response/TalentRankDto.ts": [],
+  "bounded-contexts/character/api/dto/response/ToolMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/VoieProgressDto.ts": [
+    "bounded-contexts/character/api/dto/response/TalentRankDto.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/WeaponMeta.ts": [
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts"
+  ],
+  "bounded-contexts/character/api/dto/response/index.ts": [
+    "bounded-contexts/character/api/dto/response/AptitudeResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/AptitudeScalingDto.ts",
+    "bounded-contexts/character/api/dto/response/ArmorMeta.ts",
+    "bounded-contexts/character/api/dto/response/BaseCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/BaseMeta.ts",
+    "bounded-contexts/character/api/dto/response/CharacterClassResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/CharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/ConsumableMeta.ts",
+    "bounded-contexts/character/api/dto/response/DeceasedCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/DraftCharacterResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/GenericMeta.ts",
+    "bounded-contexts/character/api/dto/response/InspirationResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/InventoryItemDto.ts",
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts",
+    "bounded-contexts/character/api/dto/response/PackMeta.ts",
+    "bounded-contexts/character/api/dto/response/RaceResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/SkillResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts",
+    "bounded-contexts/character/api/dto/response/StatsResponseDto.ts",
+    "bounded-contexts/character/api/dto/response/TacticalStats.ts",
+    "bounded-contexts/character/api/dto/response/TalentPointRewardDto.ts",
+    "bounded-contexts/character/api/dto/response/TalentRankDto.ts",
+    "bounded-contexts/character/api/dto/response/ToolMeta.ts",
+    "bounded-contexts/character/api/dto/response/VoieProgressDto.ts",
+    "bounded-contexts/character/api/dto/response/WeaponMeta.ts"
+  ],
+  "bounded-contexts/character/application/commands/AddInventoryItemCommand.ts": [],
+  "bounded-contexts/character/application/commands/CompleteDraftCommand.ts": [],
+  "bounded-contexts/character/application/commands/CreateDraftCommand.ts": [],
+  "bounded-contexts/character/application/commands/UpdateCharacterCommand.ts": [],
+  "bounded-contexts/character/application/commands/UpdateInventoryItemCommand.ts": [],
+  "bounded-contexts/character/application/commands/index.ts": [
+    "bounded-contexts/character/application/commands/AddInventoryItemCommand.ts",
+    "bounded-contexts/character/application/commands/CompleteDraftCommand.ts",
+    "bounded-contexts/character/application/commands/CreateDraftCommand.ts",
+    "bounded-contexts/character/application/commands/UpdateCharacterCommand.ts",
+    "bounded-contexts/character/application/commands/UpdateInventoryItemCommand.ts"
+  ],
+  "bounded-contexts/character/application/services/CharacterAppService.ts": [
+    "bounded-contexts/character/application/commands/index.ts",
+    "bounded-contexts/character/domain/entities/CharacterEntity.ts",
+    "bounded-contexts/character/domain/repositories/ICharacterRepository.ts",
+    "bounded-contexts/character/domain/value-objects/CharacterStats.ts"
+  ],
+  "bounded-contexts/character/character.module.ts": [
+    "bounded-contexts/character/api/controllers/CharacterController.ts",
+    "bounded-contexts/character/application/services/CharacterAppService.ts",
+    "bounded-contexts/character/domain/repositories/ICharacterRepository.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/repositories/MongoCharacterRepository.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts"
+  ],
+  "bounded-contexts/character/domain/entities/CharacterEntity.ts": [
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts",
+    "bounded-contexts/character/domain/value-objects/CharacterStats.ts",
+    "bounded-contexts/character/domain/value-objects/ResourcePool.ts",
+    "bounded-contexts/character/domain/value-objects/TalentRank.ts"
+  ],
+  "bounded-contexts/character/domain/repositories/ICharacterRepository.ts": [
+    "bounded-contexts/character/domain/entities/CharacterEntity.ts"
+  ],
+  "bounded-contexts/character/domain/value-objects/CharacterStats.ts": [],
+  "bounded-contexts/character/domain/value-objects/ResourcePool.ts": [],
+  "bounded-contexts/character/domain/value-objects/TalentRank.ts": [],
+  "bounded-contexts/character/infrastructure/persistence/mongo/mappers/CharacterMapper.ts": [
+    "bounded-contexts/character/domain/entities/CharacterEntity.ts",
+    "bounded-contexts/character/domain/value-objects/CharacterStats.ts",
+    "bounded-contexts/character/domain/value-objects/ResourcePool.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts",
+    "bounded-contexts/item/infrastructure/persistence/mongo/schemas/Item.ts"
+  ],
+  "bounded-contexts/character/infrastructure/persistence/mongo/repositories/MongoCharacterRepository.ts": [
+    "bounded-contexts/character/domain/entities/CharacterEntity.ts",
+    "bounded-contexts/character/domain/repositories/ICharacterRepository.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/mappers/CharacterMapper.ts",
+    "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts"
+  ],
+  "bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.ts": [
+    "bounded-contexts/item/infrastructure/persistence/mongo/schemas/Item.ts"
+  ],
+  "bounded-contexts/chat/chat.controller.ts": [
+    "bounded-contexts/auth/domain/jwt-auth.guard.ts",
+    "bounded-contexts/character/api/dto/index.ts",
+    "bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.ts",
+    "bounded-contexts/character/application/services/CharacterAppService.ts",
+    "bounded-contexts/chat/external/gemini-text.service.ts",
+    "global.types.d.ts"
+  ],
+  "bounded-contexts/chat/chat.module.ts": [
+    "bounded-contexts/character/character.module.ts",
+    "bounded-contexts/chat/chat.controller.ts",
+    "bounded-contexts/chat/external/gemini-text.service.ts",
+    "bounded-contexts/combat/combat.module.ts"
+  ],
+  "bounded-contexts/chat/external/gemini-json-schema.ts": [],
+  "bounded-contexts/chat/external/gemini-schemas.ts": [],
+  "bounded-contexts/chat/external/gemini-text.service.ts": [
+    "bounded-contexts/character/api/dto/index.ts",
+    "bounded-contexts/chat/external/gemini-json-schema.ts",
+    "bounded-contexts/chat/external/gemini-schemas.ts",
+    "config.ts"
+  ],
+  "bounded-contexts/combat/api/controllers/CombatController.ts": [
+    "bounded-contexts/auth/domain/jwt-auth.guard.ts",
+    "bounded-contexts/combat/api/dto/response/index.ts",
+    "global.types.d.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatActionRequestDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/CombatActionResponseDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatDiceResultDto.ts",
+    "bounded-contexts/combat/api/dto/response/DiceResultDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatDiceResultDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/CombatEndDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/CombatEndResponseDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatEndResultDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatEndResultDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatEndDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatStartEntryDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/CombatStartRequestDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatStartEntryDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatStateDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatEndDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatantDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/CombatantDto.ts": [
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts",
+    "bounded-contexts/character/api/dto/response/TacticalStats.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/DiceResultDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/EndPlayerTurnResponseDto.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatStateDto.ts",
+    "bounded-contexts/combat/api/dto/response/EnemyAttackLogDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/EnemyAttackLogDto.ts": [
+    "bounded-contexts/dice/api/dto/CombatDiceResultDto.ts",
+    "bounded-contexts/dice/api/dto/DiceResultDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/GridPositionDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/MovementEventDto.ts": [],
+  "bounded-contexts/combat/api/dto/response/MovementRequestDto.ts": [
+    "bounded-contexts/combat/api/dto/response/GridPositionDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/MovementResponseDto.ts": [
+    "bounded-contexts/combat/api/dto/response/GridPositionDto.ts",
+    "bounded-contexts/combat/api/dto/response/MovementEventDto.ts"
+  ],
+  "bounded-contexts/combat/api/dto/response/index.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatActionRequestDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatActionResponseDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatEndDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatEndResponseDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatEndResultDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatStartEntryDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatStartRequestDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatStateDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatantDto.ts",
+    "bounded-contexts/combat/api/dto/response/EndPlayerTurnResponseDto.ts",
+    "bounded-contexts/combat/api/dto/response/EnemyAttackLogDto.ts",
+    "bounded-contexts/combat/api/dto/response/GridPositionDto.ts",
+    "bounded-contexts/combat/api/dto/response/MovementEventDto.ts",
+    "bounded-contexts/combat/api/dto/response/MovementRequestDto.ts",
+    "bounded-contexts/combat/api/dto/response/MovementResponseDto.ts"
+  ],
+  "bounded-contexts/combat/application/services/CombatAppService.ts": [
+    "bounded-contexts/character/api/dto/response/index.ts",
+    "bounded-contexts/combat/api/dto/response/CombatEndDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatStartRequestDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatStateDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatantDto.ts",
+    "bounded-contexts/combat/api/dto/response/EnemyAttackLogDto.ts",
+    "bounded-contexts/combat/domain/scaling.util.ts",
+    "bounded-contexts/combat/domain/services/action-economy.service.ts",
+    "bounded-contexts/combat/domain/services/enemy-turn.service.ts",
+    "bounded-contexts/combat/domain/services/init.service.ts",
+    "bounded-contexts/combat/domain/services/turn-order.service.ts",
+    "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.ts"
+  ],
+  "bounded-contexts/combat/combat.module.ts": [
+    "bounded-contexts/aptitude/aptitude.module.ts",
+    "bounded-contexts/character/character.module.ts",
+    "bounded-contexts/chat/chat.module.ts",
+    "bounded-contexts/chat/external/gemini-text.service.ts",
+    "bounded-contexts/combat/api/controllers/CombatController.ts",
+    "bounded-contexts/combat/application/services/CombatAppService.ts",
+    "bounded-contexts/combat/domain/services/action-economy.service.ts",
+    "bounded-contexts/combat/domain/services/combat-action.service.ts",
+    "bounded-contexts/combat/domain/services/combat-grid.service.ts",
+    "bounded-contexts/combat/domain/services/enemy-turn.service.ts",
+    "bounded-contexts/combat/domain/services/init.service.ts",
+    "bounded-contexts/combat/domain/services/opportunity-attack.service.ts",
+    "bounded-contexts/combat/domain/services/turn-order.service.ts",
+    "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.ts",
+    "bounded-contexts/dice/dice.module.ts"
+  ],
+  "bounded-contexts/combat/domain/scaling.util.ts": [
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts"
+  ],
+  "bounded-contexts/combat/domain/services/action-economy.service.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatStateDto.ts",
+    "bounded-contexts/combat/domain/scaling.util.ts"
+  ],
+  "bounded-contexts/combat/domain/services/combat-action.service.ts": [
+    "bounded-contexts/character/api/dto/response/StatAttribute.ts",
+    "bounded-contexts/combat/domain/scaling.util.ts"
+  ],
+  "bounded-contexts/combat/domain/services/combat-grid.service.ts": [
+    "bounded-contexts/combat/api/dto/response/GridPositionDto.ts"
+  ],
+  "bounded-contexts/combat/domain/services/enemy-turn.service.ts": [
+    "bounded-contexts/combat/api/dto/response/EnemyAttackLogDto.ts",
+    "bounded-contexts/combat/api/dto/response/index.ts",
+    "bounded-contexts/combat/domain/scaling.util.ts",
+    "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.ts"
+  ],
+  "bounded-contexts/combat/domain/services/init.service.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatStartRequestDto.ts",
+    "bounded-contexts/combat/api/dto/response/CombatantDto.ts"
+  ],
+  "bounded-contexts/combat/domain/services/opportunity-attack.service.ts": [
+    "bounded-contexts/combat/api/dto/response/GridPositionDto.ts",
+    "bounded-contexts/combat/api/dto/response/MovementEventDto.ts",
+    "bounded-contexts/combat/domain/services/combat-grid.service.ts",
+    "bounded-contexts/dice/domain/services/DiceService.ts"
+  ],
+  "bounded-contexts/combat/domain/services/turn-order.service.ts": [
+    "bounded-contexts/combat/api/dto/response/CombatantDto.ts"
+  ],
+  "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.ts": [
+    "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.ts"
+  ],
+  "bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.ts": [],
+  "bounded-contexts/dice/api/controllers/dice.controller.ts": [
+    "bounded-contexts/dice/api/dto/DiceRequestDto.ts",
+    "bounded-contexts/dice/api/dto/DiceResultDto.ts",
+    "bounded-contexts/dice/api/dto/dice.d.ts",
+    "bounded-contexts/dice/domain/services/DiceService.ts"
+  ],
+  "bounded-contexts/dice/api/dto/CombatDiceResultDto.ts": [
+    "bounded-contexts/dice/api/dto/DiceResultDto.ts"
+  ],
+  "bounded-contexts/dice/api/dto/DiceRequestDto.ts": [
+    "bounded-contexts/dice/api/dto/dice.d.ts"
+  ],
+  "bounded-contexts/dice/api/dto/DiceResultDto.ts": [],
+  "bounded-contexts/dice/api/dto/dice.d.ts": [],
+  "bounded-contexts/dice/dice.module.ts": [
+    "bounded-contexts/dice/api/controllers/dice.controller.ts",
+    "bounded-contexts/dice/domain/services/DiceService.ts"
+  ],
+  "bounded-contexts/dice/domain/services/DiceService.ts": [
+    "bounded-contexts/dice/api/dto/CombatDiceResultDto.ts",
+    "bounded-contexts/dice/api/dto/DiceResultDto.ts",
+    "bounded-contexts/dice/api/dto/dice.d.ts"
+  ],
+  "bounded-contexts/health/health.controller.ts": [],
+  "bounded-contexts/health/health.module.ts": [
+    "bounded-contexts/health/health.controller.ts"
+  ],
+  "bounded-contexts/item/domain/services/ItemDefinitionService.ts": [
+    "bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.ts"
+  ],
+  "bounded-contexts/item/infrastructure/persistence/mongo/schemas/Item.ts": [
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts"
+  ],
+  "bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.ts": [
+    "bounded-contexts/character/api/dto/response/InventoryItemMeta.ts"
+  ],
+  "bounded-contexts/media/api/controllers/ImageController.ts": [
+    "bounded-contexts/auth/domain/jwt-auth.guard.ts",
+    "bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.ts",
+    "bounded-contexts/character/api/dto/response/CharacterResponseDto.ts",
+    "bounded-contexts/character/application/services/CharacterAppService.ts",
+    "bounded-contexts/media/api/dto/image-response.dto.ts",
+    "bounded-contexts/media/domain/services/ImageService.ts",
+    "bounded-contexts/media/infrastructure/external/GeminiImageService.ts",
+    "global.types.d.ts"
+  ],
+  "bounded-contexts/media/api/dto/AvatarResponseDto.ts": [],
+  "bounded-contexts/media/api/dto/CharacterIdBodyDto.ts": [],
+  "bounded-contexts/media/api/dto/ImageRequestDto.ts": [],
+  "bounded-contexts/media/api/dto/image-response.dto.ts": [
+    "bounded-contexts/media/api/dto/AvatarResponseDto.ts",
+    "bounded-contexts/media/api/dto/CharacterIdBodyDto.ts",
+    "bounded-contexts/media/api/dto/ImageRequestDto.ts"
+  ],
+  "bounded-contexts/media/domain/image.util.ts": [],
+  "bounded-contexts/media/domain/services/ImageService.ts": [
+    "bounded-contexts/media/domain/image.util.ts"
+  ],
+  "bounded-contexts/media/infrastructure/external/GeminiImageService.ts": [
+    "config.ts"
+  ],
+  "bounded-contexts/media/media.module.ts": [
+    "bounded-contexts/character/character.module.ts",
+    "bounded-contexts/media/api/controllers/ImageController.ts",
+    "bounded-contexts/media/domain/services/ImageService.ts",
+    "bounded-contexts/media/infrastructure/external/GeminiImageService.ts"
+  ],
+  "bounded-contexts/progression/api/dto/CharacterStatsDto.ts": [],
+  "bounded-contexts/progression/api/dto/ClassBaseStatsDto.ts": [
+    "bounded-contexts/progression/api/dto/CharacterStatsDto.ts"
+  ],
+  "bounded-contexts/progression/api/dto/ClassMetadataDto.ts": [
+    "bounded-contexts/progression/api/dto/CharacterStatsDto.ts",
+    "bounded-contexts/progression/api/dto/ClassBaseStatsDto.ts"
+  ],
+  "bounded-contexts/progression/api/dto/RaceBonusesDto.ts": [],
+  "bounded-contexts/progression/api/dto/RaceMetadataDto.ts": [
+    "bounded-contexts/progression/api/dto/RaceBonusesDto.ts",
+    "bounded-contexts/progression/api/dto/TraitEffectDto.ts"
+  ],
+  "bounded-contexts/progression/api/dto/SelectClassDto.ts": [],
+  "bounded-contexts/progression/api/dto/SelectFirstTalentDto.ts": [],
+  "bounded-contexts/progression/api/dto/SelectRaceDto.ts": [],
+  "bounded-contexts/progression/api/dto/TraitEffectDto.ts": [],
+  "bounded-contexts/progression/api/dto/UnlockRankDto.ts": [],
+  "bounded-contexts/progression/api/dto/index.ts": [
+    "bounded-contexts/progression/api/dto/CharacterStatsDto.ts",
+    "bounded-contexts/progression/api/dto/ClassBaseStatsDto.ts",
+    "bounded-contexts/progression/api/dto/ClassMetadataDto.ts",
+    "bounded-contexts/progression/api/dto/RaceBonusesDto.ts",
+    "bounded-contexts/progression/api/dto/RaceMetadataDto.ts",
+    "bounded-contexts/progression/api/dto/SelectClassDto.ts",
+    "bounded-contexts/progression/api/dto/SelectFirstTalentDto.ts",
+    "bounded-contexts/progression/api/dto/SelectRaceDto.ts",
+    "bounded-contexts/progression/api/dto/TraitEffectDto.ts",
+    "bounded-contexts/progression/api/dto/UnlockRankDto.ts"
+  ],
+  "bounded-contexts/race/race.module.ts": [
+    "bounded-contexts/race/race.service.ts",
+    "infra/mongo/race/index.ts"
+  ],
+  "bounded-contexts/race/race.service.ts": [
+    "infra/mongo/race/index.ts"
+  ],
+  "bounded-contexts/race/races.controller.ts": [
+    "bounded-contexts/progression/api/dto/index.ts",
+    "bounded-contexts/race/race.service.ts"
+  ],
+  "bounded-contexts/race/races.module.ts": [
+    "bounded-contexts/race/race.module.ts",
+    "bounded-contexts/race/races.controller.ts"
+  ],
+  "config.module.ts": [
+    "config.ts"
+  ],
+  "config.ts": [],
+  "env-loader.ts": [],
+  "global.types.d.ts": [],
+  "infra/mongo/User.ts": [],
+  "infra/mongo/race/Race.ts": [
+    "infra/mongo/race/RaceBonuses.ts",
+    "infra/mongo/race/TraitEffect.ts"
+  ],
+  "infra/mongo/race/RaceBonuses.ts": [],
+  "infra/mongo/race/TraitEffect.ts": [],
+  "infra/mongo/race/index.ts": [
+    "infra/mongo/race/Race.ts",
+    "infra/mongo/race/RaceBonuses.ts",
+    "infra/mongo/race/TraitEffect.ts"
+  ],
+  "main.ts": [
+    "app.module.ts",
+    "config.ts",
+    "env-loader.ts",
+    "seed-manager.ts"
+  ],
+  "seed-manager.ts": [
+    "bounded-contexts/aptitude/application/services/AptitudeService.ts",
+    "bounded-contexts/item/domain/services/ItemDefinitionService.ts",
+    "bounded-contexts/race/race.service.ts",
+    "seed/aptitudes.json",
+    "seed/armor-definitions.json",
+    "seed/classes/guerrier/stats.json",
+    "seed/classes/guerrier/voies.json",
+    "seed/classes/mage/stats.json",
+    "seed/classes/mage/voies.json",
+    "seed/classes/rogue/stats.json",
+    "seed/classes/rogue/voies.json",
+    "seed/item-definitions.json",
+    "seed/races.json",
+    "seed/starter-packs.json",
+    "seed/weapons-definitions.json"
+  ],
+  "seed/aptitudes.json": [],
+  "seed/armor-definitions.json": [],
+  "seed/classes/guerrier/stats.json": [],
+  "seed/classes/guerrier/voies.json": [],
+  "seed/classes/mage/stats.json": [],
+  "seed/classes/mage/voies.json": [],
+  "seed/classes/rogue/stats.json": [],
+  "seed/classes/rogue/voies.json": [],
+  "seed/item-definitions.json": [],
+  "seed/races.json": [],
+  "seed/starter-packs.json": [],
+  "seed/weapons-definitions.json": []
+}

@@ -3,6 +3,12 @@ import { Document } from "mongoose";
 
 export type UserDocument = User & Document;
 
+/**
+ * Mongoose User Schema
+ * 
+ * @infrastructure
+ * Low-level persistence representation of User aggregate
+ */
 @Schema({ timestamps: true })
 export class User {
   @Prop({

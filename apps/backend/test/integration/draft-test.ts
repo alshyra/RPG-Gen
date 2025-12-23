@@ -7,7 +7,7 @@ import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
 import { CharacterModule } from "../../src/modules/character.module.js";
 import { createTestApp, closeTestApp } from "../helpers/test-app.js";
 import { CharacterService } from "../../src/domain/character/character.service.js";
-import { JwtAuthGuard } from "../../src/bounded-contexts/auth/domain/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../../src/bounded-contexts/auth/infrastructure/auth/guards/JwtAuthGuard.js";
 
 @Injectable()
 class MockJwt implements CanActivate {

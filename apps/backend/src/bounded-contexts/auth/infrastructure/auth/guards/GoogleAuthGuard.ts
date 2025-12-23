@@ -1,11 +1,16 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { getConfig } from "../../../config.js";
+import { getConfig } from "../../../../../config.js";
 
 /**
- * GoogleAuthGuard also respects the DISABLE_AUTH_FOR_E2E flag so the OAuth
- * dance can be skipped during E2E: when enabled, the guard allows the request
- * through and seeds a synthetic user (if necessary).
+ * GoogleAuthGuard
+ * 
+ * Guard to protect routes with Google OAuth authentication.
+ * Also respects the DISABLE_AUTH_FOR_E2E flag so the OAuth
+ * dance can be skipped during E2E testing.
+ * 
+ * @infrastructure
+ * NestJS-specific guard using Passport.js
  */
 @Injectable()
 export class GoogleAuthGuard extends AuthGuard("google") {

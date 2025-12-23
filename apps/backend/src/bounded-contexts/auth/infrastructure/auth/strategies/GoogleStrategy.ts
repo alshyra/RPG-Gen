@@ -1,15 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, VerifyCallback, Profile } from "passport-google-oauth20";
-import { IUserRepository } from "./repositories/IUserRepository.js";
-import { getConfig } from "../../../config.js";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
+import { getConfig } from "../../../../../config.js";
 
 /**
  * GoogleStrategy
  *
  * Passport strategy for Google OAuth2.
- * Delegates persistence to AuthAppService → IUserRepository (port).
+ * Delegates persistence to IUserRepository (port).
  * Returns domain AuthUser entity to controller.
+ * 
+ * @infrastructure
+ * Couples to Passport.js library and Google OAuth APIs
  */
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, "google") {

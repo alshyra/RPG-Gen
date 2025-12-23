@@ -1,8 +1,8 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { Race } from "../../infra/mongo/race/index.js";
-import type { RaceDocument, TraitEffectData } from "../../infra/mongo/race/index.js";
+import { Race } from "./mongo/race/index.js";
+import type { RaceDocument, TraitEffectData } from "./mongo/race/index.js";
 
 export interface RaceMetadata {
   id: string;
