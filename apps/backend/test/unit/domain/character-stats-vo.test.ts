@@ -1,8 +1,8 @@
 import test from "ava";
-import { CharacterStatsVO } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStatsVO.js";
+import { CharacterStats } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStats.js";
 
 test("CharacterStatsVO - creates with valid stats", t => {
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 5,
     finesse: 3,
     mind: 2,
@@ -17,7 +17,7 @@ test("CharacterStatsVO - creates with valid stats", t => {
 
 test("CharacterStatsVO - throws on negative stats", t => {
   t.throws(() => {
-    new CharacterStatsVO({
+    new CharacterStats({
       vigor: -1,
       finesse: 3,
       mind: 2,
@@ -27,7 +27,7 @@ test("CharacterStatsVO - throws on negative stats", t => {
 });
 
 test("CharacterStatsVO - getTotalPoints returns sum of all stats", t => {
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 5,
     finesse: 3,
     mind: 2,
@@ -38,7 +38,7 @@ test("CharacterStatsVO - getTotalPoints returns sum of all stats", t => {
 });
 
 test("CharacterStatsVO - getVigorModifier returns floor of vigor / 2", t => {
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 5,
     finesse: 3,
     mind: 2,
@@ -49,7 +49,7 @@ test("CharacterStatsVO - getVigorModifier returns floor of vigor / 2", t => {
 });
 
 test("CharacterStatsVO - withVigor returns new instance with updated vigor", t => {
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 5,
     finesse: 3,
     mind: 2,
@@ -64,7 +64,7 @@ test("CharacterStatsVO - withVigor returns new instance with updated vigor", t =
 });
 
 test("CharacterStatsVO - toPlainObject returns plain object", t => {
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 5,
     finesse: 3,
     mind: 2,
@@ -82,7 +82,7 @@ test("CharacterStatsVO - toPlainObject returns plain object", t => {
 });
 
 test("CharacterStatsVO - createDefault returns zeroed stats", t => {
-  const stats = CharacterStatsVO.createDefault();
+  const stats = CharacterStats.createDefault();
 
   t.is(stats.vigor, 0);
   t.is(stats.finesse, 0);

@@ -2,10 +2,10 @@ import { Controller, Get, Logger, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import type { Response } from "express";
 import type { RPGRequest } from "../../../../global.types.js";
-import { AuthProfileDto } from "../../../../domain/auth/auth.profile.dto.js";
-import { AuthService } from "../../../../domain/auth/auth.service.js";
-import { GoogleAuthGuard } from "../../../../domain/auth/google-auth.guard.js";
-import { JwtAuthGuard } from "../../../../domain/auth/jwt-auth.guard.js";
+import { AuthProfileDto } from "../../domain/auth.profile.dto.js";
+import { AuthService } from "../../domain/auth.service.js";
+import { GoogleAuthGuard } from "../../domain/google-auth.guard.js";
+import { JwtAuthGuard } from "../../domain/jwt-auth.guard.js";
 import { getConfig } from "../../../../config.js";
 
 @ApiTags("auth")

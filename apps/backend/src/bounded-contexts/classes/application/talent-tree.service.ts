@@ -1,16 +1,17 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ClassDefinition } from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
-import { TalentTree, TalentRank } from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/index.js";
-import { VoieProgressDto } from "../../bounded-contexts/character/api/dto/response/VoieProgressDto.js";
+import { VoieProgressDto } from "../../character/api/dto/response/VoieProgressDto.js";
+import { ClassDefinitionDocument } from "../infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
+import { TalentTree } from "../domain/value-objects/TalentTree.js";
+import { TalentRank } from "../domain/value-objects/TalentRank.js";
 
 @Injectable()
 export class TalentTreeService {
   private readonly logger = new Logger(TalentTreeService.name);
 
   constructor(
-    @InjectModel(ClassDefinition.name) private classDefinitionModel: Model<ClassDefinition>,
+    @InjectModel(ClassDefinitionDocument.name) private classDefinitionModel: Model<ClassDefinitionDocument>,
   ) {}
 
   /**

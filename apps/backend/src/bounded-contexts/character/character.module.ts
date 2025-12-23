@@ -1,58 +1,25 @@
-import { Module, forwardRef } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
-import { ItemDefinition, ItemDefinitionSchema } from "../item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
-import { ItemDefinitionService } from "../item/domain/services/ItemDefinitionService.js";
-import {
-  CharacterController,
-  CharacterInventoryController,
-  CharacterInspirationController,
-} from "./api/controllers/index.js";
-import { Character, CharacterSchema } from "./infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import { AptitudeModule } from "../aptitude/aptitude.module.js";
-import { ClassDefinitionModule } from "../classes/class-definition.module.js";
-
-// Clean Architecture imports
-import { CharacterAppService } from "./application/services/CharacterAppService.js";
-import { ICharacterRepository } from "./domain/repositories/ICharacterRepository.js";
-import { MongoCharacterRepository } from "./infrastructure/persistence/mongo/repositories/MongoCharacterRepository.js";
-import { CharacterDtoMapper } from "./api/dto/mappers/CharacterDtoMapper.js";
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CharacterController } from './api/controllers/CharacterController.js';
+import { CharacterAppService } from './application/services/CharacterAppService.js';
+import { ICharacterRepository } from './domain/repositories/ICharacterRepository.js';
+import { MongoCharacterRepository } from './infrastructure/persistence/mongo/repositories/MongoCharacterRepository.js';
+import { CharacterSchema } from './infrastructure/persistence/mongo/schemas/CharacterDocument.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      {
-        name: Character.name,
-        schema: CharacterSchema,
-      },
-      {
-        name: ItemDefinition.name,
-        schema: ItemDefinitionSchema,
-      },
+      { name: 'Character', schema: CharacterSchema }
     ]),
-    forwardRef(() => AptitudeModule),
-    forwardRef(() => ClassDefinitionModule),
   ],
-  controllers: [
-    CharacterController,
-    CharacterInventoryController,
-    CharacterInspirationController,
-  ],
+  controllers: [CharacterController],
   providers: [
-    ItemDefinitionService,
-    // Clean Architecture providers
     CharacterAppService,
-    CharacterDtoMapper,
     {
       provide: ICharacterRepository,
       useClass: MongoCharacterRepository,
     },
   ],
-  exports: [
-    ItemDefinitionService,
-    // Clean Architecture exports
-    CharacterAppService,
-    CharacterDtoMapper,
-    ICharacterRepository,
-  ],
+  exports: [CharacterAppService],
 })
 export class CharacterModule {}

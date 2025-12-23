@@ -1,6 +1,6 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { getConfig } from "../../config.js";
+import { getConfig } from "../../../config.js";
 
 /**
  * GoogleAuthGuard also respects the DISABLE_AUTH_FOR_E2E flag so the OAuth

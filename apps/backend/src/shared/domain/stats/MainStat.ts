@@ -1,11 +1,11 @@
 // src/shared/domain/stats/MainStat.ts
 
-import { StatType, StatTypes } from './StatType.js';
-import { CharacterStats, CharacterStatsUtils } from './CharacterStats.js';
+import { StatType, StatTypes } from "./StatType.js";
+import { CharacterStats, CharacterStatsUtils } from "./CharacterStats.js";
 
 /**
  * Value Object représentant la statistique principale d'une classe
- * 
+ *
  * @immutable
  * @description
  * Encapsule la logique de calcul des bonus basés sur la stat principale.
@@ -21,29 +21,28 @@ export class MainStat {
     this._statType = statType;
   }
 
-  get statType(): StatType { 
-    return this._statType; 
+  get statType(): StatType {
+    return this._statType;
   }
 
   get value(): StatType {
     return this._statType;
   }
 
-  // ✅ Factory methods (type-safe)
-  static vigor(): MainStat { 
-    return new MainStat(StatTypes.VIGOR); 
+  static vigor(): MainStat {
+    return new MainStat(StatTypes.VIGOR);
   }
 
-  static finesse(): MainStat { 
-    return new MainStat(StatTypes.FINESSE); 
+  static finesse(): MainStat {
+    return new MainStat(StatTypes.FINESSE);
   }
 
-  static mind(): MainStat { 
-    return new MainStat(StatTypes.MIND); 
+  static mind(): MainStat {
+    return new MainStat(StatTypes.MIND);
   }
 
-  static survival(): MainStat { 
-    return new MainStat(StatTypes.SURVIVAL); 
+  static survival(): MainStat {
+    return new MainStat(StatTypes.SURVIVAL);
   }
 
   /**
@@ -61,20 +60,23 @@ export class MainStat {
     if (!value) return undefined;
 
     switch (value) {
-      case StatTypes.VIGOR: return MainStat.vigor();
-      case StatTypes.FINESSE: return MainStat.finesse();
-      case StatTypes.MIND: return MainStat.mind();
-      case StatTypes.SURVIVAL: return MainStat.survival();
+      case StatTypes.VIGOR:
+        return MainStat.vigor();
+      case StatTypes.FINESSE:
+        return MainStat.finesse();
+      case StatTypes.MIND:
+        return MainStat.mind();
+      case StatTypes.SURVIVAL:
+        return MainStat.survival();
       default:
         throw new Error(`Invalid MainStat: ${value}`);
     }
   }
 
-  // ✅ Logique métier : Calcul de bonus
-  
+
   /**
    * Calcule le bonus de la stat principale pour un personnage
-   * 
+   *
    * @example
    * const mainStat = MainStat.vigor();
    * const bonus = mainStat.calculateBonus({ vigor: 14, ... }); // 7
@@ -85,26 +87,22 @@ export class MainStat {
 
   /**
    * Calcule le scaling pour les dégâts basés sur la stat principale
-   * 
+   *
    * @param stats - Stats du personnage
    * @param baseValue - Valeur de base (ex: dégâts de l'arme)
    * @param scalingFactor - Facteur de scaling (0.0 - 1.0)
-   * 
+   *
    * @example
    * const mainStat = MainStat.vigor();
    * const damage = mainStat.calculateScaling(
-   *   { vigor: 14, ... }, 
+   *   { vigor: 14, ... },
    *   10,    // base damage
    *   0.5    // 50% scaling
    * ); // 10 + (7 * 0.5) = 13.5
    */
-  calculateScaling(
-    stats: CharacterStats, 
-    baseValue: number, 
-    scalingFactor: number
-  ): number {
+  calculateScaling(stats: CharacterStats, baseValue: number, scalingFactor: number): number {
     const bonus = this.calculateBonus(stats);
-    return baseValue + (bonus * scalingFactor);
+    return baseValue + bonus * scalingFactor;
   }
 
   /**
@@ -118,30 +116,30 @@ export class MainStat {
 
   getDisplayName(): string {
     const names: Record<StatType, string> = {
-      vigor: 'Vigueur',
-      finesse: 'Finesse',
-      mind: 'Esprit',
-      survival: 'Survie',
+      vigor: "Vigueur",
+      finesse: "Finesse",
+      mind: "Esprit",
+      survival: "Survie",
     };
     return names[this._statType];
   }
 
   getIcon(): string {
     const icons: Record<StatType, string> = {
-      vigor: '💪',
-      finesse: '🎯',
-      mind: '🧠',
-      survival: '🛡️',
+      vigor: "💪",
+      finesse: "🎯",
+      mind: "🧠",
+      survival: "🛡️",
     };
     return icons[this._statType];
   }
 
   getDescription(): string {
     const descriptions: Record<StatType, string> = {
-      vigor: 'Augmente les HP et les dégâts physiques',
-      finesse: 'Augmente la précision et les dégâts de finesse',
-      mind: 'Augmente les PA et les dégâts magiques',
-      survival: 'Augmente les PM et la résistance',
+      vigor: "Augmente les HP et les dégâts physiques",
+      finesse: "Augmente la précision et les dégâts de finesse",
+      mind: "Augmente les PA et les dégâts magiques",
+      survival: "Augmente les PM et la résistance",
     };
     return descriptions[this._statType];
   }

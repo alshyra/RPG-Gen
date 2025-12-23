@@ -4,7 +4,7 @@ import { Item } from "../../../../../item/infrastructure/persistence/mongo/schem
 import { CharacterStats } from "./CharacterStats.js";
 
 // Unlocked talent rank in a voie
-export interface UnlockedRank {
+export interface TalentProgress {
   voieId: string; // e.g., "voie_protection"
   rank: number; // 1-5
 }
@@ -16,7 +16,7 @@ export interface CharacterAptitude {
 }
 
 @Schema({ timestamps: true })
-export class Character {
+export class CharacterDocument extends Document {
   @Prop({
     required: false,
     type: MongooseSchema.Types.ObjectId,
@@ -105,7 +105,7 @@ export class Character {
     required: false,
     default: [],
   })
-  unlockedRanks: UnlockedRank[]; // Unlocked talent tree ranks
+  talentProgress: TalentProgress[]; // Unlocked talent tree ranks
 
   // NEW: Character aptitudes (unlocked abilities)
   @Prop({
@@ -185,9 +185,7 @@ export class Character {
   level: number;
 }
 
-export type CharacterDocument = Character & Document;
-
-export const CharacterSchema = SchemaFactory.createForClass(Character);
+export const CharacterSchema = SchemaFactory.createForClass(CharacterDocument);
 
 // Indexes
 CharacterSchema.index({ userId: 1, isDeceased: 1 });

@@ -1,14 +1,14 @@
-import { CharacterStatsVO } from "../value-objects/CharacterStatsVO.js";
+import { CharacterStats } from "../value-objects/CharacterStats.js";
 import { ResourcePool } from "../value-objects/ResourcePool.js";
-import { TalentRank } from "../value-objects/TalentRank.js";
+import { TalentProgress } from "../value-objects/TalentRank.js";
 import type { InventoryItemMeta } from "../../api/dto/response/InventoryItemMeta.js";
+import { ClassName, RaceId } from "#shared/domain/index.js";
 
-export type CharacterState = "draft" | "created";
+export type CharacterState = "draft" | "created" | "deceased";
 
 export interface InventoryItem {
-  _id: string;
-  name: string;
   definitionId: string;
+  name: string;
   qty: number;
   description?: string;
   equipped: boolean;
@@ -31,14 +31,14 @@ export interface CharacterProps {
   className?: ClassName;
   raceId?: RaceId;
   level: number;
-  stats?: CharacterStatsVO;
+  stats?: CharacterStats;
   hp: ResourcePool;
   pa: ResourcePool;
   pm: ResourcePool;
   totalXp: number;
   inspirationPoints: number;
   talentPoints: number;
-  unlockedRanks: TalentRank[];
+  talentProgress: TalentProgress[];
   aptitudes: CharacterAptitude[];
   inventory: InventoryItem[];
   isDeceased: boolean;
@@ -52,7 +52,7 @@ export interface CompleteCharacterData {
   name: string;
   className: ClassName;
   raceId: RaceId;
-  stats: CharacterStatsVO;
+  stats: CharacterStats;
   physicalDescription?: string;
   gender?: string;
   portrait?: string;
@@ -84,7 +84,7 @@ export class CharacterEntity {
       totalXp: 0,
       inspirationPoints: 1,
       talentPoints: 0,
-      unlockedRanks: [],
+      talentProgress: [],
       aptitudes: [],
       inventory: [],
       isDeceased: false,
@@ -190,7 +190,7 @@ export class CharacterEntity {
     return this.props.talentPoints;
   }
 
-  get stats(): CharacterStatsVO | undefined {
+  get stats(): CharacterStats | undefined {
     return this.props.stats;
   }
 
@@ -210,8 +210,8 @@ export class CharacterEntity {
     return [...this.props.aptitudes];
   }
 
-  get unlockedRanks(): TalentRank[] {
-    return [...this.props.unlockedRanks];
+  get talentProgress(): TalentProgress[] {
+    return [...this.props.talentProgress];
   }
 
   get portrait(): string | undefined {
@@ -359,22 +359,22 @@ export class CharacterEntity {
       throw new Error("No talent points available");
     }
 
-    const existingRankIndex = this.props.unlockedRanks.findIndex(r => r.voieId === voieId);
+    const existingRankIndex = this.props.talentProgress.findIndex(r => r.voieId === voieId);
 
     if (existingRankIndex === -1) {
       if (rank !== 1) {
         throw new Error("Must start at rank 1 for a new voie");
       }
-      this.props.unlockedRanks.push(TalentRank.createFirst(voieId));
+      this.props.talentProgress.push(TalentProgress.createFirst(voieId));
     } else {
-      const existingRank = this.props.unlockedRanks[existingRankIndex];
+      const existingRank = this.props.talentProgress[existingRankIndex];
       if (rank !== existingRank.rank + 1) {
         throw new Error("Must unlock ranks sequentially");
       }
       if (!existingRank.canUnlockNext()) {
         throw new Error("Already at maximum rank for this voie");
       }
-      this.props.unlockedRanks[existingRankIndex] = existingRank.unlockNext();
+      this.props.talentProgress[existingRankIndex] = existingRank.unlockNext();
     }
 
     this.props.talentPoints -= 1;
@@ -533,7 +533,7 @@ export class CharacterEntity {
     if (updates.gender !== undefined) this.props.gender = updates.gender;
   }
 
-  updateStats(stats: CharacterStatsVO): void {
+  updateStats(stats: CharacterStats): void {
     this.props.stats = stats;
   }
 

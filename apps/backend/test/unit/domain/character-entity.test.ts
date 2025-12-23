@@ -1,6 +1,6 @@
 import test from "ava";
 import { CharacterEntity } from "../../../src/bounded-contexts/character/domain/entities/CharacterEntity.js";
-import { CharacterStatsVO } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStatsVO.js";
+import { CharacterStats } from "../../../src/bounded-contexts/character/domain/value-objects/CharacterStats.js";
 
 // ===========================
 // Factory Methods
@@ -46,7 +46,7 @@ test("CharacterEntity.completeDraft - completes draft successfully", t => {
     characterId: "test-id",
   });
 
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 4,
     finesse: 2,
     mind: 2,
@@ -75,7 +75,7 @@ test("CharacterEntity.completeDraft - throws if not draft", t => {
     characterId: "test-id",
   });
 
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 4,
     finesse: 2,
     mind: 2,
@@ -247,9 +247,9 @@ test("CharacterEntity.unlockTalentRank - unlocks first rank", t => {
 
   character.unlockTalentRank("voie_protection", 1);
 
-  t.is(character.unlockedRanks.length, 1);
-  t.is(character.unlockedRanks[0].voieId, "voie_protection");
-  t.is(character.unlockedRanks[0].rank, 1);
+  t.is(character.talentProgress.length, 1);
+  t.is(character.talentProgress[0].voieId, "voie_protection");
+  t.is(character.talentProgress[0].rank, 1);
   t.is(character.talentPoints, 0);
 });
 
@@ -384,7 +384,7 @@ function createCompleteCharacter(): CharacterEntity {
     userId: "user-123",
   });
 
-  const stats = new CharacterStatsVO({
+  const stats = new CharacterStats({
     vigor: 4,
     finesse: 2,
     mind: 2,

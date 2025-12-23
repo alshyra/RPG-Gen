@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ICharacterRepository } from "../../../../domain/repositories/ICharacterRepository.js";
 import { CharacterEntity } from "../../../../domain/entities/CharacterEntity.js";
-import { Character, CharacterDocument } from "../schemas/CharacterDocument.js";
+import { CharacterDocument, CharacterDocument } from "../schemas/CharacterDocument.js";
 import { CharacterMapper } from "../mappers/CharacterMapper.js";
 
 /**
@@ -14,7 +14,7 @@ export class MongoCharacterRepository implements ICharacterRepository {
   private readonly logger = new Logger(MongoCharacterRepository.name);
 
   constructor(
-    @InjectModel(Character.name) private readonly model: Model<CharacterDocument>,
+    @InjectModel(CharacterDocument.name) private readonly model: Model<CharacterDocument>,
   ) {}
 
   async findById(characterId: string): Promise<CharacterEntity | null> {

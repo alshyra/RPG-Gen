@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../bounded-contexts/auth/domain/jwt-auth.guard.js";
 import { CharacterAppService } from "../bounded-contexts/character/application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import { ConversationService } from "../domain/chat/conversation.service.js";

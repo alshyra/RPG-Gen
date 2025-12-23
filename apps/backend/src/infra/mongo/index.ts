@@ -2,7 +2,7 @@ export { CharacterClass } from "../../bounded-contexts/character/infrastructure/
 export { Item } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/Item.js";
 export { ItemDefinition, ItemDefinitionSchema } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
 export type { ItemSlot, ItemBonuses } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
-export { Race } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/Race.js";
+export { Race } from "../../bounded-contexts/race/Race.js";
 export { Skill } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/Skill.js";
 export {
   ClassDefinition,
@@ -14,7 +14,7 @@ export { CombatEnd } from "../../bounded-contexts/combat/infrastructure/persiste
 export { CombatStartEntry } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatStartEntry.js";
 export { Combatant, CombatantSchema } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.js";
 export { CombatSession, CombatSessionSchema } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.js";
-export { Character, CharacterSchema } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
+export { CharacterDocument as Character, CharacterSchema } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
 export type { CharacterDocument } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
 export { ChatHistory, ChatHistorySchema } from "./chat/ChatHistory.js";
 export { ChatMessage } from "./chat/ChatMessage.js";

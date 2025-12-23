@@ -1,5 +1,5 @@
 import test from "ava";
-import { ProgressionService } from "../../src/domain/progression/progression.service.js";
+import { ProgressionService } from "../../src/bounded-contexts/progression/progression.service.js";
 
 const createMockCharacterModel = () => {
   const mockDocs: any[] = [];

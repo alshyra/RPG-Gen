@@ -3,9 +3,9 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { MongooseModule } from "@nestjs/mongoose";
 import { AuthController } from "./api/controllers/auth.controller.js";
-import { AuthService } from "../../domain/auth/auth.service.js";
-import { JwtStrategy } from "../../domain/auth/jwt.strategy.js";
-import { GoogleStrategy } from "../../domain/auth/google.strategy.js";
+import { AuthService } from "./domain/auth.service.js";
+import { JwtStrategy } from "./domain/jwt.strategy.js";
+import { GoogleStrategy } from "./domain/google.strategy.js";
 import { User, UserSchema } from "../../infra/mongo/User.js";
 
 @Module({

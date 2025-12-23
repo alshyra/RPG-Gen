@@ -1,21 +1,45 @@
 .
-├── api
-│   ├── character
-│   │   ├── dto
-│   │   │   ├── index.ts
-│   │   │   └── mappers
-│   │   │       └── index.ts
-│   │   └── index.ts
-│   └── index.ts
 ├── app.module.ts
-├── application
-│   └── index.ts
 ├── bounded-contexts
+│   ├── aptitude
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   │   ├── AptitudeController.ts
+│   │   │   │   └── index.ts
+│   │   │   └── dto
+│   │   │       ├── mappers
+│   │   │       ├── request
+│   │   │       └── response
+│   │   ├── application
+│   │   │   └── services
+│   │   │       └── AptitudeService.ts
+│   │   ├── aptitude.module.ts
+│   │   ├── domain
+│   │   │   ├── entities
+│   │   │   ├── index.ts
+│   │   │   └── repositories
+│   │   ├── index.ts
+│   │   └── infrastructure
+│   │       └── persistence
+│   │           └── mongo
+│   │               ├── mappers
+│   │               ├── repositories
+│   │               └── schemas
+│   │                   ├── Aptitude.ts
+│   │                   └── index.ts
 │   ├── auth
 │   │   ├── api
 │   │   │   ├── controllers
+│   │   │   │   └── auth.controller.ts
 │   │   │   └── dto
+│   │   ├── auth.module.ts
 │   │   ├── domain
+│   │   │   ├── auth.profile.dto.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── google-auth.guard.ts
+│   │   │   ├── google.strategy.ts
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   ├── jwt.strategy.ts
 │   │   │   └── services
 │   │   └── infrastructure
 │   ├── character
@@ -98,13 +122,34 @@
 │   ├── classes
 │   │   ├── api
 │   │   │   ├── controllers
+│   │   │   │   └── classes.controller.ts
 │   │   │   └── dto
+│   │   │       ├── BaseClassDto.ts
+│   │   │       ├── ClassDefinitionResponseDto.ts
+│   │   │       ├── ClasseDTO.ts
+│   │   │       ├── TalentRankDto.ts
+│   │   │       ├── TalentTreeDto.ts
+│   │   │       └── index.ts
+│   │   ├── application
+│   │   │   ├── class-definition.service.ts
+│   │   │   ├── classes.service.ts
+│   │   │   └── talent-tree.service.ts
+│   │   ├── classes.module.ts
 │   │   ├── domain
-│   │   │   └── services
+│   │   │   ├── entities
+│   │   │   │   └── CharacterClass.ts
+│   │   │   ├── types
+│   │   │   └── value-objects
+│   │   │       ├── ClassStats.ts
+│   │   │       ├── TalentRank.ts
+│   │   │       └── TalentTree.ts
 │   │   └── infrastructure
 │   │       └── persistence
 │   │           └── mongo
+│   │               ├── mappers
+│   │               │   └── ClassDefinitionMapper.ts
 │   │               └── schemas
+│   │                   └── ClassDefinitionDocument.ts
 │   ├── combat
 │   │   ├── api
 │   │   │   ├── controllers
@@ -167,6 +212,8 @@
 │   │                   └── index.ts
 │   ├── dice
 │   │   ├── api
+│   │   │   ├── controllers
+│   │   │   │   └── dice.controller.ts
 │   │   │   └── dto
 │   │   │       ├── CombatDiceResultDto.ts
 │   │   │       ├── DiceRequestDto.ts
@@ -237,57 +284,34 @@
 │   │   ├── api
 │   │   │   ├── controllers
 │   │   │   └── dto
+│   │   │       ├── CharacterStatsDto.ts
+│   │   │       ├── ClassBaseStatsDto.ts
+│   │   │       ├── ClassMetadataDto.ts
+│   │   │       ├── RaceBonusesDto.ts
+│   │   │       ├── RaceMetadataDto.ts
+│   │   │       ├── SelectClassDto.ts
+│   │   │       ├── SelectFirstTalentDto.ts
+│   │   │       ├── SelectRaceDto.ts
+│   │   │       ├── TraitEffectDto.ts
+│   │   │       ├── UnlockRankDto.ts
+│   │   │       └── index.ts
 │   │   ├── domain
 │   │   │   └── services
-│   │   └── infrastructure
-│   └── spell
-│       ├── api
-│       │   ├── controllers
-│       │   │   ├── AptitudeController.ts
-│       │   │   └── index.ts
-│       │   └── dto
-│       │       ├── mappers
-│       │       ├── request
-│       │       └── response
-│       ├── application
-│       │   └── services
-│       ├── domain
-│       │   ├── entities
-│       │   ├── index.ts
-│       │   ├── repositories
-│       │   └── services
-│       │       ├── AptitudeService.ts
-│       │       └── index.ts
+│   │   ├── infrastructure
+│   │   ├── progression.module.ts
+│   │   └── progression.service.ts
+│   └── race
 │       ├── index.ts
-│       ├── infrastructure
-│       │   └── persistence
-│       │       └── mongo
-│       │           ├── mappers
-│       │           ├── repositories
-│       │           └── schemas
-│       │               ├── Aptitude.ts
-│       │               └── index.ts
-│       └── spell.module.ts
+│       ├── race.module.ts
+│       └── race.service.ts
 ├── config.module.ts
 ├── config.ts
 ├── controllers
-│   ├── auth.controller.ts
-│   ├── characters
 │   ├── chat.controller.ts
-│   ├── classes.controller.ts
-│   ├── dice.controller.ts
 │   ├── health.controller.ts
 │   ├── progression.controller.ts
 │   └── races.controller.ts
 ├── domain
-│   ├── aptitude
-│   ├── auth
-│   │   ├── auth.profile.dto.ts
-│   │   ├── auth.service.ts
-│   │   ├── google-auth.guard.ts
-│   │   ├── google.strategy.ts
-│   │   ├── jwt-auth.guard.ts
-│   │   └── jwt.strategy.ts
 │   ├── character
 │   │   └── dto
 │   ├── chat
@@ -305,49 +329,11 @@
 │   │       ├── SubmitRollDto.ts
 │   │       ├── XpInstructionMessageDto.ts
 │   │       └── index.ts
-│   ├── class-definition
-│   │   ├── class-definition.module.ts
-│   │   └── class-definition.service.ts
-│   ├── classes
-│   │   ├── classes.service.ts
-│   │   ├── dto
-│   │   │   ├── ClassDefinitionResponseDto.ts
-│   │   │   ├── TalentRankDto.ts
-│   │   │   ├── TalentTreeDto.ts
-│   │   │   └── index.ts
-│   │   └── dtos
-│   │       └── ClasseDTO.ts
 │   ├── combat
 │   │   ├── dto
 │   │   └── services
-│   ├── image
-│   │   └── dto
-│   ├── item-definition
-│   │   └── dto
-│   ├── progression
-│   │   ├── dto
-│   │   │   ├── CharacterStatsDto.ts
-│   │   │   ├── ClassBaseStatsDto.ts
-│   │   │   ├── ClassMetadataDto.ts
-│   │   │   ├── RaceBonusesDto.ts
-│   │   │   ├── RaceMetadataDto.ts
-│   │   │   ├── SelectClassDto.ts
-│   │   │   ├── SelectFirstTalentDto.ts
-│   │   │   ├── SelectRaceDto.ts
-│   │   │   ├── TraitEffectDto.ts
-│   │   │   ├── UnlockRankDto.ts
-│   │   │   └── index.ts
-│   │   ├── index.ts
-│   │   ├── progression.module.ts
-│   │   └── progression.service.ts
-│   ├── race
-│   │   ├── index.ts
-│   │   ├── race.module.ts
-│   │   └── race.service.ts
-│   └── talent-tree
-│       ├── index.ts
-│       ├── talent-tree.module.ts
-│       └── talent-tree.service.ts
+│   └── image
+│       └── dto
 ├── env-loader.ts
 ├── global.types.d.ts
 ├── infra
@@ -361,11 +347,6 @@
 │   │   ├── chat
 │   │   │   ├── ChatHistory.ts
 │   │   │   └── ChatMessage.ts
-│   │   ├── class
-│   │   │   ├── ClassDefinition.ts
-│   │   │   ├── TalentRank.ts
-│   │   │   ├── TalentTree.ts
-│   │   │   └── index.ts
 │   │   ├── index.ts
 │   │   ├── instruction
 │   │   │   ├── GameInstruction.ts
@@ -381,35 +362,14 @@
 │       ├── index.ts
 │       └── mongo
 │           └── index.ts
-├── infrastructure
-│   ├── config
-│   ├── external
-│   │   └── gemini
-│   └── persistence
-│       └── mongo
 ├── main.ts
 ├── modules
-│   ├── auth.module.ts
-│   ├── character.module.exports.ts
-│   ├── character.module.ts
 │   ├── chat.module.exports.ts
 │   ├── chat.module.ts
-│   ├── classes.module.ts
-│   ├── combat.module.exports.md
-│   ├── combat.module.exports.ts
-│   ├── combat.module.ts
 │   ├── dice.module.ts
 │   ├── health.module.ts
 │   ├── progression.module.ts
 │   └── races.module.ts
-├── orchestrators
-│   ├── chat
-│   │   └── index.ts
-│   ├── combat
-│   │   └── index.ts
-│   ├── index.ts
-│   └── item
-│       └── index.ts
 ├── scripts
 │   └── generate-openapi-types.ts
 ├── seed
@@ -433,6 +393,16 @@
 │   ├── stats-and-skills.json
 │   └── weapons-definitions.json
 ├── seed-manager.ts
+├── shared
+│   └── domain
+│       ├── index.ts
+│       ├── stats
+│       │   ├── CharacterStats.ts
+│       │   ├── MainStat.ts
+│       │   └── StatType.ts
+│       └── types
+│           ├── ClassName.ts
+│           └── RaceId.ts
 └── workflows
     ├── chat-gameplay
     │   ├── ChatWorkflow.ts
@@ -447,4 +417,4 @@
         ├── ItemWorkflow.ts
         └── index.ts
 
-180 directories, 268 files
+160 directories, 258 files

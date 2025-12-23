@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../domain/auth/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../bounded-contexts/auth/domain/jwt-auth.guard.js";
 import { CharacterResponseDto, DraftCharacterResponseDto } from "../bounded-contexts/character/api/dto/index.js";
 import { CharacterDtoMapper } from "../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import {
@@ -9,8 +9,8 @@ import {
   SelectClassDto,
   SelectFirstTalentDto,
   UnlockRankDto
-} from "../domain/progression/dto/index.js";
-import { ProgressionService } from "../domain/progression/progression.service.js";
+} from "../bounded-contexts/progression/api/dto/index.js";
+import { ProgressionService } from "../bounded-contexts/progression/progression.service.js";
 import { type RPGRequest } from "../global.types.js";
 
 @ApiTags("progression")

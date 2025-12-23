@@ -1,7 +1,7 @@
 import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { RaceService } from "../domain/race/race.service.js";
-import { RaceMetadataDto } from "../domain/progression/dto/index.js";
+import { RaceService } from "../bounded-contexts/race/race.service.js";
+import { RaceMetadataDto } from "../bounded-contexts/progression/api/dto/index.js";
 
 @ApiTags("races")
 @Controller("races")

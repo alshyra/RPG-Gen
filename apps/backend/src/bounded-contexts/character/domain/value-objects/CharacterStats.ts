@@ -2,7 +2,7 @@
  * Value Object representing character stats (Vigor, Finesse, Mind, Survival).
  * Immutable - all modifications return a new instance.
  */
-export class CharacterStatsVO {
+export class CharacterStats {
   public readonly vigor: number;
   public readonly finesse: number;
   public readonly mind: number;
@@ -43,8 +43,8 @@ export class CharacterStatsVO {
     return Math.floor(this.survival / 2);
   }
 
-  withVigor(newVigor: number): CharacterStatsVO {
-    return new CharacterStatsVO({
+  withVigor(newVigor: number): CharacterStats {
+    return new CharacterStats({
       vigor: newVigor,
       finesse: this.finesse,
       mind: this.mind,
@@ -52,8 +52,8 @@ export class CharacterStatsVO {
     });
   }
 
-  withFinesse(newFinesse: number): CharacterStatsVO {
-    return new CharacterStatsVO({
+  withFinesse(newFinesse: number): CharacterStats {
+    return new CharacterStats({
       vigor: this.vigor,
       finesse: newFinesse,
       mind: this.mind,
@@ -61,8 +61,8 @@ export class CharacterStatsVO {
     });
   }
 
-  withMind(newMind: number): CharacterStatsVO {
-    return new CharacterStatsVO({
+  withMind(newMind: number): CharacterStats {
+    return new CharacterStats({
       vigor: this.vigor,
       finesse: this.finesse,
       mind: newMind,
@@ -70,8 +70,8 @@ export class CharacterStatsVO {
     });
   }
 
-  withSurvival(newSurvival: number): CharacterStatsVO {
-    return new CharacterStatsVO({
+  withSurvival(newSurvival: number): CharacterStats {
+    return new CharacterStats({
       vigor: this.vigor,
       finesse: this.finesse,
       mind: this.mind,
@@ -88,8 +88,8 @@ export class CharacterStatsVO {
     };
   }
 
-  static createDefault(): CharacterStatsVO {
-    return new CharacterStatsVO({
+  static createDefault(): CharacterStats {
+    return new CharacterStats({
       vigor: 0,
       finesse: 0,
       mind: 0,

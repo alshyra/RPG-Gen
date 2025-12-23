@@ -2,7 +2,7 @@
  * Value Object representing an unlocked talent rank in a voie.
  * Immutable - all modifications return a new instance.
  */
-export class TalentRank {
+export class TalentProgress {
   public readonly voieId: string;
   public readonly rank: number;
 
@@ -13,26 +13,26 @@ export class TalentRank {
     if (!voieId || voieId.trim() === "") {
       throw new Error("VoieId cannot be empty");
     }
-    if (rank < TalentRank.MIN_RANK || rank > TalentRank.MAX_RANK) {
-      throw new Error(`Rank must be between ${TalentRank.MIN_RANK} and ${TalentRank.MAX_RANK}`);
+    if (rank < TalentProgress.MIN_RANK || rank > TalentProgress.MAX_RANK) {
+      throw new Error(`Rank must be between ${TalentProgress.MIN_RANK} and ${TalentProgress.MAX_RANK}`);
     }
     this.voieId = voieId;
     this.rank = rank;
   }
 
   canUnlockNext(): boolean {
-    return this.rank < TalentRank.MAX_RANK;
+    return this.rank < TalentProgress.MAX_RANK;
   }
 
-  unlockNext(): TalentRank {
+  unlockNext(): TalentProgress {
     if (!this.canUnlockNext()) {
       throw new Error("Already at maximum rank");
     }
-    return new TalentRank(this.voieId, this.rank + 1);
+    return new TalentProgress(this.voieId, this.rank + 1);
   }
 
   isMaxRank(): boolean {
-    return this.rank === TalentRank.MAX_RANK;
+    return this.rank === TalentProgress.MAX_RANK;
   }
 
   toPlainObject(): { voieId: string; rank: number } {
@@ -42,7 +42,7 @@ export class TalentRank {
     };
   }
 
-  static createFirst(voieId: string): TalentRank {
-    return new TalentRank(voieId, TalentRank.MIN_RANK);
+  static createFirst(voieId: string): TalentProgress {
+    return new TalentProgress(voieId, TalentProgress.MIN_RANK);
   }
 }

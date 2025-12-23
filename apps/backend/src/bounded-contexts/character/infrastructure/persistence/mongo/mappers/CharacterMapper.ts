@@ -1,17 +1,16 @@
 import {
   CharacterEntity,
   CharacterProps,
-  type ClassName,
-  type RaceId,
   type CharacterState,
   type InventoryItem,
   type CharacterAptitude,
 } from "../../../../domain/entities/CharacterEntity.js";
-import { CharacterStatsVO } from "../../../../domain/value-objects/CharacterStatsVO.js";
+import { CharacterStats } from "../../../../domain/value-objects/CharacterStats.js";
 import { ResourcePool } from "../../../../domain/value-objects/ResourcePool.js";
-import { TalentRank } from "../../../../domain/value-objects/TalentRank.js";
-import { CharacterDocument, type UnlockedRank, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
+import { TalentProgress } from "../../../../domain/value-objects/TalentRank.js";
+import { CharacterDocument, type TalentProgress, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
 import type { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
+import { ClassName, RaceId } from "#shared/domain/index.js";
 
 /**
  * Mapper for converting between CharacterDocument (MongoDB) and CharacterEntity (Domain).
@@ -51,7 +50,7 @@ export class CharacterMapper {
       totalXp: props.totalXp,
       inspirationPoints: props.inspirationPoints,
       talentPoints: props.talentPoints,
-      unlockedRanks: props.unlockedRanks.map(rank => ({
+      talentProgress: props.talentProgress.map(rank => ({
         voieId: rank.voieId,
         rank: rank.rank,
       })),
@@ -79,7 +78,7 @@ export class CharacterMapper {
    */
   static toDomain(doc: CharacterDocument): CharacterEntity {
     const stats = doc.stats
-      ? new CharacterStatsVO({
+      ? new CharacterStats({
           vigor: doc.stats.vigor ?? 0,
           finesse: doc.stats.finesse ?? 0,
           mind: doc.stats.mind ?? 0,
@@ -91,8 +90,8 @@ export class CharacterMapper {
     const pa = new ResourcePool(doc.pa ?? 6, doc.paMax ?? 6);
     const pm = new ResourcePool(doc.pm ?? 4, doc.pmMax ?? 4);
 
-    const unlockedRanks = (doc.unlockedRanks || []).map(
-      (r: UnlockedRank) => new TalentRank(r.voieId, r.rank),
+    const talentProgress = (doc.talentProgress || []).map(
+      (r: TalentProgress) => new TalentProgress(r.voieId, r.rank),
     );
 
     const aptitudes: CharacterAptitude[] = (doc.aptitudes || []).map(
@@ -130,7 +129,7 @@ export class CharacterMapper {
       totalXp: doc.totalXp ?? 0,
       inspirationPoints: doc.inspirationPoints ?? 1,
       talentPoints: doc.talentPoints ?? 0,
-      unlockedRanks,
+      talentProgress: talentProgress,
       aptitudes,
       inventory,
       isDeceased: doc.isDeceased ?? false,

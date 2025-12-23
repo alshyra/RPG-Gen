@@ -16,7 +16,7 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../../../domain/auth/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../../../auth/domain/jwt-auth.guard.js";
 import type { RPGRequest } from "../../../../global.types.js";
 import { CharacterAppService } from "../../application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../dto/mappers/CharacterDtoMapper.js";

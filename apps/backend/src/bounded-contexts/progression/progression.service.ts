@@ -2,12 +2,12 @@ import { Injectable, Logger, BadRequestException, NotFoundException } from "@nes
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
-import { ItemDefinitionService } from "../../bounded-contexts/item/domain/services/ItemDefinitionService.js";
-import { ClassDefinitionService } from "../../bounded-contexts/classes/application/class-definition.service.js";
+import { ItemDefinitionService } from "../item/domain/services/ItemDefinitionService.js";
+import { ClassDefinitionService } from "../classes/application/class-definition.service.js";
 import { RaceService, RaceMetadata } from "../race/race.service.js";
-import type { UnlockedRank, CharacterAptitude } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import type { ItemBonuses } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
-import { CharacterStats } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterStats.js";
+import type { TalentProgress, CharacterAptitude } from "../character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
+import type { ItemBonuses } from "../item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
+import { CharacterStats } from "../character/infrastructure/persistence/mongo/schemas/CharacterStats.js";
 
 // Starter pack configuration per class
 interface StarterPackConfig {
@@ -140,7 +140,7 @@ export class ProgressionService {
     character.inventory = inventory;
     character.aptitudes = aptitudes;
     character.talentPoints = 0;
-    character.unlockedRanks = [];
+    character.talentProgress = [];
     character.level = 1;
 
     // Also set legacy fields for backward compatibility
@@ -212,7 +212,7 @@ export class ProgressionService {
 
     // Check if previous rank is unlocked (except for rank 1)
     if (rank > 1) {
-      const previousUnlocked = (character.unlockedRanks || []).some(
+      const previousUnlocked = (character.talentProgress || []).some(
         r => r.voieId === voieId && r.rank === rank - 1,
       );
       if (!previousUnlocked) {
@@ -221,7 +221,7 @@ export class ProgressionService {
     }
 
     // Check if rank is already unlocked
-    const alreadyUnlocked = (character.unlockedRanks || []).some(
+    const alreadyUnlocked = (character.talentProgress || []).some(
       r => r.voieId === voieId && r.rank === rank,
     );
     if (alreadyUnlocked) {
@@ -249,8 +249,8 @@ export class ProgressionService {
     }
 
     // Unlock the rank
-    const newRank: UnlockedRank = { voieId, rank };
-    character.unlockedRanks = [...(character.unlockedRanks || []), newRank];
+    const newRank: TalentProgress = { voieId, rank };
+    character.talentProgress = [...(character.talentProgress || []), newRank];
     character.talentPoints = (character.talentPoints || 0) - 1;
 
     // Add the aptitude from this rank to character.aptitudes
@@ -317,7 +317,7 @@ export class ProgressionService {
     }
 
     // Check if rank 1 is already unlocked
-    const alreadyUnlocked = (character.unlockedRanks || []).some(
+    const alreadyUnlocked = (character.talentProgress || []).some(
       r => r.voieId === voieId && r.rank === 1,
     );
     
@@ -326,8 +326,8 @@ export class ProgressionService {
     }
 
     // Unlock rank 1 (free - no talent point cost)
-    const newRank: UnlockedRank = { voieId, rank: 1 };
-    character.unlockedRanks = [...(character.unlockedRanks || []), newRank];
+    const newRank: TalentProgress = { voieId, rank: 1 };
+    character.talentProgress = [...(character.talentProgress || []), newRank];
 
     // Add aptitude from rank 1
     const newAptitude: CharacterAptitude = {

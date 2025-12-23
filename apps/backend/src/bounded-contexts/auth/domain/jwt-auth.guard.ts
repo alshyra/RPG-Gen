@@ -1,6 +1,6 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { getConfig } from "../../config.js";
+import { getConfig } from "../../../config.js";
 
 /**
  * JwtAuthGuard supports a testing bypass: when the environment variable

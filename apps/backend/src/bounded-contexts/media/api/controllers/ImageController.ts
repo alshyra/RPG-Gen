@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import Joi from "joi";
-import { JwtAuthGuard } from "../../../../domain/auth/jwt-auth.guard.js";
+import { JwtAuthGuard } from "../../../auth/domain/jwt-auth.guard.js";
 import { CharacterAppService } from "../../../character/application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../../../character/api/dto/mappers/CharacterDtoMapper.js";
 import type { CharacterResponseDto } from "../../../character/api/dto/response/CharacterResponseDto.js";

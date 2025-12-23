@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { AptitudeService } from "./bounded-contexts/aptitude/application/services/AptitudeService.js";
 import { ClassDefinitionService } from "./bounded-contexts/classes/application/class-definition.service.js";
 import { ItemDefinitionService } from "./bounded-contexts/item/domain/services/ItemDefinitionService.js";
-import { RaceService } from "./domain/race/race.service.js";
+import { RaceService } from "./bounded-contexts/race/race.service.js";
 
 // Get the directory of this file for relative paths
 const __filename = fileURLToPath(import.meta.url);

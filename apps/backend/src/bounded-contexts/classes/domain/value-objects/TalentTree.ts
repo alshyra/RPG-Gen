@@ -1,17 +1,20 @@
-import { TalentRank } from './TalentRank.js';
+import { TalentRank } from "./TalentRank.js";
 
 /**
  * Value Object représentant une voie de talents (1 des 3 arbres d'une classe)
- * 
+ *
  * @immutable
  * @description
  * Une voie = 5 rangs, chaque rang débloque 1+ aptitudes
  */
 export interface TalentTreeProps {
-  voieId: string;          // 'guerrier_force', 'mage_destruction'
-  name: string;            // 'Voie de la Force'
+  // 'guerrier_force', 'mage_destruction'
+  voieId: string;
+  // 'Voie de la Force'
+  name: string;
   description?: string;
-  ranks: TalentRank[];     // 5 rangs
+  // 5 rangs
+  ranks: TalentRank[];
 }
 
 export class TalentTree {
@@ -22,7 +25,7 @@ export class TalentTree {
 
   constructor(props: TalentTreeProps) {
     if (props.ranks.length !== 5) {
-      throw new Error('Talent tree must have exactly 5 ranks');
+      throw new Error("Talent tree must have exactly 5 ranks");
     }
 
     // Vérifier que les rangs sont dans l'ordre 1-5
@@ -39,14 +42,21 @@ export class TalentTree {
     this._ranks = sortedRanks;
   }
 
-  get voieId(): string { return this._voieId; }
-  get name(): string { return this._name; }
-  get description(): string | undefined { return this._description; }
-  get ranks(): readonly TalentRank[] { return this._ranks; }
+  get voieId(): string {
+    return this._voieId;
+  }
+  get name(): string {
+    return this._name;
+  }
+  get description(): string | undefined {
+    return this._description;
+  }
+  get ranks(): readonly TalentRank[] {
+    return this._ranks;
+  }
 
-  // ✅ Logique métier
   getRankData(rank: number): TalentRank | null {
-    return this._ranks.find(r => r.rank === rank) || null;
+    return this._ranks.find((r) => r.rank === rank) || null;
   }
 
   getAptitudeIdAtRank(rank: number): string | null {
@@ -55,11 +65,11 @@ export class TalentTree {
   }
 
   getAllAptitudeIds(): string[] {
-    return this._ranks.map(r => r.aptitudeId);
+    return this._ranks.map((r) => r.aptitudeId);
   }
 
   getRankOfAptitude(aptitudeId: string): number | null {
-    const rank = this._ranks.find(r => r.aptitudeId === aptitudeId);
+    const rank = this._ranks.find((r) => r.aptitudeId === aptitudeId);
     return rank ? rank.rank : null;
   }
 
@@ -88,7 +98,7 @@ export class TalentTree {
       voieId: this._voieId,
       name: this._name,
       description: this._description,
-      ranks: this._ranks.map(r => r.toJSON()),
+      ranks: this._ranks.map((r) => r.toJSON()),
     };
   }
 }

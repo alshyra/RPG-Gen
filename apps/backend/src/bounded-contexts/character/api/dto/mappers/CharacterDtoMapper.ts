@@ -108,7 +108,7 @@ export class CharacterDtoMapper {
       return [];
     }
 
-    const unlockedRanks = entity.unlockedRanks;
+    const unlockedRanks = entity.talentProgress;
 
     // Build a map of voieId -> max unlocked rank
     const voieRankMap = new Map<string, number>();

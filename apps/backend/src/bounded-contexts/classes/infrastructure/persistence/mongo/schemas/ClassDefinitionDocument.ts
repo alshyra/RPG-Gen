@@ -1,7 +1,5 @@
-// bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.ts
-
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
 
 // Simple interface (pas de classe, pas de logique)
 interface TalentRankData {
@@ -24,10 +22,10 @@ interface ClassStatsData {
   pm: number;
 }
 
-@Schema({ collection: 'class_definitions', timestamps: true })
+@Schema({ collection: "class_definitions", timestamps: true })
 export class ClassDefinitionDocument extends Document {
   @Prop({ required: true, unique: true })
-  name: string;  // 'guerrier', 'rogue', 'mage'
+  name: string; // 'guerrier', 'rogue', 'mage'
 
   @Prop()
   displayName?: string;
@@ -44,7 +42,11 @@ export class ClassDefinitionDocument extends Document {
   @Prop({ type: [String], default: [] })
   startingAptitudes: string[];
 
-  @Prop()
+  @Prop({
+    type: String,
+    enum: ["vigor", "finesse", "mind", "survival"],
+    required: false,
+  })
   mainStat?: string;
 
   @Prop()

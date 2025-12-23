@@ -1,8 +1,9 @@
-import { CharacterClass, ClassName } from '../../../../domain/entities/CharacterClass.js';
+import { CharacterClass } from '../../../../domain/entities/CharacterClass.js';
 import { ClassStats } from '../../../../domain/value-objects/ClassStats.js';
 import { TalentTree } from '../../../../domain/value-objects/TalentTree.js';
 import { TalentRank } from '../../../../domain/value-objects/TalentRank.js';
 import { ClassDefinitionDocument } from '../schemas/ClassDefinitionDocument.js';
+import { MainStat, parseClassName } from '#shared/domain/index.js';
 
 export class ClassDefinitionMapper {
   /**
@@ -33,15 +34,14 @@ export class ClassDefinitionMapper {
       });
     });
 
-    // ✅ Construire l'entité
     return new CharacterClass({
-      name: doc.name as ClassName,
+      name: parseClassName(doc.name)!,              // ✅ Parse et valide
       displayName: doc.displayName,
       description: doc.description,
       stats,
       talentTrees,
       startingAptitudes: doc.startingAptitudes,
-      mainStat: doc.mainStat as any,
+      mainStat: MainStat.fromString(doc.mainStat),  // ✅ Convertit string → MainStat VO
       color: doc.color,
       icon: doc.icon,
     });
@@ -72,7 +72,7 @@ export class ClassDefinitionMapper {
         })),
       })),
       startingAptitudes: [...entity.startingAptitudes],
-      mainStat: entity.mainStat,
+      mainStat: entity.mainStat?.value,  // ✅ Convertit MainStat VO → string
       color: entity.color,
       icon: entity.icon,
     };
