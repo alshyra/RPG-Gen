@@ -3,7 +3,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { AptitudeService } from "./bounded-contexts/aptitude/application/services/AptitudeService.js";
 import { ArchetypeDefinitionService } from "./bounded-contexts/archetype/application/archetype-definition.service.js";
-import { ItemDefinitionService } from "./bounded-contexts/item/domain/services/ItemDefinitionService.js";
+import { ItemDefinitionService } from "./bounded-contexts/combat/application/services/ItemDefinitionService.js";
 import { RaceService } from "./bounded-contexts/race/race.service.js";
 
 // Get the directory of this file for relative paths

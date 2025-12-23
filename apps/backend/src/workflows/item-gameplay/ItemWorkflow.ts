@@ -10,7 +10,7 @@ import type { InventoryInstructionMessageDto } from "../../domain/chat/dto/index
 import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 import type { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/CombatStateDto.js";
 import { DiceService } from "../../bounded-contexts/dice/domain/services/DiceService.js";
-import { ItemDefinitionService } from "../../bounded-contexts/item/domain/services/ItemDefinitionService.js";
+import { ItemDefinitionService } from "../../bounded-contexts/combat/application/services/ItemDefinitionService.js";
 
 interface ConsumableMetaWithHeal {
   type: "consumable";
