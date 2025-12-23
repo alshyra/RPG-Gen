@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Narrative } from '../../../domain/narrative/entities/Narrative.js';
 import { INarrativeRepository } from '../../../domain/narrative/repositories/INarrativeRepository.js';
-import { NarrativeDocument, NarrativeSchema } from '../schemas/NarrativeDocument.js';
+import { NarrativeDocument, type NarrativeDocumentType } from '../schemas/NarrativeDocument.js';
 import { NarrativeMapper } from '../mappers/NarrativeMapper.js';
 
 /**
@@ -15,7 +15,7 @@ import { NarrativeMapper } from '../mappers/NarrativeMapper.js';
 export class MongoNarrativeRepository implements INarrativeRepository {
   private readonly logger = new Logger(MongoNarrativeRepository.name);
 
-  constructor(@InjectModel(NarrativeSchema.name) private narrativeModel: Model<NarrativeDocument>) {}
+  constructor(@InjectModel(NarrativeDocument.name) private narrativeModel: Model<NarrativeDocumentType>) {}
 
   async findByUserAndCharacter(userId: string, characterId: string): Promise<Narrative | null> {
     const doc = await this.narrativeModel.findOne({ userId, characterId }).exec();

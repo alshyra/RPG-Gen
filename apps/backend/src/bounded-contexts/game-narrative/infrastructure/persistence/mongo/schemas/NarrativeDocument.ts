@@ -1,12 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
-import type { GameInstructionDto } from '../../../domain/instruction/GameInstructionDto.js';
+import { Document } from 'mongoose';
+import type { GameInstructionDto } from '../../../api/dto/response/GameInstructionDto.js';
 import type { CharacterContextData } from '../../../domain/narrative/value-objects/Context.js';
 
-export type NarrativeDocument = HydratedDocument<NarrativeDocumentSchema>;
 
 @Schema({ collection: 'narratives', timestamps: true })
-export class NarrativeDocumentSchema {
+export class NarrativeDocument extends Document {
   @Prop({ required: true, index: true })
   userId: string;
 
@@ -38,5 +37,8 @@ export class NarrativeDocumentSchema {
   updatedAt?: Date;
 }
 
-export const NarrativeSchema = SchemaFactory.createForClass(NarrativeDocumentSchema);
+export const NarrativeSchema = SchemaFactory.createForClass(NarrativeDocument);
+export type NarrativeDocumentType = NarrativeDocument & Document;
+
 NarrativeSchema.index({ userId: 1, characterId: 1 }, { unique: true });
+

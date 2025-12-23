@@ -1,7 +1,6 @@
 export * from "./RollInstructionMessageDto.js";
 export * from "./HpInstructionMessageDto.js";
 export * from "./XpInstructionMessageDto.js";
-export * from "./SpellInstructionMessageDto.js";
 export * from "./InventoryInstructionMessageDto.js";
 export * from "./CombatEndInstructionMessageDto.js";
 export * from "./CombatStartInstructionMessageDto.js";
@@ -21,3 +20,4 @@ export type GameInstructionDto =
   | InventoryInstructionMessageDto
   | CombatStartInstructionMessageDto
   | CombatEndInstructionMessageDto;
+

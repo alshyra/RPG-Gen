@@ -8,7 +8,7 @@ import {
 import { readFile } from "fs/promises";
 import path from "path";
 import { getConfig } from "../../../../../config.js";
-import type { GameInstructionDto } from "../../../domain/instruction/GameInstructionDto.js";
+import type { GameInstructionDto } from "../../../api/dto/response/GameInstructionDto.js";
 import { geminiResponseJsonSchema } from "./gemini-json-schema.js";
 import { aiResponseSchema } from "./gemini-schemas.js";
 import type { CharacterResponseDto } from "../../../../character/api/dto/index.js";

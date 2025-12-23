@@ -1,7 +1,8 @@
 import { Narrative } from '../../../domain/narrative/entities/Narrative.js';
-import { Message, MessageRole } from '../../../domain/narrative/value-objects/Message.js';
+import { Message, MessageRole, type CharacterContextData } from '../../../domain/narrative/value-objects/Message.js';
 import { Context } from '../../../domain/narrative/value-objects/Context.js';
 import { NarrativeDocument } from '../schemas/NarrativeDocument.js';
+import type { GameInstructionDto } from '../../../api/dto/response/GameInstructionDto.js';
 
 /**
  * Maps between Narrative domain entity and Mongoose document
@@ -34,7 +35,24 @@ export class NarrativeMapper {
     });
   }
 
-  static toPersistence(narrative: Narrative): Omit<NarrativeDocument, '_id'> {
+  static toPersistence(narrative: Narrative): {
+    userId: string;
+    characterId: string;
+    sessionId: string;
+    messages: Array<{
+      role: 'user' | 'assistant';
+      narrative: string;
+      instructions: readonly GameInstructionDto[];
+      timestamp: Date;
+    }>;
+    context: {
+      characterContext: CharacterContextData;
+      systemPrompt: string;
+      scenarioPrompt: string;
+    };
+    createdAt?: Date;
+    updatedAt?: Date;
+  } {
     return {
       userId: narrative.userId,
       characterId: narrative.characterId,
@@ -50,7 +68,12 @@ export class NarrativeMapper {
     };
   }
 
-  static messageToPersistence(message: Message): any {
+  static messageToPersistence(message: Message): {
+    role: 'user' | 'assistant';
+    narrative: string;
+    instructions: readonly GameInstructionDto[];
+    timestamp: Date;
+  } {
     return {
       role: message.role,
       narrative: message.narrative,

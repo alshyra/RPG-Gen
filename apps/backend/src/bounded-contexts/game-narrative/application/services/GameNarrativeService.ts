@@ -83,7 +83,7 @@ export class GameNarrativeService {
     userId: string,
     characterId: string,
     type: string,
-  ): Promise<ReadonlyArray<any>> {
+  ): Promise<ReadonlyArray<import('../../api/dto/response/GameInstructionDto.js').GameInstructionDto>> {
     return this.narrativeAppService.getInstructionsByType(userId, characterId, type);
   }
 
@@ -92,10 +92,5 @@ export class GameNarrativeService {
    */
   async deleteNarrative(userId: string, characterId: string): Promise<void> {
     await this.narrativeAppService.deleteNarrative(userId, characterId);
-  }
-}
-   */
-  async getUserConversations(userId: string): Promise<Conversation[]> {
-    return this.conversationService.getUserConversations(userId);
   }
 }

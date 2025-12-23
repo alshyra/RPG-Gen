@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards, Delete } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Delete, Get, Logger, Param, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { RPGRequest } from '../../../../global.types.js';
 import { JwtAuthGuard } from '../../../auth/infrastructure/auth/guards/JwtAuthGuard.js';
 import { GameNarrativeService } from '../../application/services/GameNarrativeService.js';
-import { NarrativeResponseMapper, ConversationResponseDto } from '../dto/index.js';
-import { ChatMessageRequestDto } from '../dto/request/index.js';
-import type { RPGRequest } from '../../../../global.types.js';
+import { ConversationResponseDto, NarrativeResponseMapper } from '../dto/index.js';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -47,13 +46,14 @@ export class NarrativeController {
   async getRecentMessages(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
-  ): Promise<any[]> {
+  ): Promise<Array<{ role: string; narrative: string; timestamp: Date; instructions: ReadonlyArray<import('../dto/response/GameInstructionDto.js').GameInstructionDto> }>> {
     const userId = req.user._id.toString();
     const messages = await this.narrativeService.getNarrativeHistory(userId, characterId);
     return messages.map(msg => ({
       role: msg.role,
       narrative: msg.narrative,
       timestamp: msg.timestamp,
+      instructions: msg.instructions,
     }));
   }
 

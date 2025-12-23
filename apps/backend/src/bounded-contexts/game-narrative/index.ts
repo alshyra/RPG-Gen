@@ -15,9 +15,7 @@ export { GameNarrativeService } from './application/services/GameNarrativeServic
 export { GameNarrativeModule } from './game-narrative.module.js';
 export { NarrativeController } from './api/controllers/narrative.controller.js';
 export {
-  ChatResponseDto,
   ConversationResponseDto,
   ChatMessageRequestDto,
-  MessageResponseDto,
-  InstructionResponseDto,
+  NarrativeResponseDto,
 } from './api/dto/index.js';

@@ -74,7 +74,7 @@ export class Narrative {
       characterId: this.characterId,
       sessionId: this.sessionId,
       context: newContext,
-      messages: this.messages,
+      messages: [...this.messages],
       createdAt: this.createdAt,
       updatedAt: new Date(),
     });
@@ -105,14 +105,14 @@ export class Narrative {
   /**
    * Get all instructions across all messages
    */
-  getAllInstructions(): ReadonlyArray<any> {
+  getAllInstructions(): ReadonlyArray<import('../../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
     return this.messages.flatMap(msg => msg.instructions);
   }
 
   /**
    * Get instructions of specific type
    */
-  getInstructionsByType(type: string): ReadonlyArray<any> {
+  getInstructionsByType(type: string): ReadonlyArray<import('../../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
     return this.getAllInstructions().filter(instr => instr.type === type);
   }
 

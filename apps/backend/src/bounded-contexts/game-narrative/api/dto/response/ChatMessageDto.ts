@@ -3,7 +3,6 @@ import {
   RollInstructionMessageDto,
   HpInstructionMessageDto,
   XpInstructionMessageDto,
-  SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
   GameInstructionDto,
   CombatEndInstructionMessageDto,
@@ -15,7 +14,6 @@ import { IsArray, IsString } from "class-validator";
   RollInstructionMessageDto,
   HpInstructionMessageDto,
   XpInstructionMessageDto,
-  SpellInstructionMessageDto,
   InventoryInstructionMessageDto,
   CombatEndInstructionMessageDto,
   CombatStartInstructionMessageDto,
@@ -40,7 +38,6 @@ export class ChatMessageDto {
         { $ref: getSchemaPath(RollInstructionMessageDto) },
         { $ref: getSchemaPath(HpInstructionMessageDto) },
         { $ref: getSchemaPath(XpInstructionMessageDto) },
-        { $ref: getSchemaPath(SpellInstructionMessageDto) },
         { $ref: getSchemaPath(InventoryInstructionMessageDto) },
         { $ref: getSchemaPath(CombatStartInstructionMessageDto) },
         // combat end is handled by the API response shape (CombatEndResponseDto) and not an AI instruction

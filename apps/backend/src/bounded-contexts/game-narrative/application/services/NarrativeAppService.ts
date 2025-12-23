@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { Narrative } from '../../domain/narrative/entities/Narrative.js';
 import { Message } from '../../domain/narrative/value-objects/Message.js';
-import { Context, CharacterContextData } from '../../domain/narrative/value-objects/Context.js';
+import { Context } from '../../domain/narrative/value-objects/Context.js';
 import { INarrativeRepository, NARRATIVE_REPOSITORY } from '../../domain/narrative/repositories/INarrativeRepository.js';
 
 /**
@@ -168,7 +168,7 @@ export class NarrativeAppService {
     userId: string,
     characterId: string,
     type: string,
-  ): Promise<ReadonlyArray<any>> {
+  ): Promise<ReadonlyArray<import('../../api/dto/response/GameInstructionDto.js').GameInstructionDto>> {
     const narrative = await this.narrativeRepository.findByUserAndCharacter(userId, characterId);
     if (!narrative) {
       throw new NotFoundException(

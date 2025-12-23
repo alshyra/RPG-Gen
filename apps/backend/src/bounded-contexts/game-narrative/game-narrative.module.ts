@@ -5,12 +5,12 @@ import { NarrativeAppService } from './application/services/NarrativeAppService.
 import { GameNarrativeService } from './application/services/GameNarrativeService.js';
 import { NARRATIVE_REPOSITORY } from './domain/narrative/repositories/INarrativeRepository.js';
 import { MongoNarrativeRepository } from './infrastructure/persistence/mongo/repositories/MongoNarrativeRepository.js';
-import { NarrativeDocumentSchema, NarrativeSchema } from './infrastructure/persistence/mongo/schemas/NarrativeDocument.js';
+import { NarrativeDocument , NarrativeSchema } from './infrastructure/persistence/mongo/schemas/NarrativeDocument.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: NarrativeDocumentSchema.name, schema: NarrativeSchema },
+      { name: NarrativeDocument.name, schema: NarrativeSchema },
     ]),
   ],
   controllers: [NarrativeController],
