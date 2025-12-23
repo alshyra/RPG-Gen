@@ -3,7 +3,7 @@ import { ArchetypeStats } from '../../../../domain/value-objects/ArchetypeStats.
 import { TalentTree } from '../../../../domain/value-objects/TalentTree.js';
 import { TalentRank } from '../../../../domain/value-objects/TalentRank.js';
 import { ArchetypeDocument } from '../schemas/ArchetypeDocument.js';
-import { MainStat, parseArchetypeName } from '#shared/domain/index.js';
+import { MainStat, parseArchetypeName } from '#shared';
 
 export class ArchetypeMapper {
   /**

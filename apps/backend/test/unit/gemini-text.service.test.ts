@@ -1,6 +1,6 @@
 import test from "ava";
 import { InternalServerErrorException, ServiceUnavailableException } from "@nestjs/common";
-import { GeminiTextService } from "../../src/bounded-contexts/chat/external/gemini-text.service.js";
+import { GeminiTextService } from "../../src/bounded-contexts/game-narrative/external/gemini-text.service.js";
 import type { ChatMessageDto } from "@rpg-gen/shared";
 
 test("initializeChatSession creates history with parts (not content)", async t => {

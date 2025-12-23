@@ -11,7 +11,7 @@ import type {
   RollInstructionMessageDto,
   XpInstructionMessageDto,
 } from "../../domain/chat/dto/index.js";
-import { GeminiTextService } from "../../bounded-contexts/chat/external/gemini-text.service.js";
+import { GeminiTextService } from "../../bounded-contexts/game-narrative/external/gemini-text.service.js";
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.

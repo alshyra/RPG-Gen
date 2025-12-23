@@ -12,7 +12,7 @@
 import test from "ava";
 import { Types } from "mongoose";
 import { ConversationService } from "../../src/domain/chat/conversation.service.js";
-import { ChatModule } from "../../src/bounded-contexts/chat/chat.module.js";
+import { ChatModule } from "../../src/bounded-contexts/game-narrative/chat.module.js";
 import { closeTestApp, createTestApp } from "../helpers/test-app.js";
 import history from "../mocks/history.js";
 
