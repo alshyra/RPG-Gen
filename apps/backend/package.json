@@ -7,7 +7,8 @@
     "#shared/*": "./src/shared/*",
     "#character/*": "./src/bounded-contexts/character/*",
     "#archetype/*": "./src/bounded-contexts/archetype/*",
-    "#combat/*": "./src/bounded-contexts/combat/*"
+    "#combat/*": "./src/bounded-contexts/combat/*",
+    "#workflows": "./src//workflows/index.js"
   },
   "scripts": {
     "start": "nest start --watch -d 9222",

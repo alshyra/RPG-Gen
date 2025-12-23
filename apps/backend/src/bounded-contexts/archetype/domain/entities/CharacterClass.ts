@@ -1,27 +1,27 @@
-import { ClassName, MainStat, CharacterStats } from '#shared/domain/index.js';
+import { ArchetypeName, MainStat, CharacterStats } from '#shared/domain/index.js';
 import { ClassStats } from '../value-objects/ClassStats.js';
 import { TalentTree } from '../value-objects/TalentTree.js';
 
 export interface CharacterClassProps {
-  name: ClassName;
+  name: ArchetypeName;
   displayName?: string;
   description?: string;
   stats: ClassStats;
   talentTrees: TalentTree[];
   startingAptitudes: string[];
-  mainStat?: MainStat;
+  mainStat: MainStat;
   color?: string;
   icon?: string;
 }
 
 export class CharacterClass {
-  private readonly _name: ClassName;
+  private readonly _name: ArchetypeName;
   private readonly _displayName?: string;
   private readonly _description?: string;
   private readonly _stats: ClassStats;
   private readonly _talentTrees: TalentTree[];
   private readonly _startingAptitudes: string[];
-  private readonly _mainStat?: MainStat;
+  private readonly _mainStat: MainStat;
   private readonly _color?: string;
   private readonly _icon?: string;
 
@@ -41,13 +41,13 @@ export class CharacterClass {
     this._icon = props.icon;
   }
 
-  get name(): ClassName { return this._name; }
+  get name(): ArchetypeName { return this._name; }
   get displayName(): string { return this._displayName || this._name; }
   get description(): string | undefined { return this._description; }
   get stats(): ClassStats { return this._stats; }
   get talentTrees(): readonly TalentTree[] { return this._talentTrees; }
   get startingAptitudes(): readonly string[] { return this._startingAptitudes; }
-  get mainStat(): MainStat | undefined { return this._mainStat; }
+  get mainStat(): MainStat { return this._mainStat; }
   get color(): string | undefined { return this._color; }
   get icon(): string | undefined { return this._icon; }
 

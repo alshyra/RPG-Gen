@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
 import { ItemDefinitionService } from "../item/domain/services/ItemDefinitionService.js";
-import { ClassDefinitionService } from "../classes/application/class-definition.service.js";
+import { ArchetypeDefinitionService } from "../archetype/application/archetype-definition.service.js";
 import { RaceService, RaceMetadata } from "../race/race.service.js";
 import type { TalentProgress, CharacterAptitude } from "../character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
 import type { ItemBonuses } from "../item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";
@@ -83,7 +83,7 @@ export class ProgressionService {
   constructor(
     @InjectModel(Character.name) private characterModel: Model<CharacterDocument>,
     private itemDefinitionService: ItemDefinitionService,
-    private classDefinitionService: ClassDefinitionService,
+    private classDefinitionService: ArchetypeDefinitionService,
     private raceService: RaceService,
   ) {}
 

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Schema as MongooseSchema, Document } from "mongoose";
 import { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
-import { CharacterStats } from "./CharacterStats.js";
+import { type CharacterStats } from "#shared/domain/index.js";
 
 // Unlocked talent rank in a voie
 export interface TalentProgress {
@@ -167,7 +167,7 @@ export class CharacterDocument extends Document {
     default: "draft",
     type: String,
   })
-  state: "draft" | "created";
+  state: "draft" | "created" | "deceased";
 
   @Prop({
     type: [Item],

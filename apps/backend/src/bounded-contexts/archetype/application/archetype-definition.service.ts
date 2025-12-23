@@ -2,31 +2,30 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import {
-  ClassDefinition,
-  ClassDefinitionDocument,
-} from "../infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
+  ArchetypeDocument,
+} from "../infrastructure/persistence/mongo/schemas/ArchetypeDocument.js";
 
 @Injectable()
-export class ClassDefinitionService {
-  private readonly logger = new Logger(ClassDefinitionService.name);
+export class ArchetypeDefinitionService {
+  private readonly logger = new Logger(ArchetypeDefinitionService.name);
 
-  constructor(@InjectModel(ClassDefinition.name) private model: Model<ClassDefinitionDocument>) {}
+  constructor(@InjectModel(ArchetypeDocument.name) private model: Model<ArchetypeDocument>) {}
 
-  async findAll(): Promise<ClassDefinition[]> {
+  async findAll(): Promise<ArchetypeDocument[]> {
     return this.model.find().sort({ name: 1 }).exec();
   }
 
-  async findByName(name: string): Promise<ClassDefinition | null> {
+  async findByName(name: string): Promise<ArchetypeDocument | null> {
     return this.model.findOne({ name }).exec();
   }
 
-  async findByNameOrThrow(name: string): Promise<ClassDefinition> {
+  async findByNameOrThrow(name: string): Promise<ArchetypeDocument> {
     const result = await this.findByName(name);
     if (!result) throw new NotFoundException(`ClassDefinition not found: ${name}`);
     return result;
   }
 
-  async upsert(def: Partial<ClassDefinition>) {
+  async upsert(def: Partial<ArchetypeDocument>) {
     // Require a name so we can reliably upsert seeded definitions
     if (!def.name) throw new Error("name required");
     const existing = await this.model.findOne({ name: def.name }).exec();

@@ -1,6 +1,6 @@
 import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { ClassesService } from "../../application/classes.service.js";
+import { ArchetypeService } from "../../application/archetype.service.js";
 import { ClassDefinitionResponseDto, TalentTreeDto } from "../dto/index.js";
 
 @ApiTags("classes")
@@ -8,7 +8,7 @@ import { ClassDefinitionResponseDto, TalentTreeDto } from "../dto/index.js";
 export class ClassesController {
   private readonly logger = new Logger(ClassesController.name);
 
-  constructor(private classesService: ClassesService) {}
+  constructor(private classesService: ArchetypeService) {}
 
   @Get()
   @ApiOperation({ summary: "Get all available classes" })

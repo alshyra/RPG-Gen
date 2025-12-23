@@ -1,7 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
+import type { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
 import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
-import type { CharacterResponseDto, DraftCharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
+import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
+import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import type {
   CombatStartInstructionMessageDto,
@@ -10,7 +11,6 @@ import type {
   RollInstructionMessageDto,
   XpInstructionMessageDto,
 } from "../../domain/chat/dto/index.js";
-import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
 
 /**

@@ -1,7 +1,7 @@
 import test from "ava";
 import { NotFoundException } from "@nestjs/common";
-import { TalentTreeService } from "../../src/bounded-contexts/classes/application/talent-tree.service.js";
-import { TalentTree, TalentRank } from "../../src/bounded-contexts/classes/infrastructure/persistence/mongo/schemas/index.js";
+import { TalentTreeService } from "../../src/bounded-contexts/archetype/application/talent-tree.service.js";
+import { TalentTree, TalentRank } from "../../src/bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/index.js";
 
 // Mock model factory
 const createMockClassDefinitionModel = () => {

@@ -9,9 +9,10 @@ import { VoieProgressDto } from "../response/VoieProgressDto.js";
 import type { InventoryItemDto } from "../response/InventoryItemDto.js";
 import type { TacticalStats } from "../response/TacticalStats.js";
 import { AptitudeService } from "../../../../aptitude/application/services/AptitudeService.js";
-import { ClassDefinitionService } from "../../../../classes/application/class-definition.service.js";
+import { ArchetypeDefinitionService } from "../../../../archetype/application/archetype-definition.service.js";
 import { CharacterMapper } from "../../../infrastructure/persistence/mongo/mappers/CharacterMapper.js";
 import type { CharacterDocument } from "../../../infrastructure/persistence/mongo/schemas/CharacterDocument.js";
+import { CharacterStats } from "#shared/domain/index.js";
 
 /**
  * Mapper for converting CharacterEntity to API response DTOs.
@@ -23,7 +24,7 @@ export class CharacterDtoMapper {
 
   constructor(
     private readonly aptitudeService: AptitudeService,
-    private readonly classDefinitionService: ClassDefinitionService,
+    private readonly classDefinitionService: ArchetypeDefinitionService,
   ) {}
 
   /**
@@ -174,7 +175,6 @@ export class CharacterDtoMapper {
       : undefined;
 
     const inventory: InventoryItemDto[] = entity.inventory.map(item => ({
-      _id: item._id,
       definitionId: item.definitionId,
       name: item.name,
       qty: item.qty,
@@ -221,7 +221,6 @@ export class CharacterDtoMapper {
       : undefined;
 
     const inventory: InventoryItemDto[] = entity.inventory.map(item => ({
-      _id: item._id,
       definitionId: item.definitionId,
       name: item.name,
       qty: item.qty,
@@ -262,18 +261,16 @@ export class CharacterDtoMapper {
    */
   static toDeceasedDto(entity: CharacterEntity): DeceasedCharacterResponseDto {
     const baseDto = CharacterDtoMapper.toCompleteDto(entity);
-    return new DeceasedCharacterResponseDto({
-      ...baseDto,
-      diedAt: entity.diedAt?.toISOString(),
-      deathLocation: entity.deathLocation,
-    });
+    baseDto.diedAt = entity.diedAt?.toISOString();
+    baseDto.deathLocation = entity.deathLocation;
+    return baseDto;
   }
 
   /**
    * Convert a CharacterEntity to BaseCharacterResponseDto.
    */
   static toBaseDto(entity: CharacterEntity): BaseCharacterResponseDto {
-    const stats: TacticalStats | undefined = entity.stats
+    const stats: CharacterStats | undefined = entity.stats
       ? {
           vigor: entity.stats.vigor,
           finesse: entity.stats.finesse,
@@ -283,7 +280,6 @@ export class CharacterDtoMapper {
       : undefined;
 
     const inventory: InventoryItemDto[] = entity.inventory.map(item => ({
-      _id: item._id,
       definitionId: item.definitionId,
       name: item.name,
       qty: item.qty,
@@ -292,31 +288,28 @@ export class CharacterDtoMapper {
       meta: item.meta ?? {},
     }));
 
-    return new BaseCharacterResponseDto({
-      characterId: entity.id,
-      name: entity.name,
-      physicalDescription: entity.physicalDescription,
-      portrait: entity.portrait,
-      gender: entity.gender,
-      state: entity.state,
-      className: entity.className,
-      raceId: entity.raceId,
-      level: entity.level,
-      stats,
-      hp: entity.hp,
-      hpMax: entity.hpMax,
-      pa: entity.pa,
-      paMax: entity.paMax,
-      pm: entity.pm,
-      pmMax: entity.pmMax,
-      totalXp: entity.totalXp,
-      inspirationPoints: entity.inspirationPoints,
-      talentPoints: entity.talentPoints,
-      isDeceased: entity.isDeceased,
-      diedAt: entity.diedAt?.toISOString(),
-      deathLocation: entity.deathLocation,
-      inventory,
-    });
+    const baseDto = new BaseCharacterResponseDto()
+    baseDto.characterId =  entity.id;
+    baseDto.name =  entity.name;
+    baseDto.physicalDescription =  entity.physicalDescription;
+    baseDto.portrait =  entity.portrait;
+    baseDto.gender = entity.gender;
+    baseDto.state = entity.state;
+    baseDto.className = entity.className;
+    baseDto.raceId = entity.raceId;
+    baseDto.level = entity.level;
+    baseDto.stats = stats;
+    baseDto.hp = entity.hp;
+    baseDto.hpMax = entity.hpMax;
+    baseDto.pa = entity.pa;
+    baseDto.paMax = entity.paMax;
+    baseDto.pm = entity.pm;
+    baseDto.pmMax = entity.pmMax;
+    baseDto.totalXp = entity.totalXp;
+    baseDto.inspirationPoints = entity.inspirationPoints;
+    baseDto.isDeceased = entity.isDeceased;
+    baseDto.inventory = inventory;
+    return baseDto;
   }
 
   /**

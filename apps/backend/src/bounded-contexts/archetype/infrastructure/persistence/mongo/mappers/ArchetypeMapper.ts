@@ -2,14 +2,14 @@ import { CharacterClass } from '../../../../domain/entities/CharacterClass.js';
 import { ClassStats } from '../../../../domain/value-objects/ClassStats.js';
 import { TalentTree } from '../../../../domain/value-objects/TalentTree.js';
 import { TalentRank } from '../../../../domain/value-objects/TalentRank.js';
-import { ClassDefinitionDocument } from '../schemas/ClassDefinitionDocument.js';
-import { MainStat, parseClassName } from '#shared/domain/index.js';
+import { ArchetypeDocument } from '../schemas/ArchetypeDocument.js';
+import { MainStat, parseArchetypeName } from '#shared/domain/index.js';
 
-export class ClassDefinitionMapper {
+export class ArchetypeMapper {
   /**
    * MongoDB Document → Domain Entity
    */
-  static toDomain(doc: ClassDefinitionDocument): CharacterClass {
+  static toDomain(doc: ArchetypeDocument): CharacterClass {
     const stats = new ClassStats({
       hpBase: doc.stats.hpBase,
       hpGain: doc.stats.hpGain,
@@ -35,13 +35,13 @@ export class ClassDefinitionMapper {
     });
 
     return new CharacterClass({
-      name: parseClassName(doc.name)!,              // ✅ Parse et valide
+      name: parseArchetypeName(doc.name)!,
       displayName: doc.displayName,
       description: doc.description,
       stats,
       talentTrees,
       startingAptitudes: doc.startingAptitudes,
-      mainStat: MainStat.fromString(doc.mainStat),  // ✅ Convertit string → MainStat VO
+      mainStat: MainStat.fromString(doc.mainStat),
       color: doc.color,
       icon: doc.icon,
     });
@@ -50,7 +50,7 @@ export class ClassDefinitionMapper {
   /**
    * Domain Entity → MongoDB Document
    */
-  static toPersistence(entity: CharacterClass): Partial<ClassDefinitionDocument> {
+  static toPersistence(entity: CharacterClass): Partial<ArchetypeDocument> {
     return {
       name: entity.name,
       displayName: entity.displayName,

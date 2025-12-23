@@ -7,10 +7,10 @@ import {
 } from "../../../../domain/entities/CharacterEntity.js";
 import { CharacterStats } from "../../../../domain/value-objects/CharacterStats.js";
 import { ResourcePool } from "../../../../domain/value-objects/ResourcePool.js";
-import { TalentProgress } from "../../../../domain/value-objects/TalentRank.js";
-import { CharacterDocument, type TalentProgress, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
+import { CharacterDocument, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
 import type { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
-import { ClassName, RaceId } from "#shared/domain/index.js";
+import { ArchetypeName, RaceId } from "#shared/domain/index.js";
+import { TalentProgress } from "#character/domain/value-objects/TalentRank.js";
 
 /**
  * Mapper for converting between CharacterDocument (MongoDB) and CharacterEntity (Domain).
@@ -59,7 +59,6 @@ export class CharacterMapper {
         currentCooldown: apt.currentCooldown,
       })),
       inventory: props.inventory.map(item => ({
-        _id: item._id,
         name: item.name,
         definitionId: item.definitionId,
         qty: item.qty,
@@ -119,8 +118,8 @@ export class CharacterMapper {
       portrait: doc.portrait,
       gender: doc.gender,
       state: doc.state as CharacterState,
-      className: doc.className as ClassName | undefined,
-      raceId: doc.raceId as RaceId | undefined,
+      className: doc.className as ArchetypeName,
+      raceId: doc.raceId as RaceId,
       level: doc.level ?? 1,
       stats,
       hp,

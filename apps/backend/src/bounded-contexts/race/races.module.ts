@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { RaceModule } from "../bounded-contexts/race/race.module.js";
-import { RacesController } from "../controllers/races.controller.js";
+import { RaceModule } from "./race.module.js";
+import { RacesController } from "./races.controller.js";
 
 @Module({
   imports: [RaceModule],

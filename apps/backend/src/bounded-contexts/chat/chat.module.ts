@@ -1,12 +1,12 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { CharacterModule } from "../bounded-contexts/character/character.module.js";
-import { CombatModule } from "../bounded-contexts/combat/combat.module.js";
-import { GeminiTextService } from "../infra/external/gemini-text.service.js";
+import { CharacterModule } from "../character/character.module.js";
+import { CombatModule } from "../combat/combat.module.js";
+import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
 import { ChatOrchestrator } from "../orchestrators/chat/index.js";
-import { ChatController } from "../controllers/chat.controller.js";
-import { ConversationService } from "../domain/chat/conversation.service.js";
-import { ChatHistory, ChatHistorySchema } from "../infra/mongo/chat/ChatHistory.js";
+import { ChatController } from "./chat.controller.js";
+import { ConversationService } from "../../domain/chat/conversation.service.js";
+import { ChatHistory, ChatHistorySchema } from "../../infra/mongo/chat/ChatHistory.js";
 
 @Module({
   imports: [

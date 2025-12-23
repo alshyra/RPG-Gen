@@ -2,8 +2,9 @@
 
 export type RaceId = 'humain' | 'nain' | 'elfe' | 'dark_elfe' | 'orc';
 
+export const RaceIdEnum = [ 'humain', 'nain', 'elfe', 'dark_elfe', 'orc' ] as const;
 export function isRaceId(value: string): value is RaceId {
-  return ['humain', 'nain', 'elfe', 'dark_elfe', 'orc'].includes(value);
+  return RaceIdEnum.includes(value as RaceId);
 }
 
 export function parseRaceId(value: string | undefined): RaceId | undefined {

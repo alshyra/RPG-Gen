@@ -2,7 +2,7 @@ import { CharacterStats } from "../value-objects/CharacterStats.js";
 import { ResourcePool } from "../value-objects/ResourcePool.js";
 import { TalentProgress } from "../value-objects/TalentRank.js";
 import type { InventoryItemMeta } from "../../api/dto/response/InventoryItemMeta.js";
-import { ClassName, RaceId } from "#shared/domain/index.js";
+import { ArchetypeName, RaceId } from "#shared/domain/index.js";
 
 export type CharacterState = "draft" | "created" | "deceased";
 
@@ -28,7 +28,7 @@ export interface CharacterProps {
   portrait?: string;
   gender?: string;
   state: CharacterState;
-  className?: ClassName;
+  className?: ArchetypeName;
   raceId?: RaceId;
   level: number;
   stats?: CharacterStats;
@@ -50,7 +50,7 @@ export interface CharacterProps {
 
 export interface CompleteCharacterData {
   name: string;
-  className: ClassName;
+  className: ArchetypeName;
   raceId: RaceId;
   stats: CharacterStats;
   physicalDescription?: string;
@@ -178,7 +178,7 @@ export class CharacterEntity {
     return !this.props.isDeceased;
   }
 
-  get className(): ClassName | undefined {
+  get className(): ArchetypeName | undefined {
     return this.props.className;
   }
 
@@ -266,7 +266,7 @@ export class CharacterEntity {
 
   private calculateBaseHp(): number {
     const vigorBonus = this.props.stats ? this.props.stats.getVigorModifier() * 2 : 0;
-    const baseByClass: Record<ClassName, number> = {
+    const baseByClass: Record<ArchetypeName, number> = {
       guerrier: 30,
       rogue: 22,
       mage: 18,
@@ -276,7 +276,7 @@ export class CharacterEntity {
   }
 
   private initializeResources(): void {
-    const resourcesByClass: Record<ClassName, { pa: number; pm: number }> = {
+    const resourcesByClass: Record<ArchetypeName, { pa: number; pm: number }> = {
       guerrier: { pa: 6, pm: 3 },
       rogue: { pa: 6, pm: 5 },
       mage: { pa: 6, pm: 3 },
@@ -308,7 +308,7 @@ export class CharacterEntity {
 
   private calculateHpGainOnLevelUp(): number {
     const vigorBonus = this.props.stats ? this.props.stats.getVigorModifier() : 0;
-    const baseByClass: Record<ClassName, number> = {
+    const baseByClass: Record<ArchetypeName, number> = {
       guerrier: 8,
       rogue: 6,
       mage: 4,
@@ -537,7 +537,7 @@ export class CharacterEntity {
     this.props.stats = stats;
   }
 
-  updateClass(className: ClassName): void {
+  updateClass(className: ArchetypeName): void {
     this.props.className = className;
   }
 

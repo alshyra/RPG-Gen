@@ -2,19 +2,19 @@ import test from "ava";
 
 import { Test } from "@nestjs/testing";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
-import { ClassDefinitionService } from "../../src/bounded-contexts/classes/application/class-definition.service.js";
+import { ArchetypeService } from "../../src/bounded-contexts/archetype/application/archetype.service.js";
+import { ArchetypeDefinitionService } from "../../src/bounded-contexts/archetype/application/archetype-definition.service.js";
 import { AptitudeService } from "../../src/bounded-contexts/aptitude/application/services/AptitudeService.js";
 import { MongooseModule } from "@nestjs/mongoose";
 import {
   ClassDefinition,
-  ClassDefinitionSchema,
-} from "../../src/bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
+  ArchetypeSchema,
+} from "../../src/bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.js";
 
 let mongoServer: MongoMemoryServer;
 let app: any;
-let _classesService: ClassesService;
-let classDefService: ClassDefinitionService;
+let _classesService: ArchetypeService;
+let classDefService: ArchetypeDefinitionService;
 
 test.before(async () => {
   mongoServer = await MongoMemoryServer.create();
@@ -23,11 +23,11 @@ test.before(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [
       MongooseModule.forRoot(mongoUri),
-      MongooseModule.forFeature([{ name: ClassDefinition.name, schema: ClassDefinitionSchema }]),
+      MongooseModule.forFeature([{ name: ClassDefinition.name, schema: ArchetypeSchema }]),
     ],
     providers: [
-      ClassesService,
-      ClassDefinitionService,
+      ArchetypeService,
+      ArchetypeDefinitionService,
       { provide: AptitudeService, useValue: { getByIds: async () => [] } },
     ],
   }).compile();
@@ -35,8 +35,8 @@ test.before(async () => {
   app = moduleRef.createNestApplication();
   await app.init();
 
-  _classesService = moduleRef.get<ClassesService>(ClassesService);
-  classDefService = moduleRef.get<ClassDefinitionService>(ClassDefinitionService);
+  _classesService = moduleRef.get<ArchetypeService>(ArchetypeService);
+  classDefService = moduleRef.get<ArchetypeDefinitionService>(ArchetypeDefinitionService);
 
   // Seed a Rogue with combat options
   await classDefService.seedFromJson([

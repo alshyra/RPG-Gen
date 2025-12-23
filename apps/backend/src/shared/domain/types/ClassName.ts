@@ -1,23 +1,23 @@
 // src/shared/domain/types/ClassName.ts
 
-export type ClassName = 'guerrier' | 'rogue' | 'mage';
+export type ArchetypeName = 'guerrier' | 'rogue' | 'mage';
 
-export function isClassName(value: string): value is ClassName {
+export function isArchetypeName(value: string): value is ArchetypeName {
   return ['guerrier', 'rogue', 'mage'].includes(value);
 }
 
-export function parseClassName(value: string | undefined): ClassName | undefined {
+export function parseArchetypeName(value: string | undefined): ArchetypeName | undefined {
   if (!value) return undefined;
   
-  if (!isClassName(value)) {
+  if (!isArchetypeName(value)) {
     throw new Error(`Invalid ClassName: ${value}. Must be one of: guerrier, rogue, mage`);
   }
   
   return value;
 }
 
-export const ClassNames = {
-  GUERRIER: 'guerrier' as ClassName,
-  ROGUE: 'rogue' as ClassName,
-  MAGE: 'mage' as ClassName,
+export const ArchetypeNames = {
+  GUERRIER: 'guerrier' as ArchetypeName,
+  ROGUE: 'rogue' as ArchetypeName,
+  MAGE: 'mage' as ArchetypeName,
 } as const;

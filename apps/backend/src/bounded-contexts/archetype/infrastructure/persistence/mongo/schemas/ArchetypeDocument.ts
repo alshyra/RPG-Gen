@@ -15,15 +15,15 @@ interface TalentTreeData {
   ranks: TalentRankData[];
 }
 
-interface ClassStatsData {
+interface ArchetypeStatsData {
   hpBase: number;
   hpGain: number;
   pa: number;
   pm: number;
 }
 
-@Schema({ collection: "class_definitions", timestamps: true })
-export class ClassDefinitionDocument extends Document {
+@Schema({ collection: "archetype_definitions", timestamps: true })
+export class ArchetypeDocument extends Document {
   @Prop({ required: true, unique: true })
   name: string; // 'guerrier', 'rogue', 'mage'
 
@@ -34,7 +34,7 @@ export class ClassDefinitionDocument extends Document {
   description?: string;
 
   @Prop({ required: true, type: Object })
-  stats: ClassStatsData;
+  stats: ArchetypeStatsData;
 
   @Prop({ type: Array, required: true })
   talentTrees: TalentTreeData[];
@@ -45,9 +45,8 @@ export class ClassDefinitionDocument extends Document {
   @Prop({
     type: String,
     enum: ["vigor", "finesse", "mind", "survival"],
-    required: false,
   })
-  mainStat?: string;
+  mainStat: string;
 
   @Prop()
   color?: string;
@@ -56,4 +55,4 @@ export class ClassDefinitionDocument extends Document {
   icon?: string;
 }
 
-export const ClassDefinitionSchema = SchemaFactory.createForClass(ClassDefinitionDocument);
+export const ArchetypeSchema = SchemaFactory.createForClass(ArchetypeDocument);

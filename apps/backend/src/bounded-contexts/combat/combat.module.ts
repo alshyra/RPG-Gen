@@ -10,7 +10,7 @@ import { CombatGridService } from "./domain/services/combat-grid.service.js";
 import { OpportunityAttackResolver } from "./domain/services/opportunity-attack.service.js";
 import { CombatActionService } from "./domain/services/combat-action.service.js";
 import { CharacterModule } from "../character/character.module.js";
-import { ChatModule } from "../../modules/chat.module.js";
+import { ChatModule } from "../chat/chat.module.js";
 import { DiceModule } from "../../modules/dice.module.js";
 import { AptitudeModule } from "../aptitude/aptitude.module.js";
 import { CombatSession, CombatSessionSchema } from "./infrastructure/persistence/mongo/schemas/CombatSession.js";

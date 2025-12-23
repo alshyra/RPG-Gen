@@ -9,16 +9,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 import {
   ClassDefinition,
-  ClassDefinitionSchema,
-} from "../../src/bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
+  ArchetypeSchema,
+} from "../../src/bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/ArchetypeDocument.js";
 
-import { ClassDefinitionService } from "../../src/bounded-contexts/classes/application/class-definition.service.js";
-import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
+import { ArchetypeDefinitionService } from "../../src/bounded-contexts/archetype/application/archetype-definition.service.js";
+import { ArchetypeService } from "../../src/bounded-contexts/archetype/application/archetype.service.js";
 import { AptitudeService } from "../../src/bounded-contexts/aptitude/application/services/AptitudeService.js";
 
 let mongoServer: MongoMemoryServer;
-let classesService: ClassesService;
-let classDefService: ClassDefinitionService;
+let classesService: ArchetypeService;
+let classDefService: ArchetypeDefinitionService;
 
 test.before(async () => {
   mongoServer = await MongoMemoryServer.create();
@@ -27,11 +27,11 @@ test.before(async () => {
   const moduleRef = await Test.createTestingModule({
     imports: [
       MongooseModule.forRoot(uri),
-      MongooseModule.forFeature([{ name: ClassDefinition.name, schema: ClassDefinitionSchema }]),
+      MongooseModule.forFeature([{ name: ClassDefinition.name, schema: ArchetypeSchema }]),
     ],
     providers: [
-      ClassesService,
-      ClassDefinitionService,
+      ArchetypeService,
+      ArchetypeDefinitionService,
       {
         provide: AptitudeService,
         useValue: { getByIds: async () => [] },
@@ -39,8 +39,8 @@ test.before(async () => {
     ],
   }).compile();
 
-  classesService = moduleRef.get(ClassesService);
-  classDefService = moduleRef.get(ClassDefinitionService);
+  classesService = moduleRef.get(ArchetypeService);
+  classDefService = moduleRef.get(ArchetypeDefinitionService);
 });
 
 import mongoose from "mongoose";

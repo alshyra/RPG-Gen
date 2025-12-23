@@ -3,8 +3,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ICharacterRepository } from "../../../../domain/repositories/ICharacterRepository.js";
 import { CharacterEntity } from "../../../../domain/entities/CharacterEntity.js";
-import { CharacterDocument, CharacterDocument } from "../schemas/CharacterDocument.js";
 import { CharacterMapper } from "../mappers/CharacterMapper.js";
+import { CharacterDocument } from "../schemas/CharacterDocument.js";
 
 /**
  * MongoDB implementation of the Character repository.

@@ -1,5 +1,5 @@
 import test from "ava";
-import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
+import { ArchetypeService } from "../../src/bounded-contexts/archetype/application/archetype.service.js";
 
 // Mock ClassDefinitionService
 function makeMockClassDefService() {
@@ -14,7 +14,7 @@ function makeMockClassDefService() {
 
 test("ClassesService.getAllClasses returns empty array with mock", async t => {
   const classDefService = makeMockClassDefService();
-  const service = new ClassesService(classDefService);
+  const service = new ArchetypeService(classDefService);
 
   const classes = await service.getAllClasses();
   t.deepEqual(classes, []);
@@ -30,7 +30,7 @@ test("ClassesService.getTalentTrees returns empty array when class has no trees"
     findAll: async () => [],
   } as any;
 
-  const service = new ClassesService(classDefService);
+  const service = new ArchetypeService(classDefService);
   const trees = await service.getTalentTrees("Guerrier");
   t.deepEqual(trees, []);
 });

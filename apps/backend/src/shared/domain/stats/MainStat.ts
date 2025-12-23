@@ -56,9 +56,7 @@ export class MainStat {
    * Parse un MainStat depuis une string
    * @throws Error si la valeur est invalide
    */
-  static fromString(value: string | undefined): MainStat | undefined {
-    if (!value) return undefined;
-
+  static fromString(value: string): MainStat  {
     switch (value) {
       case StatTypes.VIGOR:
         return MainStat.vigor();

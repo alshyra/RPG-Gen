@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from "../bounded-contexts/auth/domain/jwt-auth.guard.js";
-import { CharacterAppService } from "../bounded-contexts/character/application/services/CharacterAppService.js";
-import { CharacterDtoMapper } from "../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
-import { ConversationService } from "../domain/chat/conversation.service.js";
-import { ChatMessageDto } from "../domain/chat/dto/index.js";
-import type { RPGRequest } from "../global.types.js";
-import { GeminiTextService } from "../infra/external/gemini-text.service.js";
-import { ChatOrchestrator } from "../orchestrators/index.js";
-import type { CharacterResponseDto } from "../bounded-contexts/character/api/dto/index.js";
+import { JwtAuthGuard } from "../auth/domain/jwt-auth.guard.js";
+import { CharacterAppService } from "../character/application/services/CharacterAppService.js";
+import { CharacterDtoMapper } from "../character/api/dto/mappers/CharacterDtoMapper.js";
+import { ConversationService } from "../../domain/chat/conversation.service.js";
+import { ChatMessageDto } from "../../domain/chat/dto/index.js";
+import type { RPGRequest } from "../../global.types.js";
+import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import type { CharacterResponseDto } from "../character/api/dto/index.js";
+import { ChatOrchestrator } from "#workflows";
 
 @ApiTags("chat")
 @Controller("chat")

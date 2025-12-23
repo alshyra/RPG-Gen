@@ -1,11 +1,11 @@
-import { ClassName, RaceId } from '#shared/domain/index.js';
+import { ArchetypeName, RaceId } from '#shared/domain/index.js';
 
 /**
  * Command to complete a draft character and make it playable
  */
 export interface CompleteDraftCommand {
   name: string;
-  className: ClassName;
+  className: ArchetypeName;
   raceId: RaceId;
   stats: {
     vigor: number;

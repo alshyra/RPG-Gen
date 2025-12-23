@@ -1,7 +1,7 @@
 /**
  * Value Object pour les statistiques de base d'une classe
  */
-export interface ClassStatsProps {
+export interface ArchetypeStatsProps {
   hpBase: number;
   hpGain: number;
   pa: number;
@@ -14,7 +14,7 @@ export class ClassStats {
   private readonly _pa: number;
   private readonly _pm: number;
 
-  constructor(props: ClassStatsProps) {
+  constructor(props: ArchetypeStatsProps) {
     if (props.hpBase <= 0 || props.hpGain <= 0) {
       throw new Error('HP values must be positive');
     }

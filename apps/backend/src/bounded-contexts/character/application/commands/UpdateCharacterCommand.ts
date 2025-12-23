@@ -1,5 +1,5 @@
 import { InventoryItem } from '#character/domain/entities/CharacterEntity.js';
-import { ClassName, RaceId } from '#shared/domain/index.js';
+import { ArchetypeName, RaceId } from '#shared/domain/index.js';
 
 /**
  * Command to update character properties
@@ -16,7 +16,7 @@ export interface UpdateCharacterCommand {
   gender?: string;
 
   // Class and race
-  className?: ClassName;
+  className?: ArchetypeName;
   raceId?: RaceId;
 
   // Progression

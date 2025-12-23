@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ClassDefinitionService } from "./class-definition.service.js";
+import { ArchetypeDefinitionService } from "./archetype-definition.service.js";
 import { ClassDefinition } from "../../../infra/mongo/index.js";
 import { ClassDefinitionResponseDto, TalentTreeDto } from "../api/dto/index.js";
 
@@ -13,11 +13,11 @@ const isTalentTree = (value: unknown): value is { name: string; ranks?: Array<{ 
  * Replaces the old D&D-based class progression.
  */
 @Injectable()
-export class ClassesService {
-  private readonly logger = new Logger(ClassesService.name);
+export class ArchetypeService {
+  private readonly logger = new Logger(ArchetypeService.name);
 
   constructor(
-    private readonly classDefService: ClassDefinitionService,
+    private readonly classDefService: ArchetypeDefinitionService,
   ) {}
 
   /**

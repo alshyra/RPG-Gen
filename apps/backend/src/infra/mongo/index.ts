@@ -7,7 +7,7 @@ export { Skill } from "../../bounded-contexts/character/infrastructure/persisten
 export {
   ClassDefinition,
   ClassDefinitionSchema,
-} from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/index.js";
+} from "../../bounded-contexts/archetype/infrastructure/persistence/mongo/schemas/index.js";
 export { Aptitude, AptitudeSchema } from "../../bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.js";
 export type { AptitudeTargetType, AptitudeCategory, AptitudeScaling } from "../../bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.js";
 export { CombatEnd } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatEnd.js";
