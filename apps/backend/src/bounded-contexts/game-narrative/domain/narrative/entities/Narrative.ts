@@ -1,23 +1,29 @@
 import { Message } from '../value-objects/Message.js';
+import { Context } from '../value-objects/Context.js';
 
 /**
- * Conversation aggregate root
+ * Narrative aggregate root
  * 
- * Represents a conversation between a user and the narrative AI
+ * Represents a narrative session with messages and context
  * Associated with a specific character and user
+ * Contains both the conversation history and narrative context in one unified entity
  * 
  * @domain game-narrative
  */
-export class Conversation {
+export class Narrative {
   readonly userId: string;
   readonly characterId: string;
+  readonly sessionId: string;
   readonly messages: ReadonlyArray<Message>;
+  readonly context: Context;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
   constructor(props: {
     userId: string;
     characterId: string;
+    sessionId: string;
+    context: Context;
     messages?: Message[];
     createdAt?: Date;
     updatedAt?: Date;
@@ -28,22 +34,47 @@ export class Conversation {
     if (!props.characterId) {
       throw new Error('Character ID is required');
     }
+    if (!props.sessionId) {
+      throw new Error('Session ID is required');
+    }
+    if (!props.context) {
+      throw new Error('Context is required');
+    }
 
     this.userId = props.userId;
     this.characterId = props.characterId;
+    this.sessionId = props.sessionId;
+    this.context = props.context;
     this.messages = props.messages ?? [];
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
   }
 
   /**
-   * Add a message to the conversation
+   * Add a message to the narrative
    */
-  addMessage(message: Message): Conversation {
-    return new Conversation({
+  addMessage(message: Message): Narrative {
+    return new Narrative({
       userId: this.userId,
       characterId: this.characterId,
+      sessionId: this.sessionId,
+      context: this.context,
       messages: [...this.messages, message],
+      createdAt: this.createdAt,
+      updatedAt: new Date(),
+    });
+  }
+
+  /**
+   * Update the narrative context
+   */
+  updateContext(newContext: Context): Narrative {
+    return new Narrative({
+      userId: this.userId,
+      characterId: this.characterId,
+      sessionId: this.sessionId,
+      context: newContext,
+      messages: this.messages,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     });
@@ -65,7 +96,7 @@ export class Conversation {
   }
 
   /**
-   * Check if conversation is at message limit
+   * Check if narrative is at message limit
    */
   isAtLimit(limit: number = 60): boolean {
     return this.messages.length >= limit;
@@ -83,5 +114,12 @@ export class Conversation {
    */
   getInstructionsByType(type: string): ReadonlyArray<any> {
     return this.getAllInstructions().filter(instr => instr.type === type);
+  }
+
+  /**
+   * Build full context for narrative generation
+   */
+  getFullContext(): string {
+    return this.context.getFullContext();
   }
 }

@@ -1,10 +1,10 @@
-// Core DTOs
-export * from './ChatResponseDto.js';
-export * from './ConversationResponseMapper.js';
+// Response DTOs
+export * from './NarrativeResponseDto.js';
 
 // Request DTOs
 export * from './request/index.js';
 
-// Response DTOs (legacy instruction DTOs)
+// Instruction DTOs
 export * from './response/index.js';
+
 

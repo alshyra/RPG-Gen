@@ -1,19 +1,14 @@
 // Domain exports
-export { Conversation } from './domain/conversation/entities/Conversation.js';
-export { Message, type MessageRole } from './domain/conversation/value-objects/Message.js';
-export { NarrativeContext, type CharacterContextData } from './domain/narrative/entities/NarrativeContext.js';
+export { Narrative } from './domain/narrative/entities/Narrative.js';
+export { Message, type MessageRole } from './domain/narrative/value-objects/Message.js';
+export { Context, type CharacterContextData } from './domain/narrative/value-objects/Context.js';
 export {
-  IConversationRepository,
-  CONVERSATION_REPOSITORY,
-} from './domain/conversation/repositories/IConversationRepository.js';
-export {
-  INarrativeContextRepository,
-  NARRATIVE_CONTEXT_REPOSITORY,
-} from './domain/narrative/repositories/INarrativeContextRepository.js';
+  INarrativeRepository,
+  NARRATIVE_REPOSITORY,
+} from './domain/narrative/repositories/INarrativeRepository.js';
 
 // Application service exports
-export { ConversationAppService } from './application/services/ConversationAppService.js';
-export { NarrativeContextAppService } from './application/services/NarrativeContextAppService.js';
+export { NarrativeAppService } from './application/services/NarrativeAppService.js';
 export { GameNarrativeService } from './application/services/GameNarrativeService.js';
 
 // API layer exports

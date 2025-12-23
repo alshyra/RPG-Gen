@@ -10,19 +10,18 @@ import { CombatGridService } from "./domain/services/combat-grid.service.js";
 import { OpportunityAttackResolver } from "./domain/services/opportunity-attack.service.js";
 import { CombatActionService } from "./domain/services/combat-action.service.js";
 import { CharacterModule } from "../character/character.module.js";
-import { ChatModule } from "../game-narrative/chat.module.js";
+import { GameNarrativeModule } from "../game-narrative/game-narrative.module.js";
 import { DiceModule } from "../dice/dice.module.js";
 import { AptitudeModule } from "../aptitude/aptitude.module.js";
 import { CombatSession, CombatSessionSchema } from "./infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../orchestrators/combat/index.js";
-import { GeminiTextService } from "../game-narrative/infrastructure/external/index.js";
 
 @Module({
   imports: [
     CharacterModule,
     DiceModule,
     AptitudeModule,
-    forwardRef(() => ChatModule),
+    forwardRef(() => GameNarrativeModule),
     MongooseModule.forFeature([
       {
         name: CombatSession.name,
@@ -39,7 +38,6 @@ import { GeminiTextService } from "../game-narrative/infrastructure/external/ind
     CombatGridService,
     OpportunityAttackResolver,
     CombatActionService,
-    GeminiTextService,
     EnemyTurnService,
     // App service facade
     CombatAppService,

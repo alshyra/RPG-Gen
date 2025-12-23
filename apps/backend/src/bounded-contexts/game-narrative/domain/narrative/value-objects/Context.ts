@@ -1,6 +1,6 @@
 /**
- * NarrativeContext value object
- * Encapsulates context information for narrative generation
+ * Character context data value object
+ * Encapsulates character state and configuration
  */
 export interface CharacterContextData {
   name: string;
@@ -23,41 +23,29 @@ export interface CharacterContextData {
 }
 
 /**
- * NarrativeContext aggregate root
+ * Context value object
  * Stores the context required for narrative generation
  * Includes character state, system prompt, and scenario
  * 
  * @domain game-narrative
  */
-export class NarrativeContext {
+export class Context {
   readonly characterContext: CharacterContextData;
   readonly systemPrompt: string;
   readonly scenarioPrompt: string;
-  readonly sessionId: string;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
 
   constructor(props: {
-    sessionId: string;
     characterContext: CharacterContextData;
     systemPrompt: string;
     scenarioPrompt: string;
-    createdAt?: Date;
-    updatedAt?: Date;
   }) {
-    if (!props.sessionId) {
-      throw new Error('Session ID is required');
-    }
     if (!props.characterContext) {
       throw new Error('Character context is required');
     }
 
-    this.sessionId = props.sessionId;
     this.characterContext = props.characterContext;
     this.systemPrompt = props.systemPrompt;
     this.scenarioPrompt = props.scenarioPrompt;
-    this.createdAt = props.createdAt ?? new Date();
-    this.updatedAt = props.updatedAt ?? new Date();
   }
 
   /**
@@ -103,33 +91,11 @@ Health: ${hp}/${this.characterContext.maxHp || 'Unknown'}`;
   /**
    * Update character context
    */
-  updateCharacterContext(newContext: Partial<CharacterContextData>): NarrativeContext {
-    return new NarrativeContext({
-      sessionId: this.sessionId,
+  updateCharacterContext(newContext: Partial<CharacterContextData>): Context {
+    return new Context({
       characterContext: { ...this.characterContext, ...newContext },
       systemPrompt: this.systemPrompt,
       scenarioPrompt: this.scenarioPrompt,
-      createdAt: this.createdAt,
-      updatedAt: new Date(),
     });
-  }
-
-  /**
-   * Getter methods for accessing properties
-   */
-  getSessionId(): string {
-    return this.sessionId;
-  }
-
-  getCharacterContext(): CharacterContextData {
-    return this.characterContext;
-  }
-
-  getSystemPrompt(): string {
-    return this.systemPrompt;
-  }
-
-  getScenarioPrompt(): string {
-    return this.scenarioPrompt;
   }
 }

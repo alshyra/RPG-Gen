@@ -1,44 +1,33 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConversationDocument, ConversationDocumentSchema, ConversationSchema } from './infrastructure/persistence/mongo/schemas/ConversationDocument.js';
-import { NarrativeContextDocument, NarrativeContextDocumentSchema, NarrativeContextSchema } from './infrastructure/persistence/mongo/schemas/NarrativeContextDocument.js';
-import { MongoConversationRepository } from './infrastructure/persistence/mongo/repositories/MongoConversationRepository.js';
-import { MongoNarrativeContextRepository } from './infrastructure/persistence/mongo/repositories/MongoNarrativeContextRepository.js';
-import { CONVERSATION_REPOSITORY, NARRATIVE_CONTEXT_REPOSITORY } from './domain/repositories/index.js';
-import { ConversationAppService } from './application/services/ConversationAppService.js';
-import { NarrativeContextAppService } from './application/services/NarrativeContextAppService.js';
-import { GameNarrativeService } from './application/services/GameNarrativeService.js';
 import { NarrativeController } from './api/controllers/narrative.controller.js';
+import { NarrativeAppService } from './application/services/NarrativeAppService.js';
+import { GameNarrativeService } from './application/services/GameNarrativeService.js';
+import { NARRATIVE_REPOSITORY } from './domain/narrative/repositories/INarrativeRepository.js';
+import { MongoNarrativeRepository } from './infrastructure/persistence/mongo/repositories/MongoNarrativeRepository.js';
+import { NarrativeDocumentSchema, NarrativeSchema } from './infrastructure/persistence/mongo/schemas/NarrativeDocument.js';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: ConversationDocumentSchema.name, schema: ConversationSchema },
-      { name: NarrativeContextDocumentSchema.name, schema: NarrativeContextSchema },
+      { name: NarrativeDocumentSchema.name, schema: NarrativeSchema },
     ]),
   ],
   controllers: [NarrativeController],
   providers: [
     // Repository bindings (port/adapter pattern)
     {
-      provide: CONVERSATION_REPOSITORY,
-      useClass: MongoConversationRepository,
-    },
-    {
-      provide: NARRATIVE_CONTEXT_REPOSITORY,
-      useClass: MongoNarrativeContextRepository,
+      provide: NARRATIVE_REPOSITORY,
+      useClass: MongoNarrativeRepository,
     },
     // Application services
-    ConversationAppService,
-    NarrativeContextAppService,
+    NarrativeAppService,
     GameNarrativeService,
   ],
   exports: [
-    ConversationAppService,
-    NarrativeContextAppService,
+    NarrativeAppService,
     GameNarrativeService,
-    CONVERSATION_REPOSITORY,
-    NARRATIVE_CONTEXT_REPOSITORY,
+    NARRATIVE_REPOSITORY,
   ],
 })
 export class GameNarrativeModule {}

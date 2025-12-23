@@ -1,14 +1,12 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { ConversationAppService } from './ConversationAppService.js';
-import { NarrativeContextAppService } from './NarrativeContextAppService.js';
-import { Message } from '../../domain/conversation/value-objects/Message.js';
-import { Conversation } from '../../domain/conversation/entities/Conversation.js';
-import { NarrativeContext } from '../../domain/narrative/entities/NarrativeContext.js';
-import type { GameInstructionDto } from '../../domain/instruction/GameInstructionDto.js';
+import { Injectable, Logger } from '@nestjs/common';
+import { NarrativeAppService } from './NarrativeAppService.js';
+import { Message } from '../../domain/narrative/value-objects/Message.js';
+import { Narrative } from '../../domain/narrative/entities/Narrative.js';
+import { Context } from '../../domain/narrative/value-objects/Context.js';
 
 /**
  * Facade service for game narrative
- * Combines conversation and narrative context management
+ * High-level orchestration for narrative gameplay
  * 
  * @application game-narrative
  */
@@ -16,58 +14,86 @@ import type { GameInstructionDto } from '../../domain/instruction/GameInstructio
 export class GameNarrativeService {
   private readonly logger = new Logger(GameNarrativeService.name);
 
-  constructor(
-    private readonly conversationService: ConversationAppService,
-    private readonly narrativeContextService: NarrativeContextAppService,
-  ) {}
+  constructor(private readonly narrativeAppService: NarrativeAppService) {}
 
   /**
-   * Get a conversation with full narrative context
+   * Get a narrative with all its data
    */
-  async getConversationWithContext(
-    userId: string,
-    characterId: string,
-  ): Promise<{ conversation: Conversation; narrative?: NarrativeContext }> {
-    const conversation = await this.conversationService.getOrCreateConversation(userId, characterId);
-    const sessionId = `${userId}_${characterId}`;
-    const narrative = await this.narrativeContextService.contextRepository
-      .findBySessionId(sessionId)
-      .catch(() => undefined);
-
-    return { conversation, narrative };
+  async getNarrative(userId: string, characterId: string): Promise<Narrative> {
+    return this.narrativeAppService.getNarrativeBySessionId(`${userId}_${characterId}`);
   }
 
   /**
-   * Add a message and retrieve recent history for narrative context
+   * Create or get narrative for a user and character
+   */
+  async getOrCreateNarrative(
+    userId: string,
+    characterId: string,
+    sessionId: string,
+    initialContext: Context,
+  ): Promise<Narrative> {
+    return this.narrativeAppService.getOrCreateNarrative(
+      userId,
+      characterId,
+      sessionId,
+      initialContext,
+    );
+  }
+
+  /**
+   * Add a message and retrieve recent history
    */
   async addMessageAndGetContext(
     userId: string,
     characterId: string,
     message: Message,
     count: number = 10,
-  ): Promise<{ conversation: Conversation; recentMessages: Message[] }> {
-    const conversation = await this.conversationService.addMessage(userId, characterId, message);
-    const recentMessages = await this.conversationService.getRecentMessages(userId, characterId, count);
+  ): Promise<{ narrative: Narrative; recentMessages: Message[] }> {
+    const narrative = await this.narrativeAppService.addMessage(userId, characterId, message);
+    const recentMessages = narrative.getRecentMessages(count);
 
-    return { conversation, recentMessages };
+    return { narrative, recentMessages };
   }
 
   /**
-   * Get conversation history for narrative engine
+   * Get narrative history
    */
-  async getConversationHistory(userId: string, characterId: string): Promise<Message[]> {
-    return this.conversationService.getAllMessages(userId, characterId);
+  async getNarrativeHistory(userId: string, characterId: string): Promise<Message[]> {
+    return this.narrativeAppService.getAllMessages(userId, characterId);
   }
 
   /**
-   * Clear entire conversation
+   * Clear entire narrative
    */
-  async clearConversation(userId: string, characterId: string): Promise<void> {
-    await this.conversationService.clearConversation(userId, characterId);
+  async clearNarrative(userId: string, characterId: string): Promise<void> {
+    await this.narrativeAppService.clearNarrative(userId, characterId);
   }
 
   /**
-   * Get all user conversations
+   * Update narrative context
+   */
+  async updateContext(userId: string, characterId: string, newContext: Context): Promise<Narrative> {
+    return this.narrativeAppService.updateContext(userId, characterId, newContext);
+  }
+
+  /**
+   * Get instructions of a specific type
+   */
+  async getInstructionsByType(
+    userId: string,
+    characterId: string,
+    type: string,
+  ): Promise<ReadonlyArray<any>> {
+    return this.narrativeAppService.getInstructionsByType(userId, characterId, type);
+  }
+
+  /**
+   * Delete narrative
+   */
+  async deleteNarrative(userId: string, characterId: string): Promise<void> {
+    await this.narrativeAppService.deleteNarrative(userId, characterId);
+  }
+}
    */
   async getUserConversations(userId: string): Promise<Conversation[]> {
     return this.conversationService.getUserConversations(userId);
