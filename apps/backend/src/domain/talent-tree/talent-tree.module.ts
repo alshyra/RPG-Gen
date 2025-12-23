@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { ClassDefinition, ClassDefinitionSchema } from "../../infra/mongo/class/index.js";
+import { ClassDefinition, ClassDefinitionSchema } from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/index.js";
 import { TalentTreeService } from "./talent-tree.service.js";
 
 @Module({

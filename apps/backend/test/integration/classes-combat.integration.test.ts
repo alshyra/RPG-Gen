@@ -2,14 +2,14 @@ import test from "ava";
 
 import { Test } from "@nestjs/testing";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { ClassesService } from "../../src/domain/classes/classes.service.js";
-import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
-import { AptitudeService } from "../../src/bounded-contexts/spell/domain/services/AptitudeService.js";
+import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
+import { ClassDefinitionService } from "../../src/bounded-contexts/classes/application/class-definition.service.js";
+import { AptitudeService } from "../../src/bounded-contexts/aptitude/application/services/AptitudeService.js";
 import { MongooseModule } from "@nestjs/mongoose";
 import {
   ClassDefinition,
   ClassDefinitionSchema,
-} from "../../src/infra/mongo/class/ClassDefinition.js";
+} from "../../src/bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
 
 let mongoServer: MongoMemoryServer;
 let app: any;

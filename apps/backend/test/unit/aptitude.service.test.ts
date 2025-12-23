@@ -1,5 +1,5 @@
 import test from "ava";
-import { AptitudeService } from "../../src/bounded-contexts/spell/domain/services/AptitudeService.js";
+import { AptitudeService } from "../../src/bounded-contexts/aptitude/application/services/AptitudeService.js";
 
 // Mock Model simplifié pour le contexte
 const createMockAptitudeModel = () => {

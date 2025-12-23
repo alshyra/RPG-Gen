@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#shared/*": "./src/shared/*",
+    "#character/*": "./src/bounded-contexts/character/*",
+    "#archetype/*": "./src/bounded-contexts/archetype/*",
+    "#combat/*": "./src/bounded-contexts/combat/*"
+  },
   "scripts": {
     "start": "nest start --watch -d 9222",
     "start:prod": "node dist/main",

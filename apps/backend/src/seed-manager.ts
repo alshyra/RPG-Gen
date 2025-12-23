@@ -1,8 +1,8 @@
 import { INestApplication, Logger } from "@nestjs/common";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { AptitudeService } from "./bounded-contexts/spell/domain/services/AptitudeService.js";
-import { ClassDefinitionService } from "./domain/class-definition/class-definition.service.js";
+import { AptitudeService } from "./bounded-contexts/aptitude/application/services/AptitudeService.js";
+import { ClassDefinitionService } from "./bounded-contexts/classes/application/class-definition.service.js";
 import { ItemDefinitionService } from "./bounded-contexts/item/domain/services/ItemDefinitionService.js";
 import { RaceService } from "./domain/race/race.service.js";
 

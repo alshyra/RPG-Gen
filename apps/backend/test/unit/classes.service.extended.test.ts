@@ -1,5 +1,5 @@
 import test from "ava";
-import { ClassesService } from "../../src/domain/classes/classes.service.js";
+import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
 
 // Mock ClassDefinitionService
 function makeMockClassDefService() {

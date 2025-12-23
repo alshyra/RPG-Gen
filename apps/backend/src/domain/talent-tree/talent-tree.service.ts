@@ -1,8 +1,8 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ClassDefinition } from "../../infra/mongo/class/ClassDefinition.js";
-import { TalentTree, TalentRank } from "../../infra/mongo/class/index.js";
+import { ClassDefinition } from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
+import { TalentTree, TalentRank } from "../../bounded-contexts/classes/infrastructure/persistence/mongo/schemas/index.js";
 import { VoieProgressDto } from "../../bounded-contexts/character/api/dto/response/VoieProgressDto.js";
 
 @Injectable()

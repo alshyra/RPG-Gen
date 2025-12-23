@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Character, CharacterDocument, Item } from "../../infra/mongo/index.js";
 import { ItemDefinitionService } from "../../bounded-contexts/item/domain/services/ItemDefinitionService.js";
-import { ClassDefinitionService } from "../class-definition/class-definition.service.js";
+import { ClassDefinitionService } from "../../bounded-contexts/classes/application/class-definition.service.js";
 import { RaceService, RaceMetadata } from "../race/race.service.js";
 import type { UnlockedRank, CharacterAptitude } from "../../bounded-contexts/character/infrastructure/persistence/mongo/schemas/CharacterDocument.js";
 import type { ItemBonuses } from "../../bounded-contexts/item/infrastructure/persistence/mongo/schemas/ItemDefinition.js";

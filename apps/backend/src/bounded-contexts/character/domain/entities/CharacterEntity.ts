@@ -3,8 +3,6 @@ import { ResourcePool } from "../value-objects/ResourcePool.js";
 import { TalentRank } from "../value-objects/TalentRank.js";
 import type { InventoryItemMeta } from "../../api/dto/response/InventoryItemMeta.js";
 
-export type ClassName = "guerrier" | "rogue" | "mage";
-export type RaceId = "humain" | "nain" | "elfe" | "dark_elfe" | "orc";
 export type CharacterState = "draft" | "created";
 
 export interface InventoryItem {

@@ -10,11 +10,11 @@ const __dirname = dirname(__filename);
 import {
   ClassDefinition,
   ClassDefinitionSchema,
-} from "../../src/infra/mongo/class/ClassDefinition.js";
+} from "../../src/bounded-contexts/classes/infrastructure/persistence/mongo/schemas/ClassDefinitionDocument.js";
 
-import { ClassDefinitionService } from "../../src/domain/class-definition/class-definition.service.js";
-import { ClassesService } from "../../src/domain/classes/classes.service.js";
-import { AptitudeService } from "../../src/bounded-contexts/spell/domain/services/AptitudeService.js";
+import { ClassDefinitionService } from "../../src/bounded-contexts/classes/application/class-definition.service.js";
+import { ClassesService } from "../../src/bounded-contexts/classes/application/classes.service.js";
+import { AptitudeService } from "../../src/bounded-contexts/aptitude/application/services/AptitudeService.js";
 
 let mongoServer: MongoMemoryServer;
 let classesService: ClassesService;

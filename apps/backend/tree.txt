@@ -4,40 +4,283 @@
 │   │   ├── dto
 │   │   │   ├── index.ts
 │   │   │   └── mappers
-│   │   │       ├── CharacterDtoMapper.ts
 │   │   │       └── index.ts
 │   │   └── index.ts
 │   └── index.ts
 ├── app.module.ts
 ├── application
-│   ├── character
-│   │   ├── CharacterAppService.ts
-│   │   └── index.ts
 │   └── index.ts
+├── bounded-contexts
+│   ├── auth
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   └── dto
+│   │   ├── domain
+│   │   │   └── services
+│   │   └── infrastructure
+│   ├── character
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   │   ├── CharacterController.ts
+│   │   │   │   ├── CharacterInspirationController.ts
+│   │   │   │   ├── CharacterInventoryController.ts
+│   │   │   │   └── index.ts
+│   │   │   └── dto
+│   │   │       ├── index.ts
+│   │   │       ├── mappers
+│   │   │       │   └── CharacterDtoMapper.ts
+│   │   │       ├── request
+│   │   │       │   ├── CreateInventoryItemDto.ts
+│   │   │       │   ├── EquipInventoryDto.ts
+│   │   │       │   ├── GrantInspirationBodyDto.ts
+│   │   │       │   ├── KillCharacterBodyDto.ts
+│   │   │       │   ├── RemoveInventoryBodyDto.ts
+│   │   │       │   ├── UnlockRankDto.ts
+│   │   │       │   ├── UpdateCharacterRequestDto.ts
+│   │   │       │   └── index.ts
+│   │   │       └── response
+│   │   │           ├── AptitudeResponseDto.ts
+│   │   │           ├── AptitudeScalingDto.ts
+│   │   │           ├── ArmorMeta.ts
+│   │   │           ├── BaseCharacterResponseDto.ts
+│   │   │           ├── BaseMeta.ts
+│   │   │           ├── CharacterClassResponseDto.ts
+│   │   │           ├── CharacterResponseDto.ts
+│   │   │           ├── ConsumableMeta.ts
+│   │   │           ├── DeceasedCharacterResponseDto.ts
+│   │   │           ├── DraftCharacterResponseDto.ts
+│   │   │           ├── GenericMeta.ts
+│   │   │           ├── InspirationResponseDto.ts
+│   │   │           ├── InventoryItemDto.ts
+│   │   │           ├── InventoryItemMeta.ts
+│   │   │           ├── PackMeta.ts
+│   │   │           ├── RaceResponseDto.ts
+│   │   │           ├── SkillResponseDto.ts
+│   │   │           ├── StatAttribute.ts
+│   │   │           ├── StatsResponseDto.ts
+│   │   │           ├── TacticalStats.ts
+│   │   │           ├── TalentPointRewardDto.ts
+│   │   │           ├── TalentRankDto.ts
+│   │   │           ├── ToolMeta.ts
+│   │   │           ├── VoieProgressDto.ts
+│   │   │           ├── WeaponMeta.ts
+│   │   │           └── index.ts
+│   │   ├── application
+│   │   │   ├── commands
+│   │   │   ├── index.ts
+│   │   │   └── services
+│   │   │       └── CharacterAppService.ts
+│   │   ├── character.module.ts
+│   │   ├── domain
+│   │   │   ├── entities
+│   │   │   │   └── CharacterEntity.ts
+│   │   │   ├── repositories
+│   │   │   │   └── ICharacterRepository.ts
+│   │   │   └── value-objects
+│   │   │       ├── CharacterStatsVO.ts
+│   │   │       ├── ResourcePool.ts
+│   │   │       └── TalentRank.ts
+│   │   └── infrastructure
+│   │       └── persistence
+│   │           └── mongo
+│   │               ├── mappers
+│   │               │   ├── CharacterMapper.ts
+│   │               │   └── index.ts
+│   │               ├── repositories
+│   │               │   ├── MongoCharacterRepository.ts
+│   │               │   └── index.ts
+│   │               └── schemas
+│   │                   ├── CharacterClass.ts
+│   │                   ├── CharacterDocument.ts
+│   │                   ├── CharacterStats.ts
+│   │                   ├── Race.ts
+│   │                   └── Skill.ts
+│   ├── classes
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   └── dto
+│   │   ├── domain
+│   │   │   └── services
+│   │   └── infrastructure
+│   │       └── persistence
+│   │           └── mongo
+│   │               └── schemas
+│   ├── combat
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   │   ├── CombatController.ts
+│   │   │   │   └── index.ts
+│   │   │   └── dto
+│   │   │       ├── mappers
+│   │   │       ├── request
+│   │   │       └── response
+│   │   │           ├── CombatActionRequestDto.ts
+│   │   │           ├── CombatActionResponseDto.ts
+│   │   │           ├── CombatDiceResultDto.ts
+│   │   │           ├── CombatEndDto.ts
+│   │   │           ├── CombatEndResponseDto.ts
+│   │   │           ├── CombatEndResultDto.ts
+│   │   │           ├── CombatStartEntryDto.ts
+│   │   │           ├── CombatStartRequestDto.ts
+│   │   │           ├── CombatStateDto.ts
+│   │   │           ├── CombatantDto.ts
+│   │   │           ├── DiceResultDto.ts
+│   │   │           ├── EndPlayerTurnResponseDto.ts
+│   │   │           ├── EnemyAttackLogDto.ts
+│   │   │           ├── GridPositionDto.ts
+│   │   │           ├── MovementEventDto.ts
+│   │   │           ├── MovementRequestDto.ts
+│   │   │           ├── MovementResponseDto.ts
+│   │   │           └── index.ts
+│   │   ├── application
+│   │   │   ├── commands
+│   │   │   ├── index.ts
+│   │   │   └── services
+│   │   │       └── CombatAppService.ts
+│   │   ├── combat.module.ts
+│   │   ├── domain
+│   │   │   ├── entities
+│   │   │   ├── index.ts
+│   │   │   ├── repositories
+│   │   │   ├── scaling.util.ts
+│   │   │   ├── services
+│   │   │   │   ├── action-economy.service.ts
+│   │   │   │   ├── combat-action.service.ts
+│   │   │   │   ├── combat-grid.service.ts
+│   │   │   │   ├── enemy-turn.service.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── init.service.ts
+│   │   │   │   ├── opportunity-attack.service.ts
+│   │   │   │   └── turn-order.service.ts
+│   │   │   └── value-objects
+│   │   ├── index.ts
+│   │   └── infrastructure
+│   │       └── persistence
+│   │           └── mongo
+│   │               ├── mappers
+│   │               ├── repositories
+│   │               └── schemas
+│   │                   ├── CombatEnd.ts
+│   │                   ├── CombatSession.ts
+│   │                   ├── CombatStartEntry.ts
+│   │                   ├── Combatant.ts
+│   │                   └── index.ts
+│   ├── dice
+│   │   ├── api
+│   │   │   └── dto
+│   │   │       ├── CombatDiceResultDto.ts
+│   │   │       ├── DiceRequestDto.ts
+│   │   │       ├── DiceResultDto.ts
+│   │   │       ├── dice.d.ts
+│   │   │       └── index.ts
+│   │   ├── domain
+│   │   │   ├── index.ts
+│   │   │   └── services
+│   │   │       ├── DiceService.ts
+│   │   │       └── index.ts
+│   │   ├── index.ts
+│   │   └── infrastructure
+│   ├── item
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   └── dto
+│   │   │       ├── ItemDefinitionDto.ts
+│   │   │       ├── UseItemRequestDto.ts
+│   │   │       ├── UseItemResponseDto.ts
+│   │   │       ├── index.ts
+│   │   │       ├── mappers
+│   │   │       ├── request
+│   │   │       └── response
+│   │   ├── application
+│   │   │   └── services
+│   │   ├── domain
+│   │   │   ├── entities
+│   │   │   ├── index.ts
+│   │   │   ├── repositories
+│   │   │   └── services
+│   │   │       ├── ItemDefinitionService.ts
+│   │   │       └── index.ts
+│   │   ├── index.ts
+│   │   ├── infrastructure
+│   │   │   └── persistence
+│   │   │       └── mongo
+│   │   │           ├── mappers
+│   │   │           ├── repositories
+│   │   │           └── schemas
+│   │   │               ├── Item.ts
+│   │   │               ├── ItemDefinition.ts
+│   │   │               └── index.ts
+│   │   └── item.module.ts
+│   ├── media
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   │   ├── ImageController.ts
+│   │   │   │   └── index.ts
+│   │   │   └── dto
+│   │   │       ├── AvatarResponseDto.ts
+│   │   │       ├── CharacterIdBodyDto.ts
+│   │   │       ├── ImageRequestDto.ts
+│   │   │       ├── image-response.dto.ts
+│   │   │       └── index.ts
+│   │   ├── domain
+│   │   │   ├── image.util.ts
+│   │   │   ├── index.ts
+│   │   │   └── services
+│   │   │       ├── ImageService.ts
+│   │   │       └── index.ts
+│   │   ├── index.ts
+│   │   ├── infrastructure
+│   │   │   └── external
+│   │   │       └── GeminiImageService.ts
+│   │   └── media.module.ts
+│   ├── progression
+│   │   ├── api
+│   │   │   ├── controllers
+│   │   │   └── dto
+│   │   ├── domain
+│   │   │   └── services
+│   │   └── infrastructure
+│   └── spell
+│       ├── api
+│       │   ├── controllers
+│       │   │   ├── AptitudeController.ts
+│       │   │   └── index.ts
+│       │   └── dto
+│       │       ├── mappers
+│       │       ├── request
+│       │       └── response
+│       ├── application
+│       │   └── services
+│       ├── domain
+│       │   ├── entities
+│       │   ├── index.ts
+│       │   ├── repositories
+│       │   └── services
+│       │       ├── AptitudeService.ts
+│       │       └── index.ts
+│       ├── index.ts
+│       ├── infrastructure
+│       │   └── persistence
+│       │       └── mongo
+│       │           ├── mappers
+│       │           ├── repositories
+│       │           └── schemas
+│       │               ├── Aptitude.ts
+│       │               └── index.ts
+│       └── spell.module.ts
 ├── config.module.ts
 ├── config.ts
 ├── controllers
-│   ├── aptitude.controller.ts
 │   ├── auth.controller.ts
 │   ├── characters
-│   │   ├── character-inspiration.controller.ts
-│   │   ├── character-inventory.controller.ts
-│   │   ├── character-response.util.ts
-│   │   ├── character.controller.ts
-│   │   └── index.ts
 │   ├── chat.controller.ts
 │   ├── classes.controller.ts
-│   ├── combat.controller.ts
 │   ├── dice.controller.ts
 │   ├── health.controller.ts
-│   ├── image.controller.ts
 │   ├── progression.controller.ts
 │   └── races.controller.ts
 ├── domain
 │   ├── aptitude
-│   │   ├── aptitude.module.ts
-│   │   ├── aptitude.service.ts
-│   │   └── index.ts
 │   ├── auth
 │   │   ├── auth.profile.dto.ts
 │   │   ├── auth.service.ts
@@ -46,53 +289,7 @@
 │   │   ├── jwt-auth.guard.ts
 │   │   └── jwt.strategy.ts
 │   ├── character
-│   │   ├── character-response.mapper.ts
-│   │   ├── character.service.ts
-│   │   ├── dto
-│   │   │   ├── AptitudeResponseDto.ts
-│   │   │   ├── AptitudeScalingDto.ts
-│   │   │   ├── ArmorMeta.ts
-│   │   │   ├── BaseCharacterResponseDto.ts
-│   │   │   ├── BaseMeta.ts
-│   │   │   ├── CharacterClassResponseDto.ts
-│   │   │   ├── CharacterResponseDto.ts
-│   │   │   ├── ConsumableMeta.ts
-│   │   │   ├── CreateInventoryItemDto.ts
-│   │   │   ├── DeceasedCharacterResponseDto.ts
-│   │   │   ├── DraftCharacterResponseDto.ts
-│   │   │   ├── EquipInventoryDto.ts
-│   │   │   ├── GenericMeta.ts
-│   │   │   ├── GrantInspirationBodyDto.ts
-│   │   │   ├── InspirationResponseDto.ts
-│   │   │   ├── InventoryItemDto.ts
-│   │   │   ├── InventoryItemMeta.ts
-│   │   │   ├── KillCharacterBodyDto.ts
-│   │   │   ├── PackMeta.ts
-│   │   │   ├── RaceResponseDto.ts
-│   │   │   ├── RemoveInventoryBodyDto.ts
-│   │   │   ├── SkillResponseDto.ts
-│   │   │   ├── StatAttribute.ts
-│   │   │   ├── StatsResponseDto.ts
-│   │   │   ├── TacticalStats.ts
-│   │   │   ├── TalentPointRewardDto.ts
-│   │   │   ├── TalentRankDto.ts
-│   │   │   ├── ToolMeta.ts
-│   │   │   ├── UnlockRankDto.ts
-│   │   │   ├── UpdateCharacterRequestDto.ts
-│   │   │   ├── VoieProgressDto.ts
-│   │   │   ├── WeaponMeta.ts
-│   │   │   └── index.ts
-│   │   ├── entities
-│   │   │   ├── CharacterEntity.ts
-│   │   │   └── index.ts
-│   │   ├── repositories
-│   │   │   ├── ICharacterRepository.ts
-│   │   │   └── index.ts
-│   │   └── value-objects
-│   │       ├── CharacterStatsVO.ts
-│   │       ├── ResourcePool.ts
-│   │       ├── TalentRank.ts
-│   │       └── index.ts
+│   │   └── dto
 │   ├── chat
 │   │   ├── conversation.service.ts
 │   │   └── dto
@@ -121,59 +318,12 @@
 │   │   └── dtos
 │   │       └── ClasseDTO.ts
 │   ├── combat
-│   │   ├── combat.app.service.ts
 │   │   ├── dto
-│   │   │   ├── CombatActionRequestDto.ts
-│   │   │   ├── CombatActionResponseDto.ts
-│   │   │   ├── CombatDiceResultDto.ts
-│   │   │   ├── CombatEndDto.ts
-│   │   │   ├── CombatEndResponseDto.ts
-│   │   │   ├── CombatEndResultDto.ts
-│   │   │   ├── CombatStartEntryDto.ts
-│   │   │   ├── CombatStartRequestDto.ts
-│   │   │   ├── CombatStateDto.ts
-│   │   │   ├── CombatantDto.ts
-│   │   │   ├── DiceResultDto.ts
-│   │   │   ├── EndPlayerTurnResponseDto.ts
-│   │   │   ├── EnemyAttackLogDto.ts
-│   │   │   ├── GridPositionDto.ts
-│   │   │   ├── MovementEventDto.ts
-│   │   │   ├── MovementRequestDto.ts
-│   │   │   ├── MovementResponseDto.ts
-│   │   │   └── index.ts
-│   │   ├── enemy-turn.service.ts
-│   │   ├── scaling.util.ts
 │   │   └── services
-│   │       ├── action-economy.service.ts
-│   │       ├── combat-action.service.ts
-│   │       ├── combat-grid.service.ts
-│   │       ├── index.ts
-│   │       ├── init.service.ts
-│   │       ├── opportunity-attack.service.ts
-│   │       └── turn-order.service.ts
-│   ├── dice
-│   │   ├── dice.service.ts
-│   │   └── dto
-│   │       ├── CombatDiceResultDto.ts
-│   │       ├── DiceRequestDto.ts
-│   │       ├── DiceResultDto.ts
-│   │       └── dice.d.ts
 │   ├── image
-│   │   ├── dto
-│   │   │   ├── AvatarResponseDto.ts
-│   │   │   ├── CharacterIdBodyDto.ts
-│   │   │   ├── ImageRequestDto.ts
-│   │   │   └── image-response.dto.ts
-│   │   ├── image.service.ts
-│   │   └── image.util.ts
+│   │   └── dto
 │   ├── item-definition
-│   │   ├── dto
-│   │   │   ├── UseItemRequestDto.ts
-│   │   │   ├── UseItemResponseDto.ts
-│   │   │   └── index.ts
-│   │   ├── item-definition.dto.ts
-│   │   ├── item-definition.module.ts
-│   │   └── item-definition.service.ts
+│   │   └── dto
 │   ├── progression
 │   │   ├── dto
 │   │   │   ├── CharacterStatsDto.ts
@@ -202,21 +352,12 @@
 ├── global.types.d.ts
 ├── infra
 │   ├── external
-│   │   ├── gemini-image.service.ts
 │   │   ├── gemini-json-schema.ts
 │   │   ├── gemini-schemas.ts
 │   │   └── gemini-text.service.ts
 │   ├── mongo
 │   │   ├── User.ts
 │   │   ├── aptitude
-│   │   │   ├── Aptitude.ts
-│   │   │   └── index.ts
-│   │   ├── character
-│   │   │   ├── Character.ts
-│   │   │   ├── CharacterClass.ts
-│   │   │   ├── CharacterStats.ts
-│   │   │   ├── Race.ts
-│   │   │   └── Skill.ts
 │   │   ├── chat
 │   │   │   ├── ChatHistory.ts
 │   │   │   └── ChatMessage.ts
@@ -225,19 +366,12 @@
 │   │   │   ├── TalentRank.ts
 │   │   │   ├── TalentTree.ts
 │   │   │   └── index.ts
-│   │   ├── combat
-│   │   │   ├── CombatEnd.ts
-│   │   │   ├── CombatSession.ts
-│   │   │   ├── CombatStartEntry.ts
-│   │   │   └── Combatant.ts
 │   │   ├── index.ts
 │   │   ├── instruction
 │   │   │   ├── GameInstruction.ts
 │   │   │   ├── InventoryInstruction.ts
 │   │   │   └── RollInstruction.ts
 │   │   ├── item
-│   │   │   ├── Item.ts
-│   │   │   └── ItemDefinition.ts
 │   │   └── race
 │   │       ├── Race.ts
 │   │       ├── RaceBonuses.ts
@@ -246,13 +380,13 @@
 │   └── persistence
 │       ├── index.ts
 │       └── mongo
-│           ├── index.ts
-│           ├── mappers
-│           │   ├── CharacterMapper.ts
-│           │   └── index.ts
-│           └── repositories
-│               ├── MongoCharacterRepository.ts
-│               └── index.ts
+│           └── index.ts
+├── infrastructure
+│   ├── config
+│   ├── external
+│   │   └── gemini
+│   └── persistence
+│       └── mongo
 ├── main.ts
 ├── modules
 │   ├── auth.module.ts
@@ -266,22 +400,16 @@
 │   ├── combat.module.ts
 │   ├── dice.module.ts
 │   ├── health.module.ts
-│   ├── image.module.ts
 │   ├── progression.module.ts
 │   └── races.module.ts
 ├── orchestrators
 │   ├── chat
-│   │   ├── chat.orchestrator.ts
 │   │   └── index.ts
 │   ├── combat
-│   │   ├── combat-action.orchestrator.ts
-│   │   ├── combat-movement.orchestrator.ts
-│   │   ├── combat.orchestrator.ts
 │   │   └── index.ts
 │   ├── index.ts
 │   └── item
-│       ├── index.ts
-│       └── item.orchestrator.ts
+│       └── index.ts
 ├── scripts
 │   └── generate-openapi-types.ts
 ├── seed
@@ -304,6 +432,19 @@
 │   ├── starter-packs.json
 │   ├── stats-and-skills.json
 │   └── weapons-definitions.json
-└── seed-manager.ts
+├── seed-manager.ts
+└── workflows
+    ├── chat-gameplay
+    │   ├── ChatWorkflow.ts
+    │   └── index.ts
+    ├── combat-gameplay
+    │   ├── CombatActionWorkflow.ts
+    │   ├── CombatMovementWorkflow.ts
+    │   ├── CombatWorkflow.ts
+    │   └── index.ts
+    ├── index.ts
+    └── item-gameplay
+        ├── ItemWorkflow.ts
+        └── index.ts
 
-62 directories, 245 files
+180 directories, 268 files

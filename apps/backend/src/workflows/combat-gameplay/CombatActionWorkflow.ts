@@ -8,8 +8,8 @@ import {
 } from "../../bounded-contexts/combat/api/dto/response/CombatActionResponseDto.js";
 import { CombatSession } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { Combatant } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.js";
-import { Aptitude } from "../../bounded-contexts/spell/infrastructure/persistence/mongo/schemas/Aptitude.js";
-import { AptitudeService } from "../../bounded-contexts/spell/domain/services/AptitudeService.js";
+import { Aptitude } from "../../bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.js";
+import { AptitudeService } from "../../bounded-contexts/aptitude/application/services/AptitudeService.js";
 
 /**
  * Orchestrator for unified combat actions via aptitudes.

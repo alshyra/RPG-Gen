@@ -8,8 +8,8 @@ import {
   CharacterInspirationController,
 } from "./api/controllers/index.js";
 import { Character, CharacterSchema } from "./infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import { AptitudeModule } from "../spell/spell.module.js";
-import { ClassDefinitionModule } from "../../domain/class-definition/class-definition.module.js";
+import { AptitudeModule } from "../aptitude/aptitude.module.js";
+import { ClassDefinitionModule } from "../classes/class-definition.module.js";
 
 // Clean Architecture imports
 import { CharacterAppService } from "./application/services/CharacterAppService.js";
