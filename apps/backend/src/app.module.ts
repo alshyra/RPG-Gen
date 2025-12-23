@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { AuthModule } from "./bounded-contexts/auth/auth.module.js";
 import { CharacterModule } from "./bounded-contexts/character/character.module.js";
-import { ChatModule } from "./bounded-contexts/game-narrative/chat.module.js";
+import { GameNarrativeModule } from "./bounded-contexts/game-narrative/game-narrative.module.js";
 import { ArchetypeModule } from "./bounded-contexts/archetype/archetype.module.js";
 import { CombatModule } from "./bounded-contexts/combat/combat.module.js";
 import { DiceModule } from "./bounded-contexts/dice/dice.module.js";
@@ -24,7 +24,7 @@ import { ConfigModule } from "./config.module.js";
     ConfigModule,
     AptitudeModule,
     AuthModule,
-    ChatModule,
+    GameNarrativeModule,
     ArchetypeModule,
     CombatModule,
     DiceModule,
