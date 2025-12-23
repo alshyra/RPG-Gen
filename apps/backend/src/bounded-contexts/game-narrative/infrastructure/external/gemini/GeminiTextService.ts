@@ -7,12 +7,17 @@ import {
 } from "@nestjs/common";
 import { readFile } from "fs/promises";
 import path from "path";
-import { ChatMessageDto } from "../../domain/chat/dto/ChatMessageDto.js";
-import { GameInstructionDto } from "../../domain/chat/dto/GameInstructionDto.js";
+import { getConfig } from "../../../../../config.js";
+import type { GameInstructionDto } from "../../../domain/instruction/GameInstructionDto.js";
 import { geminiResponseJsonSchema } from "./gemini-json-schema.js";
 import { aiResponseSchema } from "./gemini-schemas.js";
-import { CharacterResponseDto } from "../../character/api/dto/index.js";
-import { getConfig } from "../../../config.js";
+import type { CharacterResponseDto } from "../../../../character/api/dto/index.js";
+
+export interface ChatMessageDto {
+  role: 'user' | 'assistant';
+  narrative: string;
+  instructions?: GameInstructionDto[];
+}
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), "chat.prompt.txt");
 const SCENARIO_PATH =
@@ -50,6 +55,7 @@ export class GeminiTextService {
     this.logger.log(`Loading scenario prompt from ${SCENARIO_PATH}`);
     return await readFile(SCENARIO_PATH, "utf8");
   }
+
   initializeChatSession(
     sessionId: string,
     systemInstruction: string,

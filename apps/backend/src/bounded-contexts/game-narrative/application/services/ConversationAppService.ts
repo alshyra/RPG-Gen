@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { Conversation } from '../../domain/conversation/entities/Conversation.js';
 import { Message } from '../../domain/conversation/value-objects/Message.js';
 import { IConversationRepository, CONVERSATION_REPOSITORY } from '../../domain/conversation/repositories/IConversationRepository.js';
-import { GameInstruction } from '../../instruction/GameInstruction.js';
+import type { GameInstructionDto } from '../../domain/instruction/GameInstructionDto.js';
 
 /**
  * Application service for Conversation data

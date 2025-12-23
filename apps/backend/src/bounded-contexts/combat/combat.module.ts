@@ -15,7 +15,7 @@ import { DiceModule } from "../dice/dice.module.js";
 import { AptitudeModule } from "../aptitude/aptitude.module.js";
 import { CombatSession, CombatSessionSchema } from "./infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../orchestrators/combat/index.js";
-import { GeminiTextService } from "../game-narrative/external/gemini-text.service.js";
+import { GeminiTextService } from "../game-narrative/infrastructure/external/index.js";
 
 @Module({
   imports: [

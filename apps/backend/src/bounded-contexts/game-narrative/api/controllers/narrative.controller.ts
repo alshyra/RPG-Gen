@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Logger, Param, Post, Req, UseGuards, Delete } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/infrastructure/auth/guards/JwtAuthGuard.js';
+import { JwtAuthGuard } from '../../../auth/infrastructure/auth/guards/JwtAuthGuard.js';
 import { GameNarrativeService } from '../../application/services/GameNarrativeService.js';
 import { ConversationResponseMapper } from '../dto/ConversationResponseMapper.js';
 import { ChatMessageRequestDto, ChatResponseDto, ConversationResponseDto } from '../dto/index.js';
-import type { RPGRequest } from '../../../global.types.js';
+import type { RPGRequest } from '../../../../global.types.js';
 
 @ApiTags('chat')
 @Controller('chat')

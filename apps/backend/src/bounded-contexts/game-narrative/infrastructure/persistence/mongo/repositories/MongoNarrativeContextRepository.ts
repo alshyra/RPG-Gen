@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { NarrativeContext } from '../../domain/narrative/entities/NarrativeContext.js';
-import { INarrativeContextRepository } from '../../domain/narrative/repositories/INarrativeContextRepository.js';
-import { NarrativeContextDocument, NarrativeContextSchema } from '../mongo/schemas/NarrativeContextDocument.js';
+import { NarrativeContext } from '../../../domain/narrative/entities/NarrativeContext.js';
+import { INarrativeContextRepository } from '../../../domain/narrative/repositories/INarrativeContextRepository.js';
+import { NarrativeContextDocument, NarrativeContextSchema } from '../schemas/NarrativeContextDocument.js';
 import { NarrativeContextMapper } from '../mappers/NarrativeContextMapper.js';
 
 /**

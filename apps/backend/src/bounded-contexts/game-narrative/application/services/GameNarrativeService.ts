@@ -4,7 +4,7 @@ import { NarrativeContextAppService } from './NarrativeContextAppService.js';
 import { Message } from '../../domain/conversation/value-objects/Message.js';
 import { Conversation } from '../../domain/conversation/entities/Conversation.js';
 import { NarrativeContext } from '../../domain/narrative/entities/NarrativeContext.js';
-import { GameInstruction } from '../../instruction/GameInstruction.js';
+import type { GameInstructionDto } from '../../domain/instruction/GameInstructionDto.js';
 
 /**
  * Facade service for game narrative

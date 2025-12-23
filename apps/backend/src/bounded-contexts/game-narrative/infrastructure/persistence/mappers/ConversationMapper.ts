@@ -1,5 +1,5 @@
-import { Conversation } from '../../domain/conversation/entities/Conversation.js';
-import { Message, MessageRole } from '../../domain/conversation/value-objects/Message.js';
+import { Conversation } from '../../../domain/conversation/entities/Conversation.js';
+import { Message, MessageRole } from '../../../domain/conversation/value-objects/Message.js';
 import { ConversationDocument } from '../mongo/schemas/ConversationDocument.js';
 
 /**

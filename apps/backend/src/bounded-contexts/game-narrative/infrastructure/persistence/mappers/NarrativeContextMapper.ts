@@ -1,4 +1,4 @@
-import { NarrativeContext } from '../../domain/narrative/entities/NarrativeContext.js';
+import { NarrativeContext } from '../../../domain/narrative/entities/NarrativeContext.js';
 import { NarrativeContextDocument } from '../mongo/schemas/NarrativeContextDocument.js';
 
 /**

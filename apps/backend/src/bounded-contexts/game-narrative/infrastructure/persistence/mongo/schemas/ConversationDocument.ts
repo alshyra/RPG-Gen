@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { GameInstruction } from '../../instruction/GameInstruction.js';
+import type { GameInstructionDto } from '../../../domain/instruction/GameInstructionDto.js';
 
-export type ConversationDocument = HydratedDocument<ConversationSchema>;
+export type ConversationDocument = HydratedDocument<ConversationDocumentSchema>;
 
 @Schema({ collection: 'conversations', timestamps: true })
-export class ConversationSchema {
+export class ConversationDocumentSchema {
   @Prop({ required: true, index: true })
   userId: string;
 
@@ -16,7 +16,7 @@ export class ConversationSchema {
   messages: Array<{
     role: 'user' | 'assistant';
     narrative: string;
-    instructions?: GameInstruction[];
+    instructions?: GameInstructionDto[];
     timestamp?: Date;
   }>;
 
@@ -27,5 +27,5 @@ export class ConversationSchema {
   updatedAt?: Date;
 }
 
-export const ConversationSchema = SchemaFactory.createForClass(ConversationSchema);
+export const ConversationSchema = SchemaFactory.createForClass(ConversationDocumentSchema);
 ConversationSchema.index({ userId: 1, characterId: 1 }, { unique: true });

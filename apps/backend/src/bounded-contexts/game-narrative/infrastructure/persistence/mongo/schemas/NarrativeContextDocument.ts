@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { CharacterContextData } from '../../domain/narrative/entities/NarrativeContext.js';
+import { CharacterContextData } from '../../../domain/narrative/entities/NarrativeContext.js';
 
-export type NarrativeContextDocument = HydratedDocument<NarrativeContextSchema>;
+export type NarrativeContextDocument = HydratedDocument<NarrativeContextDocumentSchema>;
 
 @Schema({ collection: 'narrative_contexts', timestamps: true })
-export class NarrativeContextSchema {
+export class NarrativeContextDocumentSchema {
   @Prop({ required: true, index: true, unique: true })
   sessionId: string;
 
@@ -25,4 +25,5 @@ export class NarrativeContextSchema {
   updatedAt?: Date;
 }
 
-export const NarrativeContextSchema = SchemaFactory.createForClass(NarrativeContextSchema);
+export const NarrativeContextSchema = SchemaFactory.createForClass(NarrativeContextDocumentSchema);
+
