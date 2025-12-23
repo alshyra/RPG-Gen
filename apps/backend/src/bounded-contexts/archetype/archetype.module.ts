@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { ClassesController } from "./api/controllers/classes.controller.js";
-import { ArchetypeService } from "./application/archetype.service.js";
+import { ArchetypesController } from "./api/controllers/archetypes.controller.js";
+import { ArchetypeAppService } from "./application/services/ArchetypeAppService.js";
 import { ArchetypeDocument, ArchetypeSchema } from "./infrastructure/persistence/mongo/schemas/ArchetypeDocument.js";
-import { ArchetypeDefinitionService } from "./application/archetype-definition.service.js";
+import { MongoArchetypeRepository } from "./infrastructure/persistence/mongo/repositories/MongoArchetypeRepository.js";
+import { IArchetypeRepository } from "./domain/repositories/IArchetypeRepository.js";
 
 @Module({
   imports: [
@@ -14,8 +15,14 @@ import { ArchetypeDefinitionService } from "./application/archetype-definition.s
       },
     ]),
   ],
-  controllers: [ClassesController],
-  providers: [ArchetypeService, ArchetypeDefinitionService],
-  exports: [ArchetypeService, ArchetypeDefinitionService],
+  controllers: [ArchetypesController],
+  providers: [
+    {
+      provide: IArchetypeRepository,
+      useClass: MongoArchetypeRepository,
+    },
+    ArchetypeAppService,
+  ],
+  exports: [ArchetypeAppService, IArchetypeRepository],
 })
-export class ClassesModule {}
+export class ArchetypeModule {}

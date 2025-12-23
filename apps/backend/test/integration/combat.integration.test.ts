@@ -587,7 +587,7 @@ test.skip("processAttack returns combatEnd when killing last enemy", async t => 
   };
 
   // Import the GeminiTextService class to use as provider token
-  const { GeminiTextService } = await import("../../src/infra/external/gemini-text.service.js");
+  const { GeminiTextService } = await import("../../src/bounded-contexts/chat/external/gemini-text.service.js");
 
   const ctx = await createTestApp(
     [CombatModule],

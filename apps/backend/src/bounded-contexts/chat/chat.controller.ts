@@ -7,7 +7,7 @@ import { CharacterDtoMapper } from "../character/api/dto/mappers/CharacterDtoMap
 import { ConversationService } from "../../domain/chat/conversation.service.js";
 import { ChatMessageDto } from "../../domain/chat/dto/index.js";
 import type { RPGRequest } from "../../global.types.js";
-import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import { GeminiTextService } from "./external/gemini-text.service.js";
 import type { CharacterResponseDto } from "../character/api/dto/index.js";
 import { ChatOrchestrator } from "#workflows";
 

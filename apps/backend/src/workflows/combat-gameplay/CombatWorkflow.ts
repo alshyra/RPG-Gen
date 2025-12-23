@@ -11,7 +11,7 @@ import type {
   EndPlayerTurnResponseDto,
 } from "../../bounded-contexts/combat/api/dto/response/index.js";
 import { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/index.js";
-import { GeminiTextService } from "../../infra/external/gemini-text.service.js";
+import { GeminiTextService } from "../../bounded-contexts/chat/external/gemini-text.service.js";
 import type { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
 
 /**

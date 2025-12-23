@@ -1,5 +1,5 @@
-import { CharacterClass } from '../../../../domain/entities/CharacterClass.js';
-import { ClassStats } from '../../../../domain/value-objects/ClassStats.js';
+import { Archetype } from '../../../../domain/entities/Archetype.js';
+import { ArchetypeStats } from '../../../../domain/value-objects/ArchetypeStats.js';
 import { TalentTree } from '../../../../domain/value-objects/TalentTree.js';
 import { TalentRank } from '../../../../domain/value-objects/TalentRank.js';
 import { ArchetypeDocument } from '../schemas/ArchetypeDocument.js';
@@ -9,8 +9,8 @@ export class ArchetypeMapper {
   /**
    * MongoDB Document → Domain Entity
    */
-  static toDomain(doc: ArchetypeDocument): CharacterClass {
-    const stats = new ClassStats({
+  static toDomain(doc: ArchetypeDocument): Archetype {
+    const stats = new ArchetypeStats({
       hpBase: doc.stats.hpBase,
       hpGain: doc.stats.hpGain,
       pa: doc.stats.pa,
@@ -34,7 +34,7 @@ export class ArchetypeMapper {
       });
     });
 
-    return new CharacterClass({
+    return new Archetype({
       name: parseArchetypeName(doc.name)!,
       displayName: doc.displayName,
       description: doc.description,
@@ -50,7 +50,7 @@ export class ArchetypeMapper {
   /**
    * Domain Entity → MongoDB Document
    */
-  static toPersistence(entity: CharacterClass): Partial<ArchetypeDocument> {
+  static toPersistence(entity: Archetype): Partial<ArchetypeDocument> {
     return {
       name: entity.name,
       displayName: entity.displayName,

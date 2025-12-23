@@ -12,7 +12,7 @@ export * from "./aptitudes.api";
 export * from "./auth.api";
 export * from "./character.api";
 export * from "./chat.api";
-export * from "./classes.api";
+export * from "./archetypes.api";
 export * from "./combat.api";
 export * from "./dice.api";
 export * from "./image.api";

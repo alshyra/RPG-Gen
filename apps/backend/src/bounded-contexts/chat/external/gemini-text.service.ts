@@ -11,8 +11,8 @@ import { ChatMessageDto } from "../../domain/chat/dto/ChatMessageDto.js";
 import { GameInstructionDto } from "../../domain/chat/dto/GameInstructionDto.js";
 import { geminiResponseJsonSchema } from "./gemini-json-schema.js";
 import { aiResponseSchema } from "./gemini-schemas.js";
-import { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
-import { getConfig } from "../../config.js";
+import { CharacterResponseDto } from "../../character/api/dto/index.js";
+import { getConfig } from "../../../config.js";
 
 const TEMPLATE_PATH = process.env.TEMPLATE_PATH ?? path.join(process.cwd(), "chat.prompt.txt");
 const SCENARIO_PATH =

@@ -8,7 +8,7 @@ export interface ArchetypeStatsProps {
   pm: number;
 }
 
-export class ClassStats {
+export class ArchetypeStats {
   private readonly _hpBase: number;
   private readonly _hpGain: number;
   private readonly _pa: number;
@@ -37,7 +37,7 @@ export class ClassStats {
     return this._hpBase + (level - 1) * this._hpGain + vigorBonus;
   }
 
-  equals(other: ClassStats): boolean {
+  equals(other: ArchetypeStats): boolean {
     return (
       this._hpBase === other._hpBase &&
       this._hpGain === other._hpGain &&

@@ -22,9 +22,9 @@ async function getAvailableRaces(): Promise<RaceMetadataDto[]> {
 }
 
 async function getTalentTrees(className: ClassName) {
-  const res = await apiClient.GET("/api/classes/{className}/voies", {
+  const res = await apiClient.GET("/api/archetypes/{archetypeName}/talent-trees", {
     params: {
-      path: { className },
+      path: { archetypeName: className },
     },
   });
   if (!res.data) throw new Error("No data received for talent trees");

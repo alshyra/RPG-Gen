@@ -1,12 +1,12 @@
 import { ArchetypeName, MainStat, CharacterStats } from '#shared/domain/index.js';
-import { ClassStats } from '../value-objects/ClassStats.js';
+import { ArchetypeStats } from '../value-objects/ArchetypeStats.js';
 import { TalentTree } from '../value-objects/TalentTree.js';
 
-export interface CharacterClassProps {
+export interface ArchetypeProps {
   name: ArchetypeName;
   displayName?: string;
   description?: string;
-  stats: ClassStats;
+  stats: ArchetypeStats;
   talentTrees: TalentTree[];
   startingAptitudes: string[];
   mainStat: MainStat;
@@ -14,20 +14,20 @@ export interface CharacterClassProps {
   icon?: string;
 }
 
-export class CharacterClass {
+export class Archetype {
   private readonly _name: ArchetypeName;
   private readonly _displayName?: string;
   private readonly _description?: string;
-  private readonly _stats: ClassStats;
+  private readonly _stats: ArchetypeStats;
   private readonly _talentTrees: TalentTree[];
   private readonly _startingAptitudes: string[];
   private readonly _mainStat: MainStat;
   private readonly _color?: string;
   private readonly _icon?: string;
 
-  constructor(props: CharacterClassProps) {
+  constructor(props: ArchetypeProps) {
     if (props.talentTrees.length !== 3) {
-      throw new Error('Character class must have exactly 3 talent trees');
+      throw new Error('Character archetype must have exactly 3 talent trees');
     }
 
     this._name = props.name;
@@ -44,7 +44,7 @@ export class CharacterClass {
   get name(): ArchetypeName { return this._name; }
   get displayName(): string { return this._displayName || this._name; }
   get description(): string | undefined { return this._description; }
-  get stats(): ClassStats { return this._stats; }
+  get stats(): ArchetypeStats { return this._stats; }
   get talentTrees(): readonly TalentTree[] { return this._talentTrees; }
   get startingAptitudes(): readonly string[] { return this._startingAptitudes; }
   get mainStat(): MainStat { return this._mainStat; }
