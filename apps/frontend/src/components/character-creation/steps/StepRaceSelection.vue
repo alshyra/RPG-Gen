@@ -109,8 +109,7 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useAvailableRaces, useSelectRace, useCharacter } from "@rpg-gen/api-client";
-import { RaceMetadataDto } from "@rpg-gen/shared";
+import { useAvailableRaces, useSelectRace, useCharacter, RaceMetadata } from "@rpg-gen/api-client";
 import { UiLoader } from "@rpg-gen/ui";
 import { computed, ref, watch } from "vue";
 
@@ -137,7 +136,7 @@ watch(
 );
 
 // Computed
-const selectedRaceData = computed<RaceMetadataDto | undefined>(() => {
+const selectedRaceData = computed<RaceMetadata | undefined>(() => {
   if (!selectedRace.value || !races.value) return undefined;
   return races.value.find((r) => r.id === selectedRace.value);
 });

@@ -49,7 +49,7 @@ export class CharacterAvatarController {
       throw new BadRequestException("characterId is required");
 
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
     const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
     return await this.handleGenerateAvatar(userId, characterEntity);
   }

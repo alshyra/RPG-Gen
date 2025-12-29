@@ -122,7 +122,7 @@ const { data: voies, isLoading: isLoadingVoies, error: errorVoies } = useTalentT
 // Emit changes to parent for reactive validation
 const emit = defineEmits<{
   'update:isValid': [boolean];
-  'update:selections': [{ voieIndex: number; voieName: string; statBonus: string }];
+  'update:selections': [{ voieIndex: number; voieId: string; voieName: string; statBonus: string }];
 }>();
 
 // Watch for changes and emit to parent
@@ -131,9 +131,11 @@ watch([selectedVoieIndex, selectedStat], () => {
   emit('update:isValid', isValid);
   
   if (isValid) {
+    const selectedVoie = voies.value?.[selectedVoieIndex.value!];
     emit('update:selections', {
       voieIndex: selectedVoieIndex.value!,
-      voieName: voies.value?.[selectedVoieIndex.value!]?.name || '',
+      voieId: selectedVoie?.voieId || '',
+      voieName: selectedVoie?.name || '',
       statBonus: selectedStat.value!,
     });
   }

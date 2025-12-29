@@ -135,7 +135,7 @@ const loadingSubtitle = ref("");
 
 // Talent selection state (reactive)
 const talentSelectionValid = ref(false);
-const talentSelection = ref<{ voieIndex: number; voieName: string; statBonus: string } | null>(null);
+const talentSelection = ref<{ voieIndex: number; voieId: string; voieName: string; statBonus: string } | null>(null);
 
 // 5-step flow (Info -> Race -> Class -> Talent -> Avatar)
 const steps = [
@@ -219,7 +219,7 @@ const saveFinalCharacter = async () => {
 const generateAndApplyAvatar = async () => {
   try {
     if (!currentCharacter?.value?.characterId) return;
-    await image.generateAvatar.mutateAsync({ characterId: currentCharacter.value.characterId });
+    await image.generateAvatar.mutateAsync(currentCharacter.value.characterId);
     // Refetch character to get the updated portrait
     await character.refetch();
   } catch (e) {
@@ -258,6 +258,7 @@ const finishCreation = async () => {
     // Apply first talent selection
     if (talentSelection.value) {
       await selectFirstTalentMutation.mutateAsync({
+        voieId: talentSelection.value.voieId,
         voieName: talentSelection.value.voieName,
         statBonus: talentSelection.value.statBonus as "vigor" | "finesse" | "mind" | "survival",
       });

@@ -56,7 +56,7 @@ export class CharacterInventoryController {
     @Body() item: CreateInventoryItemDto,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.addInventoryItem(userId, characterId, item);
     return this.dtoMapper.toEnrichedDto(character);
@@ -76,7 +76,7 @@ export class CharacterInventoryController {
     @Body() body: { definitionId: string },
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
     const character = await this.characterAppService.equipItem(
       userId,
       characterId,
@@ -104,7 +104,7 @@ export class CharacterInventoryController {
     @Body() updates: CreateInventoryItemDto,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.updateInventoryItem(
       userId,
@@ -134,7 +134,7 @@ export class CharacterInventoryController {
     @Body() body: RemoveInventoryBodyDto,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.removeInventoryItem(
       userId,

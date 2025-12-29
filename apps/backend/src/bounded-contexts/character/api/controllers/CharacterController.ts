@@ -51,7 +51,7 @@ export class CharacterController {
   async create(@Req() req: RPGRequest) {
     const { user } = req;
 
-    const userId = user._id.toString();
+    const userId = user.id;
     const characterId = this.characterAppService.generateCharacterId();
     const character = await this.characterAppService.createDraft({ characterId, userId });
     return CharacterDtoMapper.toDto(character);
@@ -66,7 +66,7 @@ export class CharacterController {
   })
   async findAll(@Req() req: RPGRequest) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const characters = await this.characterAppService.findByUserId(userId);
     return characters.map(c => CharacterDtoMapper.toDto(c));
@@ -81,7 +81,7 @@ export class CharacterController {
   })
   async findDrafts(@Req() req: RPGRequest) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const characters = await this.characterAppService.findDraftsByUserId(userId);
     return characters.map(c => CharacterDtoMapper.toDto(c));
@@ -96,7 +96,7 @@ export class CharacterController {
   })
   async findCreated(@Req() req: RPGRequest) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const characters = await this.characterAppService.findCompletedByUserId(userId);
     return Promise.all(characters.map(c => this.dtoMapper.toEnrichedDto(c)));
@@ -115,7 +115,7 @@ export class CharacterController {
   })
   async findOne(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.findByUserAndId(userId, characterId);
     
@@ -148,7 +148,7 @@ export class CharacterController {
     @Body() updates: UpdateCharacterRequestDto,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.update(userId, characterId, updates);
     this.logger.log('character state', character.state)
@@ -168,7 +168,7 @@ export class CharacterController {
   })
   async delete(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     await this.characterAppService.delete(userId, characterId);
     return { ok: true };
@@ -192,7 +192,7 @@ export class CharacterController {
     @Body() body: KillCharacterBodyDto,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.markAsDeceased(
       userId,
@@ -211,7 +211,7 @@ export class CharacterController {
   })
   async getDeceased(@Req() req: RPGRequest) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const characters = await this.characterAppService.findDeceasedByUserId(userId);
     return characters.map(c => {

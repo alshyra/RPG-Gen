@@ -1,12 +1,12 @@
 import { useCharacter, useChat } from "@rpg-gen/api-client";
+import type { NarrativeResponseDto } from "@rpg-gen/shared";
 import {
-  type ChatMessageDto,
   type HpInstructionMessageDto,
   type InventoryInstructionMessageDto,
-  isCombatStartInstruction,
   type RollInstructionMessageDto,
   type XpInstructionMessageDto,
-} from "@rpg-gen/shared";
+  isCombatStartInstruction,
+} from "@/types/game-instructions";
 import { computed } from "vue";
 import { useGameStore } from "../stores/gameStore";
 import { useCombat } from "./useCombat";
@@ -20,7 +20,7 @@ export function useGameMessages() {
   const character = useCharacter(characterId);
   const combat = useCombat();
 
-  const handleMessageResponse = (response: ChatMessageDto): void => {
+  const handleMessageResponse = (response: NarrativeResponseDto): void => {
     gameStore.messages.pop();
     gameStore.appendMessage("assistant", response.narrative);
     // Normalize instructions to an array before processing (be defensive)
@@ -56,11 +56,7 @@ export function useGameMessages() {
       if (!currentCharacter?.value?.characterId) {
         throw new Error("No character loaded");
       }
-      const response = await chat.sendMessage.mutateAsync({
-        role: "user",
-        narrative: messageText,
-        instructions: [],
-      });
+      const response = await chat.sendMessage.mutateAsync(messageText);
       gameStore.clearLastFailedMessage();
       handleMessageResponse(response);
     } catch (e: unknown) {

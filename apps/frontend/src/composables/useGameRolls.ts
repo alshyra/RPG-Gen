@@ -1,5 +1,5 @@
-import type { DiceResultDto, RollInstructionMessageDto } from "@rpg-gen/shared";
-import { isRollInstruction } from "@rpg-gen/shared";
+import type { DiceResultDto } from "@rpg-gen/shared";
+import { type RollInstructionMessageDto, isRollInstruction } from "@/types/game-instructions";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
 import { useChat } from "@rpg-gen/api-client";

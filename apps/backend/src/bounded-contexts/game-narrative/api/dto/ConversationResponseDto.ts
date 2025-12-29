@@ -14,7 +14,7 @@ export class ConversationResponseDto {
   @ApiProperty({ description: 'Session ID' })
   sessionId: string;
 
-  @ApiProperty({ description: 'Messages' })
+  @ApiProperty({ description: 'Messages', type: [NarrativeResponseDto] })
   messages: NarrativeResponseDto[];
 
   constructor(partial: Partial<ConversationResponseDto>) {

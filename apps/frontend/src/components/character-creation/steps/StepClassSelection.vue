@@ -92,12 +92,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useAvailableClasses, useSelectClass, useCharacter, type ClassMetadata } from "@rpg-gen/api-client";
-import type { SelectClassDto } from "@rpg-gen/shared";
 import { UiLoader } from "@rpg-gen/ui";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCharacterId } from "@/composables/useCharacterId";
 
-type ClassName = SelectClassDto['className'];
+// Type for valid class names
+type ClassName = "guerrier" | "rogue" | "mage";
 
 const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
@@ -124,7 +124,7 @@ watch(
 // Computed
 const selectedClassData = computed<ClassMetadata | undefined>(() => {
   if (!selectedClass.value || !classes.value) return undefined;
-  return classes.value.find((c) => c.id === selectedClass.value);
+  return classes.value.find((c) => c.name === selectedClass.value);
 });
 
 // Methods

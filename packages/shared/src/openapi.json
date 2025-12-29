@@ -68,6 +68,52 @@
         ]
       }
     },
+    "/api/chat/{characterId}": {
+      "post": {
+        "operationId": "NarrativeController_sendMessage",
+        "parameters": [
+          {
+            "name": "characterId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatMessageRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "AI response with narrative and instructions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NarrativeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a chat message and get AI response",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/api/chat/{characterId}/history": {
       "get": {
         "operationId": "NarrativeController_getNarrativeHistory",
@@ -155,7 +201,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/NarrativeResponseDto"
                   }
                 }
               }
@@ -1828,6 +1874,39 @@
           "picture"
         ]
       },
+      "ChatMessageRequestDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text from user",
+            "example": "I want to attack the goblin"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "NarrativeResponseDto": {
+        "type": "object",
+        "properties": {
+          "narrative": {
+            "type": "string",
+            "description": "Narrative narrative content"
+          },
+          "instructions": {
+            "description": "Game instructions",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "narrative",
+          "instructions"
+        ]
+      },
       "ConversationResponseDto": {
         "type": "object",
         "properties": {
@@ -1847,7 +1926,7 @@
             "description": "Messages",
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/NarrativeResponseDto"
             }
           }
         },
@@ -3798,6 +3877,11 @@
       "TalentTreeResponseDto": {
         "type": "object",
         "properties": {
+          "voieId": {
+            "type": "string",
+            "description": "Talent tree ID (voieId)",
+            "example": "voie_du_guerrier"
+          },
           "name": {
             "type": "string",
             "description": "Tree name",
@@ -3812,6 +3896,7 @@
           }
         },
         "required": [
+          "voieId",
           "name",
           "ranks"
         ]
@@ -3823,6 +3908,26 @@
             "type": "string",
             "description": "Class name (unique identifier)",
             "example": "guerrier"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name",
+            "example": "Guerrier"
+          },
+          "description": {
+            "type": "string",
+            "description": "Class description",
+            "example": "Un combattant robuste et aguerri"
+          },
+          "color": {
+            "type": "string",
+            "description": "UI color (hex)",
+            "example": "#ef4444"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon emoji",
+            "example": "⚔️"
           },
           "baseStats": {
             "description": "Base stats",

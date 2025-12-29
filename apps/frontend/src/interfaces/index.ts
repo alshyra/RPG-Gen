@@ -93,8 +93,8 @@ export interface HistoryMessage {
   narrative: string;
   timestamp?: number;
   instructions?:
-    | import("@rpg-gen/shared").GameInstructionDto
-    | import("@rpg-gen/shared").GameInstructionDto[];
+    | import("@/types/game-instructions").GameInstructionDto
+    | import("@/types/game-instructions").GameInstructionDto[];
 }
 export interface ProcessedMessage {
   role: "user" | "assistant" | "system";

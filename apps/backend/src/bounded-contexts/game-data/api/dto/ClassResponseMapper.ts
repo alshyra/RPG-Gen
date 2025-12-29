@@ -10,6 +10,10 @@ export class ClassResponseMapper {
   static toDto(entity: CharacterClass): ClassResponseDto {
     return {
       name: entity.name,
+      displayName: entity.displayName,
+      description: entity.description,
+      color: entity.color,
+      icon: entity.icon,
       baseStats: ClassResponseMapper.toStatsDto(entity),
       proficiencies: [...entity.proficiencies],
       startingAptitudes: [...entity.startingAptitudes],
@@ -28,6 +32,7 @@ export class ClassResponseMapper {
 
   private static toTreeDto(tree: TalentTree): TalentTreeResponseDto {
     return {
+      voieId: tree.voieId,
       name: tree.name,
       ranks: tree.ranks.map(rank => ClassResponseMapper.toRankDto(rank)),
     };

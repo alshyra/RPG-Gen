@@ -56,7 +56,7 @@ export class CharacterInspirationController {
     @Body("amount") amount: number,
   ) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     // Validate amount
     if (typeof amount !== "number" || amount <= 0 || amount > 5) {
@@ -95,7 +95,7 @@ export class CharacterInspirationController {
   })
   async spend(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const { user } = req;
-    const userId = user._id.toString();
+    const userId = user.id;
 
     const character = await this.characterAppService.findByUserAndId(userId, characterId);
     const currentPoints = character.inspirationPoints || 0;

@@ -1,30 +1,36 @@
-import { ClassMetadataDto, RaceMetadataDto, SelectClassDto } from "@rpg-gen/shared";
+import { ClassResponseDto, RaceResponseDto, TalentTreeResponseDto, VoieProgressDto, TacticalStats } from "@rpg-gen/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { computed, MaybeRefOrGetter, toValue } from "vue";
 import { apiClient } from "./client.js";
 
-type ClassName = SelectClassDto['className'];
-
 // Export types for components
-export type ClassMetadata = ClassMetadataDto;
+export type ClassMetadata = ClassResponseDto;
+export type RaceMetadata = RaceResponseDto;
+
+// Types for first talent selection
+export interface SelectFirstTalentParams {
+  voieId: string;
+  voieName: string;
+  statBonus: "vigor" | "finesse" | "mind" | "survival";
+}
 
 // API functions
-async function getAvailableClasses(): Promise<ClassMetadataDto[]> {
-  const res = await apiClient.GET("/api/progression/classes");
+async function getAvailableClasses(): Promise<ClassResponseDto[]> {
+  const res = await apiClient.GET("/api/classes");
   if (!res.data) throw new Error("No data received for available classes");
   return res.data;
 }
 
-async function getAvailableRaces(): Promise<RaceMetadataDto[]> {
-  const res = await apiClient.GET("/api/progression/races");
+async function getAvailableRaces(): Promise<RaceResponseDto[]> {
+  const res = await apiClient.GET("/api/game-data/races");
   if (!res.data) throw new Error("No data received for available races");
   return res.data;
 }
 
-async function getTalentTrees(className: ClassName) {
-  const res = await apiClient.GET("/api/archetypes/{archetypeName}/talent-trees", {
+async function getTalentTrees(className: string): Promise<TalentTreeResponseDto[]> {
+  const res = await apiClient.GET("/api/classes/{className}/talent-trees", {
     params: {
-      path: { archetypeName: className },
+      path: { className },
     },
   });
   if (!res.data) throw new Error("No data received for talent trees");
@@ -33,9 +39,10 @@ async function getTalentTrees(className: ClassName) {
 
 async function selectClass(
   characterId: string,
-  className: ClassName,
+  className: string,
 ) {
-  const res = await apiClient.POST("/api/progression/{characterId}/select-class", {
+  // Update character with the selected class using PUT /api/characters/{characterId}
+  const res = await apiClient.PUT("/api/characters/{characterId}", {
     params: {
       path: { characterId },
     },
@@ -46,28 +53,12 @@ async function selectClass(
   return res.data;
 }
 
-async function unlockRank(
-  characterId: string,
-  voieId: string,
-  rank: number,
-) {
-  const res = await apiClient.POST("/api/progression/{characterId}/unlock-rank", {
-    params: {
-      path: { characterId },
-    },
-    body: {
-      voieId,
-      rank,
-    },
-  });
-  return res.data;
-}
-
 async function selectRace(
   characterId: string,
   raceId: string,
 ) {
-  const res = await apiClient.POST("/api/progression/{characterId}/select-race", {
+  // Update character with the selected race using PUT /api/characters/{characterId}
+  const res = await apiClient.PUT("/api/characters/{characterId}", {
     params: {
       path: { characterId },
     },
@@ -77,28 +68,11 @@ async function selectRace(
   });
   return res.data;
 }
-// Select first talent endpoint (with requestBody)
-async function selectFirstTalent(
-  characterId: string,
-  voieName: string,
-  statBonus: "vigor" | "finesse" | "mind" | "survival",
-) {
-  const res = await apiClient.POST("/api/progression/{characterId}/first-talent", {
-    params: {
-      path: { characterId },
-    },
-    body: {
-      voieName,
-      statBonus,
-    },
-  });
-  return res.data;
-}
 
 // Vue Query hooks
 export function useAvailableClasses() {
   return useQuery({
-    queryKey: ["progression", "classes"],
+    queryKey: ["classes"],
     queryFn: getAvailableClasses,
     staleTime: 1000 * 60 * 60, // 1 hour - classes don't change often
   });
@@ -106,17 +80,17 @@ export function useAvailableClasses() {
 
 export function useAvailableRaces() {
   return useQuery({
-    queryKey: ["progression", "races"],
+    queryKey: ["races"],
     queryFn: getAvailableRaces,
     staleTime: 1000 * 60 * 60, // 1 hour - races don't change often
   });
 }
 
-export function useTalentTrees(classNameOrRef: MaybeRefOrGetter<ClassName>) {
+export function useTalentTrees(classNameOrRef: MaybeRefOrGetter<string>) {
   const className = toValue(classNameOrRef);
   
   return useQuery({
-    queryKey: computed(() => ["classes", className, "voies"]),
+    queryKey: computed(() => ["classes", className, "talent-trees"]),
     queryFn: () => getTalentTrees(className),
     enabled: computed(() => !!className),
     staleTime: 1000 * 60 * 60, // 1 hour
@@ -129,7 +103,7 @@ export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string | undef
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (className: ClassName) => selectClass(characterId || '', className),
+    mutationFn: (className: string) => selectClass(characterId || '', className),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
@@ -152,18 +126,46 @@ export function useSelectRace(characterIdOrRef: MaybeRefOrGetter<string | undefi
   });
 }
 
-export function useUnlockRank(characterIdOrRef: MaybeRefOrGetter<string>) {
-  const characterId = toValue(characterIdOrRef);
+/**
+ * Selects the first talent (voie) for a character and applies a stat bonus.
+ * This is used during character creation to unlock rank 1 of a chosen voie.
+ */
+async function selectFirstTalent(
+  characterId: string,
+  params: SelectFirstTalentParams,
+) {
+  const { voieId, voieName, statBonus } = params;
   
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ voieId, rank }: { voieId: string; rank: number }) =>
-      unlockRank(characterId || '', voieId, rank),
-    onSuccess: () => {
-      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+  // Build the voies array with the first rank unlocked
+  const voies: VoieProgressDto[] = [
+    {
+      voieId,
+      voieName,
+      className: "", // Will be ignored by backend as it reads from character
+      currentRank: 1,
+      ranks: [], // Backend will fill this in
+    },
+  ];
+  
+  // Build the stats with +1 bonus to the selected stat
+  // Default tactical stats start at 1 for all
+  const stats: TacticalStats = {
+    vigor: statBonus === "vigor" ? 2 : 1,
+    finesse: statBonus === "finesse" ? 2 : 1,
+    mind: statBonus === "mind" ? 2 : 1,
+    survival: statBonus === "survival" ? 2 : 1,
+  };
+  
+  const res = await apiClient.PUT("/api/characters/{characterId}", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      voies,
+      stats,
     },
   });
+  return res.data;
 }
 
 export function useSelectFirstTalent(characterIdOrRef: MaybeRefOrGetter<string | undefined>) {
@@ -172,7 +174,59 @@ export function useSelectFirstTalent(characterIdOrRef: MaybeRefOrGetter<string |
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ voieName, statBonus }: { voieName: string; statBonus: "vigor" | "finesse" | "mind" | "survival" }) => selectFirstTalent(characterId || '', voieName, statBonus),
+    mutationFn: (params: SelectFirstTalentParams) => selectFirstTalent(characterId || '', params),
+    onSuccess: () => {
+      if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+    },
+  });
+}
+
+// Types for unlock rank
+export interface UnlockRankParams {
+  voieId: string;
+  rank: number;
+}
+
+/**
+ * Unlocks a talent rank in a voie for a character.
+ * This updates the character's voies progression.
+ */
+async function unlockRank(
+  characterId: string,
+  params: UnlockRankParams,
+) {
+  const { voieId, rank } = params;
+  
+  // Build the voies array with the new rank unlocked
+  // The backend will handle validation and merging with existing voies
+  const voies: VoieProgressDto[] = [
+    {
+      voieId,
+      voieName: "", // Backend will fill this
+      className: "", // Backend will fill this
+      currentRank: rank,
+      ranks: [], // Backend will fill this
+    },
+  ];
+  
+  const res = await apiClient.PUT("/api/characters/{characterId}", {
+    params: {
+      path: { characterId },
+    },
+    body: {
+      voies,
+    },
+  });
+  return res.data;
+}
+
+export function useUnlockRank(characterIdOrRef: MaybeRefOrGetter<string | undefined>) {
+  const characterId = toValue(characterIdOrRef);
+  
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: UnlockRankParams) => unlockRank(characterId || '', params),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },

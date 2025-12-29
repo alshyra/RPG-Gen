@@ -51,7 +51,7 @@ export class CombatController {
     @Param("characterId") characterId: string,
     @Body() body: CombatStartRequestDto,
   ) {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     this.logger.debug(body);
     return this.combatOrchestrator.startCombat(userId, characterId, body);
   }
@@ -70,7 +70,7 @@ export class CombatController {
     @Param("characterId") characterId: string,
     @Body() body: CombatActionRequestDto,
   ): Promise<CombatActionResponseDto> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     return this.actionOrchestrator.executeAction(userId, characterId, body);
   }
 
@@ -81,7 +81,7 @@ export class CombatController {
     type: CombatStateDto,
   })
   async getStatus(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     return await this.combatOrchestrator.getStatus(userId, characterId);
   }
 
@@ -98,7 +98,7 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param("characterId") characterId: string,
   ): Promise<EndPlayerTurnResponseDto> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     return this.combatOrchestrator.endPlayerTurn(userId, characterId);
   }
 
@@ -112,7 +112,7 @@ export class CombatController {
     @Req() req: RPGRequest,
     @Param("characterId") characterId: string,
   ): Promise<CombatEndResponseDto> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     return this.combatOrchestrator.endCombat(userId, characterId);
   }
 
@@ -128,7 +128,7 @@ export class CombatController {
     @Param("characterId") characterId: string,
     @Body() body: MovementRequestDto,
   ): Promise<MovementResponseDto> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     return this.movementOrchestrator.executeMovement(userId, characterId, body);
   }
 }

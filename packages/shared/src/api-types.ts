@@ -69,6 +69,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/{characterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a chat message and get AI response */
+        post: operations["NarrativeController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat/{characterId}/history": {
         parameters: {
             query?: never;
@@ -749,6 +766,19 @@ export interface components {
             /** @example https://... */
             picture: string;
         };
+        ChatMessageRequestDto: {
+            /**
+             * @description Message text from user
+             * @example I want to attack the goblin
+             */
+            message: string;
+        };
+        NarrativeResponseDto: {
+            /** @description Narrative narrative content */
+            narrative: string;
+            /** @description Game instructions */
+            instructions: string[];
+        };
         ConversationResponseDto: {
             /** @description User ID */
             userId: string;
@@ -757,7 +787,7 @@ export interface components {
             /** @description Session ID */
             sessionId: string;
             /** @description Messages */
-            messages: string[];
+            messages: components["schemas"]["NarrativeResponseDto"][];
         };
         DiceRequestDto: {
             expr: string;
@@ -1605,6 +1635,11 @@ export interface components {
         };
         TalentTreeResponseDto: {
             /**
+             * @description Talent tree ID (voieId)
+             * @example voie_du_guerrier
+             */
+            voieId: string;
+            /**
              * @description Tree name
              * @example Voie du Guerrier
              */
@@ -1618,6 +1653,26 @@ export interface components {
              * @example guerrier
              */
             name: string;
+            /**
+             * @description Display name
+             * @example Guerrier
+             */
+            displayName?: string;
+            /**
+             * @description Class description
+             * @example Un combattant robuste et aguerri
+             */
+            description?: string;
+            /**
+             * @description UI color (hex)
+             * @example #ef4444
+             */
+            color?: string;
+            /**
+             * @description Icon emoji
+             * @example ⚔️
+             */
+            icon?: string;
             /** @description Base stats */
             baseStats: components["schemas"]["ClassStatsResponseDto"];
             /**
@@ -1837,6 +1892,32 @@ export interface operations {
             };
         };
     };
+    NarrativeController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatMessageRequestDto"];
+            };
+        };
+        responses: {
+            /** @description AI response with narrative and instructions */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NarrativeResponseDto"];
+                };
+            };
+        };
+    };
     NarrativeController_getNarrativeHistory: {
         parameters: {
             query?: never;
@@ -1903,7 +1984,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["NarrativeResponseDto"][];
                 };
             };
         };

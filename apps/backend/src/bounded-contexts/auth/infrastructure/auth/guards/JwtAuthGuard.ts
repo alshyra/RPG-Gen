@@ -1,6 +1,7 @@
 import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { getConfig } from "../../../../../config.js";
+import { AuthUser } from "../../../domain/entities/AuthUser.js";
 
 /**
  * JwtAuthGuard
@@ -23,17 +24,20 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
       const ctx = context.switchToHttp();
       const req = ctx.getRequest();
 
-      req.user ||= {
-        // `sub` kept for unit-test assertions
-        sub: "e2e-test-user",
+      // Create a proper AuthUser instance so toProfile() and other methods work
+      req.user ||= new AuthUser({
         // Provide a valid 24-char hex string to satisfy Mongoose ObjectId
-        _id: "000000000000000000000001",
+        id: "000000000000000000000001",
+        googleId: "e2e-test-google-id",
         email: "test@example.com",
         displayName: "Test User",
+        firstName: "Test",
+        lastName: "User",
         // Small inline image so frontend renders an <img> element for tests
         picture:
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
-      };
+        lastLogin: new Date(),
+      });
 
       return true;
     }

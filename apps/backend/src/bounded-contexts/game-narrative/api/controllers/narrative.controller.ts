@@ -1,9 +1,12 @@
-import { Controller, Delete, Get, Logger, Param, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { RPGRequest } from '../../../../global.types.js';
 import { JwtAuthGuard } from '../../../auth/infrastructure/auth/guards/JwtAuthGuard.js';
 import { GameNarrativeService } from '../../application/services/GameNarrativeService.js';
-import { ConversationResponseDto, NarrativeResponseMapper } from '../dto/index.js';
+import { ConversationService } from '../../application/services/ConversationService.js';
+import { GeminiTextService } from '../../infrastructure/external/index.js';
+import { ConversationResponseDto, NarrativeResponseDto, NarrativeResponseMapper } from '../dto/index.js';
+import { ChatMessageRequestDto } from '../dto/request/ChatMessageRequest.js';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -12,7 +15,49 @@ import { ConversationResponseDto, NarrativeResponseMapper } from '../dto/index.j
 export class NarrativeController {
   private readonly logger = new Logger(NarrativeController.name);
 
-  constructor(private readonly narrativeService: GameNarrativeService) {}
+  constructor(
+    private readonly narrativeService: GameNarrativeService,
+    private readonly conversationService: ConversationService,
+    private readonly geminiTextService: GeminiTextService,
+  ) {}
+
+  @Post(':characterId')
+  @ApiOperation({ summary: 'Send a chat message and get AI response' })
+  @ApiBody({ type: ChatMessageRequestDto })
+  @ApiResponse({
+    status: 201,
+    description: 'AI response with narrative and instructions',
+    type: NarrativeResponseDto,
+  })
+  async sendMessage(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+    @Body() body: ChatMessageRequestDto,
+  ): Promise<NarrativeResponseDto> {
+    const userId = req.user.id;
+    
+    // Save user message to history
+    await this.conversationService.append(userId, characterId, {
+      role: 'user',
+      narrative: body.message,
+      instructions: [],
+    });
+    
+    // Get AI response
+    const parsed = await this.geminiTextService.sendMessage(characterId, body.message);
+    
+    // Save assistant reply to history
+    await this.conversationService.append(userId, characterId, {
+      role: 'assistant',
+      narrative: parsed.narrative || '',
+      instructions: parsed.instructions || [],
+    });
+    
+    return new NarrativeResponseDto({
+      narrative: parsed.narrative || '',
+      instructions: parsed.instructions || [],
+    });
+  }
 
   @Get(':characterId/history')
   @ApiOperation({ summary: 'Get narrative history with a character' })
@@ -26,7 +71,7 @@ export class NarrativeController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ): Promise<ConversationResponseDto> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     const messages = await this.narrativeService.getNarrativeHistory(userId, characterId);
     return new ConversationResponseDto({
       userId,
@@ -41,19 +86,17 @@ export class NarrativeController {
   @ApiResponse({
     status: 200,
     description: 'List of recent messages',
-    type: [Object],
+    type: [NarrativeResponseDto],
   })
   async getRecentMessages(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
-  ): Promise<Array<{ role: string; narrative: string; timestamp: Date; instructions: ReadonlyArray<import('../dto/response/GameInstructionDto.js').GameInstructionDto> }>> {
-    const userId = req.user._id.toString();
+  ): Promise<NarrativeResponseDto[]> {
+    const userId = req.user.id;
     const messages = await this.narrativeService.getNarrativeHistory(userId, characterId);
-    return messages.map(msg => ({
-      role: msg.role,
+    return messages.map(msg => new NarrativeResponseDto({
       narrative: msg.narrative,
-      timestamp: msg.timestamp,
-      instructions: msg.instructions,
+      instructions: [...msg.instructions],
     }));
   }
 
@@ -64,10 +107,7 @@ export class NarrativeController {
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ): Promise<void> {
-    const userId = req.user._id.toString();
+    const userId = req.user.id;
     await this.narrativeService.clearNarrative(userId, characterId);
   }
-
-  // NOTE: The chat message endpoint (POST :characterId) should use the ChatOrchestrator
-  // which integrates with GeminiTextService for AI narrative generation
 }

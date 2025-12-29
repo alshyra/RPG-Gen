@@ -43,7 +43,7 @@ export function useArchetypes(
 
   const allArchetypes = useQuery({
     queryKey: archetypesKeys.all(),
-    queryFn: archetypesApi.getAllArchetypes,
+    queryFn: () => archetypesApi.getAllArchetypes(),
     enabled: computed(() => options?.enabled !== false),
   });
 

@@ -1,15 +1,15 @@
 import { useCharacter, useChat } from "@rpg-gen/api-client";
 import {
-  RollInstructionMessageDto,
-  HpInstructionMessageDto,
-  XpInstructionMessageDto,
-  CombatStartInstructionMessageDto,
+  type RollInstructionMessageDto,
+  type HpInstructionMessageDto,
+  type XpInstructionMessageDto,
+  type CombatStartInstructionMessageDto,
   type GameInstructionDto,
   isRollInstruction,
   isHpInstruction,
   isXpInstruction,
   isCombatStartInstruction,
-} from "@rpg-gen/shared";
+} from "@/types/game-instructions";
 import { storeToRefs } from "pinia";
 import { useCombat } from "./useCombat";
 import { useRoute, useRouter } from "vue-router";

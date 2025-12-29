@@ -1,5 +1,5 @@
 import { useDice } from "@rpg-gen/api-client";
-import type { ChatMessageDto, DiceResultDto, GameInstructionDto } from "@rpg-gen/shared";
+import type { DiceResultDto } from "@rpg-gen/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { RollModalData } from "@/interfaces";
@@ -7,6 +7,13 @@ import type { RollModalData } from "@/interfaces";
 type DisplayRole = "user" | "assistant" | "system";
 
 type StoredRole = "user" | "assistant" | "system";
+
+// Message type for UI display - stores role and narrative text
+interface GameMessage {
+  role: StoredRole;
+  narrative: string;
+  timestamp?: number;
+}
 
 // Map display roles to stored roles
 function toStoredRole(role: DisplayRole): StoredRole {
@@ -32,8 +39,8 @@ export const useGameStore = defineStore("gameStore", () => {
   const showRollModal = ref(false);
 
   // --- UI State: Game session/message/pending instruction ---
-  const messages = ref<(ChatMessageDto & { timestamp?: number })[]>([]);
-  const pendingInstruction = ref<GameInstructionDto | null>(null);
+  const messages = ref<GameMessage[]>([]);
+  const pendingInstruction = ref<{ type: string; [key: string]: unknown } | null>(null);
   const playerText = ref("");
   const isInitializing = ref(false);
   const sending = ref(false);
