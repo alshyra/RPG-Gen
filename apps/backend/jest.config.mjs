@@ -13,23 +13,27 @@ export default {
     '<rootDir>/src/bounded-contexts/**/tests/*.test.ts',
   ],
   
-  // Ignore integration tests for now (they need special setup)
+  // Only ignore node_modules and dist
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    '<rootDir>/test/integration/',
   ],
   
   // Module resolution for ESM and path aliases
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^#shared$': '<rootDir>/src/shared/domain/index.js',
+    // Strip .js extension first, then apply path mapping
+    '^#shared$': '<rootDir>/src/shared/domain/index.ts',
+    '^#shared/(.*)\\.js$': '<rootDir>/src/shared/domain/$1.ts',
     '^#shared/(.*)$': '<rootDir>/src/shared/domain/$1',
+    '^#character/(.*)\\.js$': '<rootDir>/src/bounded-contexts/character/$1.ts',
     '^#character/(.*)$': '<rootDir>/src/bounded-contexts/character/$1',
+    '^#archetype/(.*)\\.js$': '<rootDir>/src/bounded-contexts/archetype/$1.ts',
     '^#archetype/(.*)$': '<rootDir>/src/bounded-contexts/archetype/$1',
+    '^#combat/(.*)\\.js$': '<rootDir>/src/bounded-contexts/combat/$1.ts',
     '^#combat/(.*)$': '<rootDir>/src/bounded-contexts/combat/$1',
-    '^#game-data$': '<rootDir>/src/bounded-contexts/game-data/index.js',
-    '^#workflows$': '<rootDir>/src/workflows/index.js',
+    '^#game-data$': '<rootDir>/src/bounded-contexts/game-data/index.ts',
+    '^#workflows$': '<rootDir>/src/workflows/index.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   

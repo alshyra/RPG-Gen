@@ -11,6 +11,37 @@ import fs from "fs";
 import type { INestApplication } from "@nestjs/common";
 import type { Connection } from "mongoose";
 import { getConnectionToken } from "@nestjs/mongoose";
+import { GeminiImageService } from "../../src/bounded-contexts/character/infrastructure/external/GeminiImageService.js";
+import { GeminiTextService } from "../../src/bounded-contexts/game-narrative/infrastructure/external/index.js";
+
+// Initialize configuration for tests
+let configInitialized = false;
+async function ensureConfigLoaded() {
+  if (configInitialized) return;
+  
+  // Set NODE_ENV to development for tests to use development.json config
+  process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+  
+  // Load the config
+  const { loadConfig } = await import("../../src/config.js");
+  try {
+    loadConfig();
+  } catch {
+    // Config may already be loaded, ignore
+  }
+  configInitialized = true;
+}
+
+// Mock for GeminiImageService to avoid API calls in tests
+const mockGeminiImageService = {
+  generateImage: async () => "data:image/svg+xml;base64,mock-image",
+};
+
+// Mock for GeminiTextService to avoid API calls in tests
+const mockGeminiTextService = {
+  chat: async () => ({ narrative: "Mock response from AI" }),
+  generateText: async () => "Mock generated text",
+};
 
 export interface TestAppContext {
   app: INestApplication;
@@ -32,6 +63,9 @@ export async function createTestApp(
     useClass?: unknown;
   }>,
 ): Promise<TestAppContext> {
+  // Ensure config is loaded before creating modules that depend on it
+  await ensureConfigLoaded();
+  
   // Start in-memory MongoDB
   // Use a unique download/cache directory per test run to avoid lockfile collisions
   // seen in concurrent CI runners or previous cached binaries. We pick a tmpdir path
@@ -47,7 +81,11 @@ export async function createTestApp(
     imports: [MongooseModule.forRoot(mongoUri), ...(imports ?? [])],
   });
 
-  // Apply provider overrides (e.g., mock DiceService or JWT guard)
+  // Always mock Gemini services to avoid external API calls
+  moduleBuilder = moduleBuilder.overrideProvider(GeminiImageService).useValue(mockGeminiImageService);
+  moduleBuilder = moduleBuilder.overrideProvider(GeminiTextService).useValue(mockGeminiTextService);
+
+  // Apply additional provider overrides (e.g., mock DiceService or JWT guard)
   if (overrides) {
     overrides.forEach(override => {
       if (override.useClass) {

@@ -1,23 +1,6 @@
 // GENERATED FROM OpenAPI spec - do not edit manually
 
 export interface paths {
-    "/api/aptitudes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all aptitudes definitions */
-        get: operations["AptitudeController_getAll"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/auth/google": {
         parameters: {
             query?: never;
@@ -86,7 +69,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/chat/{characterId}": {
+    "/api/chat/{characterId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get narrative history with a character */
+        get: operations["NarrativeController_getNarrativeHistory"];
+        put?: never;
+        post?: never;
+        /** Clear narrative history */
+        delete: operations["NarrativeController_clearNarrative"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{characterId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get recent messages from narrative */
+        get: operations["NarrativeController_getRecentMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dice": {
         parameters: {
             query?: never;
             header?: never;
@@ -95,25 +113,110 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Send prompt to Gemini (chat) */
-        post: operations["ChatController_chat"];
+        /** Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20 */
+        post: operations["DiceController_roll"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/chat/{characterId}/history": {
+    "/api/combat/{characterId}/start": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get conversation history for a character */
-        get: operations["ChatController_getHistory"];
+        get?: never;
+        put?: never;
+        /** Initialize combat with enemies */
+        post: operations["CombatController_startCombat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/action": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute any combat action (attack, dash, disengage, spell, class feature) */
+        post: operations["CombatController_action"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current combat status */
+        get: operations["CombatController_getStatus"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/end-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End current player activation and advance turn (triggers enemy actions) */
+        post: operations["CombatController_endTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/flee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Force end current combat (flee) */
+        post: operations["CombatController_flee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/combat/{characterId}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute combatant movement on the grid */
+        post: operations["CombatController_move"];
         delete?: never;
         options?: never;
         head?: never;
@@ -225,6 +328,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/character/avatar/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate character avatar from description */
+        post: operations["CharacterAvatarController_generateAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/characters/{characterId}/inventory": {
         parameters: {
             query?: never;
@@ -311,125 +431,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/combat/{characterId}/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Initialize combat with enemies */
-        post: operations["CombatController_startCombat"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/combat/{characterId}/action": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Execute any combat action (attack, dash, disengage, spell, class feature) */
-        post: operations["CombatController_action"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/combat/{characterId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current combat status */
-        get: operations["CombatController_getStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/combat/{characterId}/end-turn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** End current player activation and advance turn (triggers enemy actions) */
-        post: operations["CombatController_endTurn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/combat/{characterId}/flee": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Force end current combat (flee) */
-        post: operations["CombatController_flee"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/combat/{characterId}/move": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Execute combatant movement on the grid */
-        post: operations["CombatController_move"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/dice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Roll dice expression like 1d6+2, optionally with advantage/disadvantage for d20 */
-        post: operations["DiceController_roll"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/classes": {
         parameters: {
             query?: never;
@@ -437,7 +438,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all available classes */
+        /** Get all available character classes */
         get: operations["ClassesController_getAllClasses"];
         put?: never;
         post?: never;
@@ -464,7 +465,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/classes/{className}/voies": {
+    "/api/classes/{className}/talent-trees": {
         parameters: {
             query?: never;
             header?: never;
@@ -498,159 +499,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Generate image from prompt */
-        post: operations["ImageController_generate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/image/generate-avatar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Generate character avatar from description */
-        post: operations["ImageController_generateAvatar"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["HealthController_getHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/classes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get available classes for character creation */
-        get: operations["ProgressionController_getAvailableClasses"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/races": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get available races for character creation */
-        get: operations["ProgressionController_getAvailableRaces"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/{characterId}/select-class": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Select a class for a character and assign starter pack */
-        post: operations["ProgressionController_selectClass"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/{characterId}/select-race": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Select a race for a character and apply bonuses */
-        post: operations["ProgressionController_selectRace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/{characterId}/unlock-rank": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Unlock a rank in a talent tree (voie) */
-        post: operations["ProgressionController_unlockRank"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/progression/{characterId}/first-talent": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Select first talent during character creation (unlock rank 1 + stat bonus) */
-        post: operations["ProgressionController_selectFirstTalent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/races": {
+    "/api/game-data/races": {
         parameters: {
             query?: never;
             header?: never;
@@ -667,7 +516,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/races/{raceId}": {
+    "/api/game-data/races/{raceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -684,190 +533,243 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/aptitudes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all available aptitudes */
+        get: operations["AptitudesController_getAllAptitudes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/aptitudes/by-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get multiple aptitudes by IDs */
+        get: operations["AptitudesController_getByIds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/aptitudes/{aptitudeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an aptitude by ID */
+        get: operations["AptitudesController_getAptitude"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all item definitions */
+        get: operations["ItemsController_getAllItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/weapons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all weapon definitions */
+        get: operations["ItemsController_getWeapons"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/armors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all armor definitions */
+        get: operations["ItemsController_getArmors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/consumables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all consumable definitions */
+        get: operations["ItemsController_getConsumables"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/starters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all starter items */
+        get: operations["ItemsController_getStarterItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/by-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get multiple items by IDs */
+        get: operations["ItemsController_getByIds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/{definitionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an item by definition ID */
+        get: operations["ItemsController_getItem"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HealthController_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/health/liveness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HealthController_liveness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        AptitudeScalingDto: {
-            /** @description Stat used for scaling (vigor, finesse, mind, survival) */
-            attribute?: string;
-            /** @description Scaling divisor (e.g., 5 = +1 every 5 levels) */
-            scalingDivisor: number;
-        };
-        AptitudeResponseDto: {
-            /** @description Unique aptitude ID */
-            aptitudeId: string;
-            /** @description Display name */
-            name: string;
-            /** @description Mechanical description */
-            description: string;
-            /** @description Narrative description for AI */
-            descriptionForAi?: string;
-            /** @description Action points cost */
-            paCost: number;
-            /** @description Movement points cost */
-            pmCost?: number;
-            /** @description Cooldown in turns */
-            cooldown: number;
-            /** @description Target type (self, enemy, ally, zone, all_enemies, all_allies) */
-            targetType: string;
-            /** @description Range in tiles (1 = melee) */
-            range: number;
-            /** @description Area of effect radius in tiles (0 = single target) */
-            areaOfEffect?: number;
-            /** @description Category (attack, defense, support, movement, utility) */
-            category: string;
-            /** @description Base power value */
-            basePower?: number;
-            /** @description Scaling configuration */
-            scaling?: components["schemas"]["AptitudeScalingDto"];
-            /** @description Status effects applied */
-            appliesStatus?: string[];
-            /** @description Duration of applied status effects */
-            statusDuration?: number;
-            /** @description Class restriction (guerrier, rogue, mage) or undefined for universal */
-            classRestriction?: string;
-            /** @description Voie ID this aptitude belongs to */
-            voieId?: string;
-            /** @description Minimum rank required to unlock (1-5) */
-            rankRequired?: number;
-            /** @description Is this a starting aptitude? */
-            isStarting?: boolean;
-            /** @description Damage type (physical, magical, fire, ice, etc.) */
-            damageType?: string;
-            /** @description Current cooldown turns remaining (0 = ready) */
-            currentCooldown?: number;
-        };
         AuthProfileDto: {
-            /** @description Id de l'utilisateur */
+            /** @example 507f1f77bcf86cd799439011 */
             id: string;
-            /** @description Email de l'utilisateur */
+            /** @example user@example.com */
             email: string;
-            /** @description Nom affiché de l'utilisateur */
-            displayName: string;
-            /** @description URL de la photo de profil de l'utilisateur */
+            /** @example John Doe */
+            displayName?: string;
+            /** @example https://... */
             picture: string;
         };
-        RollMetaDto: {
-            /** @description Attack bonus to apply */
-            attackBonus?: number;
-            /** @description Target name */
-            target?: string;
-            /** @description Target armor class */
-            targetAc?: number;
-            /** @description Damage dice expression */
-            damageDice?: string;
-            /** @description Damage bonus to apply */
-            damageBonus?: number;
-            /** @description Action type (e.g., attack, damage) */
-            action?: string;
+        ConversationResponseDto: {
+            /** @description User ID */
+            userId: string;
+            /** @description Character ID */
+            characterId: string;
+            /** @description Session ID */
+            sessionId: string;
+            /** @description Messages */
+            messages: string[];
         };
-        RollInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "roll";
-            /** @description Dice expression (e.g., 1d20+5) */
-            dices: string;
-            /** @description Semantic modifier label (e.g., "wisdom (Perception)") */
-            modifierLabel?: string;
-            /** @description Numeric modifier to apply to the roll (e.g., +3) */
-            modifierValue?: number;
-            /** @description Roll description */
-            description?: string;
-            /**
-             * @description Advantage type
-             * @enum {string}
-             */
-            advantage?: "advantage" | "disadvantage" | "none";
-            /** @description Optional metadata for combat rolls */
-            meta?: components["schemas"]["RollMetaDto"];
+        DiceRequestDto: {
+            expr: string;
+            advantage?: string;
         };
-        HpInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "hp";
-            /** @description Amount of HP change */
-            hp: number;
-        };
-        XpInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "xp";
-            /** @description Amount of XP gained */
-            xp: number;
-        };
-        SpellInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "spell";
-            /**
-             * @description Spell action
-             * @enum {string}
-             */
-            action: "learn" | "cast" | "forget";
-            /** @description Spell name */
-            name: string;
-            /** @description Spell level */
-            level?: number;
-            /** @description Spell school */
-            school?: string;
-            /** @description Spell description */
-            description?: string;
-            /** @description Spell definition ID for deterministic persistence */
-            definitionId: string;
-            /** @description Spell metadata */
-            meta?: {
-                [key: string]: unknown;
-            };
-        };
-        InventoryInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "inventory";
-            /**
-             * @description Inventory action
-             * @enum {string}
-             */
-            action: "add" | "remove" | "use";
-            /** @description Item name */
-            name: string;
-            /** @description Inventory item _id (required for use action) */
-            itemId?: string;
-            /** @description Quantity */
-            quantity?: number;
-            /** @description Item description */
-            description?: string;
-        };
-        CombatEndDto: {
-            /** @description Victory state */
-            victory: boolean;
-            /** @description XP gained */
-            xp_gained: number;
-            /** @description Player's HP at the end */
-            player_hp: number;
-            /** @description Enemies that were defeated */
-            enemies_defeated: string[];
-            /** @description Flee indicator */
-            fled?: boolean;
-        };
-        CombatEndInstructionMessageDto: {
-            /** @description Combat end information */
-            combat_end: components["schemas"]["CombatEndDto"];
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "combat_end";
+        DiceResultDto: {
+            /** @description Individual dice roll results */
+            rolls: number[];
+            /** @description Modifier applied to the total */
+            modifierValue: number;
+            /** @description Total result (sum of rolls + modifier) */
+            total: number;
         };
         CombatStartEntryDto: {
             /** @description Enemy name */
@@ -883,35 +785,282 @@ export interface components {
             /** @description Damage bonus (optional) */
             damage_bonus?: number;
         };
-        CombatStartInstructionMessageDto: {
-            /**
-             * @description Instruction type
-             * @enum {string}
-             */
-            type: "combat_start";
-            /** @description Combat start entries */
+        CombatStartRequestDto: {
+            /** @description Array of enemies to initialize combat with */
             combat_start: components["schemas"]["CombatStartEntryDto"][];
         };
-        ChatMessageDto: {
+        TacticalStats: {
+            /** @description Vigor stat */
+            vigor: number;
+            /** @description Finesse stat */
+            finesse: number;
+            /** @description Mind stat */
+            mind: number;
+            /** @description Survival stat */
+            survival: number;
+        };
+        CombatantDto: {
+            /** @description ID of the combatant (player character or enemy) */
+            id: string;
+            /** @description Combatant name */
+            name: string;
+            /** @description Initiative order value (finesse-based) */
+            initiative: number;
+            /** @description Whether combatant is player character */
+            isPlayer: boolean;
+            /** @description Current hit points */
+            hp?: number;
+            /** @description Maximum hit points */
+            hpMax?: number;
+            /** @description Current action points (PA) */
+            pa?: number;
+            /** @description Maximum action points (PA) */
+            paMax?: number;
+            /** @description Current movement points (PM) */
+            pm?: number;
+            /** @description Maximum movement points (PM) */
+            pmMax?: number;
+            /** @description Combatant level (1-20) */
+            level?: number;
+            /** @description Class name (guerrier, rogue, mage) */
+            className?: string;
+            /** @description Base power for attacks (used in damage formula) */
+            basePower?: number;
+            /** @description Which attribute scales damage (vigor, finesse, mind, survival) */
+            scalingAttribute?: string;
+            /** @description Combat stats (vigor, finesse, mind, survival) */
+            stats?: components["schemas"]["TacticalStats"];
+            /** @description Combat side (player or enemy) */
+            side?: string;
+            /** @description Grid position for tactical combat */
+            position?: Record<string, never>;
+        };
+        CombatEndDto: {
+            /** @description Victory state */
+            victory: boolean;
+            /** @description XP gained */
+            xp_gained: number;
+            /** @description Player's HP at the end */
+            player_hp: number;
+            /** @description Enemies that were defeated */
+            enemies_defeated: string[];
+            /** @description Flee indicator */
+            fled?: boolean;
+        };
+        CombatStateDto: {
+            /** @description Character ID */
+            characterId: string;
+            /** @description Whether currently in combat */
+            inCombat: boolean;
+            /** @description Active enemies */
+            enemies: components["schemas"]["CombatantDto"][];
+            /** @description Player state */
+            player: components["schemas"]["CombatantDto"];
+            /** @description Turn order for combat */
+            turnOrder: components["schemas"]["CombatantDto"][];
+            /** @description Index of current turn in turnOrder */
+            currentTurnIndex: number;
+            /** @description Current round number */
+            roundNumber: number;
+            /** @description Narrative summary of current combat */
+            narrative?: string;
+            /** @description Active status effects (stunned, burning, etc.) */
+            activeEffects?: string[];
+            /** @description Combat end result, populated when combat ends (inCombat=false) */
+            combatEnd?: components["schemas"]["CombatEndDto"];
+        };
+        CombatActionRequestDto: {
+            /** @description Aptitude ID to use (including basic attack, dash, etc.) */
+            aptitudeId: string;
+            /** @description Target combatant ID (for aptitudes targeting enemies) */
+            targetId?: string;
+        };
+        CombatDiceResultDto: {
+            /** @description Individual dice roll results */
+            rolls: number[];
+            /** @description Modifier applied to the total */
+            modifierValue: number;
+            /** @description Total result (sum of rolls + modifier) */
+            total: number;
+            /** @description Total damage dealt */
+            damageTotal: number;
+            /** @description Whether this was a critical hit */
+            isCrit: boolean;
+        };
+        CombatActionResponseDto: {
+            /** @description Whether the action was successful */
+            success: boolean;
             /**
-             * @description Message role
+             * @description Cost of the action
              * @enum {string}
              */
-            role: "user" | "assistant" | "system";
-            /** @description Narrative text (for assistant messages) */
-            narrative: string;
-            /** @description Game instructions (for assistant messages) */
-            instructions?: (components["schemas"]["RollInstructionMessageDto"] | components["schemas"]["HpInstructionMessageDto"] | components["schemas"]["XpInstructionMessageDto"] | components["schemas"]["SpellInstructionMessageDto"] | components["schemas"]["InventoryInstructionMessageDto"] | components["schemas"]["CombatStartInstructionMessageDto"])[];
+            cost: "action" | "bonus-action" | "reaction" | "free";
+            /** @description Whether attack/spell hit (if applicable) */
+            hit?: boolean;
+            /** @description Damage dealt (if applicable) */
+            damage?: number;
+            /** @description Healing restored (if applicable) */
+            healing?: number;
+            /** @description Description of action result */
+            description?: string;
+            /** @description Error message if action failed */
+            errorMessage?: string;
+            /** @description Dice roll result (for attacks) */
+            diceResult?: components["schemas"]["DiceResultDto"];
+            /** @description Damage dice result details */
+            damageDiceResult?: components["schemas"]["CombatDiceResultDto"];
+            /** @description Total damage dealt (convenience field) */
+            damageTotal?: number;
+            /** @description Whether the attack was a critical hit */
+            isCrit?: boolean;
+            /** @description Narrative text (e.g., for combat end) */
+            narrative?: string;
+        };
+        EnemyAttackLogDto: {
+            /**
+             * @description ID of the attacking enemy
+             * @example goblin-1
+             */
+            attackerId: string;
+            /**
+             * @description Name of the attacking enemy
+             * @example Goblin
+             */
+            attackerName: string;
+            /**
+             * @description ID of the target (player characterId)
+             * @example char-123
+             */
+            targetId: string;
+            /**
+             * @description Whether the attack hit the target
+             * @example true
+             */
+            hit: boolean;
+            /** @description Attack roll result */
+            attackRoll?: components["schemas"]["DiceResultDto"];
+            /** @description Damage roll result (only present if hit) */
+            damageRoll?: components["schemas"]["CombatDiceResultDto"];
+            /**
+             * @description Total damage dealt (0 if miss)
+             * @example 5
+             */
+            damageTotal?: number;
+            /**
+             * @description Whether the attack was a critical hit
+             * @example false
+             */
+            isCrit?: boolean;
+        };
+        EndPlayerTurnResponseDto: {
+            /**
+             * @description The current round number after enemy turn
+             * @example 2
+             */
+            roundNumber: number;
+            /** @description List of enemy attack logs in execution order */
+            attackLogs: components["schemas"]["EnemyAttackLogDto"][];
+            /**
+             * @description Total damage dealt to the player this turn
+             * @example 12
+             */
+            totalDamageToPlayer: number;
+            /**
+             * @description Whether the player was defeated this turn
+             * @example false
+             */
+            playerDefeated?: boolean;
+            /** @description Updated combat state after all enemy actions */
+            combatState: components["schemas"]["CombatStateDto"];
+        };
+        CombatEndResultDto: {
+            /** @description Combat end information */
+            combat_end: components["schemas"]["CombatEndDto"];
+        };
+        CombatEndResponseDto: {
+            /** @description Whether the operation succeeded */
+            success: boolean;
+            /** @description Human readable message */
+            message: string;
+            /** @description Optional instructions returned after ending combat */
+            instructions?: components["schemas"]["CombatEndResultDto"][];
+        };
+        GridPositionDto: {
+            /** @description X coordinate on combat grid */
+            x: number;
+            /** @description Y coordinate on combat grid */
+            y: number;
+        };
+        MovementRequestDto: {
+            /** @description ID of the combatant to move */
+            combatantId: string;
+            /** @description Path of grid positions to traverse */
+            path: components["schemas"]["GridPositionDto"][];
+        };
+        MovementEventDto: {
+            /**
+             * @description Event type
+             * @enum {string}
+             */
+            type: "move" | "opportunity-attack" | "reaction" | "movement-interrupted";
+            /** @description Actor combatant ID */
+            actorId: string;
+            /** @description Target combatant ID (for attacks) */
+            targetId?: string;
+            /** @description Damage dealt (if applicable) */
+            damage?: number;
+            /** @description Whether attack hit */
+            hit?: boolean;
+            /** @description Description of event */
+            description?: string;
+        };
+        MovementResponseDto: {
+            /** @description Whether movement was successful */
+            success: boolean;
+            /** @description Final position after movement */
+            finalPosition: components["schemas"]["GridPositionDto"];
+            /** @description Ordered list of events that occurred during movement */
+            events: components["schemas"]["MovementEventDto"][];
+            /** @description Remaining movement speed after this action */
+            remainingMovement: number;
+            /** @description Error message if movement failed */
+            errorMessage?: string;
         };
         RaceResponseDto: {
-            /** @description Race ID */
-            id?: string;
-            /** @description Race name */
-            name?: string;
-            /** @description Ability score modifiers */
-            mods: {
-                [key: string]: number;
-            };
+            /**
+             * @description Race ID (unique identifier)
+             * @example humain
+             */
+            id: string;
+            /**
+             * @description Display name
+             * @example Humain
+             */
+            name: string;
+            /**
+             * @description Trait name
+             * @example Polyvalent
+             */
+            trait: string;
+            /** @description Trait effect details */
+            traitEffect: components["schemas"]["TraitEffectResponseDto"];
+            /** @description Stat bonuses */
+            bonuses: components["schemas"]["RaceBonusesResponseDto"];
+            /**
+             * @description Description for AI
+             * @example Polyvalent, gagne +1 PA au premier tour.
+             */
+            descriptionForAi?: string;
+            /**
+             * @description UI color (hex)
+             * @example #3b82f6
+             */
+            color: string;
+            /**
+             * @description Icon emoji
+             * @example 👤
+             */
+            icon: string;
         };
         SkillResponseDto: {
             /** @description Skill name */
@@ -931,21 +1080,53 @@ export interface components {
             /** @description Quantity */
             qty?: number;
             /** @description Item description */
-            description: string;
+            description?: string;
             /** @description Is equipped */
             equipped: boolean;
             /** @description Arbitrary item meta */
             meta: components["schemas"]["WeaponMeta"] | components["schemas"]["ArmorMeta"] | components["schemas"]["ConsumableMeta"] | components["schemas"]["PackMeta"] | components["schemas"]["ToolMeta"];
         };
-        TacticalStats: {
-            /** @description Vigor stat */
-            vigor: number;
-            /** @description Finesse stat */
-            finesse: number;
-            /** @description Mind stat */
-            mind: number;
-            /** @description Survival stat */
-            survival: number;
+        AptitudeScalingDto: {
+            /** @description Stat used for scaling (vigor, finesse, mind, survival) */
+            attribute?: string;
+            /** @description Scaling divisor (e.g., 5 = +1 every 5 levels) */
+            scalingDivisor: number;
+        };
+        AptitudeResponseDto: {
+            /**
+             * @description Aptitude ID (unique identifier)
+             * @example frappe_simple
+             */
+            id: string;
+            /**
+             * @description Display name
+             * @example Frappe simple
+             */
+            name: string;
+            /**
+             * @description Description
+             * @example Une attaque basique
+             */
+            description?: string;
+            /**
+             * @description Action points cost
+             * @example 2
+             */
+            paCost: number;
+            /**
+             * @description Cooldown in turns
+             * @example 0
+             */
+            cooldown?: number;
+            /** @description Targeting information */
+            targeting: components["schemas"]["AptitudeTargetingResponseDto"];
+            /** @description Effects list */
+            effects?: components["schemas"]["AptitudeEffectResponseDto"][];
+            /**
+             * @description Icon emoji
+             * @example ⚔️
+             */
+            icon?: string;
         };
         TalentRankDto: {
             /**
@@ -1236,6 +1417,14 @@ export interface components {
             /** @description Talent tree progression */
             voies?: components["schemas"]["VoieProgressDto"][];
         };
+        GenerateAvatarRequestDto: {
+            /** @description UUID of the character */
+            characterId: string;
+        };
+        AvatarResponseDto: {
+            /** @description Generated avatar image URL or base64 data */
+            imageUrl: string;
+        };
         WeaponMeta: {
             /**
              * @description Type discriminator for weapons
@@ -1375,270 +1564,70 @@ export interface components {
             /** @description Updated character */
             character: components["schemas"]["CharacterResponseDto"];
         };
-        CombatStartRequestDto: {
-            /** @description Array of enemies to initialize combat with */
-            combat_start: components["schemas"]["CombatStartEntryDto"][];
-        };
-        CombatantDto: {
-            /** @description ID of the combatant (player character or enemy) */
-            id: string;
-            /** @description Combatant name */
-            name: string;
-            /** @description Initiative order value (finesse-based) */
-            initiative: number;
-            /** @description Whether combatant is player character */
-            isPlayer: boolean;
-            /** @description Current hit points */
-            hp?: number;
-            /** @description Maximum hit points */
-            hpMax?: number;
-            /** @description Current action points (PA) */
-            pa?: number;
-            /** @description Maximum action points (PA) */
-            paMax?: number;
-            /** @description Current movement points (PM) */
-            pm?: number;
-            /** @description Maximum movement points (PM) */
-            pmMax?: number;
-            /** @description Combatant level (1-20) */
-            level?: number;
-            /** @description Class name (guerrier, rogue, mage) */
-            className?: string;
-            /** @description Base power for attacks (used in damage formula) */
-            basePower?: number;
-            /** @description Which attribute scales damage (vigor, finesse, mind, survival) */
-            scalingAttribute?: string;
-            /** @description Combat stats (vigor, finesse, mind, survival) */
-            stats?: components["schemas"]["TacticalStats"];
-            /** @description Combat side (player or enemy) */
-            side?: string;
-            /** @description Grid position for tactical combat */
-            position?: Record<string, never>;
-        };
-        CombatStateDto: {
-            /** @description Character ID */
-            characterId: string;
-            /** @description Whether currently in combat */
-            inCombat: boolean;
-            /** @description Active enemies */
-            enemies: components["schemas"]["CombatantDto"][];
-            /** @description Player state */
-            player: components["schemas"]["CombatantDto"];
-            /** @description Turn order for combat */
-            turnOrder: components["schemas"]["CombatantDto"][];
-            /** @description Index of current turn in turnOrder */
-            currentTurnIndex: number;
-            /** @description Current round number */
-            roundNumber: number;
-            /** @description Narrative summary of current combat */
-            narrative?: string;
-            /** @description Active status effects (stunned, burning, etc.) */
-            activeEffects?: string[];
-            /** @description Combat end result, populated when combat ends (inCombat=false) */
-            combatEnd?: components["schemas"]["CombatEndDto"];
-        };
-        CombatActionRequestDto: {
-            /** @description Aptitude ID to use (including basic attack, dash, etc.) */
-            aptitudeId: string;
-            /** @description Target combatant ID (for aptitudes targeting enemies) */
-            targetId?: string;
-        };
-        DiceResultDto: {
-            /** @description Individual dice roll results */
-            rolls: number[];
-            /** @description Modifier applied to the total */
-            modifierValue: number;
-            /** @description Total result (sum of rolls + modifier) */
-            total: number;
-        };
-        CombatDiceResultDto: {
-            /** @description Individual dice roll results */
-            rolls: number[];
-            /** @description Modifier applied to the total */
-            modifierValue: number;
-            /** @description Total result (sum of rolls + modifier) */
-            total: number;
-            /** @description Total damage dealt */
-            damageTotal: number;
-            /** @description Whether this was a critical hit */
-            isCrit: boolean;
-        };
-        CombatActionResponseDto: {
-            /** @description Whether the action was successful */
-            success: boolean;
-            /**
-             * @description Cost of the action
-             * @enum {string}
-             */
-            cost: "action" | "bonus-action" | "reaction" | "free";
-            /** @description Whether attack/spell hit (if applicable) */
-            hit?: boolean;
-            /** @description Damage dealt (if applicable) */
-            damage?: number;
-            /** @description Healing restored (if applicable) */
-            healing?: number;
-            /** @description Description of action result */
-            description?: string;
-            /** @description Error message if action failed */
-            errorMessage?: string;
-            /** @description Dice roll result (for attacks) */
-            diceResult?: components["schemas"]["DiceResultDto"];
-            /** @description Damage dice result details */
-            damageDiceResult?: components["schemas"]["CombatDiceResultDto"];
-            /** @description Total damage dealt (convenience field) */
-            damageTotal?: number;
-            /** @description Whether the attack was a critical hit */
-            isCrit?: boolean;
-            /** @description Narrative text (e.g., for combat end) */
-            narrative?: string;
-        };
-        EnemyAttackLogDto: {
-            /**
-             * @description ID of the attacking enemy
-             * @example goblin-1
-             */
-            attackerId: string;
-            /**
-             * @description Name of the attacking enemy
-             * @example Goblin
-             */
-            attackerName: string;
-            /**
-             * @description ID of the target (player characterId)
-             * @example char-123
-             */
-            targetId: string;
-            /**
-             * @description Whether the attack hit the target
-             * @example true
-             */
-            hit: boolean;
-            /** @description Attack roll result */
-            attackRoll?: components["schemas"]["DiceResultDto"];
-            /** @description Damage roll result (only present if hit) */
-            damageRoll?: components["schemas"]["CombatDiceResultDto"];
-            /**
-             * @description Total damage dealt (0 if miss)
-             * @example 5
-             */
-            damageTotal?: number;
-            /**
-             * @description Whether the attack was a critical hit
-             * @example false
-             */
-            isCrit?: boolean;
-        };
-        EndPlayerTurnResponseDto: {
-            /**
-             * @description The current round number after enemy turn
-             * @example 2
-             */
-            roundNumber: number;
-            /** @description List of enemy attack logs in execution order */
-            attackLogs: components["schemas"]["EnemyAttackLogDto"][];
-            /**
-             * @description Total damage dealt to the player this turn
-             * @example 12
-             */
-            totalDamageToPlayer: number;
-            /**
-             * @description Whether the player was defeated this turn
-             * @example false
-             */
-            playerDefeated?: boolean;
-            /** @description Updated combat state after all enemy actions */
-            combatState: components["schemas"]["CombatStateDto"];
-        };
-        CombatEndResultDto: {
-            /** @description Combat end information */
-            combat_end: components["schemas"]["CombatEndDto"];
-        };
-        CombatEndResponseDto: {
-            /** @description Whether the operation succeeded */
-            success: boolean;
-            /** @description Human readable message */
-            message: string;
-            /** @description Optional instructions returned after ending combat */
-            instructions?: components["schemas"]["CombatEndResultDto"][];
-        };
-        GridPositionDto: {
-            /** @description X coordinate on combat grid */
-            x: number;
-            /** @description Y coordinate on combat grid */
-            y: number;
-        };
-        MovementRequestDto: {
-            /** @description ID of the combatant to move */
-            combatantId: string;
-            /** @description Path of grid positions to traverse */
-            path: components["schemas"]["GridPositionDto"][];
-        };
-        MovementEventDto: {
-            /**
-             * @description Event type
-             * @enum {string}
-             */
-            type: "move" | "opportunity-attack" | "reaction" | "movement-interrupted";
-            /** @description Actor combatant ID */
-            actorId: string;
-            /** @description Target combatant ID (for attacks) */
-            targetId?: string;
-            /** @description Damage dealt (if applicable) */
-            damage?: number;
-            /** @description Whether attack hit */
-            hit?: boolean;
-            /** @description Description of event */
-            description?: string;
-        };
-        MovementResponseDto: {
-            /** @description Whether movement was successful */
-            success: boolean;
-            /** @description Final position after movement */
-            finalPosition: components["schemas"]["GridPositionDto"];
-            /** @description Ordered list of events that occurred during movement */
-            events: components["schemas"]["MovementEventDto"][];
-            /** @description Remaining movement speed after this action */
-            remainingMovement: number;
-            /** @description Error message if movement failed */
-            errorMessage?: string;
-        };
-        DiceRequestDto: {
-            expr: string;
-            advantage?: string;
-        };
-        BaseStatsDto: {
+        ClassStatsResponseDto: {
             /**
              * @description Base HP
-             * @example 12
+             * @example 10
              */
-            hp_base: number;
+            hpBase: number;
             /**
-             * @description Base PA (action points)
+             * @description HP gained per level
+             * @example 4
+             */
+            hpGain: number;
+            /**
+             * @description Action Points
              * @example 6
              */
             pa: number;
             /**
-             * @description Base PM (movement points)
-             * @example 4
+             * @description Movement Points
+             * @example 3
              */
             pm: number;
         };
-        ClassDefinitionResponseDto: {
+        TalentRankResponseDto: {
             /**
-             * @description Class name
+             * @description Rank number (1-5)
+             * @example 1
+             */
+            rank: number;
+            /**
+             * @description Aptitude ID for this rank
+             * @example frappe_simple
+             */
+            aptitudeId: string;
+            /**
+             * @description Talent points cost
+             * @example 1
+             */
+            pointCost: number;
+        };
+        TalentTreeResponseDto: {
+            /**
+             * @description Tree name
+             * @example Voie du Guerrier
+             */
+            name: string;
+            /** @description Tree ranks */
+            ranks: components["schemas"]["TalentRankResponseDto"][];
+        };
+        ClassResponseDto: {
+            /**
+             * @description Class name (unique identifier)
              * @example guerrier
              */
             name: string;
-            /** @description Base stats for this class */
-            baseStats: components["schemas"]["BaseStatsDto"];
+            /** @description Base stats */
+            baseStats: components["schemas"]["ClassStatsResponseDto"];
             /**
-             * @description Proficiencies (finesse, vigueur, etc.)
+             * @description Proficiencies (stat types)
              * @example [
              *       "vigueur",
              *       "finesse"
              *     ]
              */
-            proficiencies: string[];
+            proficiencies?: string[];
             /**
              * @description Starting aptitude IDs
              * @example [
@@ -1646,133 +1635,28 @@ export interface components {
              *       "posture_defensive"
              *     ]
              */
-            startingAptitudes: string[];
+            startingAptitudes?: string[];
+            /** @description Talent trees */
+            talentTrees: components["schemas"]["TalentTreeResponseDto"][];
         };
-        TalentTreeDto: {
+        TraitEffectResponseDto: {
             /**
-             * @description Talent tree (voie) ID
-             * @example voie_guerrier_defense
-             */
-            id: string;
-            /**
-             * @description Talent tree name
-             * @example Voie de la Défense
-             */
-            name: string;
-            /** @description Ranks in this talent tree */
-            ranks: components["schemas"]["TalentRankDto"][];
-        };
-        ImageRequestDto: {
-            /** @description API token (optional) */
-            token?: string;
-            /** @description Image prompt */
-            prompt: string;
-            /** @description Model to use */
-            model?: string;
-        };
-        CharacterIdBodyDto: {
-            /** @description UUID of the character */
-            characterId: string;
-        };
-        AvatarResponseDto: {
-            /** @description Generated avatar image URL or base64 data */
-            imageUrl: string;
-        };
-        CharacterStatsDto: {
-            /**
-             * @description Vigor stat
-             * @example 3
-             */
-            vigor: number;
-            /**
-             * @description Finesse stat
-             * @example 1
-             */
-            finesse: number;
-            /**
-             * @description Mind stat
-             * @example 0
-             */
-            mind: number;
-            /**
-             * @description Survival stat
-             * @example 2
-             */
-            survival: number;
-        };
-        ClassBaseStatsDto: {
-            /**
-             * @description Base HP
-             * @example 12
-             */
-            hp: number;
-            /**
-             * @description Base PA (action points)
-             * @example 6
-             */
-            pa: number;
-            /**
-             * @description Base PM (movement points)
-             * @example 4
-             */
-            pm: number;
-            /** @description Base character stats */
-            stats: components["schemas"]["CharacterStatsDto"];
-        };
-        ClassMetadataDto: {
-            /**
-             * @description Class ID
-             * @example guerrier
-             */
-            id: string;
-            /**
-             * @description Internal class name
-             * @example guerrier
-             */
-            name: string;
-            /**
-             * @description Display name for UI
-             * @example Guerrier
-             */
-            displayName: string;
-            /**
-             * @description Class description
-             * @example Maître du combat rapproché, le Guerrier excelle en défense et en puissance brute.
-             */
-            description: string;
-            /** @description Base stats for the class */
-            baseStats: components["schemas"]["ClassBaseStatsDto"];
-            /**
-             * @description Color for UI (hex)
-             * @example #dc2626
-             */
-            color: string;
-            /**
-             * @description Icon emoji
-             * @example ⚔️
-             */
-            icon: string;
-        };
-        TraitEffectDto: {
-            /**
-             * @description Type of effect
-             * @example PA_BONUS
+             * @description Effect type
+             * @example pa_bonus
              */
             type: string;
             /**
-             * @description Numeric value of the effect
+             * @description Effect value
              * @example 1
              */
             value: number;
             /**
-             * @description Optional condition for the effect
-             * @example turn_1
+             * @description Condition for effect
+             * @example first_turn
              */
             condition?: string;
-            /** @description Optional sub-type (e.g., physical) */
-            subType?: string;
         };
-        RaceBonusesDto: {
+        RaceBonusesResponseDto: {
             /**
              * @description Vigor bonus
              * @example 1
@@ -1780,12 +1664,12 @@ export interface components {
             vigor?: number;
             /**
              * @description Finesse bonus
-             * @example 0
+             * @example 1
              */
             finesse?: number;
             /**
              * @description Mind bonus
-             * @example 0
+             * @example 1
              */
             mind?: number;
             /**
@@ -1794,74 +1678,84 @@ export interface components {
              */
             survival?: number;
         };
-        RaceMetadataDto: {
+        AptitudeTargetingResponseDto: {
             /**
-             * @description Race ID
-             * @example humain
+             * @description Target type
+             * @example enemy
              */
-            id: string;
+            type: string;
             /**
-             * @description Race name
-             * @example Humain
+             * @description Range in cells
+             * @example 3
+             */
+            range?: number;
+            /**
+             * @description Area of effect
+             * @example 1
+             */
+            aoe?: number;
+        };
+        AptitudeEffectResponseDto: {
+            /**
+             * @description Effect type
+             * @example damage
+             */
+            type: string;
+            /**
+             * @description Base value
+             * @example 10
+             */
+            value?: number;
+            /**
+             * @description Scaling formula
+             * @example 1d6+finesse
+             */
+            scaling?: string;
+            /**
+             * @description Effect duration in turns
+             * @example 2
+             */
+            duration?: number;
+        };
+        ItemResponseDto: {
+            /**
+             * @description Item definition ID (unique identifier)
+             * @example epee_longue
+             */
+            definitionId: string;
+            /**
+             * @description Display name
+             * @example Épée longue
              */
             name: string;
             /**
-             * @description Special trait name
-             * @example Polyvalent
+             * @description Description
+             * @example Une épée classique.
              */
-            trait: string;
-            /** @description Trait effect (structured) */
-            traitEffect: components["schemas"]["TraitEffectDto"];
-            /** @description Stat bonuses */
-            bonuses: components["schemas"]["RaceBonusesDto"];
+            description?: string;
             /**
-             * @description Description for AI usage
-             * @example Polyvalent, gagne +1 PA au premier tour.
+             * @description Rarity
+             * @example common
+             * @enum {string}
              */
-            descriptionForAi?: string;
+            rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
             /**
-             * @description Color for UI (hex)
-             * @example #3b82f6
+             * @description Base value in gold
+             * @example 50
              */
-            color: string;
+            value?: number;
+            /**
+             * @description Is this a starter item?
+             * @example false
+             */
+            isStarter: boolean;
             /**
              * @description Icon emoji
-             * @example 👤
+             * @example ⚔️
              */
-            icon: string;
-        };
-        SelectClassDto: {
-            /**
-             * @description Class name to select
-             * @example guerrier
-             * @enum {string}
-             */
-            className: "guerrier" | "rogue" | "mage";
-        };
-        UnlockRankDto: {
-            /**
-             * @description Talent tree (voie) ID
-             * @example voie_guerrier_defense
-             */
-            voieId: string;
-            /**
-             * @description Rank to unlock (1-5)
-             * @example 1
-             */
-            rank: number;
-        };
-        SelectFirstTalentDto: {
-            /**
-             * @description Name of the talent voie (path) to select
-             * @example Voie du guerrier sacré
-             */
-            voieName: string;
-            /**
-             * @description Stat to receive +1 bonus
-             * @example vigor
-             * @enum {string}
-             */
-            statBonus: "vigor" | "finesse" | "mind" | "survival";
+            icon?: string;
+            /** @description Metadata (weapon/armor/consumable) */
+            meta?: Record<string, never>;
         };
     };
     responses: never;
@@ -1872,26 +1766,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AptitudeController_getAll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of all aptitudes */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AptitudeResponseDto"][];
-                };
-            };
-        };
-    };
     AuthController_googleAuth: {
         parameters: {
             query?: never;
@@ -1935,7 +1809,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of characters */
+            /** @description Current user profile */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1963,47 +1837,7 @@ export interface operations {
             };
         };
     };
-    ChatController_chat: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChatMessageDto"];
-            };
-        };
-        responses: {
-            /** @description Chat message (assistant) with narrative and instructions */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChatMessageDto"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Chat processing failed */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ChatController_getHistory: {
+    NarrativeController_getNarrativeHistory: {
         parameters: {
             query?: never;
             header?: never;
@@ -2014,28 +1848,233 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Conversation history */
+            /** @description Narrative history */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatMessageDto"][];
+                    "application/json": components["schemas"]["ConversationResponseDto"];
                 };
             };
-            /** @description Invalid request */
+            /** @description Narrative not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NarrativeController_clearNarrative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Narrative cleared */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NarrativeController_getRecentMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of recent messages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    DiceController_roll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiceRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Dice throw result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiceResultDto"];
+                };
+            };
+            /** @description Invalid dice expression */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description History retrieval failed */
-            500: {
+        };
+    };
+    CombatController_startCombat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CombatStartRequestDto"];
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_action: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CombatActionRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatActionResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_getStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatStateDto"];
+                };
+            };
+        };
+    };
+    CombatController_endTurn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returns attack logs for animations and new player turn state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndPlayerTurnResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_flee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CombatEndResponseDto"];
+                };
+            };
+        };
+    };
+    CombatController_move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovementRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovementResponseDto"];
+                };
             };
         };
     };
@@ -2265,6 +2304,37 @@ export interface operations {
             };
         };
     };
+    CharacterAvatarController_generateAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateAvatarRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Avatar generated successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarResponseDto"];
+                };
+            };
+            /** @description Invalid request or avatar generation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CharacterInventoryController_addItem: {
         parameters: {
             query?: never;
@@ -2468,176 +2538,6 @@ export interface operations {
             };
         };
     };
-    CombatController_startCombat: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CombatStartRequestDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CombatStateDto"];
-                };
-            };
-        };
-    };
-    CombatController_action: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CombatActionRequestDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CombatActionResponseDto"];
-                };
-            };
-        };
-    };
-    CombatController_getStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CombatStateDto"];
-                };
-            };
-        };
-    };
-    CombatController_endTurn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Returns attack logs for animations and new player turn state */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EndPlayerTurnResponseDto"];
-                };
-            };
-        };
-    };
-    CombatController_flee: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CombatEndResponseDto"];
-                };
-            };
-        };
-    };
-    CombatController_move: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MovementRequestDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MovementResponseDto"];
-                };
-            };
-        };
-    };
-    DiceController_roll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DiceRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Dice throw result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DiceResultDto"];
-                };
-            };
-            /** @description Invalid dice expression */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ClassesController_getAllClasses: {
         parameters: {
             query?: never;
@@ -2647,13 +2547,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of all classes */
+            /** @description List of all classes with stats and talent trees */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ClassDefinitionResponseDto"][];
+                    "application/json": components["schemas"]["ClassResponseDto"][];
                 };
             };
         };
@@ -2663,7 +2563,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Name of the class (e.g., guerrier, rogue, mage) */
+                /** @description Class name (e.g., guerrier, rogue, mage) */
                 className: string;
             };
             cookie?: never;
@@ -2676,8 +2576,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ClassDefinitionResponseDto"];
+                    "application/json": components["schemas"]["ClassResponseDto"];
                 };
+            };
+            /** @description Class not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2686,7 +2593,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Name of the class */
+                /** @description Class name */
                 className: string;
             };
             cookie?: never;
@@ -2699,8 +2606,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TalentTreeDto"][];
+                    "application/json": components["schemas"]["TalentTreeResponseDto"][];
                 };
+            };
+            /** @description Class not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2709,7 +2623,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Name of the class */
+                /** @description Class name */
                 className: string;
             };
             cookie?: never;
@@ -2725,278 +2639,7 @@ export interface operations {
                     "application/json": string[];
                 };
             };
-        };
-    };
-    ImageController_generate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImageRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Image generation not implemented */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ImageController_generateAvatar: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterIdBodyDto"];
-            };
-        };
-        responses: {
-            /** @description Avatar generated successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AvatarResponseDto"];
-                };
-            };
-            /** @description Invalid request or avatar generation failed */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    HealthController_getHealth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProgressionController_getAvailableClasses: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of available classes with metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClassMetadataDto"][];
-                };
-            };
-        };
-    };
-    ProgressionController_getAvailableRaces: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of available races with bonuses and traits */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RaceMetadataDto"][];
-                };
-            };
-        };
-    };
-    ProgressionController_selectClass: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectClassDto"];
-            };
-        };
-        responses: {
-            /** @description Class selected and starter pack assigned */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
-                };
-            };
-            /** @description Invalid class name */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Character not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProgressionController_selectRace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    raceId?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Race selected and bonuses applied */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DraftCharacterResponseDto"];
-                };
-            };
-            /** @description Invalid race ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Character not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProgressionController_unlockRank: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UnlockRankDto"];
-            };
-        };
-        responses: {
-            /** @description Rank unlocked successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
-                };
-            };
-            /** @description Not enough talent points or invalid rank */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Character not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ProgressionController_selectFirstTalent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                characterId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectFirstTalentDto"];
-            };
-        };
-        responses: {
-            /** @description First talent selected successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterResponseDto"];
-                };
-            };
-            /** @description Invalid voie name or stat */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Character not found */
+            /** @description Class not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3020,7 +2663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RaceMetadataDto"][];
+                    "application/json": components["schemas"]["RaceResponseDto"][];
                 };
             };
         };
@@ -3043,8 +2686,376 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RaceMetadataDto"];
+                    "application/json": components["schemas"]["RaceResponseDto"];
                 };
+            };
+            /** @description Race not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AptitudesController_getAllAptitudes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all aptitudes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AptitudeResponseDto"][];
+                };
+            };
+        };
+    };
+    AptitudesController_getByIds: {
+        parameters: {
+            query: {
+                /** @description Comma-separated aptitude IDs */
+                ids: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of matching aptitudes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AptitudeResponseDto"][];
+                };
+            };
+        };
+    };
+    AptitudesController_getAptitude: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Aptitude identifier */
+                aptitudeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Aptitude details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AptitudeResponseDto"];
+                };
+            };
+            /** @description Aptitude not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemsController_getAllItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all items */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getWeapons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all weapons */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getArmors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all armor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getConsumables: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all consumables */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getStarterItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of starter items for new characters */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getByIds: {
+        parameters: {
+            query: {
+                /** @description Comma-separated item definition IDs */
+                ids: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of matching items */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemsController_getItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Item definition identifier */
+                definitionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Item details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"];
+                };
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    HealthController_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Health Check is successful */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example ok */
+                        status?: string;
+                        /**
+                         * @example {
+                         *       "database": {
+                         *         "status": "up"
+                         *       }
+                         *     }
+                         */
+                        info?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        } | null;
+                        /** @example {} */
+                        error?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        } | null;
+                        /**
+                         * @example {
+                         *       "database": {
+                         *         "status": "up"
+                         *       }
+                         *     }
+                         */
+                        details?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description The Health Check is not successful */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example error */
+                        status?: string;
+                        /**
+                         * @example {
+                         *       "database": {
+                         *         "status": "up"
+                         *       }
+                         *     }
+                         */
+                        info?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        } | null;
+                        /**
+                         * @example {
+                         *       "redis": {
+                         *         "status": "down",
+                         *         "message": "Could not connect"
+                         *       }
+                         *     }
+                         */
+                        error?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        } | null;
+                        /**
+                         * @example {
+                         *       "database": {
+                         *         "status": "up"
+                         *       },
+                         *       "redis": {
+                         *         "status": "down",
+                         *         "message": "Could not connect"
+                         *       }
+                         *     }
+                         */
+                        details?: {
+                            [key: string]: {
+                                status: string;
+                            } & {
+                                [key: string]: unknown;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+    HealthController_liveness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -14,6 +14,7 @@ import { GameNarrativeModule } from "../game-narrative/game-narrative.module.js"
 import { GameDataModule } from "../game-data/game-data.module.js";
 import { CombatSession, CombatSessionSchema } from "./infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../workflows/combat-gameplay/index.js";
+import { ChatOrchestrator } from "../../workflows/chat-gameplay/index.js";
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrato
     CombatOrchestrator,
     CombatMovementOrchestrator,
     CombatActionOrchestrator,
+    ChatOrchestrator,
   ],
   exports: [CombatAppService, CombatOrchestrator, CombatGridService, CombatActionService],
 })

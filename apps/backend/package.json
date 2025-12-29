@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#shared": "./src/shared/domain/index.js",
-    "#character/*": "./src/bounded-contexts/character/*",
-    "#archetype/*": "./src/bounded-contexts/archetype/*",
-    "#combat/*": "./src/bounded-contexts/combat/*",
-    "#game-data": "./src/bounded-contexts/game-data/index.js",
-    "#workflows": "./src/workflows/index.js"
+    "#shared": "./dist/src/shared/domain/index.js",
+    "#character/*": "./dist/src/bounded-contexts/character/*",
+    "#archetype/*": "./dist/src/bounded-contexts/archetype/*",
+    "#combat/*": "./dist/src/bounded-contexts/combat/*",
+    "#game-data": "./dist/src/bounded-contexts/game-data/index.js",
+    "#workflows": "./dist/src/workflows/index.js"
   },
   "scripts": {
     "start": "nest start --watch -d 9222",
