@@ -15,7 +15,6 @@
  * - Character death/deceased tracking
  */
 
-import test from "ava";
 import { CharacterAppService } from "../../../src/bounded-contexts/character/application/services/CharacterAppService.js";
 import { CharacterModule } from "../../../src/modules/character.module.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../../helpers/test-app.js";
@@ -31,7 +30,7 @@ import {
 
 interface CharacterTestContext {
   ctx: TestAppContext;
-  characterService: CharacterService;
+  characterService: CharacterAppService;
   userId: string;
 }
 
@@ -45,7 +44,7 @@ const TEST_USER_ID = "507f1f77bcf86cd799439011";
  */
 async function setupCharacterTest(): Promise<CharacterTestContext> {
   const ctx = await createTestApp([CharacterModule]);
-  const characterService = ctx.module.get(CharacterService);
+  const characterService = ctx.module.get(CharacterAppService);
 
   // Seed test item definitions into in-memory MongoDB
   const itemDefCollection = ctx.mongoConnection.collection("itemdefinitions");
@@ -126,498 +125,497 @@ function assertIsDeceasedCharacterDto(obj: any): void {
 
 // ============= Tests =============
 
-// ========== Character CRUD Operations ==========
-
-test("Creates a new character in draft state", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    const character = await context.characterService.create(context.userId);
-
-    assertIsDraftCharacterDto(character);
-    t.is(character.state, "draft", "New character should be in draft state");
-    t.truthy(character.characterId, "Should have characterId");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Finds all characters for a user", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create two characters
-    await context.characterService.create(context.userId);
-    await context.characterService.create(context.userId);
-
-    const characters = await context.characterService.findByUserId(context.userId);
-
-    t.true(Array.isArray(characters), "Should return array");
-    t.is(characters.length, 2, "Should have 2 characters");
-    characters.forEach((char: any) => {
-      assertIsBaseCharacterDto(char);
-    });
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Finds a single character by ID", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and update character to 'created' state
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    const updated = await context.characterService.update(context.userId, characterId, {
-      name: "Test Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    const character = await context.characterService.findByCharacterId(context.userId, characterId);
-
-    assertIsCharacterDto(character);
-    t.is(character.characterId, characterId, "Should return correct character");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Finds a draft character by ID (unfinished)", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create a character but keep it in draft state
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    // Update partially without portrait - stays in draft state
-    await context.characterService.update(context.userId, characterId, {
-      name: "Unfinished Hero",
-      gender: "male",
-      className: "guerrier",
-    });
-
-    const character = await context.characterService.findByCharacterId(context.userId, characterId);
-
-    // Should return DraftCharacterResponseDto, not CharacterResponseDto
-    assertIsDraftCharacterDto(character);
-    t.is(character.characterId, characterId, "Should return correct character");
-    t.is(character.state, "draft", "Should still be in draft state");
-    t.is(character.name, "Unfinished Hero", "Name should be updated");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Updates a character and returns proper DTO", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    const updated = await context.characterService.update(context.userId, characterId, {
-      name: "Updated Hero",
-      className: "mage",
-    });
-
-    t.is(updated.characterId, characterId, "Should return updated character");
-    t.is(updated.name, "Updated Hero", "Name should be updated");
-    t.truthy(updated.characterId, "Should have characterId");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Deletes a character", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.delete(context.userId, characterId);
-
-    const error = await t.throwsAsync(
-      () => context.characterService.findByCharacterId(context.userId, characterId),
-      { instanceOf: Error }
-    );
-
-    t.pass("Character should not be found after deletion");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-// ========== Character Death & Deceased ==========
-
-test("Marks a character as deceased with death location", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Unfortunate Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    const deceased = await context.characterService.markAsDeceased(
-      context.userId,
-      characterId,
-      "Dragon's Lair"
-    );
-
-    t.is(deceased.isDeceased, true, "Character should be marked as deceased");
-    t.is(deceased.deathLocation, "Dragon's Lair", "Should record death location");
-    t.truthy(deceased.diedAt, "Should have diedAt timestamp");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Retrieves all deceased characters for a user", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and kill a character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Deceased Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    await context.characterService.markAsDeceased(context.userId, characterId, "Battle");
-
-    const deceasedCharacters = await context.characterService.getDeceasedCharacters(context.userId);
-
-    t.true(Array.isArray(deceasedCharacters), "Should return array");
-    t.is(deceasedCharacters.length, 1, "Should have one deceased character");
-    deceasedCharacters.forEach((char: any) => {
-      assertIsDeceasedCharacterDto(char);
-    });
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-// ========== Inventory Management ==========
-
-test("Adds item to character inventory", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Adventurer",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    const itemDto = new CreateInventoryItemDto({
-      name: "Longsword",
-      qty: 1,
-      definitionId: "longsword-001",
-    });
-
-    const character = await context.characterService.addInventoryItem(
-      context.userId,
-      characterId,
-      itemDto
-    );
-
-    assertIsCharacterDto(character);
-    t.truthy(character.inventory, "Character should have inventory");
-    t.true(character.inventory.length > 0, "Inventory should have items");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Updates an inventory item quantity", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Adventurer",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    // Add item
-    const itemDto = new CreateInventoryItemDto({
-      name: "Gold Coins",
-      qty: 50,
-      definitionId: "gold-001",
-    });
-
-    const addedChar = await context.characterService.addInventoryItem(
-      context.userId,
-      characterId,
-      itemDto
-    );
-
-    // Verify item was added
-    t.true(addedChar.inventory.length > 0, "Should have added item");
-    
-    // Skip update test as itemId assignment may vary
-    // Just test that we can retrieve the character afterward
-    const retrieved = await context.characterService.findByCharacterId(context.userId, characterId);
-    assertIsCharacterDto(retrieved);
-    t.true(retrieved.inventory.length > 0, "Inventory should persist");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Removes items from inventory", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Adventurer",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    // Add item
-    const itemDto = new CreateInventoryItemDto({
-      name: "Potion",
-      qty: 3,
-      definitionId: "potion-health-001",
-    });
-
-    const addedChar = await context.characterService.addInventoryItem(
-      context.userId,
-      characterId,
-      itemDto
-    );
-
-    // Just verify items can be added and retrieved
-    t.true(addedChar.inventory.length > 0, "Should have added item");
-    t.true(addedChar.inventory[0].qty >= 1, "Should have at least 1 item");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Equips a weapon from inventory", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Warrior",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    // Add a weapon item
-    const itemDto = new CreateInventoryItemDto({
-      name: "Greatsword",
-      qty: 1,
-      definitionId: "greatsword-001",
-    });
-
-    const addedChar = await context.characterService.addInventoryItem(
-      context.userId,
-      characterId,
-      itemDto
-    );
-
-    // Verify item was added
-    t.true(addedChar.inventory.length > 0, "Should have added weapon");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-// ========== Inspiration Management ==========
-
-test("Grants inspiration points to character", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Lucky Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    // Grant inspiration
-    const updated = await context.characterService.update(context.userId, characterId, {
-      inspirationPoints: 2,
-    });
-
-    t.is(updated.inspirationPoints, 2, "Should grant correct amount");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Caps inspiration at 5 points (D&D 5e rule)", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Lucky Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-      inspirationPoints: 4,
-    });
-
-    // Try to grant inspiration that would exceed 5
-    const updated = await context.characterService.update(context.userId, characterId, {
-      inspirationPoints: 5, // Should be capped at 5
-    });
-
-    t.is(updated.inspirationPoints, 5, "Should cap at 5");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Spends inspiration points", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create and setup character
-    const created = await context.characterService.create(context.userId);
-    const characterId = created.characterId;
-
-    await context.characterService.update(context.userId, characterId, {
-      name: "Hero",
-      className: "guerrier",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-      inspirationPoints: 2,
-    });
-
-    // Spend inspiration
-    const updated = await context.characterService.update(context.userId, characterId, {
-      inspirationPoints: 1,
-    });
-
-    t.is(updated.inspirationPoints, 1, "Should decrement inspiration");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-// ========== Error Handling ==========
-
-test("Throws error for non-existent character", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    await context.characterService.findByCharacterId(context.userId, "non-existent-id");
-    t.fail("Should throw error for non-existent character");
-  } catch (error) {
-    t.pass("Should throw error when character not found");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-
-test("Throws error when deleting non-existent character", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    await context.characterService.delete(context.userId, "non-existent-id");
-    t.fail("Should throw error for non-existent character");
-  } catch (error) {
-    t.pass("Should throw error when deleting non-existent character");
-  } finally {
-    await teardownCharacterTest(context);
-  }
-});
-// ========== Draft vs Created Character Separation ==========
-
-test("Filters draft characters from list", async t => {
-  const context = await setupCharacterTest();
-
-  try {
-    // Create 1 draft character
-    const draft = await context.characterService.create(context.userId);
-    await context.characterService.update(context.userId, draft.characterId, {
-      name: "Unfinished",
-      className: "guerrier",
-    });
-
-    // Create 1 finished character
-    const finished = await context.characterService.create(context.userId);
-    await context.characterService.update(context.userId, finished.characterId, {
-      name: "Finished Hero",
-      className: "mage",
-      raceId: "humain",
-      portrait: "portrait-url.png",
-      state: "created",
-    });
-
-    // Get all characters
-    const allChars = await context.characterService.findByUserId(context.userId);
-    t.is(allChars.length, 2, "Should have 2 total characters");
-
-    // Filter drafts
-    const drafts = allChars.filter(c => c.state === 'draft');
-    t.is(drafts.length, 1, "Should have 1 draft character");
-    t.is(drafts[0].name, "Unfinished", "Draft should have correct name");
-
-    // Filter finished
-    const finished_chars = allChars.filter(c => c.state === 'created');
-    t.is(finished_chars.length, 1, "Should have 1 finished character");
-    t.is(finished_chars[0].name, "Finished Hero", "Finished should have correct name");
-  } finally {
-    await teardownCharacterTest(context);
-  }
+describe('Character Integration Tests', () => {
+
+  // ========== Character CRUD Operations ==========
+
+  test("Creates a new character in draft state", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const character = await context.characterService.create(context.userId);
+
+      assertIsDraftCharacterDto(character);
+      expect(character.state).toBe("draft");
+      expect(character.characterId).toBeTruthy();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Finds all characters for a user", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create two characters
+      await context.characterService.create(context.userId);
+      await context.characterService.create(context.userId);
+
+      const characters = await context.characterService.findByUserId(context.userId);
+
+      expect(Array.isArray(characters)).toBe(true);
+      expect(characters.length).toBe(2);
+      characters.forEach((char: any) => {
+        assertIsBaseCharacterDto(char);
+      });
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Finds a single character by ID", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and update character to 'created' state
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Test Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      const character = await context.characterService.findByCharacterId(context.userId, characterId);
+
+      assertIsCharacterDto(character);
+      expect(character.characterId).toBe(characterId);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Finds a draft character by ID (unfinished)", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create a character but keep it in draft state
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      // Update partially without portrait - stays in draft state
+      await context.characterService.update(context.userId, characterId, {
+        name: "Unfinished Hero",
+        gender: "male",
+        className: "guerrier",
+      });
+
+      const character = await context.characterService.findByCharacterId(context.userId, characterId);
+
+      // Should return DraftCharacterResponseDto, not CharacterResponseDto
+      assertIsDraftCharacterDto(character);
+      expect(character.characterId).toBe(characterId);
+      expect(character.state).toBe("draft");
+      expect(character.name).toBe("Unfinished Hero");
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Updates a character and returns proper DTO", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      const updated = await context.characterService.update(context.userId, characterId, {
+        name: "Updated Hero",
+        className: "mage",
+      });
+
+      expect(updated.characterId).toBe(characterId);
+      expect(updated.name).toBe("Updated Hero");
+      expect(updated.characterId).toBeTruthy();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Deletes a character", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.delete(context.userId, characterId);
+
+      await expect(
+        context.characterService.findByCharacterId(context.userId, characterId)
+      ).rejects.toThrow();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Character Death & Deceased ==========
+
+  test("Marks a character as deceased with death location", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Unfortunate Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      const deceased = await context.characterService.markAsDeceased(
+        context.userId,
+        characterId,
+        "Dragon's Lair"
+      );
+
+      expect(deceased.isDeceased).toBe(true);
+      expect(deceased.deathLocation).toBe("Dragon's Lair");
+      expect(deceased.diedAt).toBeTruthy();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Retrieves all deceased characters for a user", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and kill a character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Deceased Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      await context.characterService.markAsDeceased(context.userId, characterId, "Battle");
+
+      const deceasedCharacters = await context.characterService.getDeceasedCharacters(context.userId);
+
+      expect(Array.isArray(deceasedCharacters)).toBe(true);
+      expect(deceasedCharacters.length).toBe(1);
+      deceasedCharacters.forEach((char: any) => {
+        assertIsDeceasedCharacterDto(char);
+      });
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Inventory Management ==========
+
+  test("Adds item to character inventory", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Adventurer",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      const itemDto = new CreateInventoryItemDto({
+        name: "Longsword",
+        qty: 1,
+        definitionId: "longsword-001",
+      });
+
+      const character = await context.characterService.addInventoryItem(
+        context.userId,
+        characterId,
+        itemDto
+      );
+
+      assertIsCharacterDto(character);
+      expect(character.inventory).toBeTruthy();
+      expect(character.inventory.length > 0).toBe(true);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Updates an inventory item quantity", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Adventurer",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      // Add item
+      const itemDto = new CreateInventoryItemDto({
+        name: "Gold Coins",
+        qty: 50,
+        definitionId: "gold-001",
+      });
+
+      const addedChar = await context.characterService.addInventoryItem(
+        context.userId,
+        characterId,
+        itemDto
+      );
+
+      // Verify item was added
+      expect(addedChar.inventory.length > 0).toBe(true);
+      
+      // Skip update test as itemId assignment may vary
+      // Just test that we can retrieve the character afterward
+      const retrieved = await context.characterService.findByCharacterId(context.userId, characterId);
+      assertIsCharacterDto(retrieved);
+      expect(retrieved.inventory.length > 0).toBe(true);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Removes items from inventory", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Adventurer",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      // Add item
+      const itemDto = new CreateInventoryItemDto({
+        name: "Potion",
+        qty: 3,
+        definitionId: "potion-health-001",
+      });
+
+      const addedChar = await context.characterService.addInventoryItem(
+        context.userId,
+        characterId,
+        itemDto
+      );
+
+      // Just verify items can be added and retrieved
+      expect(addedChar.inventory.length > 0).toBe(true);
+      expect(addedChar.inventory[0].qty >= 1).toBe(true);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Equips a weapon from inventory", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Warrior",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      // Add a weapon item
+      const itemDto = new CreateInventoryItemDto({
+        name: "Greatsword",
+        qty: 1,
+        definitionId: "greatsword-001",
+      });
+
+      const addedChar = await context.characterService.addInventoryItem(
+        context.userId,
+        characterId,
+        itemDto
+      );
+
+      // Verify item was added
+      expect(addedChar.inventory.length > 0).toBe(true);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Inspiration Management ==========
+
+  test("Grants inspiration points to character", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Lucky Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      // Grant inspiration
+      const updated = await context.characterService.update(context.userId, characterId, {
+        inspirationPoints: 2,
+      });
+
+      expect(updated.inspirationPoints).toBe(2);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Caps inspiration at 5 points (D&D 5e rule)", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Lucky Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+        inspirationPoints: 4,
+      });
+
+      // Try to grant inspiration that would exceed 5
+      const updated = await context.characterService.update(context.userId, characterId, {
+        inspirationPoints: 5, // Should be capped at 5
+      });
+
+      expect(updated.inspirationPoints).toBe(5);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Spends inspiration points", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create and setup character
+      const created = await context.characterService.create(context.userId);
+      const characterId = created.characterId;
+
+      await context.characterService.update(context.userId, characterId, {
+        name: "Hero",
+        className: "guerrier",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+        inspirationPoints: 2,
+      });
+
+      // Spend inspiration
+      const updated = await context.characterService.update(context.userId, characterId, {
+        inspirationPoints: 1,
+      });
+
+      expect(updated.inspirationPoints).toBe(1);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Error Handling ==========
+
+  test("Throws error for non-existent character", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      await expect(
+        context.characterService.findByCharacterId(context.userId, "non-existent-id")
+      ).rejects.toThrow();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Throws error when deleting non-existent character", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      await expect(
+        context.characterService.delete(context.userId, "non-existent-id")
+      ).rejects.toThrow();
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Draft vs Created Character Separation ==========
+
+  test("Filters draft characters from list", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      // Create 1 draft character
+      const draft = await context.characterService.create(context.userId);
+      await context.characterService.update(context.userId, draft.characterId, {
+        name: "Unfinished",
+        className: "guerrier",
+      });
+
+      // Create 1 finished character
+      const finished = await context.characterService.create(context.userId);
+      await context.characterService.update(context.userId, finished.characterId, {
+        name: "Finished Hero",
+        className: "mage",
+        raceId: "humain",
+        portrait: "portrait-url.png",
+        state: "created",
+      });
+
+      // Get all characters
+      const allChars = await context.characterService.findByUserId(context.userId);
+      expect(allChars.length).toBe(2);
+
+      // Filter drafts
+      const drafts = allChars.filter(c => c.state === 'draft');
+      expect(drafts.length).toBe(1);
+      expect(drafts[0].name).toBe("Unfinished");
+
+      // Filter finished
+      const finished_chars = allChars.filter(c => c.state === 'created');
+      expect(finished_chars.length).toBe(1);
+      expect(finished_chars[0].name).toBe("Finished Hero");
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
 });

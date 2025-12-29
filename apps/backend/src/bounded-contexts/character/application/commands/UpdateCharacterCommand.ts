@@ -1,5 +1,14 @@
-import { InventoryItem } from '#character/domain/entities/CharacterEntity.js';
-import { ArchetypeName, RaceId } from '#shared/domain/index.js';
+import { type ArchetypeName, type RaceId } from '#shared';
+
+/** Inventory item for update command (qty defaults to 1 if not provided) */
+export interface UpdateInventoryItem {
+  definitionId: string;
+  name: string;
+  qty?: number;
+  description?: string;
+  equipped: boolean;
+  meta?: unknown;
+}
 
 /**
  * Command to update character properties
@@ -45,5 +54,5 @@ export interface UpdateCharacterCommand {
   state?: 'draft' | 'created' | 'deceased';
 
   // Inventory (full replacement)
-  inventory?: InventoryItem[];
+  inventory?: UpdateInventoryItem[];
 }

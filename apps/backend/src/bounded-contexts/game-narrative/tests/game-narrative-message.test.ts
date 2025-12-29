@@ -1,101 +1,98 @@
-import test from 'ava';
 import { Message } from '../domain/narrative/value-objects/Message.js';
 
-test('Message > should create a message with role and narrative', (t) => {
-  const message = new Message({
-    role: 'user',
-    narrative: 'Hello world!',
-  });
-
-  t.is(message.role, 'user');
-  t.is(message.narrative, 'Hello world!');
-  t.is(message.instructions.length, 0);
-  t.truthy(message.timestamp);
-  t.true(message.timestamp instanceof Date);
-});
-
-test('Message > should create a message with instructions', (t) => {
-  const message = new Message({
-    role: 'assistant',
-    narrative: 'You gained experience!',
-    instructions: [{ type: 'xp', xp: 10 }],
-  });
-
-  t.is(message.role, 'assistant');
-  t.is(message.narrative, 'You gained experience!');
-  t.is(message.instructions.length, 1);
-  t.is(message.instructions[0].type, 'xp');
-});
-
-test('Message > should throw error if narrative is empty', (t) => {
-  const error = t.throws(() => {
-    new Message({
+describe('Message', () => {
+  test('should create a message with role and narrative', () => {
+    const message = new Message({
       role: 'user',
-      narrative: '',
+      narrative: 'Hello world!',
     });
+
+    expect(message.role).toBe('user');
+    expect(message.narrative).toBe('Hello world!');
+    expect(message.instructions.length).toBe(0);
+    expect(message.timestamp).toBeTruthy();
+    expect(message.timestamp instanceof Date).toBe(true);
   });
 
-  t.is(error?.message, 'Message narrative cannot be empty');
-});
+  test('should create a message with instructions', () => {
+    const message = new Message({
+      role: 'assistant',
+      narrative: 'You gained experience!',
+      instructions: [{ type: 'xp', xp: 10 }],
+    });
 
-test('Message > should throw error if narrative is only whitespace', (t) => {
-  const error = t.throws(() => {
-    new Message({
+    expect(message.role).toBe('assistant');
+    expect(message.narrative).toBe('You gained experience!');
+    expect(message.instructions.length).toBe(1);
+    expect(message.instructions[0].type).toBe('xp');
+  });
+
+  test('should throw error if narrative is empty', () => {
+    expect(() => {
+      new Message({
+        role: 'user',
+        narrative: '',
+      });
+    }).toThrow('Message narrative cannot be empty');
+  });
+
+  test('should throw error if narrative is only whitespace', () => {
+    expect(() => {
+      new Message({
+        role: 'user',
+        narrative: '   ',
+      });
+    }).toThrow('Message narrative cannot be empty');
+  });
+
+  test('hasInstructions should return false for empty instructions', () => {
+    const message = new Message({
       role: 'user',
-      narrative: '   ',
+      narrative: 'Hello',
     });
+
+    expect(message.hasInstructions()).toBe(false);
   });
 
-  t.is(error?.message, 'Message narrative cannot be empty');
-});
+  test('hasInstructions should return true when instructions exist', () => {
+    const message = new Message({
+      role: 'assistant',
+      narrative: 'Take damage',
+      instructions: [{ type: 'hp', hp: -10 }],
+    });
 
-test('Message > hasInstructions should return false for empty instructions', (t) => {
-  const message = new Message({
-    role: 'user',
-    narrative: 'Hello',
+    expect(message.hasInstructions()).toBe(true);
   });
 
-  t.false(message.hasInstructions());
-});
+  test('should filter instructions by type', () => {
+    const message = new Message({
+      role: 'assistant',
+      narrative: 'Multiple effects',
+      instructions: [
+        { type: 'xp', xp: 10 },
+        { type: 'hp', hp: -5 },
+        { type: 'xp', xp: 15 },
+      ],
+    });
 
-test('Message > hasInstructions should return true when instructions exist', (t) => {
-  const message = new Message({
-    role: 'assistant',
-    narrative: 'Take damage',
-    instructions: [{ type: 'hp', hp: -10 }],
+    const xpInstructions = message.getInstructionsByType('xp');
+    expect(xpInstructions.length).toBe(2);
+
+    const hpInstructions = message.getInstructionsByType('hp');
+    expect(hpInstructions.length).toBe(1);
+
+    const rollInstructions = message.getInstructionsByType('roll');
+    expect(rollInstructions.length).toBe(0);
   });
 
-  t.true(message.hasInstructions());
-});
+  test('should use custom timestamp if provided', () => {
+    const customDate = new Date('2024-01-01T00:00:00Z');
+    const message = new Message({
+      role: 'user',
+      narrative: 'Hello',
+      timestamp: customDate,
+    });
 
-test('Message > should filter instructions by type', (t) => {
-  const message = new Message({
-    role: 'assistant',
-    narrative: 'Multiple effects',
-    instructions: [
-      { type: 'xp', xp: 10 },
-      { type: 'hp', hp: -5 },
-      { type: 'xp', xp: 15 },
-    ],
+    expect(message.timestamp.getTime()).toBe(customDate.getTime());
   });
-
-  const xpInstructions = message.getInstructionsByType('xp');
-  t.is(xpInstructions.length, 2);
-
-  const hpInstructions = message.getInstructionsByType('hp');
-  t.is(hpInstructions.length, 1);
-
-  const rollInstructions = message.getInstructionsByType('roll');
-  t.is(rollInstructions.length, 0);
-});
-
-test('Message > should use custom timestamp if provided', (t) => {
-  const customDate = new Date('2024-01-01T00:00:00Z');
-  const message = new Message({
-    role: 'user',
-    narrative: 'Hello',
-    timestamp: customDate,
-  });
-
-  t.is(message.timestamp.getTime(), customDate.getTime());
 });

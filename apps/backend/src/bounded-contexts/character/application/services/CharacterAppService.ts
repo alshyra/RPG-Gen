@@ -244,7 +244,15 @@ export class CharacterAppService {
 
     // Inventory (bulk replacement)
     if (command.inventory !== undefined) {
-      character.setInventory(command.inventory);
+      const items: InventoryItem[] = command.inventory.map(item => ({
+        definitionId: item.definitionId,
+        name: item.name,
+        qty: item.qty ?? 1,
+        description: item.description,
+        equipped: item.equipped,
+        meta: item.meta as InventoryItem['meta'],
+      }));
+      character.setInventory(items);
     }
 
     await this.repository.save(character);

@@ -3,15 +3,15 @@ import type { CharacterResponseDto } from "../../bounded-contexts/character/api/
 import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
 import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
-import { ConversationService } from "../../domain/chat/conversation.service.js";
+import { ConversationService } from "../../bounded-contexts/game-narrative/application/services/ConversationService.js";
 import type {
   CombatStartInstructionMessageDto,
   GameInstructionDto,
   HpInstructionMessageDto,
   RollInstructionMessageDto,
   XpInstructionMessageDto,
-} from "../../domain/chat/dto/index.js";
-import { GeminiTextService } from "../../bounded-contexts/game-narrative/external/gemini-text.service.js";
+} from "../../bounded-contexts/game-narrative/api/dto/response/index.js";
+import { GeminiTextService } from "../../bounded-contexts/game-narrative/infrastructure/external/index.js";
 
 /**
  * ChatOrchestrator coordinates chat-related flows that involve multiple domain services.

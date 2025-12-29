@@ -8,11 +8,11 @@ import { AptitudeResponseDto } from "../response/AptitudeResponseDto.js";
 import { VoieProgressDto } from "../response/VoieProgressDto.js";
 import type { InventoryItemDto } from "../response/InventoryItemDto.js";
 import type { TacticalStats } from "../response/TacticalStats.js";
-import { AptitudeService } from "../../../../aptitude/application/services/AptitudeService.js";
-import { ArchetypeDefinitionService } from "../../../../archetype/application/archetype-definition.service.js";
+import { AptitudeDataService } from "../../../../game-data/application/services/AptitudeDataService.js";
+import { ClassDataService } from "../../../../game-data/application/services/ClassDataService.js";
 import { CharacterMapper } from "../../../infrastructure/persistence/mongo/mappers/CharacterMapper.js";
 import type { CharacterDocument } from "../../../infrastructure/persistence/mongo/schemas/CharacterDocument.js";
-import { CharacterStats } from "#shared/domain/index.js";
+import { CharacterStats } from "#shared";
 
 /**
  * Mapper for converting CharacterEntity to API response DTOs.
@@ -23,8 +23,8 @@ export class CharacterDtoMapper {
   private readonly logger = new Logger(CharacterDtoMapper.name);
 
   constructor(
-    private readonly aptitudeService: AptitudeService,
-    private readonly classDefinitionService: ArchetypeDefinitionService,
+    private readonly aptitudeService: AptitudeDataService,
+    private readonly classDefinitionService: ClassDataService,
   ) {}
 
   /**
@@ -70,24 +70,45 @@ export class CharacterDtoMapper {
     const aptitudeDefinitions = await this.aptitudeService.findByIds(aptitudeIds);
 
     return characterAptitudes.map(charApt => {
-      const definition = aptitudeDefinitions.find(d => d.aptitudeId === charApt.aptitudeId);
+      const definition = aptitudeDefinitions.find(d => d.id === charApt.aptitudeId);
       if (!definition) {
         this.logger.warn(`Aptitude definition not found for ID: ${charApt.aptitudeId}`);
         return null;
       }
 
+      // Map effectType to category
+      const categoryMap: Record<string, AptitudeResponseDto['category']> = {
+        damage: 'attack',
+        heal: 'support',
+        buff: 'support',
+        debuff: 'attack',
+        utility: 'utility',
+        summon: 'utility',
+      };
+      const category = categoryMap[definition.effectType] ?? 'attack';
+
+      // Map targetType - handle 'area' specially
+      const targetTypeMap: Record<string, AptitudeResponseDto['targetType']> = {
+        self: 'self',
+        ally: 'ally',
+        enemy: 'enemy',
+        area: 'zone',
+        all_enemies: 'all_enemies',
+        all_allies: 'all_allies',
+      };
+      const targetType = targetTypeMap[definition.targetType] ?? 'enemy';
+
       return new AptitudeResponseDto({
-        aptitudeId: definition.aptitudeId,
+        aptitudeId: definition.id,
         name: definition.name,
-        description: definition.description,
+        description: definition.descriptionForAi || definition.name,
         descriptionForAi: definition.descriptionForAi,
         paCost: definition.paCost,
-        pmCost: definition.pmCost,
         cooldown: definition.cooldown,
-        targetType: definition.targetType,
+        targetType,
         range: definition.range,
-        areaOfEffect: definition.areaOfEffect,
-        category: definition.category,
+        areaOfEffect: definition.area ? parseInt(definition.area.replace(/\D/g, ''), 10) || undefined : undefined,
+        category,
         basePower: definition.basePower,
         currentCooldown: charApt.currentCooldown,
       });

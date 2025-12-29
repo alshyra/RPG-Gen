@@ -17,7 +17,7 @@ import {
   GenericMeta,
   type InventoryItemMeta,
 } from "../response/InventoryItemMeta.js";
-import { ItemDefinition } from "../../../../combat/infrastructure/persistence/mongo/schemas/ItemDocument.js";
+import { ItemDefinition } from "../../../../game-data/domain/item/entities/ItemDefinition.js";
 
 @ApiExtraModels(WeaponMeta, ArmorMeta, ConsumableMeta, PackMeta, ToolMeta, GenericMeta)
 export class CreateInventoryItemDto {
@@ -73,7 +73,8 @@ export class CreateInventoryItemDto {
     this.definitionId = item.definitionId;
     this.name = item.name;
     this.description = item.description;
-    this.meta = item.meta;
+    // ItemMeta from game-data is compatible with InventoryItemMeta
+    this.meta = item.meta as unknown as InventoryItemMeta;
     this.qty = 1;
   }
 }

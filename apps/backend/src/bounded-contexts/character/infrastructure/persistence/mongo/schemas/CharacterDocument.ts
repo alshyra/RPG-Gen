@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Schema as MongooseSchema, Document } from "mongoose";
-import { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
-import { type CharacterStats } from "#shared/domain/index.js";
+import { type CharacterStats } from "#shared";
+import { InventoryItemEmbed, InventoryItemEmbedSchema } from "./InventoryItemEmbed.js";
 
 // Unlocked talent rank in a voie
 export interface TalentProgress {
@@ -170,11 +170,11 @@ export class CharacterDocument extends Document {
   state: "draft" | "created" | "deceased";
 
   @Prop({
-    type: [Item],
+    type: [InventoryItemEmbedSchema],
     required: false,
     default: [],
   })
-  inventory: Item[];
+  inventory: InventoryItemEmbed[];
 
   // Character level (1-20, simplified progression)
   @Prop({
@@ -190,3 +190,6 @@ export const CharacterSchema = SchemaFactory.createForClass(CharacterDocument);
 // Indexes
 CharacterSchema.index({ userId: 1, isDeceased: 1 });
 CharacterSchema.index({ characterId: 1 }, { unique: true });
+
+// Re-export InventoryItemEmbed for backwards compatibility
+export { InventoryItemEmbed, InventoryItemEmbedSchema } from "./InventoryItemEmbed.js";

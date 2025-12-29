@@ -5,7 +5,7 @@ import {
   calculateMaxHP,
 } from "../scaling.util.js";
 import { type StatAttribute } from "../../../character/api/dto/response/StatAttribute.js";
-import type { CharacterStats } from "../../../character/infrastructure/persistence/mongo/schemas/CharacterStats.js";
+import type { CharacterStats } from "#shared";
 
 export interface CombatAction {
   characterId: string;

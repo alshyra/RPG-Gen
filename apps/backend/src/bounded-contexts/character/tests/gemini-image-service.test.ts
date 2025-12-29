@@ -1,4 +1,3 @@
-import test from "ava";
 import { GeminiImageService } from "../infrastructure/external/GeminiImageService.js";
 import { loadConfig } from "../../../config.js";
 
@@ -6,45 +5,47 @@ import { loadConfig } from "../../../config.js";
 // GeminiImageService Mock Mode Tests
 // ===========================
 
-test.before(() => {
-  // Enable mock mode for tests
-  process.env.MOCK_GEMINI = "true";
-  // Load configuration
-  loadConfig();
-});
+describe('GeminiImageService', () => {
+  beforeAll(() => {
+    // Enable mock mode for tests
+    process.env.MOCK_GEMINI = "true";
+    // Load configuration
+    loadConfig();
+  });
 
-test.after(() => {
-  delete process.env.MOCK_GEMINI;
-});
+  afterAll(() => {
+    delete process.env.MOCK_GEMINI;
+  });
 
-test("GeminiImageService.generateImage - returns mock image in mock mode", async t => {
-  const service = new GeminiImageService();
+  test("generateImage - returns mock image in mock mode", async () => {
+    const service = new GeminiImageService();
 
-  const result = await service.generateImage("Generate a fantasy portrait");
+    const result = await service.generateImage("Generate a fantasy portrait");
 
-  // Should return a mock SVG data URI
-  t.true(result.startsWith("data:image/svg+xml;base64,"));
-});
+    // Should return a mock SVG data URI
+    expect(result.startsWith("data:image/svg+xml;base64,")).toBe(true);
+  });
 
-test("GeminiImageService.generateImage - mock image is valid base64", async t => {
-  const service = new GeminiImageService();
+  test("generateImage - mock image is valid base64", async () => {
+    const service = new GeminiImageService();
 
-  const result = await service.generateImage("Test prompt");
+    const result = await service.generateImage("Test prompt");
 
-  // Extract and validate base64
-  const base64Part = result.replace("data:image/svg+xml;base64,", "");
-  t.notThrows(() => Buffer.from(base64Part, "base64"));
-});
+    // Extract and validate base64
+    const base64Part = result.replace("data:image/svg+xml;base64,", "");
+    expect(() => Buffer.from(base64Part, "base64")).not.toThrow();
+  });
 
-test("GeminiImageService.generateImage - mock image contains expected SVG content", async t => {
-  const service = new GeminiImageService();
+  test("generateImage - mock image contains expected SVG content", async () => {
+    const service = new GeminiImageService();
 
-  const result = await service.generateImage("Any prompt");
+    const result = await service.generateImage("Any prompt");
 
-  // Decode and check content
-  const base64Part = result.replace("data:image/svg+xml;base64,", "");
-  const decoded = Buffer.from(base64Part, "base64").toString("utf-8");
+    // Decode and check content
+    const base64Part = result.replace("data:image/svg+xml;base64,", "");
+    const decoded = Buffer.from(base64Part, "base64").toString("utf-8");
 
-  t.true(decoded.includes("<svg"));
-  t.true(decoded.includes("MOCK"));
+    expect(decoded.includes("<svg")).toBe(true);
+    expect(decoded.includes("MOCK")).toBe(true);
+  });
 });

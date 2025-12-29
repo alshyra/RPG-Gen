@@ -1,271 +1,272 @@
-import test from 'ava';
 import { Narrative } from '../domain/narrative/entities/Narrative.js';
 import { Message } from '../domain/narrative/value-objects/Message.js';
 import { Context } from '../domain/narrative/value-objects/Context.js';
 
-test('Narrative > should create a narrative with userId, characterId and context', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test system prompt',
-    scenarioPrompt: 'Test scenario prompt',
+describe('Narrative', () => {
+  test('should create a narrative with userId, characterId and context', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test system prompt',
+      scenarioPrompt: 'Test scenario prompt',
+    });
+
+    const narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    expect(narrative.userId).toBe('user-123');
+    expect(narrative.characterId).toBe('char-456');
+    expect(narrative.sessionId).toBe('user-123_char-456');
+    expect(narrative.messages.length).toBe(0);
+    expect(narrative.context).toEqual(context);
   });
 
-  const narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
+  test('should add a message with role and narrative', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test system prompt',
+      scenarioPrompt: 'Test scenario prompt',
+    });
+
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    const message = new Message({
+      role: 'user',
+      narrative: 'Hello!',
+    });
+
+    narrative = narrative.addMessage(message);
+
+    expect(narrative.messages.length).toBe(1);
+    expect(narrative.messages[0].role).toBe('user');
+    expect(narrative.messages[0].narrative).toBe('Hello!');
   });
 
-  t.is(narrative.userId, 'user-123');
-  t.is(narrative.characterId, 'char-456');
-  t.is(narrative.sessionId, 'user-123_char-456');
-  t.is(narrative.messages.length, 0);
-  t.deepEqual(narrative.context, context);
-});
+  test('should add multiple messages preserving order', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test system prompt',
+      scenarioPrompt: 'Test scenario prompt',
+    });
 
-test('Narrative > should add a message with role and narrative', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test system prompt',
-    scenarioPrompt: 'Test scenario prompt',
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    const message1 = new Message({ role: 'user', narrative: 'First message' });
+    const message2 = new Message({ role: 'assistant', narrative: 'Second message' });
+    const message3 = new Message({ role: 'user', narrative: 'Third message' });
+
+    narrative = narrative.addMessage(message1);
+    narrative = narrative.addMessage(message2);
+    narrative = narrative.addMessage(message3);
+
+    expect(narrative.messages.length).toBe(3);
+    expect(narrative.messages[0].narrative).toBe('First message');
+    expect(narrative.messages[1].narrative).toBe('Second message');
+    expect(narrative.messages[2].narrative).toBe('Third message');
   });
 
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
+  test('should update context', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Original prompt',
+      scenarioPrompt: 'Original scenario',
+    });
+
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    const newContext = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 2,
+        currentHp: 80,
+        maxHp: 120,
+      },
+      systemPrompt: 'Updated prompt',
+      scenarioPrompt: 'Updated scenario',
+    });
+
+    narrative = narrative.updateContext(newContext);
+
+    expect(narrative.context.characterContext.level).toBe(2);
+    expect(narrative.context.characterContext.currentHp).toBe(80);
+    expect(narrative.context.characterContext.maxHp).toBe(120);
+    expect(narrative.context.systemPrompt).toBe('Updated prompt');
   });
 
-  const message = new Message({
-    role: 'user',
-    narrative: 'Hello!',
+  test('should retrieve last N messages', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test prompt',
+      scenarioPrompt: 'Test scenario',
+    });
+
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    for (let i = 0; i < 5; i++) {
+      narrative = narrative.addMessage(new Message({ role: 'user', narrative: `Message ${i + 1}` }));
+    }
+
+    // Get last 3 messages using slice
+    const last3 = narrative.messages.slice(-3);
+    expect(last3.length).toBe(3);
+    expect(last3[0].narrative).toBe('Message 3');
+    expect(last3[1].narrative).toBe('Message 4');
+    expect(last3[2].narrative).toBe('Message 5');
   });
 
-  narrative = narrative.addMessage(message);
+  test('should get all instructions from messages', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test prompt',
+      scenarioPrompt: 'Test scenario',
+    });
 
-  t.is(narrative.messages.length, 1);
-  t.is(narrative.messages[0].role, 'user');
-  t.is(narrative.messages[0].narrative, 'Hello!');
-});
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
 
-test('Narrative > should add multiple messages preserving order', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test system prompt',
-    scenarioPrompt: 'Test scenario prompt',
+    const message1 = new Message({
+      role: 'assistant',
+      narrative: 'Test',
+      instructions: [
+        { type: 'xp', xp: 10 },
+        { type: 'hp', hp: -5 },
+      ],
+    });
+
+    const message2 = new Message({
+      role: 'assistant',
+      narrative: 'Test 2',
+      instructions: [{ type: 'roll', dices: '1d20' }],
+    });
+
+    narrative = narrative.addMessage(message1);
+    narrative = narrative.addMessage(message2);
+
+    const allInstructions = narrative.getAllInstructions();
+    expect(allInstructions.length).toBe(3);
+    expect(allInstructions[0].type).toBe('xp');
+    expect(allInstructions[1].type).toBe('hp');
+    expect(allInstructions[2].type).toBe('roll');
   });
 
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
+  test('should filter instructions by type', () => {
+    const context = new Context({
+      characterContext: {
+        name: 'Test Character',
+        race: 'Human',
+        className: 'Warrior',
+        level: 1,
+        currentHp: 100,
+        maxHp: 100,
+      },
+      systemPrompt: 'Test prompt',
+      scenarioPrompt: 'Test scenario',
+    });
+
+    let narrative = new Narrative({
+      userId: 'user-123',
+      characterId: 'char-456',
+      sessionId: 'user-123_char-456',
+      context,
+      messages: [],
+    });
+
+    const message = new Message({
+      role: 'assistant',
+      narrative: 'Test',
+      instructions: [
+        { type: 'xp', xp: 10 },
+        { type: 'hp', hp: -5 },
+        { type: 'xp', xp: 15 },
+      ],
+    });
+
+    narrative = narrative.addMessage(message);
+
+    const xpInstructions = narrative.getInstructionsByType('xp');
+    expect(xpInstructions.length).toBe(2);
+    expect((xpInstructions[0] as any).xp).toBe(10);
+    expect((xpInstructions[1] as any).xp).toBe(15);
+
+    const hpInstructions = narrative.getInstructionsByType('hp');
+    expect(hpInstructions.length).toBe(1);
+    expect((hpInstructions[0] as any).hp).toBe(-5);
   });
-
-  const message1 = new Message({ role: 'user', narrative: 'First message' });
-  const message2 = new Message({ role: 'assistant', narrative: 'Second message' });
-  const message3 = new Message({ role: 'user', narrative: 'Third message' });
-
-  narrative = narrative.addMessage(message1);
-  narrative = narrative.addMessage(message2);
-  narrative = narrative.addMessage(message3);
-
-  t.is(narrative.messages.length, 3);
-  t.is(narrative.messages[0].narrative, 'First message');
-  t.is(narrative.messages[1].narrative, 'Second message');
-  t.is(narrative.messages[2].narrative, 'Third message');
-});
-
-test('Narrative > should update context', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Original prompt',
-    scenarioPrompt: 'Original scenario',
-  });
-
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
-  });
-
-  const newContext = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 2,
-      currentHp: 80,
-      maxHp: 120,
-    },
-    systemPrompt: 'Updated prompt',
-    scenarioPrompt: 'Updated scenario',
-  });
-
-  narrative = narrative.updateContext(newContext);
-
-  t.is(narrative.context.characterContext.level, 2);
-  t.is(narrative.context.characterContext.currentHp, 80);
-  t.is(narrative.context.characterContext.maxHp, 120);
-  t.is(narrative.context.systemPrompt, 'Updated prompt');
-});
-
-test('Narrative > should retrieve last N messages', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test prompt',
-    scenarioPrompt: 'Test scenario',
-  });
-
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
-  });
-
-  for (let i = 0; i < 5; i++) {
-    narrative = narrative.addMessage(new Message({ role: 'user', narrative: `Message ${i + 1}` }));
-  }
-
-  // Get last 3 messages using slice
-  const last3 = narrative.messages.slice(-3);
-  t.is(last3.length, 3);
-  t.is(last3[0].narrative, 'Message 3');
-  t.is(last3[1].narrative, 'Message 4');
-  t.is(last3[2].narrative, 'Message 5');
-});
-
-test('Narrative > should get all instructions from messages', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test prompt',
-    scenarioPrompt: 'Test scenario',
-  });
-
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
-  });
-
-  const message1 = new Message({
-    role: 'assistant',
-    narrative: 'Test',
-    instructions: [
-      { type: 'xp', xp: 10 },
-      { type: 'hp', hp: -5 },
-    ],
-  });
-
-  const message2 = new Message({
-    role: 'assistant',
-    narrative: 'Test 2',
-    instructions: [{ type: 'roll', dices: '1d20' }],
-  });
-
-  narrative = narrative.addMessage(message1);
-  narrative = narrative.addMessage(message2);
-
-  const allInstructions = narrative.getAllInstructions();
-  t.is(allInstructions.length, 3);
-  t.is(allInstructions[0].type, 'xp');
-  t.is(allInstructions[1].type, 'hp');
-  t.is(allInstructions[2].type, 'roll');
-});
-
-test('Narrative > should filter instructions by type', (t) => {
-  const context = new Context({
-    characterContext: {
-      name: 'Test Character',
-      race: 'Human',
-      className: 'Warrior',
-      level: 1,
-      currentHp: 100,
-      maxHp: 100,
-    },
-    systemPrompt: 'Test prompt',
-    scenarioPrompt: 'Test scenario',
-  });
-
-  let narrative = new Narrative({
-    userId: 'user-123',
-    characterId: 'char-456',
-    sessionId: 'user-123_char-456',
-    context,
-    messages: [],
-  });
-
-  const message = new Message({
-    role: 'assistant',
-    narrative: 'Test',
-    instructions: [
-      { type: 'xp', xp: 10 },
-      { type: 'hp', hp: -5 },
-      { type: 'xp', xp: 15 },
-    ],
-  });
-
-  narrative = narrative.addMessage(message);
-
-  const xpInstructions = narrative.getInstructionsByType('xp');
-  t.is(xpInstructions.length, 2);
-  t.is((xpInstructions[0] as any).amount, 10);
-  t.is((xpInstructions[1] as any).amount, 15);
-
-  const hpInstructions = narrative.getInstructionsByType('hp');
-  t.is(hpInstructions.length, 1);
-  t.is((hpInstructions[0] as any).amount, -5);
 });

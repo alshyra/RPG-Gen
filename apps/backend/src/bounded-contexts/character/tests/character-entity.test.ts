@@ -1,4 +1,3 @@
-import test from "ava";
 import { CharacterEntity } from "../domain/entities/CharacterEntity.js";
 import { CharacterStats } from "../domain/value-objects/CharacterStats.js";
 
@@ -6,367 +5,393 @@ import { CharacterStats } from "../domain/value-objects/CharacterStats.js";
 // Factory Methods
 // ===========================
 
-test("CharacterEntity.createDraft - creates draft character", t => {
-  const character = CharacterEntity.createDraft({
-    characterId: "test-id",
-    userId: "user-123",
-  });
+describe('CharacterEntity', () => {
+  describe('createDraft', () => {
+    test("creates draft character", () => {
+      const character = CharacterEntity.createDraft({
+        characterId: "test-id",
+        userId: "user-123",
+      });
 
-  t.is(character.id, "test-id");
-  t.is(character.userId, "user-123");
-  t.is(character.state, "draft");
-  t.true(character.isDraft);
-  t.false(character.isComplete);
-  t.is(character.level, 1);
-  t.is(character.totalXp, 0);
-  t.is(character.inspirationPoints, 1);
-  t.is(character.talentPoints, 0);
-  t.false(character.isDeceased);
-});
-
-test("CharacterEntity.createDraft - creates with default resources", t => {
-  const character = CharacterEntity.createDraft({
-    characterId: "test-id",
-  });
-
-  t.is(character.hp, 10);
-  t.is(character.hpMax, 10);
-  t.is(character.pa, 6);
-  t.is(character.paMax, 6);
-  t.is(character.pm, 4);
-  t.is(character.pmMax, 4);
-});
-
-// ===========================
-// Complete Draft
-// ===========================
-
-test("CharacterEntity.completeDraft - completes draft successfully", t => {
-  const character = CharacterEntity.createDraft({
-    characterId: "test-id",
-  });
-
-  const stats = new CharacterStats({
-    vigor: 4,
-    finesse: 2,
-    mind: 2,
-    survival: 2,
-  });
-
-  character.completeDraft({
-    name: "Test Hero",
-    className: "guerrier",
-    raceId: "humain",
-    stats,
-    physicalDescription: "A brave warrior",
-    gender: "male",
-  });
-
-  t.is(character.state, "created");
-  t.is(character.name, "Test Hero");
-  t.is(character.className, "guerrier");
-  t.is(character.raceId, "humain");
-  t.truthy(character.stats);
-  t.is(character.stats?.vigor, 4);
-});
-
-test("CharacterEntity.completeDraft - throws if not draft", t => {
-  const character = CharacterEntity.createDraft({
-    characterId: "test-id",
-  });
-
-  const stats = new CharacterStats({
-    vigor: 4,
-    finesse: 2,
-    mind: 2,
-    survival: 2,
-  });
-
-  character.completeDraft({
-    name: "Test Hero",
-    className: "guerrier",
-    raceId: "humain",
-    stats,
-  });
-
-  t.throws(() => {
-    character.completeDraft({
-      name: "Test Hero 2",
-      className: "rogue",
-      raceId: "nain",
-      stats,
+      expect(character.id).toBe("test-id");
+      expect(character.userId).toBe("user-123");
+      expect(character.state).toBe("draft");
+      expect(character.isDraft).toBe(true);
+      expect(character.isComplete).toBe(false);
+      expect(character.level).toBe(1);
+      expect(character.totalXp).toBe(0);
+      expect(character.inspirationPoints).toBe(1);
+      expect(character.talentPoints).toBe(0);
+      expect(character.isDeceased).toBe(false);
     });
-  }, { message: "Can only complete a draft character" });
-});
 
-// ===========================
-// Level Up
-// ===========================
+    test("creates with default resources", () => {
+      const character = CharacterEntity.createDraft({
+        characterId: "test-id",
+      });
 
-test("CharacterEntity.levelUp - increases level and grants talent point", t => {
-  const character = createCompleteCharacter();
-
-  const initialLevel = character.level;
-  const initialTalentPoints = character.talentPoints;
-
-  character.levelUp();
-
-  t.is(character.level, initialLevel + 1);
-  t.is(character.talentPoints, initialTalentPoints + 1);
-});
-
-test("CharacterEntity.levelUp - throws if not complete", t => {
-  const character = CharacterEntity.createDraft({
-    characterId: "test-id",
+      expect(character.hp).toBe(10);
+      expect(character.hpMax).toBe(10);
+      expect(character.pa).toBe(6);
+      expect(character.paMax).toBe(6);
+      expect(character.pm).toBe(4);
+      expect(character.pmMax).toBe(4);
+    });
   });
 
-  t.throws(() => {
-    character.levelUp();
-  }, { message: "Cannot level up a draft character" });
-});
+  // ===========================
+  // Complete Draft
+  // ===========================
 
-// ===========================
-// Damage and Healing
-// ===========================
+  describe('completeDraft', () => {
+    test("completes draft successfully", () => {
+      const character = CharacterEntity.createDraft({
+        characterId: "test-id",
+      });
 
-test("CharacterEntity.takeDamage - reduces HP", t => {
-  const character = createCompleteCharacter();
-  const initialHp = character.hp;
+      const stats = new CharacterStats({
+        vigor: 4,
+        finesse: 2,
+        mind: 2,
+        survival: 2,
+      });
 
-  character.takeDamage(5);
+      character.completeDraft({
+        name: "Test Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats,
+        physicalDescription: "A brave warrior",
+        gender: "male",
+      });
 
-  t.is(character.hp, initialHp - 5);
-});
+      expect(character.state).toBe("created");
+      expect(character.name).toBe("Test Hero");
+      expect(character.className).toBe("guerrier");
+      expect(character.raceId).toBe("humain");
+      expect(character.stats).toBeTruthy();
+      expect(character.stats?.vigor).toBe(4);
+    });
 
-test("CharacterEntity.takeDamage - marks as deceased when HP reaches 0", t => {
-  const character = createCompleteCharacter();
+    test("throws if not draft", () => {
+      const character = CharacterEntity.createDraft({
+        characterId: "test-id",
+      });
 
-  character.takeDamage(character.hp);
+      const stats = new CharacterStats({
+        vigor: 4,
+        finesse: 2,
+        mind: 2,
+        survival: 2,
+      });
 
-  t.true(character.isDeceased);
-  t.truthy(character.diedAt);
-});
+      character.completeDraft({
+        name: "Test Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats,
+      });
 
-test("CharacterEntity.takeDamage - throws on negative damage", t => {
-  const character = createCompleteCharacter();
-
-  t.throws(() => {
-    character.takeDamage(-5);
-  }, { message: "Damage cannot be negative" });
-});
-
-test("CharacterEntity.heal - increases HP capped at max", t => {
-  const character = createCompleteCharacter();
-  character.takeDamage(10);
-  const afterDamageHp = character.hp;
-
-  character.heal(5);
-
-  t.is(character.hp, afterDamageHp + 5);
-});
-
-test("CharacterEntity.heal - does not exceed max HP", t => {
-  const character = createCompleteCharacter();
-  character.takeDamage(5);
-
-  character.heal(100);
-
-  t.is(character.hp, character.hpMax);
-});
-
-// ===========================
-// Experience
-// ===========================
-
-test("CharacterEntity.addExperience - adds XP", t => {
-  const character = createCompleteCharacter();
-  const initialXp = character.totalXp;
-
-  const result = character.addExperience(50);
-
-  t.is(character.totalXp, initialXp + 50);
-  t.false(result.leveledUp);
-});
-
-test("CharacterEntity.addExperience - throws on negative XP", t => {
-  const character = createCompleteCharacter();
-
-  t.throws(() => {
-    character.addExperience(-10);
-  }, { message: "XP amount cannot be negative" });
-});
-
-// ===========================
-// Action Points
-// ===========================
-
-test("CharacterEntity.spendActionPoints - spends PA", t => {
-  const character = createCompleteCharacter();
-  const initialPa = character.pa;
-
-  character.spendActionPoints(2);
-
-  t.is(character.pa, initialPa - 2);
-});
-
-test("CharacterEntity.spendActionPoints - throws on insufficient PA", t => {
-  const character = createCompleteCharacter();
-
-  t.throws(() => {
-    character.spendActionPoints(character.pa + 1);
-  }, { message: "Insufficient resources" });
-});
-
-test("CharacterEntity.spendMovementPoints - spends PM", t => {
-  const character = createCompleteCharacter();
-  const initialPm = character.pm;
-
-  character.spendMovementPoints(2);
-
-  t.is(character.pm, initialPm - 2);
-});
-
-test("CharacterEntity.restoreResources - restores PA and PM", t => {
-  const character = createCompleteCharacter();
-  character.spendActionPoints(3);
-  character.spendMovementPoints(2);
-
-  character.restoreResources();
-
-  t.is(character.pa, character.paMax);
-  t.is(character.pm, character.pmMax);
-});
-
-// ===========================
-// Talent Ranks
-// ===========================
-
-test("CharacterEntity.unlockTalentRank - unlocks first rank", t => {
-  const character = createCompleteCharacter();
-  character.setTalentPoints(1);
-
-  character.unlockTalentRank("voie_protection", 1);
-
-  t.is(character.talentProgress.length, 1);
-  t.is(character.talentProgress[0].voieId, "voie_protection");
-  t.is(character.talentProgress[0].rank, 1);
-  t.is(character.talentPoints, 0);
-});
-
-test("CharacterEntity.unlockTalentRank - throws without talent points", t => {
-  const character = createCompleteCharacter();
-
-  t.throws(() => {
-    character.unlockTalentRank("voie_protection", 1);
-  }, { message: "No talent points available" });
-});
-
-test("CharacterEntity.unlockTalentRank - throws if not starting at rank 1", t => {
-  const character = createCompleteCharacter();
-  character.setTalentPoints(1);
-
-  t.throws(() => {
-    character.unlockTalentRank("voie_protection", 2);
-  }, { message: "Must start at rank 1 for a new voie" });
-});
-
-// ===========================
-// Inventory
-// ===========================
-
-test("CharacterEntity.addInventoryItem - adds new item", t => {
-  const character = createCompleteCharacter();
-
-  character.addInventoryItem({
-    name: "Sword",
-    definitionId: "sword-basic",
-    qty: 1,
-    equipped: false,
+      expect(() => {
+        character.completeDraft({
+          name: "Test Hero 2",
+          className: "rogue",
+          raceId: "nain",
+          stats,
+        });
+      }).toThrow("Can only complete a draft character");
+    });
   });
 
-  t.is(character.inventory.length, 1);
-  t.is(character.inventory[0].name, "Sword");
-});
+  // ===========================
+  // Level Up
+  // ===========================
 
-test("CharacterEntity.addInventoryItem - stacks existing items", t => {
-  const character = createCompleteCharacter();
+  describe('levelUp', () => {
+    test("increases level and grants talent point", () => {
+      const character = createCompleteCharacter();
 
-  character.addInventoryItem({
-    name: "Potion",
-    definitionId: "potion-health",
-    qty: 1,
-    equipped: false,
+      const initialLevel = character.level;
+      const initialTalentPoints = character.talentPoints;
+
+      character.levelUp();
+
+      expect(character.level).toBe(initialLevel + 1);
+      expect(character.talentPoints).toBe(initialTalentPoints + 1);
+    });
+
+    test("throws if not complete", () => {
+      const character = CharacterEntity.createDraft({
+        characterId: "test-id",
+      });
+
+      expect(() => {
+        character.levelUp();
+      }).toThrow("Cannot level up a draft character");
+    });
   });
 
-  character.addInventoryItem({
-    name: "Potion",
-    definitionId: "potion-health",
-    qty: 2,
-    equipped: false,
+  // ===========================
+  // Damage and Healing
+  // ===========================
+
+  describe('takeDamage', () => {
+    test("reduces HP", () => {
+      const character = createCompleteCharacter();
+      const initialHp = character.hp;
+
+      character.takeDamage(5);
+
+      expect(character.hp).toBe(initialHp - 5);
+    });
+
+    test("marks as deceased when HP reaches 0", () => {
+      const character = createCompleteCharacter();
+
+      character.takeDamage(character.hp);
+
+      expect(character.isDeceased).toBe(true);
+      expect(character.diedAt).toBeTruthy();
+    });
+
+    test("throws on negative damage", () => {
+      const character = createCompleteCharacter();
+
+      expect(() => {
+        character.takeDamage(-5);
+      }).toThrow("Damage cannot be negative");
+    });
   });
 
-  t.is(character.inventory.length, 1);
-  t.is(character.inventory[0].qty, 3);
-});
+  describe('heal', () => {
+    test("increases HP capped at max", () => {
+      const character = createCompleteCharacter();
+      character.takeDamage(10);
+      const afterDamageHp = character.hp;
 
-test("CharacterEntity.removeInventoryItem - removes item", t => {
-  const character = createCompleteCharacter();
-  character.addInventoryItem({
-    name: "Sword",
-    definitionId: "sword-basic",
-    qty: 1,
-    equipped: false,
+      character.heal(5);
+
+      expect(character.hp).toBe(afterDamageHp + 5);
+    });
+
+    test("does not exceed max HP", () => {
+      const character = createCompleteCharacter();
+      character.takeDamage(5);
+
+      character.heal(100);
+
+      expect(character.hp).toBe(character.hpMax);
+    });
   });
 
-  character.removeInventoryItem("sword-basic");
+  // ===========================
+  // Experience
+  // ===========================
 
-  t.is(character.inventory.length, 0);
-});
+  describe('addExperience', () => {
+    test("adds XP", () => {
+      const character = createCompleteCharacter();
+      const initialXp = character.totalXp;
 
-test("CharacterEntity.equipItem - equips item", t => {
-  const character = createCompleteCharacter();
-  character.addInventoryItem({
-    name: "Sword",
-    definitionId: "sword-basic",
-    qty: 1,
-    equipped: false,
+      const result = character.addExperience(50);
+
+      expect(character.totalXp).toBe(initialXp + 50);
+      expect(result.leveledUp).toBe(false);
+    });
+
+    test("throws on negative XP", () => {
+      const character = createCompleteCharacter();
+
+      expect(() => {
+        character.addExperience(-10);
+      }).toThrow("XP amount cannot be negative");
+    });
   });
 
-  character.equipItem("sword-basic");
+  // ===========================
+  // Action Points
+  // ===========================
 
-  t.true(character.inventory[0].equipped);
-});
+  describe('spendActionPoints', () => {
+    test("spends PA", () => {
+      const character = createCompleteCharacter();
+      const initialPa = character.pa;
 
-// ===========================
-// Aptitudes
-// ===========================
+      character.spendActionPoints(2);
 
-test("CharacterEntity.addAptitude - adds aptitude", t => {
-  const character = createCompleteCharacter();
+      expect(character.pa).toBe(initialPa - 2);
+    });
 
-  character.addAptitude("apt-fireball");
+    test("throws on insufficient PA", () => {
+      const character = createCompleteCharacter();
 
-  t.is(character.aptitudes.length, 1);
-  t.is(character.aptitudes[0].aptitudeId, "apt-fireball");
-  t.is(character.aptitudes[0].currentCooldown, 0);
-});
+      expect(() => {
+        character.spendActionPoints(character.pa + 1);
+      }).toThrow("Insufficient resources");
+    });
+  });
 
-test("CharacterEntity.addAptitude - throws if already learned", t => {
-  const character = createCompleteCharacter();
-  character.addAptitude("apt-fireball");
+  describe('spendMovementPoints', () => {
+    test("spends PM", () => {
+      const character = createCompleteCharacter();
+      const initialPm = character.pm;
 
-  t.throws(() => {
-    character.addAptitude("apt-fireball");
-  }, { message: "Aptitude already learned" });
-});
+      character.spendMovementPoints(2);
 
-test("CharacterEntity.removeAptitude - removes aptitude", t => {
-  const character = createCompleteCharacter();
-  character.addAptitude("apt-fireball");
+      expect(character.pm).toBe(initialPm - 2);
+    });
+  });
 
-  character.removeAptitude("apt-fireball");
+  describe('restoreResources', () => {
+    test("restores PA and PM", () => {
+      const character = createCompleteCharacter();
+      character.spendActionPoints(3);
+      character.spendMovementPoints(2);
 
-  t.is(character.aptitudes.length, 0);
+      character.restoreResources();
+
+      expect(character.pa).toBe(character.paMax);
+      expect(character.pm).toBe(character.pmMax);
+    });
+  });
+
+  // ===========================
+  // Talent Ranks
+  // ===========================
+
+  describe('unlockTalentRank', () => {
+    test("unlocks first rank", () => {
+      const character = createCompleteCharacter();
+      character.setTalentPoints(1);
+
+      character.unlockTalentRank("voie_protection", 1);
+
+      expect(character.talentProgress.length).toBe(1);
+      expect(character.talentProgress[0].voieId).toBe("voie_protection");
+      expect(character.talentProgress[0].rank).toBe(1);
+      expect(character.talentPoints).toBe(0);
+    });
+
+    test("throws without talent points", () => {
+      const character = createCompleteCharacter();
+
+      expect(() => {
+        character.unlockTalentRank("voie_protection", 1);
+      }).toThrow("No talent points available");
+    });
+
+    test("throws if not starting at rank 1", () => {
+      const character = createCompleteCharacter();
+      character.setTalentPoints(1);
+
+      expect(() => {
+        character.unlockTalentRank("voie_protection", 2);
+      }).toThrow("Must start at rank 1 for a new voie");
+    });
+  });
+
+  // ===========================
+  // Inventory
+  // ===========================
+
+  describe('inventory', () => {
+    test("addInventoryItem - adds new item", () => {
+      const character = createCompleteCharacter();
+
+      character.addInventoryItem({
+        name: "Sword",
+        definitionId: "sword-basic",
+        qty: 1,
+        equipped: false,
+      });
+
+      expect(character.inventory.length).toBe(1);
+      expect(character.inventory[0].name).toBe("Sword");
+    });
+
+    test("addInventoryItem - stacks existing items", () => {
+      const character = createCompleteCharacter();
+
+      character.addInventoryItem({
+        name: "Potion",
+        definitionId: "potion-health",
+        qty: 1,
+        equipped: false,
+      });
+
+      character.addInventoryItem({
+        name: "Potion",
+        definitionId: "potion-health",
+        qty: 2,
+        equipped: false,
+      });
+
+      expect(character.inventory.length).toBe(1);
+      expect(character.inventory[0].qty).toBe(3);
+    });
+
+    test("removeInventoryItem - removes item", () => {
+      const character = createCompleteCharacter();
+      character.addInventoryItem({
+        name: "Sword",
+        definitionId: "sword-basic",
+        qty: 1,
+        equipped: false,
+      });
+
+      character.removeInventoryItem("sword-basic");
+
+      expect(character.inventory.length).toBe(0);
+    });
+
+    test("equipItem - equips item", () => {
+      const character = createCompleteCharacter();
+      character.addInventoryItem({
+        name: "Sword",
+        definitionId: "sword-basic",
+        qty: 1,
+        equipped: false,
+      });
+
+      character.equipItem("sword-basic");
+
+      expect(character.inventory[0].equipped).toBe(true);
+    });
+  });
+
+  // ===========================
+  // Aptitudes
+  // ===========================
+
+  describe('aptitudes', () => {
+    test("addAptitude - adds aptitude", () => {
+      const character = createCompleteCharacter();
+
+      character.addAptitude("apt-fireball");
+
+      expect(character.aptitudes.length).toBe(1);
+      expect(character.aptitudes[0].aptitudeId).toBe("apt-fireball");
+      expect(character.aptitudes[0].currentCooldown).toBe(0);
+    });
+
+    test("addAptitude - throws if already learned", () => {
+      const character = createCompleteCharacter();
+      character.addAptitude("apt-fireball");
+
+      expect(() => {
+        character.addAptitude("apt-fireball");
+      }).toThrow("Aptitude already learned");
+    });
+
+    test("removeAptitude - removes aptitude", () => {
+      const character = createCompleteCharacter();
+      character.addAptitude("apt-fireball");
+
+      character.removeAptitude("apt-fireball");
+
+      expect(character.aptitudes.length).toBe(0);
+    });
+  });
 });
 
 // ===========================

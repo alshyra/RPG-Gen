@@ -8,8 +8,8 @@ import {
 } from "../../bounded-contexts/combat/api/dto/response/CombatActionResponseDto.js";
 import { CombatSession } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { Combatant } from "../../bounded-contexts/combat/infrastructure/persistence/mongo/schemas/Combatant.js";
-import { Aptitude } from "../../bounded-contexts/aptitude/infrastructure/persistence/mongo/schemas/Aptitude.js";
-import { AptitudeService } from "../../bounded-contexts/aptitude/application/services/AptitudeService.js";
+import { Aptitude } from "../../bounded-contexts/game-data/domain/aptitude/entities/Aptitude.js";
+import { AptitudeDataService } from "../../bounded-contexts/game-data/application/services/AptitudeDataService.js";
 
 /**
  * Orchestrator for unified combat actions via aptitudes.
@@ -21,7 +21,7 @@ export class CombatActionOrchestrator {
 
   constructor(
     @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
-    private readonly aptitudeService: AptitudeService,
+    private readonly aptitudeService: AptitudeDataService,
   ) {}
 
   /**
@@ -96,13 +96,13 @@ export class CombatActionOrchestrator {
     if (aptitude.basePower && aptitude.targetType === "enemy") {
       // Damage aptitude (attack, offensive spell)
       result = await this.executeDamageAptitude(session, aptitude, request, userId, characterId);
-    } else if (aptitude.category === "support" && aptitude.basePower > 0) {
+    } else if (aptitude.effectType === "heal" && aptitude.basePower > 0) {
       // Healing aptitude
       result = await this.executeHealAptitude(session, aptitude, request, userId, characterId);
-    } else if (aptitude.category === "defense") {
+    } else if (aptitude.effectType === "buff") {
       // Buff/shield aptitude
       result = await this.executeBuffAptitude(session, aptitude, request, userId, characterId);
-    } else if (aptitude.category === "movement") {
+    } else if (aptitude.moveType) {
       // Movement aptitude (dash, teleport, etc.)
       result = await this.executeMovementAptitude(session, aptitude, request, userId, characterId);
     } else {
@@ -110,7 +110,7 @@ export class CombatActionOrchestrator {
       result = new CombatActionResponseDto({
         success: false,
         cost: ActionCost.ACTION,
-        errorMessage: `Aptitude type not yet implemented: ${aptitude.category || "unknown"}`,
+        errorMessage: `Aptitude type not yet implemented: ${aptitude.effectType || "unknown"}`,
       });
     }
 
@@ -179,13 +179,14 @@ export class CombatActionOrchestrator {
   ): Promise<CombatActionResponseDto> {
     const basePower = aptitude.basePower ?? 5;
     const scaledPower = this.aptitudeService.calculateScaledPower(basePower, session.player.hp ?? 1);
-    const areaRadius = aptitude.areaOfEffect ?? 0;
+    // Parse area shape to get radius (e.g., 'circle_2' -> 2)
+    const areaRadius = aptitude.area ? parseInt(aptitude.area.split('_')[1] || '0', 10) : 0;
 
     let targets: Combatant[] = [];
     let centerPosition: { x: number; y: number } | undefined;
 
     // Determine targets based on area of effect
-    if (areaRadius > 0 && aptitude.targetType === "zone") {
+    if (areaRadius > 0 && aptitude.area) {
       // Area of effect - use target position as center
       if (!request.targetId) {
         return new CombatActionResponseDto({
@@ -347,7 +348,7 @@ export class CombatActionOrchestrator {
     characterId: string,
   ): Promise<CombatActionResponseDto> {
     // Add buff to active effects
-    const buffId = `buff_${aptitude.aptitudeId}_${Date.now()}`;
+    const buffId = `buff_${aptitude.id}_${Date.now()}`;
     const activeEffects = session.activeEffects || [];
     activeEffects.push(buffId);
     
@@ -375,7 +376,7 @@ export class CombatActionOrchestrator {
   ): Promise<CombatActionResponseDto> {
     // TODO: Implement position-based movement when grid system is ready
     // For now, just add movement effect
-    const moveEffect = `move_${aptitude.category}_${Date.now()}`;
+    const moveEffect = `move_${aptitude.moveType}_${Date.now()}`;
     const activeEffects = session.activeEffects || [];
     activeEffects.push(moveEffect);
     

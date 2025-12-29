@@ -1,4 +1,4 @@
-import { ArchetypeName, RaceId } from '#shared/domain/index.js';
+import { ArchetypeName, RaceId } from '#shared';
 
 /**
  * Command to complete a draft character and make it playable

@@ -7,9 +7,8 @@ import {
 } from "../../../../domain/entities/CharacterEntity.js";
 import { CharacterStats } from "../../../../domain/value-objects/CharacterStats.js";
 import { ResourcePool } from "../../../../domain/value-objects/ResourcePool.js";
-import { CharacterDocument, type CharacterAptitude as MongoCharacterAptitude } from "../schemas/CharacterDocument.js";
-import type { Item } from "../../../../../item/infrastructure/persistence/mongo/schemas/Item.js";
-import { ArchetypeName, RaceId } from "#shared/domain/index.js";
+import { CharacterDocument, type CharacterAptitude as MongoCharacterAptitude, type InventoryItemEmbed } from "../schemas/CharacterDocument.js";
+import { ArchetypeName, RaceId } from "#shared";
 import { TalentProgress } from "#character/domain/value-objects/TalentRank.js";
 
 /**
@@ -65,7 +64,7 @@ export class CharacterMapper {
         description: item.description ?? "",
         equipped: item.equipped,
         meta: item.meta ?? {},
-      })) as Item[],
+      })) as InventoryItemEmbed[],
       isDeceased: props.isDeceased,
       diedAt: props.diedAt,
       deathLocation: props.deathLocation,
@@ -100,19 +99,18 @@ export class CharacterMapper {
       }),
     );
 
-    const inventory: InventoryItem[] = (doc.inventory || []).map((item: Item) => ({
-      _id: item._id,
+    const inventory: InventoryItem[] = (doc.inventory || []).map((item: InventoryItemEmbed) => ({
       name: item.name,
       definitionId: item.definitionId,
       qty: item.qty,
       description: item.description,
       equipped: item.equipped,
-      meta: item.meta as Record<string, unknown>,
+      meta: item.meta,
     }));
 
     const props: CharacterProps = {
       characterId: doc.characterId,
-      userId: doc.userId?.toString(),
+      userId: typeof doc.userId === 'string' ? doc.userId : String(doc.userId ?? ''),
       name: doc.name,
       physicalDescription: doc.physicalDescription,
       portrait: doc.portrait,

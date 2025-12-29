@@ -12,8 +12,8 @@ import {
   MovementResponseDto,
 } from "../dto/response/index.js";
 import type { RPGRequest } from "../../../../global.types.js";
-import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../../../orchestrators/combat/index.js";
-import { ChatOrchestrator } from "../../../../orchestrators/index.js";
+import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../../../workflows/combat-gameplay/index.js";
+import { ChatOrchestrator } from "../../../../workflows/index.js";
 
 /**
  * CombatController - Thin controller that delegates to CombatOrchestrator.

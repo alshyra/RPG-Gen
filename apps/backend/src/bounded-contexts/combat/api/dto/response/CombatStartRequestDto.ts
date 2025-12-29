@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsNumber, IsOptional, IsArray, ValidateNested } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsArray, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { CombatStartEntryDto } from "./CombatStartEntryDto.js";
 

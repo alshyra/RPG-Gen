@@ -101,7 +101,9 @@ export class DiceService {
     const total = this.computeTotal(base) + this.computeTotal(extra) + (damageBonus ?? 0);
 
     const result: CombatDiceResultDto = {
-      ...base,
+      rolls: base.rolls,
+      modifierValue: base.modifierValue,
+      total: base.total,
       isCrit,
       damageTotal: total,
     };

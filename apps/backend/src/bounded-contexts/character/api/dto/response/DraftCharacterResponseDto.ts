@@ -1,5 +1,4 @@
 import { InternalServerErrorException } from "@nestjs/common";
-import { CharacterDocument } from "../../../infrastructure/persistence/mongo/schemas/CharacterDocument.js";
 import { BaseCharacterResponseDto } from "./BaseCharacterResponseDto.js";
 
 // Type guards for enum values
@@ -17,12 +16,12 @@ const isValidRaceId = (value: unknown): value is 'humain' | 'nain' | 'elfe' | 'd
  * Portrait and raceId are set in subsequent steps.
  */
 export class DraftCharacterResponseDto extends BaseCharacterResponseDto {
-  constructor(init?: Partial<DraftCharacterResponseDto> | CharacterDocument) {
+  constructor(init?: Partial<DraftCharacterResponseDto>) {
+    super(init);
     if (!init) throw new InternalServerErrorException("DraftCharacterResponseDto initialized without data");
     if (!init.characterId) throw new InternalServerErrorException("DraftCharacterResponseDto: missing required field 'characterId'");
     if (init.state !== "draft") throw new InternalServerErrorException("DraftCharacterResponseDto: state must be 'draft'");
 
-    super(init);
     this.characterId = init.characterId;
     this.state = init.state;
     if (init.portrait) {

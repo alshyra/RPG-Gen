@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
-import { ConversationService } from "../../domain/chat/conversation.service.js";
+import { ConversationService } from "../../bounded-contexts/game-narrative/application/services/ConversationService.js";
 import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 
 import { CombatEndDto } from "../../bounded-contexts/combat/api/dto/response/CombatEndDto.js";
@@ -11,7 +11,7 @@ import type {
   EndPlayerTurnResponseDto,
 } from "../../bounded-contexts/combat/api/dto/response/index.js";
 import { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/index.js";
-import { GeminiTextService } from "../../bounded-contexts/game-narrative/external/gemini-text.service.js";
+import { GeminiTextService } from "../../bounded-contexts/game-narrative/infrastructure/external/index.js";
 import type { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
 
 /**
@@ -152,14 +152,22 @@ export class CombatOrchestrator {
       characterId,
     );
     const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
-    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity);
+    // Filter messages to only user/assistant roles and map to Gemini-compatible format
+    const geminiMessages = previousChatMessages
+      .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+      .map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        narrative: msg.narrative,
+        instructions: msg.instructions,
+      }));
     return this.geminiTexteService.initializeChatSession(
       characterId,
       this.geminiTexteService.initPrompt(
         characterDto,
         this.conversationService.buildCharacterSummary(characterDto),
       ),
-      previousChatMessages,
+      geminiMessages,
     );
   };
 

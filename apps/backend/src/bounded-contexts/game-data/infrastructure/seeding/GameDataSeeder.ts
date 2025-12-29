@@ -6,21 +6,21 @@ import { ItemDataService } from '../../application/services/ItemDataService.js';
 import { EnemyDataService } from '../../application/services/EnemyDataService.js';
 
 // Import seed data from JSON files
-import aptitudesData from '../../../../seed/aptitudes.json' with { type: 'json' };
-import racesData from '../../../../seed/races.json' with { type: 'json' };
-import starterPackItems from '../../../../seed/starter-packs.json' with { type: 'json' };
-import armorDefinitions from '../../../../seed/armor-definitions.json' with { type: 'json' };
-import itemsDefinitions from '../../../../seed/item-definitions.json' with { type: 'json' };
-import weaponsDefinitions from '../../../../seed/weapons-definitions.json' with { type: 'json' };
-import enemiesData from '../../../../seed/enemies.json' with { type: 'json' };
+import aptitudesData from '../../assets/aptitudes.json' with { type: 'json' };
+import racesData from '../../assets/races.json' with { type: 'json' };
+import starterPackItems from '../../assets/items/starter-packs.json' with { type: 'json' };
+import armorDefinitions from '../../assets/items/armor-definitions.json' with { type: 'json' };
+import itemsDefinitions from '../../assets/items/item-definitions.json' with { type: 'json' };
+import weaponsDefinitions from '../../assets/items/weapons-definitions.json' with { type: 'json' };
+import enemiesData from '../../assets/enemies.json' with { type: 'json' };
 
 // Class seed files
-import guerrierStats from '../../../../seed/classes/guerrier/stats.json' with { type: 'json' };
-import guerrierVoies from '../../../../seed/classes/guerrier/voies.json' with { type: 'json' };
-import mageStats from '../../../../seed/classes/mage/stats.json' with { type: 'json' };
-import mageVoies from '../../../../seed/classes/mage/voies.json' with { type: 'json' };
-import rogueStats from '../../../../seed/classes/rogue/stats.json' with { type: 'json' };
-import rogueVoies from '../../../../seed/classes/rogue/voies.json' with { type: 'json' };
+import guerrierStats from '../../assets/classes/guerrier/stats.json' with { type: 'json' };
+import guerrierVoies from '../../assets/classes/guerrier/voies.json' with { type: 'json' };
+import mageStats from '../../assets/classes/mage/stats.json' with { type: 'json' };
+import mageVoies from '../../assets/classes/mage/voies.json' with { type: 'json' };
+import rogueStats from '../../assets/classes/rogue/stats.json' with { type: 'json' };
+import rogueVoies from '../../assets/classes/rogue/voies.json' with { type: 'json' };
 
 /**
  * Responsible for seeding all game data from JSON files

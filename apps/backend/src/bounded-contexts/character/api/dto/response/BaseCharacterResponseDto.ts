@@ -1,4 +1,4 @@
-import { RaceIdEnum, type ArchetypeName, type RaceId } from "#shared/domain/index.js";
+import { RaceIdEnum, type ArchetypeName, type RaceId } from "#shared";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsArray, ValidateNested } from "class-validator";
@@ -14,6 +14,12 @@ import { type CharacterState } from "#character/domain/entities/CharacterEntity.
  * Tactical system stats (Vigor, Finesse, Mind, Survival)
  */
 export class BaseCharacterResponseDto {
+  constructor(init?: Partial<BaseCharacterResponseDto>) {
+    if (init) {
+      Object.assign(this, init);
+    }
+  }
+
   @ApiProperty({ description: "Unique character ID (UUID)" })
   characterId: string;
 

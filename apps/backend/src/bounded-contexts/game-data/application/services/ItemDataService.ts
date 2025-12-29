@@ -80,7 +80,7 @@ export class ItemDataService {
     definitionId: string;
     name: string;
     description?: string;
-    slot?: ItemSlot | string;
+    slot?: ItemSlot;
     meta?: ItemMeta;
   }): Promise<void> {
     const item = ItemDefinition.fromSeedData({

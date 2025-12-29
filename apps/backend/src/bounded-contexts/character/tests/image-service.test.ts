@@ -1,4 +1,3 @@
-import test from "ava";
 import { ImageService } from "../domain/services/ImageService.js";
 
 // Create a minimal valid PNG image as base64
@@ -12,58 +11,61 @@ const VALID_PNG_DATA_URI = `data:image/png;base64,${VALID_PNG_BASE64}`;
 // ImageService.compressImage Tests
 // ===========================
 
-test("ImageService.compressImage - compresses valid image", async t => {
-  const service = new ImageService();
+describe('ImageService', () => {
+  describe('compressImage', () => {
+    test("compresses valid image", async () => {
+      const service = new ImageService();
 
-  const result = await service.compressImage(VALID_PNG_DATA_URI);
+      const result = await service.compressImage(VALID_PNG_DATA_URI);
 
-  t.true(result.startsWith("data:image/jpeg;base64,"));
-});
+      expect(result.startsWith("data:image/jpeg;base64,")).toBe(true);
+    });
 
-test("ImageService.compressImage - compresses buffer input", async t => {
-  const service = new ImageService();
-  const buffer = Buffer.from(VALID_PNG_BASE64, "base64");
+    test("compresses buffer input", async () => {
+      const service = new ImageService();
+      const buffer = Buffer.from(VALID_PNG_BASE64, "base64");
 
-  const result = await service.compressImage(buffer);
+      const result = await service.compressImage(buffer);
 
-  t.true(result.startsWith("data:image/jpeg;base64,"));
-});
+      expect(result.startsWith("data:image/jpeg;base64,")).toBe(true);
+    });
 
-test("ImageService.compressImage - throws on invalid image", async t => {
-  const service = new ImageService();
+    test("throws on invalid image", async () => {
+      const service = new ImageService();
 
-  await t.throwsAsync(
-    async () => {
-      await service.compressImage("invalid-image-data");
-    },
-    { message: /Failed to compress image/ },
-  );
-});
+      await expect(
+        service.compressImage("invalid-image-data")
+      ).rejects.toThrow(/Failed to compress image/);
+    });
+  });
 
-// ===========================
-// ImageService.validateImage Tests
-// ===========================
+  // ===========================
+  // ImageService.validateImage Tests
+  // ===========================
 
-test("ImageService.validateImage - returns true for valid image", async t => {
-  const service = new ImageService();
+  describe('validateImage', () => {
+    test("returns true for valid image", async () => {
+      const service = new ImageService();
 
-  const isValid = await service.validateImage(VALID_PNG_DATA_URI);
+      const isValid = await service.validateImage(VALID_PNG_DATA_URI);
 
-  t.true(isValid);
-});
+      expect(isValid).toBe(true);
+    });
 
-test("ImageService.validateImage - returns false for invalid data", async t => {
-  const service = new ImageService();
+    test("returns false for invalid data", async () => {
+      const service = new ImageService();
 
-  const isValid = await service.validateImage("not-an-image");
+      const isValid = await service.validateImage("not-an-image");
 
-  t.false(isValid);
-});
+      expect(isValid).toBe(false);
+    });
 
-test("ImageService.validateImage - returns false for empty string", async t => {
-  const service = new ImageService();
+    test("returns false for empty string", async () => {
+      const service = new ImageService();
 
-  const isValid = await service.validateImage("");
+      const isValid = await service.validateImage("");
 
-  t.false(isValid);
+      expect(isValid).toBe(false);
+    });
+  });
 });

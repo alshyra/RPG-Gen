@@ -143,10 +143,6 @@ export class CombatAppService {
     const enemies = this.buildEnemies(combatStart);
     const turnOrder = this.turnOrderService.buildTurnOrder(characterId, player, enemies);
 
-    // Use class-based PA/PM
-    const className = (character.className ?? "guerrier").toLowerCase();
-    const classStats = CLASS_STATS[className] ?? CLASS_STATS.guerrier;
-
     return new CombatStateDto({
       characterId,
       inCombat: true,

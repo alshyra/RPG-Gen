@@ -25,9 +25,9 @@ export class InventoryItemDto<MetaType = InventoryItemMeta> {
   @IsNumber()
   qty?: number;
 
-  @ApiProperty({ description: "Item description" })
+  @ApiPropertyOptional({ description: "Item description" })
   @IsString()
-  description: string;
+  description?: string;
 
   @ApiProperty({ description: "Is equipped" })
   @IsBoolean()

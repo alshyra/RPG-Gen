@@ -1,35 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { AptitudeTargetingResponseDto } from './AptitudeTargetingResponseDto.js';
+import { AptitudeEffectResponseDto } from './AptitudeEffectResponseDto.js';
 
-/**
- * Aptitude targeting DTO
- */
-export class AptitudeTargetingResponseDto {
-  @ApiProperty({ description: 'Target type', example: 'enemy' })
-  type: string;
-
-  @ApiPropertyOptional({ description: 'Range in cells', example: 3 })
-  range?: number;
-
-  @ApiPropertyOptional({ description: 'Area of effect', example: 1 })
-  aoe?: number;
-}
-
-/**
- * Aptitude effect DTO
- */
-export class AptitudeEffectResponseDto {
-  @ApiProperty({ description: 'Effect type', example: 'damage' })
-  type: string;
-
-  @ApiPropertyOptional({ description: 'Base value', example: 10 })
-  value?: number;
-
-  @ApiPropertyOptional({ description: 'Scaling formula', example: '1d6+finesse' })
-  scaling?: string;
-
-  @ApiPropertyOptional({ description: 'Effect duration in turns', example: 2 })
-  duration?: number;
-}
+// Re-export for convenience
+export { AptitudeTargetingResponseDto, AptitudeEffectResponseDto };
 
 /**
  * Aptitude response DTO

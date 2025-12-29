@@ -2,7 +2,7 @@ import { CharacterStats } from "../value-objects/CharacterStats.js";
 import { ResourcePool } from "../value-objects/ResourcePool.js";
 import { TalentProgress } from "../value-objects/TalentRank.js";
 import type { InventoryItemMeta } from "../../api/dto/response/InventoryItemMeta.js";
-import { ArchetypeName, RaceId } from "#shared/domain/index.js";
+import { ArchetypeName, RaceId } from "#shared";
 
 export type CharacterState = "draft" | "created" | "deceased";
 

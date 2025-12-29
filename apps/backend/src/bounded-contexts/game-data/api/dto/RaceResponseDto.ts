@@ -1,35 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { RaceBonusesResponseDto } from './RaceBonusesResponseDto.js';
+import { TraitEffectResponseDto } from './TraitEffectResponseDto.js';
 
-/**
- * Racial bonuses DTO
- */
-export class RaceBonusesResponseDto {
-  @ApiPropertyOptional({ description: 'Vigor bonus', example: 1 })
-  vigor?: number;
-
-  @ApiPropertyOptional({ description: 'Finesse bonus', example: 1 })
-  finesse?: number;
-
-  @ApiPropertyOptional({ description: 'Mind bonus', example: 1 })
-  mind?: number;
-
-  @ApiPropertyOptional({ description: 'Survival bonus', example: 1 })
-  survival?: number;
-}
-
-/**
- * Trait effect DTO
- */
-export class TraitEffectResponseDto {
-  @ApiProperty({ description: 'Effect type', example: 'pa_bonus' })
-  type: string;
-
-  @ApiProperty({ description: 'Effect value', example: 1 })
-  value: number;
-
-  @ApiPropertyOptional({ description: 'Condition for effect', example: 'first_turn' })
-  condition?: string;
-}
+// Re-export for convenience
+export { RaceBonusesResponseDto, TraitEffectResponseDto };
 
 /**
  * Race definition response DTO

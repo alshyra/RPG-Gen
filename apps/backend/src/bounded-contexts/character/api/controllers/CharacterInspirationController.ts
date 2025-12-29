@@ -20,7 +20,7 @@ import type { RPGRequest } from "../../../../global.types.js";
 import { CharacterAppService } from "../../application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../dto/mappers/CharacterDtoMapper.js";
 import { GrantInspirationBodyDto } from "../dto/request/index.js";
-import { CharacterResponseDto, InspirationResponseDto } from "../dto/response/index.js";
+import { InspirationResponseDto } from "../dto/response/index.js";
 
 @ApiTags("character-inspiration")
 @Controller("characters/:characterId/inspiration")

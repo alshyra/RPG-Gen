@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
-import { ItemDefinitionDto } from "../../bounded-contexts/item/api/dto/ItemDefinitionDto.js";
+import { ItemDefinition } from "../../bounded-contexts/game-data/domain/item/entities/ItemDefinition.js";
 import { CharacterAppService } from "../../bounded-contexts/character/application/services/CharacterAppService.js";
 import { CharacterDtoMapper } from "../../bounded-contexts/character/api/dto/mappers/CharacterDtoMapper.js";
 import {
   CreateInventoryItemDto,
   type CharacterResponseDto,
 } from "../../bounded-contexts/character/api/dto/index.js";
-import type { InventoryInstructionMessageDto } from "../../domain/chat/dto/index.js";
+import type { InventoryInstructionMessageDto } from "../../bounded-contexts/game-narrative/api/dto/response/index.js";
 import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 import type { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/CombatStateDto.js";
 import { DiceService } from "../../bounded-contexts/game-narrative/domain/dice/DiceService.js";
-import { ItemDefinitionService } from "../../bounded-contexts/combat/application/services/ItemDefinitionService.js";
+import { ItemDataService } from "../../bounded-contexts/game-data/application/services/ItemDataService.js";
 
 interface ConsumableMetaWithHeal {
   type: "consumable";
@@ -50,7 +50,7 @@ export class ItemOrchestrator {
     private readonly dtoMapper: CharacterDtoMapper,
     private readonly combatService: CombatAppService,
     private readonly diceService: DiceService,
-    private readonly itemDefinitionService: ItemDefinitionService,
+    private readonly itemDataService: ItemDataService,
   ) {}
 
   public async handleInventoryInstruction(
@@ -61,7 +61,7 @@ export class ItemOrchestrator {
     if (!instr.itemId)
       throw new BadRequestException("itemId is required for inventory instructions");
     if (instr.action === "add") {
-      const item = await this.itemDefinitionService.findByDefinitionId(instr.itemId);
+      const item = await this.itemDataService.findById(instr.itemId);
       if (!item) throw new BadRequestException(`Item definition ${instr.itemId} not found`);
       const newInventoryItem = new CreateInventoryItemDto(item);
       return this.characterAppService.addInventoryItem(userId, characterId, newInventoryItem);
@@ -82,7 +82,7 @@ export class ItemOrchestrator {
    * Validate context for using a consumable item
    */
   private validateContext(
-    itemLike: ItemDefinitionDto,
+    itemLike: ItemDefinition,
     meta: ConsumableMetaWithHeal,
     inCombat: boolean,
   ): void {
@@ -145,7 +145,7 @@ export class ItemOrchestrator {
     const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
     const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity) as CharacterResponseDto;
 
-    const itemDefinition = await this.itemDefinitionService.findByDefinitionId(itemId);
+    const itemDefinition = await this.itemDataService.findById(itemId);
     if (!itemDefinition) throw new BadRequestException(`Item definition ${itemId} not found`);
 
     const { meta } = itemDefinition;
