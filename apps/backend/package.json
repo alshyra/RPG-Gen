@@ -74,7 +74,8 @@
     ],
     "failFast": true,
     "files": [
-      "test/**/*.test.ts"
+      "test/**/*.test.ts",
+      "src/bounded-contexts/**/tests/*.test.ts"
     ],
     "nodeArguments": [
       "--loader=ts-node/esm",

@@ -1,4 +1,4 @@
-import { DiceResultDto } from "../../src/domain/dice/dto/DiceResultDto.js";
+import { DiceResultDto } from "../../src/bounded-contexts/game-narrative/api/dto/dice/DiceResultDto.js";
 
 export interface MockDiceRollConfig {
   /** Fixed roll values to return sequentially */

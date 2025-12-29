@@ -11,7 +11,6 @@ import { OpportunityAttackResolver } from "./domain/services/opportunity-attack.
 import { CombatActionService } from "./domain/services/combat-action.service.js";
 import { CharacterModule } from "../character/character.module.js";
 import { GameNarrativeModule } from "../game-narrative/game-narrative.module.js";
-import { DiceModule } from "../dice/dice.module.js";
 import { AptitudeModule } from "../aptitude/aptitude.module.js";
 import { CombatSession, CombatSessionSchema } from "./infrastructure/persistence/mongo/schemas/CombatSession.js";
 import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrator } from "../../orchestrators/combat/index.js";
@@ -19,7 +18,6 @@ import { CombatOrchestrator, CombatMovementOrchestrator, CombatActionOrchestrato
 @Module({
   imports: [
     CharacterModule,
-    DiceModule,
     AptitudeModule,
     forwardRef(() => GameNarrativeModule),
     MongooseModule.forFeature([

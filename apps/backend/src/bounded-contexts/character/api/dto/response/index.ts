@@ -23,3 +23,4 @@ export * from "./PackMeta.js";
 export * from "./ToolMeta.js";
 export * from "./GenericMeta.js";
 export * from "./BaseMeta.js";
+export * from "./AvatarResponseDto.js";
