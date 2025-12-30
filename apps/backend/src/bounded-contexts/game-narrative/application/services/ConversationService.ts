@@ -152,4 +152,23 @@ Health: ${hp}/${maxHp || 'Unknown'}`;
       // Ignore if narrative doesn't exist
     }
   }
+
+  /**
+   * Ensure a narrative exists for a character, creating one if needed.
+   * Used for initializing a new game session.
+   */
+  async ensureNarrativeExists(userId: string, characterId: string): Promise<void> {
+    const context = new Context({
+      characterContext: { name: '', race: '', className: '', level: 1 },
+      systemPrompt: '',
+      scenarioPrompt: '',
+    });
+    
+    await this.narrativeAppService.getOrCreateNarrative(
+      userId,
+      characterId,
+      `session-${Date.now()}`,
+      context,
+    );
+  }
 }

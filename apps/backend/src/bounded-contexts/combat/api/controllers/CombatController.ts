@@ -79,10 +79,25 @@ export class CombatController {
   @ApiResponse({
     status: 200,
     type: CombatStateDto,
+    description: "Returns combat state or inCombat: false if no active combat",
   })
   async getStatus(@Req() req: RPGRequest, @Param("characterId") characterId: string) {
     const userId = req.user.id;
-    return await this.combatOrchestrator.getStatus(userId, characterId);
+    const status = await this.combatOrchestrator.getStatus(userId, characterId);
+    
+    // If no combat session exists, return a minimal response indicating no combat
+    if (!status) {
+      return new CombatStateDto({
+        characterId,
+        inCombat: false,
+        enemies: [],
+        turnOrder: [],
+        currentTurnIndex: 0,
+        roundNumber: 0,
+      });
+    }
+    
+    return status;
   }
 
   @Post(":characterId/end-turn")

@@ -6,3 +6,4 @@ export * from "./GrantInspirationBodyDto.js";
 export * from "./KillCharacterBodyDto.js";
 export * from "./UnlockRankDto.js";
 export * from "./GenerateAvatarRequestDto.js";
+export * from "./VoieProgressInputDto.js";

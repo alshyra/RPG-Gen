@@ -581,6 +581,14 @@ export class CharacterEntity {
     this.props.talentPoints = points;
   }
 
+  /**
+   * Set talent progress directly (for character creation/admin).
+   * This bypasses the normal unlock validation (talent points, sequential unlocking).
+   */
+  setTalentProgress(progress: TalentProgress[]): void {
+    this.props.talentProgress = [...progress];
+  }
+
   setInspirationPoints(points: number): void {
     if (points < 0) {
       throw new Error("Inspiration points cannot be negative");

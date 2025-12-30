@@ -34,6 +34,13 @@ const chatApi = {
     });
     return getData(response);
   },
+
+  async startNarrative(characterId: string): Promise<ConversationResponseDto> {
+    const response = await apiClient.POST("/api/chat/{characterId}/start", {
+      params: { path: { characterId } },
+    });
+    return getData(response);
+  },
 };
 
 /**
@@ -86,6 +93,20 @@ export function useChat(
     },
   });
 
+  // Mutation: Start narrative (initialize new game session)
+  const startNarrative = useMutation({
+    mutationFn: async () => {
+      if (!id.value) throw new Error("Character ID is required");
+      return chatApi.startNarrative(id.value);
+    },
+    onSuccess: () => {
+      // Invalidate history after starting narrative
+      if (id.value) {
+        void queryClient.invalidateQueries({ queryKey: chatKeys.history(id.value) });
+      }
+    },
+  });
+
   return {
     // Queries
     history,
@@ -93,6 +114,7 @@ export function useChat(
 
     // Mutations
     sendMessage,
+    startNarrative,
 
     // Helpers
     isLoading: computed(() => history.isLoading.value),

@@ -148,7 +148,7 @@ const steps = [
 
 const currentCharacter = useCurrentCharacter();
 const characterId = useCharacterId();
-const chat = useChat(characterId.value, { enabled: false }); // Disable history query during creation
+const chat = useChat(characterId, { enabled: false }); // Disable history query during creation
 const image = useImage();
 const { update, character } = useCharacter(characterId);
 const selectFirstTalentMutation = useSelectFirstTalent(characterId);
@@ -231,11 +231,18 @@ const initConversationForCharacter = async () => {
   try {
     loadingTitle.value = "Création de l'univers...";
     loadingSubtitle.value = "Préparation du premier prompt du Maître de Jeu...";
+    console.log("initConversationForCharacter called. characterId from store:", currentCharacter?.value?.characterId);
+    console.log("characterId from route (useCharacterId):", characterId.value);
     if (currentCharacter?.value?.characterId) {
-      await chat.history.refetch();
+      console.log("About to call startNarrative mutation");
+      // Initialize the narrative session for the new character
+      await chat.startNarrative.mutateAsync();
+      console.log("startNarrative completed successfully");
+    } else {
+      console.warn("Skipping startNarrative: currentCharacter characterId is falsy");
     }
   } catch (e) {
-    console.warn("Failed to initialize conversation/history", e);
+    console.error("Failed to initialize conversation/history", e);
   }
 };
 

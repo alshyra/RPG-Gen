@@ -107,13 +107,12 @@ export class NarrativeAppService {
 
   /**
    * Get all messages for a narrative
+   * Returns an empty array if narrative doesn't exist (e.g., new character)
    */
   async getAllMessages(userId: string, characterId: string): Promise<Message[]> {
     const narrative = await this.narrativeRepository.findByUserAndCharacter(userId, characterId);
     if (!narrative) {
-      throw new NotFoundException(
-        `Narrative for user ${userId} and character ${characterId} not found`,
-      );
+      return [];
     }
     return [...narrative.messages];
   }

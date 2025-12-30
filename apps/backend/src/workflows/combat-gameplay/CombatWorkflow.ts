@@ -195,11 +195,22 @@ export class CombatOrchestrator {
 
   /**
    * Get current combat status with fresh action token.
+   * Returns null if no combat session exists.
    */
-  async getStatus(userId: string, characterId: string): Promise<CombatStateDto> {
+  async getStatus(userId: string, characterId: string): Promise<CombatStateDto | null> {
     const inCombat = await this.combatAppService.isInCombat(characterId);
+    
+    // If not in combat, check if a session exists at all
+    if (!inCombat) {
+      const session = await this.combatAppService.getCombatSessionRaw(characterId);
+      if (!session) {
+        // No combat session exists - return null to indicate no combat
+        return null;
+      }
+    }
+    
     const state = await this.combatAppService.getCombatState(characterId);
-    if (!state) throw new BadRequestException("No combat at the moment");
+    if (!state) return null;
 
     if (!inCombat) {
       // Get combat session to check if narrative already exists

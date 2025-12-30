@@ -1,5 +1,6 @@
 import type { DiceResultDto } from "@rpg-gen/shared";
 import { type RollInstructionMessageDto, isRollInstruction } from "@/types/game-instructions";
+import type { RollModalData } from "@/interfaces";
 import { storeToRefs } from "pinia";
 import { watch } from "vue";
 import { useChat } from "@rpg-gen/api-client";
@@ -46,7 +47,7 @@ export function useGameRolls() {
     instr: RollInstructionMessageDto,
     skillName: string,
     skillBonus: number,
-  ) => {
+  ): RollModalData => {
     const { meta } = instr;
     return {
       skillName,
@@ -57,8 +58,8 @@ export function useGameRolls() {
       advantage: instr.advantage,
       keptRoll: null,
       discardedRoll: null,
-      action: meta?.action,
-      target: meta?.target,
+      action: typeof meta?.action === "string" ? meta.action : undefined,
+      target: typeof meta?.target === "string" ? meta.target : undefined,
       targetAc: typeof meta?.targetAc === "number" ? meta.targetAc : null,
     };
   };
@@ -83,11 +84,9 @@ export function useGameRolls() {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
     if (!characterId.value) return;
 
-    const message = await chat.sendMessage.mutateAsync({
-      role: "user",
-      narrative: `I rolled ${rollData.value?.total}`,
-      instructions: [],
-    });
+    const message = await chat.sendMessage.mutateAsync(
+      `I rolled ${rollData.value?.total}`
+    );
     if (!message) throw new Error("No message returned from confirmRoll");
 
     return message;

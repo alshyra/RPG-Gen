@@ -5,24 +5,24 @@ import { apiClient } from "./index.js";
 
 const archetypesApi = {
   async getAllArchetypes() {
-    const response = await apiClient.GET("/api/archetypes");
+    const response = await apiClient.GET("/api/classes", {});
     return response.data;
   },
   async getArchetype(archetypeName: string) {
-    const response = await apiClient.GET("/api/archetypes/{archetypeName}", {
-      params: { path: { archetypeName } },
+    const response = await apiClient.GET("/api/classes/{className}", {
+      params: { path: { className: archetypeName } },
     });
     return response.data;
   },
   async getTalentTrees(archetypeName: string) {
-    const response = await apiClient.GET("/api/archetypes/{archetypeName}/talent-trees", {
-      params: { path: { archetypeName } },
+    const response = await apiClient.GET("/api/classes/{className}/talent-trees", {
+      params: { path: { className: archetypeName } },
     });
     return response.data;
   },
   async getStartingAptitudes(archetypeName: string) {
-    const response = await apiClient.GET("/api/archetypes/{archetypeName}/starting-aptitudes", {
-      params: { path: { archetypeName } },
+    const response = await apiClient.GET("/api/classes/{className}/starting-aptitudes", {
+      params: { path: { className: archetypeName } },
     });
     return response.data;
   },

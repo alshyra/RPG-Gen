@@ -30,7 +30,7 @@
           <p class="text-sm text-slate-400 mt-3 mb-2">Aptitudes disponibles:</p>
           <UiButton
             v-for="aptitude in availableAptitudes"
-            :key="aptitude.aptitudeId"
+            :key="aptitude.id"
             :disabled="!canUseAptitude(aptitude)"
             :variant="canUseAptitude(aptitude) ? 'secondary' : 'ghost'"
             class="w-full text-left"
@@ -38,7 +38,7 @@
           >
             <div class="flex flex-col gap-1">
               <div class="flex items-center justify-between">
-                <span class="font-medium">{{ getCategoryIcon(aptitude.category) }} {{ aptitude.name }}</span>
+                <span class="font-medium">{{ aptitude.icon || '•' }} {{ aptitude.name }}</span>
                 <span
                   class="text-xs px-2 py-0.5 rounded"
                   :class="canUseAptitude(aptitude) ? 'bg-purple-500/20 text-purple-200' : 'bg-slate-700 text-slate-500'"
@@ -49,7 +49,7 @@
               <div class="text-xs text-slate-400">
                 {{ aptitude.description }}
               </div>
-              <div v-if="aptitude.cooldown > 0" class="text-xs text-amber-400">
+              <div v-if="aptitude.cooldown && aptitude.cooldown > 0" class="text-xs text-amber-400">
                 Cooldown: {{ aptitude.cooldown }} tours
               </div>
             </div>
@@ -118,13 +118,9 @@ const characterAptitudes = computed<AptitudeResponseDto[]>(() => {
   return currentCharacter?.value?.aptitudes || [];
 });
 
-// Filter to combat-usable aptitudes (attack, defense, support categories)
+// Filter to combat-usable aptitudes (all aptitudes can be used in combat for now)
 const availableAptitudes = computed(() => {
-  return characterAptitudes.value.filter(apt => 
-    apt.category === 'attack' || 
-    apt.category === 'defense' || 
-    apt.category === 'support'
-  );
+  return characterAptitudes.value;
 });
 
 // Basic attack constants
@@ -142,18 +138,6 @@ const canUseAptitude = (aptitude: AptitudeResponseDto): boolean => {
   return canAct.value && (actionRemaining.value ?? 0) >= aptitude.paCost;
 };
 
-// Get icon for aptitude category
-const getCategoryIcon = (category: string): string => {
-  const icons: Record<string, string> = {
-    attack: '⚔️',
-    defense: '🛡️',
-    support: '✨',
-    movement: '🏃',
-    utility: '🔧',
-  };
-  return icons[category] || '•';
-};
-
 const close = () => {
   emit('close');
 };
@@ -169,8 +153,8 @@ const useBasicAttack = async () => {
 const useAptitude = async (aptitude: AptitudeResponseDto) => {
   if (!props.target || !canUseAptitude(aptitude)) return;
   
-  await executeAptitude(props.target, aptitude.aptitudeId);
-  emit('attack', aptitude.aptitudeId, props.target);
+  await executeAptitude(props.target, aptitude.id);
+  emit('attack', aptitude.id, props.target);
   close();
 };
 

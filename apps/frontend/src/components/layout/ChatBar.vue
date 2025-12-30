@@ -34,9 +34,6 @@
       <!-- Dice Roll / Send button -->
       <div class="flex gap-2 shrink-0">
         <DiceRoll
-          :pending-instruction="
-            gameStore.pendingInstruction?.type === 'roll' ? gameStore.pendingInstruction : null
-          "
           :expr="pendingDiceExpr"
           @send="send"
         />
@@ -56,7 +53,7 @@
         <span>Réflexion en cours...</span>
       </div>
       <div
-        v-if="isRolling && gameStore.pendingInstruction?.type === 'roll'"
+        v-if="isRolling"
         class="bg-amber-900/50 text-amber-200 px-2 py-1 rounded border border-amber-700/50"
       >
         {{ pendingRollText }}
@@ -71,6 +68,7 @@ const { connectedTop = false, hasFailedMessage = false } = defineProps<{
   hasFailedMessage?: boolean;
 }>();
 import { useGameStore } from '@/stores/gameStore';
+import { isRollInstruction } from '@/types/game-instructions';
 import { computed } from 'vue';
 import DiceRoll from '../game/DiceRoll.vue';
 
@@ -89,12 +87,15 @@ const playerText = computed({
   },
 });
 
-const isRolling = computed(() => gameStore.pendingInstruction?.type === 'roll');
+const isRolling = computed(() => {
+  const p = gameStore.pendingInstruction;
+  return p && isRollInstruction(p);
+});
 
 // Get the dice expression from pending instruction, or default to 1d20
 const pendingDiceExpr = computed(() => {
   const p = gameStore.pendingInstruction;
-  if (p && p.type === 'roll' && p.dices) {
+  if (p && isRollInstruction(p)) {
     return p.dices;
   }
   return '1d20';
@@ -102,7 +103,7 @@ const pendingDiceExpr = computed(() => {
 
 const pendingRollText = computed(() => {
   const p = gameStore.pendingInstruction;
-  if (!p || p.type !== 'roll') return '';
+  if (!p || !isRollInstruction(p)) return '';
   const label = p.modifierLabel ?? '';
   const value = p.modifierValue ?? 0;
   const modDisplay = label ? ` (${label})` : value ? ` +${value}` : '';

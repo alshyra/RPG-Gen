@@ -7,6 +7,7 @@ import { NarrativeResponseDto } from './NarrativeResponseDto.js';
 export class NarrativeResponseMapper {
   static messageToDto(message: Message): NarrativeResponseDto {
     return new NarrativeResponseDto({
+      role: message.role,
       narrative: message.narrative,
       instructions: [...message.instructions],
     });

@@ -142,8 +142,9 @@ export class CharacterDtoMapper {
     });
 
     // Create VoieProgressDto for each talent tree
-    return Object.entries(classDef.talentTrees).map(([voieId, tree]) => {
-      const currentRank = voieRankMap.get(voieId) || 0;
+    // talentTrees is an array, use tree.voieId not the array index
+    return classDef.talentTrees.map((tree) => {
+      const currentRank = voieRankMap.get(tree.voieId) || 0;
       
       // Get unlocked aptitude IDs for this voie
       const unlockedAptitudes: string[] = [];
@@ -161,7 +162,7 @@ export class CharacterDtoMapper {
       }));
 
       return new VoieProgressDto({
-        voieId,
+        voieId: tree.voieId,
         voieName: tree.name,
         className: entity.className!,
         currentRank,

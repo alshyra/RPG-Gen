@@ -5,14 +5,8 @@ import { NarrativeResponseDto } from './NarrativeResponseDto.js';
  * Response DTO for conversation/narrative history
  */
 export class ConversationResponseDto {
-  @ApiProperty({ description: 'User ID' })
-  userId: string;
-
   @ApiProperty({ description: 'Character ID' })
   characterId: string;
-
-  @ApiProperty({ description: 'Session ID' })
-  sessionId: string;
 
   @ApiProperty({ description: 'Messages', type: [NarrativeResponseDto] })
   messages: NarrativeResponseDto[];

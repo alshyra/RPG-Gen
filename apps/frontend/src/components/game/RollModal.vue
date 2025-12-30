@@ -76,7 +76,7 @@ const closeModal = async () => {
   const message = await confirmRoll();
   if (!message) return;
 
-  gameStore.appendMessage(message.role, message.narrative);
+  gameStore.appendMessage("assistant", message.narrative);
   gameMessages.processInstructions(message.instructions || []);
   showRollModal.value = false;
   pendingInstruction.value = null;

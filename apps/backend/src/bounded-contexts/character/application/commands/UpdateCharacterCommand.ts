@@ -10,6 +10,14 @@ export interface UpdateInventoryItem {
   meta?: unknown;
 }
 
+/** Voie progress input for update command */
+export interface UpdateVoieProgress {
+  voieId: string;
+  currentRank: number;
+  voieName?: string;
+  className?: string;
+}
+
 /**
  * Command to update character properties
  * 
@@ -55,4 +63,7 @@ export interface UpdateCharacterCommand {
 
   // Inventory (full replacement)
   inventory?: UpdateInventoryItem[];
+
+  // Talent progress (voies) - will be converted to TalentProgress
+  voies?: UpdateVoieProgress[];
 }

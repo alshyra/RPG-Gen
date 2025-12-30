@@ -34,6 +34,38 @@ export class ChatOrchestrator {
     private readonly geminiTexteService: GeminiTextService,
   ) {}
 
+  /**
+   * Initialize chat session if needed (e.g., when resuming a game)
+   */
+  public async initializeChatSessionIfNeeded(userId: string, characterId: string) {
+    if (this.geminiTexteService.hasChatSession(characterId)) {
+      return;
+    }
+
+    const previousChatMessages = await this.conversationService.getHistoryMessages(
+      userId,
+      characterId,
+    );
+    const characterEntity = await this.characterAppService.findByUserAndId(userId, characterId);
+    const characterDto = await this.dtoMapper.toEnrichedDto(characterEntity);
+    // Filter messages to only user/assistant roles and map to Gemini-compatible format
+    const geminiMessages = previousChatMessages
+      .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+      .map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        narrative: msg.narrative,
+        instructions: msg.instructions,
+      }));
+    return this.geminiTexteService.initializeChatSession(
+      characterId,
+      this.geminiTexteService.initPrompt(
+        characterDto,
+        this.conversationService.buildCharacterSummary(characterDto),
+      ),
+      geminiMessages,
+    );
+  }
+
   public async getGMResponse(userId: string, characterId: string, userText: string) {
     const parsed = await this.geminiTexteService.sendMessage(characterId, userText);
     const assistantMsg = {

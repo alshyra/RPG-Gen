@@ -11,6 +11,7 @@ describe('NarrativeResponseMapper', () => {
 
       const dto = NarrativeResponseMapper.messageToDto(message);
 
+      expect(dto.role).toBe('user');
       expect(dto.narrative).toBe('Hello there!');
       expect(dto.instructions?.length).toBe(0);
     });
@@ -27,6 +28,7 @@ describe('NarrativeResponseMapper', () => {
 
       const dto = NarrativeResponseMapper.messageToDto(message);
 
+      expect(dto.role).toBe('assistant');
       expect(dto.narrative).toBe('You gain experience');
       expect(dto.instructions?.length).toBe(2);
       expect(dto.instructions?.[0].type).toBe('xp');
@@ -55,7 +57,7 @@ describe('NarrativeResponseMapper', () => {
   });
 
   describe('messagesToDtos', () => {
-    test('should map array of messages', () => {
+    test('should map array of messages with roles', () => {
       const messages = [
         new Message({ role: 'user', narrative: 'First message' }),
         new Message({ role: 'assistant', narrative: 'Second message', instructions: [{ type: 'xp', xp: 10 }] }),
@@ -65,9 +67,12 @@ describe('NarrativeResponseMapper', () => {
       const dtos = NarrativeResponseMapper.messagesToDtos(messages);
 
       expect(dtos.length).toBe(3);
+      expect(dtos[0].role).toBe('user');
       expect(dtos[0].narrative).toBe('First message');
+      expect(dtos[1].role).toBe('assistant');
       expect(dtos[1].narrative).toBe('Second message');
       expect(dtos[1].instructions?.length).toBe(1);
+      expect(dtos[2].role).toBe('user');
       expect(dtos[2].narrative).toBe('Third message');
     });
 

@@ -9,7 +9,7 @@ export {
 
 // Application service exports
 export { NarrativeAppService } from './application/services/NarrativeAppService.js';
-export { GameNarrativeService } from './application/services/GameNarrativeService.js';
+export { ConversationService } from './application/services/ConversationService.js';
 
 // API layer exports
 export { GameNarrativeModule } from './game-narrative.module.js';

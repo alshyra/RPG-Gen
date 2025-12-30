@@ -4,6 +4,7 @@ import { BadRequestException, Inject, Injectable, Logger, NotFoundException } fr
 import { CharacterEntity, InventoryItem } from "../../domain/entities/CharacterEntity.js";
 import { ICharacterRepository } from "../../domain/repositories/ICharacterRepository.js";
 import { CharacterStats } from "../../domain/value-objects/CharacterStats.js";
+import { TalentProgress } from "../../domain/value-objects/TalentRank.js";
 
 import {
   AddInventoryItemCommand,
@@ -184,6 +185,8 @@ export class CharacterAppService {
     command: UpdateCharacterCommand,
   ): Promise<CharacterEntity> {
     const character = await this.findByUserAndId(userId, characterId);
+    
+    this.logger.log(`[UPDATE] Before update - stats: ${JSON.stringify(character.stats)}, command.stats: ${JSON.stringify(command.stats)}`);
 
     // Basic info
     if (command.name || command.physicalDescription || command.portrait || command.gender) {
@@ -255,8 +258,17 @@ export class CharacterAppService {
       character.setInventory(items);
     }
 
+    // Talent progress (voies) - set directly for character creation/admin
+    if (command.voies !== undefined && command.voies.length > 0) {
+      const talentProgress: TalentProgress[] = command.voies.map(v => 
+        new TalentProgress(v.voieId, v.currentRank)
+      );
+      character.setTalentProgress(talentProgress);
+    }
+
     await this.repository.save(character);
     this.logger.log(`Character updated: ${characterId}`);
+    this.logger.log(`[UPDATE] After save - stats: ${JSON.stringify(character.stats)}`);
 
     return character;
   }

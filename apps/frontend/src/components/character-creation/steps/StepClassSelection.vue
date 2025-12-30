@@ -16,17 +16,17 @@
     <div v-else class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
       <button
         v-for="cls in classes"
-        :key="cls.id"
+        :key="cls.name"
         type="button"
         :class="[
           'relative p-4 lg:p-6 rounded-xl border-2 transition-all duration-200',
           'flex flex-col items-center text-center',
           'hover:scale-[1.02] hover:shadow-lg',
-          selectedClass === cls.id
+          selectedClass === cls.name
             ? 'border-indigo-500 bg-indigo-500/10 ring-2 ring-indigo-500/50'
             : 'border-slate-600 bg-slate-800/50 hover:border-slate-500',
         ]"
-        @click="selectClass(cls.id)"
+        @click="selectClass(cls.name)"
       >
         <!-- Class icon -->
         <div
@@ -49,7 +49,7 @@
         <!-- Base stats -->
         <div class="w-full grid grid-cols-3 gap-2 text-xs">
           <div class="bg-slate-700/50 rounded p-2">
-            <div class="text-red-400 font-bold">❤️ {{ cls.baseStats.hp }}</div>
+            <div class="text-red-400 font-bold">❤️ {{ cls.baseStats.hpBase }}</div>
             <div class="text-slate-500">PV</div>
           </div>
           <div class="bg-slate-700/50 rounded p-2">
@@ -64,7 +64,7 @@
 
         <!-- Selected indicator -->
         <div
-          v-if="selectedClass === cls.id"
+          v-if="selectedClass === cls.name"
           class="absolute top-2 right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center"
         >
           <span class="text-white text-sm">✓</span>

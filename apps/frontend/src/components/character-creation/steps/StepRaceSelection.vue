@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { useCharacterId } from "@/composables/useCharacterId";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
-import { useAvailableRaces, useSelectRace, useCharacter, RaceMetadata } from "@rpg-gen/api-client";
+import { useAvailableRaces, useSelectRace, useCharacter, RaceMetadata, type RaceId } from "@rpg-gen/api-client";
 import { UiLoader } from "@rpg-gen/ui";
 import { computed, ref, watch } from "vue";
 
@@ -121,8 +121,8 @@ const { data: races, isLoading, error } = useAvailableRaces();
 const selectRaceMutation = useSelectRace(characterId);
 const { character } = useCharacter(characterId);
 
-// Local state
-const selectedRace = ref<string | null>(null);
+// Local state - using RaceId type for type safety
+const selectedRace = ref<RaceId | null>(null);
 
 // Initialize from existing character data
 watch(
@@ -141,8 +141,17 @@ const selectedRaceData = computed<RaceMetadata | undefined>(() => {
   return races.value.find((r) => r.id === selectedRace.value);
 });
 
+// Type guard to validate raceId
+function isValidRaceId(id: string): id is RaceId {
+  return ["humain", "nain", "elfe", "dark_elfe", "orc"].includes(id);
+}
+
 // Methods
 async function selectRace(raceId: string) {
+  if (!isValidRaceId(raceId)) {
+    console.error("Invalid race ID:", raceId);
+    return;
+  }
   selectedRace.value = raceId;
   
   // Call API to select race

@@ -132,12 +132,16 @@ watch([selectedVoieIndex, selectedStat], () => {
   
   if (isValid) {
     const selectedVoie = voies.value?.[selectedVoieIndex.value!];
-    emit('update:selections', {
+    const selections = {
       voieIndex: selectedVoieIndex.value!,
       voieId: selectedVoie?.voieId || '',
       voieName: selectedVoie?.name || '',
       statBonus: selectedStat.value!,
-    });
+    };
+    
+    emit('update:selections', selections);
+    
+    emit('update:selections', selections);
   }
 });
 

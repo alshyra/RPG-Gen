@@ -1,4 +1,4 @@
-import { ClassResponseDto, RaceResponseDto, TalentTreeResponseDto, VoieProgressDto, TacticalStats } from "@rpg-gen/shared";
+import { ClassResponseDto, RaceResponseDto, TalentTreeResponseDto, TacticalStats, UpdateCharacterRequestDto } from "@rpg-gen/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { computed, MaybeRefOrGetter, toValue } from "vue";
 import { apiClient } from "./client.js";
@@ -6,6 +6,10 @@ import { apiClient } from "./client.js";
 // Export types for components
 export type ClassMetadata = ClassResponseDto;
 export type RaceMetadata = RaceResponseDto;
+
+// Type aliases for class and race values
+export type ClassName = NonNullable<UpdateCharacterRequestDto["className"]>;
+export type RaceId = NonNullable<UpdateCharacterRequestDto["raceId"]>;
 
 // Types for first talent selection
 export interface SelectFirstTalentParams {
@@ -16,13 +20,13 @@ export interface SelectFirstTalentParams {
 
 // API functions
 async function getAvailableClasses(): Promise<ClassResponseDto[]> {
-  const res = await apiClient.GET("/api/classes");
+  const res = await apiClient.GET("/api/classes", {});
   if (!res.data) throw new Error("No data received for available classes");
   return res.data;
 }
 
 async function getAvailableRaces(): Promise<RaceResponseDto[]> {
-  const res = await apiClient.GET("/api/game-data/races");
+  const res = await apiClient.GET("/api/game-data/races", {});
   if (!res.data) throw new Error("No data received for available races");
   return res.data;
 }
@@ -39,7 +43,7 @@ async function getTalentTrees(className: string): Promise<TalentTreeResponseDto[
 
 async function selectClass(
   characterId: string,
-  className: string,
+  className: ClassName,
 ) {
   // Update character with the selected class using PUT /api/characters/{characterId}
   const res = await apiClient.PUT("/api/characters/{characterId}", {
@@ -55,7 +59,7 @@ async function selectClass(
 
 async function selectRace(
   characterId: string,
-  raceId: string,
+  raceId: RaceId,
 ) {
   // Update character with the selected race using PUT /api/characters/{characterId}
   const res = await apiClient.PUT("/api/characters/{characterId}", {
@@ -103,7 +107,7 @@ export function useSelectClass(characterIdOrRef: MaybeRefOrGetter<string | undef
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (className: string) => selectClass(characterId || '', className),
+    mutationFn: (className: ClassName) => selectClass(characterId || '', className),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
@@ -119,7 +123,7 @@ export function useSelectRace(characterIdOrRef: MaybeRefOrGetter<string | undefi
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (raceId: string) => selectRace(characterId, raceId),
+    mutationFn: (raceId: RaceId) => selectRace(characterId, raceId),
     onSuccess: () => {
       if (characterId) void queryClient.invalidateQueries({ queryKey: ["character", characterId] });
     },
@@ -137,13 +141,12 @@ async function selectFirstTalent(
   const { voieId, voieName, statBonus } = params;
   
   // Build the voies array with the first rank unlocked
-  const voies: VoieProgressDto[] = [
+  // Only voieId and currentRank are required - backend fills the rest
+  const voies = [
     {
       voieId,
       voieName,
-      className: "", // Will be ignored by backend as it reads from character
       currentRank: 1,
-      ranks: [], // Backend will fill this in
     },
   ];
   
@@ -198,14 +201,11 @@ async function unlockRank(
   const { voieId, rank } = params;
   
   // Build the voies array with the new rank unlocked
-  // The backend will handle validation and merging with existing voies
-  const voies: VoieProgressDto[] = [
+  // Only voieId and currentRank are required - backend fills the rest
+  const voies = [
     {
       voieId,
-      voieName: "", // Backend will fill this
-      className: "", // Backend will fill this
       currentRank: rank,
-      ranks: [], // Backend will fill this
     },
   ];
   

@@ -5,14 +5,62 @@
 
 import type { components } from "./api-types";
 
-type RollInstructionMessageDto = components["schemas"]["RollInstructionMessageDto"];
-type HpInstructionMessageDto = components["schemas"]["HpInstructionMessageDto"];
-type XpInstructionMessageDto = components["schemas"]["XpInstructionMessageDto"];
-type SpellInstructionMessageDto = components["schemas"]["SpellInstructionMessageDto"];
-type InventoryInstructionMessageDto = components["schemas"]["InventoryInstructionMessageDto"];
-type CombatStartInstructionMessageDto = components["schemas"]["CombatStartInstructionMessageDto"];
-// combat_end instruction removed (server returns CombatEndResponseDto via API)
-// CombatRollRequestDto and CombatRollResultDto no longer exist in the schema
+// These instruction types are internal game structures not exposed via API
+// They represent parsed instructions from narrative responses
+
+/**
+ * Roll instruction for dice rolls
+ */
+export interface RollInstructionMessageDto {
+  type: "roll";
+  dices: string;
+  reason?: string;
+}
+
+/**
+ * HP change instruction
+ */
+export interface HpInstructionMessageDto {
+  type: "hp";
+  hp: number;
+  reason?: string;
+}
+
+/**
+ * XP gain instruction
+ */
+export interface XpInstructionMessageDto {
+  type: "xp";
+  xp: number;
+  reason?: string;
+}
+
+/**
+ * Spell learn instruction
+ */
+export interface SpellInstructionMessageDto {
+  type: "spell";
+  name: string;
+  description?: string;
+}
+
+/**
+ * Inventory change instruction
+ */
+export interface InventoryInstructionMessageDto {
+  type: "inventory";
+  action: "add" | "remove";
+  name: string;
+  quantity?: number;
+}
+
+/**
+ * Combat start instruction (uses existing CombatStartEntryDto from API)
+ */
+export interface CombatStartInstructionMessageDto {
+  type: "combat_start";
+  combat_start: components["schemas"]["CombatStartEntryDto"][];
+}
 
 /**
  * Union type for all game instructions

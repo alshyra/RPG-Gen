@@ -38,7 +38,7 @@
       >
         <li
           v-for="aptitude in aptitudes"
-          :key="aptitude.aptitudeId"
+          :key="aptitude.id"
           class="p-3 bg-slate-800/40 rounded border border-slate-700/30 hover:bg-slate-700/40 transition-colors"
         >
           <div class="flex items-start justify-between">
@@ -65,10 +65,10 @@
                   ⏱️ {{ aptitude.cooldown }} tours
                 </span>
                 <span
-                  v-if="aptitude.range"
+                  v-if="aptitude.targeting.range"
                   class="text-cyan-400"
                 >
-                  🎯 {{ aptitude.range }}m
+                  🎯 {{ aptitude.targeting.range }}m
                 </span>
               </div>
             </div>
@@ -143,13 +143,13 @@ const remainingCooldown = (_aptitude: AptitudeResponseDto): number => {
 
 const onUseAptitude = async (aptitude: AptitudeResponseDto) => {
   if (!canUseAptitude(aptitude)) return;
-  if (!characterId.value || !aptitude.aptitudeId) return;
+  if (!characterId.value || !aptitude.id) return;
   
   try {
     // Call the combat API to use the aptitude
     const result = await useAptitude.mutateAsync({
       characterId: characterId.value,
-      aptitudeId: aptitude.aptitudeId,
+      aptitudeId: aptitude.id,
       // TODO: Add target selection for aptitudes that require a target
     });
     

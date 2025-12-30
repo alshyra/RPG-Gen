@@ -5,30 +5,37 @@
  */
 
 export interface RollInstructionMessageDto {
+  [key: string]: unknown;
   type: "roll";
   dices: string;
   modifierLabel?: string;
   modifierValue?: number;
   reason?: string;
+  advantage?: "none" | "advantage" | "disadvantage";
+  meta?: Record<string, unknown>;
 }
 
 export interface HpInstructionMessageDto {
+  [key: string]: unknown;
   type: "hp";
   hp: number;
 }
 
 export interface XpInstructionMessageDto {
+  [key: string]: unknown;
   type: "xp";
   xp: number;
 }
 
 export interface SpellInstructionMessageDto {
+  [key: string]: unknown;
   type: "spell";
   name: string;
   action?: string;
 }
 
 export interface InventoryInstructionMessageDto {
+  [key: string]: unknown;
   type: "inventory";
   name: string;
   action: "add" | "remove" | "use";
@@ -36,6 +43,7 @@ export interface InventoryInstructionMessageDto {
 }
 
 export interface CombatStartInstructionMessageDto {
+  [key: string]: unknown;
   type: "combat_start";
   combat_start: Array<{
     name: string;
@@ -48,6 +56,7 @@ export interface CombatStartInstructionMessageDto {
 }
 
 export interface CombatEndInstructionMessageDto {
+  [key: string]: unknown;
   type: "combat_end";
   victory: boolean;
   xp_gained: number;

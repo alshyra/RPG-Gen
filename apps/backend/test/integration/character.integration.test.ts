@@ -281,5 +281,69 @@ describe("Character Integration", () => {
 
       expect(healed.hp).toBe(damaged.hp + 5);
     });
+
+    test("updates talent progress (voies)", async () => {
+      // Update character with first voie selection
+      const updated = await testCtx.characterService.update(
+        testCtx.userId,
+        characterId,
+        {
+          voies: [
+            {
+              voieId: "gue_protection",
+              currentRank: 1,
+            },
+          ],
+        },
+      );
+
+      expect(updated.talentProgress).toHaveLength(1);
+      expect(updated.talentProgress[0].voieId).toBe("gue_protection");
+      expect(updated.talentProgress[0].rank).toBe(1);
+    });
+
+    test("updates multiple voies", async () => {
+      const updated = await testCtx.characterService.update(
+        testCtx.userId,
+        characterId,
+        {
+          voies: [
+            { voieId: "gue_protection", currentRank: 2 },
+            { voieId: "gue_force", currentRank: 1 },
+          ],
+        },
+      );
+
+      expect(updated.talentProgress).toHaveLength(2);
+      const voieIds = updated.talentProgress.map(v => v.voieId);
+      expect(voieIds).toContain("gue_protection");
+      expect(voieIds).toContain("gue_force");
+    });
+
+    test("updates stats and voies together (character creation flow)", async () => {
+      // This mirrors what the frontend sends during talent selection step
+      const updated = await testCtx.characterService.update(
+        testCtx.userId,
+        characterId,
+        {
+          voies: [
+            {
+              voieId: "gue_protection",
+              currentRank: 1,
+            },
+          ],
+          stats: {
+            vigor: 9, // +1 from base
+            finesse: 7,
+            mind: 6,
+            survival: 6,
+          },
+        },
+      );
+
+      expect(updated.talentProgress).toHaveLength(1);
+      expect(updated.talentProgress[0].voieId).toBe("gue_protection");
+      expect(updated.stats?.vigor).toBe(9);
+    });
   });
 });

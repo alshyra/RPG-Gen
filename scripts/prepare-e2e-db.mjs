@@ -77,19 +77,21 @@ async function main() {
 
   // Optionally cleanup existing characters
   if (opts.cleanup) {
-    log("Fetching existing characters to delete...");
+    log("Fetching existing E2E test characters to delete...");
     const list = await request("/api/characters", { method: "GET" });
     if (list.status !== 200) {
       log("Failed to list characters, status:", list.status);
     } else {
       const chars = list.body || [];
-      log(`Found ${chars.length} characters. Deleting...`);
-      for (const c of chars) {
+      // Filter to only E2E test characters (names starting with "e2e-")
+      const e2eChars = chars.filter(c => c.name && c.name.startsWith("e2e-"));
+      log(`Found ${chars.length} total characters, ${e2eChars.length} E2E test characters to delete...`);
+      for (const c of e2eChars) {
         try {
           const del = await request(`/api/characters/${c.characterId}`, { method: "DELETE" });
-          log("Deleted", c.characterId, "status", del.status);
+          log("Deleted", c.name, c.characterId, "status", del.status);
         } catch (e) {
-          log("Failed to delete", c?.characterId, e?.message || e);
+          log("Failed to delete", c?.name, c?.characterId, e?.message || e);
         }
       }
     }

@@ -2,8 +2,9 @@ import { Body, Controller, Delete, Get, Logger, Param, Post, Req, UseGuards } fr
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { RPGRequest } from '../../../../global.types.js';
 import { JwtAuthGuard } from '../../../auth/infrastructure/auth/guards/JwtAuthGuard.js';
-import { GameNarrativeService } from '../../application/services/GameNarrativeService.js';
+import { NarrativeAppService } from '../../application/services/NarrativeAppService.js';
 import { ConversationService } from '../../application/services/ConversationService.js';
+import { NarrativeStartupService } from '../../application/services/NarrativeStartupService.js';
 import { GeminiTextService } from '../../infrastructure/external/index.js';
 import { ConversationResponseDto, NarrativeResponseDto, NarrativeResponseMapper } from '../dto/index.js';
 import { ChatMessageRequestDto } from '../dto/request/ChatMessageRequest.js';
@@ -16,8 +17,9 @@ export class NarrativeController {
   private readonly logger = new Logger(NarrativeController.name);
 
   constructor(
-    private readonly narrativeService: GameNarrativeService,
+    private readonly narrativeAppService: NarrativeAppService,
     private readonly conversationService: ConversationService,
+    private readonly narrativeStartupService: NarrativeStartupService,
     private readonly geminiTextService: GeminiTextService,
   ) {}
 
@@ -53,7 +55,13 @@ export class NarrativeController {
       instructions: parsed.instructions || [],
     });
     
+    // Process game instructions (combat_start, etc.) via startup service
+    if (parsed.instructions?.length) {
+      await this.narrativeStartupService.processInstructionsForCharacter(userId, characterId, parsed.instructions);
+    }
+    
     return new NarrativeResponseDto({
+      role: 'assistant',
       narrative: parsed.narrative || '',
       instructions: parsed.instructions || [],
     });
@@ -66,17 +74,14 @@ export class NarrativeController {
     description: 'Narrative history',
     type: ConversationResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Narrative not found' })
   async getNarrativeHistory(
     @Req() req: RPGRequest,
     @Param('characterId') characterId: string,
   ): Promise<ConversationResponseDto> {
     const userId = req.user.id;
-    const messages = await this.narrativeService.getNarrativeHistory(userId, characterId);
+    const messages = await this.narrativeAppService.getAllMessages(userId, characterId);
     return new ConversationResponseDto({
-      userId,
       characterId,
-      sessionId: `${userId}_${characterId}`,
       messages: NarrativeResponseMapper.messagesToDtos(messages),
     });
   }
@@ -93,11 +98,33 @@ export class NarrativeController {
     @Param('characterId') characterId: string,
   ): Promise<NarrativeResponseDto[]> {
     const userId = req.user.id;
-    const messages = await this.narrativeService.getNarrativeHistory(userId, characterId);
-    return messages.map(msg => new NarrativeResponseDto({
-      narrative: msg.narrative,
-      instructions: [...msg.instructions],
-    }));
+    const messages = await this.narrativeAppService.getAllMessages(userId, characterId);
+    return NarrativeResponseMapper.messagesToDtos(messages);
+  }
+
+  @Post(':characterId/start')
+  @ApiOperation({ summary: 'Initialize a new narrative session for a character and start the story' })
+  @ApiResponse({
+    status: 201,
+    description: 'Narrative session initialized with GM intro',
+    type: ConversationResponseDto,
+  })
+  async startNarrative(
+    @Req() req: RPGRequest,
+    @Param('characterId') characterId: string,
+  ): Promise<ConversationResponseDto> {
+    const userId = req.user.id;
+    
+    const gmResponse = await this.narrativeStartupService.startNarrative(userId, characterId);
+    
+    return new ConversationResponseDto({
+      characterId,
+      messages: [new NarrativeResponseDto({
+        role: 'assistant',
+        narrative: gmResponse.narrative,
+        instructions: gmResponse.instructions,
+      })],
+    });
   }
 
   @Delete(':characterId/history')
@@ -108,6 +135,6 @@ export class NarrativeController {
     @Param('characterId') characterId: string,
   ): Promise<void> {
     const userId = req.user.id;
-    await this.narrativeService.clearNarrative(userId, characterId);
+    await this.narrativeAppService.clearNarrative(userId, characterId);
   }
 }

@@ -128,7 +128,7 @@ const aptitudeMap = computed(() => {
   const aptitudes = aptitudesData.value;
   if (Array.isArray(aptitudes)) {
     aptitudes.forEach((apt) => {
-      map.set(apt.aptitudeId, { name: apt.name, description: apt.description });
+      map.set(apt.id, { name: apt.name, description: apt.description });
     });
   }
   return map;

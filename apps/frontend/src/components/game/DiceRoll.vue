@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import { useGameStore } from '@/stores/gameStore';
+import { isRollInstruction } from '@/types/game-instructions';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { UiButton } from '@rpg-gen/ui';
@@ -32,9 +33,9 @@ const onClick = async () => {
   if (isLoading.value) return;
   isLoading.value = true;
   try {
-    if (pendingInstruction.value?.type === 'roll') {
+    if (pendingInstruction.value && isRollInstruction(pendingInstruction.value)) {
       // Get advantage/disadvantage from the game instruction
-      const advantage = pendingInstruction.value.advantage || 'none';
+      const advantage = pendingInstruction.value.advantage ?? 'none';
       await gameStore.doRoll(props.expr, advantage);
     } else {
       await send();
