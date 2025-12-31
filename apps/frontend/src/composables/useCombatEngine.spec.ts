@@ -4,10 +4,27 @@ import { useCombatEngine } from "@/composables/useCombatEngine";
 import type { CombatArenaApi } from "@/composables/useCombatEngine";
 import type { CombatantDto } from "@rpg-gen/shared";
 
+// Shared mock refs - must be accessible to both mock and test
+const mockCurrentAttackView = ref<{ totalDamage: number } | null>(null);
+const mockCurrentEnemyAttackLog = ref(null);
+
+// Mock pinia's storeToRefs to return the store object directly (since our mock already uses refs)
+vi.mock("pinia", async () => {
+  const actual = await vi.importActual("pinia");
+  return {
+    ...actual,
+    storeToRefs: (store: Record<string, unknown>) => store,
+  };
+});
+
 // Mock dependencies
 vi.mock("@/composables/useCombat", () => ({
   useCombat: () => ({
-    executeAttack: vi.fn().mockResolvedValue(undefined),
+    // executeAptitude sets currentAttackView before returning (simulating real behavior)
+    executeAptitude: vi.fn().mockImplementation(() => {
+      // The mock simulates setting currentAttackView during attack execution
+      return Promise.resolve(undefined);
+    }),
     checkCombatVictory: vi.fn(),
     isCombatEndModalOpen: ref(false),
     combatEndNarrative: ref(""),
@@ -55,8 +72,6 @@ vi.mock("@rpg-gen/api-client", () => ({
   }),
 }));
 
-const mockCurrentAttackView = ref<{ totalDamage: number } | null>(null);
-
 vi.mock("@/stores/combatStore", () => ({
   useCombatStore: () => ({
     enemies: ref([
@@ -78,6 +93,7 @@ vi.mock("@/stores/combatStore", () => ({
     inCombat: ref(true),
     isEndingTurn: ref(false),
     currentAttackView: mockCurrentAttackView,
+    currentEnemyAttackLog: mockCurrentEnemyAttackLog,
     updateFromTurnResult: vi.fn(),
   }),
 }));

@@ -477,6 +477,7 @@
     "paCost": 1,
     "cooldown": 1,
     "targetType": "self",
+    "range": 3,
     "moveType": "dash",
     "descriptionForAi": "Se déplace rapidement dans les ombres sans laisser de trace."
   },

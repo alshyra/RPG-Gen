@@ -32,6 +32,7 @@ export interface CharacterProps {
   raceId?: RaceId;
   level: number;
   stats?: CharacterStats;
+  classStats?: ClassStatsData;
   hp: ResourcePool;
   pa: ResourcePool;
   pm: ResourcePool;
@@ -48,11 +49,23 @@ export interface CharacterProps {
   updatedAt?: Date;
 }
 
+/**
+ * Class stats from game-data seed, passed during character completion.
+ * These values come from ClassDataService, not hardcoded.
+ */
+export interface ClassStatsData {
+  hpBase: number;
+  hpGain: number;
+  pa: number;
+  pm: number;
+}
+
 export interface CompleteCharacterData {
   name: string;
   className: ArchetypeName;
   raceId: RaceId;
   stats: CharacterStats;
+  classStats: ClassStatsData;
   physicalDescription?: string;
   gender?: string;
   portrait?: string;
@@ -249,45 +262,34 @@ export class CharacterEntity {
     this.props.className = data.className;
     this.props.raceId = data.raceId;
     this.props.stats = data.stats;
+    this.props.classStats = data.classStats;
     this.props.physicalDescription = data.physicalDescription;
     this.props.gender = data.gender;
     this.props.portrait = data.portrait;
     this.props.state = "created";
 
     this.validateComplete();
-    this.initializeCompleteCharacter();
+    this.initializeCompleteCharacter(data.classStats);
   }
 
-  private initializeCompleteCharacter(): void {
-    const baseHp = this.calculateBaseHp();
+  /**
+   * Initialize character resources using class stats from seed data.
+   * HP formula: hpBase + (survival * survivalBonus) for level 1
+   * PA/PM: directly from class stats
+   */
+  private initializeCompleteCharacter(classStats: ClassStatsData): void {
+    const survivalBonus = 2;
+    const survival = this.props.stats?.survival ?? 0;
+    const baseHp = classStats.hpBase + (survival * survivalBonus);
     this.props.hp = ResourcePool.create(baseHp);
-    this.initializeResources();
+    this.props.pa = ResourcePool.create(classStats.pa);
+    this.props.pm = ResourcePool.create(classStats.pm);
   }
 
-  private calculateBaseHp(): number {
-    const vigorBonus = this.props.stats ? this.props.stats.getVigorModifier() * 2 : 0;
-    const baseByClass: Record<ArchetypeName, number> = {
-      guerrier: 30,
-      rogue: 22,
-      mage: 18,
-    };
-    const base = this.props.className ? baseByClass[this.props.className] : 20;
-    return base + vigorBonus;
-  }
-
-  private initializeResources(): void {
-    const resourcesByClass: Record<ArchetypeName, { pa: number; pm: number }> = {
-      guerrier: { pa: 6, pm: 3 },
-      rogue: { pa: 6, pm: 5 },
-      mage: { pa: 6, pm: 3 },
-    };
-    const resources = this.props.className
-      ? resourcesByClass[this.props.className]
-      : { pa: 6, pm: 4 };
-    this.props.pa = ResourcePool.create(resources.pa);
-    this.props.pm = ResourcePool.create(resources.pm);
-  }
-
+  /**
+   * Level up the character.
+   * HP gain formula: hpGain + vigorModifier (from stored classStats)
+   */
   levelUp(): void {
     if (!this.isComplete) {
       throw new Error("Cannot level up a draft character");
@@ -295,26 +297,19 @@ export class CharacterEntity {
     if (!this.isAlive) {
       throw new Error("Cannot level up a deceased character");
     }
+    if (!this.props.classStats) {
+      throw new Error("Cannot level up: missing class stats");
+    }
 
     this.props.level += 1;
     this.props.talentPoints += 1;
 
-    const hpGain = this.calculateHpGainOnLevelUp();
+    const vigorBonus = this.props.stats ? this.props.stats.getVigorModifier() : 0;
+    const hpGain = this.props.classStats.hpGain + vigorBonus;
     this.props.hp = new ResourcePool(
       this.props.hp.current + hpGain,
       this.props.hp.max + hpGain,
     );
-  }
-
-  private calculateHpGainOnLevelUp(): number {
-    const vigorBonus = this.props.stats ? this.props.stats.getVigorModifier() : 0;
-    const baseByClass: Record<ArchetypeName, number> = {
-      guerrier: 8,
-      rogue: 6,
-      mage: 4,
-    };
-    const base = this.props.className ? baseByClass[this.props.className] : 5;
-    return base + vigorBonus;
   }
 
   takeDamage(amount: number): void {

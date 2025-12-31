@@ -5,6 +5,7 @@ import { CharacterEntity, InventoryItem } from "../../domain/entities/CharacterE
 import { ICharacterRepository } from "../../domain/repositories/ICharacterRepository.js";
 import { CharacterStats } from "../../domain/value-objects/CharacterStats.js";
 import { TalentProgress } from "../../domain/value-objects/TalentRank.js";
+import { ClassDataService } from "../../../game-data/application/services/ClassDataService.js";
 
 import {
   AddInventoryItemCommand,
@@ -33,6 +34,7 @@ export class CharacterAppService {
   constructor(
     @Inject(ICharacterRepository)
     private readonly repository: ICharacterRepository,
+    private readonly classDataService: ClassDataService,
   ) {}
 
   // ========================================
@@ -153,12 +155,24 @@ export class CharacterAppService {
       throw new BadRequestException("Stats must total exactly 27 points");
     }
 
+    // Fetch class stats from game-data seed
+    const classData = await this.classDataService.findByName(command.className);
+    if (!classData) {
+      throw new NotFoundException(`Class ${command.className} not found in game data`);
+    }
+
     // ✅ Délégation à l'entité (domain logic)
     character.completeDraft({
       name: command.name,
       className: command.className,
       raceId: command.raceId,
       stats,
+      classStats: {
+        hpBase: classData.stats.hpBase,
+        hpGain: classData.stats.hpGain,
+        pa: classData.stats.pa,
+        pm: classData.stats.pm,
+      },
       physicalDescription: command.physicalDescription,
       gender: command.gender,
       portrait: command.portrait,

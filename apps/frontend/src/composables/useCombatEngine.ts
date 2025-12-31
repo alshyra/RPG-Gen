@@ -9,12 +9,44 @@ import type {
   CombatEngineEventPayload,
   UnitClickedPayload,
 } from "@rpg-gen/combat-engine";
-import type { CombatantDto, EnemyAttackLogDto } from "@rpg-gen/shared";
+import type { CombatantDto, EnemyAttackLogDto, GridPositionDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { onUnmounted, ref, watch } from "vue";
 
 // Re-export the type from store for backwards compatibility
 export type { CombatArenaApi } from "@/stores/combatStore";
+
+/**
+ * Build a full Manhattan path including start position.
+ * Backend requires path[0] to be the current position.
+ */
+function buildManhattanPath(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): GridPositionDto[] {
+  const path: GridPositionDto[] = [{ x: startX, y: startY }];
+  
+  let currentX = startX;
+  let currentY = startY;
+
+  // Move horizontally first (X axis)
+  const stepX = endX > currentX ? 1 : -1;
+  while (currentX !== endX) {
+    currentX += stepX;
+    path.push({ x: currentX, y: currentY });
+  }
+
+  // Then move vertically (Y axis)
+  const stepY = endY > currentY ? 1 : -1;
+  while (currentY !== endY) {
+    currentY += stepY;
+    path.push({ x: currentX, y: currentY });
+  }
+
+  return path;
+}
 
 export function useCombatEngine() {
   const backendCombat = useBackendCombat();
@@ -139,20 +171,26 @@ export function useCombatEngine() {
         return;
       }
 
+      // Build full Manhattan path (start position + each step)
+      // Backend requires path to start at current position
+      const fullPath = buildManhattanPath(
+        payload.fromGridX,
+        payload.fromGridY,
+        payload.gridX,
+        payload.gridY,
+      );
+
       // Sync movement with backend to consume PM
       try {
         const result = await combat.move.mutateAsync({
           characterId: characterId.value!,
           movement: {
             combatantId: payload.unitId,
-            path: [
-              { x: payload.fromGridX, y: payload.fromGridY },
-              { x: payload.gridX, y: payload.gridY },
-            ],
+            path: fullPath,
           },
         });
         
-        console.log("[useCombatEngine] Movement synced, PM consumed:", result.remainingMovement);
+        console.log("[useCombatEngine] Movement synced, PM consumed:", result.pm);
         
         // Handle movement events (opportunity attacks, etc.)
         if (result.events && result.events.length > 0) {

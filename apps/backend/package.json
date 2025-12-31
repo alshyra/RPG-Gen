@@ -19,7 +19,6 @@
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
     "test:cov": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
-    "test:ava": "ava",
     "generate:openapi": "node --loader ts-node/esm ./src/scripts/generate-openapi-types.ts",
     "import:spells": "ts-node ./src/scripts/import-spells.ts"
   },
@@ -58,14 +57,12 @@
     "zod-to-json-schema": "^3.25.0"
   },
   "devDependencies": {
-    "@ava/typescript": "^6.0.0",
     "@jest/globals": "^30.2.0",
     "@nestjs/testing": "^11.1.8",
     "@stylistic/eslint-plugin": "^5.5.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "@types/supertest": "^6.0.2",
-    "ava": "^6.4.1",
     "jest": "^30.2.0",
     "mongodb-memory-server": "^10.3.0",
     "nodemon": "^3.1.11",
@@ -75,21 +72,5 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4"
-  },
-  "ava": {
-    "extensions": [
-      "ts"
-    ],
-    "failFast": true,
-    "files": [
-      "test/**/*.test.ts",
-      "src/bounded-contexts/**/tests/*.test.ts"
-    ],
-    "nodeArguments": [
-      "--loader=ts-node/esm",
-      "--experimental-specifier-resolution=node",
-      "--enable-source-maps",
-      "--no-warnings"
-    ]
   }
 }

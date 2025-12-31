@@ -1,11 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
-import {
-  calculateDamage,
-  calculateHealing,
-  calculateMaxHP,
-} from "../scaling.util.js";
 import { type StatAttribute } from "../../../character/api/dto/response/StatAttribute.js";
 import type { CharacterStats } from "#shared";
+import { ClassDataService } from "../../../game-data/application/services/ClassDataService.js";
+import { FormulasService } from "../../../game-data/application/services/FormulasService.js";
 
 export interface CombatAction {
   characterId: string;
@@ -28,20 +25,28 @@ export type ActionResult = {
 };
 
 /**
- * CombatActionService - Applies the unified scaling system to combat actions
+ * CombatActionService - Applies combat actions using game-data formulas
  * 
- * This service integrates the scaling.util functions into actual combat gameplay:
- * - Damage calculations use: (basePower + Attribut) * (1 + (Level - 1) * 0.15)
- * - Healing uses the same formula
+ * This service uses FormulasService for all calculations:
+ * - Damage calculations use configurable formulas from formulas.json
+ * - Healing uses the same approach
  * - All calculations are deterministic (no RNG)
+ * 
+ * @see FormulasService for formula implementations
+ * @see formulas.json for configurable parameters
  */
 @Injectable()
 export class CombatActionService {
   private readonly logger = new Logger(CombatActionService.name);
 
+  constructor(
+    private readonly classDataService: ClassDataService,
+    private readonly formulasService: FormulasService,
+  ) {}
+
   /**
-   * Calculate damage for an aptitude action
-   * This is the integration point for the scaling system
+   * Calculate damage for an aptitude action.
+   * Uses FormulasService with configurable parameters from formulas.json.
    */
   calculateAptitudeDamage(
     basePower: number,
@@ -49,12 +54,15 @@ export class CombatActionService {
     characterStats: CharacterStats | Record<string, number>,
     level: number,
   ): number {
-    return calculateDamage(basePower, scalingAttribute, characterStats as CharacterStats, level);
+    const scalingValue = scalingAttribute
+      ? (characterStats[scalingAttribute] ?? 0)
+      : 0;
+    return this.formulasService.calculateDamage(basePower, scalingValue, level);
   }
 
   /**
-   * Calculate healing for an aptitude action
-   * Uses the same scaling formula as damage
+   * Calculate healing for an aptitude action.
+   * Uses FormulasService with configurable parameters from formulas.json.
    */
   calculateAptitudeHealing(
     basePower: number,
@@ -62,19 +70,29 @@ export class CombatActionService {
     characterStats: CharacterStats | Record<string, number>,
     level: number,
   ): number {
-    return calculateHealing(basePower, scalingAttribute, characterStats as CharacterStats, level);
+    const scalingValue = scalingAttribute
+      ? (characterStats[scalingAttribute] ?? 0)
+      : 0;
+    return this.formulasService.calculateHealing(basePower, scalingValue, level);
   }
 
   /**
-   * Get max HP for a character (used for healing caps)
+   * Get max HP for a character (used for healing caps).
+   * Fetches class stats from game-data and uses FormulasService for calculation.
+   * @throws Error if class definition not found
    */
-  getMaxHP(className: string, level: number, survival: number): number {
-    return calculateMaxHP(className, level, survival);
+  async getMaxHP(className: string, level: number, survival: number): Promise<number> {
+    const classDefinition = await this.classDataService.findByName(className);
+    if (!classDefinition) {
+      throw new Error(`Class ${className} not found in game data`);
+    }
+    const { hpBase, hpGain } = classDefinition.stats;
+    return this.formulasService.calculateMaxHP(hpBase, hpGain, level, survival);
   }
 
   /**
-   * Calculate total damage or healing from an action
-   * This consolidates all the scaling logic in one place
+   * Calculate total damage or healing from an action.
+   * Delegates to appropriate method based on effect type.
    */
   calculateActionEffect(
     basePower: number,

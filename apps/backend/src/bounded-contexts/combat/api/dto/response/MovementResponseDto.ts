@@ -26,9 +26,9 @@ export class MovementResponseDto {
   @Type(() => MovementEventDto)
   events: MovementEventDto[];
 
-  @ApiProperty({ description: "Remaining movement speed after this action" })
+  @ApiProperty({ description: "Remaining movement points (PM) after this action" })
   @IsNumber()
-  remainingMovement: number;
+  pm: number;
 
   @ApiPropertyOptional({ description: "Error message if movement failed" })
   @IsOptional()

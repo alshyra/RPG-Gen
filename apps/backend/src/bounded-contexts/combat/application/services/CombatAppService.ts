@@ -9,6 +9,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import type { Model } from "mongoose";
 import { CombatSession } from "../../infrastructure/persistence/mongo/schemas/CombatSession.js";
 import type { CharacterResponseDto } from "../../../character/api/dto/response/index.js";
+import { type StatAttribute } from "../../../character/api/dto/response/StatAttribute.js";
 import { CombatantDto } from "../../api/dto/response/CombatantDto.js";
 import { CombatEndDto } from "../../api/dto/response/CombatEndDto.js";
 import { CombatStartRequestDto } from "../../api/dto/response/CombatStartRequestDto.js";
@@ -18,7 +19,20 @@ import { ActionEconomyService } from "../../domain/services/action-economy.servi
 import { InitService } from "../../domain/services/init.service.js";
 import { TurnOrderService } from "../../domain/services/turn-order.service.js";
 import { EnemyTurnService } from "../../domain/services/enemy-turn.service.js";
-import { calculateMaxHP, CLASS_STATS } from "../../domain/scaling.util.js";
+import { CombatGridService } from "../../domain/services/combat-grid.service.js";
+import { type ClassStatsInput } from "../../domain/scaling.util.js";
+import { ClassDataService } from "../../../game-data/application/services/ClassDataService.js";
+import { FormulasService } from "../../../game-data/application/services/FormulasService.js";
+
+const VALID_STAT_ATTRIBUTES: StatAttribute[] = ["vigor", "finesse", "mind", "survival"];
+
+function isStatAttribute(value: string): value is StatAttribute {
+  return VALID_STAT_ATTRIBUTES.includes(value as StatAttribute);
+}
+
+// Grid constants
+const GRID_WIDTH = 15;
+const GRID_HEIGHT = 10;
 
 /**
  * CombatAppService - Combat state management for the new tactical system
@@ -39,6 +53,9 @@ export class CombatAppService {
     private readonly turnOrderService: TurnOrderService,
     private readonly actionEconomyService: ActionEconomyService,
     private readonly enemyTurnService: EnemyTurnService,
+    private readonly gridService: CombatGridService,
+    private readonly classDataService: ClassDataService,
+    private readonly formulasService: FormulasService,
   ) {}
 
   /**
@@ -58,15 +75,37 @@ export class CombatAppService {
   /**
    * Build player combat stats using the new scaling system
    */
-  private buildPlayerStats(character: CharacterResponseDto): CombatantDto {
+  private async buildPlayerStats(character: CharacterResponseDto): Promise<CombatantDto> {
     const className = (character.className ?? "guerrier").toLowerCase();
-    const classStats = CLASS_STATS[className] ?? CLASS_STATS.guerrier;
+    const classDefinition = await this.classDataService.findByName(className);
+    
+    // Get class stats from game-data, fallback to guerrier
+    const classStats: ClassStatsInput = classDefinition?.stats ?? {
+      hpBase: 12,
+      hpGain: 8,
+      pa: 6,
+      pm: 4,
+    };
+    const mainStatRaw = classDefinition?.mainStat ?? "vigor";
+    const mainStat: StatAttribute = isStatAttribute(mainStatRaw) ? mainStatRaw : "vigor";
+    
     const level = character.level ?? 1;
     const survival = character.stats?.survival ?? 0;
 
-    // Calculate HP using the new formula
-    const hpMax = calculateMaxHP(className, level, survival);
+    // Calculate HP using FormulasService (data from seed)
+    const hpMax = this.formulasService.calculateMaxHP(
+      classStats.hpBase,
+      classStats.hpGain,
+      level,
+      survival,
+    );
     const hp = character.hp ?? hpMax;
+
+    // Use character's PA/PM if available, fallback to class defaults
+    const pa = character.pa ?? classStats.pa;
+    const paMax = character.paMax ?? classStats.pa;
+    const pm = character.pm ?? classStats.pm;
+    const pmMax = character.pmMax ?? classStats.pm;
 
     return new CombatantDto({
       id: character.characterId,
@@ -75,16 +114,16 @@ export class CombatAppService {
       hp,
       hpMax,
       initiative: 0,
-      // New tactical system fields
-      pa: classStats.pa,
-      paMax: classStats.pa,
-      pm: classStats.pm,
-      pmMax: classStats.pm,
+      // New tactical system fields - use character values as source of truth
+      pa,
+      paMax,
+      pm,
+      pmMax,
       position: { x: 1, y: 5 },  // Player starts on left side
       level,
       className,
       basePower: 5, // Default player base power
-      scalingAttribute: classStats.main_stat,
+      scalingAttribute: mainStat,
       stats: {
         vigor: character.stats?.vigor ?? 0,
         finesse: character.stats?.finesse ?? 0,
@@ -97,10 +136,10 @@ export class CombatAppService {
 
   /**
    * Roll initiative (finesse-based in new system)
+   * Uses FormulasService for the die roll configuration.
    */
   private rollInitiative(finesse: number = 0): number {
-    const baseRoll = Math.floor(Math.random() * 20) + 1;
-    return baseRoll + finesse;
+    return this.formulasService.rollInitiative(finesse);
   }
 
   /**
@@ -119,7 +158,10 @@ export class CombatAppService {
     userId: string,
   ): Promise<CombatStateDto> {
     const { characterId } = character;
-    const state = this.buildInitialState(character, combatStart);
+    const state = await this.buildInitialState(character, combatStart);
+
+    // Initialize the combat grid with positions
+    this.initializeGridForCombat(characterId, state);
 
     await this.persistSessionWithUser(state, userId);
     this.logger.log(`Combat initialized for ${characterId} with ${state.enemies.length} enemies`);
@@ -127,14 +169,69 @@ export class CombatAppService {
   }
 
   /**
+   * Initialize the combat grid with player and enemy positions
+   */
+  private initializeGridForCombat(characterId: string, state: CombatStateDto): void {
+    const combatants: Array<{
+      id: string;
+      position: { x: number; y: number };
+      reach?: number;
+      speed?: number;
+      isHostile: boolean;
+    }> = [];
+
+    // Add player at left side of grid
+    const playerPosition = { x: 2, y: Math.floor(GRID_HEIGHT / 2) };
+    state.player.position = playerPosition;
+    combatants.push({
+      id: state.player.id || characterId,
+      position: playerPosition,
+      speed: state.player.pm ?? 6, // Default PM as speed
+      reach: 1,
+      isHostile: false,
+    });
+
+    // Add enemies spread across the right side of the grid
+    state.enemies.forEach((enemy, index) => {
+      const enemyPosition = {
+        x: GRID_WIDTH - 3,
+        y: Math.max(1, Math.min(GRID_HEIGHT - 2, Math.floor(GRID_HEIGHT / 2) - Math.floor(state.enemies.length / 2) + index)),
+      };
+      enemy.position = enemyPosition;
+      combatants.push({
+        id: enemy.id,
+        position: enemyPosition,
+        speed: enemy.pm ?? 4, // Default enemy PM
+        reach: 1,
+        isHostile: true,
+      });
+    });
+
+    // Update turnOrder positions as well
+    state.turnOrder.forEach(combatant => {
+      if (combatant.isPlayer) {
+        combatant.position = state.player.position;
+      } else {
+        const enemy = state.enemies.find(e => e.id === combatant.id);
+        if (enemy) {
+          combatant.position = enemy.position;
+        }
+      }
+    });
+
+    this.gridService.initializeGrid(characterId, GRID_WIDTH, GRID_HEIGHT, combatants);
+    this.logger.debug(`Grid initialized for combat ${characterId}: ${combatants.length} combatants`);
+  }
+
+  /**
    * Build initial combat state with the new system
    */
-  private buildInitialState(
+  private async buildInitialState(
     character: CharacterResponseDto,
     combatStart: CombatStartRequestDto,
-  ): CombatStateDto {
+  ): Promise<CombatStateDto> {
     const { characterId } = character;
-    const player = this.buildPlayerStats(character);
+    const player = await this.buildPlayerStats(character);
 
     // Roll initiative based on finesse
     const finesse = character.stats?.finesse ?? 0;
@@ -243,7 +340,7 @@ export class CombatAppService {
       ? doc.turnOrder.map(t => new CombatantDto(t))
       : [];
 
-    return new CombatStateDto({
+    const state = new CombatStateDto({
       characterId: doc.characterId,
       inCombat: !!doc.inCombat,
       enemies,
@@ -253,6 +350,60 @@ export class CombatAppService {
       roundNumber: doc.roundNumber ?? 1,
       activeEffects: doc.activeEffects ?? [],
     });
+
+    // Ensure grid is initialized (may be lost after server restart)
+    this.ensureGridInitialized(characterId, state);
+
+    return state;
+  }
+
+  /**
+   * Ensure the combat grid is initialized from persisted state
+   * Called when loading combat state to handle server restarts
+   */
+  private ensureGridInitialized(characterId: string, state: CombatStateDto): void {
+    // Check if grid already exists
+    const existingPositions = this.gridService.getAllPositions(characterId);
+    if (existingPositions.length > 0) {
+      return; // Grid already initialized
+    }
+
+    // Rebuild grid from persisted positions
+    const combatants: Array<{
+      id: string;
+      position: { x: number; y: number };
+      reach?: number;
+      speed?: number;
+      isHostile: boolean;
+    }> = [];
+
+    // Add player
+    const playerPos = state.player.position ?? { x: 2, y: Math.floor(GRID_HEIGHT / 2) };
+    combatants.push({
+      id: state.player.id || characterId,
+      position: playerPos,
+      speed: state.player.pm ?? 6,
+      reach: 1,
+      isHostile: false,
+    });
+
+    // Add enemies
+    state.enemies.forEach((enemy, index) => {
+      const enemyPos = enemy.position ?? {
+        x: GRID_WIDTH - 3,
+        y: Math.max(1, Math.min(GRID_HEIGHT - 2, Math.floor(GRID_HEIGHT / 2) - Math.floor(state.enemies.length / 2) + index)),
+      };
+      combatants.push({
+        id: enemy.id,
+        position: enemyPos,
+        speed: enemy.pm ?? 4,
+        reach: 1,
+        isHostile: true,
+      });
+    });
+
+    this.gridService.initializeGrid(characterId, GRID_WIDTH, GRID_HEIGHT, combatants);
+    this.logger.debug(`Grid re-initialized for combat ${characterId} from persisted state`);
   }
 
   /**

@@ -79,7 +79,7 @@ Execute a movement on the combat grid. Reads active effects from combat state to
     damage?: number;
     description?: string;
   }>;
-  remainingMovement: number;
+  pm: number;  // Remaining movement points
   errorMessage?: string;  // If success = false
 }
 ```
@@ -181,7 +181,7 @@ POST /api/combat/:characterId/move
   events: [
     {type: 'move', actorId: 'player-1', description: 'Moved to (5, 10)'}
   ],
-  remainingMovement: 55  // 60 - 5
+  pm: 55  // 60 - 5 tiles moved
 }
 ```
 
@@ -223,7 +223,7 @@ POST /api/combat/:characterId/move
     {type: 'move', actorId: 'player-1', description: 'Moved to (3, 5)'}
     // No OA events due to 'disengaged' effect
   ],
-  remainingMovement: 28
+  pm: 28
 }
 ```
 
@@ -256,7 +256,7 @@ POST /api/combat/:characterId/move
     },
     {type: "move", actorId: "player-1", description: "Moved to (5, 7)"}
   ],
-  remainingMovement: 28  // 30 - 2
+  pm: 28  // 30 - 2 tiles moved
 }
 ```
 

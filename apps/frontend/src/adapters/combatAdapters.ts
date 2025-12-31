@@ -12,13 +12,13 @@ export class CombatAdapter {
       {
         id: state.player.id,
         characterKey: "Archer-Green", // Player default sprite
-        position: this.getInitialPosition("player", state),
+        position: this.getPosition(state.player.position, "player", 0),
         stats: {
           hp: state.player.hp ?? 0,
           maxHp: state.player.hpMax ?? 0,
           attack: (state.player.basePower ?? 0) + (state.player.level ?? 1),
           defense: 0,
-          moveRange: 3,
+          moveRange: state.player.pm ?? 3,
           attackRange: 1,
           // Tactical system resources
           pa: state.player.pa,
@@ -34,13 +34,13 @@ export class CombatAdapter {
         (enemy, idx): UnitConfig => ({
           id: enemy.id,
           characterKey: this.mapEnemyToSprite(enemy.name),
-          position: this.getInitialPosition("enemy", state, idx),
+          position: this.getPosition(enemy.position, "enemy", idx),
           stats: {
             hp: enemy.hp ?? 0,
             maxHp: enemy.hpMax ?? 0,
             attack: (enemy.basePower ?? 0) + (enemy.level ?? 1),
             defense: 0,
-            moveRange: 2,
+            moveRange: enemy.pm ?? 2,
             attackRange: 1,
             // Tactical system resources
             pa: enemy.pa,
@@ -66,23 +66,41 @@ export class CombatAdapter {
   }
 
   /**
-   * Position initiale basée sur l'ordre de tour
+   * Get position from backend or use default based on team
    */
-  private static getInitialPosition(
+  private static getPosition(
+    backendPosition: { x: number; y: number } | undefined,
     team: "player" | "enemy",
-    _state: CombatStateDto,
-    index = 0,
+    index: number,
+  ): GridPosition {
+    // Use backend position if available
+    if (backendPosition) {
+      return {
+        gridX: backendPosition.x,
+        gridY: backendPosition.y,
+      };
+    }
+    // Fallback to default positions
+    return this.getDefaultPosition(team, index);
+  }
+
+  /**
+   * Default position when backend doesn't provide one
+   */
+  private static getDefaultPosition(
+    team: "player" | "enemy",
+    index: number,
   ): GridPosition {
     if (team === "player") {
       return {
         gridX: 2,
-        gridY: 4,
-      }; // Gauche centre
+        gridY: 5,
+      }; // Left center (matches backend GRID_HEIGHT/2)
     }
-    // Ennemis à droite, espacés verticalement
+    // Enemies on right, spaced vertically
     return {
-      gridX: 9,
-      gridY: 3 + index * 2, // 3, 5, 7...
+      gridX: 12, // GRID_WIDTH - 3 = 12 with backend default
+      gridY: Math.max(1, Math.min(8, 5 - Math.floor(3 / 2) + index)),
     };
   }
 

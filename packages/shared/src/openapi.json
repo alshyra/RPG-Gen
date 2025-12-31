@@ -3828,6 +3828,23 @@
           "combat_start"
         ]
       },
+      "GridPositionDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "X coordinate on combat grid"
+          },
+          "y": {
+            "type": "number",
+            "description": "Y coordinate on combat grid"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ]
+      },
       "CombatantDto": {
         "type": "object",
         "properties": {
@@ -3900,8 +3917,12 @@
             "description": "Combat side (player or enemy)"
           },
           "position": {
-            "type": "object",
-            "description": "Grid position for tactical combat"
+            "description": "Grid position for tactical combat",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GridPositionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -4276,23 +4297,6 @@
           "message"
         ]
       },
-      "GridPositionDto": {
-        "type": "object",
-        "properties": {
-          "x": {
-            "type": "number",
-            "description": "X coordinate on combat grid"
-          },
-          "y": {
-            "type": "number",
-            "description": "Y coordinate on combat grid"
-          }
-        },
-        "required": [
-          "x",
-          "y"
-        ]
-      },
       "MovementRequestDto": {
         "type": "object",
         "properties": {
@@ -4374,9 +4378,9 @@
               "$ref": "#/components/schemas/MovementEventDto"
             }
           },
-          "remainingMovement": {
+          "pm": {
             "type": "number",
-            "description": "Remaining movement speed after this action"
+            "description": "Remaining movement points (PM) after this action"
           },
           "errorMessage": {
             "type": "string",
@@ -4387,7 +4391,7 @@
           "success",
           "finalPosition",
           "events",
-          "remainingMovement"
+          "pm"
         ]
       }
     }

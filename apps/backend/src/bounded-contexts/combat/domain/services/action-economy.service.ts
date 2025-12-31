@@ -1,6 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import type { CombatStateDto } from "../../api/dto/response/CombatStateDto.js";
-import { CLASS_STATS } from "../scaling.util.js";
 
 /**
  * ActionEconomyService - Manages PA/PM resource system for tactical combat
@@ -8,10 +7,12 @@ import { CLASS_STATS } from "../scaling.util.js";
  * PA (Points d'Action): Used for abilities/attacks
  * PM (Points de Mouvement): Used for grid movement
  * 
- * Resources are reset at the start of each turn based on class.
+ * Resources are reset at the start of each turn based on paMax/pmMax stored in player state.
+ * These values come from class data seed files, not hardcoded values.
  */
 @Injectable()
 export class ActionEconomyService {
+  private readonly logger = new Logger(ActionEconomyService.name);
   /**
    * Consume PA for an action. Returns updated state.
    */
@@ -65,23 +66,23 @@ export class ActionEconomyService {
   }
 
   /**
-   * Reset PA/PM at the start of a turn based on class
+   * Reset PA/PM at the start of a turn based on stored max values.
+   * The paMax/pmMax values MUST be initialized from class stats when combat starts.
    */
   resetResources(state: CombatStateDto): CombatStateDto {
-    const className = state.player?.className?.toLowerCase() ?? "guerrier";
-    const classStats = CLASS_STATS[className] ?? CLASS_STATS.guerrier;
-
-    const paMax = classStats.pa;
-    const pmMax = classStats.pm;
+    if (!state.player?.paMax || !state.player?.pmMax) {
+      this.logger.warn("Missing paMax/pmMax in player state - resources may not be set correctly");
+    }
+    
+    const paMax = state.player?.paMax ?? 0;
+    const pmMax = state.player?.pmMax ?? 0;
 
     return {
       ...state,
       player: state.player ? {
         ...state.player,
         pa: paMax,
-        paMax: paMax,
         pm: pmMax,
-        pmMax: pmMax,
       } : state.player,
     };
   }

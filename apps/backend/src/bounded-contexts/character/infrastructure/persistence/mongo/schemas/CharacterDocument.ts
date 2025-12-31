@@ -63,6 +63,18 @@ export class CharacterDocument extends Document {
   })
   stats: CharacterStats;
 
+  // Class stats from game-data seed (for HP gain on level-up)
+  @Prop({
+    type: Object,
+    required: false,
+  })
+  classStats: {
+    hpBase: number;
+    hpGain: number;
+    pa: number;
+    pm: number;
+  };
+
   // NEW: Resource pools
   @Prop({
     required: false,

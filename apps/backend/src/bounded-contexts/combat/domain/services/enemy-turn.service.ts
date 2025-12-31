@@ -4,16 +4,19 @@ import { Model } from "mongoose";
 import { CombatSession } from "../../infrastructure/persistence/mongo/schemas/CombatSession.js";
 import type { EnemyAttackLogDto } from "../../api/dto/response/EnemyAttackLogDto.js";
 import type { CombatStateDto, CombatantDto } from "../../api/dto/response/index.js";
-import { calculateDamage } from "../scaling.util.js";
+import { FormulasService } from "../../../game-data/application/services/FormulasService.js";
 
 /**
- * EnemyTurnService - Manages enemy turns in the new tactical system
+ * EnemyTurnService - Manages enemy turns in the tactical system
  * 
- * Key changes from D&D:
+ * Key design:
  * - NO attack rolls (hits are automatic)
- * - Damage is calculated using: (basePower + Attribut) * (1 + (Level - 1) * 0.15)
+ * - Damage is calculated using FormulasService (data from seeds)
  * - Enemies have PA/PM like players
  * - All damage is deterministic (no RNG)
+ * 
+ * @see FormulasService for damage calculation
+ * @see formulas.json for configurable parameters
  */
 @Injectable()
 export class EnemyTurnService {
@@ -21,6 +24,7 @@ export class EnemyTurnService {
 
   constructor(
     @InjectModel(CombatSession.name) private readonly combatSessionModel: Model<CombatSession>,
+    private readonly formulasService: FormulasService,
   ) {}
 
   /**
@@ -39,14 +43,18 @@ export class EnemyTurnService {
     damage: number;
     playerDefeated: boolean;
   }> {
-    // Calculate damage using the new scaling formula
-    // Formula: (basePower + Attribut_Scaling) * (1 + (Level - 1) * 0.15)
-    const basePower = enemy.basePower ?? 5; // Default base power for enemies
-    const scalingAttribute = enemy.scalingAttribute ?? "vigor";
-    const stats = enemy.stats ?? { vigor: 2, finesse: 2, mind: 2, survival: 2 };
-    const level = enemy.level ?? 1;
+    // Get default values from formulas.json for missing enemy properties
+    const enemyDefaults = this.formulasService.getEnemyDefaults();
+    
+    // Calculate damage using FormulasService with data from enemy or defaults
+    const basePower = enemy.basePower ?? enemyDefaults.basePower;
+    const scalingAttribute = enemy.scalingAttribute ?? enemyDefaults.scalingAttribute;
+    const stats = enemy.stats ?? enemyDefaults.stats;
+    const level = enemy.level ?? enemyDefaults.level;
 
-    const damage = calculateDamage(basePower, scalingAttribute, stats, level);
+    // Get scaling stat value
+    const scalingValue = stats[scalingAttribute] ?? 0;
+    const damage = this.formulasService.calculateDamage(basePower, scalingValue, level);
 
     const attackLog: EnemyAttackLogDto = {
       attackerId: enemy.id,
@@ -100,6 +108,9 @@ export class EnemyTurnService {
     const attackLogs: EnemyAttackLogDto[] = [];
     let totalDamage = 0;
     let playerDefeated = false;
+    
+    // Get default PA from formulas.json
+    const enemyDefaults = this.formulasService.getEnemyDefaults();
 
     for (const enemy of enemies) {
       // Skip dead enemies
@@ -108,8 +119,8 @@ export class EnemyTurnService {
       // Stop if player is already defeated
       if (playerDefeated) break;
 
-      // Check if enemy has PA to attack (default 1 PA cost per attack)
-      const enemyPA = enemy.pa ?? 1;
+      // Check if enemy has PA to attack (default from formulas.json)
+      const enemyPA = enemy.pa ?? enemyDefaults.pa;
       if (enemyPA <= 0) continue;
 
       // Execute attack

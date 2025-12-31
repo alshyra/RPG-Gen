@@ -40,6 +40,7 @@ export class CharacterMapper {
             survival: props.stats.survival,
           }
         : undefined,
+      classStats: props.classStats,
       hp: props.hp.current,
       hpMax: props.hp.max,
       pa: props.pa.current,
@@ -120,6 +121,7 @@ export class CharacterMapper {
       raceId: doc.raceId as RaceId,
       level: doc.level ?? 1,
       stats,
+      classStats: doc.classStats,
       hp,
       pa,
       pm,

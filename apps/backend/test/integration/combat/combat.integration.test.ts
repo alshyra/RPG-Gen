@@ -11,7 +11,7 @@
  * - Turn advancement and round progression
  * - Turn order rebuild after enemy death
  */
-import test from "ava";
+import { describe, test, expect, afterEach } from "@jest/globals";
 import { CombatModule } from "../../../src/bounded-contexts/combat/combat.module.js";
 import { CombatAppService } from "../../../src/bounded-contexts/combat/application/services/CombatAppService.js";
 import { CharacterAppService } from "../../../src/bounded-contexts/character/application/services/CharacterAppService.js";
@@ -113,11 +113,20 @@ async function setupCombatTest(diceRolls: number[]): Promise<CombatTestContext> 
 
 // ============= Turn Order Tests =============
 
-test("initializeCombat creates turn order with enemies and player", async t => {
-  // Dice rolls: enemy1 init, enemy2 init, player init
-  const testCtx = await setupCombatTest([16, 15, 11]);
+describe("Combat Turn Order", () => {
+  let testCtx: CombatTestContext | null = null;
 
-  try {
+  afterEach(async () => {
+    if (testCtx) {
+      await closeTestApp(testCtx.ctx);
+      testCtx = null;
+    }
+  });
+
+  test("initializeCombat creates turn order with enemies and player", async () => {
+    // Dice rolls: enemy1 init, enemy2 init, player init
+    testCtx = await setupCombatTest([16, 15, 11]);
+
     const character = createTestCharacter();
     const combatStart = createCombatStartRequest(2);
 
@@ -130,20 +139,16 @@ test("initializeCombat creates turn order with enemies and player", async t => {
     const playerEntries = state.turnOrder.filter(c => c.isPlayer);
     const enemyEntries = state.turnOrder.filter(c => !c.isPlayer);
 
-    t.is(playerEntries.length, 1, "Should have 1 player entry");
-    t.is(enemyEntries.length, 2, "Should have 2 enemy entries");
-    t.true(state.inCombat, "Combat should be active");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(playerEntries.length).toBe(1);
+    expect(enemyEntries.length).toBe(2);
+    expect(state.inCombat).toBe(true);
+  });
 
-test("initializeCombat sorts turn order by initiative descending", async t => {
-  // Dice rolls: we use high values to ensure predictable order
-  // Enemy1 gets 20, Enemy2 gets 10, Player gets 5 (+ DEX mod 2 = 7)
-  const testCtx = await setupCombatTest([20, 10, 5]);
+  test("initializeCombat sorts turn order by initiative descending", async () => {
+    // Dice rolls: we use high values to ensure predictable order
+    // Enemy1 gets 20, Enemy2 gets 10, Player gets 5 (+ DEX mod 2 = 7)
+    testCtx = await setupCombatTest([20, 10, 5]);
 
-  try {
     const character = createTestCharacter();
     const combatStart = createCombatStartRequest(2);
 
@@ -158,22 +163,18 @@ test("initializeCombat sorts turn order by initiative descending", async t => {
       if (idx === 0) return true;
       return arr[idx - 1].initiative >= arr[idx].initiative;
     });
-    t.true(initiativeSorted, "Turn order should be sorted by initiative descending");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(initiativeSorted).toBe(true);
+  });
 
-test("initializeCombat breaks ties with enemies before players", async t => {
-  // Both enemy and player will have same initiative (simulated tie)
-  // We need to understand how many dice rolls happen:
-  // - 1 roll for enemy initiative
-  // - 1 roll for player initiative
-  // With 1 enemy, player init = roll + DEX mod (+2)
-  // If enemy rolls 15 and player rolls 13, player init = 13 + 2 = 15 (tie!)
-  const testCtx = await setupCombatTest([15, 13]);
+  test("initializeCombat breaks ties with enemies before players", async () => {
+    // Both enemy and player will have same initiative (simulated tie)
+    // We need to understand how many dice rolls happen:
+    // - 1 roll for enemy initiative
+    // - 1 roll for player initiative
+    // With 1 enemy, player init = roll + DEX mod (+2)
+    // If enemy rolls 15 and player rolls 13, player init = 13 + 2 = 15 (tie!)
+    testCtx = await setupCombatTest([15, 13]);
 
-  try {
     const character = createTestCharacter(); // DEX 14 = +2 mod
     const combatStart = createCombatStartRequest(1);
 
@@ -184,7 +185,7 @@ test("initializeCombat breaks ties with enemies before players", async t => {
     );
 
     // Debug: log initiatives
-    t.log(
+    console.log(
       "Turn order:",
       state.turnOrder.map(c => ({
         name: c.name,
@@ -198,30 +199,25 @@ test("initializeCombat breaks ties with enemies before players", async t => {
     const enemyInOrder = state.turnOrder.find(c => !c.isPlayer);
     const playerInOrder = state.turnOrder.find(c => c.isPlayer);
 
-    t.truthy(enemyInOrder, "Enemy should be in turn order");
-    t.truthy(playerInOrder, "Player should be in turn order");
+    expect(enemyInOrder).toBeTruthy();
+    expect(playerInOrder).toBeTruthy();
 
     // Both should have same initiative if tie-break test is valid
     if (enemyInOrder && playerInOrder && enemyInOrder.initiative === playerInOrder.initiative) {
       // On tie, enemy should come before player in the turn order
       const enemyIdx = state.turnOrder.indexOf(enemyInOrder);
       const playerIdx = state.turnOrder.indexOf(playerInOrder);
-      t.true(enemyIdx < playerIdx, "Enemy should come before player on initiative tie");
+      expect(enemyIdx).toBeLessThan(playerIdx);
     } else {
       // If not a tie, just verify sorting is correct
-      t.log("Not a tie scenario, skipping tie-break assertion");
-      t.pass("Turn order is sorted correctly");
+      console.log("Not a tie scenario, skipping tie-break assertion");
     }
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+  });
 
-test("initializeCombat includes player in turn order", async t => {
-  // Dice rolls: 3 enemies + player
-  const testCtx = await setupCombatTest([18, 12, 8, 5]);
+  test("initializeCombat includes player in turn order", async () => {
+    // Dice rolls: 3 enemies + player
+    testCtx = await setupCombatTest([18, 12, 8, 5]);
 
-  try {
     const character = createTestCharacter({ characterId: "hero-123" });
     const combatStart = createCombatStartRequest(3);
 
@@ -233,44 +229,49 @@ test("initializeCombat includes player in turn order", async t => {
 
     const playerEntries = state.turnOrder.filter(c => c.isPlayer);
 
-    t.is(playerEntries.length, 1, "Should have 1 player entry in turn order");
-    t.is(playerEntries[0].id, "hero-123", "Player entry should have correct id");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
+    expect(playerEntries.length).toBe(1);
+    expect(playerEntries[0].id).toBe("hero-123");
+  });
 });
 
 // ============= Action Economy Tests =============
 // NOTE: Action economy tests are skipped because the system now uses PA/PM on CombatantDto
 // instead of actionMax/actionRemaining/bonusActionMax/bonusActionRemaining on CombatStateDto
 
-test.skip("initializeCombat sets default action economy (1 action + 1 bonus action)", async t => {
-  // Legacy test - action economy moved to CombatantDto PA/PM system
-  t.pass();
-});
+describe("Action Economy (Legacy - PA/PM system)", () => {
+  test.skip("initializeCombat sets default action economy (1 action + 1 bonus action)", () => {
+    // Legacy test - action economy moved to CombatantDto PA/PM system
+  });
 
-test.skip("decrementAction reduces actionRemaining", async t => {
-  // Legacy test - action economy moved to CombatantDto PA/PM system
-  t.pass();
-});
+  test.skip("decrementAction reduces actionRemaining", () => {
+    // Legacy test - action economy moved to CombatantDto PA/PM system
+  });
 
-test.skip("decrementAction returns unchanged state when no actions remaining", async t => {
-  // Legacy test - action economy moved to CombatantDto PA/PM system
-  t.pass();
-});
+  test.skip("decrementAction returns unchanged state when no actions remaining", () => {
+    // Legacy test - action economy moved to CombatantDto PA/PM system
+  });
 
-test.skip("decrementBonusAction reduces bonusActionRemaining", async t => {
-  // Legacy test - action economy moved to CombatantDto PA/PM system
-  t.pass();
+  test.skip("decrementBonusAction reduces bonusActionRemaining", () => {
+    // Legacy test - action economy moved to CombatantDto PA/PM system
+  });
 });
 
 // ============= Combat with Multiple Enemies =============
 
-test("combat with 3 enemies creates proper turn order", async t => {
-  // Dice rolls for 3 enemies + player
-  const testCtx = await setupCombatTest([18, 12, 8, 5]);
+describe("Combat with Multiple Enemies", () => {
+  let testCtx: CombatTestContext | null = null;
 
-  try {
+  afterEach(async () => {
+    if (testCtx) {
+      await closeTestApp(testCtx.ctx);
+      testCtx = null;
+    }
+  });
+
+  test("combat with 3 enemies creates proper turn order", async () => {
+    // Dice rolls for 3 enemies + player
+    testCtx = await setupCombatTest([18, 12, 8, 5]);
+
     const character = createTestCharacter();
     const combatStart = createCombatStartRequest(3);
 
@@ -281,56 +282,61 @@ test("combat with 3 enemies creates proper turn order", async t => {
     );
 
     // Should have 4 entries: 3 enemies + 1 player
-    t.is(state.turnOrder.length, 4, "Should have 4 turn order entries (3 enemies + 1 player)");
+    expect(state.turnOrder.length).toBe(4);
 
     const playerEntries = state.turnOrder.filter(c => c.isPlayer);
-    t.is(playerEntries.length, 1, "Should have 1 player entry");
+    expect(playerEntries.length).toBe(1);
 
     const enemyEntries = state.turnOrder.filter(c => !c.isPlayer);
-    t.is(enemyEntries.length, 3, "Should have 3 enemy entries");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
-
-test("full combat turn order simulation with 2 enemies", async t => {
-  // Use different values to create a predictable order
-  const testCtx = await setupCombatTest([10, 10, 10]);
-
-  const character = createTestCharacter();
-  const combatStart = createCombatStartRequest(2);
-
-  const state = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
-
-  // Should have 3 entries: 2 enemies + 1 player
-  t.is(state.turnOrder.length, 3, "Should have 3 entries (2 enemies + 1 player)");
-
-  // Verify we have the right number of each type
-  const enemies = state.turnOrder.filter(c => !c.isPlayer);
-  const players = state.turnOrder.filter(c => c.isPlayer);
-
-  t.is(enemies.length, 2, "Should have 2 enemy entries");
-  t.is(players.length, 1, "Should have 1 player entry");
-
-  // Player entry should have correct name
-  t.is(players[0].name, "Test Hero", "Player entry should be Test Hero");
-
-  // Turn order should be sorted by initiative
-  const initiativeSorted = state.turnOrder.every((_, idx, arr) => {
-    if (idx === 0) return true;
-    return arr[idx - 1].initiative >= arr[idx].initiative;
+    expect(enemyEntries.length).toBe(3);
   });
-  t.true(initiativeSorted, "Turn order should be sorted by initiative");
 
-  await closeTestApp(testCtx.ctx);
+  test("full combat turn order simulation with 2 enemies", async () => {
+    // Use different values to create a predictable order
+    testCtx = await setupCombatTest([10, 10, 10]);
+
+    const character = createTestCharacter();
+    const combatStart = createCombatStartRequest(2);
+
+    const state = await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
+
+    // Should have 3 entries: 2 enemies + 1 player
+    expect(state.turnOrder.length).toBe(3);
+
+    // Verify we have the right number of each type
+    const enemies = state.turnOrder.filter(c => !c.isPlayer);
+    const players = state.turnOrder.filter(c => c.isPlayer);
+
+    expect(enemies.length).toBe(2);
+    expect(players.length).toBe(1);
+
+    // Player entry should have correct name
+    expect(players[0].name).toBe("Test Hero");
+
+    // Turn order should be sorted by initiative
+    const initiativeSorted = state.turnOrder.every((_, idx, arr) => {
+      if (idx === 0) return true;
+      return arr[idx - 1].initiative >= arr[idx].initiative;
+    });
+    expect(initiativeSorted).toBe(true);
+  });
 });
 
 // ============= Combat State Persistence =============
 
-test("combat state is persisted and retrievable", async t => {
-  const testCtx = await setupCombatTest([15, 10]);
+describe("Combat State Persistence", () => {
+  let testCtx: CombatTestContext | null = null;
 
-  try {
+  afterEach(async () => {
+    if (testCtx) {
+      await closeTestApp(testCtx.ctx);
+      testCtx = null;
+    }
+  });
+
+  test("combat state is persisted and retrievable", async () => {
+    testCtx = await setupCombatTest([15, 10]);
+
     const character = createTestCharacter({ characterId: "persist-test-char" });
     const combatStart = createCombatStartRequest(1);
 
@@ -339,48 +345,47 @@ test("combat state is persisted and retrievable", async t => {
     // Retrieve state
     const retrieved = await testCtx.combatService.getCombatState("persist-test-char");
 
-    t.truthy(retrieved, "Should retrieve combat state");
-    t.is(retrieved?.characterId, "persist-test-char");
-    t.true(retrieved?.inCombat);
-    t.is(retrieved?.enemies.length, 1);
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(retrieved).toBeTruthy();
+    expect(retrieved?.characterId).toBe("persist-test-char");
+    expect(retrieved?.inCombat).toBe(true);
+    expect(retrieved?.enemies.length).toBe(1);
+  });
 
-test("isInCombat returns true when combat is active", async t => {
-  const testCtx = await setupCombatTest([15, 10]);
+  test("isInCombat returns true when combat is active", async () => {
+    testCtx = await setupCombatTest([15, 10]);
 
-  try {
     const character = createTestCharacter({ characterId: "combat-check-char" });
     const combatStart = createCombatStartRequest(1);
 
     await testCtx.combatService.initializeCombat(character, combatStart, TEST_USER_ID);
 
     const inCombat = await testCtx.combatService.isInCombat("combat-check-char");
-    t.true(inCombat, "Should return true when in combat");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(inCombat).toBe(true);
+  });
 
-test("isInCombat returns false when no combat exists", async t => {
-  const testCtx = await setupCombatTest([]);
+  test("isInCombat returns false when no combat exists", async () => {
+    testCtx = await setupCombatTest([]);
 
-  try {
     const inCombat = await testCtx.combatService.isInCombat("non-existent-char");
-    t.false(inCombat, "Should return false when no combat");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
+    expect(inCombat).toBe(false);
+  });
 });
 
 // ============= Combat End =============
 
-test("endCombat cleans up combat state", async t => {
-  const testCtx = await setupCombatTest([15, 10]);
+describe("Combat End", () => {
+  let testCtx: CombatTestContext | null = null;
 
-  try {
+  afterEach(async () => {
+    if (testCtx) {
+      await closeTestApp(testCtx.ctx);
+      testCtx = null;
+    }
+  });
+
+  test("endCombat cleans up combat state", async () => {
+    testCtx = await setupCombatTest([15, 10]);
+
     const character = createTestCharacter({ characterId: "end-combat-char" });
     const combatStart = createCombatStartRequest(1);
 
@@ -391,16 +396,12 @@ test("endCombat cleans up combat state", async t => {
 
     // Verify combat is ended
     const inCombat = await testCtx.combatService.isInCombat("end-combat-char");
-    t.false(inCombat, "Should not be in combat after endCombat");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(inCombat).toBe(false);
+  });
 
-test("applyPlayerDamage returns final snapshot and endResult when last enemy dies", async t => {
-  const testCtx = await setupCombatTest([15, 10]);
+  test("applyPlayerDamage returns final snapshot and endResult when last enemy dies", async () => {
+    testCtx = await setupCombatTest([15, 10]);
 
-  try {
     const character = createTestCharacter({ characterId: "kill-last-enemy-char" });
     // Create a single enemy with 1 HP to ensure a killing blow
     const combatStart = createCombatStartRequest(1);
@@ -414,7 +415,7 @@ test("applyPlayerDamage returns final snapshot and endResult when last enemy die
     );
 
     const [enemy] = initState.enemies;
-    t.truthy(enemy, "There should be one enemy");
+    expect(enemy).toBeTruthy();
 
     // Apply 2 damage, should kill and end combat
     const result = await testCtx.combatService.applyPlayerDamage(
@@ -423,25 +424,18 @@ test("applyPlayerDamage returns final snapshot and endResult when last enemy die
       2,
     );
 
-    t.truthy(result, "Result should be returned");
-    t.truthy(result.state, "Result should contain state");
-    t.false(result.state.inCombat, "Combat should be ended (inCombat false)");
-    t.truthy(result.endResult, "Result should contain endResult when combat ends");
-    t.truthy(result.endResult?.xp_gained, "endResult should contain xpGained");
-    t.truthy(result.endResult?.enemies_defeated, "endResult should contain enemiesDefeated");
-    t.true(
-      (result.endResult?.enemies_defeated?.length ?? 0) > 0,
-      "At least one enemy should be defeated",
-    );
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
-});
+    expect(result).toBeTruthy();
+    expect(result.state).toBeTruthy();
+    expect(result.state.inCombat).toBe(false);
+    expect(result.endResult).toBeTruthy();
+    expect(result.endResult?.xp_gained).toBeTruthy();
+    expect(result.endResult?.enemies_defeated).toBeTruthy();
+    expect((result.endResult?.enemies_defeated?.length ?? 0)).toBeGreaterThan(0);
+  });
 
-test("applyEnemyDamage returns final snapshot when player dies", async t => {
-  const testCtx = await setupCombatTest([15, 10]);
+  test("applyEnemyDamage returns final snapshot when player dies", async () => {
+    testCtx = await setupCombatTest([15, 10]);
 
-  try {
     const character = createTestCharacter({
       characterId: "player-dies-char",
       hp: 5,
@@ -453,23 +447,106 @@ test("applyEnemyDamage returns final snapshot when player dies", async t => {
     // Apply large enemy damage to kill player
     const result = await testCtx.combatService.applyEnemyDamage(character.characterId, 999);
 
-    t.truthy(result, "Result should be returned");
-    t.false(result.state.inCombat, "Combat should be ended (player dead)");
-    t.true(result.state.player.hp <= 0, "Player HP should be 0 or less");
-  } finally {
-    await closeTestApp(testCtx.ctx);
-  }
+    expect(result).toBeTruthy();
+    expect(result.state.inCombat).toBe(false);
+    expect(result.state.player.hp).toBeLessThanOrEqual(0);
+  });
+
+  test.skip("endPlayerTurn returns final snapshot when player dies (not 404)", () => {
+    // TODO: Update this test - CombatOrchestrator location has changed
+  });
+
+  // NOTE: This test is skipped because the combat action API has changed significantly
+  // The old action economy and attack system no longer applies
+  test.skip("processAttack returns combatEnd when killing last enemy", () => {
+    // This test needs to be rewritten to use the new tactical combat system
+    // with PA/PM instead of action/bonus action
+  });
 });
 
-test.skip("endPlayerTurn returns final snapshot when player dies (not 404)", async t => {
-  // TODO: Update this test - CombatOrchestrator location has changed
-  t.pass();
-});
+// ============= Combat Damage Tests (merged from root file) =============
 
-// NOTE: This test is skipped because the combat action API has changed significantly
-// The old action economy and attack system no longer applies
-test.skip("processAttack returns combatEnd when killing last enemy", async t => {
-  // This test needs to be rewritten to use the new tactical combat system
-  // with PA/PM instead of action/bonus action
-  t.pass();
+describe("Combat Damage", () => {
+  let testCtx: CombatTestContext | null = null;
+
+  afterEach(async () => {
+    if (testCtx) {
+      await closeTestApp(testCtx.ctx);
+      testCtx = null;
+    }
+  });
+
+  test("applies damage to enemy", async () => {
+    testCtx = await setupCombatTest([15, 10]);
+
+    const character = createTestCharacter({ characterId: "damage-enemy-char" });
+    const combatStart = createCombatStartRequest(1);
+    combatStart.combat_start[0].hp = 20;
+
+    const state = await testCtx.combatService.initializeCombat(
+      character,
+      combatStart,
+      TEST_USER_ID,
+    );
+
+    const enemy = state.enemies[0];
+    const initialHp = enemy.hp;
+
+    const result = await testCtx.combatService.applyPlayerDamage(
+      character.characterId,
+      enemy.id,
+      5,
+    );
+
+    const damagedEnemy = result.state.enemies.find(e => e.id === enemy.id);
+    expect(damagedEnemy?.hp).toBe(initialHp - 5);
+  });
+
+  test("applies damage to player", async () => {
+    testCtx = await setupCombatTest([15, 10]);
+
+    const character = createTestCharacter({ characterId: "damage-player-char", hp: 20, hpMax: 20 });
+    const combatStart = createCombatStartRequest(1);
+
+    const state = await testCtx.combatService.initializeCombat(
+      character,
+      combatStart,
+      TEST_USER_ID,
+    );
+
+    const initialHp = state.player.hp;
+
+    const result = await testCtx.combatService.applyEnemyDamage(
+      character.characterId,
+      5,
+    );
+
+    expect(result.state.player.hp).toBe(initialHp - 5);
+  });
+
+  test("ends combat when last enemy dies", async () => {
+    testCtx = await setupCombatTest([15, 10]);
+
+    const character = createTestCharacter({ characterId: "last-enemy-char" });
+    const combatStart = createCombatStartRequest(1);
+    combatStart.combat_start[0].hp = 5; // Low HP enemy
+
+    const state = await testCtx.combatService.initializeCombat(
+      character,
+      combatStart,
+      TEST_USER_ID,
+    );
+
+    const enemy = state.enemies[0];
+
+    const result = await testCtx.combatService.applyPlayerDamage(
+      character.characterId,
+      enemy.id,
+      10, // Overkill
+    );
+
+    expect(result.state.inCombat).toBe(false);
+    expect(result.endResult).toBeDefined();
+    expect(result.endResult?.xp_gained).toBeGreaterThanOrEqual(0);
+  });
 });

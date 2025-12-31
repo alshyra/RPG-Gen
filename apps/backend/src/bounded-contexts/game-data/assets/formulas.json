@@ -1,0 +1,39 @@
+{
+  "combat": {
+    "damage": {
+      "levelMultiplierBase": 1.0,
+      "levelMultiplierGrowth": 0.15
+    },
+    "healing": {
+      "levelMultiplierBase": 1.0,
+      "levelMultiplierGrowth": 0.15
+    }
+  },
+  "character": {
+    "hp": {
+      "survivalBonus": 2
+    },
+    "initiative": {
+      "baseDie": 20
+    }
+  },
+  "aptitude": {
+    "power": {
+      "scalingDivisor": 2
+    }
+  },
+  "defaults": {
+    "enemy": {
+      "basePower": 5,
+      "level": 1,
+      "scalingAttribute": "vigor",
+      "stats": {
+        "vigor": 2,
+        "finesse": 2,
+        "mind": 2,
+        "survival": 2
+      },
+      "pa": 1
+    }
+  }
+}

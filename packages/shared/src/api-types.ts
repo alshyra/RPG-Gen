@@ -1705,6 +1705,12 @@ export interface components {
             /** @description Array of enemies to initialize combat with */
             combat_start: components["schemas"]["CombatStartEntryDto"][];
         };
+        GridPositionDto: {
+            /** @description X coordinate on combat grid */
+            x: number;
+            /** @description Y coordinate on combat grid */
+            y: number;
+        };
         CombatantDto: {
             /** @description ID of the combatant (player character or enemy) */
             id: string;
@@ -1739,7 +1745,7 @@ export interface components {
             /** @description Combat side (player or enemy) */
             side?: string;
             /** @description Grid position for tactical combat */
-            position?: Record<string, never>;
+            position?: components["schemas"]["GridPositionDto"];
         };
         CombatEndDto: {
             /** @description Victory state */
@@ -1891,12 +1897,6 @@ export interface components {
             /** @description Optional instructions returned after ending combat */
             instructions?: components["schemas"]["CombatEndResultDto"][];
         };
-        GridPositionDto: {
-            /** @description X coordinate on combat grid */
-            x: number;
-            /** @description Y coordinate on combat grid */
-            y: number;
-        };
         MovementRequestDto: {
             /** @description ID of the combatant to move */
             combatantId: string;
@@ -1927,8 +1927,8 @@ export interface components {
             finalPosition: components["schemas"]["GridPositionDto"];
             /** @description Ordered list of events that occurred during movement */
             events: components["schemas"]["MovementEventDto"][];
-            /** @description Remaining movement speed after this action */
-            remainingMovement: number;
+            /** @description Remaining movement points (PM) after this action */
+            pm: number;
             /** @description Error message if movement failed */
             errorMessage?: string;
         };

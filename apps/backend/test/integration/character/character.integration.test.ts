@@ -38,6 +38,14 @@ interface CharacterTestContext {
 // Fixed user ID for tests (valid MongoDB ObjectId format)
 const TEST_USER_ID = "507f1f77bcf86cd799439011";
 
+// Default stats for characters in 'created' state
+const DEFAULT_STATS = {
+  vigor: 1,
+  finesse: 1,
+  mind: 1,
+  survival: 1,
+};
+
 // ============= Setup & Teardown =============
 
 /**
@@ -75,51 +83,61 @@ async function teardownCharacterTest(context: CharacterTestContext): Promise<voi
 /**
  * Verify that response is a valid DTO instance
  */
-function assertIsDraftCharacterDto(obj: any): void {
-  if (!(obj instanceof DraftCharacterResponseDto) && obj.characterId === undefined) {
-    throw new Error("Not a DraftCharacterResponseDto");
+function assertIsDraftCharacterDto(obj: unknown): asserts obj is DraftCharacterResponseDto {
+  if (obj === null || typeof obj !== "object") {
+    throw new Error("Not a DraftCharacterResponseDto: object is null or not an object");
   }
-  if (typeof obj.characterId !== "string") {
-    throw new Error("characterId must be string");
+  const record = obj as Record<string, unknown>;
+  // Entity uses 'id', DTO uses 'characterId' - accept either
+  const hasId = typeof record.id === "string" || typeof record.characterId === "string";
+  if (!hasId) {
+    throw new Error("id or characterId must be string");
   }
-  if (obj.state !== "draft") {
-    throw new Error("state must be 'draft'");
+  if (record.state !== "draft") {
+    throw new Error(`state must be 'draft', got '${record.state}'`);
   }
 }
 
-function assertIsCharacterDto(obj: any): void {
-  if (!(obj instanceof CharacterResponseDto) && obj.characterId === undefined) {
-    throw new Error("Not a CharacterResponseDto");
+function assertIsCharacterDto(obj: unknown): asserts obj is CharacterResponseDto {
+  if (obj === null || typeof obj !== "object") {
+    throw new Error("Not a CharacterResponseDto: object is null or not an object");
   }
-  if (typeof obj.characterId !== "string") {
-    throw new Error("characterId must be string");
+  const record = obj as Record<string, unknown>;
+  // Entity uses 'id', DTO uses 'characterId' - accept either
+  const hasId = typeof record.id === "string" || typeof record.characterId === "string";
+  if (!hasId) {
+    throw new Error("id or characterId must be string");
   }
-  if (typeof obj.name !== "string") {
+  if (typeof record.name !== "string") {
     throw new Error("name must be string");
   }
-  if (obj.state !== "created") {
-    throw new Error("state must be 'created'");
+  if (record.state !== "created") {
+    throw new Error(`state must be 'created', got '${record.state}'`);
   }
   // hp/hpMax are optional, might not be set yet
 }
 
-function assertIsBaseCharacterDto(obj: any): void {
-  if (!(obj instanceof BaseCharacterResponseDto) && obj.characterId === undefined) {
-    throw new Error("Not a BaseCharacterResponseDto");
+function assertIsBaseCharacterDto(obj: unknown): asserts obj is BaseCharacterResponseDto {
+  if (obj === null || typeof obj !== "object") {
+    throw new Error("Not a BaseCharacterResponseDto: object is null or not an object");
   }
-  if (typeof obj.characterId !== "string") {
-    throw new Error("characterId must be string");
+  const record = obj as Record<string, unknown>;
+  // Entity uses 'id', DTO uses 'characterId' - accept either
+  const hasId = typeof record.id === "string" || typeof record.characterId === "string";
+  if (!hasId) {
+    throw new Error("id or characterId must be string");
   }
 }
 
-function assertIsDeceasedCharacterDto(obj: any): void {
-  if (!(obj instanceof DeceasedCharacterResponseDto) && obj.characterId === undefined) {
-    throw new Error("Not a DeceasedCharacterResponseDto");
+function assertIsDeceasedCharacterDto(obj: unknown): asserts obj is DeceasedCharacterResponseDto {
+  if (obj === null || typeof obj !== "object") {
+    throw new Error("Not a DeceasedCharacterResponseDto: object is null or not an object");
   }
-  if (obj.isDeceased !== true) {
+  const record = obj as Record<string, unknown>;
+  if (record.isDeceased !== true) {
     throw new Error("isDeceased must be true");
   }
-  if (obj.diedAt === undefined) {
+  if (record.diedAt === undefined) {
     throw new Error("diedAt must be defined");
   }
 }
@@ -180,6 +198,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -271,6 +290,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -301,6 +321,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -333,6 +354,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -370,6 +392,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -413,6 +436,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -451,6 +475,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -491,6 +516,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -518,6 +544,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
         inspirationPoints: 4,
       });
@@ -546,6 +573,7 @@ describe('Character Integration Tests', () => {
         className: "guerrier",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
         inspirationPoints: 2,
       });
@@ -609,6 +637,7 @@ describe('Character Integration Tests', () => {
         className: "mage",
         raceId: "humain",
         portrait: "portrait-url.png",
+        stats: DEFAULT_STATS,
         state: "created",
       });
 
@@ -625,6 +654,234 @@ describe('Character Integration Tests', () => {
       const finished_chars = allChars.filter(c => c.state === 'created');
       expect(finished_chars.length).toBe(1);
       expect(finished_chars[0].name).toBe("Finished Hero");
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  // ========== Character Flow Tests (merged from root file) ==========
+
+  test("Completes a draft character with full data", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      // Create draft
+      await context.characterService.createDraft({
+        characterId,
+        userId: context.userId,
+      });
+
+      // Complete draft with all required fields
+      const completed = await context.characterService.completeDraft(
+        context.userId,
+        characterId,
+        {
+          name: "Complete Hero",
+          className: "guerrier",
+          raceId: "humain",
+          stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+          physicalDescription: "A brave warrior",
+          gender: "male",
+        },
+      );
+
+      expect(completed).toBeDefined();
+      expect(completed.name).toBe("Complete Hero");
+      expect(completed.className).toBe("guerrier");
+      expect(completed.raceId).toBe("humain");
+      expect(completed.state).toBe("created");
+      expect(completed.hp).toBeGreaterThan(0);
+      expect(completed.hpMax).toBeGreaterThan(0);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Rejects invalid stats total on completeDraft", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({
+        characterId,
+        userId: context.userId,
+      });
+
+      // Invalid stats (total != 27)
+      await expect(
+        context.characterService.completeDraft(context.userId, characterId, {
+          name: "Invalid Hero",
+          className: "guerrier",
+          raceId: "humain",
+          stats: { vigor: 10, finesse: 10, mind: 10, survival: 10 }, // Total = 40
+        }),
+      ).rejects.toThrow("Stats must total exactly 27 points");
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Adds experience points to character", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "XP Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      const before = await context.characterService.findByUserAndId(context.userId, characterId);
+      const initialXp = before.totalXp;
+
+      await context.characterService.addExperience(characterId, 100);
+
+      const after = await context.characterService.findByUserAndId(context.userId, characterId);
+      expect(after.totalXp).toBe(initialXp + 100);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Takes damage correctly", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "Damage Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      const before = await context.characterService.findByUserAndId(context.userId, characterId);
+      const initialHp = before.hp;
+
+      await context.characterService.takeDamage(characterId, 5);
+
+      const after = await context.characterService.findByUserAndId(context.userId, characterId);
+      expect(after.hp).toBe(initialHp - 5);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Heals character correctly", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "Heal Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      // Take damage first
+      await context.characterService.takeDamage(characterId, 10);
+      const damaged = await context.characterService.findByUserAndId(context.userId, characterId);
+
+      // Then heal
+      await context.characterService.heal(characterId, 5);
+      const healed = await context.characterService.findByUserAndId(context.userId, characterId);
+
+      expect(healed.hp).toBe(damaged.hp + 5);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Updates talent progress (voies)", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "Voie Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      const updated = await context.characterService.update(context.userId, characterId, {
+        voies: [{ voieId: "gue_protection", currentRank: 1 }],
+      });
+
+      expect(updated.talentProgress).toHaveLength(1);
+      expect(updated.talentProgress[0].voieId).toBe("gue_protection");
+      expect(updated.talentProgress[0].rank).toBe(1);
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Updates multiple voies", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "Multi Voie Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      const updated = await context.characterService.update(context.userId, characterId, {
+        voies: [
+          { voieId: "gue_protection", currentRank: 2 },
+          { voieId: "gue_force", currentRank: 1 },
+        ],
+      });
+
+      expect(updated.talentProgress).toHaveLength(2);
+      const voieIds = updated.talentProgress.map(v => v.voieId);
+      expect(voieIds).toContain("gue_protection");
+      expect(voieIds).toContain("gue_force");
+    } finally {
+      await teardownCharacterTest(context);
+    }
+  });
+
+  test("Updates stats and voies together", async () => {
+    const context = await setupCharacterTest();
+
+    try {
+      const characterId = context.characterService.generateCharacterId();
+
+      await context.characterService.createDraft({ characterId, userId: context.userId });
+      await context.characterService.completeDraft(context.userId, characterId, {
+        name: "Combo Hero",
+        className: "guerrier",
+        raceId: "humain",
+        stats: { vigor: 8, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      const updated = await context.characterService.update(context.userId, characterId, {
+        voies: [{ voieId: "gue_protection", currentRank: 1 }],
+        stats: { vigor: 9, finesse: 7, mind: 6, survival: 6 },
+      });
+
+      expect(updated.talentProgress).toHaveLength(1);
+      expect(updated.talentProgress[0].voieId).toBe("gue_protection");
+      expect(updated.stats?.vigor).toBe(9);
     } finally {
       await teardownCharacterTest(context);
     }

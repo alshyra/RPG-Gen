@@ -59,7 +59,7 @@ Strict rule: Do not use `as` casting in production code.
 
 Tests & CI
 
-- Backend uses AVA (packages/backend). Run in package folder: npm run test
+- Backend uses Jest (apps/backend). Run in package folder: npm run test
 - Frontend uses Vitest + Cypress (packages/frontend): npm run test, npm run test:e2e
 - CI enforces lint+type checks, unit tests, and E2E runs with docker-compose. See `.github/workflows/qa-checks.yml` for exact steps.
 

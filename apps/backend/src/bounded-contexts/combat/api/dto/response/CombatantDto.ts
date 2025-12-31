@@ -3,6 +3,7 @@ import { Type } from "class-transformer";
 import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { type StatAttribute } from "../../../../character/api/dto/response/StatAttribute.js";
 import { TacticalStats } from "../../../../character/api/dto/response/TacticalStats.js";
+import { GridPositionDto } from "./GridPositionDto.js";
 
 /**
  * CombatantDto - Unified combatant representation for the new tactical system
@@ -93,9 +94,14 @@ export class CombatantDto {
   @IsString()
   side?: "player" | "enemy";
 
-  @ApiPropertyOptional({ description: "Grid position for tactical combat" })
+  @ApiPropertyOptional({
+    description: "Grid position for tactical combat",
+    type: GridPositionDto,
+  })
   @IsOptional()
-  position?: { x: number; y: number };
+  @ValidateNested()
+  @Type(() => GridPositionDto)
+  position?: GridPositionDto;
 
   constructor(init?: Partial<CombatantDto>) {
     Object.assign(this, init);

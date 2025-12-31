@@ -61,6 +61,7 @@ describe('CharacterEntity', () => {
         className: "guerrier",
         raceId: "humain",
         stats,
+        classStats: { hpBase: 12, hpGain: 10, pa: 6, pm: 4 },
         physicalDescription: "A brave warrior",
         gender: "male",
       });
@@ -90,6 +91,7 @@ describe('CharacterEntity', () => {
         className: "guerrier",
         raceId: "humain",
         stats,
+        classStats: { hpBase: 12, hpGain: 10, pa: 6, pm: 4 },
       });
 
       expect(() => {
@@ -98,6 +100,7 @@ describe('CharacterEntity', () => {
           className: "rogue",
           raceId: "nain",
           stats,
+          classStats: { hpBase: 10, hpGain: 6, pa: 5, pm: 6 },
         });
       }).toThrow("Can only complete a draft character");
     });
@@ -411,11 +414,20 @@ function createCompleteCharacter(): CharacterEntity {
     survival: 2,
   });
 
+  // Class stats from game-data seed
+  const classStats = {
+    hpBase: 12,
+    hpGain: 10,
+    pa: 6,
+    pm: 4,
+  };
+
   character.completeDraft({
     name: "Test Hero",
     className: "guerrier",
     raceId: "humain",
     stats,
+    classStats,
   });
 
   return character;

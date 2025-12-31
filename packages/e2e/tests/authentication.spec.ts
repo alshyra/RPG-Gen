@@ -53,12 +53,12 @@ test.describe("Authentication Flow", () => {
       await page.waitForLoadState("networkidle");
 
       // User profile should be visible - look for any user indicator
-      // The exact element might vary, so check for common profile elements
+      // The mock sets name to "E2E Test User" which displays as "Test User" in header
       const hasProfileMenu =
         (await page
-          .locator('[data-testid="user-profile"], .user-profile, button:has-text("E2E")')
+          .locator('[data-testid="user-profile"], .user-profile, button:has-text("Test User")')
           .count()) > 0;
-      const hasUsername = (await page.getByText("E2E", { exact: false }).count()) > 0;
+      const hasUsername = (await page.getByText("Test User", { exact: false }).count()) > 0;
 
       // At least one profile indicator should be present
       expect(hasProfileMenu || hasUsername).toBeTruthy();

@@ -5,6 +5,7 @@ import { MovementEventDto, MovementEventType } from "../../bounded-contexts/comb
 import { MovementRequestDto } from "../../bounded-contexts/combat/api/dto/response/MovementRequestDto.js";
 import { MovementResponseDto } from "../../bounded-contexts/combat/api/dto/response/MovementResponseDto.js";
 import { CombatGridService } from "../../bounded-contexts/combat/domain/services/combat-grid.service.js";
+import { ActionEconomyService } from "../../bounded-contexts/combat/domain/services/action-economy.service.js";
 import {
   CombatantStats,
   OpportunityAttackResolver,
@@ -22,6 +23,7 @@ export class CombatMovementOrchestrator {
     private readonly gridService: CombatGridService,
     private readonly oaResolver: OpportunityAttackResolver,
     private readonly combatService: CombatAppService,
+    private readonly actionEconomy: ActionEconomyService,
   ) {}
 
   /**
@@ -36,8 +38,36 @@ export class CombatMovementOrchestrator {
 
     try {
       // Fetch active effects from combat state
-      const combatState = await this.combatService.getCombatState(characterId);
+      let combatState = await this.combatService.getCombatState(characterId);
       const activeEffects = combatState.activeEffects ?? [];
+
+      // Calculate movement cost (path length - 1 since first point is current position)
+      const movementCost = request.path.length - 1;
+      if (movementCost <= 0) {
+        return {
+          success: false,
+          finalPosition:
+            this.gridService.getPosition(combatId, request.combatantId) ??
+            new GridPositionDto(0, 0),
+          events: [],
+          pm: combatState.player?.pm ?? 0,
+          errorMessage: "Invalid path: must contain at least 2 points",
+        };
+      }
+
+      // Check if player has enough PM
+      if (!this.actionEconomy.hasEnoughPM(combatState, movementCost)) {
+        const currentPM = combatState.player?.pm ?? 0;
+        return {
+          success: false,
+          finalPosition:
+            this.gridService.getPosition(combatId, request.combatantId) ??
+            new GridPositionDto(0, 0),
+          events: [],
+          pm: currentPM,
+          errorMessage: `Not enough PM: requires ${movementCost}, has ${currentPM}`,
+        };
+      }
 
       // Validate path
       const validation = this.gridService.validatePath(
@@ -54,7 +84,7 @@ export class CombatMovementOrchestrator {
             this.gridService.getPosition(combatId, request.combatantId) ??
             new GridPositionDto(0, 0),
           events: [],
-          remainingMovement: 0,
+          pm: combatState.player?.pm ?? 0,
           errorMessage: validation.error,
         };
       }
@@ -90,26 +120,33 @@ export class CombatMovementOrchestrator {
       const finalPosition = request.path[request.path.length - 1];
       this.gridService.applyMovement(combatId, request.combatantId, finalPosition);
 
+      // Consume PM via ActionEconomyService
+      combatState = this.actionEconomy.consumePM(combatState, movementCost);
+
+      // Update combat state with new position and consumed PM
+      const combatant = combatState.player.id === request.combatantId
+        ? combatState.player
+        : combatState.enemies.find(e => e.id === request.combatantId);
+      
+      if (combatant) {
+        combatant.position = { x: finalPosition.x, y: finalPosition.y };
+      }
+      
+      // Save updated state (position + consumed PM)
+      await this.combatService.saveCombatState(combatState);
+
       // Add movement event
       events.unshift({
         type: MovementEventType.MOVE,
         actorId: request.combatantId,
-        description: `Moved to (${finalPosition.x}, ${finalPosition.y})`,
+        description: `Moved to (${finalPosition.x}, ${finalPosition.y}) [${movementCost} PM]`,
       });
-
-      // Calculate remaining movement
-      const distance = request.path.length - 1;
-      const combatantPos = positions.find(p => p.combatantId === request.combatantId);
-      const baseSpeed = combatantPos?.speed ?? 30;
-      const hasDashed = activeEffects.includes("dashed");
-      const maxMovement = hasDashed ? baseSpeed * 2 : baseSpeed;
-      const remainingMovement = maxMovement - distance;
 
       return {
         success: true,
         finalPosition,
         events,
-        remainingMovement: Math.max(0, remainingMovement),
+        pm: combatState.player?.pm ?? 0,
       };
     } catch (error) {
       this.logger.error(`Movement failed for ${request.combatantId}:`, error);

@@ -29,6 +29,7 @@ import { AptitudeDataService } from './application/services/AptitudeDataService.
 import { ItemDataService } from './application/services/ItemDataService.js';
 import { EnemyDataService } from './application/services/EnemyDataService.js';
 import { GameDataService } from './application/services/GameDataService.js';
+import { FormulasService } from './application/services/FormulasService.js';
 
 // Infrastructure
 import { GameDataSeeder } from './infrastructure/seeding/GameDataSeeder.js';
@@ -84,6 +85,7 @@ import { ItemsController } from './api/controllers/items.controller.js';
     ItemDataService,
     EnemyDataService,
     GameDataService,
+    FormulasService,
     // Infrastructure
     GameDataSeeder,
   ],
@@ -95,6 +97,7 @@ import { ItemsController } from './api/controllers/items.controller.js';
     AptitudeDataService,
     ItemDataService,
     EnemyDataService,
+    FormulasService,
     GameDataSeeder,
   ],
 })
