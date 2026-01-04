@@ -433,6 +433,14 @@ export function useCombat() {
     if (wasDefeated) emit("unit:died", { unitId });
   };
 
+  /**
+   * Update unit's movement range (PM).
+   * Should be called when PM changes (after movement, after end turn).
+   */
+  const updateUnitMoveRange = (unitId: string, newPm: number) => {
+    combatUnit.updateMoveRange(unitId, newPm);
+  };
+
   const setupDragEvents = () => {
     if (!combatPixiInstance.value) return;
     combatPixiInstance.value.stage.eventMode = "static";
@@ -486,6 +494,7 @@ export function useCombat() {
     moveUnitToGrid,
     setupDragEvents,
     updateUnitHealth,
+    updateUnitMoveRange,
     on,
     off,
     emit,

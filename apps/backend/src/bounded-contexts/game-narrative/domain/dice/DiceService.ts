@@ -69,23 +69,6 @@ export class DiceService {
     return this.rollNormal(diceCount, diceSides, modifierValue, rand);
   }
 
-  rollAttack(
-    attackBonus: number,
-    targetAc: number,
-  ): { hit: boolean; isCrit: boolean; diceResult: DiceResultDto } {
-    const diceResult = this.rollDiceExpr("1d20");
-    const [die] = diceResult.rolls;
-    const totalAttack = die + attackBonus;
-    const isCrit = die === 20;
-    const fumble = die === 1;
-    const hit = isCrit || (totalAttack >= targetAc && !fumble);
-    return {
-      hit,
-      isCrit,
-      diceResult,
-    };
-  }
-
   private computeTotal(diceResult?: DiceResultDto): number {
     if (!diceResult) return 0;
     if (typeof diceResult.total === "number") return diceResult.total;

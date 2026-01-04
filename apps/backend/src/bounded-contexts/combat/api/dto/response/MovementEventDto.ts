@@ -30,10 +30,6 @@ export class MovementEventDto {
   @IsNumber()
   damage?: number;
 
-  @ApiPropertyOptional({ description: "Whether attack hit" })
-  @IsOptional()
-  hit?: boolean;
-
   @ApiPropertyOptional({ description: "Description of event" })
   @IsOptional()
   @IsString()

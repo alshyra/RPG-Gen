@@ -76,7 +76,6 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
             {
               name: "Goblin Scout",
               hp: 1, // Very low HP so player wins quickly
-              ac: 5, // Very low AC so attacks always hit
               attack_bonus: -10, // Very low bonus so enemy can't hit
               damage_dice: "1d1",
               damage_bonus: 0,
@@ -310,7 +309,6 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           {
             name: "Weak Goblin",
             hp: 3,
-            ac: 10,
             attack_bonus: 1,
             damage_dice: "1d4",
             damage_bonus: 0,
@@ -318,7 +316,6 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           {
             name: "Strong Goblin",
             hp: 8,
-            ac: 12,
             attack_bonus: 3,
             damage_dice: "1d6",
             damage_bonus: 1,
@@ -397,7 +394,6 @@ test.describe("User Journey: Combat Flow (Complete)", () => {
           {
             name: "Goblin",
             hp: 20, // High HP so it survives longer
-            ac: 10,
             attack_bonus: 1,
             damage_dice: "1d4",
             damage_bonus: 0,

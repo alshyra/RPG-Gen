@@ -55,7 +55,6 @@ export interface InventoryItemForUi {
   meta?: {
     class?: string;
     type?: string;
-    ac?: string | number;
   };
 }
 

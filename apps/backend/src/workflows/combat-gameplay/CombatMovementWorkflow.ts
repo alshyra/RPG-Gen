@@ -102,7 +102,6 @@ export class CombatMovementOrchestrator {
           attackBonus: 4,
           damageDice: "1d6",
           damageBonus: 2,
-          ac: 13,
         });
       }
 

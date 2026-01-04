@@ -57,7 +57,6 @@ export const combatStartInstructionSchema = z.object({
       z.object({
         name: z.string().describe("Enemy name"),
         hp: z.number().describe("Enemy HP"),
-        ac: z.number().describe("Enemy AC"),
         attack_bonus: z.number().optional().describe("Enemy attack bonus"),
         damage_dice: z.string().optional().describe("Enemy damage dice"),
         damage_bonus: z.number().optional().describe("Enemy damage bonus"),

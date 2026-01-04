@@ -40,6 +40,7 @@ export const setupInteractionController = (
 
     // Clear and redraw: show reachable cells + path preview if valid
     helpers.hideReachableCells();
+    console.log('onStageMove', unit)
     helpers.showReachableCells(unit.gridX, unit.gridY, unit.maxMoveRange);
 
     if (distance > 0 && distance <= unit.maxMoveRange) {

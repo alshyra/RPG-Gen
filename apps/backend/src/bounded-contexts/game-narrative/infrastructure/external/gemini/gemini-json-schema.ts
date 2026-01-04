@@ -47,7 +47,6 @@ export const geminiResponseJsonSchema = {
               properties: {
                 name: { type: "string" },
                 hp: { type: "number" },
-                ac: { type: "number" },
                 attack_bonus: { type: "number" },
                 damage_dice: { type: "string" },
                 damage_bonus: { type: "number" },

@@ -2091,10 +2091,6 @@
             "type": "number",
             "description": "Enemy HP"
           },
-          "ac": {
-            "type": "number",
-            "description": "Enemy AC"
-          },
           "attack_bonus": {
             "type": "number",
             "description": "Attack bonus (optional)"
@@ -2110,8 +2106,7 @@
         },
         "required": [
           "name",
-          "hp",
-          "ac"
+          "hp"
         ]
       },
       "CombatStartInstructionMessageDto": {
@@ -2558,7 +2553,7 @@
             "description": "Physical description of the character"
           },
           "race": {
-            "description": "Character race (new system)",
+            "description": "Character race",
             "allOf": [
               {
                 "$ref": "#/components/schemas/RaceResponseDto"
@@ -2712,7 +2707,7 @@
             "description": "Physical description of the character"
           },
           "race": {
-            "description": "Character race (new system)",
+            "description": "Character race",
             "allOf": [
               {
                 "$ref": "#/components/schemas/RaceResponseDto"
@@ -2892,7 +2887,7 @@
             "description": "Physical description of the character"
           },
           "race": {
-            "description": "Character race (new system)",
+            "description": "Character race",
             "allOf": [
               {
                 "$ref": "#/components/schemas/RaceResponseDto"
@@ -3038,7 +3033,7 @@
             "description": "Physical description of the character"
           },
           "race": {
-            "description": "Character race (new system)",
+            "description": "Character race",
             "allOf": [
               {
                 "$ref": "#/components/schemas/RaceResponseDto"
@@ -3264,10 +3259,6 @@
           "class": {
             "type": "string",
             "description": "Armor class (Light, Medium, Heavy, Shield)"
-          },
-          "ac": {
-            "type": "string",
-            "description": "AC value (e.g., 11 + Dex modifier)"
           },
           "strength": {
             "type": "string",
@@ -4105,10 +4096,6 @@
               "free"
             ]
           },
-          "hit": {
-            "type": "boolean",
-            "description": "Whether attack/spell hit (if applicable)"
-          },
           "damage": {
             "type": "number",
             "description": "Damage dealt (if applicable)"
@@ -4177,21 +4164,8 @@
             "description": "ID of the target (player characterId)",
             "example": "char-123"
           },
-          "hit": {
-            "type": "boolean",
-            "description": "Whether the attack hit the target",
-            "example": true
-          },
-          "attackRoll": {
-            "description": "Attack roll result",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DiceResultDto"
-              }
-            ]
-          },
           "damageRoll": {
-            "description": "Damage roll result (only present if hit)",
+            "description": "Damage roll result",
             "allOf": [
               {
                 "$ref": "#/components/schemas/CombatDiceResultDto"
@@ -4212,8 +4186,7 @@
         "required": [
           "attackerId",
           "attackerName",
-          "targetId",
-          "hit"
+          "targetId"
         ]
       },
       "EndPlayerTurnResponseDto": {
@@ -4341,10 +4314,6 @@
           "damage": {
             "type": "number",
             "description": "Damage dealt (if applicable)"
-          },
-          "hit": {
-            "type": "boolean",
-            "description": "Whether attack hit"
           },
           "description": {
             "type": "string",

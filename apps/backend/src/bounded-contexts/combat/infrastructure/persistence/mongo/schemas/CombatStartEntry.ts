@@ -15,12 +15,6 @@ export class CombatStartEntry {
   hp: number;
 
   @Prop({
-    required: true,
-    type: Number,
-  })
-  ac: number;
-
-  @Prop({
     required: false,
     type: Number,
   })

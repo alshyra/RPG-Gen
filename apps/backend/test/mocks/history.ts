@@ -18,7 +18,6 @@ export default {
             {
               name: "Goblin-1",
               hp: 7,
-              ac: 10,
               attack_bonus: 0,
               damage_dice: "1d4",
               damage_bonus: 0,

@@ -29,7 +29,7 @@ const props = withDefaults(
 
 // Utiliser le composable
 const combat = useCombat();
-const { init, createUnit, setupDragEvents, updateUnitHealth, on, off, emit, moveUnitToGrid } =
+const { init, createUnit, setupDragEvents, updateUnitHealth, updateUnitMoveRange, on, off, emit, moveUnitToGrid } =
   combat;
 const appRef = ref<PIXI.Application | null>(null);
 
@@ -76,6 +76,7 @@ defineExpose({
     if (combat && combat.clearAllUnits) await combat.clearAllUnits();
   },
   updateUnitHealth,
+  updateUnitMoveRange,
   moveUnitToGrid,
   setupDragEvents,
 

@@ -22,11 +22,6 @@ export class CombatActionResponseDto {
   @IsEnum(ActionCost)
   cost: ActionCost;
 
-  @ApiPropertyOptional({ description: "Whether attack/spell hit (if applicable)" })
-  @IsOptional()
-  @IsBoolean()
-  hit?: boolean;
-
   @ApiPropertyOptional({ description: "Damage dealt (if applicable)" })
   @IsOptional()
   @IsNumber()
@@ -87,7 +82,6 @@ export class CombatActionResponseDto {
     this.diceResult = init?.diceResult;
     this.errorMessage = init?.errorMessage;
     this.healing = init?.healing;
-    this.hit = init?.hit;
     this.isCrit = init?.isCrit;
     this.narrative = init?.narrative;
     this.success = init?.success ?? false;

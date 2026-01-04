@@ -9,7 +9,6 @@ export interface CombatantStats {
   attackBonus: number;
   damageDice: string;
   damageBonus: number;
-  ac: number;
 }
 
 /**
@@ -98,31 +97,15 @@ export class OpportunityAttackResolver {
     defenderId: string,
     attackerId: string,
   ): MovementEventDto {
-    // Roll attack
-    const attackRoll = this.diceService.rollDiceExpr("1d20");
-    const totalAttack = attackRoll.total + attacker.attackBonus;
-
-    const hit = totalAttack >= defender.ac;
-
-    let damage = 0;
-    if (hit) {
-      const damageRoll = this.diceService.rollDiceExpr(attacker.damageDice);
-      damage = damageRoll.total + attacker.damageBonus;
-    }
-
-    this.logger.debug(
-      `OA: ${attackerId} rolled ${totalAttack} vs AC ${defender.ac}, hit: ${hit}, damage: ${damage}`,
-    );
-
+    const damageRoll = this.diceService.rollDiceExpr(attacker.damageDice);
+    const damage = damageRoll.total + attacker.damageBonus;
+    // TODO: implement damage reduction someday
     return {
       type: MovementEventType.OPPORTUNITY_ATTACK,
       actorId: attackerId,
       targetId: defenderId,
-      hit,
       damage,
-      description: hit
-        ? `${attackerId} hits with opportunity attack for ${damage} damage`
-        : `${attackerId} misses opportunity attack`,
+      description: `${attackerId} hits with opportunity attack for ${damage} damage`,
     };
   }
 }

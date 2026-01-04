@@ -178,7 +178,6 @@ async function main() {
               {
                 name: "Goblin",
                 hp: 7,
-                ac: 13,
                 attack_bonus: 4,
                 damage_dice: "1d6",
                 damage_bonus: 2,

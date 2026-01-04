@@ -30,7 +30,7 @@ export class BaseCharacterResponseDto {
   physicalDescription?: string;
 
   @ApiPropertyOptional({
-    description: "Character race (new system)",
+    description: "Character race",
     type: RaceResponseDto,
   })
   race?: RaceResponseDto;

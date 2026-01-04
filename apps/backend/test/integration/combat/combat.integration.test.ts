@@ -66,7 +66,6 @@ function createCombatStartRequest(numEnemies: number): CombatStartRequestDto {
     combat_start: Array.from({ length: numEnemies }, (_, i) => ({
       name: `Goblin ${i + 1}`,
       hp: 7,
-      ac: 13,
       attack_bonus: 4,
       damage_dice: "1d6",
       damage_bonus: 2,

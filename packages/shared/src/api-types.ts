@@ -869,8 +869,6 @@ export interface components {
             name: string;
             /** @description Enemy HP */
             hp: number;
-            /** @description Enemy AC */
-            ac: number;
             /** @description Attack bonus (optional) */
             attack_bonus?: number;
             /** @description Damage dice (optional) */
@@ -1068,7 +1066,7 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race (new system) */
+            /** @description Character race */
             race?: components["schemas"]["RaceResponseDto"];
             /** @description Current hit points */
             hp?: number;
@@ -1133,7 +1131,7 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race (new system) */
+            /** @description Character race */
             race?: components["schemas"]["RaceResponseDto"];
             /** @description Current hit points */
             hp?: number;
@@ -1215,7 +1213,7 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race (new system) */
+            /** @description Character race */
             race?: components["schemas"]["RaceResponseDto"];
             /** @description Current hit points */
             hp?: number;
@@ -1278,7 +1276,7 @@ export interface components {
             name?: string;
             /** @description Physical description of the character */
             physicalDescription?: string;
-            /** @description Character race (new system) */
+            /** @description Character race */
             race?: components["schemas"]["RaceResponseDto"];
             /** @description Current hit points */
             hp?: number;
@@ -1377,8 +1375,6 @@ export interface components {
             starter?: boolean;
             /** @description Armor class (Light, Medium, Heavy, Shield) */
             class?: string;
-            /** @description AC value (e.g., 11 + Dex modifier) */
-            ac?: string;
             /** @description Strength requirement (e.g., Str 13) */
             strength?: string;
             /** @description Stealth effect (e.g., Disadvantage) */
@@ -1807,8 +1803,6 @@ export interface components {
              * @enum {string}
              */
             cost: "action" | "bonus-action" | "reaction" | "free";
-            /** @description Whether attack/spell hit (if applicable) */
-            hit?: boolean;
             /** @description Damage dealt (if applicable) */
             damage?: number;
             /** @description Healing restored (if applicable) */
@@ -1844,14 +1838,7 @@ export interface components {
              * @example char-123
              */
             targetId: string;
-            /**
-             * @description Whether the attack hit the target
-             * @example true
-             */
-            hit: boolean;
-            /** @description Attack roll result */
-            attackRoll?: components["schemas"]["DiceResultDto"];
-            /** @description Damage roll result (only present if hit) */
+            /** @description Damage roll result */
             damageRoll?: components["schemas"]["CombatDiceResultDto"];
             /**
              * @description Total damage dealt (0 if miss)
@@ -1915,8 +1902,6 @@ export interface components {
             targetId?: string;
             /** @description Damage dealt (if applicable) */
             damage?: number;
-            /** @description Whether attack hit */
-            hit?: boolean;
             /** @description Description of event */
             description?: string;
         };

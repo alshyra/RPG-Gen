@@ -14,11 +14,6 @@ export class ArmorMeta extends BaseMeta {
   @IsString()
   class?: string;
 
-  @ApiPropertyOptional({ description: "AC value (e.g., 11 + Dex modifier)" })
-  @IsOptional()
-  @IsString()
-  ac?: string;
-
   @ApiPropertyOptional({ description: "Strength requirement (e.g., Str 13)" })
   @IsOptional()
   @IsString()

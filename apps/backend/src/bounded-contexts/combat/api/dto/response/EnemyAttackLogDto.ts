@@ -25,20 +25,8 @@ export class EnemyAttackLogDto {
   })
   targetId: string;
 
-  @ApiProperty({
-    description: "Whether the attack hit the target",
-    example: true,
-  })
-  hit: boolean;
-
   @ApiPropertyOptional({
-    description: "Attack roll result",
-    type: DiceResultDto,
-  })
-  attackRoll?: DiceResultDto;
-
-  @ApiPropertyOptional({
-    description: "Damage roll result (only present if hit)",
+    description: "Damage roll result",
     type: CombatDiceResultDto,
   })
   damageRoll?: CombatDiceResultDto;

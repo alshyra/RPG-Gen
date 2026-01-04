@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="currentAttack?.hit ?? false"
     class="bg-slate-700/50 rounded-lg p-4 mb-4"
   >
     <div class="text-center">

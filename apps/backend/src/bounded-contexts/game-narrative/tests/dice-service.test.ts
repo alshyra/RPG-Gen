@@ -145,37 +145,6 @@ describe('DiceService', () => {
   });
 
   // =====================
-  // rollAttack tests
-  // =====================
-
-  describe('rollAttack', () => {
-    test('hit when roll + bonus >= AC', () => {
-      const service = createDiceService();
-      // We can't control the random in rollAttack, but we can test the logic
-      // by checking the return structure
-      const result = service.rollAttack(5, 15);
-
-      expect(typeof result.hit).toBe('boolean');
-      expect(typeof result.isCrit).toBe('boolean');
-      expect(result.diceResult).toBeTruthy();
-      expect(Array.isArray(result.diceResult.rolls)).toBe(true);
-    });
-
-    test('critical hit on natural 20 always hits', () => {
-      // This test verifies that when roll is 20, hit is true and isCrit is true
-      // Since we can't control internal randomness, we test the return types
-      const service = createDiceService();
-      const result = service.rollAttack(0, 30);
-
-      // If it's a crit (roll was 20), hit must be true
-      if (result.isCrit) {
-        expect(result.hit).toBe(true);
-        expect(result.diceResult.rolls[0]).toBe(20);
-      }
-    });
-  });
-
-  // =====================
   // rollDamage tests
   // =====================
 

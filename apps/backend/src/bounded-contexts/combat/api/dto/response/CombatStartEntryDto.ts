@@ -10,10 +10,6 @@ export class CombatStartEntryDto {
   @IsNumber()
   hp: number;
 
-  @ApiProperty({ description: "Enemy AC" })
-  @IsNumber()
-  ac: number;
-
   @ApiPropertyOptional({ description: "Attack bonus (optional)" })
   @IsOptional()
   @IsNumber()

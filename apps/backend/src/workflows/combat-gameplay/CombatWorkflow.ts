@@ -6,6 +6,7 @@ import { CombatAppService } from "../../bounded-contexts/combat/application/serv
 
 import { CombatEndDto } from "../../bounded-contexts/combat/api/dto/response/CombatEndDto.js";
 import type {
+  CombatantDto,
   CombatEndResponseDto,
   CombatStartRequestDto,
   EndPlayerTurnResponseDto,
@@ -13,6 +14,7 @@ import type {
 import { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/index.js";
 import { GeminiTextService } from "../../bounded-contexts/game-narrative/infrastructure/external/index.js";
 import type { CharacterResponseDto } from "../../bounded-contexts/character/api/dto/index.js";
+import { CombatGridService } from "#combat/index.js";
 
 /**
  * CombatOrchestrator coordinates combat flows across multiple domain services.
@@ -34,6 +36,7 @@ export class CombatOrchestrator {
     private readonly dtoMapper: CharacterDtoMapper,
     private readonly conversationService: ConversationService,
     private readonly geminiTexteService: GeminiTextService,
+    private readonly gridService: CombatGridService,
   ) {}
 
   /**
@@ -102,6 +105,13 @@ export class CombatOrchestrator {
     return state;
   }
 
+
+  public isEnemyInRange(combatId: string, character: CombatantDto) {
+    return (ennemy: CombatantDto) => {
+      return this.gridService.isInReach(combatId, ennemy.id, character.position!);
+    }
+  }
+
   /**
    * End player turn and process all enemy attacks.
    * Returns attack logs for frontend to replay with animations.
@@ -112,24 +122,26 @@ export class CombatOrchestrator {
   ): Promise<EndPlayerTurnResponseDto> {
     const combatState = await this.combatAppService.getCombatState(characterId);
     if (!combatState) throw new NotFoundException("combat state not found");
-
+    
     // Process enemy turns in order (no dice service needed in new system)
-    const aliveEnemies = combatState.enemies.filter(e => (e.hp ?? 0) > 0);
-    const enemyTurnResult = await this.combatAppService.processEnemyTurns(
+    const aliveEnemies = combatState.enemies
+      .filter(e => (e.hp ?? 0) > 0)
+      .filter(this.isEnemyInRange(combatState.characterId, combatState.player))
+    const { state: finalState, playerDefeated, attackLogs, totalDamage } = await this.combatAppService.processEnemyTurns(
       characterId,
       combatState,
       aliveEnemies,
     );
 
-    const finalState = enemyTurnResult.state;
-
     if (!finalState) throw new NotFoundException("combat state not found after enemy turns");
 
     // If the enemy turn did not end the combat (player still alive), advance to next player
     // activation and persist the refreshed state.
-    if (!enemyTurnResult.playerDefeated) {
+    if (!playerDefeated) {
       finalState.currentTurnIndex = finalState.turnOrder.findIndex(c => c.isPlayer) ?? 0;
       finalState.roundNumber = (finalState.roundNumber ?? 1) + 1;
+      finalState.player.pa = finalState.player.paMax;
+      finalState.player.pm = finalState.player.pmMax;
       await this.combatAppService.saveCombatState(finalState);
     } else {
       // If player died, the session may have been cleaned up by endCombat; ensure finalState
@@ -139,9 +151,9 @@ export class CombatOrchestrator {
 
     return {
       roundNumber: finalState.roundNumber,
-      attackLogs: enemyTurnResult.attackLogs,
-      totalDamageToPlayer: enemyTurnResult.totalDamage,
-      playerDefeated: enemyTurnResult.playerDefeated,
+      attackLogs,
+      playerDefeated,
+      totalDamageToPlayer: totalDamage,
       combatState: finalState,
     };
   }

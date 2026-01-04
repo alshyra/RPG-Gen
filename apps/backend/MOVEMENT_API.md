@@ -35,7 +35,6 @@ Execute a combat action (attack, dash, disengage, spell, class feature).
 {
   success: boolean;
   cost: 'ACTION' | 'BONUS_ACTION' | 'REACTION' | 'FREE';
-  hit?: boolean;            // For attack actions
   damage?: number;          // Damage dealt
   healing?: number;         // HP restored
   description: string;
@@ -75,7 +74,6 @@ Execute a movement on the combat grid. Reads active effects from combat state to
     type: 'move' | 'opportunity-attack' | 'reaction' | 'movement-interrupted';
     actorId: string;
     targetId?: string;
-    hit?: boolean;
     damage?: number;
     description?: string;
   }>;
@@ -123,8 +121,7 @@ When receiving movement events:
 1. Parse the `events` array in order
 2. For each `opportunity-attack` event:
    - Animate the attack (actor → target)
-   - Show hit/miss indicator
-   - Apply damage if `hit === true`
+   - Apply damage
    - Play sound/visual effect
 3. Update final position after all events resolve
 
@@ -250,7 +247,6 @@ POST /api/combat/:characterId/move
       type: "opportunity-attack",
       actorId: "enemy-1",
       targetId: "player-1",
-      hit: true,
       damage: 6,
       description: "Enemy-1 makes an opportunity attack against Player-1"
     },

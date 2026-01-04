@@ -48,7 +48,6 @@ export interface CombatStartInstructionMessageDto {
   combat_start: Array<{
     name: string;
     hp: number;
-    ac: number;
     attack_bonus?: number;
     damage_dice?: string;
     damage_bonus?: number;

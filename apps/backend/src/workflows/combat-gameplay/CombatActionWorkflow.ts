@@ -287,7 +287,6 @@ export class CombatActionOrchestrator {
     return new CombatActionResponseDto({
       success: true,
       cost: ActionCost.ACTION,
-      hit: true,  // Always hits now (no AC)
       damage: totalDamage,
       description,
       damageTotal: totalDamage,

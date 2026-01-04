@@ -60,7 +60,6 @@ export class EnemyTurnService {
       attackerId: enemy.id,
       attackerName: enemy.name,
       targetId: characterId,
-      hit: true, // Always hits in new system
       isCrit: false, // No crits in base system
       damageTotal: damage,
     };

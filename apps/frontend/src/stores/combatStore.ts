@@ -22,6 +22,7 @@ export interface CombatArenaApi {
   ) => Promise<unknown>;
   clearAllUnits: () => Promise<void>;
   updateUnitHealth: (unitId: string, damage: number) => void;
+  updateUnitMoveRange: (unitId: string, newPm: number) => void;
   moveUnitToGrid: (unitId: string, gridX: number, gridY: number) => void;
   setupDragEvents: () => void;
   on: <T extends keyof CombatEngineEventPayload>(

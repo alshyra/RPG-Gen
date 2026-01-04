@@ -107,10 +107,20 @@ export function useCombatEngine() {
     console.log("entering end turn, resolving ennemies attacks...");
     const response = await combat.endTurn.mutateAsync(characterId.value!);
 
+    // Update player's PM after turn reset
+    const arenaApi = getArenaApi();
+    if (arenaApi && response.combatState?.player) {
+      arenaApi.updateUnitMoveRange(
+        response.combatState.player.id,
+        response.combatState.player.pm ?? 0,
+      );
+    }
+
     // Replay enemy attacks on visual engine (if arena is registered)
     if (response.attackLogs?.length) {
-      await replayEnemyAttacks(response.attackLogs);
+      return await replayEnemyAttacks(response.attackLogs);
     }
+    console.log("no enemy attacks to replay");
   };
   /**
    * Subscribe to visual engine events
@@ -192,13 +202,18 @@ export function useCombatEngine() {
         
         console.log("[useCombatEngine] Movement synced, PM consumed:", result.pm);
         
+        // Update visual move range to match new PM
+        const arenaApi = getArenaApi();
+        if (arenaApi) {
+          arenaApi.updateUnitMoveRange(payload.unitId, result.pm ?? 0);
+        }
+        
         // Handle movement events (opportunity attacks, etc.)
         if (result.events && result.events.length > 0) {
           for (const event of result.events) {
             if (event.type === "opportunity-attack" && event.damage) {
               console.log("[useCombatEngine] Opportunity attack:", event);
               // Update visual HP
-              const arenaApi = getArenaApi();
               if (arenaApi && event.targetId) {
                 arenaApi.updateUnitHealth(event.targetId, event.damage);
               }
@@ -299,7 +314,7 @@ export function useCombatEngine() {
       for (const log of logs) {
         // Animate attack (TODO: add attack animation method)
         // For now just update health
-        if (log.hit && log.damageTotal && log.targetId) {
+        if (log.damageTotal && log.targetId) {
           const arenaApi = getArenaApi();
           if (arenaApi) {
             arenaApi.updateUnitHealth(log.targetId, log.damageTotal);

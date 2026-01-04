@@ -102,7 +102,6 @@ export async function prepareE2EDb(options: PrepareDbOptions = {}): Promise<{ ok
                 {
                   name: "Goblin",
                   hp: 7,
-                  ac: 13,
                   attack_bonus: 4,
                   damage_dice: "1d6",
                   damage_bonus: 2,

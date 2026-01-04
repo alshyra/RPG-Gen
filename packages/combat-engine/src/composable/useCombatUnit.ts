@@ -177,9 +177,20 @@ export const useCombatUnit = () => {
     animateDeath(unit);
   };
 
+  /**
+   * Update unit's movement range (PM)
+   * Should be called when PM changes (after movement, after end turn)
+   */
+  const updateMoveRange = (unitId: string, newMaxMoveRange: number) => {
+    const unit = units.value.get(unitId);
+    if (!unit) throw new Error(`updateMoveRange: unit ${unitId} not found`);
+    unit.maxMoveRange = newMaxMoveRange;
+  };
+
   return {
     createUnitEntry,
     moveUnitState,
     updateHp,
+    updateMoveRange,
   };
 };
