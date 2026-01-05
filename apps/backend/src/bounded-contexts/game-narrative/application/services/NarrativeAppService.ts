@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
-import { Narrative } from '../../domain/narrative/entities/Narrative.js';
-import { Message } from '../../domain/narrative/value-objects/Message.js';
-import { Context } from '../../domain/narrative/value-objects/Context.js';
-import { INarrativeRepository, NARRATIVE_REPOSITORY } from '../../domain/narrative/repositories/INarrativeRepository.js';
+import { Narrative } from '../../domain/entities/Narrative.js';
+import { Message } from '../../domain/value-objects/Message.js';
+import { Context } from '../../domain/value-objects/Context.js';
+import { INarrativeRepository, NARRATIVE_REPOSITORY } from '../../domain/repositories/INarrativeRepository.js';
 
 /**
  * Application service for Narrative

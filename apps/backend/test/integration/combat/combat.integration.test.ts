@@ -15,7 +15,7 @@ import { describe, test, expect, afterEach } from "@jest/globals";
 import { CombatModule } from "../../../src/bounded-contexts/combat/combat.module.js";
 import { CombatAppService } from "../../../src/bounded-contexts/combat/application/services/CombatAppService.js";
 import { CharacterAppService } from "../../../src/bounded-contexts/character/application/services/CharacterAppService.js";
-import { DiceService } from "../../../src/bounded-contexts/game-narrative/domain/dice/DiceService.js";
+import { DiceService } from "../../../src/bounded-contexts/game-narrative/domain/services/DiceService.js";
 import type { CharacterResponseDto } from "../../../src/bounded-contexts/character/api/dto/index.js";
 import { type CombatStartRequestDto } from "../../../src/bounded-contexts/combat/api/dto/response/index.js";
 import { createTestApp, closeTestApp, type TestAppContext } from "../../helpers/test-app.js";
@@ -230,28 +230,6 @@ describe("Combat Turn Order", () => {
 
     expect(playerEntries.length).toBe(1);
     expect(playerEntries[0].id).toBe("hero-123");
-  });
-});
-
-// ============= Action Economy Tests =============
-// NOTE: Action economy tests are skipped because the system now uses PA/PM on CombatantDto
-// instead of actionMax/actionRemaining/bonusActionMax/bonusActionRemaining on CombatStateDto
-
-describe("Action Economy (Legacy - PA/PM system)", () => {
-  test.skip("initializeCombat sets default action economy (1 action + 1 bonus action)", () => {
-    // Legacy test - action economy moved to CombatantDto PA/PM system
-  });
-
-  test.skip("decrementAction reduces actionRemaining", () => {
-    // Legacy test - action economy moved to CombatantDto PA/PM system
-  });
-
-  test.skip("decrementAction returns unchanged state when no actions remaining", () => {
-    // Legacy test - action economy moved to CombatantDto PA/PM system
-  });
-
-  test.skip("decrementBonusAction reduces bonusActionRemaining", () => {
-    // Legacy test - action economy moved to CombatantDto PA/PM system
   });
 });
 

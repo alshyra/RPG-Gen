@@ -1,4 +1,4 @@
-import { Context } from '../domain/narrative/value-objects/Context.js';
+import { Context } from '../domain/value-objects/Context.js';
 
 describe('Context', () => {
   test('should create a context with character data and prompts', () => {

@@ -105,14 +105,14 @@ export class Narrative {
   /**
    * Get all instructions across all messages
    */
-  getAllInstructions(): ReadonlyArray<import('../../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
+  getAllInstructions(): ReadonlyArray<import('../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
     return this.messages.flatMap(msg => msg.instructions);
   }
 
   /**
    * Get instructions of specific type
    */
-  getInstructionsByType(type: string): ReadonlyArray<import('../../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
+  getInstructionsByType(type: string): ReadonlyArray<import('../../api/dto/response/GameInstructionDto.js').GameInstructionDto> {
     return this.getAllInstructions().filter(instr => instr.type === type);
   }
 

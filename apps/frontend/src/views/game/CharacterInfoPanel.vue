@@ -17,7 +17,7 @@
       <CharacterPortrait class="shrink-0" />
       <div class="card flex-1 overflow-auto min-h-0">
         <AbilityScores class="mt-3" />
-        
+
         <!-- PA/PM Resources -->
         <div class="border-t border-slate-600 mt-3 pt-3 px-3">
           <div class="flex gap-4 text-sm">
@@ -35,7 +35,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="border-t border-slate-600 mt-3" />
         <nav class="p-3 space-y-2">
           <AppRouterButton

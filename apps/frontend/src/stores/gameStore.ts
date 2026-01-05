@@ -1,4 +1,4 @@
-import { useDice } from "@rpg-gen/api-client";
+import { diceApi } from "@rpg-gen/api-client";
 import type { DiceResultDto } from "@rpg-gen/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
@@ -6,21 +6,13 @@ import type { RollModalData } from "@/interfaces";
 
 type DisplayRole = "user" | "assistant" | "system";
 
-type StoredRole = "user" | "assistant" | "system";
-
 // Message type for UI display - stores role and narrative text
 interface GameMessage {
-  role: StoredRole;
+  role: DisplayRole;
   narrative: string;
   timestamp?: number;
 }
 
-// Map display roles to stored roles
-function toStoredRole(role: DisplayRole): StoredRole {
-  if (role === "assistant") return "assistant";
-  if (role === "user") return "user";
-  return "system";
-}
 
 /**
  * Game Store - UI state only
@@ -29,9 +21,6 @@ function toStoredRole(role: DisplayRole): StoredRole {
  * pending instructions, and UI flags. Dice rolls use TanStack Query mutation.
  */
 export const useGameStore = defineStore("gameStore", () => {
-  // --- Query Hooks ---
-  const dice = useDice();
-
   // --- UI State: Roll history (local state, not API-managed) ---
   const rolls = ref<DiceResultDto[]>([]);
   const latestRoll = ref<DiceResultDto | null>(null);
@@ -53,7 +42,7 @@ export const useGameStore = defineStore("gameStore", () => {
 
   // --- Actions ---
   const doRoll = async (expr: string, advantage?: "advantage" | "disadvantage" | "none") => {
-    const diceResultDto = await dice.roll.mutateAsync({
+    const diceResultDto = await diceApi.roll({
       expr,
       advantage: advantage || "none",
     });
@@ -64,7 +53,7 @@ export const useGameStore = defineStore("gameStore", () => {
 
   const appendMessage = (role: DisplayRole, narrative: string) =>
     messages.value.push({
-      role: toStoredRole(role),
+      role,
       narrative,
       timestamp: Date.now(),
     });
@@ -76,7 +65,7 @@ export const useGameStore = defineStore("gameStore", () => {
     }[],
   ) => {
     messages.value = list.map(m => ({
-      role: toStoredRole(m.role),
+      role: m.role,
       narrative: m.narrative,
       timestamp: Date.now(),
     }));

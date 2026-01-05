@@ -2,22 +2,31 @@
   <div class="space-y-4">
     <h2 class="text-xl font-bold">Choisissez votre première Voie</h2>
     <p class="text-slate-400 text-sm">
-      Chaque classe possède 3 voies de talents. Choisissez-en une pour débloquer son premier rang et 
+      Chaque classe possède 3 voies de talents. Choisissez-en une pour débloquer son premier rang et
       choisissez une statistique à améliorer (+1).
     </p>
 
     <!-- Loading state -->
-    <div v-if="isLoadingVoies" class="py-8">
+    <div
+      v-if="isLoadingVoies"
+      class="py-8"
+    >
       <UiLoader />
     </div>
 
     <!-- Error state -->
-    <div v-else-if="errorVoies" class="text-red-400 text-sm">
+    <div
+      v-else-if="errorVoies"
+      class="text-red-400 text-sm"
+    >
       Erreur lors du chargement des voies: {{ errorVoies.message }}
     </div>
 
     <!-- Voies selection -->
-    <div v-else-if="voies && voies.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div
+      v-else-if="voies && voies.length > 0"
+      class="grid grid-cols-1 md:grid-cols-3 gap-4"
+    >
       <button
         v-for="(voie, index) in voies"
         :key="index"
@@ -31,10 +40,13 @@
         @click="selectVoie(index)"
       >
         <div class="font-bold text-lg mb-2">{{ voie.name }}</div>
-        <div v-if="voie.ranks && voie.ranks.length > 0" class="mt-3 text-xs text-slate-500">
+        <div
+          v-if="voie.ranks && voie.ranks.length > 0"
+          class="mt-3 text-xs text-slate-500"
+        >
           Premier rang: {{ voie.ranks[0]?.aptitudeId || '?' }}
         </div>
-        
+
         <!-- Selected indicator -->
         <div
           v-if="selectedVoieIndex === index"
@@ -46,7 +58,10 @@
     </div>
 
     <!-- Stat selection (only if voie selected) -->
-    <div v-if="selectedVoieIndex !== null" class="mt-6">
+    <div
+      v-if="selectedVoieIndex !== null"
+      class="mt-6"
+    >
       <h3 class="font-bold mb-3">Choisissez une statistique à améliorer (+1)</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button
@@ -63,7 +78,7 @@
         >
           <div :class="['font-bold', stat.color]">{{ stat.icon }} {{ stat.name }}</div>
           <div class="text-xs text-slate-400 mt-1">+1</div>
-          
+
           <!-- Selected indicator -->
           <div
             v-if="selectedStat === stat.key"
@@ -76,7 +91,10 @@
     </div>
 
     <!-- Selection summary -->
-    <div v-if="selectedVoieIndex !== null && selectedStat" class="mt-4 p-4 bg-slate-800/50 rounded-lg">
+    <div
+      v-if="selectedVoieIndex !== null && selectedStat"
+      class="mt-4 p-4 bg-slate-800/50 rounded-lg"
+    >
       <div class="flex items-center justify-between">
         <div>
           <span class="text-slate-400">Voie sélectionnée:</span>
@@ -129,7 +147,7 @@ const emit = defineEmits<{
 watch([selectedVoieIndex, selectedStat], () => {
   const isValid = selectedVoieIndex.value !== null && selectedStat.value !== null;
   emit('update:isValid', isValid);
-  
+
   if (isValid) {
     const selectedVoie = voies.value?.[selectedVoieIndex.value!];
     const selections = {
@@ -138,9 +156,9 @@ watch([selectedVoieIndex, selectedStat], () => {
       voieName: selectedVoie?.name || '',
       statBonus: selectedStat.value!,
     };
-    
+
     emit('update:selections', selections);
-    
+
     emit('update:selections', selections);
   }
 });

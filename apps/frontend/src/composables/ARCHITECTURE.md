@@ -7,14 +7,15 @@ Document d'analyse de l'architecture actuelle des composables Vue 3 (Composition
 Les composables sont organisés en 3 catégories distinctes :
 
 1. **Composables Core** : Context et session du joueur
-2. **Composables Métier** : Logique applicative spécifique  
+2. **Composables Métier** : Logique applicative spécifique
 3. **Utilitaires** : Helpers et services purs (non-composables)
 
 ---
 
 ## 📍 Composables Core (Context & Session)
 
-### `useCharacterId()` 
+### `useCharacterId()`
+
 **Périmètre** : Extraction du paramètre de route  
 **Responsabilité** : Fournir l'ID du personnage courant via route.params  
 **Dépendances** : Vue Router  
@@ -30,8 +31,10 @@ const characterId = useCharacterId();
 ---
 
 ### `useCurrentCharacter()`
+
 **Périmètre** : Accès au personnage courant via TanStack Query  
-**Responsabilité** : 
+**Responsabilité** :
+
 - Récupérer les données du personnage depuis l'API
 - Exposer le personnage comme Computed ref reactive
 - Tracker les mises à jour et les chargements
@@ -52,8 +55,10 @@ const currentCharacter = useCurrentCharacter();
 ## 🎮 Composables Métier
 
 ### `useCombat()`
+
 **Périmètre** : Orchestration complète des actions de combat  
 **Responsabilités** :
+
 - Initier un combat via instruction d'IA
 - Gérer les tours du joueur (endActivation)
 - Exécuter les attaques avec animation
@@ -62,6 +67,7 @@ const currentCharacter = useCurrentCharacter();
 - Navigation et modales d'UI
 
 **Dépendances** :
+
 - `useCombatApi` (api-client) - requêtes HTTP
 - `useCharacter` (api-client) - mise à jour stats
 - `useRouter` - navigation
@@ -72,6 +78,7 @@ const currentCharacter = useCurrentCharacter();
 - `useCharacterId` - identification
 
 **Retour** : Objet avec méthodes
+
 ```typescript
 {
   endActivation,
@@ -85,6 +92,7 @@ const currentCharacter = useCurrentCharacter();
 ```
 
 **Points clés** :
+
 - Gère la transition combat_start → combat_arena → combat_end
 - Synchronise HP après chaque tour ennemi
 - Détecte fin de combat via watcher sur `combatApi.status.data.value?.combatEnd`
@@ -95,8 +103,10 @@ const currentCharacter = useCurrentCharacter();
 ---
 
 ### `useCombatEngine()`
+
 **Périmètre** : Contrôle du rendu visuel et interactions PIXI.js  
 **Responsabilités** :
+
 - Synchroniser l'état backend avec le rendu PIXI
 - Gérer les événements d'interaction utilisateur (drag, click)
 - Animer les attaques (dégâts, mouvement, mort)
@@ -104,6 +114,7 @@ const currentCharacter = useCurrentCharacter();
 - Contrôler la saisie (freeze UI pendant replay = `isReplaying`)
 
 **Dépendances** :
+
 - `CombatAdapter` - transformation d'état
 - `CombatArenaApi` - interface PIXI
 - `useCombat` - logique métier
@@ -112,6 +123,7 @@ const currentCharacter = useCurrentCharacter();
 - `useCurrentCharacter` - stats joueur
 
 **Interface exposée** : `CombatArenaApi`
+
 ```typescript
 interface CombatArenaApi {
   init(), createUnit(), clearAllUnits()
@@ -123,6 +135,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - Pattern de registration : `registerArena()` appelé par CombatPanel
 - `isReplaying` flag pour freeze l'UI durant animations
 - Convertit instruction d'IA en unités PIXI
@@ -133,14 +146,17 @@ interface CombatArenaApi {
 ---
 
 ### `useGameSession()`
+
 **Périmètre** : Gestion de la session de jeu et instructions d'IA  
 **Responsabilités** :
+
 - Charger le contexte de jeu initial (quêtes, perso, scénario)
 - Parser les instructions reçues de l'IA (rolls, HP, XP, combat_start)
 - Dispatcher les instructions aux composables appropriés
 - Manager les transitions d'état de jeu
 
 **Dépendances** :
+
 - `useChat` (api-client) - historique messages
 - `useCharacter` (api-client) - stats
 - `useCombat` - combat flow
@@ -149,6 +165,7 @@ interface CombatArenaApi {
 - `gameStore` - UI + messages
 
 **Retour** : Objet avec méthodes
+
 ```typescript
 {
   initialize,
@@ -158,6 +175,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - Détecte type d'instruction avec type guards (`isRollInstruction`, etc.)
 - Appelle `useCombat.initializeCombat()` pour combat_start
 - Gère retry sur erreurs Gemini API
@@ -168,14 +186,17 @@ interface CombatArenaApi {
 ---
 
 ### `useGameMessages()`
+
 **Périmètre** : Traitement des réponses de chat et instructions  
 **Responsabilités** :
+
 - Envoyer messages à l'IA (useCombat + useCombatEngine)
 - Parser la réponse narrative
 - Extraire et dispatcher les instructions
 - Gérer les erreurs de communication
 
 **Dépendances** :
+
 - `useChat` (api-client) - communication
 - `useCharacter` (api-client) - données
 - `useCombat` - delegation combat
@@ -183,6 +204,7 @@ interface CombatArenaApi {
 - `useCurrentCharacter` - perso courant
 
 **Retour** : Objet avec méthodes
+
 ```typescript
 {
   sendMessage,
@@ -191,6 +213,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - Defensive: normalise instructions en array
 - Traite combatStart, roll, hp, xp instructions
 - Gère retry sur erreur Gemini
@@ -201,14 +224,17 @@ interface CombatArenaApi {
 ---
 
 ### `useGameRolls()`
+
 **Périmètre** : Traitement des jets de dés  
 **Responsabilités** :
+
 - Calculer résultats de jets (dés + bonus compétence)
 - Construire vue de roll pour affichage
 - Intégrer avec système de compétences D&D 5e
 - Envoyer résultat à l'IA
 
 **Dépendances** :
+
 - `useChat` (api-client) - envoi résultat
 - `useCharacterId` - identification
 - `useCurrentCharacter` - stats (bonus)
@@ -216,6 +242,7 @@ interface CombatArenaApi {
 - `gameStore` - state modales
 
 **Retour** : Objet avec méthodes
+
 ```typescript
 {
   onDiceRolled,
@@ -225,6 +252,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - Calcule bonus depuis characterResponseDto.scores
 - Gère advantage/disadvantage
 - Construit `rollData` pour affichage modal
@@ -234,16 +262,20 @@ interface CombatArenaApi {
 ---
 
 ### `useSpellManagement(characterId)`
+
 **Périmètre** : Gestion des sorts du personnage  
 **Responsabilités** :
+
 - Apprendre de nouveaux sorts
 - Oublier des sorts
 - Synchroniser avec API
 
 **Dépendances** :
+
 - `useCharacter` (api-client) - mise à jour
 
 **Retour** : Objet avec méthodes
+
 ```typescript
 {
   learnSpell,
@@ -252,6 +284,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - Dédupe par definitionId avant ajout
 - Append/filter sur array existant
 
@@ -260,18 +293,22 @@ interface CombatArenaApi {
 ---
 
 ### `useAbilityScores()`
+
 **Périmètre** : Gestion des scores de capacité D&D 5e  
 **Responsabilités** :
+
 - Calculer points utilisés via Point Buy
 - Valider modifications selon budget
 - Formatter modificateurs (+X/-X)
 - Différencier création vs level-up
 
 **Dépendances** :
+
 - `useCurrentCharacter` - données scores
 - `dndRulesService` - constantes D&D
 
 **Retour** : Objet avec computed + méthodes
+
 ```typescript
 {
   characterScores,
@@ -282,6 +319,7 @@ interface CombatArenaApi {
 ```
 
 **Points clés** :
+
 - COST table pour Point Buy (8→0pts, 18→19pts)
 - Support budget par level-up (increments au-dessus score initial)
 - Immuable (retourne nouvel objet)
@@ -293,8 +331,10 @@ interface CombatArenaApi {
 ## 🛠️ Utilitaires (Non-Composables)
 
 ### `skillsUtils.ts`
+
 **Périmètre** : Logique de compétences pures  
-**Responsabilité** : `computeUpdatedSkills(skill, existingSkills)`  
+**Responsabilité** : `computeUpdatedSkills(skill, existingSkills)`
+
 - Toggle proficiency d'une compétence
 - Ajouter nouvelle compétence si absent
 - Retourner nouvel array immutable
@@ -304,13 +344,16 @@ interface CombatArenaApi {
 ---
 
 ### `usePortraits.ts`
+
 **Périmètre** : Chargement et matching portraits d'ennemis  
 **Responsabilité** :
+
 - Charger manifest de portraits (/public/images/enemies/)
 - Matcher meilleur portrait par slug du nom
 - Fallback gracieux
 
 **Export** : Fonctions (pas de composable)
+
 ```typescript
 loadPortraitManifest()
 pickBestPortrait(nameOrId)
@@ -318,6 +361,7 @@ getFallbackPortrait(nameOrId)
 ```
 
 **Points clés** :
+
 - Cache manifest en ref global
 - Cherche .webp puis .png
 - Slugify : "Goblin King" → "goblin-king"
@@ -359,14 +403,18 @@ getFallbackPortrait(nameOrId)
 ## 📋 Patterns & Conventions
 
 ### Computed Refs (liveness)
+
 Les composables retournent `Computed` refs, pas des valeurs primitives. Permet tracking réactif automatique :
+
 ```typescript
 const characterId = useCharacterId(); // Computed<string>
 const currentCharacter = useCurrentCharacter(); // ComputedRef<CharacterDto>
 ```
 
 ### Direct API Client Access
+
 Pas de wrapper—les composables appellent directement `@rpg-gen/api-client` (TanStack Query) :
+
 ```typescript
 const combatApi = useCombatApi(characterId);
 await combatApi.attack.mutateAsync({...});
@@ -374,19 +422,25 @@ combatApi.status.data.value // state reactif
 ```
 
 ### Inlining (Flatten Helpers)
+
 Depuis le nettoyage récent, les petites functions helper sont inlinées pour éviter over-abstraction :
+
 - ❌ ~~startCombat()~~ wrapper
 - ✅ combatApi.startCombat.mutateAsync() direct
 
 ### Store Refs (via storeToRefs)
+
 État UI persistant via Pinia (modales, logs, messages) :
+
 ```typescript
 const combatStore = useCombatStore();
 const { currentAttackView, isCombatEndModalOpen } = storeToRefs(combatStore);
 ```
 
 ### Watchers pour Side Effects
+
 Détection état backend → action UI :
+
 ```typescript
 watch(
   () => combatApi.status.data.value?.combatEnd,
@@ -399,15 +453,18 @@ watch(
 ## 🚨 Problèmes Actuels & Notes
 
 ### Parfois Mélangé
+
 - `useCombat` : Fait orchestration + messages système + navigation (big composable)
 - `useCombatEngine` : Gère rendu + interactions + watchers complexes
 
 **Possibilité refactor futur** : Scinder `useCombat` en `useCombatOrchestration` + `useCombatFeedback`
 
 ### API Client Abstraction Mince
+
 Les DTOs générés (`CombatStateDto`, `CharacterResponseDto`, etc.) manquent de types stricts pour les instructions imbriquées (rolls, combat_start). Type guards utilisés pour parser.
 
 ### Stale Props à Améliorer
+
 - `useCombatEngine.registerArena()` : Pattern registration à la main, pas idéal
 - **Alternative future** : Provide/inject + ref reactif
 
@@ -415,19 +472,20 @@ Les DTOs générés (`CombatStateDto`, `CharacterResponseDto`, etc.) manquent de
 
 ## 📊 Responsabilités par Couche
 
-| Couche | Responsabilité | Exemples |
-|--------|---|---|
-| **Core** | Context joueur, route, données brutes | `useCharacterId`, `useCurrentCharacter` |
-| **Métier** | Logique applicative, workflows | `useCombat`, `useGameSession`, `useSpellManagement` |
-| **Rendu** | PIXI, UI, animations | `useCombatEngine` |
-| **Comms** | Chat, rolls, instructions | `useGameMessages`, `useGameRolls` |
-| **Utils** | Calculs purs, helpers | `skillsUtils`, `usePortraits` |
+| Couche     | Responsabilité                        | Exemples                                            |
+| ---------- | ------------------------------------- | --------------------------------------------------- |
+| **Core**   | Context joueur, route, données brutes | `useCharacterId`, `useCurrentCharacter`             |
+| **Métier** | Logique applicative, workflows        | `useCombat`, `useGameSession`, `useSpellManagement` |
+| **Rendu**  | PIXI, UI, animations                  | `useCombatEngine`                                   |
+| **Comms**  | Chat, rolls, instructions             | `useGameMessages`, `useGameRolls`                   |
+| **Utils**  | Calculs purs, helpers                 | `skillsUtils`, `usePortraits`                       |
 
 ---
 
 ## 🎯 Bonnes Pratiques Actuelles
 
 ✅ **À Respecter** :
+
 - Composables = logique réutilisable uniquement
 - DTOs + type guards pour validation
 - Eviter `as` casting (strict TypeScript)
@@ -436,7 +494,8 @@ Les DTOs générés (`CombatStateDto`, `CharacterResponseDto`, etc.) manquent de
 - Computed refs pour liveness
 
 ✅ **Patterns à Suivre** :
-- `useCharacterId()` → `characterId.value` 
+
+- `useCharacterId()` → `characterId.value`
 - `useCurrentCharacter()` → `currentCharacter.value?.field`
 - `useCombat()` pour workflows métier
 - Watchers pour détection état backend
@@ -446,12 +505,11 @@ Les DTOs générés (`CombatStateDto`, `CharacterResponseDto`, etc.) manquent de
 
 ## 📌 Où Ajouter Nouveau Code
 
-| Besoin | Où ? | Exemple |
-|--------|------|---------|
-| État joueur courant | `useCurrentCharacter()` | HP, XP, spells |
-| Action métier | Nouveau composable métier | `useInventoryManagement()` |
-| Calcul pur D&D | Utils ou service | `calculateAC()` |
-| Logique UI (modales, etc) | `combatStore` ou `gameStore` | `showRollModal` |
-| Rendu / animation | `useCombatEngine` ou composable spécialisé | PIXI events |
-| Appel API | Via composable métier + api-client | `useCombat.executeAttack()` |
-
+| Besoin                    | Où ?                                       | Exemple                     |
+| ------------------------- | ------------------------------------------ | --------------------------- |
+| État joueur courant       | `useCurrentCharacter()`                    | HP, XP, spells              |
+| Action métier             | Nouveau composable métier                  | `useInventoryManagement()`  |
+| Calcul pur D&D            | Utils ou service                           | `calculateAC()`             |
+| Logique UI (modales, etc) | `combatStore` ou `gameStore`               | `showRollModal`             |
+| Rendu / animation         | `useCombatEngine` ou composable spécialisé | PIXI events                 |
+| Appel API                 | Via composable métier + api-client         | `useCombat.executeAttack()` |

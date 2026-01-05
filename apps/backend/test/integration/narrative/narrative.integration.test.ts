@@ -10,8 +10,8 @@
 
 import { GameNarrativeModule } from "../../../src/bounded-contexts/game-narrative/game-narrative.module.js";
 import { NarrativeAppService } from "../../../src/bounded-contexts/game-narrative/application/services/NarrativeAppService.js";
-import { Context } from "../../../src/bounded-contexts/game-narrative/domain/narrative/value-objects/Context.js";
-import { Message } from "../../../src/bounded-contexts/game-narrative/domain/narrative/value-objects/Message.js";
+import { Context } from "../../../src/bounded-contexts/game-narrative/domain/value-objects/Context.js";
+import { Message } from "../../../src/bounded-contexts/game-narrative/domain/value-objects/Message.js";
 import { createTestApp, closeTestApp } from "../../helpers/test-app.js";
 import type { TestAppContext } from "../../helpers/test-app.js";
 

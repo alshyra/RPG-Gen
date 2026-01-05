@@ -11,17 +11,26 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex items-center justify-center py-8">
+    <div
+      v-if="isLoading"
+      class="flex items-center justify-center py-8"
+    >
       <UiLoader />
     </div>
 
     <!-- No class selected -->
-    <div v-else-if="!className" class="text-center py-8 text-slate-400">
+    <div
+      v-else-if="!className"
+      class="text-center py-8 text-slate-400"
+    >
       <p>Sélectionnez d'abord une classe pour voir l'arbre de talents</p>
     </div>
 
     <!-- Talent Trees Grid -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+    <div
+      v-else
+      class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6"
+    >
       <div
         v-for="voie in voies"
         :key="voie.voieId"
@@ -30,9 +39,7 @@
         <!-- Voie Header -->
         <div class="text-center mb-4">
           <h4 class="text-lg font-bold text-indigo-400">{{ voie.voieName }}</h4>
-          <div class="text-xs text-slate-500 mt-1">
-            {{ voie.currentRank }}/5 rangs débloqués
-          </div>
+          <div class="text-xs text-slate-500 mt-1">{{ voie.currentRank }}/5 rangs débloqués</div>
         </div>
 
         <!-- Ranks -->
@@ -68,19 +75,35 @@
                   <div class="text-sm font-medium text-white">
                     {{ getAptitudeName(getAptitudeIdForRank(voie, rank)) }}
                   </div>
-                  <div v-if="getAptitudeDescription(getAptitudeIdForRank(voie, rank))" class="text-xs text-slate-400 mt-0.5">
+                  <div
+                    v-if="getAptitudeDescription(getAptitudeIdForRank(voie, rank))"
+                    class="text-xs text-slate-400 mt-0.5"
+                  >
                     {{ getAptitudeDescription(getAptitudeIdForRank(voie, rank)) }}
                   </div>
                   <div class="text-xs text-slate-500 mt-1">
-                    {{ voie.ranks?.find(r => r.rank === rank)?.pointCost || 1 }} point{{ (voie.ranks?.find(r => r.rank === rank)?.pointCost || 1) > 1 ? 's' : '' }}
+                    {{ voie.ranks?.find(r => r.rank === rank)?.pointCost || 1 }}
+                    point{{ (voie.ranks?.find(r => r.rank === rank)?.pointCost || 1) > 1 ? 's' : '' }}
                   </div>
                 </div>
               </div>
               <!-- Status icon -->
               <div>
-                <span v-if="isRankUnlocked(voie, rank)" class="text-green-400">✓</span>
-                <span v-else-if="canUnlockRank(voie, rank)" class="text-yellow-400">⭐</span>
-                <span v-else class="text-slate-600">🔒</span>
+                <span
+                  v-if="isRankUnlocked(voie, rank)"
+                  class="text-green-400"
+                  >✓</span
+                >
+                <span
+                  v-else-if="canUnlockRank(voie, rank)"
+                  class="text-yellow-400"
+                  >⭐</span
+                >
+                <span
+                  v-else
+                  class="text-slate-600"
+                  >🔒</span
+                >
               </div>
             </div>
           </button>
@@ -156,14 +179,14 @@ function isRankUnlocked(voie: { currentRank: number }, rank: number): boolean {
 function canUnlockRank(voie: { currentRank: number; requiredTalentPoints?: number }, rank: number): boolean {
   // Already unlocked?
   if (isRankUnlocked(voie, rank)) return false;
-  
+
   // Not enough points?
   const cost = voie.requiredTalentPoints ?? 1;
   if (talentPoints.value < cost) return false;
-  
+
   // Rank 1 can always be unlocked (if points available)
   if (rank === 1) return true;
-  
+
   // Higher ranks need previous rank unlocked
   return voie.currentRank === rank - 1;
 }
@@ -181,7 +204,7 @@ function getRankButtonClasses(voie: { currentRank: number; requiredTalentPoints?
 async function handleUnlockRank(voieId: string, rank: number) {
   const voie = voies.value.find((v) => v.voieId === voieId);
   if (!voie || !canUnlockRank(voie, rank)) return;
-  
+
   try {
     await unlockMutation.mutateAsync({ voieId, rank });
   } catch (e) {

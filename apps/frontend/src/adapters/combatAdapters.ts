@@ -87,10 +87,7 @@ export class CombatAdapter {
   /**
    * Default position when backend doesn't provide one
    */
-  private static getDefaultPosition(
-    team: "player" | "enemy",
-    index: number,
-  ): GridPosition {
+  private static getDefaultPosition(team: "player" | "enemy", index: number): GridPosition {
     if (team === "player") {
       return {
         gridX: 2,

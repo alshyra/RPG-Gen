@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="bg-slate-700/50 rounded-lg p-4 mb-4"
-  >
+  <div class="bg-slate-700/50 rounded-lg p-4 mb-4">
     <div class="flex justify-between items-center">
       <div class="text-sm text-slate-400">PV de {{ currentAttack?.target ?? '' }}</div>
       <div class="flex items-center gap-2">

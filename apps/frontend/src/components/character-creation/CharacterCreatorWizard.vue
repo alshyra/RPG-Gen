@@ -66,8 +66,8 @@
         </div>
         <!-- Step 4: Talent Selection (first voie + stat bonus) -->
         <div class="h-full">
-          <StepTalentSelection 
-            v-if="currentStep === 3" 
+          <StepTalentSelection
+            v-if="currentStep === 3"
             @update:is-valid="talentSelectionValid = $event"
             @update:selections="talentSelection = $event"
           />
@@ -209,7 +209,7 @@ const previousStep = () => {
 const saveFinalCharacter = async () => {
   console.log("Finishing character creation for", currentCharacter);
   if (!currentCharacter || !currentCharacter?.value?.className) return;
-  
+
   // Only update the state - don't spread entire character to avoid corrupting data
   await update.mutateAsync({
     state: "created",

@@ -143,12 +143,14 @@ export const useGameSession = () => {
       // Wait for history query to resolve (refetch to get fresh data)
       const { data: historyData } = await chat.history.refetch();
       if (historyData?.messages?.length) {
-        const processed = processHistoryMessages(historyData.messages.map(m => ({
-          role: m.role ?? "assistant",
-          narrative: m.narrative,
-          // Instructions from API are parsed objects, not JSON strings
-          instructions: m.instructions,
-        })));
+        const processed = processHistoryMessages(
+          historyData.messages.map(m => ({
+            role: m.role ?? "assistant",
+            narrative: m.narrative,
+            // Instructions from API are parsed objects, not JSON strings
+            instructions: m.instructions,
+          })),
+        );
         gameStore.updateMessages(processed);
       }
     } catch (e: unknown) {

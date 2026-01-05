@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NarrativeAppService } from './NarrativeAppService.js';
-import { Message, type MessageRole } from '../../domain/narrative/value-objects/Message.js';
-import { Context } from '../../domain/narrative/value-objects/Context.js';
+import { Message, type MessageRole } from '../../domain/value-objects/Message.js';
+import { Context } from '../../domain/value-objects/Context.js';
 import type { ChatMessageDto } from '../../api/dto/response/ChatMessageDto.js';
 
 /** Minimal character info needed for building summaries */

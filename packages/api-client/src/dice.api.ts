@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/vue-query";
 import { apiClient, getData } from "./index.js";
 
 // Internal API function
-const diceApi = {
+export const diceApi = {
   async roll(request: DiceRequestDto): Promise<DiceResultDto> {
     const response = await apiClient.POST("/api/dice", {
       body: request,

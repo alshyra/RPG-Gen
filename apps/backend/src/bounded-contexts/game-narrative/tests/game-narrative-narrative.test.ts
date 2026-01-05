@@ -1,6 +1,6 @@
-import { Narrative } from '../domain/narrative/entities/Narrative.js';
-import { Message } from '../domain/narrative/value-objects/Message.js';
-import { Context } from '../domain/narrative/value-objects/Context.js';
+import { Narrative } from '../domain/entities/Narrative.js';
+import { Message } from '../domain/value-objects/Message.js';
+import { Context } from '../domain/value-objects/Context.js';
 
 describe('Narrative', () => {
   test('should create a narrative with userId, characterId and context', () => {

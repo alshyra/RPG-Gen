@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { CombatGridService } from "./combat-grid.service.js";
 import { GridPositionDto } from "../../api/dto/response/GridPositionDto.js";
 import { MovementEventDto, MovementEventType } from "../../api/dto/response/MovementEventDto.js";
-import { DiceService } from "../../../game-narrative/domain/dice/DiceService.js";
+import { DiceService } from "../../../game-narrative/domain/services/DiceService.js";
 
 export interface CombatantStats {
   id: string;

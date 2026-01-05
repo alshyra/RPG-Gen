@@ -1,19 +1,28 @@
 <template>
   <div class="h-full flex flex-col">
     <h3 class="text-lg font-semibold mb-4 text-center">Choisissez votre race</h3>
-    
+
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex-1 flex items-center justify-center">
+    <div
+      v-if="isLoading"
+      class="flex-1 flex items-center justify-center"
+    >
       <UiLoader />
     </div>
 
     <!-- Error state -->
-    <div v-else-if="error" class="flex-1 flex items-center justify-center text-red-400">
+    <div
+      v-else-if="error"
+      class="flex-1 flex items-center justify-center text-red-400"
+    >
       <p>Erreur lors du chargement des races</p>
     </div>
 
     <!-- Race cards -->
-    <div v-else class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+    <div
+      v-else
+      class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6"
+    >
       <button
         v-for="race in races"
         :key="race.id"
@@ -37,7 +46,10 @@
         </div>
 
         <!-- Race name -->
-        <h4 class="text-lg lg:text-xl font-bold mb-2" :style="{ color: race.color }">
+        <h4
+          class="text-lg lg:text-xl font-bold mb-2"
+          :style="{ color: race.color }"
+        >
           {{ race.name }}
         </h4>
 
@@ -45,7 +57,7 @@
         <div class="text-sm font-medium text-indigo-400 mb-1">
           {{ race.trait }}
         </div>
-        
+
         <!-- Trait effect -->
         <p class="text-xs text-slate-400 mb-3">
           {{ race.descriptionForAi }}
@@ -90,11 +102,17 @@
     </div>
 
     <!-- Selection confirmation -->
-    <div v-if="selectedRace && selectedRaceData" class="mt-4 p-4 bg-slate-800/50 rounded-lg">
+    <div
+      v-if="selectedRace && selectedRaceData"
+      class="mt-4 p-4 bg-slate-800/50 rounded-lg"
+    >
       <div class="flex items-center justify-between">
         <div>
           <span class="text-slate-400">Race sélectionnée:</span>
-          <span class="ml-2 font-bold" :style="{ color: selectedRaceData.color }">
+          <span
+            class="ml-2 font-bold"
+            :style="{ color: selectedRaceData.color }"
+          >
             {{ selectedRaceData.icon }} {{ selectedRaceData.name }}
           </span>
         </div>
@@ -153,7 +171,7 @@ async function selectRace(raceId: string) {
     return;
   }
   selectedRace.value = raceId;
-  
+
   // Call API to select race
   try {
     await selectRaceMutation.mutateAsync(raceId);

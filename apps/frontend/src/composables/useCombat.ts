@@ -131,7 +131,6 @@ export function useCombat() {
     // Combat end is now detected automatically by watchers
   };
 
-
   /**
    * Execute an aptitude against a target (new unified system)
    */
@@ -187,7 +186,7 @@ export function useCombat() {
       console.log("[useCombat] Combat end already handled, skipping");
       return;
     }
-    
+
     const victory = combatApi.status.data.value?.combatEnd?.victory ?? false;
     const xpGained = combatApi.status.data.value?.combatEnd?.xp_gained ?? 0;
     const enemiesDefeated = combatApi.status.data.value?.combatEnd?.enemies_defeated ?? [];

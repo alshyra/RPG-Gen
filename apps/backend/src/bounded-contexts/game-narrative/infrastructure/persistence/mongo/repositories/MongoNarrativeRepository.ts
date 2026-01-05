@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { NarrativeDocument, type NarrativeDocumentType } from '../schemas/NarrativeDocument.js';
 import { NarrativeMapper } from '../mappers/NarrativeMapper.js';
-import { INarrativeRepository, Narrative } from '../../../../domain/narrative/index.js';
+import { INarrativeRepository, Narrative } from '../../../../domain/index.js';
 
 /**
  * MongoDB implementation of INarrativeRepository

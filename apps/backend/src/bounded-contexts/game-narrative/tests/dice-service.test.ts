@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { DiceService } from '../domain/dice/DiceService.js';
+import { DiceService } from '../domain/services/DiceService.js';
 
 // Create a deterministic random function for testing
 const createFixedRandom = (values: number[]) => {
@@ -141,87 +141,6 @@ describe('DiceService', () => {
       expect(result.rolls.length).toBe(1);
       expect(result.rolls[0]).toBe(4);
       expect(result.total).toBe(6); // 4 + 2
-    });
-  });
-
-  // =====================
-  // rollDamage tests
-  // =====================
-
-  describe('rollDamage', () => {
-    test('returns base damage on non-crit', () => {
-      const service = createDiceService();
-      // Mock using deterministic expression parsing
-      const result = service.rollDamage('1d6', false, 2);
-
-      expect(result.isCrit).toBe(false);
-      expect(result.damageTotal).toBeTruthy();
-      expect(result.damageTotal).toBeGreaterThanOrEqual(3); // 1 (min roll) + 2 (bonus)
-      expect(result.damageTotal).toBeLessThanOrEqual(8); // 6 (max roll) + 2 (bonus)
-    });
-
-    test('doubles dice on critical hit', () => {
-      const service = createDiceService();
-      const result = service.rollDamage('1d6', true, 0);
-
-      expect(result.isCrit).toBe(true);
-      // Crit doubles the dice, so total includes two d6 rolls
-      expect(result.damageTotal).toBeGreaterThanOrEqual(2); // 1 + 1 min
-      expect(result.damageTotal).toBeLessThanOrEqual(12); // 6 + 6 max
-    });
-
-    test('includes damage bonus', () => {
-      const service = createDiceService();
-      const result = service.rollDamage('1d4', false, 5);
-
-      expect(result.damageTotal).toBeGreaterThanOrEqual(6); // 1 + 5
-      expect(result.damageTotal).toBeLessThanOrEqual(9); // 4 + 5
-    });
-  });
-
-  // =====================
-  // rollSave tests
-  // =====================
-
-  describe('rollSave', () => {
-    test('success when roll + bonus >= DC', () => {
-      const service = createDiceService();
-      const result = service.rollSave(5, 15);
-
-      expect(typeof result.success).toBe('boolean');
-      expect(result.diceResult).toBeTruthy();
-      expect(Array.isArray(result.diceResult.rolls)).toBe(true);
-
-      // Verify the logic: if roll + 5 >= 15, success is true
-      const roll = result.diceResult.rolls[0];
-      if (roll === 20) {
-        expect(result.success).toBe(true); // Natural 20 always succeeds
-      } else if (roll + 5 >= 15) {
-        expect(result.success).toBe(true);
-      } else {
-        expect(result.success).toBe(false);
-      }
-    });
-
-    test('natural 20 always succeeds', () => {
-      const service = createDiceService();
-
-      // Run multiple times to get statistical coverage
-      let gotNat20 = false;
-      for (let i = 0; i < 100; i++) {
-        const result = service.rollSave(-10, 100); // Impossible without nat 20
-        if (result.diceResult.rolls[0] === 20) {
-          gotNat20 = true;
-          expect(result.success).toBe(true);
-          break;
-        }
-      }
-
-      // If we didn't get a nat 20 in 100 tries, just pass the test
-      // (probability of not getting one is (19/20)^100 ≈ 0.006)
-      if (!gotNat20) {
-        expect(true).toBe(true);
-      }
     });
   });
 

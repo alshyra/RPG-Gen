@@ -11,7 +11,7 @@ import { CombatModule } from "../../../src/bounded-contexts/combat/combat.module
 import { CombatAppService } from "../../../src/bounded-contexts/combat/application/services/CombatAppService.js";
 import { CombatMovementOrchestrator } from "../../../src/workflows/combat-gameplay/CombatMovementWorkflow.js";
 import { CharacterAppService } from "../../../src/bounded-contexts/character/application/services/CharacterAppService.js";
-import { DiceService } from "../../../src/bounded-contexts/game-narrative/domain/dice/DiceService.js";
+import { DiceService } from "../../../src/bounded-contexts/game-narrative/domain/services/DiceService.js";
 import type { CharacterResponseDto } from "../../../src/bounded-contexts/character/api/dto/index.js";
 import { type CombatStartRequestDto } from "../../../src/bounded-contexts/combat/api/dto/response/index.js";
 import { GridPositionDto } from "../../../src/bounded-contexts/combat/api/dto/response/GridPositionDto.js";

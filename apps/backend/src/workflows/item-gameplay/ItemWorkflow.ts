@@ -9,7 +9,7 @@ import {
 import type { InventoryInstructionMessageDto } from "../../bounded-contexts/game-narrative/api/dto/response/index.js";
 import { CombatAppService } from "../../bounded-contexts/combat/application/services/CombatAppService.js";
 import type { CombatStateDto } from "../../bounded-contexts/combat/api/dto/response/CombatStateDto.js";
-import { DiceService } from "../../bounded-contexts/game-narrative/domain/dice/DiceService.js";
+import { DiceService } from "../../bounded-contexts/game-narrative/domain/services/DiceService.js";
 import { ItemDataService } from "../../bounded-contexts/game-data/application/services/ItemDataService.js";
 
 interface ConsumableMetaWithHeal {

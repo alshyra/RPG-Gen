@@ -1,19 +1,28 @@
 <template>
   <div class="h-full flex flex-col">
     <h3 class="text-lg font-semibold mb-4 text-center">Choisissez votre classe</h3>
-    
+
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex-1 flex items-center justify-center">
+    <div
+      v-if="isLoading"
+      class="flex-1 flex items-center justify-center"
+    >
       <UiLoader />
     </div>
 
     <!-- Error state -->
-    <div v-else-if="error" class="flex-1 flex items-center justify-center text-red-400">
+    <div
+      v-else-if="error"
+      class="flex-1 flex items-center justify-center text-red-400"
+    >
       <p>Erreur lors du chargement des classes</p>
     </div>
 
     <!-- Class cards -->
-    <div v-else class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+    <div
+      v-else
+      class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6"
+    >
       <button
         v-for="cls in classes"
         :key="cls.name"
@@ -37,7 +46,10 @@
         </div>
 
         <!-- Class name -->
-        <h4 class="text-lg lg:text-xl font-bold mb-2" :style="{ color: cls.color }">
+        <h4
+          class="text-lg lg:text-xl font-bold mb-2"
+          :style="{ color: cls.color }"
+        >
           {{ cls.displayName }}
         </h4>
 
@@ -73,11 +85,17 @@
     </div>
 
     <!-- Selection confirmation -->
-    <div v-if="selectedClass && selectedClassData" class="mt-4 p-4 bg-slate-800/50 rounded-lg">
+    <div
+      v-if="selectedClass && selectedClassData"
+      class="mt-4 p-4 bg-slate-800/50 rounded-lg"
+    >
       <div class="flex items-center justify-between">
         <div>
           <span class="text-slate-400">Classe sélectionnée:</span>
-          <span class="ml-2 font-bold" :style="{ color: selectedClassData.color }">
+          <span
+            class="ml-2 font-bold"
+            :style="{ color: selectedClassData.color }"
+          >
             {{ selectedClassData.icon }} {{ selectedClassData.displayName }}
           </span>
         </div>
@@ -130,7 +148,7 @@ const selectedClassData = computed<ClassMetadata | undefined>(() => {
 // Methods
 async function selectClass(classId: string) {
   selectedClass.value = classId;
-  
+
   // Call API to select class and assign starter pack
   try {
     await selectClassMutation.mutateAsync(classId as ClassName);

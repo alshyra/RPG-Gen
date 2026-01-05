@@ -40,9 +40,7 @@
       v-else
       class="p-4 bg-slate-800/30 rounded-lg text-slate-400 text-center"
     >
-      <slot name="empty-state">
-        Aucun personnage dans cette catégorie.
-      </slot>
+      <slot name="empty-state"> Aucun personnage dans cette catégorie. </slot>
     </div>
   </section>
 </template>

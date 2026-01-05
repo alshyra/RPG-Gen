@@ -1,11 +1,11 @@
 // Domain exports
-export { Narrative } from './domain/narrative/entities/Narrative.js';
-export { Message, type MessageRole } from './domain/narrative/value-objects/Message.js';
-export { Context, type CharacterContextData } from './domain/narrative/value-objects/Context.js';
+export { Narrative } from './domain/entities/Narrative.js';
+export { Message, type MessageRole } from './domain/value-objects/Message.js';
+export { Context, type CharacterContextData } from './domain/value-objects/Context.js';
 export {
   INarrativeRepository,
   NARRATIVE_REPOSITORY,
-} from './domain/narrative/repositories/INarrativeRepository.js';
+} from './domain/repositories/INarrativeRepository.js';
 
 // Application service exports
 export { NarrativeAppService } from './application/services/NarrativeAppService.js';

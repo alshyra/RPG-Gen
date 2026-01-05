@@ -1,5 +1,5 @@
 import { NarrativeDocument } from '../schemas/NarrativeDocument.js';
-import { CharacterContextData, Context, Message, MessageRole, Narrative } from '../../../../domain/narrative/index.js';
+import { CharacterContextData, Context, Message, MessageRole, Narrative } from '../../../../domain/index.js';
 import { GameInstructionDto } from '../../../../api/dto/index.js';
 
 /**

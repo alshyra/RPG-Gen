@@ -2,7 +2,7 @@
   <div class="p-2">
     <div class="card p-3">
       <h2 class="font-bold text-slate-200 mb-2">Aptitudes</h2>
-      
+
       <!-- PA/PM Display -->
       <div class="flex gap-4 mb-4 p-2 bg-slate-800/60 rounded border border-slate-700/40">
         <div class="flex items-center gap-2">
@@ -28,7 +28,8 @@
         v-if="!hasAptitudes"
         class="text-xs text-slate-400"
       >
-        Aucune aptitude apprise. Débloquez des rangs dans vos voies pour apprendre de nouvelles aptitudes.
+        Aucune aptitude apprise. Débloquez des rangs dans vos voies pour apprendre de nouvelles
+        aptitudes.
       </div>
 
       <!-- Aptitudes list -->
@@ -52,12 +53,10 @@
               >
                 {{ aptitude.description }}
               </div>
-              
+
               <!-- Aptitude stats -->
               <div class="flex gap-3 mt-2 text-xs">
-                <span class="text-yellow-400">
-                  ⚡ {{ aptitude.paCost }} PA
-                </span>
+                <span class="text-yellow-400"> ⚡ {{ aptitude.paCost }} PA </span>
                 <span
                   v-if="aptitude.cooldown"
                   class="text-purple-400"
@@ -144,7 +143,7 @@ const remainingCooldown = (_aptitude: AptitudeResponseDto): number => {
 const onUseAptitude = async (aptitude: AptitudeResponseDto) => {
   if (!canUseAptitude(aptitude)) return;
   if (!characterId.value || !aptitude.id) return;
-  
+
   try {
     // Call the combat API to use the aptitude
     const result = await useAptitude.mutateAsync({
@@ -152,7 +151,7 @@ const onUseAptitude = async (aptitude: AptitudeResponseDto) => {
       aptitudeId: aptitude.id,
       // TODO: Add target selection for aptitudes that require a target
     });
-    
+
     if (result.success) {
       console.log('Aptitude used successfully:', result);
     } else {

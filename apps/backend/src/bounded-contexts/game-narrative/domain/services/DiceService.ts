@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { AdvantageType } from "../../api/dto/dice/dice-types.js";
 import { DiceResultDto } from "../../api/dto/dice/DiceResultDto.js";
-import { CombatDiceResultDto } from "../../api/dto/dice/CombatDiceResultDto.js";
 
 @Injectable()
 export class DiceService {
@@ -67,50 +66,5 @@ export class DiceService {
     }
 
     return this.rollNormal(diceCount, diceSides, modifierValue, rand);
-  }
-
-  private computeTotal(diceResult?: DiceResultDto): number {
-    if (!diceResult) return 0;
-    if (typeof diceResult.total === "number") return diceResult.total;
-    if (Array.isArray(diceResult.rolls) && diceResult.rolls.length)
-      return diceResult.rolls.reduce((s, v) => s + v, 0);
-    return 0;
-  }
-
-  rollDamage(expression: string, isCrit: boolean, damageBonus = 0): CombatDiceResultDto {
-    const base = this.rollDiceExpr(expression);
-    const extra = isCrit ? this.rollDiceExpr(expression) : undefined;
-
-    const total = this.computeTotal(base) + this.computeTotal(extra) + (damageBonus ?? 0);
-
-    const result: CombatDiceResultDto = {
-      rolls: base.rolls,
-      modifierValue: base.modifierValue,
-      total: base.total,
-      isCrit,
-      damageTotal: total,
-    };
-
-    return result;
-  }
-
-  /**
-   * Roll a saving throw for a target against a spell DC.
-   * @param savingThrowBonus - The target's saving throw modifier
-   * @param spellDC - The spell save DC (typically 8 + proficiency + casting ability modifier)
-   * @returns Whether the save succeeded and the dice result
-   */
-  rollSave(
-    savingThrowBonus: number,
-    spellDC: number,
-  ): { success: boolean; diceResult: DiceResultDto } {
-    const diceResult = this.rollDiceExpr("1d20");
-    const [die] = diceResult.rolls;
-    const totalSave = die + savingThrowBonus;
-    const success = die === 20 || totalSave >= spellDC; // Natural 20 always succeeds
-    return {
-      success,
-      diceResult,
-    };
   }
 }

@@ -17,7 +17,7 @@ function getStatBonus(character: unknown, statName: string): number {
   if (!char?.stats) return 0;
   const normalizedName = statName.toLowerCase();
   const stats = char.stats as Record<string, number>;
-  
+
   switch (normalizedName) {
     case "vigor":
     case "vigueur":
@@ -84,9 +84,7 @@ export function useGameRolls() {
     if (!pendingInstruction || !isRollInstruction(pendingInstruction.value)) return;
     if (!characterId.value) return;
 
-    const message = await chat.sendMessage.mutateAsync(
-      `I rolled ${rollData.value?.total}`
-    );
+    const message = await chat.sendMessage.mutateAsync(`I rolled ${rollData.value?.total}`);
     if (!message) throw new Error("No message returned from confirmRoll");
 
     return message;

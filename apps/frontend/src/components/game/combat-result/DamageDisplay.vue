@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="bg-slate-700/50 rounded-lg p-4 mb-4"
-  >
+  <div class="bg-slate-700/50 rounded-lg p-4 mb-4">
     <div class="text-center">
       <div class="text-sm text-slate-400 mb-2">Dégâts infligés</div>
 

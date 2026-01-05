@@ -1,5 +1,5 @@
 import { NarrativeResponseMapper } from '../api/dto/NarrativeResponseMapper.js';
-import { Message } from '../domain/narrative/value-objects/Message.js';
+import { Message } from '../domain/value-objects/Message.js';
 
 describe('NarrativeResponseMapper', () => {
   describe('messageToDto', () => {

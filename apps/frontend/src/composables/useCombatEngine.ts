@@ -5,10 +5,7 @@ import { useCombat as useBackendCombat } from "@/composables/useCombat";
 import { useCurrentCharacter } from "@/composables/useCurrentCharacter";
 import { useCombatStore, type CombatArenaApi } from "@/stores/combatStore";
 import { useCombat as useCombatApi } from "@rpg-gen/api-client";
-import type {
-  CombatEngineEventPayload,
-  UnitClickedPayload,
-} from "@rpg-gen/combat-engine";
+import type { CombatEngineEventPayload, UnitClickedPayload } from "@rpg-gen/combat-engine";
 import type { CombatantDto, EnemyAttackLogDto, GridPositionDto } from "@rpg-gen/shared";
 import { storeToRefs } from "pinia";
 import { onUnmounted, ref, watch } from "vue";
@@ -27,7 +24,7 @@ function buildManhattanPath(
   endY: number,
 ): GridPositionDto[] {
   const path: GridPositionDto[] = [{ x: startX, y: startY }];
-  
+
   let currentX = startX;
   let currentY = startY;
 
@@ -199,15 +196,15 @@ export function useCombatEngine() {
             path: fullPath,
           },
         });
-        
+
         console.log("[useCombatEngine] Movement synced, PM consumed:", result.pm);
-        
+
         // Update visual move range to match new PM
         const arenaApi = getArenaApi();
         if (arenaApi) {
           arenaApi.updateUnitMoveRange(payload.unitId, result.pm ?? 0);
         }
-        
+
         // Handle movement events (opportunity attacks, etc.)
         if (result.events && result.events.length > 0) {
           for (const event of result.events) {
@@ -398,11 +395,7 @@ export function useCombatEngine() {
     }
 
     // Enemy attacks player - update player HP (use damage from log)
-    if (
-      log.hit &&
-      log.damageTotal &&
-      combat.status.data.value?.player
-    ) {
+    if (log.hit && log.damageTotal && combat.status.data.value?.player) {
       console.log(
         "[useCombatEngine] Calling updateUnitHealth for player, damage:",
         log.damageTotal,

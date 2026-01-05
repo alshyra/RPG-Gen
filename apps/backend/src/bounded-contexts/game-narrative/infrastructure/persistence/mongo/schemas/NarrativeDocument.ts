@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { GameInstructionDto } from '../../../../api/dto/index.js';
-import { CharacterContextData } from '../../../../domain/narrative/index.js';
+import { CharacterContextData } from '../../../../domain/index.js';
 
 
 @Schema({ collection: 'narratives', timestamps: true })

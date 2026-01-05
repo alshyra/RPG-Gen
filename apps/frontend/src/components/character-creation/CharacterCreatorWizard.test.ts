@@ -51,13 +51,7 @@ describe.skip("CharacterCreatorWizard finish flow", () => {
 
     const wrapper = mount((await import("./CharacterCreatorWizard.vue")).default, {
       global: {
-        stubs: [
-          "StepBasicInfo",
-          "StepClassSelection",
-          "StepAvatar",
-          "UiLoader",
-          "UiButton",
-        ],
+        stubs: ["StepBasicInfo", "StepClassSelection", "StepAvatar", "UiLoader", "UiButton"],
       },
     });
 

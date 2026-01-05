@@ -7,9 +7,7 @@
     <div class="bg-slate-800 border border-slate-600 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
       <h3 class="text-lg font-semibold text-slate-100 mb-4">Choisir une action</h3>
 
-      <div class="text-xs text-slate-400 mb-4">
-        PA: {{ actionRemaining }} / {{ actionMax }}
-      </div>
+      <div class="text-xs text-slate-400 mb-4">PA: {{ actionRemaining }} / {{ actionMax }}</div>
 
       <div class="space-y-2 mb-4">
         <!-- Basic attack aptitude -->
@@ -49,7 +47,10 @@
               <div class="text-xs text-slate-400">
                 {{ aptitude.description }}
               </div>
-              <div v-if="aptitude.cooldown && aptitude.cooldown > 0" class="text-xs text-amber-400">
+              <div
+                v-if="aptitude.cooldown && aptitude.cooldown > 0"
+                class="text-xs text-amber-400"
+              >
                 Cooldown: {{ aptitude.cooldown }} tours
               </div>
             </div>
@@ -71,7 +72,7 @@
       >
         Fin de tour
       </UiButton>
-      
+
       <UiButton
         class="w-full px-4 py-2"
         :variant="'ghost'"
@@ -144,7 +145,7 @@ const close = () => {
 
 const useBasicAttack = async () => {
   if (!props.target || !canUseBasicAttack.value) return;
-  
+
   await executeAptitude(props.target, BASIC_ATTACK_ID);
   emit('attack', BASIC_ATTACK_ID, props.target);
   close();
@@ -152,7 +153,7 @@ const useBasicAttack = async () => {
 
 const useAptitude = async (aptitude: AptitudeResponseDto) => {
   if (!props.target || !canUseAptitude(aptitude)) return;
-  
+
   await executeAptitude(props.target, aptitude.id);
   emit('attack', aptitude.id, props.target);
   close();

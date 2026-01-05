@@ -1,4 +1,4 @@
-import { Message } from '../domain/narrative/value-objects/Message.js';
+import { Message } from '../domain/value-objects/Message.js';
 
 describe('Message', () => {
   test('should create a message with role and narrative', () => {
